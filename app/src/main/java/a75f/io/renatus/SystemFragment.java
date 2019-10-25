@@ -397,6 +397,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 				oaoArc.setProgress(progress);
 				oaoArc.setData(angel,(int)returnAirCO2);
+				oaoArc.setContentDescription(String.valueOf(returnAirCO2));
 			}
 		} else {
 			oaoArc.setVisibility(View.GONE);

@@ -341,6 +341,7 @@ public class InstallerOptions extends Fragment {
 
                 if (!Globals.getInstance().siteAlreadyCreated()) {
                     BuildingTuners.getInstance();
+                    DefaultSchedules.setDefaultCoolingHeatingTemp();
                     DefaultSchedules.generateDefaultSchedule(false, null);
                 }
 

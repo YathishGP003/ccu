@@ -894,6 +894,7 @@ public class FloorPlanFragment extends Fragment
 						.build();
 				String zoneId = CCUHsApi.getInstance().addZone(hsZone);
 				hsZone.setId(zoneId);
+				DefaultSchedules.setDefaultCoolingHeatingTemp();
 				hsZone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zoneId));
 				CCUHsApi.getInstance().updateZone(hsZone, zoneId);
 				CCUHsApi.getInstance().syncEntityTree();
@@ -906,7 +907,7 @@ public class FloorPlanFragment extends Fragment
 						.getSystemService(Context.INPUT_METHOD_SERVICE);
 				mgr.hideSoftInputFromWindow(addRoomEdit.getWindowToken(), 0);
 
-				//TODO: update default building data
+				/*//TODO: update default building data
 				Schedule buildingSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
 				Schedule zoneSchedule = CCUHsApi.getInstance().getScheduleById(hsZone.getScheduleRef());
 				for (Schedule.Days days : zoneSchedule.getDays()) {
@@ -914,7 +915,7 @@ public class FloorPlanFragment extends Fragment
 					days.setCoolingVal(buildingSchedule.getCurrentValues().getCoolingVal());
 				}
 
-				CCUHsApi.getInstance().updateZoneSchedule(zoneSchedule, zoneSchedule.getRoomRef());
+				CCUHsApi.getInstance().updateZoneSchedule(zoneSchedule, zoneSchedule.getRoomRef());*/
 				siteRoomList.add(addRoomEdit.getText().toString());
 				return true;
 			}

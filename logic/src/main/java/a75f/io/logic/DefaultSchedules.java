@@ -10,15 +10,19 @@ import org.projecthaystack.HList;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
+import a75f.io.api.haystack.Equip;
+import a75f.io.logic.tuners.TunerUtil;
 
 public class DefaultSchedules {
 
-    public static final double DEFAULT_COOLING_TEMP = 74.0F;
-    public static final double DEFAULT_HEATING_TEMP = 70.0F;
+    public static double DEFAULT_COOLING_TEMP = 74.0F;
+    public static double DEFAULT_HEATING_TEMP = 70.0F;
 
     public static String generateDefaultSchedule(boolean zone, String zoneId) {
 
@@ -148,5 +152,55 @@ public class DefaultSchedules {
         } else {
             CCUHsApi.getInstance().updateSchedule(localId.toVal(), defaultSchedule);
         }
+    }
+
+    public static void setDefaultCoolingHeatingTemp(){
+        HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
+        Equip p = new Equip.Builder().setHashMap(tuner).build();
+
+        double hdb = TunerUtil.getHeatingDeadband(p.getId());
+        double cdb = TunerUtil.getCoolingDeadband(p.getId());
+        HashMap coolULMap = CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
+        HashMap heatULMap = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
+        HashMap coolLLMap = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
+        HashMap heatLLMap = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
+        double heatLL = getTuner(heatLLMap.get("id").toString());
+        double heatUL = getTuner(heatULMap.get("id").toString());
+        double coolLL = getTuner(coolLLMap.get("id").toString());
+        double coolUL = getTuner(coolULMap.get("id").toString());
+
+        double coolValue = (coolLL + coolUL)/2;
+        double heatValue = (heatLL + heatUL)/2;
+
+        double coolHeatValue = coolValue > heatValue ? (coolValue - heatValue) : (heatValue - coolValue);
+        if (coolHeatValue <(hdb + cdb)){
+            double diff = (hdb + cdb) - coolHeatValue;
+            double dbDiff = diff/2;
+            if (diff > 1) {
+                coolValue = coolValue - dbDiff;
+                heatValue = heatValue + dbDiff;
+            }else {
+                heatValue = heatValue - dbDiff;
+                coolValue = coolValue + dbDiff;
+            }
+        }
+
+        DEFAULT_COOLING_TEMP = coolValue;
+        DEFAULT_HEATING_TEMP = heatValue;
+    }
+
+    public static double getTuner(String id) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        ArrayList values = hayStack.readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        return 0;
     }
 }

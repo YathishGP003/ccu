@@ -1,6 +1,2 @@
- - Merge branch 'renatus_dev_sam' into 'master'
- - resolves RENATUS-769
- - Alert conditional value fetch optimization
- - Merge branch 'mahesh_renuts' into 'master'
- - update equip open
- - resolved RENATUS-767
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-787, CM Temp should be excluded if temp breach

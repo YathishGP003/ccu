@@ -50,6 +50,9 @@ public class EvalExLibTest
         
         expression = new Expression("100 < 90 || 190 <= 200");
         System.out.println(expression.eval());
+    
+        expression = new Expression("-6 > -5");
+        System.out.println(expression.eval());
         
     }
     

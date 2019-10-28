@@ -1072,7 +1072,7 @@ public class CCUHsApi
         tagsDb.updateConfig("currentCCU", id);
     }
 
-    public String createCCU(String ccuName, String installerEmail)
+    public String createCCU(String ccuName, String installerEmail, String equipRef)
     {
         HashMap equip = CCUHsApi.getInstance().read("equip and system");
         String ahuRef = equip.size() > 0 ? equip.get("id").toString() : "";
@@ -1085,6 +1085,7 @@ public class CCUHsApi
         hDictBuilder.add("dis", HStr.make(ccuName));
         hDictBuilder.add("fmEmail", HStr.make(installerEmail));
         hDictBuilder.add("siteRef", getSiteId());
+        hDictBuilder.add("equipRef", equipRef);
         hDictBuilder.add("createdDate", HDateTime.make(System.currentTimeMillis()).date);
         hDictBuilder.add("gatewayRef", ahuRef);
         hDictBuilder.add("ahuRef", ahuRef);
@@ -1109,6 +1110,7 @@ public class CCUHsApi
         hDictBuilder.add("dis", HStr.make(ccuName));
         hDictBuilder.add("fmEmail", HStr.make(installerEmail));
         hDictBuilder.add("siteRef", getSiteId());
+        hDictBuilder.add("equipRef", ccu.get("equipRef").toString());
         hDictBuilder.add("createdDate", HDate.make(ccu.get("createdDate").toString()));
         hDictBuilder.add("gatewayRef", ahuRef);
         hDictBuilder.add("ahuRef", ahuRef);
@@ -1138,6 +1140,7 @@ public class CCUHsApi
         hDictBuilder.add("dis", HStr.make(ccu.get("dis").toString()));
         hDictBuilder.add("fmEmail", HStr.make(ccu.get("fmEmail").toString()));
         hDictBuilder.add("siteRef", getSiteId());
+        hDictBuilder.add("equipRef", ccu.get("equipRef").toString());
         hDictBuilder.add("createdDate", HDate.make(ccu.get("createdDate").toString()));
         hDictBuilder.add("gatewayRef", ahuRef);
         hDictBuilder.add("ahuRef", ahuRef);

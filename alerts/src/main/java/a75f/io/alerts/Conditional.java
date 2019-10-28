@@ -183,6 +183,7 @@ public class Conditional
             else if (grpOperation.contains("delta"))
             {
                 pointList = new ArrayList<>();
+                pointValList = new ArrayList<>();
                 ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("zone and equip");
                 for (Map q : equips) {
                     HashMap point = CCUHsApi.getInstance().read(key+" and equipRef == \""+q.get("id")+"\"");
@@ -192,6 +193,7 @@ public class Conditional
     
                     List<HisItem> hisItems = CCUHsApi.getInstance().getHisItems(point.get("id").toString(), 0 ,2);
                     if (hisItems.size() < 2) {
+                        CcuLog.d("CCU_ALERTS"," Not enough his vals to evaluate conditional "+toString());
                         return;
                     }
                     
@@ -203,8 +205,11 @@ public class Conditional
                     }
                     resVal = reading1.getVal() - reading2.getVal();
                     Expression expression = new Expression(resVal+ " "+condition+" " + val);
+                    CcuLog.d("CCU_ALERTS", " expression "+expression.toString());
                     if (expression.eval().intValue() > 0) {
+                        CcuLog.d("CCU_ALERTS", " Add to pointList");
                         pointList.add(point.get("id").toString());
+                        pointValList.add(new PointVal(point.get("id").toString(), Double.parseDouble(val)));
                     }
                 }
     

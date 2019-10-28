@@ -141,7 +141,8 @@ public class AlertProcessor
             boolean statusInit = false;
             for (int i = 0; i < def.conditionals.size(); i+=2) {
                 if (i == 0) {
-                    if ((def.conditionals.get(0).grpOperation != null) && def.conditionals.get(0).grpOperation.equals("equip"))
+                    if ((def.conditionals.get(0).grpOperation != null) && (def.conditionals.get(0).grpOperation.equals("equip")
+                                                                                    || def.conditionals.get(0).grpOperation.equals("delta")))
                     {
                         pointList = def.conditionals.get(0).pointList;
                     } else {
@@ -152,7 +153,8 @@ public class AlertProcessor
                 }
                 
                 if (def.conditionals.get(i-1).operator.contains("&&")) {
-                    if (def.conditionals.get(i).grpOperation != null && def.conditionals.get(i).grpOperation.equals("equip"))
+                    if (def.conditionals.get(i).grpOperation != null && ( def.conditionals.get(i).grpOperation.equals("equip")
+                                                                          || def.conditionals.get(0).grpOperation.equals("delta")))
                     {
                         if (pointList == null) {
                             if (alertStatus)
@@ -177,7 +179,8 @@ public class AlertProcessor
                     }
                 } else if (def.conditionals.get(i-1).operator.contains("||")) {
                     
-                    if ((def.conditionals.get(i).grpOperation != null) && def.conditionals.get(i).grpOperation.equals("equip"))
+                    if ((def.conditionals.get(i).grpOperation != null) && (def.conditionals.get(i).grpOperation.equals("equip")
+                                                                            || def.conditionals.get(0).grpOperation.equals("delta")))
                     {
                         if (def.conditionals.get(i).pointList != null)
                         {

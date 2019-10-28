@@ -10,6 +10,7 @@ import a75f.io.logic.BaseJob;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.watchdog.WatchdogMonitor;
 
 /**
@@ -51,6 +52,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
         }
     
         tsData = new HashMap();
+        DiagEquip.getInstance().updatePoints();
 
         try {
             //TODO Crash here causing issues in Analytics portal #RENATUS-396 kumar

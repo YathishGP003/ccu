@@ -18,6 +18,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.diag.DiagEquip;
 
 import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStruct;
@@ -34,7 +35,7 @@ public class MeshNetwork extends DeviceNetwork
     @Override
     public void sendMessage() {
         CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendNodeMessage");
-    
+        DiagEquip.getInstance().setDiagHisVal("serial and connection", LSerial.getInstance().isConnected() ? 1.0 :0);
         if (!LSerial.getInstance().isConnected()) {
             CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
             LSerial.getInstance().setResetSeedMessage(true);

@@ -288,8 +288,6 @@ public abstract class SystemProfile
     }
     
     public void addCMPoints(String siteRef, String equipref, String equipDis , String tz) {
-        Point cmAlive = new Point.Builder().setDisplayName(equipDis + "-" + "cmAlive").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cm").addMarker("alive").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(cmAlive);
 		Point cmCurrentTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmCurrentTemp").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cm").addMarker("current").addMarker("temp").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
         String ctID = CCUHsApi.getInstance().addPoint(cmCurrentTemp);
         CCUHsApi.getInstance().writeHisValById(ctID, 0.0);

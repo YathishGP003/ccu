@@ -37,6 +37,7 @@ public class AlertFormatter
         entitySet.add("site");
         entitySet.add("system");
         entitySet.add("cond");
+        entitySet.add("ccu");
     }
     
     public static String getFormattedMessage(AlertDefinition def) {
@@ -94,11 +95,14 @@ public class AlertFormatter
                 HashMap s = hs.readMapById(p.getSiteRef());
                 return s.get("dis").toString();
             case "system":
+                HashMap system = hs.read("system and equip");
+                return system.get("dis").toString();
+            case "ccu":
                 HashMap ccu = hs.read("device and ccu");
                 return ccu.get("dis").toString();
             case "cond":
                 CcuLog.d("CCU_ALERTS"," Read cond val point "+point);
-                //Cond vals can of three forms
+                //Cond vals can be of three forms
                 // 1. value fetched for a unique query or absolute value -> use c.val
                 // 2. point id for key - > run query to fetch cond val
                 // 3. point id to get value -> run through pointValList to find

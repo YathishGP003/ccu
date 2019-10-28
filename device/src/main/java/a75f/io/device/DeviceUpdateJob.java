@@ -44,6 +44,11 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
             CcuLog.d(L.TAG_CCU_DEVICE,"No Site Registered ! <-DeviceUpdateJob ");
             return;
         }
+        HashMap ccu = CCUHsApi.getInstance().read("ccu");
+        if (ccu.size() == 0) {
+            CcuLog.d(L.TAG_CCU_JOB,"No CCU Registered ! <-DeviceUpdateJob ");
+            return;
+        }
         deviceNw.sendMessage();
         deviceNw.sendSystemControl();
         CcuLog.d(L.TAG_CCU_JOB, "<-DeviceUpdateJob ");

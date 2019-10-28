@@ -34,6 +34,7 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Site;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
@@ -263,7 +264,7 @@ public class CreateNewSite extends Fragment {
                         String ahuRef = ccu.get("ahuRef").toString();
                         CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef);
                     } else {
-                        String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail);
+                        String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create());
                         CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                     }
                     goTonext();
@@ -311,7 +312,7 @@ public class CreateNewSite extends Fragment {
                         String ahuRef = ccu.get("ahuRef").toString();
                         CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef);
                     } else {
-                        String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail);
+                        String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create());
                         CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                     }
                 }

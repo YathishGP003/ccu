@@ -1,4 +1,3 @@
- - Merge branch 'mahesh_renuts' into 'master'
- - RENATUS-788 and RENATUS-612 add default schedule
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-778, for current temp value 45 an 100 , ui shows 0
+ - Merge branch 'renatus_dev_sam' into 'master'
+ - Implement diagnostic equip
+ - Add delta operator in alert fw

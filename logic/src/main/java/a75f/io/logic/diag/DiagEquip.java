@@ -33,7 +33,7 @@ public class DiagEquip
     
     public String create() {
         HashMap diagEquip = CCUHsApi.getInstance().read("equip and diag");
-        if (diagEquip.size() >= 0) {
+        if (diagEquip.size() > 0) {
             CcuLog.d(L.TAG_CCU," DIAG Equip already created");
             return null;
         }

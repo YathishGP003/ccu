@@ -576,7 +576,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         for(int i=0;i<zoneMap.size();i++)
         {
             Equip avgTempEquip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
-            double avgTemp = CCUHsApi.getInstance().readPointPriorityValByQuery("point and air and temp and sensor and current and equipRef == \"" + avgTempEquip.getId() + "\"");
+            double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + avgTempEquip.getId() + "\"");
 
             double heatDB = CCUHsApi.getInstance().readPointPriorityValByQuery("point and heating and deadband and base and equipRef == \"" + avgTempEquip.getId() + "\"");
             double coolDB = CCUHsApi.getInstance().readPointPriorityValByQuery("point and cooling and deadband and base and equipRef == \"" + avgTempEquip.getId() + "\"");

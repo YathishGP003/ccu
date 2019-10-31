@@ -139,14 +139,12 @@ public class OaoArc extends View {
         mProgressPaint.setStrokeCap(Paint.Cap.ROUND);
 
         mCurrentAirCo2TextPaint = new Paint();
-        mCurrentAirCo2TextPaint = new Paint();
         mCurrentAirCo2TextPaint.setTypeface(latoLightFont);
         mCurrentAirCo2TextPaint.setStyle(Paint.Style.FILL);
         mCurrentAirCo2TextPaint.setColor(Color.parseColor("#99000000"));
         mCurrentAirCo2TextPaint.setAntiAlias(true);
         mCurrentAirCo2TextPaint.setTextSize(42);
 
-        mUnitTextPaint = new Paint();
         mUnitTextPaint = new Paint();
         mUnitTextPaint.setTypeface(latoLightFont);
         mUnitTextPaint.setStyle(Paint.Style.FILL);
@@ -156,7 +154,6 @@ public class OaoArc extends View {
         mUnitTextPaint.setTextSize(12);
 
 
-        mTextPaint = new Paint();
         mTextPaint = new Paint();
         mTextPaint.setTypeface(latoLightFont);
         mTextPaint.setStyle(Paint.Style.FILL);

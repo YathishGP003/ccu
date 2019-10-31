@@ -1028,10 +1028,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         for(int k=0;k<zoneMap.size();k++)
                         {
                             Equip p = new Equip.Builder().setHashMap(zoneMap.get(k)).build();
-                            equipOpen = p;
                             String updatedEquipId = p.getId();
-                            equipId[0] = updatedEquipId;
-                            mSchedule = Schedule.getScheduleByEquipId(p.getId());
+                            equipOpen = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
+                            equipId[0] = equipOpen.getId();
+                            mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
                             if (p.getProfile().startsWith("DAB")) {
                                 HashMap dabPoints = ScheduleProcessJob.getDABEquipPoints(p.getId());
                                 Log.i("PointsValue", "DAB Points:" + dabPoints.toString());

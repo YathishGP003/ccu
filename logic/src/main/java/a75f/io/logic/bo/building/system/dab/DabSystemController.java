@@ -655,6 +655,10 @@ public class DabSystemController extends SystemController
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList<HashMap> dabEquips = hayStack.readAll("equip and dab and zone");
         for (HashMap m : dabEquips) {
+            if (isZoneDead(new Equip.Builder().setHashMap(m).build())) {
+                Log.d("CCU_SYSTEM","Skip Cumulative damper adjustment, Equip Dead "+m.toString());
+                continue;
+            }
             HashMap damperPos = hayStack.read("point and damper and normalized and cmd and equipRef == \""+m.get("id").toString()+"\"");
             double damperPosVal = hayStack.readHisValById(damperPos.get("id").toString());
             double adjustedDamperPos = damperPosVal + (damperPosVal * percent) /100.0;

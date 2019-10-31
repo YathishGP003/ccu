@@ -16,7 +16,6 @@ import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
@@ -25,7 +24,6 @@ import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.util.HSEquipUtil;
 import a75f.io.logic.jobs.ScheduleProcessJob;
-import a75f.io.logic.jobs.VAVScheduler;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
@@ -400,7 +398,6 @@ public class VavSystemController extends SystemController
     }
     
     public boolean isZoneDead(Equip q) {
-    
         try
         {
             return CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and equipRef == \"" + q.getId() + "\"").equals("Zone Temp Dead");
@@ -693,6 +690,10 @@ public class VavSystemController extends SystemController
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList<HashMap> vavEquips = hayStack.readAll("equip and vav and zone");
         for (HashMap m : vavEquips) {
+            if (isZoneDead(new Equip.Builder().setHashMap(m).build())) {
+                Log.d("CCU_SYSTEM", "Skip Cumulative damper adjustment, Equip Dead " + m.toString());
+                continue;
+            }
             HashMap damperPos = hayStack.read("point and damper and normalized and cmd and equipRef == \""+m.get("id").toString()+"\"");
             double damperPosVal = hayStack.readHisValById(damperPos.get("id").toString());
             double adjustedDamperPos = damperPosVal + (damperPosVal * percent) /100.0;

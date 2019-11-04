@@ -3,7 +3,7 @@
 
     before_script:
       - whoami
-      - git submodule add --force https://ryan75f:Ayngayn6!@gitlab.com/75f/apps/lightsaber/ci-setup.git
+      - git submodule add --force https://usdevrepos:mDRg-9kqCpmuypoxR1GZ@gitlab.com/75f/apps/lightsaber/ci-setup.git
       - cd ci-setup
       - git reset --hard && git checkout master && git pull
       - ls -al

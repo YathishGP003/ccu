@@ -148,19 +148,21 @@ public class DabSystemController extends SystemController
             String sysEquip = L.ccu().systemProfile.getSystemEquipRef();
             if(sysEquip != null) {
                 double cmCurrentTemp = getCMCurrentTemp(sysEquip);
-                double desiredTempCooling = ScheduleProcessJob.getSystemCoolingDesiredTemp();
-                double desiredTempHeating = ScheduleProcessJob.getSystemHeatingDesiredTemp();
+                if(!isCMTempDead(cmCurrentTemp)) {
+                    double desiredTempCooling = ScheduleProcessJob.getSystemCoolingDesiredTemp();
+                    double desiredTempHeating = ScheduleProcessJob.getSystemHeatingDesiredTemp();
 
-                double cmCoolingLoad = cmCurrentTemp > desiredTempCooling ? cmCurrentTemp - desiredTempCooling : 0;
-                double cmHeatingLoad = cmCurrentTemp < desiredTempHeating ? desiredTempHeating - cmCurrentTemp : 0;
-                double zoneDynamicPriority = getCMDynamicPriority(cmCoolingLoad > 0 ? cmCoolingLoad : cmHeatingLoad);
-                totalCoolingLoad += cmCoolingLoad;
-                totalHeatingLoad += cmHeatingLoad;
-                zoneCount++;
+                    double cmCoolingLoad = cmCurrentTemp > desiredTempCooling ? cmCurrentTemp - desiredTempCooling : 0;
+                    double cmHeatingLoad = cmCurrentTemp < desiredTempHeating ? desiredTempHeating - cmCurrentTemp : 0;
+                    double zoneDynamicPriority = getCMDynamicPriority(cmCoolingLoad > 0 ? cmCoolingLoad : cmHeatingLoad);
+                    totalCoolingLoad += cmCoolingLoad;
+                    totalHeatingLoad += cmHeatingLoad;
+                    zoneCount++;
 
-                weightedAverageLoadSum += (cmCoolingLoad * zoneDynamicPriority) - (cmHeatingLoad * zoneDynamicPriority);
-                prioritySum += zoneDynamicPriority;
-                CcuLog.d(L.TAG_CCU_SYSTEM, "CM dab zoneDynamicPriority: " + zoneDynamicPriority + " cmCoolingLoad: " + cmCoolingLoad + " cmHeatingLoad: " + cmHeatingLoad+" weightedAverageLoadSum "+weightedAverageLoadSum+","+prioritySum+","+cmCurrentTemp);
+                    weightedAverageLoadSum += (cmCoolingLoad * zoneDynamicPriority) - (cmHeatingLoad * zoneDynamicPriority);
+                    prioritySum += zoneDynamicPriority;
+                    CcuLog.d(L.TAG_CCU_SYSTEM, "CM dab zoneDynamicPriority: " + zoneDynamicPriority + " cmCoolingLoad: " + cmCoolingLoad + " cmHeatingLoad: " + cmHeatingLoad + " weightedAverageLoadSum " + weightedAverageLoadSum + "," + prioritySum + "," + cmCurrentTemp);
+                }
             }
         }
         

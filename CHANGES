@@ -1,1 +1,2 @@
- - Update .gitlab-ci.yml
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-800, VAV CM dead is calculated

@@ -169,24 +169,14 @@ public class DefaultSchedules {
         double coolLL = getTuner(coolLLMap.get("id").toString());
         double coolUL = getTuner(coolULMap.get("id").toString());
 
-        double coolValue = (coolLL + coolUL)/2;
-        double heatValue = (heatLL + heatUL)/2;
-
-        double coolHeatValue = coolValue > heatValue ? (coolValue - heatValue) : (heatValue - coolValue);
-        if (coolHeatValue <(hdb + cdb)){
-            double diff = (hdb + cdb) - coolHeatValue;
-            double dbDiff = diff/2;
-            if (diff > 1) {
-                coolValue = coolValue - dbDiff;
-                heatValue = heatValue + dbDiff;
-            }else {
-                heatValue = heatValue - dbDiff;
-                coolValue = coolValue + dbDiff;
-            }
+        double diffValue = (coolLL - heatLL);
+        if (diffValue <= (hdb + cdb)){
+            DEFAULT_COOLING_TEMP = coolLL + cdb;
+            DEFAULT_HEATING_TEMP = heatLL - hdb;
+        }else {
+            DEFAULT_COOLING_TEMP = coolLL;
+            DEFAULT_HEATING_TEMP = heatLL;
         }
-
-        DEFAULT_COOLING_TEMP = coolValue;
-        DEFAULT_HEATING_TEMP = heatValue;
     }
 
     public static double getTuner(String id) {

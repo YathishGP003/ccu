@@ -39,11 +39,12 @@ import org.joda.time.Interval;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
+import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
@@ -54,7 +55,6 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.renatus.R;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
 import a75f.io.renatus.util.FontManager;
-import io.objectbox.model.Model;
 
 public class SchedulerFragment extends DialogFragment implements ManualScheduleDialogListener {
 
@@ -573,13 +573,18 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 AlertDialog alert = builder.create();
                 alert.show();
             } else if (schedule.isBuildingSchedule()) {
-    
                 StringBuilder spillZones = new StringBuilder();
+                ArrayList<String> headers = new ArrayList<>();
                 for (String zone : spillsMap.keySet())
                 {
                     for (Interval i : spillsMap.get(zone))
                     {
                         Zone z = new Zone.Builder().setHashMap(CCUHsApi.getInstance().readMapById(zone)).build();
+                        Floor f = new Floor.Builder().setHashMap(CCUHsApi.getInstance().readMapById(z.getFloorRef())).build();
+                        if (!headers.contains(f.getDisplayName())) {
+                            spillZones.append(f.getDisplayName() + "\n");
+                            headers.add(f.getDisplayName());
+                        }
                         spillZones.append("Zone " + z.getDisplayName()+" "+ScheduleUtil.getDayString(i.getStart().getDayOfWeek())+" (" + i.getStart().hourOfDay().get() + ":" + (i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()) + " - " + i.getEnd().hourOfDay().get() + ":" + (i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()) + ") \n");
                     }
                 }
@@ -641,10 +646,11 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     }
     
     private HashMap<String,ArrayList<Interval>> getScheduleSpills(ArrayList<Schedule.Days> daysArrayList) {
-        
-        HashMap<String,ArrayList<Interval>> spillsMap = new HashMap<>();
+
+        LinkedHashMap<String,ArrayList<Interval>> spillsMap = new LinkedHashMap<>();
         if (schedule.isZoneSchedule()) {
             Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
+
             ArrayList<Interval> intervalSpills = new ArrayList<>();
             ArrayList<Interval> systemIntervals = systemSchedule.getMergedIntervals(daysArrayList);
     
@@ -688,7 +694,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             
         } else if (schedule.isBuildingSchedule()) {
             ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("room");
-            
+            Collections.sort(zones, (lhs, rhs) -> lhs.get("floorRef").toString().compareTo(rhs.get("floorRef").toString()));
             for (HashMap m : zones) {
                 ArrayList<Interval> intervalSpills = new ArrayList<>();
                 if(m.containsKey("scheduleRef")) {

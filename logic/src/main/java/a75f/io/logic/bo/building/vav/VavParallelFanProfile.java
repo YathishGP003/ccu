@@ -16,6 +16,7 @@ import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.system.SystemController;
+import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
@@ -149,8 +150,9 @@ public class VavParallelFanProfile extends VavProfile
             
                 loopOp = 0;
             }
-        
-            if (valveController.getControlVariable() == 0)
+    
+            SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("rtu and mode")];
+            if (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.OFF|| valveController.getControlVariable() == 0)
             {
                 valve.currentPosition = 0;
             }

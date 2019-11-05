@@ -162,7 +162,7 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 				mMenu.findItem(R.id.renameSelection).setVisible(true);
 				break;
 			default:
-				mode.setSubtitle("" + checkedCount + " floor selected");
+				mode.setSubtitle("" + checkedCount + " floors selected");
 				mMenu.findItem(R.id.renameSelection).setVisible(false);
 				break;
 		}

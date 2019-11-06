@@ -1,2 +1,4 @@
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-800, VAV CM dead is calculated
+ - Merge branch 'renatus_dev_sam' into 'master'
+ - resolves RENATUS-769
+ - Merge branch 'mahesh_renuts' into 'master'
+ - RENATUS-755, Containment check error message in building schedule should display Floor Name and Zone Name

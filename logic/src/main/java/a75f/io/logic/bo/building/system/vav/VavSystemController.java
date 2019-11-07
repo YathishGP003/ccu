@@ -558,7 +558,8 @@ public class VavSystemController extends SystemController
         double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("zone and dead and percent and influence",L.ccu().systemProfile.getSystemEquipRef());
 
 
-        CcuLog.d(L.TAG_CCU_SYSTEM, "VavSysController = "+hasTi+","+tempZones+","+totalEquips+","+cmTempInfForPercentileZonesDead+","+(((totalEquips - tempZones)*100)/(totalEquips)));
+        if(totalEquips > 0)
+            CcuLog.d(L.TAG_CCU_SYSTEM, "VavSysController = "+hasTi+","+tempZones+","+totalEquips+","+cmTempInfForPercentileZonesDead+","+(((totalEquips - tempZones)*100)/(totalEquips)));
         if((totalEquips == 0) || (!hasTi && ((((totalEquips - tempZones)*100)/(totalEquips)) >= cmTempInfForPercentileZonesDead))){
             double cmTemp = getCMCurrentTemp(L.ccu().systemProfile.getSystemEquipRef());
             if(!isCMTempDead(cmTemp)) {

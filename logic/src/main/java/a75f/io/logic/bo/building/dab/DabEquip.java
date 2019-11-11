@@ -357,7 +357,19 @@ public class DabEquip
                                   .build();
         String occupancyId = CCUHsApi.getInstance().addPoint(occupancy);
         CCUHsApi.getInstance().writeHisValById(occupancyId, 0.0);
-        
+        Point zoneDynamicPriorityPoint = new Point.Builder()
+                .setDisplayName(equipDis+"-zoneDynamicPriority")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("dab").addMarker("zone").addMarker("dynamic").addMarker("priority").addMarker("writable")
+                .addMarker("sp").addMarker("his").addMarker("equipHis").addMarker("logical")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+        String zoneDynamicPriorityPointID = CCUHsApi.getInstance().addPoint(zoneDynamicPriorityPoint);
+        CCUHsApi.getInstance().writeHisValById(zoneDynamicPriorityPointID, 10.0);
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);

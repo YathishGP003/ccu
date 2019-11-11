@@ -230,6 +230,20 @@ public class CazEquip
         String eatID = CCUHsApi.getInstance().addPoint(eatPoint);
         CCUHsApi.getInstance().writeHisValById(eatID, 0.0);
 
+        Point zoneDynamicPriorityPoint = new Point.Builder()
+            .setDisplayName(equipDis+"-zoneDynamicPriority")
+            .setEquipRef(equipRef)
+            .setSiteRef(siteRef)
+            .setRoomRef(roomRef)
+            .setFloorRef(floorRef)
+            .addMarker("ti").addMarker("zone").addMarker("dynamic").addMarker("priority").addMarker("writable")
+            .addMarker("sp").addMarker("his").addMarker("equipHis").addMarker("logical")
+            .setGroup(String.valueOf(nodeAddr))
+            .setTz(tz)
+            .build();
+        String zoneDynamicPriorityPointID = CCUHsApi.getInstance().addPoint(zoneDynamicPriorityPoint);
+        CCUHsApi.getInstance().writeHisValById(zoneDynamicPriorityPointID, 10.0);
+
         Point occupancy = new Point.Builder()
                 .setDisplayName(siteDis+"-TI-"+nodeAddr+"-occupancy")
                 .setEquipRef(equipRef)

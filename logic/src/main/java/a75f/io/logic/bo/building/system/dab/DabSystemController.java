@@ -403,9 +403,17 @@ public class DabSystemController extends SystemController
         }
         
         double zonePrioritySpread = TunerUtil.readTunerValByQuery("point and tuner and zone and priority and spread and equipRef == \"" + equipRef + "\"");;
-        double zonePriorityMultiplier = TunerUtil.readTunerValByQuery("point and tuner and zone and priority and multiplier and equipRef == \""+equipRef+"\"");;
-        
-        return p.val * Math.pow(zonePriorityMultiplier, (zoneLoad/zonePrioritySpread) > 10 ? 10 : (zoneLoad/zonePrioritySpread));
+        double zonePriorityMultiplier = TunerUtil.readTunerValByQuery("point and tuner and zone and priority and multiplier and equipRef == \""+equipRef+"\"");
+        double equipDynamicPriority = p.val * Math.pow(zonePriorityMultiplier, (zoneLoad/zonePrioritySpread) > 10 ? 10 : (zoneLoad/zonePrioritySpread));
+        try {
+            HashMap zdpPoint = CCUHsApi.getInstance().read("point and zone and dynamic and priority and equipRef == \"" + equipRef + "\"");
+            double zdpPointValue = CCUHsApi.getInstance().readHisValById(zdpPoint.get("id").toString());
+            if (zdpPointValue != equipDynamicPriority)
+                CCUHsApi.getInstance().writeHisValById(zdpPoint.get("id").toString(), equipDynamicPriority);
+        }catch (Exception e){
+            
+        }
+        return equipDynamicPriority;
     }
     
     public double getEquipCo2LoopOp(String equipRef){
@@ -477,7 +485,7 @@ public class DabSystemController extends SystemController
             }
         }
         double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("zone and dead and percent and influence",L.ccu().systemProfile.getSystemEquipRef());
-        if( ((totalEquips == 0)) || (!hasTi && ((((totalEquips -tempZones )*100)/(totalEquips)) >= cmTempInfForPercentileZonesDead))){
+        if( (totalEquips == 0) || (!hasTi && ((((totalEquips -tempZones )*100)/(totalEquips)) >= cmTempInfForPercentileZonesDead))){
             double cmTemp = getCMCurrentTemp(L.ccu().systemProfile.getSystemEquipRef());
             if(!isCMTempDead(cmTemp)) {
                 tempSum += cmTemp;

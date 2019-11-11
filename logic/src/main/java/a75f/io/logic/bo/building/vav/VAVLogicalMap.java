@@ -570,7 +570,20 @@ public class VAVLogicalMap
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
         CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
-        
+
+        Point zoneDynamicPriorityPoint = new Point.Builder()
+                .setDisplayName(equipDis+"-zoneDynamicPriority")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(room)
+                .setFloorRef(floor)
+                .addMarker("vav").addMarker("zone").addMarker("dynamic").addMarker("priority").addMarker("writable")
+                .addMarker("sp").addMarker("his").addMarker("equipHis").addMarker("logical")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+        String zoneDynamicPriorityPointID = CCUHsApi.getInstance().addPoint(zoneDynamicPriorityPoint);
+        CCUHsApi.getInstance().writeHisValById(zoneDynamicPriorityPointID, 10.0);
         //Create Physical points and map
         SmartNode device = new SmartNode(nodeAddr, siteRef, floor, room, equipRef);
         device.th1In.setPointRef(datID);

@@ -288,12 +288,17 @@ public abstract class SystemProfile
     }
     
     public void addCMPoints(String siteRef, String equipref, String equipDis , String tz) {
-		Point cmCurrentTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmCurrentTemp").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cm").addMarker("current").addMarker("temp").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+		Point cmCurrentTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmCurrentTemp").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cm").addMarker("current").addMarker("temp").addMarker("his").addMarker("equipHis").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
         String ctID = CCUHsApi.getInstance().addPoint(cmCurrentTemp);
         CCUHsApi.getInstance().writeHisValById(ctID, 0.0);
-        Point cmDesiredTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmDesiredTemp").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cm").addMarker("desired").addMarker("temp").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
-        String cmDesiredTempId = CCUHsApi.getInstance().addPoint(cmDesiredTemp);
-        CCUHsApi.getInstance().writeDefaultValById(cmDesiredTempId, 0.0);
+        Point cmCoolDesiredTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmCoolingDesiredTemp").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cm").addMarker("cooling").addMarker("desired").addMarker("temp").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
+        String cmCoolDesiredTempId = CCUHsApi.getInstance().addPoint(cmCoolDesiredTemp);
+        CCUHsApi.getInstance().writeDefaultValById(cmCoolDesiredTempId, 0.0);
+        CCUHsApi.getInstance().writeHisValById(cmCoolDesiredTempId, 0.0);
+        Point cmHeatDesiredTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmHeatingDesiredTemp").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cm").addMarker("cooling").addMarker("desired").addMarker("temp").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
+        String cmHeatDesiredTempId = CCUHsApi.getInstance().addPoint(cmHeatDesiredTemp);
+        CCUHsApi.getInstance().writeDefaultValById(cmHeatDesiredTempId, 0.0);
+        CCUHsApi.getInstance().writeHisValById(cmHeatDesiredTempId, 0.0);
     }
     
     

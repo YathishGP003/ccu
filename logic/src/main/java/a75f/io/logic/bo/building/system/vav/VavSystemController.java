@@ -106,6 +106,7 @@ public class VavSystemController extends SystemController
         
         updateSystemHumidity();
         updateSystemTemperature();
+        updateSystemDesiredTemp();
         
         profile.setSystemPoint("average and humidity", averageSystemHumidity);
         profile.setSystemPoint("average and temp", averageSystemTemperature);
@@ -541,7 +542,20 @@ public class VavSystemController extends SystemController
     public double getAverageSystemHumidity() {
         return averageSystemHumidity;
     }
-    
+
+    public void updateSystemDesiredTemp(){
+        try {
+
+            double desiredTempCooling = ScheduleProcessJob.getSystemCoolingDesiredTemp();
+            double desiredTempHeating = ScheduleProcessJob.getSystemHeatingDesiredTemp();
+            HashMap coolTempPoint = CCUHsApi.getInstance().read("point and system and cm and cooling and desired and temp and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
+            CCUHsApi.getInstance().writeHisValById(coolTempPoint.get("id").toString(), desiredTempCooling);
+            HashMap heatTempPoint = CCUHsApi.getInstance().read("point and system and cm and heating and desired and temp and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
+            CCUHsApi.getInstance().writeHisValById(heatTempPoint.get("id").toString(), desiredTempHeating);
+        }catch (Exception e){
+
+        }
+    }
     public void updateSystemTemperature() {
         //Average across zones or from proxy zone.
         double tempSum = 0;

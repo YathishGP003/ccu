@@ -449,21 +449,6 @@ public class TwoPipeFanCoilUnitEquip {
         //TODO, what if already equip exists in a zone and its schedule is zone or named? Kumar
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
         CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
-
-
-        Point zoneDynamicPriorityPoint = new Point.Builder()
-                .setDisplayName(equipDis+"-zoneDynamicPriority")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(room)
-                .setFloorRef(floor)
-                .addMarker("fcu").addMarker(profile).addMarker("zone").addMarker("dynamic").addMarker("priority").addMarker("writable")
-                .addMarker("sp").addMarker("his").addMarker("equipHis").addMarker("logical")
-                .setGroup(String.valueOf(nodeAddr))
-                .setTz(tz)
-                .build();
-        String zoneDynamicPriorityPointID = CCUHsApi.getInstance().addPoint(zoneDynamicPriorityPoint);
-        CCUHsApi.getInstance().writeHisValById(zoneDynamicPriorityPointID, 0.0);
         //Create Physical points and map
         SmartStat device = new SmartStat(nodeAddr, siteRef, floor, room,equipRef,profile);
         

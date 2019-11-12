@@ -1169,7 +1169,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
             {
-                Log.d(L.TAG_CCU_UI," scheduleType "+mScheduleType);
                 if (position == 0 && (mScheduleType != -1))
                 {
                     if (mSchedule.isZoneSchedule())

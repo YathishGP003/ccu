@@ -94,6 +94,7 @@ public class DabSystemController extends SystemController
         co2LoopOpWA = co2WA = totalCoolingLoad = totalHeatingLoad = zoneCount = 0;
         updateSystemHumidity();
         updateSystemTemperature();
+        updateSystemDesiredTemp();
         
         profile.setSystemPoint("average and humidity", averageSystemHumidity);
         profile.setSystemPoint("average and temp", averageSystemTemperature);
@@ -459,6 +460,20 @@ public class DabSystemController extends SystemController
     @Override
     public double getAverageSystemHumidity() {
         return averageSystemHumidity;
+    }
+
+    public void updateSystemDesiredTemp(){
+        try {
+
+            double desiredTempCooling = ScheduleProcessJob.getSystemCoolingDesiredTemp();
+            double desiredTempHeating = ScheduleProcessJob.getSystemHeatingDesiredTemp();
+            HashMap coolTempPoint = CCUHsApi.getInstance().read("point and system and cm and cooling and desired and temp and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
+            CCUHsApi.getInstance().writeHisValById(coolTempPoint.get("id").toString(), desiredTempCooling);
+            HashMap heatTempPoint = CCUHsApi.getInstance().read("point and system and cm and heating and desired and temp and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
+            CCUHsApi.getInstance().writeHisValById(heatTempPoint.get("id").toString(), desiredTempHeating);
+        }catch (Exception e){
+
+        }
     }
     
     public void updateSystemTemperature() {

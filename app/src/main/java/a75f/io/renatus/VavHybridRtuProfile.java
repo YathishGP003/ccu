@@ -1,6 +1,5 @@
 package a75f.io.renatus;
 
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Build;

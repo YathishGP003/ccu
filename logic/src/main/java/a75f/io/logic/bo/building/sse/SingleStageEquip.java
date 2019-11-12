@@ -289,20 +289,8 @@ public class SingleStageEquip {
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(occupancy);
-        Point zoneDynamicPriorityPoint = new Point.Builder()
-                .setDisplayName(equipDis+"-zoneDynamicPriority")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef)
-                .addMarker("sse").addMarker("zone").addMarker("dynamic").addMarker("priority").addMarker("writable")
-                .addMarker("sp").addMarker("his").addMarker("equipHis").addMarker("logical")
-                .setGroup(String.valueOf(nodeAddr))
-                .setTz(tz)
-                .build();
-        String zoneDynamicPriorityPointID = CCUHsApi.getInstance().addPoint(zoneDynamicPriorityPoint);
-        CCUHsApi.getInstance().writeHisValById(zoneDynamicPriorityPointID, 0.0);
-        SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+        
+		SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
         device.desiredTemp.setPointRef(dtId);

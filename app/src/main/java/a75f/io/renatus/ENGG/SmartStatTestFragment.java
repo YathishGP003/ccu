@@ -35,9 +35,13 @@ import java.util.List;
 import java.util.Set;
 
 import a75f.io.device.json.serializers.JsonSerializer;
+import a75f.io.device.mesh.MeshUtil;
+import a75f.io.device.serial.CcuToCmOverUsbFirmwareMetadataMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatSettingsMessage_t;
+import a75f.io.device.serial.FirmwareDeviceType_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartStatProfileMap_t;
+import a75f.io.logic.bo.util.ByteArrayUtils;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
 import a75f.io.usbserial.SerialAction;
@@ -117,6 +121,9 @@ public class SmartStatTestFragment extends BaseDialogFragment
 
 	@BindView(R.id.sendControl)
 	Button sendControl;
+	
+	@BindView(R.id.sendFota)
+	Button sendFota;
 
 	int channelSelection = 0;
 	int profileSlection = 0;
@@ -473,8 +480,30 @@ public class SmartStatTestFragment extends BaseDialogFragment
 			usbService.write(msg.getOrderedBuffer());
 		}
 	}
-
-
+	
+	@OnClick(R.id.sendFota)
+	public void sendFirmwareMetadata() {
+		CcuToCmOverUsbFirmwareMetadataMessage_t message = new CcuToCmOverUsbFirmwareMetadataMessage_t();
+		
+		message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_FIRMWARE_METADATA);
+		message.lwMeshAddress.set(1000);
+		
+		message.metadata.deviceType.set(FirmwareDeviceType_t.SMART_STAT_V2);
+		//message.metadata.deviceType.set(FirmwareDeviceType_t.ITM_DEVICE_TYPE);
+		message.metadata.majorVersion.set((short)1);
+		message.metadata.minorVersion.set((short)1);
+		message.metadata.lengthInBytes.set(332702);
+		
+		message.metadata.setSignature(ByteArrayUtils.hexStringToByteArray("609bc792a0469f4f0f1f80a004a1a74795b3eea7133b9ae12cef63d1c0531c5a"));
+		
+		try {
+			Log.e("CCU_SERIAL", "[METADATA] SEND");
+			MeshUtil.sendStructToCM(message);
+		} catch (Exception e) {
+			Log.e("CCU_SERIAL", "[METADATA] FAILED TO SEND");
+		}
+	}
+	
 	@OnClick(R.id.sendControl)
 	public void sendControl() {
 

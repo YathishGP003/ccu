@@ -17,7 +17,7 @@ public class OTAUpdateHandlerService extends Service {
 
     private static String TAG = "OTAUpdateHandlerService";
 
-    private static int FIVE_MINUTES_MS = 300000;
+    private static int FIVE_MINUTES_MS = 300000*6;
     private static int TWENTY_SECONDS_MS = 20000;
 
     private boolean mIsTimerStarted = false;

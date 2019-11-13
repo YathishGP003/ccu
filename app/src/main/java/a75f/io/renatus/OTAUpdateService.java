@@ -234,6 +234,7 @@ public class OTAUpdateService extends IntentService {
         String firmwareVersion = intent.getStringExtra("firmwareVersion");
         String cmdLevel = intent.getStringExtra("cmdLevel");
 
+        Log.d(TAG,"handleOtaUpdateStartRequest "+firmwareVersion+" Node "+nodeAddressStr);
         if(nodeAddressStr == null || firmwareVersion == null) {
             return;
         }
@@ -261,6 +262,9 @@ public class OTAUpdateService extends IntentService {
         }
         else if(firmwareVersion.startsWith("Itm_") || firmwareVersion.startsWith("itm_")) {
             mFirmwareDeviceType = FirmwareDeviceType_t.ITM_DEVICE_TYPE;
+            startUpdate(nodeAddress, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
+        } else if(firmwareVersion.startsWith("SmartStatV2_") || firmwareVersion.startsWith("smartstatv2_")) {
+            mFirmwareDeviceType = FirmwareDeviceType_t.SMART_STAT_V2;
             startUpdate(nodeAddress, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
         }
     }
@@ -436,7 +440,7 @@ public class OTAUpdateService extends IntentService {
         String filePathSystem = DOWNLOAD_DIR.toString() + "/" + filename + fileFormat;
         String filePathUrl = DOWNLOAD_BASE_URL + deviceType.getUpdateUrlDirectory() + filename + fileFormat;
 
-        Log.d(TAG, "[DOWNLOAD] Starting download of file " + filename + fileFormat);
+        Log.d(TAG, "[DOWNLOAD] Starting download of file " + filePathUrl);
 
         DownloadManager.Request downloadRequest = new DownloadManager.Request(Uri.parse(filePathUrl))
                 .setTitle(filename + fileFormat)

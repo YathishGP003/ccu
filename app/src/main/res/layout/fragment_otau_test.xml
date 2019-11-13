@@ -23,7 +23,7 @@
             android:ems="10"
             android:inputType="textPersonName"
             android:hint="Firmware Name String"
-            android:text="SmartNode_v" />
+            android:text="SmartStatV2_v1.1" />
 
         <LinearLayout
             android:layout_width="wrap_content"

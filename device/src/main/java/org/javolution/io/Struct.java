@@ -28,6 +28,7 @@ import a75f.io.device.json.serializers.Signed16Serializer;
 import a75f.io.device.json.serializers.Signed8Serializer;
 import a75f.io.device.json.serializers.UTF8Serializer;
 import a75f.io.device.json.serializers.Unsigned16Serializer;
+import a75f.io.device.json.serializers.Unsigned32Serializer;
 import a75f.io.device.json.serializers.Unsigned8Serializer;
 
 /**
@@ -1410,6 +1411,7 @@ public class Struct {
     /**
      * This class represents a 32 bits unsigned integer.
      */
+    @JsonSerialize(using = Unsigned32Serializer.class)
     public class Unsigned32 extends Member {
 
         public Unsigned32() {

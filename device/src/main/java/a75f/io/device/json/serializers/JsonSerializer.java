@@ -49,6 +49,7 @@ public class JsonSerializer
 		JsonGenerator jg = jf.createJsonGenerator(sw);
 		m.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
 		m.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
+		//m.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 		
 		if (prettyPrint)
 		{

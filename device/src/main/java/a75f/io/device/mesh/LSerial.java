@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
+import a75f.io.device.serial.CmToCcuOverUsbFirmwarePacketRequest_t;
+import a75f.io.device.serial.CmToCcuOverUsbFirmwareUpdateAckMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSmartStatRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnLocalControlsOverrideMessage_t;
@@ -22,6 +24,8 @@ import a75f.io.logic.Globals;
 import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
+
+import static a75f.io.device.mesh.DLog.LogdStructAsJson;
 
 /**
  * Created by Yinten isOn 8/21/2017.
@@ -119,6 +123,14 @@ public class LSerial
             {
                 DLog.LogdSerial("Event Type:CM_TO_CCU_OVER_USB_SMART_STAT_LOCAL_CONTROLS_OVERRIDE="+data.length+","+data.toString());
                 Pulse.updateSetTempFromSmartStat(fromBytes(data, CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t.class));
+            } else if (messageType == MessageType.CM_TO_CCU_OVER_USB_FIRMWARE_UPDATE_ACK) {
+                CmToCcuOverUsbFirmwareUpdateAckMessage_t msg = new CmToCcuOverUsbFirmwareUpdateAckMessage_t();
+                msg.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
+                LogdStructAsJson(msg);
+            } else if (messageType == MessageType.CM_TO_CCU_OVER_USB_FIRMWARE_PACKET_REQUEST) {
+                CmToCcuOverUsbFirmwarePacketRequest_t msg = new CmToCcuOverUsbFirmwarePacketRequest_t();
+                msg.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
+                LogdStructAsJson(msg);
             }
 
             // Pass event to external handlers
@@ -162,7 +174,7 @@ public class LSerial
         //Log hexadecimal
         DLog.Logd("Incoming Hexadecimal: " + struct.toString());
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
-            DLog.LogdStructAsJson(struct);
+            LogdStructAsJson(struct);
         return struct;
     }
 
@@ -233,7 +245,7 @@ public class LSerial
 
         //Only if the struct was wrote to serial should it be logged.
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
-            DLog.LogdStructAsJson(struct);
+            LogdStructAsJson(struct);
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }
@@ -258,14 +270,14 @@ public class LSerial
                 .getSimpleName(), structHash))
         {
             if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
-                DLog.LogdStructAsJson(struct);
+                LogdStructAsJson(struct);
             DLog.Logd("Struct " + struct.getClass().getSimpleName() + " was already sent, returning");
             return true;
         }
 
         //Only if the struct was wrote to serial should it be logged.
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
-            DLog.LogdStructAsJson(struct);
+            LogdStructAsJson(struct);
         return false;
     }
     /***
@@ -323,7 +335,7 @@ public class LSerial
 
         //Only if the struct was wrote to serial should it be logged.
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
-            DLog.LogdStructAsJson(struct);
+            LogdStructAsJson(struct);
 
         mUsbService.write(struct.getOrderedBuffer());
         return true;

@@ -464,11 +464,12 @@ public class OAOEquip
         Point usePerRoomCO2Sensing  = new Point.Builder().setDisplayName(equipDis + "-usePerRoomCO2Sensing")
                                                          .setEquipRef(equipRef)
                                                          .setSiteRef(siteRef)
-                                                         .addMarker("config").addMarker("oao").addMarker("writable").addMarker("room").addMarker("co2").addMarker("sensing").addMarker("sp")
+                                                         .addMarker("config").addMarker("oao").addMarker("writable").addMarker("room").addMarker("co2").addMarker("sensing").addMarker("sp").addMarker("his").addMarker("equipHis")
                                                          .setGroup(String.valueOf(nodeAddr))
                                                          .setTz(tz).build();
         String usePerRoomCO2SensingId = CCUHsApi.getInstance().addPoint(usePerRoomCO2Sensing );
         hayStack.writeDefaultValById(usePerRoomCO2SensingId, config.usePerRoomCO2Sensing ? 1.0 :0);
+        hayStack.writeHisValById(usePerRoomCO2SensingId, config.usePerRoomCO2Sensing ? 1.0 :0);
     }
     
     public double getHisVal(String tags) {
@@ -572,6 +573,7 @@ public class OAOEquip
         setConfigNumVal("co2 and threshold", config.co2Threshold);
         setConfigNumVal("exhaust and fan and hysteresis", config.exhaustFanHysteresis);
         setConfigNumVal("room and co2 and sensing", config.usePerRoomCO2Sensing? 1:0);
+        CCUHsApi.getInstance().writeHisValByQuery("point and config and oao and room and co2 and sensing", config.usePerRoomCO2Sensing? 1.0:0);
         
     }
     

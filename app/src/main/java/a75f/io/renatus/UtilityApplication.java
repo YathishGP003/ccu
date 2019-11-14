@@ -50,8 +50,7 @@ public abstract class UtilityApplication extends Application
                     break;
                 case UsbService.ACTION_USB_PERMISSION_NOT_GRANTED: // USB PERMISSION NOT GRANTED
                     NotificationHandler.setCMConnectionStatus(false);
-                    Toast.makeText(context, "USB Permission not granted", Toast.LENGTH_SHORT)
-                         .show();
+                    Toast.makeText(context, "USB Permission not granted", Toast.LENGTH_SHORT).show();
                     break;
                 case UsbService.ACTION_NO_USB: // NO USB CONNECTED
                     NotificationHandler.setCMConnectionStatus(false);

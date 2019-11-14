@@ -380,7 +380,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                             .setDisplayName(equipDis+"-"+"coolingSignal")
                             .setSiteRef(siteRef)
                             .setEquipRef(equipref)
-                            .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("his").addMarker("equipHis")
+                            .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("his").addMarker("equipHis").setUnit("%")
                             .setTz(tz)
                             .build();
         CCUHsApi.getInstance().addPoint(coolingSignal);

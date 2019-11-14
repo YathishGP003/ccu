@@ -75,6 +75,15 @@ public class DiagEquip
                                      .setTz(tz)
                                      .build();
         hsApi.addPoint(chargingStatus);
+
+        Point powerConnected = new Point.Builder()
+                .setDisplayName(equipDis+"-powerConnected")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .addMarker("diag").addMarker("power").addMarker("connected").addMarker("his").addMarker("equipHis")
+                .setTz(tz)
+                .build();
+        hsApi.addPoint(powerConnected);
     
         Point wifiRssi = new Point.Builder()
                                        .setDisplayName(equipDis+"-wifiRssi")
@@ -164,18 +173,19 @@ public class DiagEquip
     
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         Intent batteryStatus = Globals.getInstance().getApplicationContext().registerReceiver(null, ifilter);
-    
-        /*int plugged = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED,-1);
+
+        boolean isPowerConnected = false;
+        int plugged = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED,-1);
         if((plugged == BatteryManager.BATTERY_PLUGGED_AC) || (plugged == BatteryManager.BATTERY_PLUGGED_USB))
-            mIsPowerConnected = true;
-        else mIsPowerConnected = false;*/
+            isPowerConnected = true;
         
         // Are we charging / charged?
         int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
         boolean charging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
                              status == BatteryManager.BATTERY_STATUS_FULL;
         setDiagHisVal("charging and status", charging ? 1.0 : 0);
-    
+
+        setDiagHisVal("power and connected", (charging ? 1.0 : (isPowerConnected ? 1.0 : 0)));
         int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
         setDiagHisVal("battery and level", (level*100)/scale);

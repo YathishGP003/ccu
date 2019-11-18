@@ -1,6 +1,7 @@
 package a75f.io.alerts;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -19,6 +20,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.Alert_;
@@ -57,10 +61,11 @@ public class AlertProcessor
     
     HashMap<String, Integer> offsetCounter = new HashMap<>();
     HashSet<String> activeAlertRefs ;
+    private ScheduledExecutorService taskExecutor;
     
     AlertProcessor(Context c) {
         mContext = c;
-    
+        taskExecutor = Executors.newSingleThreadScheduledExecutor();
         if(boxStore != null && !boxStore.isClosed())
         {
             boxStore.close();
@@ -69,9 +74,22 @@ public class AlertProcessor
         alertBox = boxStore.boxFor(Alert.class);
         parser = new AlertParser();
         predefinedAlerts = getPredefinedAlerts();
+        taskExecutor.scheduleAtFixedRate(getWifiStatusRunnable(), 900, 60, TimeUnit.SECONDS );
         if (predefinedAlerts == null || predefinedAlerts.size() == 0) {
             fetchPredefinedAlerts();
         }
+    }
+
+    private Runnable getWifiStatusRunnable()
+    {
+        return new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                predefinedAlerts.add(parser.parseWifiAlerts(mContext).get(0));
+            }
+        };
     }
     
     //For Unit testing
@@ -417,6 +435,7 @@ public class AlertProcessor
         if (alert._id.equals("") || AlertSyncHandler.delete(mContext, alert._id))
         {
             alertBox.remove(alert.id);
+            AlertSyncHandler.mListener.onDeleteSuccess();
         }
     }
     

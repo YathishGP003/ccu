@@ -8,6 +8,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -61,6 +63,7 @@ import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
+import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -335,6 +338,9 @@ public class FloorPlanFragment extends Fragment
 
 			@Override
 			protected Void doInBackground(String... strings) {
+				if (!HTTPUtils.isNetworkConnected(getActivity())){
+					return null;
+				}
 				HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
 				HashMap site = CCUHsApi.getInstance().read("site");
 				String siteLUID = site.get("id").toString();
@@ -388,6 +394,11 @@ public class FloorPlanFragment extends Fragment
 				
 
 				return null;
+			}
+
+			@Override
+			protected void onPostExecute(Void aVoid) {
+				super.onPostExecute(aVoid);
 			}
 		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}

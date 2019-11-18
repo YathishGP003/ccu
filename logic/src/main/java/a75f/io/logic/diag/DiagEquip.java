@@ -4,9 +4,12 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
+import android.preference.PreferenceManager;
+import android.util.Log;
 
 import java.util.HashMap;
 
@@ -17,6 +20,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.R;
 
 public class DiagEquip
 {
@@ -161,6 +165,56 @@ public class DiagEquip
                                          .setTz(tz)
                                          .build();
         hsApi.addPoint(firmwareUpdate);
+
+        Point appRestart = new Point.Builder()
+                .setDisplayName(equipDis+"-appRestart")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .addMarker("diag").addMarker("app").addMarker("restart").addMarker("his").addMarker("equipHis")
+                .setUnit("")
+                .setTz(tz)
+                .build();
+        hsApi.addPoint(appRestart);
+
+        Point zonePassword = new Point.Builder()
+                .setDisplayName(equipDis+"-zonePassword")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .addMarker("diag").addMarker("zone").addMarker("password").addMarker("his").addMarker("writable").addMarker("equipHis")
+                .setUnit("")
+                .setTz(tz)
+                .build();
+        hsApi.addPoint(zonePassword);
+
+        Point systemPassword = new Point.Builder()
+                .setDisplayName(equipDis+"-systemPassword")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .addMarker("diag").addMarker("system").addMarker("password").addMarker("his").addMarker("writable").addMarker("equipHis")
+                .setUnit("")
+                .setTz(tz)
+                .build();
+        hsApi.addPoint(systemPassword);
+
+        Point buildingPassword = new Point.Builder()
+                .setDisplayName(equipDis+"-buildingPassword")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .addMarker("diag").addMarker("building").addMarker("password").addMarker("his").addMarker("writable").addMarker("equipHis")
+                .setUnit("")
+                .setTz(tz)
+                .build();
+        hsApi.addPoint(buildingPassword);
+
+        Point setupPassword = new Point.Builder()
+                .setDisplayName(equipDis+"-setupPassword")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .addMarker("diag").addMarker("setup").addMarker("password").addMarker("his").addMarker("writable").addMarker("equipHis")
+                .setUnit("")
+                .setTz(tz)
+                .build();
+        hsApi.addPoint(setupPassword);
     }
     
     
@@ -197,6 +251,10 @@ public class DiagEquip
                 setDiagHisVal("wifi and link and speed", wifiInfo.getLinkSpeed());
                 setDiagHisVal("wifi and rssi", wifiInfo.getRssi());
                 setDiagHisVal("wifi and signal and strength", wifi.calculateSignalLevel(wifiInfo.getRssi(), 10));
+            } else {
+                setDiagHisVal("wifi and link and speed", 0);
+                setDiagHisVal("wifi and rssi", 0);
+                setDiagHisVal("wifi and signal and strength", 0);
             }
         }
         
@@ -208,9 +266,30 @@ public class DiagEquip
             setDiagHisVal("total and memory", mi.totalMem/1048576L);
             setDiagHisVal("low and memory",  mi.lowMemory? 1.0 :0);
         }
+        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
+        boolean isAppRestart = spDefaultPrefs.getBoolean("APP_RESTART",false);
+        if (isAppRestart){
+            setDiagHisVal("app and restart",1);
+        } else{
+            setDiagHisVal("app and restart",0);
+        }
+
+        String zonePass = spDefaultPrefs.getString("zone_settings_password","");
+        String buildingPass = spDefaultPrefs.getString("building_settings_password","");
+        String systemPass = spDefaultPrefs.getString("system_settings_password","");
+        String setupPass = spDefaultPrefs.getString("use_setup_password","");
+        setDiagDefaultHisVal("zone and password",PasswordUtils.encryptIt(zonePass));
+        setDiagDefaultHisVal("building and password",PasswordUtils.encryptIt(buildingPass));
+        setDiagDefaultHisVal("system and password",PasswordUtils.encryptIt(systemPass));
+        setDiagDefaultHisVal("setup and password",PasswordUtils.encryptIt(setupPass));
     }
     
     public void setDiagHisVal(String tag, double val) {
         CCUHsApi.getInstance().writeHisValByQuery("point and diag and "+tag, val);
+    }
+
+    public void setDiagDefaultHisVal(String tag, String val) {
+        Log.d("Mahesh"," save diag password" +tag +" "+val);
+        CCUHsApi.getInstance().writeDefaultVal("point and diag and "+tag, val);
     }
 }

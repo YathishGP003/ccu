@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabItem;
@@ -9,22 +11,34 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
+import android.text.InputType;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.L;
+import a75f.io.logic.diag.PasswordUtils;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 import a75f.io.renatus.registartion.CustomViewPager;
+import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.CCUUtils;
+import a75f.io.renatus.util.Prefs;
 
 public class RenatusLandingActivity extends AppCompatActivity {
 
@@ -52,12 +66,13 @@ public class RenatusLandingActivity extends AppCompatActivity {
      */
     private CustomViewPager mViewPager;
     private TabLayout mTabLayout, btnTabs;
+    private Prefs prefs;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        prefs = new Prefs(this);
         if (!isFinishing()) {
             setContentView(R.layout.activity_renatus_landing);
             mSettingPagerAdapter = new SettingsPagerAdapter(getSupportFragmentManager());
@@ -73,11 +88,17 @@ public class RenatusLandingActivity extends AppCompatActivity {
 
             pageSettingButton = findViewById(R.id.pageSettingButton);
             pageDashBoardButton = findViewById(R.id.pageDashBoardButton);
+            if (isSetupPassWordRequired()) {
+                showRequestPasswordAlert("Setup Access Authentication",getString(R.string.USE_SETUP_PASSWORD_KEY), 0);
+            }
 
             btnTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
                 @Override
                 public void onTabSelected(TabLayout.Tab tab) {
                       if (tab.getPosition() == 0){
+                          if (isSetupPassWordRequired()) {
+                              showRequestPasswordAlert("Setup Access Authentication",getString(R.string.USE_SETUP_PASSWORD_KEY), tab.getPosition());
+                          }
                           tab.setIcon(R.drawable.ic_settings_orange);
                           mViewPager.setAdapter(mSettingPagerAdapter);
                           mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
@@ -213,9 +234,24 @@ public class RenatusLandingActivity extends AppCompatActivity {
                     menuToggle.setVisibility(View.VISIBLE);
                     floorMenu.setVisibility(View.GONE);
                 } else if (i == 1 && mViewPager.getAdapter().instantiateItem(mViewPager, i) instanceof ZoneFragmentNew){
+                    if (isZonePassWordRequired()) {
+                        showRequestPasswordAlert("Zone Settings Authentication", getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), i);
+                    }
                     menuToggle.setVisibility(View.GONE);
                     floorMenu.setVisibility(View.VISIBLE);
-                } else {
+                }  else if (i == 2 && mViewPager.getAdapter().instantiateItem(mViewPager, i) instanceof SystemFragment){
+                    if (isSystemPassWordRequired()) {
+                        showRequestPasswordAlert("System Settings Authentication", getString(R.string.SYSTEM_SETTINGS_PASSWORD_KEY), i);
+                    }
+                    menuToggle.setVisibility(View.GONE);
+                    floorMenu.setVisibility(View.VISIBLE);
+                }   else if (i == 3 && mViewPager.getAdapter().instantiateItem(mViewPager, i) instanceof SchedulerFragment){
+                    if (isBuildingPassWordRequired()) {
+                        showRequestPasswordAlert("Building Settings Authentication", getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY), i);
+                    }
+                    menuToggle.setVisibility(View.GONE);
+                    floorMenu.setVisibility(View.VISIBLE);
+                }else {
                     floorMenu.setVisibility(View.GONE);
                     menuToggle.setVisibility(View.GONE);
                 }
@@ -292,4 +328,93 @@ public class RenatusLandingActivity extends AppCompatActivity {
         }
     }
 
+    public void showRequestPasswordAlert(String title, String key, int position) {
+
+        String password = PasswordUtils.decryptIt(getSavedPassword(key));
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        SpannableString spannable = new SpannableString(title);
+        spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.accent)), 0, title.length(), 0);
+        builder.setTitle(spannable);
+        builder.setCancelable(false);
+
+        EditText etPassword = new EditText(this);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(20,20,20,0);
+        etPassword.setLayoutParams(lp);
+        etPassword.setHint("Enter Password");
+        etPassword.setInputType(InputType.TYPE_CLASS_TEXT |
+                InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        etPassword.setTextSize(20);
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.addView(etPassword);
+        builder.setView(layout);
+
+        builder.setPositiveButton("OK", null);
+        builder.setNegativeButton("CANCEL", null);
+
+        AlertDialog dialog = builder.create();
+        dialog.setOnShowListener(dialogInterface -> {
+            Button posButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            posButton.setTextColor(getResources().getColor(R.color.black));
+            posButton.setOnClickListener(view -> {
+                if (etPassword.getText().toString().equals(password)) {
+                    dialogInterface.dismiss();
+                    mViewPager.setCurrentItem(position);
+                } else {
+                    Toast.makeText(RenatusLandingActivity.this, "Incorrect Password!", Toast.LENGTH_LONG).show();
+                }
+            });
+
+            Button negButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+            negButton.setOnClickListener(view -> {
+                if (position == 0){
+                    finish();
+                    dialog.dismiss();
+                    return;
+                }
+                mViewPager.setCurrentItem(0);
+                dialog.dismiss();
+            });
+        });
+        dialog.show();
+    }
+
+    private String getSavedPassword(String key) {
+        String password = "";
+        String tag = "";
+        if (key.contains("zone")){
+            tag = "zone and password";
+        } else if (key.contains("building")){
+            tag = "building and password";
+        } else if (key.contains("system")){
+            tag = "system and password";
+        } else if (key.contains("setup")){
+            tag = "setup and password";
+        }
+      //  password = CCUHsApi.getInstance().readDefaultStrVal("diag and "+tag);
+        HashMap diagEquip = CCUHsApi.getInstance().read("equip and diag");
+        Log.d("Mahesh","diag equip"+diagEquip);
+        ArrayList<HashMap> points = CCUHsApi.getInstance().readAll(key +"and equipRef == \""+diagEquip.get("id")+"\"");
+        Log.d("Mahesh","pointa"+points);
+        return password;
+    }
+
+    private boolean isZonePassWordRequired(){
+        return (prefs.getBoolean(getString(R.string.SET_ZONE_PASSWORD))&& !prefs.getString(getString(R.string.ZONE_SETTINGS_PASSWORD_KEY)).isEmpty());
+    }
+
+    private boolean isSystemPassWordRequired(){
+        return (prefs.getBoolean(getString(R.string.SET_SYSTEM_PASSWORD))&& !prefs.getString(getString(R.string.SYSTEM_SETTINGS_PASSWORD_KEY)).isEmpty());
+    }
+
+    private boolean isBuildingPassWordRequired(){
+        return (prefs.getBoolean(getString(R.string.SET_BUILDING_PASSWORD))&& !prefs.getString(getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY)).isEmpty());
+    }
+
+    private boolean isSetupPassWordRequired(){
+        return (prefs.getBoolean(getString(R.string.SET_SETUP_PASSWORD))&& !prefs.getString(getString(R.string.USE_SETUP_PASSWORD_KEY)).isEmpty());
+    }
 }

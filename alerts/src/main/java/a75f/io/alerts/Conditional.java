@@ -1,5 +1,7 @@
 package a75f.io.alerts;
 
+import android.util.Log;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.udojava.evalex.Expression;
 
@@ -78,14 +80,17 @@ public class Conditional
      *
      */
     void evaluate() {
-        
+        if (grpOperation.contains("alert")){
+            status = true;
+            return;
+        }
         if (key.isEmpty() || value.isEmpty() || condition.isEmpty()) {
             throw new IllegalArgumentException("Invalid Conditional");
         }
         val = isNumeric(value) ? value : String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value));
         
         CcuLog.d("CCU_ALERTS"," Evaluate Conditional : "+key+ " "+condition+" "+val);
-        
+
         if (grpOperation == null || grpOperation.equals("")) {
             HashMap point = CCUHsApi.getInstance().read(key);
             if (point.size() == 0) {
@@ -115,7 +120,23 @@ public class Conditional
                     
                 }
             }
-        } else {
+        } else if (grpOperation.contains("oao")){
+            ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and oao");
+            if (equips.size()!=0) {
+                for (Map q : equips) {
+                    HashMap point = CCUHsApi.getInstance().read(key+" and equipRef == \""+q.get("id")+"\"");
+                    if (point.size() == 0) {
+                        continue;
+                    }
+                    val = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value+" and equipRef == \""+q.get("id")+"\""));
+                    resVal = CCUHsApi.getInstance().readHisValById(point.get("id").toString());
+
+                    Expression expression = new Expression(resVal + " " + condition + " " + val);
+                    status = expression.eval().intValue() > 0;
+                }
+            }
+        }
+        else {
             pointList = null;
             pointValList = new ArrayList<>();
             ArrayList<HashMap> points = CCUHsApi.getInstance().readAll(key);

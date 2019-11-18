@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import a75f.io.renatus.util.ActivityLifecycleHandler;
 import io.fabric.sdk.android.Fabric;
 
 /**
@@ -30,6 +31,7 @@ public class RenatusApp extends UtilityApplication
 	{
 		super.onCreate();
 		mContext = getApplicationContext();
+		registerActivityLifecycleCallbacks(new ActivityLifecycleHandler());
 		AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 		Fabric.with(this, new Crashlytics());
 	}

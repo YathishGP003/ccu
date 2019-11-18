@@ -15,7 +15,6 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemConstants;
-import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
@@ -23,6 +22,7 @@ import a75f.io.logic.tuners.VavTRTuners;
 
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
+import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 
 /**
  * System profile to handle AHU via IE gateways.
@@ -246,7 +246,7 @@ public class VavIERtu extends VavSystemProfile
         
         ControlMote.setAnalogOut("analog3", VavSystemController.getInstance().getAverageSystemHumidity());
     
-        systemCo2LoopOp = VavSystemController.getInstance().getSystemState() == SystemController.State.OFF
+        systemCo2LoopOp = VavSystemController.getInstance().getSystemState() == OFF
                                   ? 0 : (SystemConstants.CO2_CONFIG_MAX - getSystemCO2()) * 100 / 200 ;
         setSystemLoopOp("co2", systemCo2LoopOp);
         
@@ -273,10 +273,11 @@ public class VavIERtu extends VavSystemProfile
     
     @Override
     public String getStatusMessage(){
+        
         StringBuilder status = new StringBuilder();
-        status.append(systemFanLoopOp > 0 ? " Fan ON ":"");
-        status.append(systemCoolingLoopOp > 0 ? " | Cooling ON ":"");
-        status.append(systemHeatingLoopOp > 0 ? " | Heating ON ":"");
+        status.append(VavSystemController.getInstance().getSystemState() == COOLING ? " Cooling DAT (F): " + getCmdSignal("cooling"):"");
+        status.append(VavSystemController.getInstance().getSystemState() == HEATING ? " Heating DAT (F): " + getCmdSignal("heating"):"");
+        status.append(VavSystemController.getInstance().getSystemState() != OFF ? " | Static Pressure (in): " + (getCmdSignal("fan") / 10):"");
         
         if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
             status.insert(0, "Free Cooling Used |");

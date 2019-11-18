@@ -125,7 +125,7 @@ public class ConventionalUnitLogicalMap {
                 .addMarker("zone").addMarker("standalone").addMarker("cpu")
                 .addMarker("air").addMarker("voc").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
-                .setUnit("ppm")
+                .setUnit("ppb")
                 .setTz(tz)
                 .build();
         String vocId = CCUHsApi.getInstance().addPoint(voc);

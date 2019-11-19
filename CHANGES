@@ -1,0 +1,7 @@
+ - Merge branch 'renatus_dev_sam' into 'master'
+ - resolves RENATUS-766
+ - resolves RENATUS-803
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-816, VOC unit is ppb
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-804, CM Desired temp has to be historized

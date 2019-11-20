@@ -32,6 +32,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.L;
+import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.diag.PasswordUtils;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
@@ -330,7 +331,8 @@ public class RenatusLandingActivity extends AppCompatActivity {
 
     public void showRequestPasswordAlert(String title, String key, int position) {
 
-        String password = PasswordUtils.decryptIt(getSavedPassword(key));
+        final int[] passwordAttempt = {0};
+        String password = getSavedPassword(key);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         SpannableString spannable = new SpannableString(title);
         spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.accent)), 0, title.length(), 0);
@@ -363,8 +365,14 @@ public class RenatusLandingActivity extends AppCompatActivity {
                 if (etPassword.getText().toString().equals(password)) {
                     dialogInterface.dismiss();
                     mViewPager.setCurrentItem(position);
+                    passwordAttempt[0] = 0;
+                    prefs.setInt("PASSWORD_ATTEMPT",passwordAttempt[0]);
+                    DiagEquip.getInstance().setDiagHisVal("password and attempt",passwordAttempt[0]);
                 } else {
                     Toast.makeText(RenatusLandingActivity.this, "Incorrect Password!", Toast.LENGTH_LONG).show();
+                    passwordAttempt[0]++;
+                    prefs.setInt("PASSWORD_ATTEMPT",passwordAttempt[0]);
+                    DiagEquip.getInstance().setDiagHisVal("password and attempt",passwordAttempt[0]);
                 }
             });
 
@@ -383,7 +391,7 @@ public class RenatusLandingActivity extends AppCompatActivity {
     }
 
     private String getSavedPassword(String key) {
-        String password = "";
+        String password;
         String tag = "";
         if (key.contains("zone")){
             tag = "zone and password";
@@ -394,11 +402,7 @@ public class RenatusLandingActivity extends AppCompatActivity {
         } else if (key.contains("setup")){
             tag = "setup and password";
         }
-      //  password = CCUHsApi.getInstance().readDefaultStrVal("diag and "+tag);
-        HashMap diagEquip = CCUHsApi.getInstance().read("equip and diag");
-        Log.d("Mahesh","diag equip"+diagEquip);
-        ArrayList<HashMap> points = CCUHsApi.getInstance().readAll(key +"and equipRef == \""+diagEquip.get("id")+"\"");
-        Log.d("Mahesh","pointa"+points);
+        password = CCUHsApi.getInstance().readDefaultStrVal(tag);
         return password;
     }
 

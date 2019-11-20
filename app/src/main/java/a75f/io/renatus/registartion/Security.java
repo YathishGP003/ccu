@@ -470,7 +470,6 @@ public class Security extends Fragment {
         } else if (key.contains("setup")){
             tag = "setup and password";
         }
-        Log.d("Mahesh"," save diag password" +tag +" "+val);
         CCUHsApi.getInstance().writeDefaultVal("point and diag and "+tag, val);
     }
 }

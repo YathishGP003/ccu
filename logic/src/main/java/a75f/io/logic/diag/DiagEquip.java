@@ -215,6 +215,15 @@ public class DiagEquip
                 .setTz(tz)
                 .build();
         hsApi.addPoint(setupPassword);
+
+        Point passwordAttempt = new Point.Builder()
+                .setDisplayName(equipDis+"-passwordAttempt")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .addMarker("diag").addMarker("password").addMarker("attempt").addMarker("his").addMarker("equipHis")
+                .setTz(tz)
+                .build();
+        hsApi.addPoint(passwordAttempt);
     }
     
     
@@ -273,15 +282,24 @@ public class DiagEquip
         } else{
             setDiagHisVal("app and restart",0);
         }
+        setDiagHisVal("password and attempt", spDefaultPrefs.getInt("PASSWORD_ATTEMPT",0));
 
         String zonePass = spDefaultPrefs.getString("zone_settings_password","");
         String buildingPass = spDefaultPrefs.getString("building_settings_password","");
         String systemPass = spDefaultPrefs.getString("system_settings_password","");
         String setupPass = spDefaultPrefs.getString("use_setup_password","");
-        setDiagDefaultHisVal("zone and password",PasswordUtils.encryptIt(zonePass));
-        setDiagDefaultHisVal("building and password",PasswordUtils.encryptIt(buildingPass));
-        setDiagDefaultHisVal("system and password",PasswordUtils.encryptIt(systemPass));
-        setDiagDefaultHisVal("setup and password",PasswordUtils.encryptIt(setupPass));
+        if (!zonePass.isEmpty()) {
+            setDiagDefaultHisVal("zone and password", zonePass);
+        }
+        if (!buildingPass.isEmpty()) {
+            setDiagDefaultHisVal("building and password", buildingPass);
+        }
+        if (!systemPass.isEmpty()) {
+            setDiagDefaultHisVal("system and password", systemPass);
+        }
+        if (!setupPass.isEmpty()) {
+            setDiagDefaultHisVal("setup and password", setupPass);
+        }
     }
     
     public void setDiagHisVal(String tag, double val) {
@@ -289,7 +307,6 @@ public class DiagEquip
     }
 
     public void setDiagDefaultHisVal(String tag, String val) {
-        Log.d("Mahesh"," save diag password" +tag +" "+val);
         CCUHsApi.getInstance().writeDefaultVal("point and diag and "+tag, val);
     }
 }

@@ -450,7 +450,7 @@ public class BuildingTuners
                                        .setEquipRef(equipRef)
                                        .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                        .addMarker("zone").addMarker("voc").addMarker("target").addMarker("sp")
-                                       .setUnit("ppm")
+                                       .setUnit("ppb")
                                        .setTz(tz)
                                        .build();
         String zoneVOCTargetId = hayStack.addPoint(zoneVOCTarget);
@@ -463,7 +463,7 @@ public class BuildingTuners
                                           .setEquipRef(equipRef)
                                           .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                           .addMarker("zone").addMarker("voc").addMarker("threshold").addMarker("sp")
-                                          .setUnit("ppm")
+                                          .setUnit("ppb")
                                           .setTz(tz)
                                           .build();
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
@@ -944,7 +944,7 @@ public class BuildingTuners
                                          .setFloorRef(floorRef)
                                          .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("sp").addMarker("equipHis")
                                          .addMarker("zone").addMarker("voc").addMarker("target")
-                                         .setUnit("ppm")
+                                         .setUnit("ppb")
                                          .setTz(tz)
                                          .build();
         String zoneVOCTargetId = hayStack.addPoint(zoneVOCTarget);
@@ -966,7 +966,7 @@ public class BuildingTuners
                                         .setFloorRef(floorRef)
                                         .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                         .addMarker("zone").addMarker("voc").addMarker("threshold").addMarker("sp")
-                                        .setUnit("ppm")
+                                        .setUnit("ppb")
                                         .setTz(tz)
                                         .build();
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
@@ -1253,7 +1253,7 @@ public class BuildingTuners
                                        .setEquipRef(equipRef)
                                        .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                        .addMarker("zone").addMarker("voc").addMarker("target").addMarker("sp")
-                                       .setUnit("ppm")
+                                       .setUnit("ppb")
                                        .setTz(tz)
                                        .build();
         String zoneVOCTargetId = hayStack.addPoint(zoneVOCTarget);
@@ -1266,7 +1266,7 @@ public class BuildingTuners
                                           .setEquipRef(equipRef)
                                           .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                           .addMarker("zone").addMarker("voc").addMarker("threshold").addMarker("sp")
-                                          .setUnit("ppm")
+                                          .setUnit("ppb")
                                           .setTz(tz)
                                           .build();
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
@@ -1605,7 +1605,7 @@ public class BuildingTuners
                                       .setFloorRef(floorRef)
                                       .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("sp").addMarker("equipHis")
                                       .addMarker("zone").addMarker("voc").addMarker("target")
-                                      .setUnit("ppm")
+                                      .setUnit("ppb")
                                       .setTz(tz)
                                       .build();
         String zoneVOCTargetId = hayStack.addPoint(zoneVOCTarget);
@@ -1627,7 +1627,7 @@ public class BuildingTuners
                                          .setFloorRef(floorRef)
                                          .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                          .addMarker("zone").addMarker("voc").addMarker("threshold").addMarker("sp")
-                                         .setUnit("ppm")
+                                         .setUnit("ppb")
                                          .setTz(tz)
                                          .build();
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);

@@ -451,6 +451,7 @@ public class OAOEquip
                                                           .setUnit("ppm").setTz(tz).build();
         String co2ThresholdId = CCUHsApi.getInstance().addPoint(co2Threshold );
         hayStack.writeDefaultValById(co2ThresholdId, config.co2Threshold);
+        hayStack.writeHisValById(co2ThresholdId,config.co2Threshold);
     
         Point exhaustFanHysteresis  = new Point.Builder().setDisplayName(equipDis + "-exhaustFanHysteresis")
                                                           .setEquipRef(equipRef)
@@ -574,6 +575,7 @@ public class OAOEquip
         setConfigNumVal("exhaust and fan and hysteresis", config.exhaustFanHysteresis);
         setConfigNumVal("room and co2 and sensing", config.usePerRoomCO2Sensing? 1:0);
         CCUHsApi.getInstance().writeHisValByQuery("point and config and oao and room and co2 and sensing", config.usePerRoomCO2Sensing? 1.0:0);
+        CCUHsApi.getInstance().writeHisValByQuery("point and config and oao and co2 and threshold", config.co2Threshold);
         
     }
     

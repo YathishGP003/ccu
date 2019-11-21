@@ -1,2 +1,4 @@
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-819, VOC target unit to ppb
+ - #RENATUS-820, Cm heating desired in setback is wrong
+ - #RENATUS-818, VAV Fully modulating occupancy signal should be 1 or 0
+ - #RENATUS-817, OAO | CO2 threshold historize

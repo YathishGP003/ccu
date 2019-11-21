@@ -318,7 +318,7 @@ public class CreateNewSite extends Fragment {
                 }
                 L.saveCCUState();
                 CCUHsApi.getInstance().syncEntityTree();
-                Toast.makeText(getActivity(),"Details edited saved Successfully",Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(),"Edited details saved successfully",Toast.LENGTH_LONG).show();
             }
         });
 

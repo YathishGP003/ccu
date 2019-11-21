@@ -5,8 +5,10 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,11 +17,12 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logic.diag.PasswordUtils;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
 import butterknife.BindView;
@@ -102,6 +105,9 @@ public class Security extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
     }
 
     @Override
@@ -157,7 +163,7 @@ public class Security extends Fragment {
         mZonePass.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                mTitle = getString(R.string.systemsettings);
+                mTitle = getString(R.string.zonesettings);
                 mKey = getString(R.string.ZONE_SETTINGS_PASSWORD_KEY);
                 mSetKey = getString(R.string.SET_ZONE_PASSWORD);
                 showCustomDialog(mTitle,mKey,mSetKey,mZonePassTb,mZoneTap);
@@ -167,7 +173,7 @@ public class Security extends Fragment {
         mSystemPass.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                mTitle = getString(R.string.zonesettings);
+                mTitle = getString(R.string.systemsettings);
                 mKey = getString(R.string.SYSTEM_SETTINGS_PASSWORD_KEY);
                 mSetKey = getString(R.string.SET_SYSTEM_PASSWORD);
                 showCustomDialog(mTitle,mKey,mSetKey,mSystemPassTb,mSystemtap);
@@ -290,7 +296,7 @@ public class Security extends Fragment {
                     }
                     else {
                         mTitle = getString(R.string.setupchange);
-                        mKey = getString(R.string.SETUP_PASSWORD_KEY);
+                        mKey = getString(R.string.USE_SETUP_PASSWORD_KEY);
                         showCustomDialog(mTitle,mKey,mSetKey,mSetupPassTb,mSetupTap);
                     }
                 }

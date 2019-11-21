@@ -16,6 +16,15 @@ import a75f.io.logger.CcuLog;
 
 public class AlertSyncHandler
 {
+    static AlertDeleteListener mListener;
+
+    public interface AlertDeleteListener {
+        void onDeleteSuccess();
+    }
+
+    public AlertSyncHandler(AlertDeleteListener mListener) {
+        AlertSyncHandler.mListener = mListener;
+    }
     public static List<Alert> sync(Context c, List<Alert> alerts) {
         ArrayList<Alert> syncedAlerts = new ArrayList<>();
         for (Alert a : alerts)

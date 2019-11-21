@@ -33,6 +33,15 @@ public class AlertManager
         }
         return mInstance;
     }
+
+    public static AlertManager getInstance()
+    {
+        if (mInstance == null)
+        {
+            throw new IllegalStateException("No instance found");
+        }
+        return mInstance;
+    }
     
     public void init(Context c) {
         mContext = c;
@@ -110,6 +119,16 @@ public class AlertManager
     }
     public void deleteAlertDefinition(String _id) {
         processor.deleteCustomAlertDefinition(_id);
+    }
+
+    public Context getApplicationContext() {
+        return mContext;
+    }
+
+    public void setApplicationContext(Context mApplicationContext) {
+        if (this.mContext == null) {
+            this.mContext = mApplicationContext;
+        }
     }
     
 }

@@ -1,5 +1,8 @@
 package a75f.io.renatus.util.HttpsUtils;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.Scheme;
@@ -33,5 +36,11 @@ public class HTTPUtils {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public static boolean isNetworkConnected(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
     }
 }

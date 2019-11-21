@@ -19,6 +19,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import a75f.io.alerts.AlertManager;
 import a75f.io.device.DeviceUpdateJob;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.logic.Globals;
@@ -99,6 +100,7 @@ public abstract class UtilityApplication extends Application
         super.onCreate();
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         Globals.getInstance().setApplicationContext(this);
+        AlertManager.getInstance(this).setApplicationContext(this);
         setUsbFilters();  // Start listening notifications from UsbService
         startService(new Intent(this, OTAUpdateHandlerService.class));  // Start OTA update event + timer handler service
         startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it

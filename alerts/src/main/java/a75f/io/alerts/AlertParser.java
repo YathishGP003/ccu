@@ -23,7 +23,8 @@ public class AlertParser
     public final String SYSTEM_ALERTS_FILE = "SystemAlerts.json";
     public final String ZONE_ALERTS_FILE = "ZoneAlerts.json";
     public final String NODE_ALERTS_FILE = "NodeAlerts.json";
-    
+    public final String WIFI_ALERTS_FILE = "WifiSignalAlerts.json";
+
     public ArrayList<AlertDefinition> parseAllAlerts(Context c) {
         ArrayList<AlertDefinition> systemAlerts = parseSystemAlerts(c);
         ArrayList<AlertDefinition> zoneAlerts = parseZoneAlerts(c);
@@ -59,6 +60,12 @@ public class AlertParser
     public ArrayList<AlertDefinition> parseNodeAlerts(Context c) {
         
         String alerts = readFileFromAssets(c, NODE_ALERTS_FILE);
+        return alerts != null ? parseAlertsString(alerts) : null;
+    }
+
+    public ArrayList<AlertDefinition> parseWifiAlerts(Context c) {
+
+        String alerts = readFileFromAssets(c, WIFI_ALERTS_FILE);
         return alerts != null ? parseAlertsString(alerts) : null;
     }
     

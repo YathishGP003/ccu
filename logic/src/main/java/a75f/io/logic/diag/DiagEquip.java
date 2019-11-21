@@ -4,9 +4,12 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
+import android.preference.PreferenceManager;
+import android.util.Log;
 
 import java.util.HashMap;
 
@@ -17,6 +20,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.R;
 
 public class DiagEquip
 {
@@ -161,6 +165,16 @@ public class DiagEquip
                                          .setTz(tz)
                                          .build();
         hsApi.addPoint(firmwareUpdate);
+
+        Point appRestart = new Point.Builder()
+                .setDisplayName(equipDis+"-appRestart")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .addMarker("diag").addMarker("app").addMarker("restart").addMarker("his").addMarker("equipHis")
+                .setUnit("")
+                .setTz(tz)
+                .build();
+        hsApi.addPoint(appRestart);
     }
     
     
@@ -197,6 +211,10 @@ public class DiagEquip
                 setDiagHisVal("wifi and link and speed", wifiInfo.getLinkSpeed());
                 setDiagHisVal("wifi and rssi", wifiInfo.getRssi());
                 setDiagHisVal("wifi and signal and strength", wifi.calculateSignalLevel(wifiInfo.getRssi(), 10));
+            } else {
+                setDiagHisVal("wifi and link and speed", 0);
+                setDiagHisVal("wifi and rssi", 0);
+                setDiagHisVal("wifi and signal and strength", 0);
             }
         }
         
@@ -207,6 +225,13 @@ public class DiagEquip
             setDiagHisVal("available and memory",mi.availMem / 1048576L);
             setDiagHisVal("total and memory", mi.totalMem/1048576L);
             setDiagHisVal("low and memory",  mi.lowMemory? 1.0 :0);
+        }
+        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
+        boolean isAppRestart = spDefaultPrefs.getBoolean("APP_RESTART",false);
+        if (isAppRestart){
+            setDiagHisVal("app and restart",1);
+        } else{
+            setDiagHisVal("app and restart",0);
         }
     }
     

@@ -1,0 +1,21 @@
+[
+  {
+    "conditionals": [
+      {
+        "order": "1",
+        "key": "diag and wifi and signal and strength",
+        "value": "0",
+        "grpOperation": "",
+        "condition": "=="
+      }
+    ],
+    "offset": "0",
+    "alert": {
+      "mTitle": "CCU Server No Communication",
+      "mMessage": "CCU doesn't have communication with server",
+      "mNotificationMsg": "CCU doesn't have communication with server",
+      "mSeverity": "WARN",
+      "mEnabled": "true"
+    }
+  }
+]

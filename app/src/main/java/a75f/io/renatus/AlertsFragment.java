@@ -17,13 +17,14 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import a75f.io.alerts.AlertManager;
+import a75f.io.alerts.AlertSyncHandler;
 import a75f.io.api.haystack.Alert;
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
  */
 
-public class AlertsFragment extends Fragment
+public class AlertsFragment extends Fragment implements AlertSyncHandler.AlertDeleteListener
 {
 	
 	ArrayList<Alert> alertList;
@@ -32,12 +33,13 @@ public class AlertsFragment extends Fragment
 	
 	public AlertsFragment()
 	{
+		new AlertSyncHandler(this);
 	}
 	     
 	
 	public static AlertsFragment newInstance()
 	{
-		
+
 		return new AlertsFragment();
 	}
 	
@@ -80,6 +82,7 @@ public class AlertsFragment extends Fragment
 					builder.setNegativeButton("Mark-Fixed", new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							AlertManager.getInstance(getActivity()).fixAlert(a);
+							getActivity().runOnUiThread(() -> adapter.notifyDataSetChanged());
 						}
 					});
 				}
@@ -134,5 +137,16 @@ public class AlertsFragment extends Fragment
 		DateFormat sdf = new SimpleDateFormat("dd MMM yyyy HH:mm");
 		Date date = new Date(millis);
 		return sdf.format(date);
+	}
+
+	@Override
+	public void onDeleteSuccess() {
+		getActivity().runOnUiThread(() -> {
+			alertList.clear();
+			alertList = new ArrayList<>(AlertManager.getInstance(getActivity()).getAllAlerts());
+			adapter= new AlertAdapter(alertList,getActivity());
+			listView.setAdapter(adapter);
+			adapter.notifyDataSetChanged();
+		});
 	}
 }

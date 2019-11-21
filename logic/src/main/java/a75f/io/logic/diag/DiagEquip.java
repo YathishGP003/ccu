@@ -175,55 +175,6 @@ public class DiagEquip
                 .setTz(tz)
                 .build();
         hsApi.addPoint(appRestart);
-
-        Point zonePassword = new Point.Builder()
-                .setDisplayName(equipDis+"-zonePassword")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .addMarker("diag").addMarker("zone").addMarker("password").addMarker("his").addMarker("writable").addMarker("equipHis")
-                .setUnit("")
-                .setTz(tz)
-                .build();
-        hsApi.addPoint(zonePassword);
-
-        Point systemPassword = new Point.Builder()
-                .setDisplayName(equipDis+"-systemPassword")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .addMarker("diag").addMarker("system").addMarker("password").addMarker("his").addMarker("writable").addMarker("equipHis")
-                .setUnit("")
-                .setTz(tz)
-                .build();
-        hsApi.addPoint(systemPassword);
-
-        Point buildingPassword = new Point.Builder()
-                .setDisplayName(equipDis+"-buildingPassword")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .addMarker("diag").addMarker("building").addMarker("password").addMarker("his").addMarker("writable").addMarker("equipHis")
-                .setUnit("")
-                .setTz(tz)
-                .build();
-        hsApi.addPoint(buildingPassword);
-
-        Point setupPassword = new Point.Builder()
-                .setDisplayName(equipDis+"-setupPassword")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .addMarker("diag").addMarker("setup").addMarker("password").addMarker("his").addMarker("writable").addMarker("equipHis")
-                .setUnit("")
-                .setTz(tz)
-                .build();
-        hsApi.addPoint(setupPassword);
-
-        Point passwordAttempt = new Point.Builder()
-                .setDisplayName(equipDis+"-passwordAttempt")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .addMarker("diag").addMarker("password").addMarker("attempt").addMarker("his").addMarker("equipHis")
-                .setTz(tz)
-                .build();
-        hsApi.addPoint(passwordAttempt);
     }
     
     
@@ -282,31 +233,9 @@ public class DiagEquip
         } else{
             setDiagHisVal("app and restart",0);
         }
-        setDiagHisVal("password and attempt", spDefaultPrefs.getInt("PASSWORD_ATTEMPT",0));
-
-        String zonePass = spDefaultPrefs.getString("zone_settings_password","");
-        String buildingPass = spDefaultPrefs.getString("building_settings_password","");
-        String systemPass = spDefaultPrefs.getString("system_settings_password","");
-        String setupPass = spDefaultPrefs.getString("use_setup_password","");
-        if (!zonePass.isEmpty()) {
-            setDiagDefaultHisVal("zone and password", zonePass);
-        }
-        if (!buildingPass.isEmpty()) {
-            setDiagDefaultHisVal("building and password", buildingPass);
-        }
-        if (!systemPass.isEmpty()) {
-            setDiagDefaultHisVal("system and password", systemPass);
-        }
-        if (!setupPass.isEmpty()) {
-            setDiagDefaultHisVal("setup and password", setupPass);
-        }
     }
     
     public void setDiagHisVal(String tag, double val) {
         CCUHsApi.getInstance().writeHisValByQuery("point and diag and "+tag, val);
-    }
-
-    public void setDiagDefaultHisVal(String tag, String val) {
-        CCUHsApi.getInstance().writeDefaultVal("point and diag and "+tag, val);
     }
 }

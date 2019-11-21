@@ -1,6 +1,7 @@
 package a75f.io.alerts;
 
 import android.content.Context;
+import android.os.StrictMode;
 import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -66,6 +67,8 @@ public class AlertProcessor
     AlertProcessor(Context c) {
         mContext = c;
         taskExecutor = Executors.newSingleThreadScheduledExecutor();
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
         if(boxStore != null && !boxStore.isClosed())
         {
             boxStore.close();

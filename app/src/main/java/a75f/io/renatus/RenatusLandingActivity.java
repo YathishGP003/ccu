@@ -367,12 +367,10 @@ public class RenatusLandingActivity extends AppCompatActivity {
                     mViewPager.setCurrentItem(position);
                     passwordAttempt[0] = 0;
                     prefs.setInt("PASSWORD_ATTEMPT",passwordAttempt[0]);
-                    DiagEquip.getInstance().setDiagHisVal("password and attempt",passwordAttempt[0]);
                 } else {
                     Toast.makeText(RenatusLandingActivity.this, "Incorrect Password!", Toast.LENGTH_LONG).show();
                     passwordAttempt[0]++;
                     prefs.setInt("PASSWORD_ATTEMPT",passwordAttempt[0]);
-                    DiagEquip.getInstance().setDiagHisVal("password and attempt",passwordAttempt[0]);
                 }
             });
 
@@ -394,15 +392,15 @@ public class RenatusLandingActivity extends AppCompatActivity {
         String password;
         String tag = "";
         if (key.contains("zone")){
-            tag = "zone and password";
+            tag = getString(R.string.ZONE_SETTINGS_PASSWORD_KEY);
         } else if (key.contains("building")){
-            tag = "building and password";
+            tag = getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY);
         } else if (key.contains("system")){
-            tag = "system and password";
+            tag = getString(R.string.SYSTEM_SETTINGS_PASSWORD_KEY);
         } else if (key.contains("setup")){
-            tag = "setup and password";
+            tag = getString(R.string.USE_SETUP_PASSWORD_KEY);
         }
-        password = CCUHsApi.getInstance().readDefaultStrVal(tag);
+        password = prefs.getString(tag);
         return password;
     }
 

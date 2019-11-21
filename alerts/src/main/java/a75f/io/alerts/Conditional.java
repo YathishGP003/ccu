@@ -1,5 +1,8 @@
 package a75f.io.alerts;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -84,6 +87,10 @@ public class Conditional
             status = true;
             return;
         }
+        if (grpOperation.contains("Clear Password")){
+            clearPassword(value);
+            return;
+        }
         if (key.isEmpty() || value.isEmpty() || condition.isEmpty()) {
             throw new IllegalArgumentException("Invalid Conditional");
         }
@@ -135,6 +142,13 @@ public class Conditional
                     status = expression.eval().intValue() > 0;
                 }
             }
+        } else if (grpOperation.contains("security")){
+            SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(AlertManager.getInstance().getApplicationContext());
+            resVal = spDefaultPrefs.getInt("PASSWORD_ATTEMPT",0);
+            CcuLog.d("CCU_ALERTS ", " Evaluate Conditional: "+toString());
+            val = isNumeric(value) ? value : String.valueOf(CCUHsApi.getInstance().read(value));
+            Expression expression = new Expression(resVal+ " "+condition+" " + value);
+            status = expression.eval().intValue() > 0;
         }
         else {
             pointList = null;
@@ -239,7 +253,27 @@ public class Conditional
         
         CcuLog.d("CCU_ALERTS ", " Evaluated Conditional: "+toString()+" ,"+(grpOperation.equals("equip") ? pointList.size() : status)+" resVal "+resVal);
     }
-    
+
+    private void clearPassword(String value) {
+        Context context = AlertManager.getInstance().getApplicationContext();
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = pref.edit();
+        if (value.contains("Zone")){
+            editor.putString("zone_settings_password","");
+            editor.putBoolean("set_zone_password",false);
+        } else if (value.contains("System")){
+            editor.putString("system_settings_password","");
+            editor.putBoolean("set_system_password",false);
+        } else if (value.contains("Building")){
+            editor.putString("building_settings_password","");
+            editor.putBoolean("set_building_password",false);
+        } else if (value.contains("Setup")){
+            editor.putString("use_setup_password","");
+            editor.putBoolean("set_setup_password",false);
+        }
+        editor.apply();
+    }
+
     class PointValAscComparator implements Comparator<PointVal>
     {
         public int compare(PointVal a, PointVal b)

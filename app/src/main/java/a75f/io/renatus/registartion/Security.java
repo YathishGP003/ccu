@@ -296,7 +296,7 @@ public class Security extends Fragment {
                     }
                     else {
                         mTitle = getString(R.string.setupchange);
-                        mKey = getString(R.string.SETUP_PASSWORD_KEY);
+                        mKey = getString(R.string.USE_SETUP_PASSWORD_KEY);
                         showCustomDialog(mTitle,mKey,mSetKey,mSetupPassTb,mSetupTap);
                     }
                 }
@@ -362,7 +362,6 @@ public class Security extends Fragment {
                                 prefs.setString(key, password);
                                 togglePassword.setChecked(true);
                                 alertDialog.dismiss();
-                                saveToDiag(key, password);
                                 textViewTap.setText(getString(R.string.taptochange));
                                 Toast.makeText(mContext, "Password is set for " + title, Toast.LENGTH_SHORT).show();
                             } else {
@@ -381,7 +380,6 @@ public class Security extends Fragment {
                         if (password.equals(confirmpassword)) {
                             prefs.setBoolean(setKey, true);
                             prefs.setString(key, password);
-                            saveToDiag(key, password);
                             togglePassword.setChecked(true);
                             alertDialog.dismiss();
                             Toast.makeText(mContext, "Password is set for " + title, Toast.LENGTH_SHORT).show();
@@ -457,19 +455,5 @@ public class Security extends Fragment {
         //Intent i = new Intent(mContext, RegisterGatherCCUDetails.class);
         //startActivity(i);
         ((FreshRegistration)getActivity()).selectItem(9);
-    }
-
-    private void saveToDiag(String key,String val){
-        String tag = "";
-        if (key.contains("zone")){
-           tag = "zone and password";
-        } else if (key.contains("building")){
-            tag = "building and password";
-        } else if (key.contains("system")){
-            tag = "system and password";
-        } else if (key.contains("setup")){
-            tag = "setup and password";
-        }
-        CCUHsApi.getInstance().writeDefaultVal("point and diag and "+tag, val);
     }
 }

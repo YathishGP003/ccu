@@ -243,7 +243,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         } else {
             signal = 0;
         }
-        setCmdSignal("occupancy",signal * 100);
+        setCmdSignal("occupancy",signal);
         ControlMote.setRelayState("relay3", signal );
         
         if (getConfigVal("relay7 and output and enabled") > 0 && systemMode != SystemMode.OFF

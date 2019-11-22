@@ -1,4 +1,4 @@
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-820, Cm heating desired in setback is wrong
- - #RENATUS-818, VAV Fully modulating occupancy signal should be 1 or 0
- - #RENATUS-817, OAO | CO2 threshold historize
+ - Merge branch 'mahesh_renuts' into 'master'
+ - RENATUS-823, add check for wifi connect
+ - save password attempt on diag
+ - add custom alerts

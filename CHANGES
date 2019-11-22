@@ -1,4 +1,2 @@
- - Merge branch 'mahesh_renuts' into 'master'
- - RENATUS-823, add check for wifi connect
- - save password attempt on diag
- - add custom alerts
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-818, VAV Fully modulating occupancy signal should be 1 or 0

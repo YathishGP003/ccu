@@ -897,7 +897,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
      public static HashMap getCPUEquipPoints(String equipID) {
             HashMap cpuPoints = new HashMap();
 
-                    cpuPoints.put("Profile","Smartstat - Convention Package Unit");
+                    cpuPoints.put("Profile","Smartstat - Conventional Package Unit");
             ArrayList equipStatusPoint = CCUHsApi.getInstance().readAll("point and status and message and equipRef == \""+equipID+"\"");
 
          boolean isCooling1On = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay1 and equipRef == \"" + equipID + "\"") > 0 ? true : false;

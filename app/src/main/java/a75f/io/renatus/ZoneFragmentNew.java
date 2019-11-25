@@ -193,12 +193,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         mFloorListAdapter = new DataArrayAdapter<Floor>(getActivity(), R.layout.listviewitem,floorList);
         lvFloorList.setAdapter(mFloorListAdapter);
         loadGrid(parentRootView);
-
+        if(floorList != null && floorList.size()>0){
+            lvFloorList.setContentDescription(floorList.get(0).getDisplayName());
+        }
         floorMenu = (ImageView) view.findViewById(R.id.floorMenu);
         floorMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 openFloor();
             }
         });
@@ -431,6 +432,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         showWeather();
         clickedView = -1;
         loadGrid(parentRootView);
+        lvFloorList.setContentDescription(floorList.get(position).getDisplayName());
         expandableListView.invalidateViews();
     }
 
@@ -1005,6 +1007,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 }
 
                 if(isExpanded) {
+                    v.setContentDescription(zoneTitle);
                     linearLayoutZonePoints.removeAllViews();
                     if (scheduleSpinner.getSelectedItemPosition() == 1)
                     {

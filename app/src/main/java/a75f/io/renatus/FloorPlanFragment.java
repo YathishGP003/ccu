@@ -338,7 +338,7 @@ public class FloorPlanFragment extends Fragment
 
 			@Override
 			protected Void doInBackground(String... strings) {
-				if (!HTTPUtils.isNetworkConnected(getActivity())){
+				if (!HTTPUtils.isNetworkConnected()){
 					return null;
 				}
 				HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);

@@ -49,6 +49,14 @@ import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
 public class Pulse
 {
 	private static ZoneDataInterface currentTempInterface = null;
+	private static int mTimeSinceCMDead = 0;
+	private static boolean mDataReceived = false;
+
+	public static void setCMDeadTimerIncrement(boolean isReboot){
+		if(isReboot)mTimeSinceCMDead = 0;
+		else
+			mTimeSinceCMDead++;
+	}
 	public static void regularSNUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t smartNodeRegularUpdateMessage_t)
 	{
 		short nodeAddr = (short)smartNodeRegularUpdateMessage_t.update.smartNodeAddress.get();
@@ -354,6 +362,8 @@ public class Pulse
 	}
 	
 	public static void regularCMUpdate(CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t) {
+		mDataReceived = true;
+		mTimeSinceCMDead = 0;
 		CCUHsApi hayStack = CCUHsApi.getInstance();
 		String addr = String.valueOf(L.ccu().getSmartNodeAddressBand()).substring(0,2).concat("99");
 		HashMap device = hayStack.read("device and addr == \""+Short.parseShort(addr)+"\"");
@@ -555,6 +565,48 @@ public class Pulse
 		short address = (short)wrmOrCMReootMsgs.wrmAddress.get();
 		if(address == 0x00 || (address == 0x01) || (address == L.ccu().getSmartNodeAddressBand()+99)){
 			LSerial.getInstance().setResetSeedMessage(true);
+		}
+	}
+	public static void smartDevicesRebootMessage(WrmOrCmRebootIndicationMessage_t wrmOrCMReootMsgs){
+		Log.d(L.TAG_CCU_DEVICE,"smartDevicesRebootMessage = "+wrmOrCMReootMsgs.wrmAddress+","+wrmOrCMReootMsgs.rebootCause);
+		short address = (short)wrmOrCMReootMsgs.wrmAddress.get();
+		if(address == 0x00 || (address == 0x01) || (address == L.ccu().getSmartNodeAddressBand()+99)){
+			LSerial.getInstance().setResetSeedMessage(true);
+
+			String str = "addr:"+address;
+			str+= ",master_fw_ver:"+wrmOrCMReootMsgs.majorFirmwareVersion+"."+wrmOrCMReootMsgs.minorFirmwareVersion;
+			switch (wrmOrCMReootMsgs.rebootCause.get()){
+				case MeshUtil.POWER_ON_RESET:
+					str+= ", cause:"+"POWER_ON_RESET";
+					break;
+				case MeshUtil.CORE_BROWNOUT_RESET:
+					str+= ", cause:"+"CORE_BROWNOUT_RESET";
+					break;
+				case MeshUtil.VDD_BROWNOUT_RESET:
+					str+= ", cause:"+"VDD_BROWNOUT_RESET";
+					break;
+				case MeshUtil.EXTERNAL_RESET:
+					str+= ", cause:"+"EXTERNAL_RESET";
+					break;
+				case MeshUtil.WATCHDOG_RESET:
+					str+= ", cause:"+"WATCHDOG_RESET";
+					break;
+				case MeshUtil.SOFTWARE_RESET:
+					str+= ", cause:"+"SOFTWARE_RESET";
+					break;
+				case MeshUtil.BACKUP_RESET:
+					str+= ", cause:"+"BACKUP_RESET";
+					break;
+				default:
+					str+= ", cause:"+"UNDEFINED";
+					break;
+			}
+			str += ", device:"+wrmOrCMReootMsgs.deviceId;
+			str += ", serialnumber:"+wrmOrCMReootMsgs.deviceSerial;
+
+			//3 TODO create alert here for device reboot
+
+
 		}
 	}
 	public static void updateSetTempFromSmartNode(CmToCcuOverUsbSnLocalControlsOverrideMessage_t setTempUpdate){

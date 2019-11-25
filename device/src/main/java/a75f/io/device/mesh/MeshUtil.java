@@ -18,7 +18,15 @@ import static a75f.io.device.DeviceConstants.SIMULATION_SLEEP_TIME;
 
 public class MeshUtil
 {
-    
+
+    //SmartNode Reset constants
+    public static final int POWER_ON_RESET = 0x01;
+    public static final int CORE_BROWNOUT_RESET = 0x02;
+    public static final int VDD_BROWNOUT_RESET = 0x04;
+    public static final int EXTERNAL_RESET = 0x10;
+    public static final int WATCHDOG_RESET = 0x20;
+    public static final int SOFTWARE_RESET = 0x40;
+    public static final int BACKUP_RESET = 0x80;
     public static boolean sendHeartbeat(short temperatureOffset)
     {
         CcuToCmOverUsbCcuHeartbeatMessage_t heartbeatMessage_t = new CcuToCmOverUsbCcuHeartbeatMessage_t();

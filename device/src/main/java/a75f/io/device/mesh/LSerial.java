@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
+import a75f.io.device.serial.CmToCcuOverUsbErrorReportMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwarePacketRequest_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwareUpdateAckMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t;
@@ -131,6 +132,18 @@ public class LSerial
                 CmToCcuOverUsbFirmwarePacketRequest_t msg = new CmToCcuOverUsbFirmwarePacketRequest_t();
                 msg.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
                 LogdStructAsJson(msg);
+            }else if(messageType == MessageType.CM_ERROR_REPORT){
+                CmToCcuOverUsbErrorReportMessage_t msg = new CmToCcuOverUsbErrorReportMessage_t();
+                msg.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN),0);
+                LogdStructAsJson(msg);
+                //TODO Create an alert when received
+
+            }else if(messageType == MessageType.CM_TO_CCU_OVER_USB_CM4_REGULAR_UPDATE){
+
+            }else if(messageType == MessageType.CM_TO_CCU_OVER_USB_SN_REBOOT){
+                DLog.LogdSerial("Event Type CM_TO_CCU_OVER_USB_SN_REBOOT DEVICE_REBOOT:"+data.length+","+data.toString());
+               // Pulse.smartDevicesRebootMessage(fromBytes(data, SnRebootIndicationMessage_t.class));
+
             }
 
             // Pass event to external handlers

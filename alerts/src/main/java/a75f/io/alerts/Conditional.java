@@ -83,11 +83,11 @@ public class Conditional
      *
      */
     void evaluate() {
-        if (grpOperation.contains("alert")){
+        if (grpOperation!=null && !grpOperation.isEmpty() && grpOperation.contains("alert")){
             status = true;
             return;
         }
-        if (grpOperation.contains("Clear Password")){
+        if (grpOperation!=null && !grpOperation.isEmpty() && grpOperation.contains("Clear Password")){
             clearPassword(value);
             return;
         }

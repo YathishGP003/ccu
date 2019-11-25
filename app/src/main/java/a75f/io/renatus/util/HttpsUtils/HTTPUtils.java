@@ -15,6 +15,8 @@ import org.apache.http.params.HttpParams;
 
 import java.security.KeyStore;
 
+import a75f.io.logic.Globals;
+
 /**
  * Created by mahesh on 03-10-2019.
  */
@@ -38,7 +40,11 @@ public class HTTPUtils {
         }
     }
 
-    public static boolean isNetworkConnected(Context context) {
+    public static boolean isNetworkConnected() {
+        Context context = Globals.getInstance().getApplicationContext();
+        if (context == null){
+            return false;
+        }
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();

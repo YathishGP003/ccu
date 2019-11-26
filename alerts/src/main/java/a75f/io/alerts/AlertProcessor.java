@@ -12,6 +12,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 
 import org.joda.time.DateTime;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.projecthaystack.HRef;
 
 import java.io.File;
 import java.io.IOException;
@@ -120,7 +123,12 @@ public class AlertProcessor
     public void fetchPredefinedAlerts() {
         try
         {
-            String alertDef = HttpUtil.sendRequest(mContext, "readPredefined", "");
+            HashMap site = CCUHsApi.getInstance().read("site");
+            if (site == null || site.get("id") == null){
+                return;
+            }
+            String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
+            String alertDef = HttpUtil.sendRequest(mContext, "readPredefined ", new JSONObject().put("siteRef", siteGUID.replace("@","")).toString());
             CcuLog.d("CCU_ALERTS", " alertDef " + alertDef);
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -136,6 +144,8 @@ public class AlertProcessor
             }
             savePredefinedAlertDefinitions(alertDef);
         }catch (JsonParseException | IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
             e.printStackTrace();
         }
     }

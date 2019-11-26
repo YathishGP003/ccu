@@ -588,6 +588,8 @@ public class FloorPlanFragment extends Fragment
 		rl_systemdevice.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
 		rl_oao.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
 		textViewSystemDevice.setTextColor(Color.WHITE);
+		textViewSystemDevice.setSelected(true);
+		textViewOAO.setSelected(true);
 		textViewOAO.setTextColor(Color.WHITE);
 		rl_oao.setEnabled(false);
 		rl_systemdevice.setEnabled(false);
@@ -613,6 +615,8 @@ public class FloorPlanFragment extends Fragment
 	{
 		rl_systemdevice.setBackgroundColor(Color.WHITE);
 		rl_oao.setBackgroundColor(Color.WHITE);
+		textViewSystemDevice.setSelected(false);
+		textViewOAO.setSelected(false);
 		textViewSystemDevice.setTextColor(getContext().getResources().getColor(R.color.text_color));
 		textViewOAO.setTextColor(getContext().getResources().getColor(R.color.text_color));
 		rl_systemdevice.setEnabled(true);

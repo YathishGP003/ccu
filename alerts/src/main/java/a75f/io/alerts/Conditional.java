@@ -251,7 +251,7 @@ public class Conditional
             }
         }
         
-        CcuLog.d("CCU_ALERTS ", " Evaluated Conditional: "+toString()+" ,"+(grpOperation.equals("equip") ? pointList.size() : status)+" resVal "+resVal);
+        CcuLog.d("CCU_ALERTS ", " Evaluated Conditional: "+toString()+" ,"+ (grpOperation != null ?(grpOperation.equals("equip") ? pointList.size() : status):"")+" resVal "+resVal);
     }
 
     private void clearPassword(String value) {

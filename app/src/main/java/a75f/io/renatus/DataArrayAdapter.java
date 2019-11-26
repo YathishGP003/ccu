@@ -55,14 +55,14 @@ public class DataArrayAdapter<T> extends ArrayAdapter<T>
 			{
 				convertView.setBackground(getContext().getResources().getDrawable(R.drawable.ic_listselector));
 				textView_Data.setTextColor(Color.WHITE);
-				convertView.setSelected(true);
+				textView_Data.setSelected(true);
 			}
 			if (position == nSelectedPostion)
 			{
 				//v.setBackgroundColor(getContext().getResources().getColor(R.color.orange_multi));
 				convertView.setBackground(getContext().getResources().getDrawable(R.drawable.ic_listselector));
 				textView_Data.setTextColor(Color.WHITE);
-				convertView.setSelected(true);
+				textView_Data.setSelected(true);
 			}
 			//				v.setBackgroundDrawable(getContext().getResources().getDrawable(R.drawable.selector));
 			else
@@ -70,7 +70,7 @@ public class DataArrayAdapter<T> extends ArrayAdapter<T>
 				//v.setBackgroundColor(Color.TRANSPARENT);
 				textView_Data.setTextColor(getContext().getResources().getColor(R.color.text_color));
 				convertView.setBackgroundColor(Color.WHITE);
-				convertView.setSelected(false);
+				textView_Data.setSelected(false);
 			}
 		}
 		else

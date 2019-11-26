@@ -1,6 +1,0 @@
- - Merge branch 'mahesh_renuts' into 'master'
- - RENATUS-825, check for app context and return false if null
- - check for null and empty value
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-783, Predefined alerts definition - update
- - Heatpump changeover text change from B to O

@@ -22,6 +22,7 @@ import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.HSEquipUtil;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
@@ -284,8 +285,8 @@ public class VavSystemController extends SystemController
         CcuLog.d(L.TAG_CCU_SYSTEM, "weightedAverageCoolingOnlyLoadMA: "+weightedAverageCoolingOnlyLoadMA+" weightedAverageHeatingOnlyLoadMA: "
                                                     +weightedAverageHeatingOnlyLoadMA +" systemState: "+systemState+" coolingSignal: "+coolingSignal+" heatingSignal: "+heatingSignal);
     
-        profile.setSystemPoint("moving and average and cooling and load",weightedAverageCoolingOnlyLoadMA);
-        profile.setSystemPoint("moving and average and heating and load",weightedAverageHeatingOnlyLoadMA);
+        profile.setSystemPoint("moving and average and cooling and load", CCUUtils.roundToTwoDecimal(weightedAverageCoolingOnlyLoadMA));
+        profile.setSystemPoint("moving and average and heating and load",CCUUtils.roundToTwoDecimal(weightedAverageHeatingOnlyLoadMA));
         
         if (systemState == HEATING)
         {

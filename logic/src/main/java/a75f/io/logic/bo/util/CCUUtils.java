@@ -12,4 +12,8 @@ public class CCUUtils
         DecimalFormat df = new DecimalFormat("#.#");
         return Double.parseDouble(df.format(number));
     }
+    public static double roundToTwoDecimal(double number) {
+        DecimalFormat df = new DecimalFormat("#.##");
+        return Double.parseDouble(df.format(number));
+    }
 }

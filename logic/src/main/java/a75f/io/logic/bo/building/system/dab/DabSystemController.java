@@ -23,6 +23,7 @@ import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.HSEquipUtil;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
@@ -272,9 +273,9 @@ public class DabSystemController extends SystemController
         CcuLog.d(L.TAG_CCU_SYSTEM, "weightedAverageCoolingLoadPostML: "+weightedAverageCoolingLoadPostML+" weightedAverageHeatingLoadPostML: "
                                    +weightedAverageHeatingLoadPostML+" coolingSignal: "+coolingSignal+" heatingSignal: "+heatingSignal);
         
-        profile.setSystemPoint("weighted and average and moving and load",weightedAverageLoadMA);
-        profile.setSystemPoint("weighted and average and cooling and load",weightedAverageCoolingLoadPostML);
-        profile.setSystemPoint("weighted and average and heating and load",weightedAverageHeatingLoadPostML);
+        profile.setSystemPoint("weighted and average and moving and load", CCUUtils.roundToTwoDecimal(weightedAverageLoadMA));
+        profile.setSystemPoint("weighted and average and cooling and load",CCUUtils.roundToTwoDecimal(weightedAverageCoolingLoadPostML));
+        profile.setSystemPoint("weighted and average and heating and load",CCUUtils.roundToTwoDecimal(weightedAverageHeatingLoadPostML));
         
         if (systemState != OFF)
         {

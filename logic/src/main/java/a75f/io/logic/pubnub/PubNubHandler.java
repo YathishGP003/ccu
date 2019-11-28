@@ -1,8 +1,14 @@
 package a75f.io.logic.pubnub;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -34,6 +40,16 @@ public class PubNubHandler
             case AlertRemoveHandler.REMOVE_DEF_CMD:
             case AlertRemoveHandler.CLR_SITEDEF_CMD:
                 AlertRemoveHandler.handleMessage(cmd, msg);
+                break;
+            case AlertGenerateHandler.CM_ERROR_REPORT:
+            case AlertGenerateHandler.CM_TO_CCU_OVER_USB_SN_REBOOT:
+            case AlertGenerateHandler.FSV_REBOOT:
+            case AlertGenerateHandler.DEVICE_RESTART:
+            case AlertGenerateHandler.CM_RESET:
+            case AlertGenerateHandler.DEVICE_REBOOT:
+            case AlertGenerateHandler.FIRMWARE_OTA_UPDATE_STARTED:
+            case AlertGenerateHandler.FIRMWARE_OTA_UPDATE_ENDED:
+                AlertGenerateHandler.handleMessage(cmd);
                 break;
             default:
                 CcuLog.d(L.TAG_CCU_PUBNUB, "UnSupported PubNub Command : "+cmd);

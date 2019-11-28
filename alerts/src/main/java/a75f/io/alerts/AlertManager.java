@@ -79,11 +79,15 @@ public class AlertManager
     public void processAlerts() {
         processor.processAlerts();
     }
+
+    public void generateAlert(String title){
+        processor.generateAlert(title);
+    }
     
     public List<Alert> getActiveAlerts() {
         return processor.getActiveAlerts();
     }
-    
+
     public List<Alert> getAllAlerts() {
         return processor.getAllAlerts();
     }

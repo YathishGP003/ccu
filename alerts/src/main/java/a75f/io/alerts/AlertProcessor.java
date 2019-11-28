@@ -62,7 +62,7 @@ public class AlertProcessor
     private static final String PREFS_ALERT_DEFS = "ccu_alerts";
     private static final String PREFS_ALERTS_CUSTOM = "custom_alerts";
     private static final String PREFS_ALERTS_PREDEFINED = "predef_alerts";
-    
+
     HashMap<String, Integer> offsetCounter = new HashMap<>();
     HashSet<String> activeAlertRefs ;
     private ScheduledExecutorService taskExecutor;
@@ -176,6 +176,16 @@ public class AlertProcessor
                                                                                     || def.conditionals.get(0).grpOperation.equals("delta")))
                     {
                         pointList = def.conditionals.get(0).pointList;
+                    }else if((def.conditionals.get(0).grpOperation != null) && (def.conditionals.get(0).grpOperation.equals("alert"))){
+                        List<Alert> aList = getActiveAlerts();
+                        for (Alert a:aList){
+                            if (a.mTitle.equals(def.alert.mTitle)){
+                                def.conditionals.get(0).status = true;
+                                alertStatus = true;
+                            } else {
+                                alertStatus = def.conditionals.get(0).status;
+                            }
+                        }
                     } else {
                         statusInit = true;
                         alertStatus = def.conditionals.get(0).status;
@@ -457,6 +467,15 @@ public class AlertProcessor
         if (a != null)
         {
             alertBox.remove(a.id);
+        }
+    }
+
+    public void generateAlert(String title){
+        ArrayList<AlertDefinition> alertDefinition = getAlertDefinitions();
+        for (AlertDefinition ad :alertDefinition) {
+            if (ad.alert.mTitle.equals(title)) {
+                ad.evaluateAlert();
+            }
         }
     }
     

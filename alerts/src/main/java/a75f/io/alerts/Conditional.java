@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.logger.CcuLog;
@@ -82,17 +83,19 @@ public class Conditional
      *  - when grpOperation is max/min/bottom etc , update status boolean.
      *
      */
-    void evaluate() {
-        if (grpOperation!=null && !grpOperation.isEmpty() && grpOperation.contains("alert")){
+
+    void evaluateAlert(){
+        if (grpOperation!= null && !grpOperation.isEmpty() && grpOperation.contains("alert")){
             status = true;
-            return;
         }
+    }
+    void evaluate() {
         if (grpOperation!=null && !grpOperation.isEmpty() && grpOperation.contains("Clear Password")){
             clearPassword(value);
             return;
         }
         if (key.isEmpty() || value.isEmpty() || condition.isEmpty()) {
-            throw new IllegalArgumentException("Invalid Conditional");
+            return;
         }
         val = isNumeric(value) ? value : String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value));
         
@@ -298,5 +301,5 @@ public class Conditional
     public String toString() {
         return operator != null ? order+":"+operator : order+": "+key+" "+condition+" "+value+" ("+grpOperation+")";
     }
-    
+
 }

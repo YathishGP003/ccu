@@ -593,7 +593,7 @@ public class HClient extends HProj
     CcuLog.d("CCU_HS", "HClient Req: ");
     req.dump();
     HGrid res = postGrid(op, req);
-    if (res.isErr()) throw new CallErrException(res);
+    if (res != null && res.isErr()) { CcuLog.e("CCU_HS", "Network Error: " +res);}
     return res;
   }
 
@@ -601,7 +601,7 @@ public class HClient extends HProj
   {
     String reqStr = HZincWriter.gridToString(req, this.version);
     String resStr = postString(uri + op, reqStr);
-    return new HZincReader(resStr).readGrid();
+    return (resStr == null? null : new HZincReader(resStr).readGrid());
   }
 
 
@@ -667,7 +667,10 @@ public class HClient extends HProj
         try { c.disconnect(); } catch(Exception e) {}
       }
     }
-    catch (Exception e) { throw new CallNetworkException(e); }
+    catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
 ////////////////////////////////////////////////////////////////

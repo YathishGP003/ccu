@@ -362,7 +362,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
             }
 
 
-            cpuDevice.setProfilePoint("temp and conditioning and mode",state.ordinal());
+            cpuDevice.setProfilePoint("temp and operating and mode",state.ordinal());
             if(cpuDevice.getStatus() != state.ordinal())
                 cpuDevice.setStatus(state.ordinal());
            ZoneTempState temperatureState = ZoneTempState.NONE;

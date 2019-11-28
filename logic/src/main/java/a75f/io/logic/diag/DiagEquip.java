@@ -5,6 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
@@ -175,6 +178,15 @@ public class DiagEquip
                 .setTz(tz)
                 .build();
         hsApi.addPoint(appRestart);
+        Point appVersion = new Point.Builder()
+                .setDisplayName(equipDis+"-appVersion")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .addMarker("diag").addMarker("app").addMarker("version").addMarker("his").addMarker("equipHis")
+                .setUnit("")
+                .setTz(tz)
+                .build();
+        hsApi.addPoint(appVersion);
     }
     
     
@@ -232,6 +244,18 @@ public class DiagEquip
             setDiagHisVal("app and restart",1);
         } else{
             setDiagHisVal("app and restart",0);
+        }
+
+        PackageManager pm = Globals.getInstance().getApplicationContext().getPackageManager();
+        PackageInfo pi;
+        try {
+            pi = pm.getPackageInfo("a75f.io.renatus", 0);
+            String version = pi.versionName.substring(pi.versionName.lastIndexOf('_')+1,pi.versionName.length() - 2);
+            setDiagHisVal("app and version",Double.parseDouble(version));
+
+        } catch (PackageManager.NameNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
     

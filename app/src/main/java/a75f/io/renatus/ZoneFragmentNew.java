@@ -1946,7 +1946,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly, R.layout.spinner_zone_item);
             else if(hpuEquipPoints.get("condEnabled").toString().contains("Heat Only"))
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly, R.layout.spinner_zone_item);
-            if(hpuEquipPoints.get("condEnabled").toString().contains("Off")) {
+            else if(hpuEquipPoints.get("condEnabled").toString().contains("Off")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
                 conditionMode = 0;
             }

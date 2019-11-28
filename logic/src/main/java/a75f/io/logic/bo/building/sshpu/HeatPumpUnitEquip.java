@@ -1026,7 +1026,7 @@ public class HeatPumpUnitEquip{
         CCUHsApi.getInstance().writePoint(fanOpModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_DEFAULT_FAN_OPERATIONAL_MODE, 0);
         CCUHsApi.getInstance().writeHisValById(fanOpModeId, TunerConstants.STANDALONE_DEFAULT_FAN_OPERATIONAL_MODE);
 
-        Point operationalMode = new Point.Builder()
+        Point conditionalMode = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"ConditioningMode")
                 .setSiteRef(siteRef)
                 .setFloorRef(floor)
@@ -1037,9 +1037,9 @@ public class HeatPumpUnitEquip{
                 .setEnums("off,auto,heatonly,coolonly")
                 .setTz(tz)
                 .build();
-        String operationalModeId = CCUHsApi.getInstance().addPoint(operationalMode);
-        CCUHsApi.getInstance().writePoint(operationalModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_DEFAULT_OPERATIONAL_MODE, 0);
-        CCUHsApi.getInstance().writeHisValById(operationalModeId, TunerConstants.STANDALONE_DEFAULT_OPERATIONAL_MODE);
+        String conditionalModeId = CCUHsApi.getInstance().addPoint(conditionalMode);
+        CCUHsApi.getInstance().writePoint(conditionalModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_DEFAULT_CONDITIONAL_MODE, 0);
+        CCUHsApi.getInstance().writeHisValById(conditionalModeId, TunerConstants.STANDALONE_DEFAULT_CONDITIONAL_MODE);
 
 
         Point targetDehumidifier = new Point.Builder()

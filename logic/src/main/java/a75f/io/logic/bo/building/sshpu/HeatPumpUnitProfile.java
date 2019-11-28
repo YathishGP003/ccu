@@ -194,7 +194,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             }
 
 
-            hpuDevice.setProfilePoint("temp and conditioning and mode",state.ordinal());
+            hpuDevice.setProfilePoint("temp and operating and mode",state.ordinal());
             if(hpuDevice.getStatus() != state.ordinal())
                 hpuDevice.setStatus(state.ordinal());
         }

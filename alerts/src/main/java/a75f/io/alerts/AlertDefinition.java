@@ -69,6 +69,16 @@ public class AlertDefinition
             }
         }
     }
+
+    public void evaluateAlert() {
+        for (Conditional c : conditionals)
+        {
+            if (c.operator == null)
+            {
+                c.evaluateAlert();
+            }
+        }
+    }
     
     //Evaluate conditionals for an equip
     public boolean evaluate(String equipId) {

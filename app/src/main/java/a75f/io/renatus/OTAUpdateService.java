@@ -36,7 +36,11 @@ import a75f.io.device.serial.SnRebootIndicationMessage_t;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.Globals;
 import a75f.io.logic.bo.util.ByteArrayUtils;
+import a75f.io.logic.pubnub.AlertGenerateHandler;
 import a75f.io.usbserial.UsbService;
+
+import static a75f.io.logic.pubnub.AlertGenerateHandler.FIRMWARE_OTA_UPDATE_ENDED;
+import static a75f.io.logic.pubnub.AlertGenerateHandler.FIRMWARE_OTA_UPDATE_STARTED;
 
 public class OTAUpdateService extends IntentService {
 
@@ -201,6 +205,7 @@ public class OTAUpdateService extends IntentService {
             short versionMinor = msg.smartNodeMinorFirmwareVersion.get();
 
             //TODO notify something (PubNub?) that an update has completed
+            AlertGenerateHandler.handleMessage(FIRMWARE_OTA_UPDATE_ENDED);
 
             if (mUpdateWaitingToComplete && versionMatches(versionMajor, versionMinor)) {
                 Log.d(TAG, "[UPDATE] [SUCCESSFUL]"
@@ -421,7 +426,7 @@ public class OTAUpdateService extends IntentService {
         Log.d(TAG, "[STARTUP] Starting to update device with address " + mCurrentLwMeshAddress);
 
         //TODO notify something (PubNub?) that an update has started
-
+        AlertGenerateHandler.handleMessage(FIRMWARE_OTA_UPDATE_STARTED);
         mUpdateInProgress = true;
         mLastSentPacket = -1;
 

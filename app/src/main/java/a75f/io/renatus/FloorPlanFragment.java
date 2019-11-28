@@ -352,6 +352,9 @@ public class FloorPlanFragment extends Fragment
 				//for floor
 				HDict tDict = new HDictBuilder().add("filter", "floor and siteRef == " + siteGUID).toDict();
 				HGrid floorPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+				if (floorPoint == null){
+					return null;
+				}
 				Iterator it = floorPoint.iterator();
 
 				siteFloorList.clear();

@@ -446,7 +446,7 @@ public class OAOEquip
         Point co2Threshold  = new Point.Builder().setDisplayName(equipDis + "-co2Threshold")
                                                           .setEquipRef(equipRef)
                                                           .setSiteRef(siteRef)
-                                                          .addMarker("config").addMarker("oao").addMarker("writable").addMarker("co2").addMarker("threshold").addMarker("sp")
+                                                          .addMarker("config").addMarker("oao").addMarker("writable").addMarker("co2").addMarker("threshold").addMarker("sp").addMarker("his").addMarker("equipHis")
                                                           .setGroup(String.valueOf(nodeAddr))
                                                           .setUnit("ppm").setTz(tz).build();
         String co2ThresholdId = CCUHsApi.getInstance().addPoint(co2Threshold );

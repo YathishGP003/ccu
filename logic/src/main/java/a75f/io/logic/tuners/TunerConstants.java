@@ -95,7 +95,7 @@ public class TunerConstants
     public static final double STANDALONE_TARGET_DEHUMIDIFIER = 45;
     public static final double STANDALONE_TARGET_HUMIDITY = 25;
     public static final double STANDALONE_DEFAULT_FAN_OPERATIONAL_MODE = 1.0;//AUTO
-    public static final double STANDALONE_DEFAULT_OPERATIONAL_MODE = 1.0;//Auto
+    public static final double STANDALONE_DEFAULT_CONDITIONAL_MODE = 1.0;//Auto
     
     public static final double OAO_CO2_DAMPER_OPENING_RATE = 10 ;//(%/100ppm)
     public static final double OAO_ECONOMIZING_MIN_TEMP = 0 ;

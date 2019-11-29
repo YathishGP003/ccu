@@ -24,6 +24,7 @@ import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
+import a75f.io.device.alerts.AlertGenerateHandler;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbFirmwareMetadataMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbFirmwarePacketMessage_t;
@@ -36,11 +37,10 @@ import a75f.io.device.serial.SnRebootIndicationMessage_t;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.Globals;
 import a75f.io.logic.bo.util.ByteArrayUtils;
-import a75f.io.logic.pubnub.AlertGenerateHandler;
 import a75f.io.usbserial.UsbService;
 
-import static a75f.io.logic.pubnub.AlertGenerateHandler.FIRMWARE_OTA_UPDATE_ENDED;
-import static a75f.io.logic.pubnub.AlertGenerateHandler.FIRMWARE_OTA_UPDATE_STARTED;
+import static a75f.io.device.alerts.AlertGenerateHandler.FIRMWARE_OTA_UPDATE_ENDED;
+import static a75f.io.device.alerts.AlertGenerateHandler.FIRMWARE_OTA_UPDATE_STARTED;
 
 public class OTAUpdateService extends IntentService {
 

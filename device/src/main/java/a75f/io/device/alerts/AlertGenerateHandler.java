@@ -1,10 +1,4 @@
-package a75f.io.logic.pubnub;
-
-import android.util.Log;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+package a75f.io.device.alerts;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.logic.Globals;

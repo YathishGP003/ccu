@@ -1918,8 +1918,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
 
-        Spinner spinnerValue1 = viewPointRow1.findViewById(R.id.spinnerValue1);
-        Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
+        Spinner conditionSpinner = viewPointRow1.findViewById(R.id.spinnerValue1);
+        Spinner fanSpinner = viewPointRow1.findViewById(R.id.spinnerValue2);
 
 
         textViewTitle.setText(hpuEquipPoints.get("Profile").toString()+" ("+nodeAddress+")");
@@ -1953,7 +1953,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         }
         conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
-        spinnerValue1.setAdapter(conModeAdapter);
+        conditionSpinner.setAdapter(conModeAdapter);
         ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
                 getActivity(), R.array.smartstat_fanmode, R.layout.spinner_zone_item);
 
@@ -1966,10 +1966,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             }
         }
         fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
-        spinnerValue2.setAdapter(fanModeAdapter);
+        fanSpinner.setAdapter(fanModeAdapter);
 
-        spinnerValue1.setSelection(conditionMode,false);
-        spinnerValue2.setSelection(fanMode,false);
+        conditionSpinner.setSelection(conditionMode,false);
+        fanSpinner.setSelection(fanMode,false);
 
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
@@ -2028,7 +2028,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         isHPUFromPubNub = isPubNub;
         isHPUloaded = isLoaded;
         String tempEquipId = equipId;
-        spinnerValue1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        conditionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 try {
@@ -2054,7 +2054,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             }
         });
 
-        spinnerValue2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        fanSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 try {

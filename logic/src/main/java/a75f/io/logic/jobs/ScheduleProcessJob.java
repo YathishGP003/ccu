@@ -811,20 +811,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }else{
             p2FCUPoints.put("Status","OFF");
         }
-        if (fanopModePoint > 0)
-        {
-            p2FCUPoints.put("Fan Mode",fanopModePoint);
-            //vavPoints.add(dampPos+"% Open");
-        }else{
-            p2FCUPoints.put("Fan Mode",0);
-            //vavPoints.add(0);
-        }
-        if (condtionModePoint > 0)
-        {
-            p2FCUPoints.put("Conditioning Mode",condtionModePoint);
-        }else{
-            p2FCUPoints.put("Conditioning Mode",0);
-        }
+        p2FCUPoints.put("Fan Mode",fanopModePoint);
+        p2FCUPoints.put("Conditioning Mode",condtionModePoint);
         if(isCoolingOn && !isHeatingOn)
             p2FCUPoints.put("condEnabled","Cool Only");
         else if(!isCoolingOn && isHeatingOn)
@@ -864,20 +852,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }else{
             p4FCUPoints.put("Status","OFF");
         }
-        if (fanopModePoint > 0)
-        {
-            p4FCUPoints.put("Fan Mode",fanopModePoint);
-            //vavPoints.add(dampPos+"% Open");
-        }else{
-            p4FCUPoints.put("Fan Mode",0);
-            //vavPoints.add(0);
-        }
-        if (condtionModePoint > 0)
-        {
-            p4FCUPoints.put("Conditioning Mode",condtionModePoint);
-        }else{
-            p4FCUPoints.put("Conditioning Mode",0);
-        }
+        p4FCUPoints.put("Fan Mode",fanopModePoint);
+        p4FCUPoints.put("Conditioning Mode",condtionModePoint);
         if(isCoolingOn && !isHeatingOn)
             p4FCUPoints.put("condEnabled","Cool Only");
         else if(!isCoolingOn && isHeatingOn)
@@ -920,18 +896,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             }else{
                 cpuPoints.put("Status","OFF");
             }
-            if (fanopModePoint > 0)
-            {
-                cpuPoints.put("Fan Mode",fanopModePoint);
-            }else{
-                cpuPoints.put("Fan Mode",0);
-            }
-            if (conditionModePoint > 0)
-            {
-                cpuPoints.put("Conditioning Mode",conditionModePoint);
-            }else{
-                cpuPoints.put("Conditioning Mode",0);
-            }
+            cpuPoints.put("Fan Mode",fanopModePoint);
+            cpuPoints.put("Conditioning Mode",conditionModePoint);
             if(fanHighHumdOption > 0){
                if(fanHighHumdOption > 1) isFanHighEnabled = false;
                 cpuPoints.put("Fan High Humidity",fanHighHumdOption);
@@ -989,18 +955,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             //vavPoints.add(status);
         }else{
             hpuPoints.put("Status","OFF");
-        }if (fanopModePoint > 0)
-        {
-            hpuPoints.put("Fan Mode",fanopModePoint);
-        }else{
-            hpuPoints.put("Fan Mode",0);
         }
-        if (conditionModePoint > 0)
-        {
-            hpuPoints.put("Conditioning Mode",conditionModePoint);
-        }else{
-            hpuPoints.put("Conditioning Mode",0);
-        }
+        hpuPoints.put("Fan Mode",fanopModePoint);
+        hpuPoints.put("Conditioning Mode",conditionModePoint);
         if(fanHighHumdOption > 0){
             if(fanHighHumdOption > 1)isFanHighEnabled = false; //Since relay 5 is mapped to humidity or dehumidity
             hpuPoints.put("Fan High Humidity",fanHighHumdOption);

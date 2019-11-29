@@ -41,16 +41,6 @@ public class PubNubHandler
             case AlertRemoveHandler.CLR_SITEDEF_CMD:
                 AlertRemoveHandler.handleMessage(cmd, msg);
                 break;
-            case AlertGenerateHandler.CM_ERROR_REPORT:
-            case AlertGenerateHandler.CM_TO_CCU_OVER_USB_SN_REBOOT:
-            case AlertGenerateHandler.FSV_REBOOT:
-            case AlertGenerateHandler.DEVICE_RESTART:
-            case AlertGenerateHandler.CM_RESET:
-            case AlertGenerateHandler.DEVICE_REBOOT:
-            case AlertGenerateHandler.FIRMWARE_OTA_UPDATE_STARTED:
-            case AlertGenerateHandler.FIRMWARE_OTA_UPDATE_ENDED:
-                AlertGenerateHandler.handleMessage(cmd);
-                break;
             default:
                 CcuLog.d(L.TAG_CCU_PUBNUB, "UnSupported PubNub Command : "+cmd);
                 

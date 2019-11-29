@@ -42,5 +42,6 @@ dependencies {
     implementation project(path: ':usbserial')
     implementation project(':haystack')
     implementation project(':logic')
+    implementation project(':alerts')
 }
 

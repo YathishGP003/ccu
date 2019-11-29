@@ -11,6 +11,7 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import a75f.io.device.alerts.AlertGenerateHandler;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbErrorReportMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwarePacketRequest_t;
@@ -22,14 +23,13 @@ import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.logic.Globals;
-import a75f.io.logic.pubnub.AlertGenerateHandler;
 import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
 
+import static a75f.io.device.alerts.AlertGenerateHandler.CM_ERROR_REPORT;
+import static a75f.io.device.alerts.AlertGenerateHandler.DEVICE_REBOOT;
 import static a75f.io.device.mesh.DLog.LogdStructAsJson;
-import static a75f.io.logic.pubnub.AlertGenerateHandler.CM_ERROR_REPORT;
-import static a75f.io.logic.pubnub.AlertGenerateHandler.DEVICE_REBOOT;
 
 /**
  * Created by Yinten isOn 8/21/2017.

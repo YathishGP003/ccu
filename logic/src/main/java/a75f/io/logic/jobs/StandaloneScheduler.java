@@ -208,12 +208,17 @@ public class StandaloneScheduler {
                     String id = cdb.get("id").toString();
                     Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
                     for (String marker : p.getMarkers()) {
-                        if (marker.equals("his")) {
-                            hayStack.writeHisValById(id, val);
-                        }
+
                         if (marker.equals("writable")) {
                             CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val " + p.getDisplayName() + ": " + val);
                             CCUHsApi.getInstance().pointWrite(HRef.copy(id), TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", HNum.make(val), HNum.make(0));
+                        }
+                    }
+
+                    for (String marker : p.getMarkers()) {
+                        if (marker.equals("his")) {
+                            CcuLog.d(L.TAG_CCU_UI, "Set His Val " + id + ": " + val);
+                            hayStack.writeHisValById(id, val);
                         }
                     }
                 }

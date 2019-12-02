@@ -1,10 +1,5 @@
- - Merge branch 'mahesh_renuts' into 'master'
- - RENATUS-827, fixed crash when network exception added alert for device reboot,FIRMWARE OTA UPDATE STARTED, FIRMWARE OTA UPDATE ENDED
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-831, SmartStat condition status is wrong
- - #RENATUS-831, SmartStat condition status is wrong
- - #RENATUS-833, Round of decimal values
- - #RENATUS-833, Round of decimal values
- - #RENATUS-831, SmartStat condition status is wrong
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-817, OAO | Co2 thershold not historized
+ - #RENATUS-831, CPU | Conditioning status update
+ - #RENATUS-783, Predefined Alert definition update
+ - #RENATUS-831, CPU | Conditioning status update
+ - #RENATUS-783, Predefined Alert definition update

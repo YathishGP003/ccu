@@ -273,7 +273,17 @@ public class Conditional
         } else if (value.contains("Setup")){
             editor.putString("use_setup_password","");
             editor.putBoolean("set_setup_password",false);
-        }
+        } else if (value.contains("Reset All")){
+		
+            editor.putString("zone_settings_password","");
+            editor.putBoolean("set_zone_password",false);
+            editor.putString("system_settings_password","");
+            editor.putBoolean("set_system_password",false);
+            editor.putString("building_settings_password","");
+            editor.putBoolean("set_building_password",false);
+            editor.putString("use_setup_password","");
+            editor.putBoolean("set_setup_password",false);
+		}
         editor.apply();
     }
 

@@ -25,6 +25,7 @@ import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartNodeSensorReading_t;
 import a75f.io.device.serial.SmartStatFanSpeed_t;
+import a75f.io.device.serial.SnRebootIndicationMessage_t;
 import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -568,13 +569,6 @@ public class Pulse
 		short address = (short)wrmOrCMReootMsgs.wrmAddress.get();
 		if(address == 0x00 || (address == 0x01) || (address == L.ccu().getSmartNodeAddressBand()+99)){
 			LSerial.getInstance().setResetSeedMessage(true);
-		}
-	}
-	public static void smartDevicesRebootMessage(WrmOrCmRebootIndicationMessage_t wrmOrCMReootMsgs){
-		Log.d(L.TAG_CCU_DEVICE,"smartDevicesRebootMessage = "+wrmOrCMReootMsgs.wrmAddress+","+wrmOrCMReootMsgs.rebootCause);
-		short address = (short)wrmOrCMReootMsgs.wrmAddress.get();
-		if(address == 0x00 || (address == 0x01) || (address == L.ccu().getSmartNodeAddressBand()+99)){
-			LSerial.getInstance().setResetSeedMessage(true);
 
 			String str = "addr:"+address;
 			str+= ", master_fw_ver:"+wrmOrCMReootMsgs.majorFirmwareVersion+"."+wrmOrCMReootMsgs.minorFirmwareVersion;
@@ -609,6 +603,45 @@ public class Pulse
 
 			AlertGenerateHandler.handleMessage(DEVICE_REBOOT,"Device reboot info - "+str);
 		}
+	}
+	public static void smartDevicesRebootMessage(SnRebootIndicationMessage_t snRebootIndicationMsgs){
+		Log.d(L.TAG_CCU_DEVICE,"smartDevicesRebootMessage = "+snRebootIndicationMsgs.smartNodeAddress+","+snRebootIndicationMsgs.rebootCause);
+		short address = (short)snRebootIndicationMsgs.smartNodeAddress.get();
+			LSerial.getInstance().setResetSeedMessage(true);
+
+			String str = "addr:"+address;
+			str+= ", master_fw_ver:"+snRebootIndicationMsgs.smartNodeMajorFirmwareVersion+"."+snRebootIndicationMsgs.smartNodeMinorFirmwareVersion;
+			switch (snRebootIndicationMsgs.rebootCause.get()){
+				case MeshUtil.POWER_ON_RESET:
+					str+= ", cause:"+"POWER_ON_RESET";
+					break;
+				case MeshUtil.CORE_BROWNOUT_RESET:
+					str+= ", cause:"+"CORE_BROWNOUT_RESET";
+					break;
+				case MeshUtil.VDD_BROWNOUT_RESET:
+					str+= ", cause:"+"VDD_BROWNOUT_RESET";
+					break;
+				case MeshUtil.EXTERNAL_RESET:
+					str+= ", cause:"+"EXTERNAL_RESET";
+					break;
+				case MeshUtil.WATCHDOG_RESET:
+					str+= ", cause:"+"WATCHDOG_RESET";
+					break;
+				case MeshUtil.SOFTWARE_RESET:
+					str+= ", cause:"+"SOFTWARE_RESET";
+					break;
+				case MeshUtil.BACKUP_RESET:
+					str+= ", cause:"+"BACKUP_RESET";
+					break;
+				default:
+					str+= ", cause:"+"UNDEFINED";
+					break;
+			}
+		    str += ", device type:"+ snRebootIndicationMsgs.smartNodeDeviceType.get();
+			str += ", device:"+ snRebootIndicationMsgs.smartNodeDeviceId;
+			str += ", serialnumber:"+ snRebootIndicationMsgs.smartNodeSerialNumber;
+
+			AlertGenerateHandler.handleMessage(DEVICE_REBOOT,"Device reboot info - "+str);
 	}
 	public static void updateSetTempFromSmartNode(CmToCcuOverUsbSnLocalControlsOverrideMessage_t setTempUpdate){
 		short nodeAddr = (short)setTempUpdate.smartNodeAddress.get();

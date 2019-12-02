@@ -21,6 +21,7 @@ import a75f.io.device.serial.CmToCcuOverUsbSmartStatRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnLocalControlsOverrideMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.device.serial.SnRebootIndicationMessage_t;
 import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.logic.Globals;
 import a75f.io.usbserial.SerialAction;
@@ -121,7 +122,6 @@ public class LSerial
             {
                 DLog.LogdSerial("Event Type DEVICE_REBOOT:"+data.length+","+data.toString());
                 Pulse.rebootMessageFromCM(fromBytes(data, WrmOrCmRebootIndicationMessage_t.class));
-                Pulse.smartDevicesRebootMessage(fromBytes(data, WrmOrCmRebootIndicationMessage_t.class));
             }
             else if(messageType == MessageType.CM_TO_CCU_OVER_USB_SMART_STAT_LOCAL_CONTROLS_OVERRIDE)
             {
@@ -145,7 +145,7 @@ public class LSerial
 
             }else if(messageType == MessageType.CM_TO_CCU_OVER_USB_SN_REBOOT){
                 DLog.LogdSerial("Event Type CM_TO_CCU_OVER_USB_SN_REBOOT DEVICE_REBOOT:"+data.length+","+data.toString());
-                Pulse.smartDevicesRebootMessage(fromBytes(data, WrmOrCmRebootIndicationMessage_t.class));
+                Pulse.smartDevicesRebootMessage(fromBytes(data, SnRebootIndicationMessage_t.class));
 
             }
 

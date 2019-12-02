@@ -21,6 +21,7 @@ import a75f.io.device.serial.CmToCcuOverUsbSmartStatRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnLocalControlsOverrideMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.device.serial.SnRebootIndicationMessage_t;
 import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.logic.Globals;
 import a75f.io.usbserial.SerialAction;
@@ -28,7 +29,6 @@ import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
 
 import static a75f.io.device.alerts.AlertGenerateHandler.CM_ERROR_REPORT;
-import static a75f.io.device.alerts.AlertGenerateHandler.DEVICE_REBOOT;
 import static a75f.io.device.mesh.DLog.LogdStructAsJson;
 
 /**
@@ -122,7 +122,6 @@ public class LSerial
             {
                 DLog.LogdSerial("Event Type DEVICE_REBOOT:"+data.length+","+data.toString());
                 Pulse.rebootMessageFromCM(fromBytes(data, WrmOrCmRebootIndicationMessage_t.class));
-                AlertGenerateHandler.handleMessage(DEVICE_REBOOT);
             }
             else if(messageType == MessageType.CM_TO_CCU_OVER_USB_SMART_STAT_LOCAL_CONTROLS_OVERRIDE)
             {
@@ -140,15 +139,15 @@ public class LSerial
                 CmToCcuOverUsbErrorReportMessage_t msg = new CmToCcuOverUsbErrorReportMessage_t();
                 msg.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN),0);
                 LogdStructAsJson(msg);
-                //TODO Create an alert when received
-               AlertGenerateHandler.handleMessage(CM_ERROR_REPORT);
+                String str = "error type:"+msg.errorType.get().name();
+                str+= ", error detail:" +msg.errorDetail;
+                AlertGenerateHandler.handleMessage(CM_ERROR_REPORT, "CM error:"+str);
 
             }else if(messageType == MessageType.CM_TO_CCU_OVER_USB_CM4_REGULAR_UPDATE){
 
             }else if(messageType == MessageType.CM_TO_CCU_OVER_USB_SN_REBOOT){
                 DLog.LogdSerial("Event Type CM_TO_CCU_OVER_USB_SN_REBOOT DEVICE_REBOOT:"+data.length+","+data.toString());
-                AlertGenerateHandler.handleMessage(DEVICE_REBOOT);
-               // Pulse.smartDevicesRebootMessage(fromBytes(data, SnRebootIndicationMessage_t.class));
+                Pulse.smartDevicesRebootMessage(fromBytes(data, SnRebootIndicationMessage_t.class));
 
             }
 

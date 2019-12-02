@@ -80,8 +80,8 @@ public class AlertManager
         processor.processAlerts();
     }
 
-    public void generateAlert(String title){
-        processor.generateAlert(title);
+    public void generateAlert(String title, String msg){
+        processor.generateAlert(title,msg);
     }
     
     public List<Alert> getActiveAlerts() {

@@ -1,20 +1,22 @@
 package a75f.io.logic.pubnub;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.HashMap;
 
+import a75f.io.alerts.AlertManager;
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 
 public class PubNubHandler
 {
+    //
+    public static final String CM_RESET = "CM RESET";
+
     public static void handleMessage(JsonObject msg, Context context){
         String cmd = msg.get("command") != null ? msg.get("command").getAsString(): "";
         switch (cmd) {
@@ -40,6 +42,11 @@ public class PubNubHandler
             case AlertRemoveHandler.REMOVE_DEF_CMD:
             case AlertRemoveHandler.CLR_SITEDEF_CMD:
                 AlertRemoveHandler.handleMessage(cmd, msg);
+                break;
+            case CM_RESET:
+                HashMap ccu = CCUHsApi.getInstance().read("ccu");
+                String ccuName = ccu.get("dis").toString();
+                AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(CM_RESET,"CM Reset request sent for  - "+ccuName);
                 break;
             default:
                 CcuLog.d(L.TAG_CCU_PUBNUB, "UnSupported PubNub Command : "+cmd);

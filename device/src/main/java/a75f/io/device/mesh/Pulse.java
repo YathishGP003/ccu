@@ -14,6 +14,7 @@ import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.device.alerts.AlertGenerateHandler;
+import a75f.io.device.serial.CcuToCmOverUsbCmResetMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
@@ -637,7 +638,7 @@ public class Pulse
 					str+= ", cause:"+"UNDEFINED";
 					break;
 			}
-		    str += ", device type:"+ snRebootIndicationMsgs.smartNodeDeviceType.get();
+		str += ", device type:"+ snRebootIndicationMsgs.smartNodeDeviceType.get().name();
 			str += ", device:"+ snRebootIndicationMsgs.smartNodeDeviceId;
 			str += ", serialnumber:"+ snRebootIndicationMsgs.smartNodeSerialNumber;
 
@@ -879,4 +880,11 @@ public class Pulse
 	}
 
 	public static void setCurrentTempInterface(ZoneDataInterface in) { currentTempInterface = in; }
+
+	public static void sendCMResetMessage(){
+		CcuToCmOverUsbCmResetMessage_t msg = new CcuToCmOverUsbCmResetMessage_t();
+		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_CM_RESET);
+		msg.reset.set((short)1);
+		MeshUtil.sendStructToCM(msg);
+	}
 }

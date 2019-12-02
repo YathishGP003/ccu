@@ -3,6 +3,7 @@ package a75f.io.device.mesh;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -12,6 +13,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.device.alerts.AlertGenerateHandler;
 import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
@@ -39,6 +41,7 @@ import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 
+import static a75f.io.device.alerts.AlertGenerateHandler.DEVICE_REBOOT;
 import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
 
@@ -574,7 +577,7 @@ public class Pulse
 			LSerial.getInstance().setResetSeedMessage(true);
 
 			String str = "addr:"+address;
-			str+= ",master_fw_ver:"+wrmOrCMReootMsgs.majorFirmwareVersion+"."+wrmOrCMReootMsgs.minorFirmwareVersion;
+			str+= ", master_fw_ver:"+wrmOrCMReootMsgs.majorFirmwareVersion+"."+wrmOrCMReootMsgs.minorFirmwareVersion;
 			switch (wrmOrCMReootMsgs.rebootCause.get()){
 				case MeshUtil.POWER_ON_RESET:
 					str+= ", cause:"+"POWER_ON_RESET";
@@ -601,12 +604,10 @@ public class Pulse
 					str+= ", cause:"+"UNDEFINED";
 					break;
 			}
-			str += ", device:"+wrmOrCMReootMsgs.deviceId;
-			str += ", serialnumber:"+wrmOrCMReootMsgs.deviceSerial;
+			str += ", device:"+ Arrays.toString(wrmOrCMReootMsgs.deviceId).replaceAll("[\\[\\]]","");
+			str += ", serialnumber:"+ Arrays.toString(wrmOrCMReootMsgs.deviceSerial).replaceAll("[\\[\\]]","");
 
-			//3 TODO create alert here for device reboot
-
-
+			AlertGenerateHandler.handleMessage(DEVICE_REBOOT,"Device reboot info - "+str);
 		}
 	}
 	public static void updateSetTempFromSmartNode(CmToCcuOverUsbSnLocalControlsOverrideMessage_t setTempUpdate){

@@ -182,8 +182,6 @@ public class AlertProcessor
                             if (a.mTitle.equals(def.alert.mTitle)){
                                 def.conditionals.get(0).status = true;
                                 alertStatus = true;
-                            } else {
-                                alertStatus = def.conditionals.get(0).status;
                             }
                         }
                     } else {
@@ -470,11 +468,13 @@ public class AlertProcessor
         }
     }
 
-    public void generateAlert(String title){
+    public void generateAlert(String title, String msg){
         ArrayList<AlertDefinition> alertDefinition = getAlertDefinitions();
         for (AlertDefinition ad :alertDefinition) {
             if (ad.alert.mTitle.equals(title)) {
-                ad.evaluateAlert();
+                ad.alert.setmMessage(msg);
+                ad.alert.setmNotificationMsg(msg);
+                addAlert(AlertBuilder.build(ad, AlertFormatter.getFormattedMessage(ad)));
             }
         }
     }

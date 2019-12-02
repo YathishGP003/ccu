@@ -19,7 +19,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
@@ -203,9 +205,9 @@ public class OTAUpdateService extends IntentService {
 
             short versionMajor = msg.smartNodeMajorFirmwareVersion.get();
             short versionMinor = msg.smartNodeMinorFirmwareVersion.get();
-
-            //TODO notify something (PubNub?) that an update has completed
-            AlertGenerateHandler.handleMessage(FIRMWARE_OTA_UPDATE_ENDED);
+            HashMap ccu = CCUHsApi.getInstance().read("ccu");
+            String ccuName = ccu.get("dis").toString();
+            AlertGenerateHandler.handleMessage(FIRMWARE_OTA_UPDATE_ENDED, "Firmware OTA update for"+" "+ccuName+" "+"ended for smart node"+" "+ +msg.smartNodeAddress.get()+" "+"with version"+" "+versionMajor + "." + versionMinor);
 
             if (mUpdateWaitingToComplete && versionMatches(versionMajor, versionMinor)) {
                 Log.d(TAG, "[UPDATE] [SUCCESSFUL]"
@@ -426,7 +428,9 @@ public class OTAUpdateService extends IntentService {
         Log.d(TAG, "[STARTUP] Starting to update device with address " + mCurrentLwMeshAddress);
 
         //TODO notify something (PubNub?) that an update has started
-        AlertGenerateHandler.handleMessage(FIRMWARE_OTA_UPDATE_STARTED);
+        HashMap ccu = CCUHsApi.getInstance().read("ccu");
+        String ccuName = ccu.get("dis").toString();
+        AlertGenerateHandler.handleMessage(FIRMWARE_OTA_UPDATE_STARTED, "Firmware OTA update for"+" "+ccuName+" "+"started for smart node"+" "+mCurrentLwMeshAddress+" "+"with version"+" "+versionMajor + "." + versionMinor);
         mUpdateInProgress = true;
         mLastSentPacket = -1;
 

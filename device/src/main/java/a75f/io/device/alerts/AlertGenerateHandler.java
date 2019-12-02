@@ -18,31 +18,31 @@ public class AlertGenerateHandler {
     public static final String FIRMWARE_OTA_UPDATE_STARTED = "FIRMWARE OTA UPDATE STARTED";
     public static final String FIRMWARE_OTA_UPDATE_ENDED = "FIRMWARE OTA UPDATE ENDED";
 
-    public static void handleMessage(String cmd) {
+    public static void handleMessage(String cmd, String msg) {
             switch (cmd) {
                 case FSV_REBOOT:
-                    AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(FSV_REBOOT);
+                    AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(FSV_REBOOT, msg);
                     break;
                 case CM_ERROR_REPORT:
-                    AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(CM_ERROR_REPORT);
+                    AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(CM_ERROR_REPORT, msg);
                     break;
                 case CM_TO_CCU_OVER_USB_SN_REBOOT:
-                    AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(CM_TO_CCU_OVER_USB_SN_REBOOT);
+                    AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(CM_TO_CCU_OVER_USB_SN_REBOOT, msg);
                     break;
                 case DEVICE_RESTART:
-                    AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(DEVICE_RESTART);
+                    AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(DEVICE_RESTART, msg);
                     break;
                 case CM_RESET:
-                    AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(CM_RESET);
+                    AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(CM_RESET, msg);
                     break;
                 case DEVICE_REBOOT:
-                    AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(DEVICE_REBOOT);
+                    AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(DEVICE_REBOOT, msg);
                     break;
                 case FIRMWARE_OTA_UPDATE_STARTED:
-                    AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(FIRMWARE_OTA_UPDATE_STARTED);
+                    AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(FIRMWARE_OTA_UPDATE_STARTED, msg);
                     break;
                 case FIRMWARE_OTA_UPDATE_ENDED:
-                    AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(FIRMWARE_OTA_UPDATE_ENDED);
+                    AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(FIRMWARE_OTA_UPDATE_ENDED, msg);
                     break;
             }
     }

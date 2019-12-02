@@ -472,11 +472,6 @@ public class AlertProcessor
         ArrayList<AlertDefinition> alertDefinition = getAlertDefinitions();
         for (AlertDefinition ad :alertDefinition) {
             if (ad.alert.mTitle.equals(title)) {
-                for (Alert a:getActiveAlerts()){
-                    if (a.getmTitle().equals(ad.alert.mTitle)){
-                        return;
-                    }
-                }
                 ad.alert.setmMessage(msg);
                 ad.alert.setmNotificationMsg(msg);
                 addAlert(AlertBuilder.build(ad, AlertFormatter.getFormattedMessage(ad)));

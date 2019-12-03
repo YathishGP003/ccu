@@ -29,6 +29,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import a75f.io.alerts.AlertManager;
+import a75f.io.alerts.AlertProcessor;
 import a75f.io.renatus.DABFullyAHUProfile;
 import a75f.io.renatus.DABHybridAhuProfile;
 import a75f.io.renatus.DABStagedProfile;
@@ -312,6 +314,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 }
                 if (currentFragment instanceof CongratsFragment) {
                     prefs.setBoolean("REGISTRATION", true);
+                    AlertManager.getInstance().fetchAllPredefinedAlerts();
                     Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
                     i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(i);

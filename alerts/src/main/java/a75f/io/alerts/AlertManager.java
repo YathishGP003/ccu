@@ -83,6 +83,10 @@ public class AlertManager
     public void generateAlert(String title, String msg){
         processor.generateAlert(title,msg);
     }
+
+    public void fetchAllPredefinedAlerts(){
+        processor.fetchAllPredefinedAlerts();
+    }
     
     public List<Alert> getActiveAlerts() {
         return processor.getActiveAlerts();

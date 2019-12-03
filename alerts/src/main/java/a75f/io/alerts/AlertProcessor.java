@@ -1,6 +1,7 @@
 package a75f.io.alerts;
 
 import android.content.Context;
+import android.os.CountDownTimer;
 import android.os.StrictMode;
 import android.util.Log;
 
@@ -81,9 +82,7 @@ public class AlertProcessor
         parser = new AlertParser();
         predefinedAlerts = getPredefinedAlerts();
         taskExecutor.scheduleAtFixedRate(getWifiStatusRunnable(), 900, 60, TimeUnit.SECONDS );
-        if (predefinedAlerts == null || predefinedAlerts.size() == 0) {
-            fetchPredefinedAlerts();
-        }
+        fetchAllPredefinedAlerts();
     }
 
     private Runnable getWifiStatusRunnable()
@@ -126,6 +125,12 @@ public class AlertProcessor
             HashMap site = CCUHsApi.getInstance().read("site");
             if (site == null || site.get("id") == null){
                 return;
+            }
+
+            if (BuildConfig.DEBUG)
+            {
+                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                StrictMode.setThreadPolicy(policy);
             }
             String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
             String alertDef = HttpUtil.sendRequest(mContext, "readPredefined ", new JSONObject().put("siteRef", siteGUID.replace("@","")).toString());
@@ -508,5 +513,22 @@ public class AlertProcessor
     public void clearAlerts() {
         //alertList.clear();
         //activeAlertList.clear();
+    }
+
+    public void fetchAllPredefinedAlerts(){
+
+            new CountDownTimer(20000, 1000) {
+                @Override
+                public void onTick(long l) {
+
+                }
+
+                @Override
+                public void onFinish() {
+                    if (predefinedAlerts == null || predefinedAlerts.size() == 0) {
+                        fetchPredefinedAlerts();
+                    }
+                }
+            }.start();
     }
 }

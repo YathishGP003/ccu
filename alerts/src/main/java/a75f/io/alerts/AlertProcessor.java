@@ -1,7 +1,6 @@
 package a75f.io.alerts;
 
 import android.content.Context;
-import android.os.CountDownTimer;
 import android.os.StrictMode;
 import android.util.Log;
 
@@ -516,19 +515,19 @@ public class AlertProcessor
     }
 
     public void fetchAllPredefinedAlerts(){
-
-            new CountDownTimer(20000, 1000) {
-                @Override
-                public void onTick(long l) {
-
-                }
-
-                @Override
-                public void onFinish() {
-                    if (predefinedAlerts == null || predefinedAlerts.size() == 0) {
-                        fetchPredefinedAlerts();
-                    }
-                }
-            }.start();
+        if (predefinedAlerts == null || predefinedAlerts.size() == 0) {
+            taskExecutor.scheduleAtFixedRate(getAllPredefinedAlerts(), 60, 60, TimeUnit.SECONDS );
+        }
+    }
+    private Runnable getAllPredefinedAlerts()
+    {
+        return new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                fetchPredefinedAlerts();
+            }
+        };
     }
 }

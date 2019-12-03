@@ -87,6 +87,10 @@ public class AlertManager
     public void fetchAllPredefinedAlerts(){
         processor.fetchAllPredefinedAlerts();
     }
+
+    public void fetchPredefinedAlerts(){
+        processor.fetchPredefinedAlerts();
+    }
     
     public List<Alert> getActiveAlerts() {
         return processor.getActiveAlerts();

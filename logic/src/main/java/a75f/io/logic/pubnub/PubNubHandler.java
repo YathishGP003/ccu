@@ -16,6 +16,7 @@ public class PubNubHandler
 {
     //
     public static final String CM_RESET = "CM RESET";
+    public static final String PRE_DEF_ALERT = "predefinedAlertDefinition";
 
     public static void handleMessage(JsonObject msg, Context context){
         String cmd = msg.get("command") != null ? msg.get("command").getAsString(): "";
@@ -47,6 +48,9 @@ public class PubNubHandler
                 HashMap ccu = CCUHsApi.getInstance().read("ccu");
                 String ccuName = ccu.get("dis").toString();
                 AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(CM_RESET,"CM Reset request sent for  - "+ccuName);
+                break;
+            case PRE_DEF_ALERT:
+                AlertManager.getInstance(Globals.getInstance().getApplicationContext()).fetchPredefinedAlerts();
                 break;
             default:
                 CcuLog.d(L.TAG_CCU_PUBNUB, "UnSupported PubNub Command : "+cmd);

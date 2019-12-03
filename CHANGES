@@ -1,5 +1,5 @@
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-831, CPU | Conditioning status update
- - #RENATUS-783, Predefined Alert definition update
- - #RENATUS-831, CPU | Conditioning status update
- - #RENATUS-783, Predefined Alert definition update
+ - Merge branch 'mahesh_renuts' into 'master'
+ - remove filter
+ - fixes
+ - fix
+ - set alert info to alert message

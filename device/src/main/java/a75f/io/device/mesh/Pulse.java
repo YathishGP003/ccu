@@ -658,7 +658,7 @@ public class Pulse
 					str+= ", cause:"+"UNDEFINED";
 					break;
 			}
-		str += ", device type:"+ snRebootIndicationMsgs.smartNodeDeviceType.get().name();
+		    str += ", device type:"+ snRebootIndicationMsgs.smartNodeDeviceType.get().name();
 			str += ", device:"+ snRebootIndicationMsgs.smartNodeDeviceId;
 			str += ", serialnumber:"+ snRebootIndicationMsgs.smartNodeSerialNumber;
 

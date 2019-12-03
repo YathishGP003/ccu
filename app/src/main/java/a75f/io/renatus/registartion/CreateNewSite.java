@@ -263,8 +263,10 @@ public class CreateNewSite extends Fragment {
                     if (ccu.size() > 0) {
                         String ahuRef = ccu.get("ahuRef").toString();
                         CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef);
+                        L.ccu().setCCUName(ccuName);
                     } else {
                         String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create());
+                        L.ccu().setCCUName(ccuName);
                         CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                     }
                     goTonext();
@@ -311,8 +313,10 @@ public class CreateNewSite extends Fragment {
                     if (ccu.size() > 0) {
                         String ahuRef = ccu.get("ahuRef").toString();
                         CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef);
+                        L.ccu().setCCUName(ccuName);
                     } else {
                         String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create());
+                        L.ccu().setCCUName(ccuName);
                         CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                     }
                 }

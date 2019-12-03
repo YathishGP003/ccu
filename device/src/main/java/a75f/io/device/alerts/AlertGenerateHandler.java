@@ -17,6 +17,9 @@ public class AlertGenerateHandler {
     public static final String DEVICE_REBOOT = "DEVICE REBOOT";
     public static final String FIRMWARE_OTA_UPDATE_STARTED = "FIRMWARE OTA UPDATE STARTED";
     public static final String FIRMWARE_OTA_UPDATE_ENDED = "FIRMWARE OTA UPDATE ENDED";
+    public static final String CM_DEAD = "CM DEAD";
+    public static final String DEVICE_DEAD = "DEVICE DEAD";
+    public static final String DEVICE_LOW_SIGNAL = "DEVICE NO SIGNAL";
 
     public static void handleMessage(String cmd, String msg) {
             switch (cmd) {
@@ -43,6 +46,15 @@ public class AlertGenerateHandler {
                     break;
                 case FIRMWARE_OTA_UPDATE_ENDED:
                     AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(FIRMWARE_OTA_UPDATE_ENDED, msg);
+                    break;
+                case CM_DEAD:
+                    AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(CM_DEAD, msg);
+                    break;
+                case DEVICE_DEAD:
+                    AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(DEVICE_DEAD, msg);
+                    break;
+                case DEVICE_LOW_SIGNAL:
+                    AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(DEVICE_LOW_SIGNAL, msg);
                     break;
             }
     }

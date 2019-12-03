@@ -30,6 +30,7 @@ import a75f.io.device.serial.SnRebootIndicationMessage_t;
 import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Sensor;
 import a75f.io.logic.bo.building.SensorType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -43,6 +44,8 @@ import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 
+import static a75f.io.device.alerts.AlertGenerateHandler.CM_DEAD;
+import static a75f.io.device.alerts.AlertGenerateHandler.DEVICE_LOW_SIGNAL;
 import static a75f.io.device.alerts.AlertGenerateHandler.DEVICE_REBOOT;
 import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
@@ -61,10 +64,17 @@ public class Pulse
 		if(isReboot)mTimeSinceCMDead = 0;
 		else
 			mTimeSinceCMDead++;
+		//TODO need to replace this 15 minutes to Tuner
+
+		if(mTimeSinceCMDead > 15){
+			mTimeSinceCMDead = 0;
+			AlertGenerateHandler.handleMessage(CM_DEAD, L.ccu().getCCUName() +" has stopped reporting data properly and needs to be serviced. Please contact 75F support for assistance.");
+		}
 	}
 	public static void regularSNUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t smartNodeRegularUpdateMessage_t)
 	{
 		short nodeAddr = (short)smartNodeRegularUpdateMessage_t.update.smartNodeAddress.get();
+		int rssi = smartNodeRegularUpdateMessage_t.update.rssi.get();
 		CCUHsApi hayStack = CCUHsApi.getInstance();
 		HashMap device = hayStack.read("device and addr == \""+nodeAddr+"\"");
 		if (device != null && device.size() > 0)
@@ -78,6 +88,11 @@ public class Pulse
 			for(HashMap phyPoint : phyPoints) {
 				if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
 					continue;
+				}
+				if((rssi - 128) < 40) {
+					//TODO need to iterate for 50 times or more , means 25 minutes atleast and then trigger alert
+					AlertGenerateHandler.handleMessage(DEVICE_LOW_SIGNAL, L.ccu().getCCUName() + " ," + nodeAddr + " is having an issues and has reported low signal for last 50 updates. If you continue to receive this alert, please contact 75F support.");
+
 				}
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
 				Point logPointInfo = new Point.Builder().setHashMap(logPoint).build();
@@ -115,8 +130,7 @@ public class Pulse
 						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
 						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : analog1In "+getAnalogConversion(phyPoint, logPoint, val));
 						if (currentTempInterface != null) {
-							if(getAnalogConversion(phyPoint, logPoint, val) > 0)
-							currentTempInterface.updateSensorValue(nodeAddr);
+							if(getAnalogConversion(phyPoint, logPoint, val) > 0) currentTempInterface.updateSensorValue(nodeAddr);
 						}
 						break;
 					case ANALOG_IN_TWO:
@@ -475,11 +489,17 @@ public class Pulse
 	{
 		short nodeAddr = (short)smartStatRegularUpdateMessage_t.update.smartNodeAddress.get();
 		double occupancyDetected  = smartStatRegularUpdateMessage_t.update.occupancyDetected.get();
+		int rssi = smartStatRegularUpdateMessage_t.update.rssi.get();
 		CCUHsApi hayStack = CCUHsApi.getInstance();
 		HashMap device = hayStack.read("device and addr == \""+nodeAddr+"\"");
 		if (device != null && device.size() > 0)
 		{
 			Device deviceInfo = new Device.Builder().setHashMap(device).build();
+			if((rssi - 128) < 40) {
+				//TODO need to iterate for 50 times or more , means 25 minutes atleast and then trigger alert
+				AlertGenerateHandler.handleMessage(DEVICE_LOW_SIGNAL, L.ccu().getCCUName() + " ," + deviceInfo.getDisplayName() + " is having an issues and has reported low signal for last 50 updates. If you continue to receive this alert, please contact 75F support.");
+
+			}
 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + deviceInfo.getId() + "\"");
 			boolean is2pfcu = deviceInfo.getMarkers().contains("pipe2");
 			String logicalCurTempPoint = "";

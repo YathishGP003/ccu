@@ -69,8 +69,15 @@ public class CCUApplication
     private String           mTitle        = "";
     private ArrayList<Floor> mfloors       = new ArrayList<Floor>();
     private short           mSmartNodeAddressBand;
+    private String mCCUName;
     
 
+    public String getCCUName(){
+        return mCCUName;
+    }
+    public void setCCUName(String name){
+        mCCUName = name;
+    }
     
     public short getSmartNodeAddressBand()
     {

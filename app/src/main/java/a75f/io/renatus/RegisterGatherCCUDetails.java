@@ -113,6 +113,7 @@ public class RegisterGatherCCUDetails extends Activity {
                     return;
                 }
                 String installerEmail = mInstallerEmailET.getText().toString();
+                L.ccu().setCCUName(ccuName);
                 String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create());
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
 

@@ -223,6 +223,27 @@ public class SmartNode
     public RawPoint addSensor(Port p) {
         Equip q = new Equip.Builder().setHashMap(CCUHsApi.getInstance()
                                               .read("equip and group == \""+smartNodeAddress+"\"")).build();
+        String sensorUnit = "";
+        switch (p){
+            case SENSOR_CO2:
+            case SENSOR_NO:
+            case SENSOR_CO2_EQUIVALENT:
+            case SENSOR_CO:
+                sensorUnit = "ppm";
+                break;
+            case SENSOR_ILLUMINANCE:
+                sensorUnit = "lux";
+                break;
+            case SENSOR_PRESSURE:
+                sensorUnit = "Pa";
+                break;
+            case SENSOR_SOUND:
+                sensorUnit = "dB";
+                break;
+            case SENSOR_VOC:
+                sensorUnit = "ppb";
+                break;
+        }
     
         Point equipSensor = new Point.Builder()
                                  .setDisplayName(q.getDisplayName()+"-"+p.getPortSensor())
@@ -230,7 +251,7 @@ public class SmartNode
                                  .setSiteRef(siteRef)
                                  .setRoomRef(roomRef)
                                  .setFloorRef(floorRef)
-                                 .addMarker("zone").addMarker("sensor").addMarker(p.getPortSensor()).addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
+                                 .addMarker("zone").addMarker("sensor").addMarker(p.getPortSensor()).addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis").addMarker(sensorUnit)
                                  .setGroup(String.valueOf(smartNodeAddress))
                                  .setTz(tz)
                                  .build();

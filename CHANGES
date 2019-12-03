@@ -1,5 +1,2 @@
- - Merge branch 'mahesh_renuts' into 'master'
- - remove filter
- - fixes
- - fix
- - set alert info to alert message
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-835, Sensor type points not have units

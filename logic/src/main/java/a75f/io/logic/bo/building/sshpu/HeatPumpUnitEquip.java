@@ -221,7 +221,7 @@ public class HeatPumpUnitEquip{
                 .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
                 .addMarker("air").addMarker("pressure").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
-                .setUnit("Pa")
+                .setUnit("inch wc")
                 .setTz(tz)
                 .build();
         String psId = CCUHsApi.getInstance().addPoint(ps);

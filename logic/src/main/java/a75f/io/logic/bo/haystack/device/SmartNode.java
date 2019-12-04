@@ -233,7 +233,7 @@ public class SmartNode
                 sensorUnit = "lux";
                 break;
             case SENSOR_PRESSURE:
-                sensorUnit = "Pa";
+                sensorUnit = "inch wc";
                 break;
             case SENSOR_SOUND:
                 sensorUnit = "dB";
@@ -251,7 +251,7 @@ public class SmartNode
                                  .setSiteRef(siteRef)
                                  .setRoomRef(roomRef)
                                  .setFloorRef(floorRef)
-                                 .addMarker("zone").addMarker("sensor").addMarker(p.getPortSensor()).addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
+                                 .addMarker("zone").addMarker("sensor").addMarker(p.getPortSensor()).addMarker("his").addMarker("cur").addMarker("current").addMarker("logical").addMarker("equipHis")
                                  .setUnit(sensorUnit)
                                  .setGroup(String.valueOf(smartNodeAddress))
                                  .setTz(tz)

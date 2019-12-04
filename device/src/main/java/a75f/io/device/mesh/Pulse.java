@@ -850,6 +850,8 @@ public class Pulse
 					break;
 				case OCCUPANCY:
 					hasSensorOccupancy = true;
+					CCUHsApi.getInstance().writeHisValById(sp.getId(), val);
+					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), val);
 					updateOccupancyStatus(sp,val, device,addr);
 					break;
 				case ENERGY_METER_HIGH:
@@ -894,8 +896,6 @@ public class Pulse
 					updateSmartStatDesiredTemp(addr, dt, false);
 				}
 			}
-			CCUHsApi.getInstance().writeHisValById(sp.getId(), val);
-			CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), val);
 		}
 	}
 

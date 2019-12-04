@@ -168,7 +168,7 @@ public class VavTRTuners
                                   .setEquipRef(equipRef)
                                   .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
                                   .addMarker("staticPressure").addMarker("spinit").addMarker("writable").addMarker("his").addMarker("equipHis")
-                                  .setUnit("in")
+                                  .setUnit("inch wc")
                                   .setTz(tz)
                                   .build();
         String staticPressureSPInitId = hayStack.addPoint(staticPressureSPInit);
@@ -181,7 +181,7 @@ public class VavTRTuners
                                  .setEquipRef(equipRef)
                                  .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
                                  .addMarker("staticPressure").addMarker("spmin").addMarker("writable").addMarker("his").addMarker("equipHis")
-                                 .setUnit("in")
+                                 .setUnit("inch wc")
                                  .setTz(tz)
                                  .build();
         String staticPressureSPMinId = hayStack.addPoint(staticPressureSPMin);
@@ -194,7 +194,7 @@ public class VavTRTuners
                                  .setEquipRef(equipRef)
                                  .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
                                  .addMarker("staticPressure").addMarker("spmax").addMarker("writable").addMarker("his").addMarker("equipHis")
-                                 .setUnit("in")
+                                 .setUnit("inch wc")
                                  .setTz(tz)
                                  .build();
         String staticPressureSPMaxId = hayStack.addPoint(staticPressureSPMax);
@@ -245,7 +245,7 @@ public class VavTRTuners
                                   .setEquipRef(equipRef)
                                   .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
                                   .addMarker("staticPressure").addMarker("sptrim").addMarker("writable").addMarker("his").addMarker("equipHis")
-                                  .setUnit("in")
+                                  .setUnit("inch wc")
                                   .setTz(tz)
                                   .build();
         String staticPressureSPTrimId = hayStack.addPoint(staticPressureSPTrim);
@@ -258,7 +258,7 @@ public class VavTRTuners
                                  .setEquipRef(equipRef)
                                  .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
                                  .addMarker("staticPressure").addMarker("spres").addMarker("writable").addMarker("his").addMarker("equipHis")
-                                 .setUnit("in")
+                                 .setUnit("inch wc")
                                  .setTz(tz)
                                  .build();
         String staticPressureSPResId = hayStack.addPoint(staticPressureSPRes);
@@ -271,7 +271,7 @@ public class VavTRTuners
                                     .setEquipRef(equipRef)
                                     .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
                                     .addMarker("staticPressure").addMarker("spresmax").addMarker("writable").addMarker("his").addMarker("equipHis")
-                                    .setUnit("in")
+                                    .setUnit("inch wc")
                                     .setTz(tz)
                                     .build();
         String staticPressureSPResMaxId = hayStack.addPoint(staticPressureSPResMax);

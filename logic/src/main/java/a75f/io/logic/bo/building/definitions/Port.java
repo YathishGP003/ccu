@@ -33,7 +33,7 @@ public enum Port
 			case SENSOR_SOUND:
 				return "sound";
 			case SENSOR_CO2_EQUIVALENT:
-				return "co2_equivalent";
+				return "co2Equivalent";
 			case SENSOR_ILLUMINANCE:
 				return "illuminance";
 			case SENSOR_UVI:

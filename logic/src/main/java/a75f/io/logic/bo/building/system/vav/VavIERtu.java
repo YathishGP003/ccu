@@ -277,7 +277,7 @@ public class VavIERtu extends VavSystemProfile
         StringBuilder status = new StringBuilder();
         status.append(VavSystemController.getInstance().getSystemState() == COOLING ? " Cooling DAT (F): " + getCmdSignal("cooling"):"");
         status.append(VavSystemController.getInstance().getSystemState() == HEATING ? " Heating DAT (F): " + getCmdSignal("heating"):"");
-        status.append(VavSystemController.getInstance().getSystemState() != OFF ? " | Static Pressure (in): " + (getCmdSignal("fan") / 10):"");
+        status.append(VavSystemController.getInstance().getSystemState() != OFF ? " | Static Pressure (inch wc): " + (getCmdSignal("fan") / 10):"");
         
         if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
             status.insert(0, "Free Cooling Used |");
@@ -323,7 +323,7 @@ public class VavIERtu extends VavSystemProfile
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
                                   .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his").addMarker("equipHis")
-                                  .setUnit("in").setTz(tz)
+                                  .setUnit("inch wc").setTz(tz)
                                   .build();
         CCUHsApi.getInstance().addPoint(fanSignal);
     }
@@ -409,7 +409,7 @@ public class VavIERtu extends VavSystemProfile
                                                    .setEquipRef(equipref)
                                                    .addMarker("system").addMarker("config").addMarker("analog2")
                                                    .addMarker("min").addMarker("staticPressure").addMarker("writable").addMarker("sp")
-                                                   .setUnit("in")
+                                                   .setUnit("inch wc")
                                                    .setTz(tz)
                                                    .build();
         String minStaticPressureId = hayStack.addPoint(minStaticPressure);
@@ -421,7 +421,7 @@ public class VavIERtu extends VavSystemProfile
                                                    .setEquipRef(equipref)
                                                    .addMarker("system").addMarker("config").addMarker("analog2")
                                                    .addMarker("max").addMarker("staticPressure").addMarker("writable").addMarker("sp")
-                                                   .setUnit("in")
+                                                   .setUnit("inch wc")
                                                    .setTz(tz)
                                                    .build();
         String maxStaticPressureId = hayStack.addPoint(maxStaticPressure);

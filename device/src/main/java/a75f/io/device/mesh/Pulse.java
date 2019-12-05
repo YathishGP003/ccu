@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -45,6 +46,7 @@ import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.device.alerts.AlertGenerateHandler.CM_DEAD;
+import static a75f.io.device.alerts.AlertGenerateHandler.DEVICE_DEAD;
 import static a75f.io.device.alerts.AlertGenerateHandler.DEVICE_LOW_SIGNAL;
 import static a75f.io.device.alerts.AlertGenerateHandler.DEVICE_REBOOT;
 import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
@@ -59,6 +61,9 @@ public class Pulse
 	private static ZoneDataInterface currentTempInterface = null;
 	private static int mTimeSinceCMDead = 0;
 	private static boolean mDataReceived = false;
+	private static HashMap mDeviceLowSignalCount = new HashMap();
+	private static HashMap mDeviceLowSignalAlert = new HashMap();
+	private static HashMap<Short, Long> mDeviceUpdate = new HashMap();
 
 	public static void setCMDeadTimerIncrement(boolean isReboot){
 		if(isReboot)mTimeSinceCMDead = 0;
@@ -75,10 +80,36 @@ public class Pulse
 	{
 		short nodeAddr = (short)smartNodeRegularUpdateMessage_t.update.smartNodeAddress.get();
 		int rssi = smartNodeRegularUpdateMessage_t.update.rssi.get();
+		if (!mDeviceLowSignalAlert.containsKey(nodeAddr)) {
+			mDeviceLowSignalAlert.put(nodeAddr,false);
+		}
 		CCUHsApi hayStack = CCUHsApi.getInstance();
 		HashMap device = hayStack.read("device and addr == \""+nodeAddr+"\"");
 		if (device != null && device.size() > 0)
 		{
+			Device deviceInfo = new Device.Builder().setHashMap(device).build();
+			//update last updated time
+			mDeviceUpdate.put(nodeAddr,Calendar.getInstance().getTimeInMillis());
+			if((rssi - 128) < 40) {
+				if (!mDeviceLowSignalCount.containsKey(nodeAddr)) {
+					mDeviceLowSignalCount.put(nodeAddr, 1);
+				}
+				int mLowSignalCount = (int)mDeviceLowSignalCount.get(nodeAddr);
+				if (mLowSignalCount < 100) {
+					mLowSignalCount++;
+					mDeviceLowSignalCount.put(nodeAddr, mLowSignalCount);
+				}
+				mLowSignalCount = (int)mDeviceLowSignalCount.get(nodeAddr);
+				if (!(boolean)mDeviceLowSignalAlert.get(nodeAddr) && mLowSignalCount >= 50) {
+					mDeviceLowSignalAlert.put(nodeAddr,true);
+					HashMap ccu = CCUHsApi.getInstance().read("ccu");
+					String ccuName = ccu.get("dis").toString();
+					AlertGenerateHandler.handleMessage(DEVICE_LOW_SIGNAL, "For"+" "+ccuName + " ," + deviceInfo.getDisplayName() + " is having an issues and has reported low signal for last 50 updates. If you continue to receive this alert, please contact 75F support.");
+				}
+			} else {
+				mDeviceLowSignalCount.remove(nodeAddr);
+				mDeviceLowSignalAlert.put(nodeAddr,false);
+			}
 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
 			boolean isSse = false;
 			String logicalCurTempPoint = "";
@@ -88,11 +119,6 @@ public class Pulse
 			for(HashMap phyPoint : phyPoints) {
 				if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
 					continue;
-				}
-				if((rssi - 128) < 40) {
-					//TODO need to iterate for 50 times or more , means 25 minutes atleast and then trigger alert
-					AlertGenerateHandler.handleMessage(DEVICE_LOW_SIGNAL, L.ccu().getCCUName() + " ," + nodeAddr + " is having an issues and has reported low signal for last 50 updates. If you continue to receive this alert, please contact 75F support.");
-
 				}
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
 				Point logPointInfo = new Point.Builder().setHashMap(logPoint).build();
@@ -490,15 +516,34 @@ public class Pulse
 		short nodeAddr = (short)smartStatRegularUpdateMessage_t.update.smartNodeAddress.get();
 		double occupancyDetected  = smartStatRegularUpdateMessage_t.update.occupancyDetected.get();
 		int rssi = smartStatRegularUpdateMessage_t.update.rssi.get();
+		if (!mDeviceLowSignalAlert.containsKey(nodeAddr)) {
+			mDeviceLowSignalAlert.put(nodeAddr,false);
+		}
 		CCUHsApi hayStack = CCUHsApi.getInstance();
 		HashMap device = hayStack.read("device and addr == \""+nodeAddr+"\"");
 		if (device != null && device.size() > 0)
 		{
 			Device deviceInfo = new Device.Builder().setHashMap(device).build();
+			mDeviceUpdate.put(nodeAddr,Calendar.getInstance().getTimeInMillis());
 			if((rssi - 128) < 40) {
-				//TODO need to iterate for 50 times or more , means 25 minutes atleast and then trigger alert
-				AlertGenerateHandler.handleMessage(DEVICE_LOW_SIGNAL, L.ccu().getCCUName() + " ," + deviceInfo.getDisplayName() + " is having an issues and has reported low signal for last 50 updates. If you continue to receive this alert, please contact 75F support.");
-
+				if (!mDeviceLowSignalCount.containsKey(nodeAddr)) {
+					mDeviceLowSignalCount.put(nodeAddr, 1);
+				}
+				int mLowSignalCount = (int)mDeviceLowSignalCount.get(nodeAddr);
+				if (mLowSignalCount < 100) {
+					mLowSignalCount++;
+					mDeviceLowSignalCount.put(nodeAddr, mLowSignalCount);
+				}
+				mLowSignalCount = (int)mDeviceLowSignalCount.get(nodeAddr);
+				if (!(boolean)mDeviceLowSignalAlert.get(nodeAddr) && mLowSignalCount >= 50){
+					mDeviceLowSignalAlert.put(nodeAddr,true);
+					HashMap ccu = CCUHsApi.getInstance().read("ccu");
+					String ccuName = ccu.get("dis").toString();
+					AlertGenerateHandler.handleMessage(DEVICE_LOW_SIGNAL, "For"+" "+ccuName + " ," + deviceInfo.getDisplayName() + " is having an issues and has reported low signal for last 50 updates. If you continue to receive this alert, please contact 75F support.");
+				}
+			} else {
+				mDeviceLowSignalCount.remove(nodeAddr);
+				mDeviceLowSignalAlert.put(nodeAddr,false);
 			}
 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + deviceInfo.getId() + "\"");
 			boolean is2pfcu = deviceInfo.getMarkers().contains("pipe2");
@@ -906,5 +951,27 @@ public class Pulse
 		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_CM_RESET);
 		msg.reset.set((short)1);
 		MeshUtil.sendStructToCM(msg);
+	}
+
+	public static void checkForDeviceDead(){
+		if (mDeviceUpdate == null){
+			return;
+		}
+		for (Short address: mDeviceUpdate.keySet()){
+             long lastUpdateTime = mDeviceUpdate.get(address);
+             long currentTime = Calendar.getInstance().getTimeInMillis();
+             //trigger device dead alert if no signal update over 15min
+             if ((currentTime - lastUpdateTime) == 900000){
+				 HashMap ccu = CCUHsApi.getInstance().read("ccu");
+				 String ccuName = ccu.get("dis").toString();
+
+				 CCUHsApi hayStack = CCUHsApi.getInstance();
+				 HashMap device = hayStack.read("device and addr == \""+address+"\"");
+				 if (device != null && device.size() > 0) {
+					 Device deviceInfo = new Device.Builder().setHashMap(device).build();
+					 AlertGenerateHandler.handleMessage(DEVICE_DEAD, "For"+" "+ccuName + "," +deviceInfo.getDisplayName() +" has stopped reporting data. Please contact 75F support.");
+				 }
+			 }
+		}
 	}
 }

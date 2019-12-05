@@ -19,7 +19,7 @@ public class AlertGenerateHandler {
     public static final String FIRMWARE_OTA_UPDATE_ENDED = "FIRMWARE OTA UPDATE ENDED";
     public static final String CM_DEAD = "CM DEAD";
     public static final String DEVICE_DEAD = "DEVICE DEAD";
-    public static final String DEVICE_LOW_SIGNAL = "DEVICE NO SIGNAL";
+    public static final String DEVICE_LOW_SIGNAL = "DEVICE LOW SIGNAL";
 
     public static void handleMessage(String cmd, String msg) {
             switch (cmd) {

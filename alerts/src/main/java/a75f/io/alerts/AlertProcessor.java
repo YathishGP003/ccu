@@ -132,7 +132,7 @@ public class AlertProcessor
                 StrictMode.setThreadPolicy(policy);
             }
             String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
-            String alertDef = HttpUtil.sendRequest(mContext, "readPredefined ", new JSONObject().put("siteRef", siteGUID.replace("@","")).toString());
+            String alertDef = HttpUtil.sendRequest(mContext, "readPredefined", new JSONObject().put("siteRef", siteGUID.replace("@","")).toString());
             CcuLog.d("CCU_ALERTS", " alertDef " + alertDef);
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

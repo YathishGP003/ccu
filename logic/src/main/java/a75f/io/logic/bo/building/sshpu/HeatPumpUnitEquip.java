@@ -522,7 +522,7 @@ public class HeatPumpUnitEquip{
                 .setEquipRef(equipref)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone")
+                .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone").addMarker("hpu")
                 .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
                 .setTz(tz)
                 .build();
@@ -534,7 +534,7 @@ public class HeatPumpUnitEquip{
                 .setEquipRef(equipref)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker("temp").addMarker("operating").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone")
+                .addMarker("standalone").addMarker("temp").addMarker("operating").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone").addMarker("hpu")
                 .setEnums("off,cooling,heating,tempdead")
                 .setTz(tz)
                 .build();

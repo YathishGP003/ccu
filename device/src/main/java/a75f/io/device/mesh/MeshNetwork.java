@@ -172,7 +172,8 @@ public class MeshNetwork extends DeviceNetwork
             CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendSystemControl : Abort , No system profile");
             return;
         }
-        
+        Pulse.checkForDeviceDead();
+
         if (ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU)
         {
             DaikinIE.sendControl();

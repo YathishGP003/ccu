@@ -1,8 +1,3 @@
- - Merge branch 'mahesh_renuts' into 'master'
- - RENATUS-783, fetch alert at fixed schedule rate
- - fetch alerts when after finish registration
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-836, Device Dead, Device low signal alert creation
- - #RENATUS-835, Sensor type points not have units
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-835, Sensor type points not have units
+ - #RENATUS-838, Change of pressure units to inch wc
+ - #RENATUS-839, Occupancy sensor value is not displayed

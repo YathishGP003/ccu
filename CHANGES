@@ -1,3 +1,5 @@
+ - Merge branch 'mahesh_renuts' into 'master'
+ - fixes
+ - RENATUS-836, add device dead and device signal low alert
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-838, Change of pressure units to inch wc
- - #RENATUS-839, Occupancy sensor value is not displayed
+ - #RENATUS-841, CPU, HPU profile type tags miss for operating mode

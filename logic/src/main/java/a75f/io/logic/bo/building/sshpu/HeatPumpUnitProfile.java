@@ -541,7 +541,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 //Turn off stage1
                 setCmdSignal("compressor and stage1",0,addr);
                 switch (hpChangeOverType){
-                    case ENERGIZE_IN_COOLING:
+                    case ENERGIZE_IN_HEATING:
                         if(getCmdSignal("changeover and stage1",addr) > 0)
                             setCmdSignal("changeover and stage1",0,addr);
                         break;
@@ -806,7 +806,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 setCmdSignal("compressor and stage1",0,addr);
                 setCmdSignal("compressor and stage2",0,addr);
                 switch (hpChangeOverType){
-                    case ENERGIZE_IN_HEATING:
+                    case ENERGIZE_IN_COOLING:
                         if(getCmdSignal("heatpump and changeover and stage1",addr) > 0)
                             setCmdSignal("heatpump and changeover and stage1",0,addr);
                         break;

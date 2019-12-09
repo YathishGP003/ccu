@@ -79,6 +79,7 @@ public class FloorPlanFragment extends Fragment
 {
 	public static final String ACTION_BLE_PAIRING_COMPLETED =
 			"a75f.io.renatus.BLE_PAIRING_COMPLETED";
+	public static Zone selectedZone;
 	public DataArrayAdapter<Floor> mFloorListAdapter;
 	public DataArrayAdapter<Zone>  mRoomListAdapter;
 	public DataArrayAdapter<String>                      mModuleListAdapter;
@@ -179,10 +180,11 @@ public class FloorPlanFragment extends Fragment
 	
 	private Zone getSelectedZone()
 	{
-		return roomList.get(mRoomListAdapter.getSelectedPostion());
+		selectedZone = roomList.get(mRoomListAdapter.getSelectedPostion());
+		return selectedZone;
 	}
-	
-	
+
+
 	private Floor getSelectedFloor()
 	{
 		return floorList.get(mFloorListAdapter.getSelectedPostion());

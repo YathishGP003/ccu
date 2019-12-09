@@ -10,7 +10,12 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.util.ArrayList;
+
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -155,6 +160,21 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         }
         else if (mProfileType == ProfileType.DAB)
         {
+            if (L.ccu().systemProfile.getProfileType() == ProfileType.VAV_REHEAT || L.ccu().systemProfile.getProfileType() == ProfileType.VAV_SERIES_FAN || L.ccu().systemProfile.getProfileType() == ProfileType.VAV_PARALLEL_FAN
+                    ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_ANALOG_RTU ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU
+                    ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU){
+                Toast.makeText(getActivity(),"Set System Profile to DAB and try",Toast.LENGTH_LONG).show();
+                dismiss();
+                return;
+            }
+            ArrayList<Equip> zoneEquips  = HSUtil.getEquips(mRoomName);
+            for (Equip equip: zoneEquips) {
+                if (equip.getProfile().contains("VAV")) {
+                    Toast.makeText(getActivity(), "Unpair all VAV Zones and try", Toast.LENGTH_LONG).show();
+                    dismiss();
+                    return;
+                }
+            }
             if (L.isSimulation())
             {
                 showDialogFragment(FragmentDABConfiguration
@@ -169,6 +189,20 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         }
         else if (mProfileType == ProfileType.VAV_REHEAT || mProfileType == ProfileType.VAV_SERIES_FAN || mProfileType == ProfileType.VAV_PARALLEL_FAN)
         {
+            if(L.ccu().systemProfile.getProfileType() == ProfileType.DAB || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_ANALOG_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU
+                    ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU){
+                Toast.makeText(getActivity(),"Set System Profile to VAV and try",Toast.LENGTH_LONG).show();
+                dismiss();
+                return;
+            }
+            ArrayList<Equip> zoneEquips  = HSUtil.getEquips(mRoomName);
+           for (Equip equip: zoneEquips){
+             if(equip.getProfile().contains("DAB")) {
+                   Toast.makeText(getActivity(),"Unpair all DAB Zones and try",Toast.LENGTH_LONG).show();
+                   dismiss();
+                   return;
+               }
+           }
             if (L.isSimulation())
             {
                 showDialogFragment(FragmentVAVConfiguration

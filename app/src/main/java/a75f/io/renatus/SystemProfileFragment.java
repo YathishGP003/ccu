@@ -11,7 +11,12 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.util.ArrayList;
+
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.logic.L;
 import a75f.io.renatus.registartion.FreshRegistration;
 import butterknife.BindView;
@@ -79,39 +84,87 @@ public class SystemProfileFragment extends Fragment {
                         getActivity().getSupportFragmentManager().beginTransaction()
                                 .replace(R.id.profileContainer, new DefaultSystemProfile()).commit();
                         break;
-
                     case 1:
-                        getActivity().getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.profileContainer, new VavStagedRtuProfile()).commit();
+                        if (canAddVAVProfile()) {
+                            getActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.profileContainer, new VavStagedRtuProfile()).commit();
+                        } else {
+                            Toast.makeText(getActivity(),"Unpair all DAB Zones and try",Toast.LENGTH_LONG).show();
+                            spSystemProfile.setSelection(L.ccu().systemProfile != null ?
+                                    systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
+                        }
                         break;
 
                     case 2:
-                        getActivity().getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.profileContainer, new VavAnalogRtuProfile()).commit();
+                        if (canAddVAVProfile()) {
+                            getActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.profileContainer, new VavAnalogRtuProfile()).commit();
+                        } else {
+                            Toast.makeText(getActivity(),"Unpair all DAB Zones and try",Toast.LENGTH_LONG).show();
+                            spSystemProfile.setSelection(L.ccu().systemProfile != null ?
+                                    systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
+                        }
                         break;
                     case 3:
-                        getActivity().getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.profileContainer, new VavStagedRtuWithVfdProfile()).commit();
+                        if (canAddVAVProfile()) {
+                            getActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.profileContainer, new VavStagedRtuWithVfdProfile()).commit();
+                        } else {
+                            Toast.makeText(getActivity(),"Unpair all DAB Zones and try",Toast.LENGTH_LONG).show();
+                            spSystemProfile.setSelection(L.ccu().systemProfile != null ?
+                                    systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
+                        }
                         break;
                     case 4:
-                        getActivity().getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.profileContainer, new VavHybridRtuProfile()).commit();
+                        if (canAddVAVProfile()) {
+                            getActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.profileContainer, new VavHybridRtuProfile()).commit();
+                        } else {
+                            Toast.makeText(getActivity(),"Unpair all DAB Zones and try",Toast.LENGTH_LONG).show();
+                            spSystemProfile.setSelection(L.ccu().systemProfile != null ?
+                                    systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
+                        }
                         break;
                     case 5:
-                        getActivity().getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.profileContainer, new DABStagedProfile()).commit();
+                        if (canAddDABProfile()) {
+                            getActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.profileContainer, new DABStagedProfile()).commit();
+                        }else {
+                            Toast.makeText(getActivity(),"Unpair all VAV " +
+                                    " and try",Toast.LENGTH_LONG).show();
+                            spSystemProfile.setSelection(L.ccu().systemProfile != null ?
+                                    systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
+                        }
                         break;
                     case 6:
-                        getActivity().getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.profileContainer, new DABFullyAHUProfile()).commit();
+                        if (canAddDABProfile()) {
+                            getActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.profileContainer, new DABFullyAHUProfile()).commit();
+                        }else {
+                            Toast.makeText(getActivity(),"Unpair all VAV Zones and try",Toast.LENGTH_LONG).show();
+                            spSystemProfile.setSelection(L.ccu().systemProfile != null ?
+                                    systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
+                        }
                         break;
                     case 7:
-                        getActivity().getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.profileContainer, new DABStagedRtuWithVfdProfile()).commit();
+                        if (canAddDABProfile()) {
+                            getActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.profileContainer, new DABStagedRtuWithVfdProfile()).commit();
+                        }else {
+                            Toast.makeText(getActivity(),"Unpair all VAV Zones and try",Toast.LENGTH_LONG).show();
+                            spSystemProfile.setSelection(L.ccu().systemProfile != null ?
+                                    systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
+                        }
                         break;
                     case 8:
-                        getActivity().getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.profileContainer, new DABHybridAhuProfile()).commit();
+                        if (canAddDABProfile()) {
+                            getActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.profileContainer, new DABHybridAhuProfile()).commit();
+                        }else {
+                            Toast.makeText(getActivity(),"Unpair all VAV Zones and try",Toast.LENGTH_LONG).show();
+                            spSystemProfile.setSelection(L.ccu().systemProfile != null ?
+                                    systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
+                        }
                         break;
                     case 9:
                         getActivity().getSupportFragmentManager().beginTransaction()
@@ -153,5 +206,34 @@ public class SystemProfileFragment extends Fragment {
         });
         spSystemProfile.setSelection(L.ccu().systemProfile != null ?
                 systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
+    }
+
+    private boolean canAddVAVProfile() {
+        if (FloorPlanFragment.selectedZone == null){
+            return true;
+        }
+        ArrayList<Equip> zoneEquips  = HSUtil.getEquips(FloorPlanFragment.selectedZone.getId());
+        if (zoneEquips.size() ==0 ){
+            return true;
+        }
+
+        for(Equip eq: zoneEquips){
+            return !eq.getProfile().contains("DAB");
+        }
+        return false;
+    }
+
+    private boolean canAddDABProfile() {
+        if (FloorPlanFragment.selectedZone == null){
+            return true;
+        }
+        ArrayList<Equip> zoneEquips  = HSUtil.getEquips(FloorPlanFragment.selectedZone.getId());
+        if (zoneEquips.size() ==0 ){
+            return true;
+        }
+        for(Equip eq: zoneEquips){
+            return !eq.getProfile().contains("VAV");
+        }
+        return false;
     }
 }

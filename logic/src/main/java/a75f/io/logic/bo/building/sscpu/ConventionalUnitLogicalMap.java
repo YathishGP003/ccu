@@ -698,7 +698,7 @@ public class ConventionalUnitLogicalMap {
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
                 .addMarker("relay6").addMarker("type").addMarker("sp").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
-                .setEnums("false,true")
+                .setEnums("na,fanhigh,humidifier,dehumidifier")
                 .setTz(tz)
                 .build();
         String relay6TypeId = CCUHsApi.getInstance().addPoint(relay6Type);

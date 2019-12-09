@@ -46,7 +46,22 @@ public class TunerUtil
         }
         return 0;
     }
-    
+    public static double readBuildingTunerValByQuery(String query) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap tunerPoint = hayStack.read("point and tuner and "+query+" and siteRef == \""+hayStack.getSiteId()+"\"");
+        if(tunerPoint != null && (tunerPoint.get("id" )!= null)) {
+            ArrayList values = hayStack.readPoint(tunerPoint.get("id").toString());
+            if (values != null && values.size() > 0) {
+                for (int l = 1; l <= values.size(); l++) {
+                    HashMap valMap = ((HashMap) values.get(l - 1));
+                    if (valMap.get("val") != null) {
+                        return Double.parseDouble(valMap.get("val").toString());
+                    }
+                }
+            }
+        }
+        return 0;
+    }
     public static String readTunerStrByQuery(String query) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap tunerPoint = hayStack.read("point and tuner and "+query);

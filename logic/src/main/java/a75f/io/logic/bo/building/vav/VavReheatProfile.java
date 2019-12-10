@@ -113,6 +113,7 @@ public class VavReheatProfile extends VavProfile
             //If supply air temperature from air handler is greater than room temperature, Cooling shall be
             //locked out.
             SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
+            SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("rtu and mode")];
             if (roomTemp > setTempCooling)
             {
                 //Zone is in Cooling
@@ -140,7 +141,7 @@ public class VavReheatProfile extends VavProfile
                     coolingLoop.setDisabled();
                 }
                 int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
-                if (conditioning == SystemController.State.COOLING)
+                if (conditioning == SystemController.State.COOLING && systemMode != SystemMode.COOLONLY)
                 {
                     if (heatingLoopOp <= 50)
                     {
@@ -193,8 +194,7 @@ public class VavReheatProfile extends VavProfile
                     coolingLoop.setDisabled();
                 }
             }
-    
-            SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("rtu and mode")];
+            
             if (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.OFF|| valveController.getControlVariable() == 0)
             {
                 valve.currentPosition = 0;

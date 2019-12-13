@@ -141,7 +141,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
             Log.d("FANMODE","CPU profile - fanmodesaved="+fanModeSaved+","+fanSpeed.name()+","+occupied);
             if(!occupied &&(fanSpeed != OFF ) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_LOW_ALL_TIMES) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES)&& (fanSpeed != StandaloneLogicalFanSpeeds.FAN_HIGH2_ALL_TIMES)){
                 //Reset to auto during unoccupied hours, if it is not all times set
-                if(fanSpeed != StandaloneLogicalFanSpeeds.AUTO) {
+                if((fanSpeed != StandaloneLogicalFanSpeeds.AUTO) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_LOW_ALL_TIMES) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES)) {
                     StandaloneScheduler.updateOperationalPoints(cpuEquip.getId(), "fan and operation and mode", StandaloneLogicalFanSpeeds.AUTO.ordinal());
                     fanSpeed = StandaloneLogicalFanSpeeds.AUTO;
                 }

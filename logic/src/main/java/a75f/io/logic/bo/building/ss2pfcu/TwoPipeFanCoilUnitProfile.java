@@ -131,7 +131,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             //For dual temp but for single mode we use tuners
 
             if (!occupied && (fanSpeed != StandaloneLogicalFanSpeeds.OFF)) {
-                if (fanSpeed != StandaloneLogicalFanSpeeds.AUTO) {
+                if ((fanSpeed != StandaloneLogicalFanSpeeds.AUTO) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_LOW_ALL_TIMES) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_HIGH2_ALL_TIMES)) {
                     StandaloneScheduler.updateOperationalPoints(twoPfcuEquip.getId(), "fan and operation and mode", StandaloneLogicalFanSpeeds.AUTO.ordinal());
                     fanSpeed = StandaloneLogicalFanSpeeds.AUTO;
                 }

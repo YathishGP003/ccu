@@ -126,7 +126,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             StandaloneLogicalFanSpeeds fanSpeed = StandaloneLogicalFanSpeeds.values()[(int) ssFanOpMode];
             int fanModeSaved = Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).getInt(hpuEquip.getId(),0);
             if (!occupied && (fanSpeed != StandaloneLogicalFanSpeeds.OFF)) {
-                if (fanSpeed != StandaloneLogicalFanSpeeds.AUTO) {
+                if ((fanSpeed != StandaloneLogicalFanSpeeds.AUTO) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_LOW_ALL_TIMES) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES)) {
                     StandaloneScheduler.updateOperationalPoints(hpuEquip.getId(), "fan and operation and mode", StandaloneLogicalFanSpeeds.AUTO.ordinal());
                     fanSpeed = StandaloneLogicalFanSpeeds.AUTO;
                 }

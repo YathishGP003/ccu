@@ -380,7 +380,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                             .setDisplayName(equipDis+"-"+"coolingSignal")
                             .setSiteRef(siteRef)
                             .setEquipRef(equipref)
-                            .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("his").addMarker("equipHis").setUnit("%")
+                            .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("analog1").addMarker("his").addMarker("equipHis").setUnit("%")
                             .setTz(tz)
                             .build();
         CCUHsApi.getInstance().addPoint(coolingSignal);
@@ -389,7 +389,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                       .setDisplayName(equipDis+"-"+"heatingSignal")
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
-                                      .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("his").addMarker("equipHis")
+                                      .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("analog3").addMarker("his").addMarker("equipHis")
                                       .setUnit("%").setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(heatingSignal);
@@ -398,7 +398,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                       .setDisplayName(equipDis+"-"+"fanSignal")
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
-                                      .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his").addMarker("equipHis")
+                                      .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("analog2").addMarker("his").addMarker("equipHis")
                                       .setUnit("%").setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(fanSignal);
@@ -407,7 +407,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                   .setDisplayName(equipDis+"-"+"co2Signal")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
-                                  .addMarker("system").addMarker("cmd").addMarker("co2").addMarker("his").addMarker("equipHis")
+                                  .addMarker("system").addMarker("cmd").addMarker("co2").addMarker("analog4").addMarker("his").addMarker("equipHis")
                                   .setUnit("%").setTz(tz)
                                   .build();
         CCUHsApi.getInstance().addPoint(co2Signal);

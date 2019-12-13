@@ -323,7 +323,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                       .setDisplayName(equipDis+"-"+"coolingSignal")
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
-                                      .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("his").addMarker("equipHis")
+                                      .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("analog1").addMarker("his").addMarker("equipHis")
                                       .setUnit("%").setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(coolingSignal);
@@ -332,7 +332,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                       .setDisplayName(equipDis+"-"+"heatingSignal")
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
-                                      .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("his").addMarker("equipHis")
+                                      .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("analog3").addMarker("his").addMarker("equipHis")
                                       .setUnit("%").setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(heatingSignal);
@@ -341,7 +341,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                   .setDisplayName(equipDis+"-"+"fanSignal")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
-                                  .setUnit("%").addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his").addMarker("equipHis")
+                                  .setUnit("%").addMarker("system").addMarker("cmd").addMarker("fan").addMarker("analog2").addMarker("his").addMarker("equipHis")
                                   .setTz(tz)
                                   .build();
         CCUHsApi.getInstance().addPoint(fanSignal);

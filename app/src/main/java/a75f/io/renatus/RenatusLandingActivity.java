@@ -10,8 +10,10 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
 import android.text.InputType;
 import android.text.SpannableString;
+import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -354,6 +356,27 @@ public class RenatusLandingActivity extends AppCompatActivity {
         AlertDialog dialog = builder.create();
         dialog.setOnShowListener(dialogInterface -> {
             Button posButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            posButton.setEnabled(false);
+            etPassword.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int count) {
+                    if (count>0){
+                        posButton.setEnabled(true);
+                    } else {
+                        posButton.setEnabled(false);
+                    }
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+
+                }
+            });
             posButton.setTextColor(getResources().getColor(R.color.black));
             posButton.setOnClickListener(view -> {
                 if (etPassword.getText().toString().equals(password)) {
@@ -365,6 +388,7 @@ public class RenatusLandingActivity extends AppCompatActivity {
                     Toast.makeText(RenatusLandingActivity.this, "Incorrect Password!", Toast.LENGTH_LONG).show();
                     passwordAttempt[0]++;
                     prefs.setInt("PASSWORD_ATTEMPT",passwordAttempt[0]);
+                    etPassword.setText("");
                 }
             });
 

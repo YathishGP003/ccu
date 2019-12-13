@@ -520,30 +520,30 @@ public class ConventionalUnitProfile extends ZoneProfile {
                 if((curValue > 0) && occupied) {
                     if (curValue < targetThreshold) {
                         relayStages.put("Humidifier", 1);
-                        setCmdSignal("fan and stage2", 1.0, addr);
-                    } else if (getCmdSignal("fan and stage2", addr) > 0) {
+                        setCmdSignal("humidifier", 1.0, addr);
+                    } else if (getCmdSignal("humidifier", addr) > 0) {
                         if (curValue > (targetThreshold + 5.0))
-                            setCmdSignal("fan and stage2", 0, addr);
+                            setCmdSignal("humidifier", 0, addr);
                         else
                             relayStages.put("Humdifier", 1);
                     }
                 }else
-                    setCmdSignal("fan and stage2", 0, addr);
+                    setCmdSignal("humidifier", 0, addr);
 
                 break;
             case DE_HUMIDIFIER:
                 if((curValue > 0) && occupied) {
                     if (curValue > targetThreshold) {
-                        setCmdSignal("fan and stage2", 1.0, addr);
+                        setCmdSignal("dehumidifier", 1.0, addr);
                         relayStages.put("Dehumidifier", 1);
-                    } else if (getCmdSignal("fan and stage2", addr) > 0) {
+                    } else if (getCmdSignal("dehumidifier", addr) > 0) {
                         if (curValue < (targetThreshold - 5.0))
-                            setCmdSignal("fan and stage2", 0, addr);
+                            setCmdSignal("dehumidifier", 0, addr);
                         else
                             relayStages.put("Dehumidifier", 1);
                     }
                 }else
-                    setCmdSignal("fan and stage2", 0, addr);
+                    setCmdSignal("dehumidifier", 0, addr);
                 break;
         }
     }

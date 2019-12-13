@@ -380,8 +380,10 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 setCmdSignal("compressor and stage2", 0, node);
             if (getCmdSignal("aux and heating ", node) > 0)
                 setCmdSignal("aux and heating ", 0, node);
-            if (getCmdSignal("changeover and stage1", node) > 0)
-                setCmdSignal("changeover and stage1", 0, node);
+            if (getCmdSignal("changeover and cooling and stage1", node) > 0)
+                setCmdSignal("changeover and cooling and stage1", 0, node);
+            if (getCmdSignal("changeover and heating and stage1", node) > 0)
+                setCmdSignal("changeover and heating and stage1", 0, node);
             if (getCmdSignal("fan and stage1", node) > 0)
                 setCmdSignal("fan and stage1", 0, node);
             if((fanStage2Type == SmartStatFanRelayType.FAN_STAGE2.ordinal()) || (temperatureState == ZoneTempState.FAN_OP_MODE_OFF)) {
@@ -394,7 +396,8 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 setCmdSignal("compressor and stage1", 0, node);
                 setCmdSignal("compressor and stage2", 0, node);
                 setCmdSignal("aux and heating ", 0, node);
-                setCmdSignal("changeover and stage1", 0, node);
+                setCmdSignal("changeover and cooling and stage1", 0, node);
+                setCmdSignal("changeover and heating and stage1", 0, node);
             }
         }
          HashMap<String,Integer> relayStages = new HashMap<String, Integer>();
@@ -462,10 +465,10 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             switch (hpChangeOverType){
                 case ENERGIZE_IN_COOLING:
                     relayStages.put("CoolingStage1",1);
-                    setCmdSignal("changeover and stage1",1.0,addr);
+                    setCmdSignal("changeover and cooling and stage1",1.0,addr);
                     break;
                     default:
-                        setCmdSignal("changeover and stage1",0,addr);
+                        setCmdSignal("changeover and cooling and stage1",0,addr);
                         break;
             }
 
@@ -542,11 +545,11 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 setCmdSignal("compressor and stage1",0,addr);
                 switch (hpChangeOverType){
                     case ENERGIZE_IN_HEATING:
-                        if(getCmdSignal("changeover and stage1",addr) > 0)
-                            setCmdSignal("changeover and stage1",0,addr);
+                        if(getCmdSignal("changeover and heating and stage1",addr) > 0)
+                            setCmdSignal("changeover and heating and stage1",0,addr);
                         break;
                         default:
-                            setCmdSignal("changeover and stage1",0,addr);
+                            setCmdSignal("changeover and heating and stage1",0,addr);
                             break;
                 }
                 if(occupied){
@@ -599,7 +602,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     }
                 }
             }else{
-                if((getCmdSignal("compressor and stage1", addr) > 0) || ((hpChangeOverType == SmartStatHeatPumpChangeOverType.ENERGIZE_IN_COOLING) && (getCmdSignal("changeover and stage1",addr) > 0)))
+                if((getCmdSignal("compressor and stage1", addr) > 0) || ((hpChangeOverType == SmartStatHeatPumpChangeOverType.ENERGIZE_IN_COOLING) && (getCmdSignal("changeover and cooling and stage1",addr) > 0)))
                     relayStages.put("CoolingStage1",1);
                 if(getCmdSignal("fan and stage1", addr) > 0)relayStages.put("FanStage1",1);
             }
@@ -611,29 +614,29 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 if(curHumidity > 0 && occupied) {
                     if (curHumidity < humidifierTargetThreshold) {
                         relayStages.put("Humidifier", 1);
-                        setCmdSignal("fan and stage2", 1.0, addr);
-                    } else if (getCmdSignal("fan and stage2", addr) > 0) {
+                        setCmdSignal("humidifier", 1.0, addr);
+                    } else if (getCmdSignal("humidifier", addr) > 0) {
                         if (hpuEquip.getHumidity() > (humidifierTargetThreshold + 5.0))
-                            setCmdSignal("fan and stage2", 0, addr);
+                            setCmdSignal("humidifier", 0, addr);
                         else
                             relayStages.put("Humdifier", 1);
                     }
                 }else
-                    setCmdSignal("fan and stage2", 0, addr);
+                    setCmdSignal("humidifier", 0, addr);
                 break;
             case DE_HUMIDIFIER:
                 if(curHumidity > 0 && occupied) {
                     if (curHumidity > humidifierTargetThreshold) {
-                        setCmdSignal("fan and stage2", 1.0, addr);
+                        setCmdSignal("dehumidifier", 1.0, addr);
                         relayStages.put("Dehumidifier", 1);
-                    } else if (getCmdSignal("fan and stage2", addr) > 0) {
+                    } else if (getCmdSignal("dehumidifier", addr) > 0) {
                         if (curHumidity < (humidifierTargetThreshold - 5.0))
-                            setCmdSignal("fan and stage2", 0, addr);
+                            setCmdSignal("dehumidifier", 0, addr);
                         else
                             relayStages.put("Dehumidifier", 1);
                     }
                 }else
-                    setCmdSignal("fan and stage2", 0, addr);
+                    setCmdSignal("dehumidifier", 0, addr);
                 break;
         }
 
@@ -706,10 +709,10 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             switch (hpChangeOverType){
                 case ENERGIZE_IN_HEATING:
                     relayStages.put("HeatingStage1",1);
-                    setCmdSignal("heatpump and changeover and stage1",1.0,addr);
+                    setCmdSignal("heatpump and changeover and heating and stage1",1.0,addr);
                     break;
                 default:
-                    setCmdSignal("heatpump and changeover and stage1",0,addr);
+                    setCmdSignal("heatpump and changeover and heating and stage1",0,addr);
                     break;
             }
             if(curTemp <= (setTempHeating - heatingDeadband)){
@@ -807,8 +810,8 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 setCmdSignal("compressor and stage2",0,addr);
                 switch (hpChangeOverType){
                     case ENERGIZE_IN_COOLING:
-                        if(getCmdSignal("heatpump and changeover and stage1",addr) > 0)
-                            setCmdSignal("heatpump and changeover and stage1",0,addr);
+                        if(getCmdSignal("heatpump and changeover and cooling and stage1",addr) > 0)
+                            setCmdSignal("heatpump and changeover and cooling and stage1",0,addr);
                         break;
                 }
                 if(occupied){
@@ -867,7 +870,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                          relayStages.put("HeatingStage2", 1);
                          relayStages.put("HeatingStage1", 1);
                 }
-                if((getCmdSignal("compressor and stage1", addr) > 0) || (getCmdSignal("changeover and stage1",addr) > 0))
+                if((getCmdSignal("compressor and stage1", addr) > 0) || (getCmdSignal("changeover and heating and stage1",addr) > 0))
                     relayStages.put("HeatingStage1",1);
                 if(getCmdSignal("fan and stage1", addr) > 0)relayStages.put("FanStage1",1);
             }
@@ -879,30 +882,30 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 if(curHumidity > 0 && occupied) {
                     if (curHumidity < humidifierTargetThreshold) {
                         relayStages.put("Humidifier", 1);
-                        setCmdSignal("fan and stage2", 1.0, addr);
+                        setCmdSignal("humidifier", 1.0, addr);
                     } else if (getCmdSignal("fan and stage2", addr) > 0) {
                         if (curHumidity > (humidifierTargetThreshold + 5.0))
-                            setCmdSignal("fan and stage2", 0, addr);
+                            setCmdSignal("humidifier", 0, addr);
                         else
                             relayStages.put("Humidifier", 1);
                     }
                 }else {
-                    setCmdSignal("fan and stage2", 0, addr);
+                    setCmdSignal("humidifier", 0, addr);
                 }
                 break;
             case DE_HUMIDIFIER:
                 if((curHumidity > 0) && occupied) {
                     if (curHumidity > humidifierTargetThreshold) {
                         relayStages.put("Dehumidifier", 1);
-                        setCmdSignal("fan and stage2", 1.0, addr);
+                        setCmdSignal("dehumidifier", 1.0, addr);
                     } else if (getCmdSignal("fan and stage2", addr) > 0) {
                         if (curHumidity < (humidifierTargetThreshold - 5.0))
-                            setCmdSignal("fan and stage2", 0, addr);
+                            setCmdSignal("dehumidifier", 0, addr);
                         else
                             relayStages.put("Dehumidifier", 1);
                     }
                 }else {
-                    setCmdSignal("fan and stage2",0,addr);
+                    setCmdSignal("dehumidifier",0,addr);
                 }
                 break;
         }
@@ -924,30 +927,30 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 if((curValue > 0) && occupied) {
                     if (curValue < targetThreshold) {
                         relayStages.put("Humidifier", 1);
-                        setCmdSignal("fan and stage2", 1.0, addr);
-                    } else if (getCmdSignal("fan and stage2", addr) > 0) {
+                        setCmdSignal("humidifier", 1.0, addr);
+                    } else if (getCmdSignal("humidifier", addr) > 0) {
                         if (curValue > (targetThreshold + 5.0))
-                            setCmdSignal("fan and stage2", 0, addr);
+                            setCmdSignal("humidifier", 0, addr);
                         else
                             relayStages.put("Humdifier", 1);
                     }
                 }else
-                    setCmdSignal("fan and stage2", 0, addr);
+                    setCmdSignal("humidifier", 0, addr);
                 break;
             case DE_HUMIDIFIER:
                 double targetDehumidityThreshold = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and dehumidifier and equipRef == \"" + equipId + "\"");
                 if((curValue > 0) && occupied) {
                     if (curValue > targetDehumidityThreshold) {
-                        setCmdSignal("fan and stage2", 1.0, addr);
+                        setCmdSignal("dehumidifier", 1.0, addr);
                         relayStages.put("Dehumidifier", 1);
-                    } else if (getCmdSignal("fan and stage2", addr) > 0) {
+                    } else if (getCmdSignal("dehumidifier", addr) > 0) {
                         if (curValue < (targetDehumidityThreshold - 5.0))
-                            setCmdSignal("fan and stage2", 0, addr);
+                            setCmdSignal("dehumidifier", 0, addr);
                         else
                             relayStages.put("Dehumidifier", 1);
                     }
                 }else
-                    setCmdSignal("fan and stage2", 0, addr);
+                    setCmdSignal("dehumidifier", 0, addr);
                 break;
         }
     }

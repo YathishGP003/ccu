@@ -1,5 +1,6 @@
 package a75f.io.logic.jobs;
 
+import android.os.StrictMode;
 import android.util.Log;
 
 import org.joda.time.DateTime;
@@ -22,6 +23,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BaseJob;
+import a75f.io.logic.BuildConfig;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -1502,5 +1504,16 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     public static void setScheduleDataInterface(ZoneDataInterface in) { scheduleDataInterface = in; }
     public static void setZoneDataInterface(ZoneDataInterface in){
         zoneDataInterface = in;
+    }
+
+    public static void clearTempOverrides(String coolDTid, String heatDTid) {
+        if (BuildConfig.DEBUG)
+        {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+        }
+        CCUHsApi.getInstance().pointWrite(HRef.copy(coolDTid), 4, "manual", HNum.make(0), HNum.make(1, "ms"));
+        CCUHsApi.getInstance().pointWrite(HRef.copy(heatDTid), 4, "manual", HNum.make(0), HNum.make(1, "ms"));
+        systemOccupancy = UNOCCUPIED;
     }
 }

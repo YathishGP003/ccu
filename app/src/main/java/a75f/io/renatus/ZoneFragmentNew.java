@@ -62,6 +62,7 @@ import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.LOutput;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
@@ -724,6 +725,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     CCUHsApi.getInstance().scheduleSync();
                 } else if (position == 1 && (mScheduleType != -1))
                 {
+                    clearTempOverride(equipId[0]);
                     if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled"))
                     {
                         mSchedule.setDisabled(false);
@@ -1084,6 +1086,20 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             }
         });
         //return view;
+    }
+
+    private void clearTempOverride(String equipId) {
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED || ScheduleProcessJob.getSystemOccupancy() == Occupancy.FORCEDOCCUPIED) {
+                    HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \"" + equipId + "\"");
+                    HashMap heatDT = CCUHsApi.getInstance().read("point and desired and heating and temp and equipRef == \"" + equipId + "\"");
+                    ScheduleProcessJob.clearTempOverrides(coolDT.get("id").toString(), heatDT.get("id").toString());
+                }
+            }
+        },400);
     }
 
 

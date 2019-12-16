@@ -242,10 +242,10 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
             case R.id.toggleRelay1:
                 relay1Spinner.setEnabled(relay1Cb.isChecked());
                 setConfigEnabledBackground("relay1",relay1Cb.isChecked() ? 1: 0);
-                if (relay1Cb.isChecked())
+                /*if (relay1Cb.isChecked())
                 {
                     setConfigAssociationBackground("relay1", relay1Spinner.getSelectedItemPosition());
-                }
+                }*/
                 break;
             case R.id.toggleRelay2:
                 relay2Spinner.setEnabled(relay2Cb.isChecked());

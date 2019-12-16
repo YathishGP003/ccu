@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -207,6 +208,8 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
             temperatureOffset.setValue(offsetIndex);
             switchExtTempSensor.setChecked(mProfileConfig.enableThermistor2);
             switchThermistor1.setChecked(mProfileConfig.enableThermistor1);
+
+            fanHumiDSpinner.setSelection(mProfileConfig.relay6Type - 1);
             if (mProfileConfig.getOutputs().size() > 0) {
                 for (Output output : mProfileConfig.getOutputs()) {
                     switch (output.getPort()) {
@@ -231,9 +234,44 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
                     }
                 }
             }
+        }else
+            fanHumiDSpinner.setSelection(0,false);
 
-            fanHumiDSpinner.setSelection(mProfileConfig.relay6Type - 1);
-        }
+        fanHumiDSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                if(mProfileConfig != null){
+                    if(mProfileConfig.relay6Type > 0) {
+                        switchFanHighOb.setEnabled(true);
+                        if(position == 0 && !switchFanLowG.isChecked())switchFanHighOb.setChecked(false);
+                    }else{
+                        if(switchFanLowG.isChecked()){
+                            switchFanHighOb.setEnabled(true);
+                        }else{
+                            switchFanHighOb.setEnabled(false);
+                            switchFanHighOb.setChecked(false);
+                        }
+                    }
+                }else{
+                    if(position > 0){
+                        switchFanHighOb.setEnabled(true);
+                        //switchFanHighOb.setChecked(true);
+                    }else{
+                        if(switchFanLowG.isChecked()){
+                            switchFanHighOb.setEnabled(true);
+                        }else{
+                            switchFanHighOb.setEnabled(false);
+                            switchFanHighOb.setChecked(false);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
         setButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -387,7 +425,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
     }
 
     @Override
-    @OnCheckedChanged({R.id.testCpuRelay1, R.id.testCpuRelay2, R.id.testCpuRelay3, R.id.testCpuRelay4, R.id.testCpuRelay5, R.id.testCpuRelay6,R.id.toggleCpuFanLow})
+    @OnCheckedChanged({R.id.testCpuRelay1, R.id.testCpuRelay2, R.id.testCpuRelay3, R.id.testCpuRelay4, R.id.testCpuRelay5, R.id.testCpuRelay6,R.id.toggleCpuFanLow,R.id.toggleCpuFanHigh})
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         switch (buttonView.getId()) {
             case R.id.testCpuRelay1:
@@ -412,8 +450,29 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
                 if(switchFanLowG.isChecked()){
                     switchFanHighOb.setEnabled(true);
                 }else {
-                    switchFanHighOb.setEnabled(false);
-                    switchFanHighOb.setChecked(false);
+                    if(fanHumiDSpinner.getSelectedItemPosition() > 0) {
+                        switchFanHighOb.setEnabled(true);
+                        switchFanHighOb.setChecked(true);
+                    }else{
+                        switchFanHighOb.setEnabled(false);
+                        switchFanHighOb.setChecked(false);
+                    }
+                }
+                break;
+            case R.id.toggleCpuFanHigh:
+                if(fanHumiDSpinner.getSelectedItemPosition() > 0){
+
+                    if(!switchFanHighOb.isChecked())
+                        switchFanHighOb.setChecked(false);
+                    else
+                        switchFanHighOb.setChecked(true);
+                    switchFanHighOb.setEnabled(true);
+                }else {
+                    if(!switchFanLowG.isChecked()) {
+
+                        switchFanHighOb.setEnabled(false);
+                        switchFanHighOb.setChecked(false);
+                    }
                 }
                 break;
         }

@@ -467,9 +467,9 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     relayStages.put("CoolingStage1",1);
                     setCmdSignal("changeover and cooling and stage1",1.0,addr);
                     break;
-                    default:
-                        setCmdSignal("changeover and cooling and stage1",0,addr);
-                        break;
+                case ENERGIZE_IN_HEATING:
+                    setCmdSignal("changeover and heating and stage1",0,addr);
+                    break;
             }
 
             if(isFanStage1Enabled){
@@ -548,9 +548,9 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                         if(getCmdSignal("changeover and heating and stage1",addr) > 0)
                             setCmdSignal("changeover and heating and stage1",0,addr);
                         break;
-                        default:
-                            setCmdSignal("changeover and heating and stage1",0,addr);
-                            break;
+                    case ENERGIZE_IN_COOLING:
+                        setCmdSignal("changeover and cooling and stage1",0,addr);
+                        break;
                 }
                 if(occupied){
                     switch (fanSpeed){
@@ -711,8 +711,8 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     relayStages.put("HeatingStage1",1);
                     setCmdSignal("heatpump and changeover and heating and stage1",1.0,addr);
                     break;
-                default:
-                    setCmdSignal("heatpump and changeover and heating and stage1",0,addr);
+                case ENERGIZE_IN_COOLING:
+                    setCmdSignal("heatpump and changeover and cooling and stage1",0,addr);
                     break;
             }
             if(curTemp <= (setTempHeating - heatingDeadband)){
@@ -812,6 +812,9 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     case ENERGIZE_IN_COOLING:
                         if(getCmdSignal("heatpump and changeover and cooling and stage1",addr) > 0)
                             setCmdSignal("heatpump and changeover and cooling and stage1",0,addr);
+                        break;
+                    case ENERGIZE_IN_HEATING:
+                        setCmdSignal("heatpump and changeover and heating and stage1",0,addr);
                         break;
                 }
                 if(occupied){

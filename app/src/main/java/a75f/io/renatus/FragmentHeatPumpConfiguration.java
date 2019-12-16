@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -220,6 +221,8 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
             temperatureOffset.setValue(offsetIndex);
             switchExtTempSensor.setChecked(mProfileConfig.enableThermistor2);
             switchThermistor1.setChecked(mProfileConfig.enableThermistor1);
+            fanHumiDSpinner.setSelection(mProfileConfig.fanRelay5Type - 1, false);
+            hpChangeOverTypeSpinner.setSelection(mProfileConfig.changeOverRelay6Type - 1);
             if (mProfileConfig.getOutputs().size() > 0) {
                 for (Output output : mProfileConfig.getOutputs()) {
                     switch (output.getPort()) {
@@ -244,9 +247,46 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
                     }
                 }
             }
-            hpChangeOverTypeSpinner.setSelection(mProfileConfig.changeOverRelay6Type - 1);
-            fanHumiDSpinner.setSelection(mProfileConfig.fanRelay5Type - 1);
-        }
+        }else
+            fanHumiDSpinner.setSelection(0,false);
+
+        fanHumiDSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                Log.d("FragHPU","HPU OnItemSelected ="+position);
+                if(mProfileConfig != null){
+                    Log.d("FragHPU","HPU OnItemSelected ="+position+","+mProfileConfig.fanRelay5Type);
+                    if(mProfileConfig.fanRelay5Type > 0) {
+                        switchFanHigh.setEnabled(true);
+                        if(position == 0 && !switchFanLowG.isChecked())switchFanHigh.setChecked(false);
+                    }else{
+                        if(switchFanLowG.isChecked()){
+                            switchFanHigh.setEnabled(true);
+                        }else{
+                            switchFanHigh.setEnabled(false);
+                            switchFanHigh.setChecked(false);
+                        }
+                    }
+                }else{
+                    if(position > 0){
+                        switchFanHigh.setEnabled(true);
+                        //switchFanHigh.setChecked(true);
+                    }else{
+                        if(switchFanLowG.isChecked()){
+                            switchFanHigh.setEnabled(true);
+                        }else{
+                            switchFanHigh.setEnabled(false);
+                            switchFanHigh.setChecked(false);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
         /*hpChangeOverTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -410,7 +450,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
     }
 
     @Override
-    @OnCheckedChanged({R.id.testHpuRelay1,R.id.testHpuRelay2,R.id.testHpuRelay3,R.id.testHpuRelay4,R.id.testHpuRelay5,R.id.testHpuRelay6,R.id.toggleFanLow})
+    @OnCheckedChanged({R.id.testHpuRelay1,R.id.testHpuRelay2,R.id.testHpuRelay3,R.id.testHpuRelay4,R.id.testHpuRelay5,R.id.testHpuRelay6,R.id.toggleFanLow, R.id.toggleFanHigh})
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         switch (buttonView.getId())
         {
@@ -436,8 +476,28 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
                 if(switchFanLowG.isChecked()){
                     switchFanHigh.setEnabled(true);
                 }else {
-                    switchFanHigh.setEnabled(false);
-                    switchFanHigh.setChecked(false);
+                    if(fanHumiDSpinner.getSelectedItemPosition() > 0) {
+                        switchFanHigh.setEnabled(true);
+                        switchFanHigh.setChecked(true);
+                    }else {
+                        switchFanHigh.setEnabled(false);
+                        switchFanHigh.setChecked(false);
+                    }
+                }
+                break;
+            case R.id.toggleFanHigh:
+                if(fanHumiDSpinner.getSelectedItemPosition() > 0){
+                    if(!switchFanHigh.isChecked())
+                        switchFanHigh.setChecked(false);
+                    else
+                        switchFanHigh.setChecked(true);
+                    switchFanHigh.setEnabled(true);
+                }else{
+                    if(!switchFanLowG.isChecked()) {
+
+                        switchFanHigh.setEnabled(false);
+                        switchFanHigh.setChecked(false);
+                    }
                 }
                 break;
         }

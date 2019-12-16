@@ -251,13 +251,13 @@ public class SingleStageEquip {
         CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
 
         Point dischargeAirTemp1 = new Point.Builder()
-                .setDisplayName(siteDis+"-SSE-"+nodeAddr+"-AirflowTemperatureSensor")
+                .setDisplayName(siteDis+"-SSE-"+nodeAddr+"-airflowTempSensorTh1")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("zone").addMarker("sse")
-                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("discharge").addMarker("his").addMarker("logical").addMarker("equipHis")
+                .addMarker("zone").addMarker("sse").addMarker("supply")
+                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")
                 .setTz(tz)

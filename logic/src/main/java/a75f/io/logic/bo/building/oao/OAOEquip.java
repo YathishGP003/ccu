@@ -65,7 +65,7 @@ public class OAOEquip
                                    .setFloorRef(floorRef)
                                    .addMarker("oao").addMarker("inside").addMarker("enthalpy").addMarker("his").addMarker("equipHis").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
-                                   .setUnit("J")
+                                   .setUnit("BTU/lb")
                                    .setTz(tz)
                                    .build();
         hayStack.addPoint(insideEnthalpy);
@@ -78,7 +78,7 @@ public class OAOEquip
                                        .setFloorRef(floorRef)
                                        .addMarker("oao").addMarker("outside").addMarker("enthalpy").addMarker("his").addMarker("equipHis").addMarker("sp")
                                        .setGroup(String.valueOf(nodeAddr))
-                                       .setUnit("J")
+                                       .setUnit("BTU/lb")
                                        .setTz(tz)
                                        .build();
         hayStack.addPoint(outsideEnthalpy);

@@ -447,6 +447,7 @@ public class FourPipeFanCoilUnitEquip  {
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
         //TODO, what if already equip exists in a zone and its schedule is zone or named? Kumar
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
+        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
                 //Create Physical points and map
         SmartStat device = new SmartStat(nodeAddr, siteRef, floor, room,equipRef,profile);
         

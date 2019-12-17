@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.TimeUtils;
 import a75f.io.renatus.views.RangeBarView;
 
@@ -37,6 +38,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
     public static int NO_REPLACE = -1;
     private int mPosition;
     private Schedule mSchedule;
+    Prefs prefs;
 
     public interface ManualScheduleDialogListener {
         boolean onClickSave(int position, double minTemp, double maxTemp, int startTimeHour, int endTimeHour, int startTimeMinute, int endTimeMinute,
@@ -95,7 +97,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-
+        prefs = new Prefs(getActivity());
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View view = inflater.inflate(R.layout.dialog_manualschedule, null);
 
@@ -291,6 +293,26 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
 
             if (days.size() == 0) {
                 Toast.makeText(ManualSchedulerDialogFragment.this.getContext(), "Select one or more days to apply the schedule", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (prefs.getBoolean(getString(R.string.USE_SAME_TEMP_ALL_DAYS))){
+                new AlertDialog.Builder(getActivity())
+                        .setCancelable(false)
+                        .setTitle(mSchedule.isZoneSchedule()? "Zone Schedule" : "Building Schedule")
+                        .setMessage(mSchedule.isZoneSchedule()? "Are you sure you want to update same occupied temperature for all days?" : "Are you sure you want to apply these changes to building? " +
+                                "Which will update same occupied temperature for all days in this building.")
+                        .setPositiveButton(getString(R.string.ok), (dialog, which) -> {
+                            for (Schedule.Days sDays: mSchedule.getDays()){
+                                sDays.setCoolingVal((double) rangeSeekBarView.getCoolValue());
+                                sDays.setHeatingVal((double)rangeSeekBarView.getHeatValue());
+                            }
+                            mListener.onClickSave(mDay == null ? NO_REPLACE : mPosition, rangeSeekBarView.getCoolValue(),
+                                    rangeSeekBarView.getHeatValue(),
+                                    startHour, endHour, startMinutes, endMinutes, days);
+                            dismiss();
+                        })
+                        .setNegativeButton(getString(R.string.cancel), null)
+                        .show();
                 return;
             }
 

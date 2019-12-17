@@ -1506,14 +1506,20 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         zoneDataInterface = in;
     }
 
-    public static void clearTempOverrides(String coolDTid, String heatDTid) {
+    public static void clearTempOverrides(String equipId) {
         if (BuildConfig.DEBUG)
         {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
-        CCUHsApi.getInstance().pointWrite(HRef.copy(coolDTid), 4, "manual", HNum.make(0), HNum.make(1, "ms"));
-        CCUHsApi.getInstance().pointWrite(HRef.copy(heatDTid), 4, "manual", HNum.make(0), HNum.make(1, "ms"));
+        Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().readMapById(equipId)).build();
+        HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \"" + equipId + "\"");
+        HashMap heatDT = CCUHsApi.getInstance().read("point and desired and heating and temp and equipRef == \"" + equipId + "\"");
+        CCUHsApi.getInstance().pointWrite(HRef.copy(coolDT.get("id").toString()), 4, "manual", HNum.make(0), HNum.make(1, "ms"));
+        CCUHsApi.getInstance().pointWrite(HRef.copy(heatDT.get("id").toString()), 4, "manual", HNum.make(0), HNum.make(1, "ms"));
         systemOccupancy = UNOCCUPIED;
+        Occupied occupied = getOccupiedModeCache(equip.getRoomRef());
+        occupied.setForcedOccupied(false);
+        putOccupiedModeCache(equip.getRoomRef(),occupied);
     }
 }

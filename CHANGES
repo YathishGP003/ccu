@@ -1,3 +1,14 @@
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-854, SmartStat | Fan low all times resets to auto
- - #RENATUS-855, SmartStat HPU relay 5 and relay 6 changes update
+ - #RENATUS-849, HPU  fan high speed turns on, even when low is not enabled
+ - Merge branch 'mahesh_renuts' into 'master'
+ - RENATUS-858, get current temp based on equip id
+ - #RENATUS-862, HPU, Enerigze in heating should be off
+ - Merge branch 'mahesh_renuts' into 'master'
+ - Merge branch 'kumar_renatus' into 'master'
+ - RENATUS-847, reset temp overrides
+ - #RENATUS-860, DAB Fuly modulating, occupancy signal is relay
+ - #RENATUS-851, HPU Schedule type is not historized on creation
+ - #RENATUS-859, OAO - inside and outside enthalpy unit change to BTU/lb
+ - #RENATUS-850, Occupancy detection not historized
+ - Merge branch 'mahesh_renuts' into 'master'
+ - clear password when enter wrong password

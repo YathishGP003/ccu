@@ -313,7 +313,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			@Override
 			public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l)
 			{
-				setConfigBackground("relay7 and humidifier and type", i);
+				setHumidifierConfigBackground("relay7 and humidifier and type", i);
 			}
 			@Override
 			public void onNothingSelected(AdapterView<?> adapterView)
@@ -423,7 +423,21 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			}
 		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 	}
-	
+	private void setHumidifierConfigBackground(String tags, double val) {
+		new AsyncTask<String, Void, Void>() {
+
+			@Override
+			protected Void doInBackground( final String ... params ) {
+				systemProfile.setHumidifierConfigVal(tags, val);
+				return null;
+			}
+
+			@Override
+			protected void onPostExecute( final Void result ) {
+				// continue what you are doing...
+			}
+		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+	}
 	private void setSelectionBackground(String analog, boolean selected) {
 		new AsyncTask<String, Void, Void>() {
 			@Override

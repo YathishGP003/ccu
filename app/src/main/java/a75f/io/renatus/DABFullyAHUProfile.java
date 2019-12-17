@@ -258,7 +258,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l)
             {
-                setConfigBackground("relay7 and humidifier and type", i);
+                setHumidifierrConfigBackground("relay7 and humidifier and type", i);
             }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView)
@@ -349,6 +349,21 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             @Override
             protected Void doInBackground( final String ... params ) {
                 systemProfile.setConfigVal(tags, val);
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute( final Void result ) {
+                // continue what you are doing...
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+    }
+    private void setHumidifierrConfigBackground(String tags, double val) {
+        new AsyncTask<String, Void, Void>() {
+            
+            @Override
+            protected Void doInBackground( final String ... params ) {
+                systemProfile.setHumidifierConfigVal(tags, val);
                 return null;
             }
             

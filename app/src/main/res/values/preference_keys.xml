@@ -12,4 +12,5 @@
     <string name="BUILDING_SETTINGS_PASSWORD_KEY">building_settings_password</string>
     <string name="USE_SETUP_PASSWORD_KEY">use_setup_password</string>
     <string name="USE_SAME_SETTINGS_PASSWORD_KEY">use_same_settings_password</string>
+    <string name="USE_SAME_TEMP_ALL_DAYS">use_same_temp_all_days</string>
 </resources>

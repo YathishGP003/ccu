@@ -14,8 +14,10 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.ToggleButton;
 
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HRef;
@@ -57,6 +59,7 @@ public class InstallerOptions extends Fragment {
     Button mNext;
     Context mContext;
     Spinner mAddressBandSpinner;
+    ToggleButton mToggleTempAll;
     HGrid mCCUS;
     HGrid mSite;
     String mSiteId;
@@ -144,6 +147,7 @@ public class InstallerOptions extends Fragment {
 
         imageGoback = rootView.findViewById(R.id.imageGoback);
         mAddressBandSpinner = rootView.findViewById(R.id.spinnerAddress);
+        mToggleTempAll = rootView.findViewById(R.id.toggleTempAll);
         mNext = rootView.findViewById(R.id.buttonNext);
         imageTemp = rootView.findViewById(R.id.imageTemp);
 
@@ -189,6 +193,8 @@ public class InstallerOptions extends Fragment {
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
+        mToggleTempAll.setChecked(prefs.getBoolean(getString(R.string.USE_SAME_TEMP_ALL_DAYS)));
+        mToggleTempAll.setOnCheckedChangeListener((compoundButton, isChecked) -> prefs.setBoolean(getString(R.string.USE_SAME_TEMP_ALL_DAYS), isChecked));
 
       /*  imageGoback.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {

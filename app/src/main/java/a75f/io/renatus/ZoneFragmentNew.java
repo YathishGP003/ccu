@@ -1089,14 +1089,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     }
 
     private void clearTempOverride(String equipId) {
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
+        new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 if (ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED || ScheduleProcessJob.getSystemOccupancy() == Occupancy.FORCEDOCCUPIED) {
-                    HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \"" + equipId + "\"");
-                    HashMap heatDT = CCUHsApi.getInstance().read("point and desired and heating and temp and equipRef == \"" + equipId + "\"");
-                    ScheduleProcessJob.clearTempOverrides(coolDT.get("id").toString(), heatDT.get("id").toString());
+                    ScheduleProcessJob.clearTempOverrides(equipId);
                 }
             }
         },400);
@@ -1207,6 +1204,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     vacationImageButton.setTag(mSchedule.getId());
                 } else if (position == 1 && (mScheduleType != -1))
                 {
+                    clearTempOverride(equipId);
                     if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled"))
                     {
                         mSchedule.setDisabled(false);

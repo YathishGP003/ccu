@@ -215,7 +215,8 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                 } else {
                     signal = curSignal;
                 }
-                setCmdSignal("relay7",signal);
+                setCmdSignal("humidifier",signal * 100);
+                setCmdSignal("dehumidifier",0);
             } else {
                 //Dehumidification
                 int curSignal = (int)ControlMote.getRelayState("relay7");
@@ -226,14 +227,16 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                 } else {
                     signal = curSignal;
                 }
-                setCmdSignal("relay7",signal);
+                setCmdSignal("dehumidifier",signal * 100);
+                setCmdSignal("humidifier",0);
             }
             CcuLog.d(L.TAG_CCU_SYSTEM,"humidity :"+humidity+" targetMinHumidity: "+targetMinHumidity+" humidityHysteresis: "+humidityHysteresis+
                                       " targetMaxHumidity: "+targetMaxHumidity+" signal: "+signal*100);
             
             ControlMote.setRelayState("relay7", signal);
         }else {
-            setCmdSignal("relay7",0);
+            setCmdSignal("humidifier",0);
+            setCmdSignal("dehumidifier",0);
             ControlMote.setRelayState("relay7", 0);
         }
     
@@ -353,22 +356,22 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                         .build();
         CCUHsApi.getInstance().addPoint(occupancySignal);
         Point humidifierSignal = new Point.Builder()
-                                         .setDisplayName(equipDis+"-humidifier")
+                                         .setDisplayName(equipDis+"-humidifierSignal")
                                          .setSiteRef(siteRef)
                                          .setEquipRef(equipref)
-                                         .addMarker("system").addMarker("cmd").addMarker("relay7").addMarker("humidifier").addMarker("his").addMarker("equipHis")
+                                         .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his").addMarker("equipHis")
                                          .setUnit("%").setTz(tz)
                                          .build();
         CCUHsApi.getInstance().addPoint(humidifierSignal);
         
-        /*Point dehumidifierSignal = new Point.Builder()
+        Point dehumidifierSignal = new Point.Builder()
                                            .setDisplayName(equipDis+"-"+"dehumidifierSignal")
                                            .setSiteRef(siteRef)
                                            .setEquipRef(equipref)
                                            .addMarker("system").addMarker("cmd").addMarker("dehumidifier").addMarker("his").addMarker("equipHis")
                                            .setUnit("%").setTz(tz)
                                            .build();
-        CCUHsApi.getInstance().addPoint(dehumidifierSignal);*/
+        CCUHsApi.getInstance().addPoint(dehumidifierSignal);
     }
     
     public double getCmdSignal(String cmd) {
@@ -542,12 +545,14 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     }
     
     public void setHumidifierConfigVal(String tags, double val) {
+        CCUHsApi.getInstance().writeDefaultVal("point and system and config and "+tags, val);
         double curHumidifierType = CCUHsApi.getInstance().readDefaultVal("point and system and config and "+tags);
-        if(curHumidifierType != val) {
+        /*if(curHumidifierType != val) {
             CCUHsApi.getInstance().writeDefaultVal("point and system and config and "+tags, val);
             if (val > 0) {//dehumidifier
-                HashMap cmd = CCUHsApi.getInstance().read("point and system and cmd and relay7");
+                HashMap cmd = CCUHsApi.getInstance().read("point and system and cmd and humidifier");
                 if(cmd != null &&(cmd.size() > 0)) {
+
                     HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
                     String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
                     Point cmdPoint = new Point.Builder().setHashMap(cmd).removeMarker("humidifier").addMarker("dehumidifier").setDisplayName(equipDis + "-dehumidifier").build();
@@ -555,8 +560,10 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                     CCUHsApi.getInstance().updatePoint(cmdPoint, cmdPoint.getId());
                     CCUHsApi.getInstance().syncEntityTree();
                 }
+
+
             } else {//humidifier
-                HashMap cmd = CCUHsApi.getInstance().read("point and system and cmd and relay7");
+                HashMap cmd = CCUHsApi.getInstance().read("point and system and cmd and dehumidifier");
                 if(cmd != null && (cmd.size() > 0)) {
                     HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
                     String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
@@ -567,7 +574,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                 }
 
             }
-        }
+        }*/
     }
     public double getConfigEnabled(String config) {
         

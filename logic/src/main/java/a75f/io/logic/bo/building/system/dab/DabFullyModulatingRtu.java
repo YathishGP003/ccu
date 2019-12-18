@@ -353,10 +353,10 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                         .build();
         CCUHsApi.getInstance().addPoint(occupancySignal);
         Point humidifierSignal = new Point.Builder()
-                                         .setDisplayName(equipDis+"-"+ Stage.HUMIDIFIER.displayName)
+                                         .setDisplayName(equipDis+"-humidifier")
                                          .setSiteRef(siteRef)
                                          .setEquipRef(equipref)
-                                         .addMarker("system").addMarker("cmd").addMarker("relay7").addMarker("his").addMarker("equipHis")
+                                         .addMarker("system").addMarker("cmd").addMarker("relay7").addMarker("humidifier").addMarker("his").addMarker("equipHis")
                                          .setUnit("%").setTz(tz)
                                          .build();
         CCUHsApi.getInstance().addPoint(humidifierSignal);
@@ -550,7 +550,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                 if(cmd != null &&(cmd.size() > 0)) {
                     HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
                     String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
-                    Point cmdPoint = new Point.Builder().setHashMap(cmd).setDisplayName(equipDis + "_"+Stage.DEHUMIDIFIER.displayName).build();
+                    Point cmdPoint = new Point.Builder().setHashMap(cmd).removeMarker("humidifier").addMarker("dehumidifier").setDisplayName(equipDis + "-dehumidifier").build();
                     CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + cmdPoint.getDisplayName()+","+cmdPoint.getMarkers().toString());
                     CCUHsApi.getInstance().updatePoint(cmdPoint, cmdPoint.getId());
                     CCUHsApi.getInstance().syncEntityTree();
@@ -560,7 +560,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                 if(cmd != null && (cmd.size() > 0)) {
                     HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
                     String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
-                    Point cmdPoint = new Point.Builder().setHashMap(cmd).setDisplayName(equipDis + "_"+Stage.DEHUMIDIFIER.displayName).build();
+                    Point cmdPoint = new Point.Builder().setHashMap(cmd).removeMarker("dehumidifier").addMarker("humidifier").setDisplayName(equipDis + "-humidifier").build();
                     CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + cmdPoint.getDisplayName()+","+cmdPoint.getMarkers().toString());
                     CCUHsApi.getInstance().updatePoint(cmdPoint, cmdPoint.getId());
                     CCUHsApi.getInstance().syncEntityTree();

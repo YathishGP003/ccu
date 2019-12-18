@@ -175,7 +175,12 @@ public class Point extends Entity
             this.markers.add(marker);
             return this;
         }
-        
+        public Builder removeMarker(String marker)
+        {
+            if(this.markers.contains(marker))
+                this.markers.remove(marker);
+            return this;
+        }
         public Point build(){
             Point p = new Point();
             p.displayName = this.displayName;

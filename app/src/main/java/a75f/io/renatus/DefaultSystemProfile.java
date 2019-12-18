@@ -8,12 +8,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Spinner;
-
-import org.projecthaystack.HRef;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.renatus.registartion.FreshRegistration;

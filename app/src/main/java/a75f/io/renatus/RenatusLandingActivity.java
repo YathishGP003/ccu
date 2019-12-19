@@ -395,7 +395,13 @@ public class RenatusLandingActivity extends AppCompatActivity {
             Button negButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
             negButton.setOnClickListener(view -> {
                 if (position == 0){
-                    finish();
+                    btnTabs.getTabAt(1).setIcon(R.drawable.ic_dashboard_orange);
+                    btnTabs.getTabAt(1).select();
+                    mViewPager.setAdapter(mStatusPagerAdapter);
+                    mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
+
+                    menuToggle.setVisibility(View.GONE);
+                    floorMenu.setVisibility(View.GONE);
                     dialog.dismiss();
                     return;
                 }

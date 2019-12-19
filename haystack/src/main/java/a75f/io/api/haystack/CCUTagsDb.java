@@ -450,7 +450,7 @@ public class CCUTagsDb extends HServer {
         if (p.getMaxVal() != null) b.add("maxVal",Double.parseDouble(p.getMaxVal()));
         if (p.getIncrementVal() != null) b.add("incrementVal",Double.parseDouble(p.getIncrementVal()));
         if (p.getTunerGroup() != null) b.add("tunerGroup",p.getTunerGroup());*/
-        
+
         for (String m : p.getMarkers()) {
             b.add(m);
         }
@@ -477,7 +477,7 @@ public class CCUTagsDb extends HServer {
         if (p.getMaxVal() != null) b.add("maxVal",Double.parseDouble(p.getMaxVal()));
         if (p.getIncrementVal() != null) b.add("incrementVal",Double.parseDouble(p.getIncrementVal()));
         if (p.getTunerGroup() != null) b.add("tunerGroup",p.getTunerGroup());*/
-        
+
         for (String m : p.getMarkers()) {
             b.add(m);
         }

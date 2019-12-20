@@ -148,8 +148,8 @@ public class CongratsFragment extends Fragment {
         }
         HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
         Equip eqp = new Equip.Builder().setHashMap(tuner).build();
-        double buildingLimitMax =  TunerUtil.readTunerValByQuery("building and limit and max", eqp.getId());
-        double buildingLimitMin =  TunerUtil.readTunerValByQuery("building and limit and min", eqp.getId());
+        double buildingLimitMax =  TunerUtil.readBuildingTunerValByQuery("building and limit and max");
+        double buildingLimitMin =  TunerUtil.readBuildingTunerValByQuery("building and limit and min");
         HashMap maxHeatMap =  CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef ==\"" + eqp.getId() + "\"");
         HashMap minHeatMap =  CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef ==\"" +  eqp.getId() + "\"");
         HashMap maxCoolMap =  CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef ==\""+  eqp.getId() + "\"");

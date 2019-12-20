@@ -28,8 +28,8 @@ public abstract class SystemController
     public abstract double getAverageSystemTemperature();
     
     public boolean buildingLimitMinBreached(String equipType) {
-        double buildingLimitMin =  TunerUtil.readTunerValByQuery("building and limit and min", L.ccu().systemProfile.getSystemEquipRef());
-        double tempDeadLeeway = TunerUtil.readTunerValByQuery("temp and dead and leeway",L.ccu().systemProfile.getSystemEquipRef());
+        double buildingLimitMin =  TunerUtil.readBuildingTunerValByQuery("building and limit and min");
+        double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList<HashMap> equips = hayStack.readAll("equip and zone and "+equipType);
@@ -46,8 +46,8 @@ public abstract class SystemController
     }
     
     public boolean buildingLimitMaxBreached(String equipType) {
-        double buildingLimitMax =  TunerUtil.readTunerValByQuery("building and limit and max", L.ccu().systemProfile.getSystemEquipRef());
-        double tempDeadLeeway = TunerUtil.readTunerValByQuery("temp and dead and leeway",L.ccu().systemProfile.getSystemEquipRef());
+        double buildingLimitMax =  TunerUtil.readBuildingTunerValByQuery("building and limit and max");
+        double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList<HashMap> equips = hayStack.readAll("equip and zone and "+equipType);

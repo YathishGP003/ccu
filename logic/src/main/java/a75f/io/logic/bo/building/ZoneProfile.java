@@ -142,8 +142,8 @@ public abstract class ZoneProfile extends Schedulable
     }
     
     public boolean buildingLimitMinBreached() {
-        double buildingLimitMin =  TunerUtil.readTunerValByQuery("building and limit and min", L.ccu().systemProfile.getSystemEquipRef());
-        double tempDeadLeeway = TunerUtil.readTunerValByQuery("temp and dead and leeway",L.ccu().systemProfile.getSystemEquipRef());
+        double buildingLimitMin =  TunerUtil.readBuildingTunerValByQuery("building and limit and min");
+        double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
     
         double currentTemp = getCurrentTemp();
         if (currentTemp < buildingLimitMin && currentTemp > (buildingLimitMin-tempDeadLeeway)) {
@@ -153,8 +153,8 @@ public abstract class ZoneProfile extends Schedulable
     }
     
     public boolean buildingLimitMaxBreached() {
-        double buildingLimitMax =  TunerUtil.readTunerValByQuery("building and limit and max", L.ccu().systemProfile.getSystemEquipRef());
-        double tempDeadLeeway = TunerUtil.readTunerValByQuery("temp and dead and leeway",L.ccu().systemProfile.getSystemEquipRef());
+        double buildingLimitMax =  TunerUtil.readBuildingTunerValByQuery("building and limit and max");
+        double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
     
         double currentTemp = getCurrentTemp();
         if (currentTemp > buildingLimitMax && currentTemp < (buildingLimitMax+tempDeadLeeway)) {

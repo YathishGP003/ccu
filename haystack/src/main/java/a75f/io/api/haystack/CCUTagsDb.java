@@ -446,6 +446,10 @@ public class CCUTagsDb extends HServer {
                 .add("tz", p.getTz());
         if (p.getUnit() != null) b.add("unit", p.getUnit());
         if (p.getEnums() != null) b.add("enum", p.getEnums());
+        if (p.getMinVal() != null) b.add("minVal",Double.parseDouble(p.getMinVal()));
+        if (p.getMaxVal() != null) b.add("maxVal",Double.parseDouble(p.getMaxVal()));
+        if (p.getIncrementVal() != null) b.add("incrementVal",Double.parseDouble(p.getIncrementVal()));
+        if (p.getTunerGroup() != null) b.add("tunerGroup",p.getTunerGroup());
         
         for (String m : p.getMarkers()) {
             b.add(m);
@@ -469,6 +473,10 @@ public class CCUTagsDb extends HServer {
                 .add("tz", p.getTz());
         if (p.getUnit() != null) b.add("unit", p.getUnit());
         if (p.getEnums() != null) b.add("enum", p.getEnums());
+        if (p.getMinVal() != null) b.add("minVal",Double.parseDouble(p.getMinVal()));
+        if (p.getMaxVal() != null) b.add("maxVal",Double.parseDouble(p.getMaxVal()));
+        if (p.getIncrementVal() != null) b.add("incrementVal",Double.parseDouble(p.getIncrementVal()));
+        if (p.getTunerGroup() != null) b.add("tunerGroup",p.getTunerGroup());
         
         for (String m : p.getMarkers()) {
             b.add(m);

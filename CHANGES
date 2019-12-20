@@ -1,6 +1,4 @@
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-864, revoked old code
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-864, dehumidifier data point is not removed
  - Merge branch 'mahesh_renuts' into 'master'
- - change conflict error message
+ - RENATUS-868, redirect to dashboard
+ - #RENATUS-864, Fully modulating , humidifier , dehumidifier updates

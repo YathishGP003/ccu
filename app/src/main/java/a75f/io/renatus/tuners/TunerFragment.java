@@ -142,8 +142,10 @@ public class TunerFragment extends Fragment
             ArrayList<HashMap> userIntents = CCUHsApi.getInstance().readAll("userIntent and equipRef == \""+m.get("id")+"\"");
             
             for (Map t : userIntents) {
-                tunerList.add(t.get("dis").toString());
-                tunerMap.put(t.get("dis").toString(), t.get("id").toString());
+                if(!t.get("dis").toString().contains("desired")) {
+                    tunerList.add(t.get("dis").toString());
+                    tunerMap.put(t.get("dis").toString(), t.get("id").toString());
+                }
             }
             expandableListDetail.put(m.get("dis").toString(), tunerList);
         }

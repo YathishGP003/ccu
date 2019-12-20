@@ -566,7 +566,7 @@ public class BuildingTuners
         }
         hayStack.writeHisValById(unoccupiedZoneSetbackId, HSUtil.getPriorityVal(unoccupiedZoneSetbackId));
         
-        Point heatingUserLimitMin = new Point.Builder()
+        /*Point heatingUserLimitMin = new Point.Builder()
                                               .setDisplayName(equipdis+"-"+"heatingUserLimitMin")
                                               .setSiteRef(siteRef)
                                               .setEquipRef(equipref)
@@ -657,6 +657,7 @@ public class BuildingTuners
             }
         }
         hayStack.writeHisValById(coolingUserLimitMaxId, HSUtil.getPriorityVal(coolingUserLimitMaxId));
+        */
     }
     
     public void addVavEquipTuners(String equipdis, String equipref, String roomRef, String floorRef) {

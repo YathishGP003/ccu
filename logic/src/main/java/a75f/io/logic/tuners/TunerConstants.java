@@ -106,6 +106,9 @@ public class TunerConstants
     public static final double OAO_OA_DAMPER_MAT_MIN = 44 ;
     public static final double OAO_ECONOMIZING_TO_MAIN_COOLING_LOOP_MAP = 30 ;
     public static final double OAO_ENTHALPY_DUCT_COMPENSATION_OFFSET = 0 ;
+	public static final String VAV_TUNER_GROUP = "VAV";
+    public static final String DAB_TUNER_GROUP = "DAB";
+    public static final String GENERIC_TUNER_GROUP = "GENERIC";
     
     
 }

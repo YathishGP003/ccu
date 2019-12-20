@@ -1,15 +1,13 @@
 package a75f.io.renatus;
 
-import android.app.ProgressDialog;
+
 import android.content.DialogInterface;
-import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -19,7 +17,6 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.ToggleButton;
@@ -30,7 +27,6 @@ import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.tuners.TunerUtil;
@@ -290,7 +286,6 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
     public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
                                long arg3)
     {
-        Stage s = Stage.getEnum(arg0.getSelectedItem().toString());
         switch (arg0.getId())
         {
             case R.id.relay1Spinner:

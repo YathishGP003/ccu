@@ -82,10 +82,10 @@ public class DabProfile extends ZoneProfile
     @Override
     public boolean isZoneDead() {
         
-        double buildingLimitMax =  TunerUtil.readTunerValByQuery("building and limit and max", L.ccu().systemProfile.getSystemEquipRef());
-        double buildingLimitMin =  TunerUtil.readTunerValByQuery("building and limit and min", L.ccu().systemProfile.getSystemEquipRef());
+        double buildingLimitMax =  TunerUtil.readBuildingTunerValByQuery("building and limit and max");
+        double buildingLimitMin =  TunerUtil.readBuildingTunerValByQuery("building and limit and min");
         
-        double tempDeadLeeway = TunerUtil.readTunerValByQuery("temp and dead and leeway",L.ccu().systemProfile.getSystemEquipRef());
+        double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
     
         if (dabEquip.getCurrentTemp() > (buildingLimitMax + tempDeadLeeway)
             || dabEquip.getCurrentTemp() < (buildingLimitMin - tempDeadLeeway))

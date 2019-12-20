@@ -296,10 +296,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         if(getActivity() != null) {
             int i;
             if(currentTemp > 0) {
-                double buildingLimitMax =  TunerUtil.readTunerValByQuery("building and limit and max", L.ccu().systemProfile.getSystemEquipRef());
-                double buildingLimitMin =  TunerUtil.readTunerValByQuery("building and limit and min", L.ccu().systemProfile.getSystemEquipRef());
+                double buildingLimitMax =  TunerUtil.readBuildingTunerValByQuery("building and limit and max");
+                double buildingLimitMin =  TunerUtil.readBuildingTunerValByQuery("building and limit and min");
 
-                double tempDeadLeeway = TunerUtil.readTunerValByQuery("temp and dead and leeway",L.ccu().systemProfile.getSystemEquipRef());
+                double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
                 for (i = 0; i < seekArcArrayList.size(); i++)
                 {
                     GridItem gridItem = (GridItem) seekArcArrayList.get(i).getTag();
@@ -571,10 +571,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         double coolLowerlimit = 0;
         double heatUpperlimit = 0;
         double heatLowerlimit = 0;
-        double buildingLimitMax =  TunerUtil.readTunerValByQuery("building and limit and max", L.ccu().systemProfile.getSystemEquipRef());
-        double buildingLimitMin =  TunerUtil.readTunerValByQuery("building and limit and min", L.ccu().systemProfile.getSystemEquipRef());
+        double buildingLimitMax =  TunerUtil.readBuildingTunerValByQuery("building and limit and max");
+        double buildingLimitMin =  TunerUtil.readBuildingTunerValByQuery("building and limit and min");
 
-        double tempDeadLeeway = TunerUtil.readTunerValByQuery("temp and dead and leeway",L.ccu().systemProfile.getSystemEquipRef());
+        double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
 
         for(int i=0;i<zoneMap.size();i++)
         {

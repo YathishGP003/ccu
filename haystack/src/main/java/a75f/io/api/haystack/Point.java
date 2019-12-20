@@ -22,7 +22,11 @@ public class Point extends Entity
     private String            group;
     private String            kind;
     private String            id;
-    private String enums;
+    private String            enums;
+    private String            minVal;
+    private String            maxVal;
+    private String            incrementVal;
+    private String            tunerGroup;
     
     public void setDisplayName(String displayName)
     {
@@ -96,6 +100,10 @@ public class Point extends Entity
     {
         return enums;
     }
+    public String getMinVal(){return minVal;}
+    public String getMaxVal(){return maxVal;}
+    public String getIncrementVal(){return incrementVal;}
+    public String getTunerGroup(){return tunerGroup;}
     public void setEnums(String enums)
     {
         this.enums = enums;
@@ -114,6 +122,10 @@ public class Point extends Entity
         private String floorRef;
         private String group;
         private String enums;
+        private String minVal;
+        private String maxVal;
+        private String incrementVal;
+        private String tunerGroup;
         public Builder setKind(String kind)
         {
             this.kind = kind;
@@ -181,6 +193,26 @@ public class Point extends Entity
                 this.markers.remove(marker);
             return this;
         }
+        public Builder setMinVal(String min)
+        {
+            this.minVal = min;
+            return this;
+        }
+        public Builder setMaxVal(String max)
+        {
+            this.maxVal = max;
+            return this;
+        }
+        public Builder setIncrementVal(String inc)
+        {
+            this.incrementVal = inc;
+            return this;
+        }
+        public Builder setTunerGroup(String tg)
+        {
+            this.tunerGroup = tg;
+            return this;
+        }
         public Point build(){
             Point p = new Point();
             p.displayName = this.displayName;
@@ -195,7 +227,10 @@ public class Point extends Entity
             p.id = this.id;
             p.kind = this.kind;
             p.enums = this.enums;
-            //CCUHsApi.getInstance().addPoint(p);
+            p.minVal = this.minVal;
+            p.maxVal = this.maxVal;
+            p.incrementVal = this.incrementVal;
+            p.tunerGroup = this.tunerGroup;
             return p;
         }
     
@@ -253,6 +288,22 @@ public class Point extends Entity
                 else if (pair.getKey().equals("enum"))
                 {
                     this.enums = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("minVal"))
+                {
+                    this.minVal = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("maxVal"))
+                {
+                    this.maxVal = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("incrementVal"))
+                {
+                    this.incrementVal = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("tunerGroup"))
+                {
+                    this.tunerGroup = pair.getValue().toString();
                 }
                 //it.remove();
             }

@@ -806,15 +806,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         //HashMap currTmep = CCUHsApi.getInstance().read("point and air and temp and sensor and current and equipRef == \"" + p.getId() + "\"");
         HashMap coolDT = CCUHsApi.getInstance().read("point and temp and desired and cooling and sp and equipRef == \"" + p.getId() + "\"");
         HashMap heatDT = CCUHsApi.getInstance().read("point and temp and desired and heating and sp and equipRef == \"" + p.getId() + "\"");
-        HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
-        HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
+        //HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
+        //HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
 
         //float pointcurrTmep = (float)getPointVal(currTmep.get("id").toString());
 
         double pointheatDT =  CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and equipRef == \"" + p.getId() + "\"");
         double pointcoolDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and cooling and equipRef == \"" + p.getId() + "\"");
-        float pointbuildingMin = (float)getPointVal(buildingMin.get("id").toString());
-        float pointbuildingMax = (float)getPointVal(buildingMax.get("id").toString());
+        float pointbuildingMin = (float) TunerUtil.readBuildingTunerValByQuery("building and limit and min");//getPointVal(buildingMin.get("id").toString());
+        float pointbuildingMax = (float) TunerUtil.readBuildingTunerValByQuery("building and limit and max");//getPointVal(buildingMax.get("id").toString());
 
         String floorName = floorList.get(mFloorListAdapter.getSelectedPostion()).getDisplayName();
         Log.i("EachzoneData","CurrentTemp:"+currentAverageTemp+" FloorName:"+floorName+" ZoneName:"+zoneTitle+","+heatDeadband+","+coolDeadband);
@@ -1264,8 +1264,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         });
 
         double pointcurrTmep = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + p.getId() + "\"");
-        HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
-        HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
+        double pointbuildingMin = TunerUtil.readBuildingTunerValByQuery("building and limit and min");
+        double pointbuildingMax = TunerUtil.readBuildingTunerValByQuery("building and limit and max");
         /*if(pointcurrTmep == 0)
         {
             pointcurrTmep = 72;
@@ -1283,14 +1283,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         double pointheatDB = CCUHsApi.getInstance().readPointPriorityValByQuery("point and heating and deadband and base and equipRef == \"" + p.getId() + "\"");
         double pointcoolDB = CCUHsApi.getInstance().readPointPriorityValByQuery("point and cooling and deadband and base and equipRef == \"" + p.getId() + "\"");
 
-        float pointbuildingMin = (float)getPointVal(buildingMin.get("id").toString());
-        float pointbuildingMax = (float)getPointVal(buildingMax.get("id").toString());
+        //float pointbuildingMin = (float)getPointVal(buildingMin.get("id").toString());
+        //float pointbuildingMax = (float)getPointVal(buildingMax.get("id").toString());
 
         if(!seekArc.isDetailedView())
         {
-            seekArc.setData(false, pointbuildingMin, pointbuildingMax, (float)pointheatUL, (float)pointheatLL, (float)pointcoolLL, (float)pointcoolUL, (float)pointheatDT, (float) pointcoolDT, (float)pointcurrTmep, (float)pointheatDB, (float)pointcoolDB);
+            seekArc.setData(false, (float)pointbuildingMin, (float)pointbuildingMax, (float)pointheatUL, (float)pointheatLL, (float)pointcoolLL, (float)pointcoolUL, (float)pointheatDT, (float) pointcoolDT, (float)pointcurrTmep, (float)pointheatDB, (float)pointcoolDB);
         }else {
-            seekArc.setData(true, pointbuildingMin, pointbuildingMax, (float)pointheatUL, (float)pointheatLL, (float)pointcoolLL, (float)pointcoolUL, (float)pointheatDT, (float) pointcoolDT, (float)pointcurrTmep, (float)pointheatDB, (float)pointcoolDB);
+            seekArc.setData(true, (float)pointbuildingMin, (float)pointbuildingMax, (float)pointheatUL, (float)pointheatLL, (float)pointcoolLL, (float)pointcoolUL, (float)pointheatDT, (float) pointcoolDT, (float)pointcurrTmep, (float)pointheatDB, (float)pointcoolDB);
         }
 
         linearLayoutZonePoints.removeAllViews();

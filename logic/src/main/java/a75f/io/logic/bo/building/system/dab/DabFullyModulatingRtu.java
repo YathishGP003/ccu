@@ -215,7 +215,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                 } else {
                     signal = curSignal;
                 }
-                setCmdSignal("humidifier and relay7",signal * 100);
+                setCmdSignal("humidifier and relay7",signal);
                 //setCmdSignal("dehumidifier and relay7",0);
             } else {
                 //Dehumidification
@@ -227,7 +227,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                 } else {
                     signal = curSignal;
                 }
-                setCmdSignal("dehumidifier and relay7",signal * 100);
+                setCmdSignal("dehumidifier and relay7",signal);
                 //setCmdSignal("humidifier",0);
             }
             CcuLog.d(L.TAG_CCU_SYSTEM,"humidity :"+humidity+" targetMinHumidity: "+targetMinHumidity+" humidityHysteresis: "+humidityHysteresis+
@@ -360,7 +360,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                          .setSiteRef(siteRef)
                                          .setEquipRef(equipref)
                                          .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("relay7").addMarker("his").addMarker("equipHis")
-                                         .setUnit("%").setTz(tz)
+                                         .setTz(tz)
                                          .build();
         CCUHsApi.getInstance().addPoint(humidifierSignal);
         

@@ -425,7 +425,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
                                   .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("relay7").addMarker("his").addMarker("equipHis")
-                                  .setUnit("%").setTz(tz)
+                                  .setTz(tz)
                                   .build();
         CCUHsApi.getInstance().addPoint(humidifierSignal);
     

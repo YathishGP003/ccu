@@ -21,6 +21,7 @@ public class OAOTuners
                                              .setEquipRef(equipRef)
                                              .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                              .addMarker("co2").addMarker("damper").addMarker("opening").addMarker("rate")
+                                             .setMinVal("0").setMaxVal("200").setIncrementVal("10").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                              .setTz(tz)
                                              .build();
         String co2DamperOpeningRateId = hayStack.addPoint(co2DamperOpeningRate);
@@ -33,6 +34,7 @@ public class OAOTuners
                                                        .setEquipRef(equipRef)
                                                        .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                        .addMarker("enthalpy").addMarker("duct").addMarker("compensation").addMarker("offset")
+                                                       .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                        .setTz(tz)
                                                        .build();
         String enthalpyDuctCompensationOffsetId = hayStack.addPoint(enthalpyDuctCompensationOffset);
@@ -45,6 +47,7 @@ public class OAOTuners
                                                   .setEquipRef(equipRef)
                                                   .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                   .addMarker("economizing").addMarker("min").addMarker("temp")
+                                                  .setMinVal("-50").setMaxVal("80").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                   .setUnit("\u00B0F")
                                                   .setTz(tz)
                                                   .build();
@@ -58,6 +61,7 @@ public class OAOTuners
                                                   .setEquipRef(equipRef)
                                                   .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                   .addMarker("economizing").addMarker("max").addMarker("temp")
+                                                  .setMinVal("-50").setMaxVal("120").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                   .setUnit("\u00B0F")
                                                   .setTz(tz)
                                                   .build();
@@ -71,6 +75,7 @@ public class OAOTuners
                                                .setEquipRef(equipRef)
                                                .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                .addMarker("economizing").addMarker("min").addMarker("humidity")
+                                               .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                .setUnit("%")
                                                .setTz(tz)
                                                .build();
@@ -84,6 +89,7 @@ public class OAOTuners
                                                .setEquipRef(equipRef)
                                                .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                .addMarker("economizing").addMarker("max").addMarker("humidity")
+                                               .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                .setUnit("%")
                                                .setTz(tz)
                                                .build();
@@ -97,6 +103,7 @@ public class OAOTuners
                                                      .setEquipRef(equipRef)
                                                      .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                      .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("target")
+                                                     .setMinVal("30").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                      .setUnit("\u00B0F")
                                                      .setTz(tz)
                                                      .build();
@@ -110,6 +117,7 @@ public class OAOTuners
                                                       .setEquipRef(equipRef)
                                                       .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                       .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("min")
+                                                      .setMinVal("30").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                       .setUnit("\u00B0F")
                                                       .setTz(tz)
                                                       .build();
@@ -123,6 +131,7 @@ public class OAOTuners
                                                          .setEquipRef(equipRef)
                                                          .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                          .addMarker("economizing").addMarker("main").addMarker("cooling").addMarker("loop").addMarker("map")
+                                                         .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                          .setUnit("\u00B0F")
                                                          .setTz(tz)
                                                          .build();
@@ -140,6 +149,7 @@ public class OAOTuners
                                            .setEquipRef(equipref)
                                            .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                            .addMarker("co2").addMarker("damper").addMarker("opening").addMarker("rate")
+                                           .setMinVal("0").setMaxVal("200").setIncrementVal("10").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                            .setTz(tz)
                                            .build();
         String co2DamperOpeningRateId = hayStack.addPoint(co2DamperOpeningRate);
@@ -160,6 +170,7 @@ public class OAOTuners
                                              .setEquipRef(equipref)
                                              .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                              .addMarker("enthalpy").addMarker("duct").addMarker("compensation").addMarker("offset")
+                                             .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                              .setTz(tz)
                                              .build();
         String enthalpyDuctCompensationOffsetId = hayStack.addPoint(enthalpyDuctCompensationOffset);
@@ -180,6 +191,7 @@ public class OAOTuners
                                                        .setEquipRef(equipref)
                                                        .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                        .addMarker("economizing").addMarker("min").addMarker("temp")
+                                                       .setMinVal("-50").setMaxVal("80").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                        .setUnit("\u00B0F")
                                                        .setTz(tz)
                                                        .build();
@@ -201,6 +213,7 @@ public class OAOTuners
                                                   .setEquipRef(equipref)
                                                   .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                   .addMarker("economizing").addMarker("max").addMarker("temp")
+                                                  .setMinVal("-50").setMaxVal("120").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                   .setUnit("\u00B0F")
                                                   .setTz(tz)
                                                   .build();
@@ -222,6 +235,7 @@ public class OAOTuners
                                                   .setEquipRef(equipref)
                                                   .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                   .addMarker("economizing").addMarker("min").addMarker("humidity")
+                                                  .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                   .setUnit("%")
                                                   .setTz(tz)
                                                   .build();
@@ -243,6 +257,7 @@ public class OAOTuners
                                                .setEquipRef(equipref)
                                                .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                .addMarker("economizing").addMarker("max").addMarker("humidity")
+                                               .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                .setUnit("%")
                                                .setTz(tz)
                                                .build();
@@ -264,6 +279,7 @@ public class OAOTuners
                                                .setEquipRef(equipref)
                                                .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("target")
+                                               .setMinVal("30").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                .setUnit("\u00B0F")
                                                .setTz(tz)
                                                .build();
@@ -285,6 +301,7 @@ public class OAOTuners
                                                     .setEquipRef(equipref)
                                                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                     .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("minimum")
+                                                    .setMinVal("30").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                     .setUnit("\u00B0F")
                                                     .setTz(tz)
                                                     .build();
@@ -306,6 +323,7 @@ public class OAOTuners
                                                      .setEquipRef(equipref)
                                                      .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                      .addMarker("economizing").addMarker("main").addMarker("cooling").addMarker("loop").addMarker("map")
+                                                     .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                      .setUnit("%")
                                                      .setTz(tz)
                                                      .build();

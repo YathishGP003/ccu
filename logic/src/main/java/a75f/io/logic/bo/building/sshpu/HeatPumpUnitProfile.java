@@ -564,11 +564,13 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                             setCmdSignal("fan and stage1",0,addr);
                             setCmdSignal("fan and stage2",0,addr);
                             break;
+                        case FAN_LOW_ALL_TIMES:
                         case FAN_LOW_CURRENT_OCCUPIED:
                         case FAN_LOW_OCCUPIED:
                             relayStages.put("FanStage1",1);
                             setCmdSignal("fan and stage1",1.0,addr);
                             break;
+                        case FAN_HIGH_ALL_TIMES:
                         case FAN_HIGH_CURRENT_OCCUPIED:
                         case FAN_HIGH_OCCUPIED:
 
@@ -832,6 +834,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                             setCmdSignal("fan and stage1",0,addr);
                             setCmdSignal("fan and stage2",0,addr);
                             break;
+                        case FAN_LOW_ALL_TIMES:
                         case FAN_LOW_CURRENT_OCCUPIED:
                         case FAN_LOW_OCCUPIED:
                             if(isFanStage1Enabled) {
@@ -839,6 +842,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                                 setCmdSignal("fan and stage1", 1.0, addr);
                             }
                             break;
+                        case FAN_HIGH_ALL_TIMES:
                         case FAN_HIGH_CURRENT_OCCUPIED:
                         case FAN_HIGH_OCCUPIED:
                             if(isFanStage1Enabled) {

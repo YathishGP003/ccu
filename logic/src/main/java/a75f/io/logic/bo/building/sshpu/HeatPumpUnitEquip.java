@@ -642,6 +642,21 @@ public class HeatPumpUnitEquip{
                 .build();
         String enableOccupancyControlId = CCUHsApi.getInstance().addPoint(enableOccupancyControl);
         CCUHsApi.getInstance().writeDefaultValById(enableOccupancyControlId, config.enableOccupancyControl == true ? 1.0 : 0);
+        if(config.enableOccupancyControl){
+            Point occupancyDetection = new Point.Builder()
+                    .setDisplayName(equipDis+"-occupancyDetection")
+                    .setEquipRef(equipRef)
+                    .setSiteRef(siteRef)
+                    .setRoomRef(room)
+                    .setFloorRef(floor)
+                    .addMarker("occupancy").addMarker("detection").addMarker("hpu").addMarker("his").addMarker("zone").addMarker("equipHis")
+                    .setGroup(String.valueOf(nodeAddr))
+                    .setEnums("false,true")
+                    .setTz(tz)
+                    .build();
+            String occupancyDetectionId = CCUHsApi.getInstance().addPoint(occupancyDetection);
+            CCUHsApi.getInstance().writeHisValById(occupancyDetectionId, 0.0);
+        }
 
         Point temperatureOffset = new Point.Builder()
                 .setDisplayName(equipDis+"-temperatureOffset")
@@ -974,6 +989,25 @@ public class HeatPumpUnitEquip{
 
         }
 
+        if(config.enableOccupancyControl){
+            Point occupancyDetection = new Point.Builder()
+                    .setDisplayName(equipDis+"-occupancyDetection")
+                    .setEquipRef(equip.getId())
+                    .setSiteRef(siteRef)
+                    .setRoomRef(equip.getRoomRef())
+                    .setFloorRef(equip.getFloorRef())
+                    .addMarker("occupancy").addMarker("detection").addMarker("hpu").addMarker("his").addMarker("zone").addMarker("equipHis")
+                    .setGroup(String.valueOf(nodeAddr))
+                    .setEnums("false,true")
+                    .setTz(tz)
+                    .build();
+            String occupancyDetectionId = CCUHsApi.getInstance().addPoint(occupancyDetection);
+            CCUHsApi.getInstance().writeHisValById(occupancyDetectionId, 0.0);
+        }else {
+            HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and hpu and his and equipRef== \"" + equip.getId() + "\"");
+            if ((occDetPoint != null) && (occDetPoint.size() > 0))
+                CCUHsApi.getInstance().deleteEntityTree(occDetPoint.get("id").toString());
+        }
         setConfigNumVal("enable and relay1",config.enableRelay1 == true ? 1.0 : 0);
         setConfigNumVal("enable and relay2",config.enableRelay2 == true ? 1.0 : 0);
         setConfigNumVal("enable and relay3",config.enableRelay3 == true ? 1.0 : 0);

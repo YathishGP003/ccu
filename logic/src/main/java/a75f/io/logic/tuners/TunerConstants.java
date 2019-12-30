@@ -58,7 +58,7 @@ public class TunerConstants
     public static final double ZONE_HEATING_USERLIMIT_MAX = 67;
     public static final double ZONE_COOLING_USERLIMIT_MIN = 72;
     public static final double ZONE_COOLING_USERLIMIT_MAX = 77;
-    
+
     
     public static final double SYSTEM_PRECONDITION_RATE = 15.0;
     public static final double USER_LIMIT_SPREAD = 4;
@@ -67,7 +67,7 @@ public class TunerConstants
     public static final double BUILDING_TO_ZONE_DIFFERENTIAL = 3;
     public static final double ZONE_TEMP_DEAD_LEEWAY = 10;
     public static final double CM_TEMP_INFLU_PERCENTILE_ZONE_DEAD = 50;
-    
+
     public static final double MIN_COOLING_DAMPER = 40;
     public static final double MAX_COOLING_DAMPER = 80;
     public static final double MIN_HEATING_DAMPER = 40;

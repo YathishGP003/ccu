@@ -649,10 +649,10 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         ZoneTempState temperatureState = ZoneTempState.NONE;
         if(buildingLimitMinBreached() ||  buildingLimitMaxBreached() )
             temperatureState = ZoneTempState.EMERGENCY;
-        state = relayStages.size() > 0 ?  (relayStages.containsKey("CoolingStage") ? COOLING : DEADBAND ) : DEADBAND;
-        StandaloneScheduler.updateSmartStatStatus(equipId, state, relayStages,temperatureState);
-        if(hpuEquip.getStatus() != state.ordinal())
-            hpuEquip.setStatus(state.ordinal());
+        ZoneState curstate = relayStages.size() > 0 ?  (relayStages.containsKey("CoolingStage1") ? COOLING : DEADBAND ) : DEADBAND;
+        StandaloneScheduler.updateSmartStatStatus(equipId, curstate, relayStages,temperatureState);
+        if(hpuEquip.getStatus() != curstate.ordinal())
+            hpuEquip.setStatus(curstate.ordinal());
     }
     private void hpuHeatOnlyMode(HeatPumpUnitEquip hpuEquip,String equipId, double curTemp, Occupied occuStatus,Short addr, StandaloneLogicalFanSpeeds fanSpeed){
         double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equipId);
@@ -925,10 +925,10 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         ZoneTempState temperatureState = ZoneTempState.NONE;
         if(buildingLimitMinBreached() ||  buildingLimitMaxBreached() )
             temperatureState = ZoneTempState.EMERGENCY;
-        state = relayStages.size() > 0 ?  (relayStages.containsKey("HeatingStage") ? HEATING : DEADBAND ) : DEADBAND;
-        StandaloneScheduler.updateSmartStatStatus(equipId, state, relayStages,temperatureState);
-        if(hpuEquip.getStatus() != state.ordinal())
-            hpuEquip.setStatus(state.ordinal());
+        ZoneState curstate = relayStages.size() > 0 ?  (relayStages.containsKey("HeatingStage1") ? HEATING : DEADBAND ) : DEADBAND;
+        StandaloneScheduler.updateSmartStatStatus(equipId, curstate, relayStages,temperatureState);
+        if(hpuEquip.getStatus() != curstate.ordinal())
+            hpuEquip.setStatus(curstate.ordinal());
 
     }
     public void updateHumidityStatus(int fanStage2Type, Short addr,String equipId, double curValue, HashMap<String,Integer> relayStages){

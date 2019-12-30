@@ -170,7 +170,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         textViewaddEntryIcon = rootView.findViewById(R.id.addEntryIcon);
         mVacationLayout = rootView.findViewById(R.id.constraintLt_Vacations);
         scheduleScrollView = rootView.findViewById(R.id.scheduleScrollView);
-
+        scheduleScrollView.post(() -> scheduleScrollView.smoothScrollTo(0,0));
         textViewaddEntryIcon.setTypeface(iconFont);
         textViewaddEntryIcon.setText(getString(R.string.icon_plus));
 
@@ -432,6 +432,8 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         }
         
         if(vacations != null) {
+            Collections.sort(vacations, (lhs, rhs) -> lhs.getStartDate().compareTo(rhs.getStartDate()));
+            Collections.sort(vacations, (lhs, rhs) -> lhs.getEndDate().compareTo(rhs.getEndDate()));
             mVacationAdapter = new VacationAdapter(vacations, mEditOnClickListener, mDeleteOnClickListener);
             mVacationRecycler.setAdapter(mVacationAdapter);
             mVacationRecycler.setLayoutManager(new LinearLayoutManager(this.getContext()));

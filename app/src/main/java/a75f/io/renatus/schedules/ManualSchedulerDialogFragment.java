@@ -147,7 +147,8 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         npStartTime.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         npStartTime.setVisibility(View.VISIBLE);
         npStartTime.setWrapSelectorWheel(false);
-        npStartTime.setFormatter(value -> TimeUtils.valToTime(value));
+        npStartTime.setFormatter(TimeUtils::valToTime);
+        npStartTime.setOnLongClickListener(view13 -> true);
 
         try {
             Method method = npStartTime.getClass().getDeclaredMethod("changeValueByOne", boolean.class);
@@ -164,8 +165,8 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         npEndTime.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         npEndTime.setVisibility(View.VISIBLE);
         npEndTime.setWrapSelectorWheel(false);
-
-        npEndTime.setFormatter(value -> TimeUtils.valToTime(value));
+        npEndTime.setOnLongClickListener(view13 -> true);
+        npEndTime.setFormatter(TimeUtils::valToTime);
 
         try {
             Method method = npEndTime.getClass().getDeclaredMethod("changeValueByOne", boolean.class);

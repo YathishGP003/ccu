@@ -61,7 +61,7 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.ViewHo
             Date today = new Date(System.currentTimeMillis());
             viewHolder.mEndDate.setText(outputFormat.format(endDate));
             viewHolder.mStartDate.setText(outputFormat.format(startDate));
-            if ((new DateTime(today).dayOfYear().get()) > (new DateTime(endDate).dayOfYear().get())) {
+            if (today.after(endDate)) {
                 viewHolder.mVacationEdit.setVisibility(View.INVISIBLE);
             }
         } catch (ParseException e) {

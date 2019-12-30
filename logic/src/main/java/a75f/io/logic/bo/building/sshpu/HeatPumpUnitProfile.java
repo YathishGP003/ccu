@@ -549,6 +549,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             if(curTemp <= (setTempCooling - hysteresis)){
                 //Turn off stage1
                 setCmdSignal("compressor and stage1",0,addr);
+                setCmdSignal("compressor and stage2",0,addr);
                 switch (hpChangeOverType){
                     case ENERGIZE_IN_HEATING:
                         if(getCmdSignal("changeover and heating and stage1",addr) > 0)

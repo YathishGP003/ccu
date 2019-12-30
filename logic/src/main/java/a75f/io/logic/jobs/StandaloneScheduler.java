@@ -181,6 +181,7 @@ public class StandaloneScheduler {
                 status = status + " Fan OFF";
         }
         if(equipId != null) {
+            CCUHsApi.getInstance().writeHisValByQuery("point and temp and operating and mode and his and equipRef == \""+equipId+"\"" , (double)state.ordinal());
             if(getSmartStatStatusString(equipId).equals(status) == false) {
                 if(standaloneStatus.containsKey(equipId))standaloneStatus.remove(equipId);
                 standaloneStatus.put(equipId, status);
@@ -239,7 +240,6 @@ public class StandaloneScheduler {
     }
 
 	public static void updateStandaloneEquipStatus(String equipId,String status, ZoneState state) {
-        CCUHsApi.getInstance().writeHisValByQuery("point and temp and operating and mode and his and equipRef == \""+equipId+"\"" , (double)state.ordinal());
         CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and equipRef == \""+equipId+"\"", status);
         if (zoneDataInterface != null) {
             Log.i("PubNub","updateStandaloneEquipStatus Refresh");

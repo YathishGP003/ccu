@@ -932,7 +932,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             temperatureState = ZoneTempState.EMERGENCY;
         ZoneState curstate = relayStages.size() > 0 ?  (relayStages.containsKey("HeatingStage1") ? HEATING : DEADBAND ) : DEADBAND;
         StandaloneScheduler.updateSmartStatStatus(equipId, curstate, relayStages,temperatureState);
-        if(hpuEquip.getStatus() != curstate.ordinal())
+        //if(hpuEquip.getStatus() != curstate.ordinal())
             hpuEquip.setStatus(curstate.ordinal());
 
     }

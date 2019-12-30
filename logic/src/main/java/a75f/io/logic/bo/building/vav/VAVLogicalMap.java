@@ -548,7 +548,7 @@ public class VAVLogicalMap
                                     .setSiteRef(siteRef)
                                     .setRoomRef(room)
                                     .setFloorRef(floor)
-                                    .addMarker("vav").addMarker("occupancy").addMarker("mode").addMarker("zone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                    .addMarker("vav").addMarker("occupancy").addMarker("mode").addMarker("zone").addMarker("his").addMarker("equipHis")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
                                     .setTz(tz)

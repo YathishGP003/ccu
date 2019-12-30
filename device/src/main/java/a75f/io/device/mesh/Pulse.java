@@ -610,6 +610,14 @@ public class Pulse
 			SmartNodeSensorReading_t[] sensorReadings = smartStatRegularUpdateMessage_t.update.sensorReadings;
 			if (sensorReadings.length > 0) {
 				handleSmartStatSensorEvents(sensorReadings, nodeAddr, deviceInfo, occupancyDetected );
+			}else if(occupancyDetected > 0){
+
+				SmartStat node = new SmartStat(nodeAddr);
+				RawPoint sp = node.getRawPoint(Port.SENSOR_OCCUPANCY);
+				if(sp == null)
+					sp = node.addSensor(Port.SENSOR_OCCUPANCY);
+
+				updateOccupancyStatus(sp,occupancyDetected, deviceInfo,nodeAddr);
 			}
 			//Write Current temp point based on th2 enabled or not, except for 2pfcud
             double oldCurTempVal = hayStack.readHisValById(logicalCurTempPoint);
@@ -939,6 +947,9 @@ public class Pulse
 					updateSmartStatDesiredTemp(addr, dt, false);
 				}
 			}
+			HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and his and equipRef== \"" + device.getEquipRef() + "\"");
+			if ((occDetPoint != null) && (occDetPoint.size() > 0))
+				CCUHsApi.getInstance().writeHisValById(occDetPoint.get("id").toString(),val);
 		}
 		CCUHsApi.getInstance().writeHisValById(sp.getId(), val);
 		CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), val);

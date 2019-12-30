@@ -295,7 +295,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("equipHis").addMarker("cur").addMarker("supply")
+                .addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("equipHis").addMarker("cur").addMarker("discharge")
                 .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("th1").addMarker("his").addMarker("logical").addMarker("zone")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")
@@ -563,6 +563,22 @@ public class TwoPipeFanCoilUnitEquip {
         String enableOccupancyControlId = CCUHsApi.getInstance().addPoint(enableOccupancyControl);
         CCUHsApi.getInstance().writeDefaultValById(enableOccupancyControlId, config.enableOccupancyControl == true ? 1.0 : 0);
 
+        if(config.enableOccupancyControl){
+
+            Point occupancyDetection = new Point.Builder()
+                    .setDisplayName(equipDis+"-occupancyDetection")
+                    .setEquipRef(equipRef)
+                    .setSiteRef(siteRef)
+                    .setRoomRef(room)
+                    .setFloorRef(floor)
+                    .addMarker("occupancy").addMarker("detection").addMarker("fcu").addMarker(profile).addMarker("his").addMarker("zone").addMarker("equipHis")
+                    .setGroup(String.valueOf(nodeAddr))
+                    .setEnums("false,true")
+                    .setTz(tz)
+                    .build();
+            String occupancyDetectionId = CCUHsApi.getInstance().addPoint(occupancyDetection);
+            CCUHsApi.getInstance().writeHisValById(occupancyDetectionId, 0.0);
+        }
         Point temperatureOffset = new Point.Builder()
                 .setDisplayName(equipDis+"-temperatureOffset")
                 .setEquipRef(equipRef)
@@ -729,6 +745,33 @@ public class TwoPipeFanCoilUnitEquip {
         SmartStat.setPointEnabled(nodeAddr, Port.TH1_IN.name(),config.enableThermistor1);
         SmartStat.setPointEnabled(nodeAddr, Port.TH2_IN.name(), config.enableThermistor2);
 
+
+        HashMap equipHash = CCUHsApi.getInstance().read("equip and group == \"" + config.getNodeAddress() + "\"");
+        Equip equip = new Equip.Builder().setHashMap(equipHash).build();
+        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        String siteRef = (String) siteMap.get(Tags.ID);
+        String siteDis = (String) siteMap.get("dis");
+        String tz = siteMap.get("tz").toString();
+        String equipDis = siteDis + "-HPU-" + nodeAddr;
+        if(config.enableOccupancyControl){
+            Point occupancyDetection = new Point.Builder()
+                    .setDisplayName(equipDis+"-occupancyDetection")
+                    .setEquipRef(equip.getId())
+                    .setSiteRef(siteRef)
+                    .setRoomRef(equip.getRoomRef())
+                    .setFloorRef(equip.getFloorRef())
+                    .addMarker("occupancy").addMarker("detection").addMarker("fcu").addMarker("pipe2").addMarker("his").addMarker("zone").addMarker("equipHis")
+                    .setGroup(String.valueOf(nodeAddr))
+                    .setEnums("false,true")
+                    .setTz(tz)
+                    .build();
+            String occupancyDetectionId = CCUHsApi.getInstance().addPoint(occupancyDetection);
+            CCUHsApi.getInstance().writeHisValById(occupancyDetectionId, 0.0);
+        }else {
+            HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and fcu and pipe2 and his and equipRef== \"" + equip.getId() + "\"");
+            if ((occDetPoint != null) && (occDetPoint.size() > 0))
+                CCUHsApi.getInstance().deleteEntityTree(occDetPoint.get("id").toString());
+        }
         setConfigNumVal("enable and relay1",config.enableRelay1 == true ? 1.0 : 0);
         setConfigNumVal("enable and relay2",config.enableRelay2 == true ? 1.0 : 0);
         setConfigNumVal("enable and relay3",config.enableRelay3 == true ? 1.0 : 0);

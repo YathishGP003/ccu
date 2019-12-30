@@ -256,7 +256,7 @@ public class SingleStageEquip {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("zone").addMarker("sse").addMarker("supply")
+                .addMarker("zone").addMarker("sse").addMarker("discharge")
                 .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")

@@ -620,7 +620,7 @@ public class HeatPumpUnitEquip{
     }
 
     public void setProfilePoint(String tags, double val) {
-        CCUHsApi.getInstance().writeHisValByQuery("point and zone and standalone and his and "+tags, val);
+        CCUHsApi.getInstance().writeHisValByQuery("point and zone and standalone and his and "+tags+" and group == \""+nodeAddr+"\"", val);
     }
     public void createHeatPumpConfigPoints(HeatPumpUnitConfiguration config, String equipRef, String floor, String room) {
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);

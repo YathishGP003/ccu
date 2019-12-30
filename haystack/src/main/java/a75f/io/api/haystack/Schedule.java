@@ -530,6 +530,9 @@ public class Schedule extends Entity
             if (startDateTime.isAfter(endDateTime))
             {
                 if (day.getDay() == DAYS.SUNDAY.ordinal()) {
+                    if (startDateTime.getWeekOfWeekyear() >= 52){
+                        scheduledInterval = new Interval(startDateTime, endDateTime.plusDays(1));
+                    } else
                     scheduledInterval = new Interval(startDateTime, endDateTime.withWeekOfWeekyear(startDateTime.getWeekOfWeekyear()+1)
                                                                                .withDayOfWeek(DAYS.values()[day.getDay()].getNextDay().ordinal() + 1));
                 } else {

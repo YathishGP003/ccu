@@ -290,7 +290,7 @@ public class HeatPumpUnitEquip{
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker(profile).addMarker("equipHis").addMarker("cur").addMarker("supply")
+                .addMarker("standalone").addMarker(profile).addMarker("equipHis").addMarker("cur").addMarker("discharge")
                 .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("th1").addMarker("his").addMarker("logical").addMarker("zone")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")

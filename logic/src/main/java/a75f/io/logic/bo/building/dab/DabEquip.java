@@ -350,7 +350,7 @@ public class DabEquip
                                   .setSiteRef(siteRef)
                                   .setRoomRef(roomRef)
                                   .setFloorRef(floorRef)
-                                  .addMarker("dab").addMarker("occupancy").addMarker("mode").addMarker("zone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                  .addMarker("dab").addMarker("occupancy").addMarker("mode").addMarker("zone").addMarker("his").addMarker("equipHis")
                                   .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
                                   .setGroup(String.valueOf(nodeAddr))
                                   .setTz(tz)

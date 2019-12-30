@@ -289,7 +289,7 @@ public class ConventionalUnitLogicalMap {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker(profile).addMarker("equipHis").addMarker("supply")
+                .addMarker("standalone").addMarker(profile).addMarker("equipHis").addMarker("discharge")
                 .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("th1").addMarker("his").addMarker("cur").addMarker("logical").addMarker("zone")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")

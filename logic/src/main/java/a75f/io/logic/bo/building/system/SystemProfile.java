@@ -287,19 +287,19 @@ public abstract class SystemProfile
             }
         }
 
-        Point stagenAirflowSampleWaitTime = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stagenAirflowSampleWaitTime").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stagen").addMarker("airflow").addMarker("sample").addMarker("wait").addMarker("time").addMarker("sp").addMarker("equipHis")
+        Point airflowSampleWaitTime = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "airflowSampleWaitTime").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("airflow").addMarker("sample").addMarker("wait").addMarker("time").addMarker("sp").addMarker("equipHis")
                 .setMinVal("1").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("m")
                 .setTz(tz).build();
-        String stagenAirflowSampleWaitTimeId = hayStack.addPoint(stagenAirflowSampleWaitTime);
-        HashMap stagenAirflowSampleWaitTimePoint = hayStack.read("point and tuner and default and stagen and airflow and sample and wait and time");
-        ArrayList<HashMap> stagenAirflowSampleWaitTimeArr = hayStack.readPoint(stagenAirflowSampleWaitTimePoint.get("id").toString());
-        for (HashMap valMap : stagenAirflowSampleWaitTimeArr)
+        String airflowSampleWaitTimeId = hayStack.addPoint(airflowSampleWaitTime);
+        HashMap airflowSampleWaitTimePoint = hayStack.read("point and tuner and default and airflow and sample and wait and time");
+        ArrayList<HashMap> airflowSampleWaitTimeArr = hayStack.readPoint(airflowSampleWaitTimePoint.get("id").toString());
+        for (HashMap valMap : airflowSampleWaitTimeArr)
         {
             if (valMap.get("val") != null)
             {
-                hayStack.pointWrite(HRef.copy(stagenAirflowSampleWaitTimeId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(stagenAirflowSampleWaitTimeId, Double.parseDouble(valMap.get("val").toString()));
+                hayStack.pointWrite(HRef.copy(airflowSampleWaitTimeId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                hayStack.writeHisValById(airflowSampleWaitTimeId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
 
@@ -655,11 +655,11 @@ public abstract class SystemProfile
             }
         }
 
-        Point ccuAlarmVolumeLevel = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "ccuAlarmVolumeLevel").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("ccu").addMarker("alarm").addMarker("volume").addMarker("level").addMarker("sp").addMarker("equipHis")
+        Point ccuAlarmVolumeLevel = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "ccuAlarmVolumeLevel").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("alarm").addMarker("volume").addMarker("level").addMarker("sp").addMarker("equipHis")
                 .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz).build();
         String ccuAlarmVolumeLevelId = hayStack.addPoint(ccuAlarmVolumeLevel);
-        HashMap ccuAlarmVolumeLevelPoint = hayStack.read("point and tuner and default and ccu and alarm and volume and level");
+        HashMap ccuAlarmVolumeLevelPoint = hayStack.read("point and tuner and default and alarm and volume and level");
         ArrayList<HashMap> ccuAlarmVolumeLevelArr = hayStack.readPoint(ccuAlarmVolumeLevelPoint.get("id").toString());
         for (HashMap valMap : ccuAlarmVolumeLevelArr)
         {
@@ -671,7 +671,7 @@ public abstract class SystemProfile
         }
 
         Point cmHeartBeatInterval = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "cmHeartBeatInterval").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("cm").addMarker("heart").addMarker("beat").addMarker("interval").addMarker("level").addMarker("sp").addMarker("equipHis")
-                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("m")
                 .setTz(tz).build();
         String cmHeartBeatIntervalId = hayStack.addPoint(cmHeartBeatInterval);
@@ -687,7 +687,7 @@ public abstract class SystemProfile
         }
 
         Point heartBeatsToSkip = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "heartBeatsToSkip").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("heart").addMarker("beats").addMarker("to").addMarker("skip").addMarker("sp").addMarker("equipHis")
-                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("3").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz).build();
         String heartBeatsToSkipId = hayStack.addPoint(heartBeatsToSkip);
         HashMap heartBeatsToSkipPoint = hayStack.read("point and tuner and default and heart and beats and to and skip");
@@ -786,8 +786,6 @@ public abstract class SystemProfile
         String rebalanceHoldTimeId = hayStack.addPoint(rebalanceHoldTime);
         hayStack.writePoint(rebalanceHoldTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 20.0, 0);
         hayStack.writeHisValById(rebalanceHoldTimeId, 20.0);
-
-        addDefaultDabSystemTuners();
     }
     
     public void updateGatewayRef(String systemEquipId)

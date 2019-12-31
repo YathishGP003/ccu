@@ -729,19 +729,19 @@ public class BuildingTuners
         hayStack.writePoint(abnormalCurTempRiseTriggerId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 4.0, 0);
         hayStack.writeHisValById(abnormalCurTempRiseTriggerId, 4.0);
 
-        Point stageNAirflowSampleWaitTime  = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"stagenAirflowSampleWaitTime")
+        Point airflowSampleWaitTime  = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"airflowSampleWaitTime")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .addMarker("stagen").addMarker("airflow").addMarker("sample").addMarker("wait").addMarker("time").addMarker("sp")
+                .addMarker("airflow").addMarker("sample").addMarker("wait").addMarker("time").addMarker("sp")
                 .setMinVal("1").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("m")
                 .setTz(tz)
                 .build();
-        String stageNAirflowSampleWaitTimeId = hayStack.addPoint(stageNAirflowSampleWaitTime);
-        hayStack.writePoint(stageNAirflowSampleWaitTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 100.0, 0);
-        hayStack.writeHisValById(stageNAirflowSampleWaitTimeId, 100.0);
+        String airflowSampleWaitTimeId = hayStack.addPoint(airflowSampleWaitTime);
+        hayStack.writePoint(airflowSampleWaitTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 100.0, 0);
+        hayStack.writeHisValById(airflowSampleWaitTimeId, 100.0);
 
         Point stage1CoolingAirflowTempLowerOffset  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"stage1CoolingAirflowTempLowerOffset")
@@ -1084,7 +1084,7 @@ public class BuildingTuners
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .addMarker("ccu").addMarker("alarm").addMarker("volume").addMarker("level").addMarker("sp")
+                .addMarker("alarm").addMarker("volume").addMarker("level").addMarker("sp")
                 .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz)
                 .build();
@@ -1111,7 +1111,7 @@ public class BuildingTuners
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .addMarker("heart").addMarker("beat").addMarker("to").addMarker("skip").addMarker("sp")
+                .addMarker("heart").addMarker("beats").addMarker("to").addMarker("skip").addMarker("sp")
                 .setMinVal("3").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz)
                 .build();
@@ -3382,6 +3382,54 @@ public class BuildingTuners
             }
         }
         hayStack.writeHisValById(standaloneAirflowSampleWaitTimeId, HSUtil.getPriorityVal(standaloneAirflowSampleWaitTimeId));
+
+        Point sa2PfcHeatingThreshold = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"2PipeFancoilHeatingThreshold")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("standalone").addMarker("heating").addMarker("threshold").addMarker("pipe2").addMarker("fcu").addMarker("sp")
+                .setMinVal("70").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String sa2PfcHeatingThresholdId = hayStack.addPoint(sa2PfcHeatingThreshold);
+        HashMap sa2PfcHeatingThresholdPoint = hayStack.read("point and tuner and default and base and standalone and heating and threshold and pipe2 and fcu");
+        ArrayList<HashMap> sa2PfcHeatingThresholdArr = hayStack.readPoint(sa2PfcHeatingThresholdPoint.get("id").toString());
+        for (HashMap valMap : sa2PfcHeatingThresholdArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(sa2PfcHeatingThresholdId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(sa2PfcHeatingThresholdId, HSUtil.getPriorityVal(sa2PfcHeatingThresholdId));
+
+        Point sa2PfcCoolingThreshold = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"2PipeFancoilCoolingThreshold")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("standalone").addMarker("cooling").addMarker("threshold").addMarker("pipe2").addMarker("fcu").addMarker("sp")
+                .setMinVal("45").setMaxVal("70").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String sa2PfcCoolingThresholdId = hayStack.addPoint(sa2PfcCoolingThreshold);
+        HashMap sa2PfcCoolingThresholdPoint = hayStack.read("point and tuner and default and base and standalone and cooling and threshold and pipe2 and fcu");
+        ArrayList<HashMap> sa2PfcCoolingThresholdArr = hayStack.readPoint(sa2PfcCoolingThresholdPoint.get("id").toString());
+        for (HashMap valMap : sa2PfcCoolingThresholdArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(sa2PfcCoolingThresholdId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(sa2PfcCoolingThresholdId, HSUtil.getPriorityVal(sa2PfcCoolingThresholdId));
     }
     public void addEquipStandaloneTuners(String equipdis, String equipref, String roomRef, String floorRef){
         addEquipZoneTuners(equipdis,equipref, roomRef, floorRef);

@@ -623,22 +623,6 @@ public abstract class SystemProfile
             }
         }
 
-        Point rebalanceHoldTime = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "rebalanceHoldTime").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("rebalance").addMarker("hold").addMarker("time").addMarker("sp").addMarker("equipHis")
-                .setMaxVal("1").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
-                .setUnit("m")
-                .setTz(tz).build();
-        String rebalanceHoldTimeId = hayStack.addPoint(rebalanceHoldTime);
-        HashMap rebalanceHoldTimePoint = hayStack.read("point and tuner and default and rebalance and hold and time");
-        ArrayList<HashMap> rebalanceHoldTimeArr = hayStack.readPoint(rebalanceHoldTimePoint.get("id").toString());
-        for (HashMap valMap : rebalanceHoldTimeArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(rebalanceHoldTimeId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(rebalanceHoldTimeId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
-
         Point clockUpdateInterval = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "clockUpdateInterval").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("clock").addMarker("update").addMarker("interval").addMarker("sp").addMarker("equipHis")
                 .setMinVal("1").setMaxVal("120").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("m")
@@ -788,6 +772,20 @@ public abstract class SystemProfile
         String humidityCompensationOffsetId = hayStack.addPoint(humidityCompensationOffset);
         hayStack.writePoint(humidityCompensationOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
         hayStack.writeHisValById(humidityCompensationOffsetId, 0.0);
+
+        Point rebalanceHoldTime = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"rebalanceHoldTime")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("system").addMarker("rebalance").addMarker("hold").addMarker("time").addMarker("sp")
+                .setMinVal("1").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                .setUnit("m")
+                .setTz(tz)
+                .build();
+        String rebalanceHoldTimeId = hayStack.addPoint(rebalanceHoldTime);
+        hayStack.writePoint(rebalanceHoldTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 20.0, 0);
+        hayStack.writeHisValById(rebalanceHoldTimeId, 20.0);
 
         addDefaultDabSystemTuners();
     }

@@ -660,7 +660,7 @@ public class BuildingTuners
         hayStack.writeHisValById(adrHeatingDeadbandId, 3.0);
 
         Point snCoolingAirflowTemperature  = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"snCoolingAirflowTemperature")
+                .setDisplayName(equipDis+"-"+"snCoolingAirflowTemp")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -674,7 +674,7 @@ public class BuildingTuners
         hayStack.writeHisValById(snCoolingAirflowTemperatureId, 60.0);
 
         Point snHeatingAirflowTemperature  = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"snHeatingAirflowTemperature")
+                .setDisplayName(equipDis+"-"+"snHeatingAirflowTemp")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -706,7 +706,7 @@ public class BuildingTuners
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .addMarker("constant").addMarker("temp").addMarker("alert").addMarker("timer").addMarker("sp")
+                .addMarker("constant").addMarker("temp").addMarker("alert").addMarker("time").addMarker("sp")
                 .setMinVal("0").setMaxVal("360").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("m")
                 .setTz(tz)
@@ -1598,6 +1598,270 @@ public class BuildingTuners
         }
         hayStack.writeHisValById(coolingUserLimitMaxId, HSUtil.getPriorityVal(coolingUserLimitMaxId));
         */
+
+        Point zoneDeadTime = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"zoneDeadTime")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("1").setMaxVal("15").setIncrementVal("1").setTunerGroup(TunerConstants.TIMER_TUNER)
+                .addMarker("zone").addMarker("dead").addMarker("time").addMarker("sp")
+                .setUnit("m")
+                .setTz(tz)
+                .build();
+        String zoneDeadTimeId = hayStack.addPoint(zoneDeadTime);
+        HashMap zoneDeadTimePoint = hayStack.read("point and tuner and default and zone and dead and time");
+        ArrayList<HashMap> zoneDeadTimeArr = hayStack.readPoint(zoneDeadTimePoint.get("id").toString());
+        for (HashMap valMap : zoneDeadTimeArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(zoneDeadTimeId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(zoneDeadTimeId, HSUtil.getPriorityVal(zoneDeadTimeId));
+
+        Point autoAwayTime = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"autoAwayTime")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("40").setMaxVal("300").setIncrementVal("5").setTunerGroup(TunerConstants.TIMER_TUNER)
+                .addMarker("zone").addMarker("auto").addMarker("away").addMarker("time").addMarker("sp")
+                .setUnit("m")
+                .setTz(tz)
+                .build();
+        String autoAwayTimeId = hayStack.addPoint(autoAwayTime);
+        HashMap autoAwayTimePoint = hayStack.read("point and tuner and default and zone and auto and away and time");
+        ArrayList<HashMap> autoAwayTimeArr = hayStack.readPoint(autoAwayTimePoint.get("id").toString());
+        for (HashMap valMap : autoAwayTimeArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(autoAwayTimeId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(autoAwayTimeId, HSUtil.getPriorityVal(autoAwayTimeId));
+
+        Point forcedOccupiedTime = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"forcedOccupiedTime")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("30").setMaxVal("300").setIncrementVal("10").setTunerGroup(TunerConstants.TIMER_TUNER)
+                .addMarker("zone").addMarker("forced").addMarker("occupied").addMarker("time").addMarker("sp")
+                .setUnit("m")
+                .setTz(tz)
+                .build();
+        String forcedOccupiedTimeId = hayStack.addPoint(forcedOccupiedTime);
+        HashMap forcedOccupiedTimePoint = hayStack.read("point and tuner and default and zone and forced and occupied and time");
+        ArrayList<HashMap> forcedOccupiedTimeArr = hayStack.readPoint(forcedOccupiedTimePoint.get("id").toString());
+        for (HashMap valMap : forcedOccupiedTimeArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(forcedOccupiedTimeId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(forcedOccupiedTimeId, HSUtil.getPriorityVal(forcedOccupiedTimeId));
+
+        Point adrCoolingDeadband = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"adrCoolingDeadband")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("zone").addMarker("adr").addMarker("cooling").addMarker("deadband").addMarker("sp")
+                .setMinVal("0").setMaxVal("10").setIncrementVal("0.5").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String adrCoolingDeadbandId = hayStack.addPoint(adrCoolingDeadband);
+        HashMap adrCoolingDeadbandPoint = hayStack.read("point and tuner and default and zone and adr and cooling and deadband");
+        ArrayList<HashMap> adrCoolingDeadbandArr = hayStack.readPoint(adrCoolingDeadbandPoint.get("id").toString());
+        for (HashMap valMap : adrCoolingDeadbandArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(adrCoolingDeadbandId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(adrCoolingDeadbandId, HSUtil.getPriorityVal(adrCoolingDeadbandId));
+
+        Point adrHeatingDeadband = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"adrHeatingDeadband")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("zone").addMarker("adr").addMarker("heating").addMarker("deadband").addMarker("sp")
+                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String adrHeatingDeadbandId = hayStack.addPoint(adrHeatingDeadband);
+        HashMap adrHeatingDeadbandPoint = hayStack.read("point and tuner and default and zone and adr and heating and deadband");
+        ArrayList<HashMap> adrHeatingDeadbandArr = hayStack.readPoint(adrHeatingDeadbandPoint.get("id").toString());
+        for (HashMap valMap : adrHeatingDeadbandArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(adrHeatingDeadbandId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(adrHeatingDeadbandId, HSUtil.getPriorityVal(adrHeatingDeadbandId));
+
+        Point snCoolingAirflowTemp = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"snCoolingAirflowTemp")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("zone").addMarker("sn").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("sp")
+                .setMinVal("35").setMaxVal("75").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String snCoolingAirflowTempId = hayStack.addPoint(snCoolingAirflowTemp);
+        HashMap snCoolingAirflowTempPoint = hayStack.read("point and tuner and default and zone and sn and cooling and airflow and temp");
+        ArrayList<HashMap> snCoolingAirflowTempArr = hayStack.readPoint(snCoolingAirflowTempPoint.get("id").toString());
+        for (HashMap valMap : snCoolingAirflowTempArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(snCoolingAirflowTempId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(snCoolingAirflowTempId, HSUtil.getPriorityVal(snCoolingAirflowTempId));
+
+        Point snHeatingAirflowTemp = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"snHeatingAirflowTemp")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("zone").addMarker("sn").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("sp")
+                .setMinVal("65").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String snHeatingAirflowTempId = hayStack.addPoint(snHeatingAirflowTemp);
+        HashMap snHeatingAirflowTempPoint = hayStack.read("point and tuner and default and zone and sn and heating and airflow and temp");
+        ArrayList<HashMap> snHeatingAirflowTempArr = hayStack.readPoint(snHeatingAirflowTempPoint.get("id").toString());
+        for (HashMap valMap : snHeatingAirflowTempArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(snHeatingAirflowTempId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(snHeatingAirflowTempId, HSUtil.getPriorityVal(snHeatingAirflowTempId));
+
+        Point constantTempAlertTime = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"constantTempAlertTime")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("zone").addMarker("constant").addMarker("temp").addMarker("alert").addMarker("time").addMarker("sp")
+                .setMinVal("0").setMaxVal("360").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setUnit("m")
+                .setTz(tz)
+                .build();
+        String constantTempAlertTimeId = hayStack.addPoint(constantTempAlertTime);
+        HashMap constantTempAlertTimePoint = hayStack.read("point and tuner and default and zone and constant and temp and alert and time");
+        ArrayList<HashMap> constantTempAlertTimeArr = hayStack.readPoint(constantTempAlertTimePoint.get("id").toString());
+        for (HashMap valMap : constantTempAlertTimeArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(constantTempAlertTimeId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(constantTempAlertTimeId, HSUtil.getPriorityVal(constantTempAlertTimeId));
+
+        Point abnormalCurTempRiseTrigger = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"abnormalCurTempRiseTrigger ")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("zone").addMarker("abnormal").addMarker("cur").addMarker("temp").addMarker("rise").addMarker("trigger").addMarker("sp")
+                .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String abnormalCurTempRiseTriggerId = hayStack.addPoint(abnormalCurTempRiseTrigger);
+        HashMap abnormalCurTempRiseTriggerPoint = hayStack.read("point and tuner and default and zone and abnormal and cur and temp and rise and trigger");
+        ArrayList<HashMap> abnormalCurTempRiseTriggerArr = hayStack.readPoint(abnormalCurTempRiseTriggerPoint.get("id").toString());
+        for (HashMap valMap : abnormalCurTempRiseTriggerArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(abnormalCurTempRiseTriggerId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(abnormalCurTempRiseTriggerId, HSUtil.getPriorityVal(abnormalCurTempRiseTriggerId));
+
+        Point lightingIntensityOccupancyDetect = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"lightingIntensityOccupancyDetect ")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("zone").addMarker("lighting").addMarker("intensity").addMarker("occupancy").addMarker("detect").addMarker("sp")
+                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.LCM_TUNER)
+                .setUnit("%")
+                .setTz(tz)
+                .build();
+        String lightingIntensityOccupancyDetectId = hayStack.addPoint(lightingIntensityOccupancyDetect);
+        HashMap lightingIntensityOccupancyDetectPoint = hayStack.read("point and tuner and default and zone and lighting and intensity and occupancy and detect");
+        ArrayList<HashMap> lightingIntensityOccupancyDetectArr = hayStack.readPoint(lightingIntensityOccupancyDetectPoint.get("id").toString());
+        for (HashMap valMap : lightingIntensityOccupancyDetectArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(lightingIntensityOccupancyDetectId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(lightingIntensityOccupancyDetectId, HSUtil.getPriorityVal(lightingIntensityOccupancyDetectId));
+
+        Point minLightingControlOverride = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"minLightingControlOverride ")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("zone").addMarker("min").addMarker("lightning").addMarker("control").addMarker("override").addMarker("sp")
+                .setMinVal("1").setMaxVal("360").setIncrementVal("1").setTunerGroup(TunerConstants.LCM_TUNER)
+                .setUnit("m")
+                .setTz(tz)
+                .build();
+        String minLightingControlOverrideId = hayStack.addPoint(minLightingControlOverride);
+        HashMap minLightingControlOverridePoint = hayStack.read("point and tuner and default and zone and min and lighting and control and override");
+        ArrayList<HashMap> minLightingControlOverrideArr = hayStack.readPoint(minLightingControlOverridePoint.get("id").toString());
+        for (HashMap valMap : minLightingControlOverrideArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(minLightingControlOverrideId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(minLightingControlOverrideId, HSUtil.getPriorityVal(minLightingControlOverrideId));
     }
     
     public void addVavEquipTuners(String equipdis, String equipref, String roomRef, String floorRef) {
@@ -2998,6 +3262,126 @@ public class BuildingTuners
             }
         }
         hayStack.writeHisValById(standaloneHeatingPreconditioningRateId, HSUtil.getPriorityVal(standaloneHeatingPreconditioningRateId));
+
+        Point standaloneCoolingAirflowTempLowerOffset = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"standaloneCoolingAirflowTempLowerOffset")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
+                .setMinVal("35").setMaxVal("70").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String standaloneCoolingAirflowTempLowerOffsetId = hayStack.addPoint(standaloneCoolingAirflowTempLowerOffset);
+        HashMap standaloneCoolingAirflowTempLowerOffsetPoint = hayStack.read("point and tuner and default and base and standalone and cooling and airflow and temp and lower and offset");
+        ArrayList<HashMap> standaloneCoolingAirflowTempLowerOffsetArr = hayStack.readPoint(standaloneCoolingAirflowTempLowerOffsetPoint.get("id").toString());
+        for (HashMap valMap : standaloneCoolingAirflowTempLowerOffsetArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(standaloneCoolingAirflowTempLowerOffsetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(standaloneCoolingAirflowTempLowerOffsetId, HSUtil.getPriorityVal(standaloneCoolingAirflowTempLowerOffsetId));
+
+        Point standaloneCoolingAirflowTempUpperOffset = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"standaloneCoolingAirflowTempUpperOffset")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
+                .setMinVal("35").setMaxVal("70").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String standaloneCoolingAirflowTempUpperOffsetId = hayStack.addPoint(standaloneCoolingAirflowTempUpperOffset);
+        HashMap standaloneCoolingAirflowTempUpperOffsetPoint = hayStack.read("point and tuner and default and base and standalone and cooling and airflow and temp and upper and offset");
+        ArrayList<HashMap> standaloneCoolingAirflowTempUpperOffsetArr = hayStack.readPoint(standaloneCoolingAirflowTempUpperOffsetPoint.get("id").toString());
+        for (HashMap valMap : standaloneCoolingAirflowTempUpperOffsetArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(standaloneCoolingAirflowTempUpperOffsetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(standaloneCoolingAirflowTempUpperOffsetId, HSUtil.getPriorityVal(standaloneCoolingAirflowTempUpperOffsetId));
+
+        Point standaloneHeatingAirflowTempLowerOffset = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"standaloneHeatingAirflowTempLowerOffset")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
+                .setMinVal("80").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String standaloneHeatingAirflowTempLowerOffsetId = hayStack.addPoint(standaloneHeatingAirflowTempLowerOffset);
+        HashMap standaloneHeatingAirflowTempLowerOffsetPoint = hayStack.read("point and tuner and default and base and standalone and heating and airflow and temp and lower and offset");
+        ArrayList<HashMap> standaloneHeatingAirflowTempLowerOffsetArr = hayStack.readPoint(standaloneHeatingAirflowTempLowerOffsetPoint.get("id").toString());
+        for (HashMap valMap : standaloneHeatingAirflowTempLowerOffsetArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(standaloneHeatingAirflowTempLowerOffsetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(standaloneHeatingAirflowTempLowerOffsetId, HSUtil.getPriorityVal(standaloneHeatingAirflowTempLowerOffsetId));
+
+        Point standaloneHeatingAirflowTempUpperOffset = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"standaloneHeatingAirflowTempUpperOffset")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
+                .setMinVal("80").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String standaloneHeatingAirflowTempUpperOffsetId = hayStack.addPoint(standaloneHeatingAirflowTempUpperOffset);
+        HashMap standaloneHeatingAirflowTempUpperOffsetPoint = hayStack.read("point and tuner and default and base and standalone and heating and airflow and temp and upper and offset");
+        ArrayList<HashMap> standaloneHeatingAirflowTempUpperOffsetArr = hayStack.readPoint(standaloneHeatingAirflowTempUpperOffsetPoint.get("id").toString());
+        for (HashMap valMap : standaloneHeatingAirflowTempUpperOffsetArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(standaloneHeatingAirflowTempUpperOffsetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(standaloneHeatingAirflowTempUpperOffsetId, HSUtil.getPriorityVal(standaloneHeatingAirflowTempUpperOffsetId));
+
+        Point standaloneAirflowSampleWaitTime = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"standaloneAirflowSampleWaitTime")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("airflow").addMarker("sample").addMarker("wait").addMarker("time").addMarker("sp")
+                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setUnit("m")
+                .setTz(tz)
+                .build();
+        String standaloneAirflowSampleWaitTimeId = hayStack.addPoint(standaloneAirflowSampleWaitTime);
+        HashMap standaloneAirflowSampleWaitTimePoint = hayStack.read("point and tuner and default and base and standalone and airflow and sample and wait and time");
+        ArrayList<HashMap> standaloneAirflowSampleWaitTimeArr = hayStack.readPoint(standaloneAirflowSampleWaitTimePoint.get("id").toString());
+        for (HashMap valMap : standaloneAirflowSampleWaitTimeArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(standaloneAirflowSampleWaitTimeId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(standaloneAirflowSampleWaitTimeId, HSUtil.getPriorityVal(standaloneAirflowSampleWaitTimeId));
     }
     public void addEquipStandaloneTuners(String equipdis, String equipref, String roomRef, String floorRef){
         addEquipZoneTuners(equipdis,equipref, roomRef, floorRef);

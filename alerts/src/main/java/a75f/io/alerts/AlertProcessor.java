@@ -102,7 +102,7 @@ public class AlertProcessor
         for (Alert a:alertList){
             //clear alerts after 24 hours
             if ((System.currentTimeMillis() - a.getStartTime()) >= 86400000){
-                deleteAlert(a);
+                alertBox.remove(a.id);
             }
         }
     }

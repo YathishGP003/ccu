@@ -16,6 +16,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTRTuners;
@@ -222,7 +223,7 @@ public class VavIERtu extends VavSystemProfile
         }
         systemFanLoopOp = Math.min(systemFanLoopOp, 100);
         setSystemLoopOp("fan", systemFanLoopOp);
-        
+        double spSignal = 0;
         if (getConfigVal("analog2 and output and enabled") > 0)
         {
             double staticPressureMin = getConfigVal("analog2 and staticPressure and min");
@@ -232,17 +233,17 @@ public class VavIERtu extends VavSystemProfile
             
             if (staticPressureMax > staticPressureMin)
             {
-                signal = (int) ( 10 * (staticPressureMin + (staticPressureMax - staticPressureMin) * (systemFanLoopOp/100)));
+                spSignal = CCUUtils.roundToTwoDecimal(staticPressureMin + (staticPressureMax - staticPressureMin) * (systemFanLoopOp / 100));
             }
             else
             {
-                signal = (int) (10 * (staticPressureMin - (staticPressureMin - staticPressureMax) * (systemFanLoopOp/100)));
+                spSignal = CCUUtils.roundToTwoDecimal(staticPressureMin - (staticPressureMin - staticPressureMax) * (systemFanLoopOp/100));
             }
         } else {
-            signal = 0;
+            spSignal = 0;
         }
-        setCmdSignal("fan", signal);
-        ControlMote.setAnalogOut("analog2", signal);
+        setCmdSignal("fan", spSignal);
+        ControlMote.setAnalogOut("analog2", spSignal);
         
         ControlMote.setAnalogOut("analog3", VavSystemController.getInstance().getAverageSystemHumidity());
     
@@ -277,7 +278,7 @@ public class VavIERtu extends VavSystemProfile
         StringBuilder status = new StringBuilder();
         status.append(VavSystemController.getInstance().getSystemState() == COOLING ? " Cooling DAT (F): " + getCmdSignal("cooling"):"");
         status.append(VavSystemController.getInstance().getSystemState() == HEATING ? " Heating DAT (F): " + getCmdSignal("heating"):"");
-        status.append(VavSystemController.getInstance().getSystemState() != OFF ? " | Static Pressure (inch wc): " + (getCmdSignal("fan") / 10):"");
+        status.append(VavSystemController.getInstance().getSystemState() != OFF ? " | Static Pressure (inch wc): " + (getCmdSignal("fan")):"");
         
         if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
             status.insert(0, "Free Cooling Used |");

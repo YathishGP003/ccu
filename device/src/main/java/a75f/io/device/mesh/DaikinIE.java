@@ -154,7 +154,7 @@ public class DaikinIE
     
     
     public static void sendStaticPressure(String url) {
-        send(url, String.format(DAIKIN_IE_MSG_BODY, inchToPascal(L.ccu().systemProfile.getCmd("fan")/10)));
+        send(url, String.format(DAIKIN_IE_MSG_BODY, inchToPascal(L.ccu().systemProfile.getCmd("fan"))));
     }
     
     public static void sendCoolingDATAutoControl(final Double val){

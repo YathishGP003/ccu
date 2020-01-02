@@ -10,6 +10,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -149,6 +150,8 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         npStartTime.setWrapSelectorWheel(false);
         npStartTime.setFormatter(TimeUtils::valToTime);
         npStartTime.setOnLongClickListener(view13 -> true);
+        npStartTime.setOnTouchListener((view16, motionEvent) -> false);
+        npStartTime.setOnClickListener(view15 -> {});
 
         try {
             Method method = npStartTime.getClass().getDeclaredMethod("changeValueByOne", boolean.class);
@@ -166,6 +169,8 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         npEndTime.setVisibility(View.VISIBLE);
         npEndTime.setWrapSelectorWheel(false);
         npEndTime.setOnLongClickListener(view13 -> true);
+        npEndTime.setOnTouchListener((view14, motionEvent) -> false);
+        npEndTime.setOnClickListener(view15 -> {});
         npEndTime.setFormatter(TimeUtils::valToTime);
 
         try {

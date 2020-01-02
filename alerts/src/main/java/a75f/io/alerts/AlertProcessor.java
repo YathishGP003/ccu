@@ -95,6 +95,17 @@ public class AlertProcessor
             }
         };
     }
+
+    private void clearElapsedAlerts()
+    {
+        ArrayList<Alert> alertList = new ArrayList<>(getAllAlerts());
+        for (Alert a:alertList){
+            //clear alerts after 24 hours
+            if ((System.currentTimeMillis() - a.getStartTime()) >= 86400000){
+                deleteAlert(a);
+            }
+        }
+    }
     
     //For Unit testing
     AlertProcessor(String alertDef) {
@@ -293,6 +304,7 @@ public class AlertProcessor
                 fixAlert(a);
             }
         }
+        clearElapsedAlerts();
         
         for (Alert a : getActiveAlerts()) {
             CcuLog.d("CCU_ALERTS"," Active Alert "+a.toString());

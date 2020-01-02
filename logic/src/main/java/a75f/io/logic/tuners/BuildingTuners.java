@@ -2326,7 +2326,6 @@ public class BuildingTuners
         HashMap tuner = CCUHsApi.getInstance().read("point and tuner and default and dab");
         if (tuner != null && tuner.size() > 0) {
             CcuLog.d(L.TAG_CCU_SYSTEM,"Default DAB Tuner points already exist");
-            Log.d("Mahesh"," already exist" + tuner);
             return;
         }
         CcuLog.d(L.TAG_CCU_SYSTEM,"Default DAB Tuner  does not exist. Create Now");

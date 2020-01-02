@@ -92,6 +92,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
             Log.d(TAG,"SmartStat CPU profile");
 
             HashMap<String,Integer> relayStages = new HashMap<String,Integer>();
+            ZoneState curState = DEADBAND;
             ConventionalUnitLogicalMap cpuDevice = cpuDeviceMap.get(node);
             if(cpuDevice.profileType != ProfileType.SMARTSTAT_CONVENTIONAL_PACK_UNIT)
                 continue;
@@ -176,7 +177,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
             {
 
                 //Zone is in Cooling
-                state = COOLING;
+                curState = COOLING;
                 double cs1 = getConfigEnabled("relay1",node);
                 boolean isCoolingStage1Enabled = cs1 > 0 ? true : false;
                 boolean isCoolingStage2Enabled = getConfigEnabled("relay2", node) > 0 ? true : false;
@@ -246,11 +247,11 @@ public class ConventionalUnitProfile extends ZoneProfile {
                     updateHumidityStatus(fanHighType,node,cpuDevice.getHumidity(),targetThreshold,relayStages);
                 Log.d(TAG, " smartstat cpu,cooling updates =" + node+","+roomTemp+","+occupied+","+isCoolingStage1Enabled+","+opMode.name()+","+fanSpeed.name()+","+cs1);
             }
-            else if ((fanSpeed != OFF) &&((opMode == StandaloneOperationalMode.AUTO) || (opMode == StandaloneOperationalMode.HEAT_ONLY))&&(roomTemp <= (setTempHeating + hysteresis)))
+            else if ((roomTemp > 0) && (fanSpeed != OFF) &&((opMode == StandaloneOperationalMode.AUTO) || (opMode == StandaloneOperationalMode.HEAT_ONLY))&&(roomTemp <= (setTempHeating + hysteresis)))
             {
                 //Zone is in heating
 
-                state = HEATING;
+                curState = HEATING;
                 setCmdSignal("cooling and stage1",0,node);
                 setCmdSignal("cooling and stage2",0,node);
                 boolean isHeatingStage1Enabled = getConfigEnabled("relay4", node) > 0;
@@ -327,7 +328,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
             else
             {
                 if(occupied && (fanSpeed != OFF)) {
-                    state = DEADBAND;
+                    curState = DEADBAND;
                     if(isFanStage1Enabled &&  (fanSpeed != AUTO) /*((fanSpeed == StandaloneFanSpeed.FAN_LOW) || (fanSpeed == StandaloneFanSpeed.FAN_HIGH))*/) {
                         relayStages.put("FanStage1", 1);
                         setCmdSignal("fan and stage1",1.0,node);
@@ -342,7 +343,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                     }else if(isFanStage2Enabled && ((fanHighType == SmartStatFanRelayType.HUMIDIFIER) || (fanHighType == SmartStatFanRelayType.DE_HUMIDIFIER)))
                         updateHumidityStatus(fanHighType,node,cpuDevice.getHumidity(),targetThreshold,relayStages);
                 }else{
-                    state = DEADBAND;
+                    curState = DEADBAND;
                     if(getCmdSignal("fan and stage1",node) > 0)
                         setCmdSignal("fan and stage1",0,node);
                     if (fanHighType == SmartStatFanRelayType.FAN_STAGE2) {
@@ -363,14 +364,14 @@ public class ConventionalUnitProfile extends ZoneProfile {
             }
 
 
-            cpuDevice.setProfilePoint("temp and operating and mode",state.ordinal());
-            if(cpuDevice.getStatus() != state.ordinal())
-                cpuDevice.setStatus(state.ordinal());
+            cpuDevice.setProfilePoint("temp and operating and mode",curState.ordinal());
+            if(cpuDevice.getStatus() != curState.ordinal())
+                cpuDevice.setStatus(curState.ordinal());
            ZoneTempState temperatureState = ZoneTempState.NONE;
             if(buildingLimitMinBreached() ||  buildingLimitMaxBreached() )
                 temperatureState = ZoneTempState.EMERGENCY;
 
-            StandaloneScheduler.updateSmartStatStatus(cpuEquip.getId(),state, relayStages, temperatureState);
+            StandaloneScheduler.updateSmartStatStatus(cpuEquip.getId(),curState, relayStages, temperatureState);
         }
     }
 

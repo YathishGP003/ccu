@@ -182,8 +182,9 @@ public class DiagEquip
                 .setDisplayName(equipDis+"-appVersion")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
-                .addMarker("diag").addMarker("app").addMarker("version").addMarker("his").addMarker("equipHis")
+                .addMarker("diag").addMarker("app").addMarker("version").addMarker("his").addMarker("equipHis").addMarker("writable")
                 .setUnit("")
+                .setKind("string")
                 .setTz(tz)
                 .build();
         hsApi.addPoint(appVersion);
@@ -252,6 +253,8 @@ public class DiagEquip
             pi = pm.getPackageInfo("a75f.io.renatus", 0);
             String version = pi.versionName.substring(pi.versionName.lastIndexOf('_')+1,pi.versionName.length() - 2);
             setDiagHisVal("app and version",Double.parseDouble(version));
+            Log.d("DiagEquip","version ="+version+","+pi.versionName+","+pi.versionName.substring(pi.versionName.lastIndexOf('_')+1));
+            CCUHsApi.getInstance().writeDefaultVal("point and diag and app and version",pi.versionName.substring(pi.versionName.lastIndexOf('_')+1));
 
         } catch (PackageManager.NameNotFoundException e) {
             // TODO Auto-generated catch block

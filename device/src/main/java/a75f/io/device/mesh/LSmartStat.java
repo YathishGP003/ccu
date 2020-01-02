@@ -391,12 +391,12 @@ public class LSmartStat {
     }
     
     private static double getMaxUserTempLimits(String equipId, double deadband){
-        double maxCool =  StandaloneTunerUtil.readTunerValByQuery("zone and cooling and user and limit and max",equipId);
+        double maxCool =  TunerUtil.readBuildingTunerValByQuery("cooling and user and limit and max");
         return maxCool- deadband;
     }
 
     private static double getMinUserTempLimits(String equipId, double deadband){
-        double maxHeat =  StandaloneTunerUtil.readTunerValByQuery("zone and heating and user and limit and max",equipId);
+        double maxHeat =  TunerUtil.readBuildingTunerValByQuery("heating and user and limit and max");
         return maxHeat+ deadband;
     }
 }

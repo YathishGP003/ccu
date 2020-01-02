@@ -145,7 +145,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             }
             Log.d(TAG, " smartstat hpu, updates =" + node+","+roomTemp+","+occupied+","+","+state);
 
-            if((fanSpeed != StandaloneLogicalFanSpeeds.OFF) ){
+            if((fanSpeed != StandaloneLogicalFanSpeeds.OFF) && (roomTemp > 0)){
                 switch (opMode){
                     case AUTO:
                         if(roomTemp < averageDesiredTemp){

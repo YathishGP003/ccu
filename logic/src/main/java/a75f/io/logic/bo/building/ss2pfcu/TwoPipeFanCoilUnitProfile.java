@@ -144,7 +144,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                     fanSpeed = StandaloneLogicalFanSpeeds.values()[ fanModeSaved];
                 }
             }
-            if(fanSpeed != StandaloneLogicalFanSpeeds.OFF){
+            if((roomTemp > 0) && (fanSpeed != StandaloneLogicalFanSpeeds.OFF)){
                 switch (opMode){
                     case AUTO:
                         if(supplyWaterTempTh2 > heatingThreshold){

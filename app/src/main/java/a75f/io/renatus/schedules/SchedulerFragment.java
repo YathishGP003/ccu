@@ -104,6 +104,14 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
     }
 
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser && scheduleScrollView != null){
+            scheduleScrollView.post(() -> scheduleScrollView.smoothScrollTo(0,0));
+        }
+    }
+
     private ConstraintLayout mVacationLayout;
 
     public SchedulerFragment() {

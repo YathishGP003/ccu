@@ -106,10 +106,10 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
             mCalendarView.addDecorator(rangeDecorator2);
 
             DateTime today = new DateTime();
-            if (mStartDate.dayOfYear().get() < today.dayOfYear().get() && mEndDate.dayOfYear().get() < today.dayOfYear().get() ) {
+            if (mStartDate.isBefore(today) && mEndDate.isBefore(today) ) {
                 mCalendarView.state().edit().setMinimumDate(startDay).commit();
                 mCalendarView.state().edit().setMaximumDate(endDay).commit();
-            } else if (mStartDate.dayOfYear().get() < today.dayOfYear().get()) {
+            } else if (mStartDate.isBefore(today)) {
                 mCalendarView.state().edit().setMinimumDate(startDay).commit();
             } else {
                 mCalendarView.state().edit().setMinimumDate(CalendarDay.today()).commit();

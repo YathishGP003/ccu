@@ -1765,6 +1765,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
         View viewPointRow1 = inflater.inflate(R.layout.zones_item_type2, null);
+        View viewDischarge = inflater.inflate(R.layout.zones_item_discharge, null);
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
@@ -1774,6 +1775,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         Spinner spinnerValue1 = viewPointRow1.findViewById(R.id.spinnerValue1);
         Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
+
+        TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
+        AsyncTask.execute(() -> {
+            double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and equipRef == \""+equipId+"\"");
+            if (dischargePoint >0){
+                textAirflowValue.setText(dischargePoint+" \u2109");
+            } else {
+                textAirflowValue.setText(0+" \u2109");
+            }
+        });
 
 
         int conditionMode = 0;
@@ -1864,12 +1875,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
 
         linearLayoutZonePoints.addView(viewPointRow1);
-        viewPointRow1.setPadding(0,0,0,40);
         try {
             linearLayoutZonePoints.addView(viewPointRow1);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        linearLayoutZonePoints.addView(viewDischarge);
+        viewDischarge.setPadding(0,0,0,40);
 
         int tempConditionMode = conditionMode;
         int tempFanMode = fanMode;
@@ -1933,6 +1945,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
         View viewPointRow1 = inflater.inflate(R.layout.zones_item_type2, null);
+        View viewDischarge = inflater.inflate(R.layout.zones_item_discharge, null);
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
@@ -1943,6 +1956,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         Spinner conditionSpinner = viewPointRow1.findViewById(R.id.spinnerValue1);
         Spinner fanSpinner = viewPointRow1.findViewById(R.id.spinnerValue2);
 
+        TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
+        AsyncTask.execute(() -> {
+            double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and equipRef == \""+equipId+"\"");
+            if (dischargePoint >0){
+                textAirflowValue.setText(dischargePoint+" \u2109");
+            } else {
+                textAirflowValue.setText(0+" \u2109");
+            }
+        });
 
         textViewTitle.setText(hpuEquipPoints.get("Profile").toString()+" ("+nodeAddress+")");
         textViewStatus.setText(hpuEquipPoints.get("Status").toString());
@@ -2034,7 +2056,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
 
         linearLayoutZonePoints.addView(viewPointRow1);
-        viewPointRow1.setPadding(0,0,0,40);
         try {
             if(viewPointRow1.getParent() != null) {
                 ((ViewGroup)viewPointRow1.getParent()).removeView(viewPointRow1);
@@ -2043,6 +2064,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         } catch (Exception e) {
             e.printStackTrace();
         }
+        linearLayoutZonePoints.addView(viewDischarge);
+        viewDischarge.setPadding(0,0,0,40);
 
         int tempConditionMode = conditionMode;
         int tempfanMode = fanMode;
@@ -2118,12 +2141,23 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
         View viewPointRow1 = inflater.inflate(R.layout.zones_item_type2, null);
+        View viewDischarge = inflater.inflate(R.layout.zones_item_discharge, null);
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
 
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
+
+        TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
+        AsyncTask.execute(() -> {
+            double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and equipRef == \""+equipId+"\"");
+            if (dischargePoint >0){
+                textAirflowValue.setText(dischargePoint+" \u2109");
+            } else {
+                textAirflowValue.setText(0+" \u2109");
+            }
+        });
 
         Spinner spinnerValue1 = viewPointRow1.findViewById(R.id.spinnerValue1);
         Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
@@ -2181,7 +2215,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
         linearLayoutZonePoints.addView(viewPointRow1);
-        viewPointRow1.setPadding(0,0,0,40);
+
         try {
             if(viewPointRow1.getParent() != null) {
                 ((ViewGroup)viewPointRow1.getParent()).removeView(viewPointRow1);
@@ -2190,6 +2224,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         } catch (Exception e) {
             e.printStackTrace();
         }
+        linearLayoutZonePoints.addView(viewDischarge);
+        viewDischarge.setPadding(0,0,0,40);
         int tempConditionMode = conditionMode;
         int tempfanMode = fanMode;
         isFromPubNub = isPubNub;
@@ -2246,6 +2282,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
         View viewPointRow1 = inflater.inflate(R.layout.zones_item_type2, null);
+        View viewDischarge = inflater.inflate(R.layout.zones_item_discharge, null);
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
@@ -2255,6 +2292,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         Spinner spinnerValue1 = viewPointRow1.findViewById(R.id.spinnerValue1);
         Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
+
+        TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
+        AsyncTask.execute(() -> {
+            double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and equipRef == \""+equipId+"\"");
+            if (dischargePoint >0){
+                textAirflowValue.setText(dischargePoint+" \u2109");
+            } else {
+                textAirflowValue.setText(0+" \u2109");
+            }
+        });
 
 
         int conditionMode = 0;
@@ -2309,7 +2356,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
         linearLayoutZonePoints.addView(viewPointRow1);
-        viewPointRow1.setPadding(0,0,0,40);
+
         try {
             if(viewPointRow1.getParent() != null) {
                 ((ViewGroup)viewPointRow1.getParent()).removeView(viewPointRow1);
@@ -2318,6 +2365,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         } catch (Exception e) {
             e.printStackTrace();
         }
+        linearLayoutZonePoints.addView(viewDischarge);
+        viewDischarge.setPadding(0,0,0,40);
         int tempConditionMode = conditionMode;
         int tempFanMode = fanMode;
         isFromPubNub = isPubNub;

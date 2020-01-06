@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import org.joda.time.DateTime;
+import org.apache.commons.lang3.time.DateUtils;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -61,7 +61,9 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.ViewHo
             Date today = new Date(System.currentTimeMillis());
             viewHolder.mEndDate.setText(outputFormat.format(endDate));
             viewHolder.mStartDate.setText(outputFormat.format(startDate));
-            if (today.after(endDate)) {
+            if (DateUtils.isSameDay(today,endDate)){
+                viewHolder.mVacationEdit.setVisibility(View.VISIBLE);
+            } else if (today.after(endDate)) {
                 viewHolder.mVacationEdit.setVisibility(View.INVISIBLE);
             }
         } catch (ParseException e) {

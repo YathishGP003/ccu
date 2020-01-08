@@ -220,7 +220,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("system").addMarker("co2").addMarker("ignoreRequest").addMarker("sp")
-                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setTz(tz)
                 .build();
         String co2IgnoreRequestId = hayStack.addPoint(co2IgnoreRequest);
@@ -233,7 +233,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("system").addMarker("co2").addMarker("spinit").addMarker("sp")
-                .setMinVal("0").setMaxVal("1500").setIncrementVal("10").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("1500").setIncrementVal("10").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("ppm")
                 .setTz(tz)
                 .build();
@@ -247,7 +247,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("system").addMarker("co2").addMarker("spmax").addMarker("sp")
-                .setMinVal("100").setMaxVal("2000").setIncrementVal("10").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("100").setMaxVal("2000").setIncrementVal("10").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("ppm")
                 .setTz(tz)
                 .build();
@@ -261,7 +261,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("co2").addMarker("spmin").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0").setMaxVal("1500").setIncrementVal("10").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("1500").setIncrementVal("10").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("ppm")
                 .setTz(tz)
                 .build();
@@ -275,7 +275,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("co2").addMarker("spres").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("-30.0").setMaxVal("-1.0").setIncrementVal("1.0").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("-30.0").setMaxVal("-1.0").setIncrementVal("1.0").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("ppm")
                 .setTz(tz)
                 .build();
@@ -289,7 +289,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("co2").addMarker("spresmax").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("-50.0").setMaxVal("-1.0").setIncrementVal("1.0").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("-50.0").setMaxVal("-1.0").setIncrementVal("1.0").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("ppm")
                 .setTz(tz)
                 .build();
@@ -303,7 +303,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("co2").addMarker("sptrim").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0").setMaxVal("50").setIncrementVal("1.0").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("50").setIncrementVal("1.0").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("ppm")
                 .setTz(tz)
                 .build();
@@ -317,7 +317,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("co2").addMarker("timeDelay").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("m")
                 .setTz(tz)
                 .build();
@@ -331,7 +331,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("co2").addMarker("timeInterval").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("m")
                 .setTz(tz)
                 .build();
@@ -345,7 +345,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("sat").addMarker("ignoreRequest").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setTz(tz)
                 .build();
         String satIgnoreRequestId = hayStack.addPoint(satIgnoreRequest);
@@ -358,7 +358,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("sat").addMarker("spinit").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("50").setMaxVal("70").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("50").setMaxVal("70").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -372,7 +372,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("sat").addMarker("spmax").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("55").setMaxVal("75").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("55").setMaxVal("75").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -386,7 +386,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("sat").addMarker("spmin").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("45").setMaxVal("65").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("45").setMaxVal("65").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -400,7 +400,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("sat").addMarker("spres").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("-0.1").setMaxVal("-2.0").setIncrementVal("-0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("-0.1").setMaxVal("-2.0").setIncrementVal("-0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -414,7 +414,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("sat").addMarker("spresmax").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("-0.1").setMaxVal("-3.0").setIncrementVal("-0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("-0.1").setMaxVal("-3.0").setIncrementVal("-0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -428,7 +428,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("sat").addMarker("sptrim").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("-0.5").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("-0.5").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -442,7 +442,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("sat").addMarker("timeDelay").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0").setMaxVal("30").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("30").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("m")
                 .setTz(tz)
                 .build();
@@ -456,7 +456,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("sat").addMarker("timeInterval").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("m")
                 .setTz(tz)
                 .build();
@@ -470,7 +470,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("staticPressure").addMarker("ignoreRequest").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setTz(tz)
                 .build();
         String staticPressureIgnoreRequestId = hayStack.addPoint(staticPressureIgnoreRequest);
@@ -483,7 +483,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("staticPressure").addMarker("spinit").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0.1").setMaxVal("2.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0.1").setMaxVal("2.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("inch wc")
                 .setTz(tz)
                 .build();
@@ -497,7 +497,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("staticPressure").addMarker("spmax").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0.1").setMaxVal("2.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0.1").setMaxVal("2.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("inch wc")
                 .setTz(tz)
                 .build();
@@ -511,7 +511,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("staticPressure").addMarker("spmin").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0.1").setMaxVal("2.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0.1").setMaxVal("2.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("inch wc")
                 .setTz(tz)
                 .build();
@@ -525,7 +525,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("staticPressure").addMarker("spres").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0.01").setMaxVal("0.2").setIncrementVal("0.01").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0.01").setMaxVal("0.2").setIncrementVal("0.01").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("inch wc")
                 .setTz(tz)
                 .build();
@@ -539,7 +539,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("staticPressure").addMarker("spresmax").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0.05").setMaxVal("0.5").setIncrementVal("0.05").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0.05").setMaxVal("0.5").setIncrementVal("0.05").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("inch wc")
                 .setTz(tz)
                 .build();
@@ -553,7 +553,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("staticPressure").addMarker("sptrim").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("-0.01").setMaxVal("-0.5").setIncrementVal("-0.01").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("-0.01").setMaxVal("-0.5").setIncrementVal("-0.01").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("inch wc")
                 .setTz(tz)
                 .build();
@@ -567,7 +567,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("staticPressure").addMarker("timeDelay").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0").setMaxVal("30").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("30").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("m")
                 .setTz(tz)
                 .build();
@@ -581,7 +581,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("system").addMarker("tuner").addMarker("sp")
                 .addMarker("staticPressure").addMarker("timeInterval").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0").setMaxVal("30").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("30").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("m")
                 .setTz(tz)
                 .build();

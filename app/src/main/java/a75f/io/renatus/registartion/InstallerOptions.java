@@ -252,14 +252,14 @@ public class InstallerOptions extends Fragment {
 
         hdb = (float) TunerUtil.getHeatingDeadband(p.getId());
         cdb = (float) TunerUtil.getCoolingDeadband(p.getId());
-        HashMap coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
-        HashMap heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
-        HashMap coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
-        HashMap heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
-        HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + p.getId() + "\"");
-        HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + p.getId() + "\"");
+        HashMap coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
+        HashMap heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user");
+        HashMap coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
+        HashMap heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user");
+        HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min");
+        HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max");
         HashMap setbackMap = CCUHsApi.getInstance().read("unoccupied and setback and equipRef == \"" + p.getId() + "\"");
-        HashMap zoneDiffMap = CCUHsApi.getInstance().read("building and zone and differential and equipRef == \"" + p.getId() + "\"");
+        HashMap zoneDiffMap = CCUHsApi.getInstance().read("building and zone and differential");
 
         upperCoolingTemp = (float) getTuner(coolUL.get("id").toString());
         lowerCoolingTemp = (float) getTuner(coolLL.get("id").toString());

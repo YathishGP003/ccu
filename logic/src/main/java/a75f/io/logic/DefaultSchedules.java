@@ -160,10 +160,10 @@ public class DefaultSchedules {
 
         double hdb = TunerUtil.getHeatingDeadband(p.getId());
         double cdb = TunerUtil.getCoolingDeadband(p.getId());
-        HashMap coolULMap = CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
-        HashMap heatULMap = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
-        HashMap coolLLMap = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
-        HashMap heatLLMap = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
+        HashMap coolULMap = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
+        HashMap heatULMap = CCUHsApi.getInstance().read("point and limit and max and heating and user");
+        HashMap coolLLMap = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
+        HashMap heatLLMap = CCUHsApi.getInstance().read("point and limit and min and heating and user");
         double heatLL = getTuner(heatLLMap.get("id").toString());
         double heatUL = getTuner(heatULMap.get("id").toString());
         double coolLL = getTuner(coolLLMap.get("id").toString());

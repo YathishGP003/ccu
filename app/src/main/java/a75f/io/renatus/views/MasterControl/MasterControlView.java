@@ -169,14 +169,14 @@ public class MasterControlView extends LinearLayout {
 
         hdb = TunerUtil.getHeatingDeadband(p.getId());
         cdb = TunerUtil.getCoolingDeadband(p.getId());
-        coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
-        heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
-        coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
-        heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
-        buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + p.getId() + "\"");
-        buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + p.getId() + "\"");
+        coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
+        heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user");
+        coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
+        heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user");
+        buildingMin = CCUHsApi.getInstance().read("building and limit and min");
+        buildingMax = CCUHsApi.getInstance().read("building and limit and max");
         setbackMap = CCUHsApi.getInstance().read("unoccupied and setback and equipRef == \"" + p.getId() + "\"");
-        zoneDiffMap = CCUHsApi.getInstance().read("building and zone and differential and equipRef == \"" + p.getId() + "\"");
+        zoneDiffMap = CCUHsApi.getInstance().read("building and zone and differential");
 
     }
 
@@ -209,12 +209,12 @@ public class MasterControlView extends LinearLayout {
         HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
         Equip p = new Equip.Builder().setHashMap(tuner).build();
 
-        coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
-        heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
-        coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
-        heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
-        buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + p.getId() + "\"");
-        buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + p.getId() + "\"");
+        coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
+        heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user");
+        coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
+        heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user");
+        buildingMin = CCUHsApi.getInstance().read("building and limit and min");
+        buildingMax = CCUHsApi.getInstance().read("building and limit and max");
 
         for (Schedule s: schedulesList){
             if(s.isBuildingSchedule() && !s.isZoneSchedule()){
@@ -549,10 +549,10 @@ public class MasterControlView extends LinearLayout {
                 }
                 Equip p = new Equip.Builder().setHashMap(gridList.get(0)).build();
 
-                HashMap zoneCoolUL = read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
-                HashMap zoneHeatUL = read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
-                HashMap zoneCoolLL = read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
-                HashMap zoneHeatLL = read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
+                HashMap zoneCoolUL = read("point and limit and max and cooling and user");
+                HashMap zoneHeatUL = read("point and limit and max and heating and user");
+                HashMap zoneCoolLL = read("point and limit and min and cooling and user");
+                HashMap zoneHeatLL = read("point and limit and min and heating and user");
 
                 if (zoneCoolUL.size() != 0) {
                     writePoint(zoneCoolUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) coolTempUL, 0);
@@ -610,12 +610,12 @@ public class MasterControlView extends LinearLayout {
                 Equip p = new Equip.Builder().setHashMap(tuner).build();
                 String gUid  = CCUHsApi.getInstance().getGUID(p.getId());
 
-                HashMap buildingCoolUL = read("point and limit and max and cooling and user and equipRef == \"" + gUid + "\"");
-                HashMap buildingHeatUL = read("point and limit and max and heating and user and equipRef == \"" + gUid + "\"");
-                HashMap buildingCoolLL = read("point and limit and min and cooling and user and equipRef == \"" + gUid + "\"");
-                HashMap buildingHeatLL = read("point and limit and min and heating and user and equipRef == \"" + gUid + "\"");
-                HashMap buildingMin = read("building and limit and min and equipRef == \"" + gUid + "\"");
-                HashMap buildingMax = read("building and limit and max and equipRef == \"" + gUid + "\"");
+                HashMap buildingCoolUL = read("point and limit and max and cooling and user");
+                HashMap buildingHeatUL = read("point and limit and max and heating and user");
+                HashMap buildingCoolLL = read("point and limit and min and cooling and user");
+                HashMap buildingHeatLL = read("point and limit and min and heating and user");
+                HashMap buildingMin = read("building and limit and min");
+                HashMap buildingMax = read("building and limit and max");
 
                 if (buildingCoolUL.size() != 0) {
                     writePoint(buildingCoolUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) coolTempUL, 0);

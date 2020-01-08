@@ -150,10 +150,10 @@ public class CongratsFragment extends Fragment {
         Equip eqp = new Equip.Builder().setHashMap(tuner).build();
         double buildingLimitMax =  TunerUtil.readBuildingTunerValByQuery("building and limit and max");
         double buildingLimitMin =  TunerUtil.readBuildingTunerValByQuery("building and limit and min");
-        HashMap maxHeatMap =  CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef ==\"" + eqp.getId() + "\"");
-        HashMap minHeatMap =  CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef ==\"" +  eqp.getId() + "\"");
-        HashMap maxCoolMap =  CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef ==\""+  eqp.getId() + "\"");
-        HashMap minCoolMap =  CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef ==\""+  eqp.getId() + "\"");
+        HashMap maxHeatMap =  CCUHsApi.getInstance().read("point and limit and max and heating and user");
+        HashMap minHeatMap =  CCUHsApi.getInstance().read("point and limit and min and heating and user");
+        HashMap maxCoolMap =  CCUHsApi.getInstance().read("point and limit and max and cooling and user");
+        HashMap minCoolMap =  CCUHsApi.getInstance().read("point and limit and min and cooling and user");
         buldingLimit = (int)buildingLimitMin+"|"+ (int)buildingLimitMax;
         heatingLimit = (int)getTuner(minHeatMap.get("id").toString())+"|"+(int)getTuner(maxHeatMap.get("id").toString());
         coolingLimit = (int)getTuner(minCoolMap.get("id").toString())+"|"+(int)getTuner(maxCoolMap.get("id").toString());

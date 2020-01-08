@@ -67,12 +67,12 @@ public class TempLimitView extends LinearLayout {
         HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
         Equip p = new Equip.Builder().setHashMap(tuner).build();
 
-        HashMap coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
-        HashMap heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
-        HashMap coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
-        HashMap heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
-        HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + p.getId() + "\"");
-        HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + p.getId() + "\"");
+        HashMap coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
+        HashMap heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user");
+        HashMap coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
+        HashMap heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user");
+        HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min");
+        HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max");
 
         setTempControl((float) getTuner(heatLL.get("id").toString()), (float) getTuner(heatUL.get("id").toString()),
                 (float) getTuner(coolLL.get("id").toString()), (float) getTuner(coolUL.get("id").toString()),

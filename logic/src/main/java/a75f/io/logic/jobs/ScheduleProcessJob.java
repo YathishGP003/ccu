@@ -774,7 +774,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }else{
             vavPoints.put("Reheat Coil",0);
         }
-        if (supplyAirPoint > 0)
+        if (enteringAirPoint > 0)
         {
             vavPoints.put("Entering Airfow",enteringAirPoint+" \u2109");
         }else{

@@ -1672,10 +1672,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         textViewValue1.setText(vavPoints.get("Damper").toString());
         textViewLabel2.setText("Reheat Coil : ");
         textViewValue2.setText(vavPoints.get("Reheat Coil").toString());
-        textViewLabel3.setText("Supply Airfow : ");
-        textViewValue3.setText(vavPoints.get("Supply Airfow").toString());
-        textViewLabel4.setText("Discharge Airfow : ");
-        textViewValue4.setText(vavPoints.get("Discharge Airflow").toString());
+        textViewLabel3.setText("Discharge Airfow : ");
+        textViewValue3.setText(vavPoints.get("Discharge Airfow").toString());
+        textViewLabel4.setText("Entering Airfow : ");
+        textViewValue4.setText(vavPoints.get("Entering Airflow").toString());
 
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
@@ -1777,14 +1777,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
 
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
-        AsyncTask.execute(() -> {
-            double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and equipRef == \""+equipId+"\"");
-            if (dischargePoint >0){
-                textAirflowValue.setText(dischargePoint+" \u2109");
-            } else {
-                textAirflowValue.setText(0+" \u2109");
-            }
-        });
+        textAirflowValue.setText(cpuEquipPoints.get("Discharge Airflow").toString());
 
 
         int conditionMode = 0;
@@ -1957,14 +1950,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         Spinner fanSpinner = viewPointRow1.findViewById(R.id.spinnerValue2);
 
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
-        AsyncTask.execute(() -> {
-            double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and equipRef == \""+equipId+"\"");
-            if (dischargePoint >0){
-                textAirflowValue.setText(dischargePoint+" \u2109");
-            } else {
-                textAirflowValue.setText(0+" \u2109");
-            }
-        });
+        textAirflowValue.setText(hpuEquipPoints.get("Discharge Airflow").toString());
 
         textViewTitle.setText(hpuEquipPoints.get("Profile").toString()+" ("+nodeAddress+")");
         textViewStatus.setText(hpuEquipPoints.get("Status").toString());
@@ -2150,14 +2136,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
 
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
-        AsyncTask.execute(() -> {
-            double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and equipRef == \""+equipId+"\"");
-            if (dischargePoint >0){
-                textAirflowValue.setText(dischargePoint+" \u2109");
-            } else {
-                textAirflowValue.setText(0+" \u2109");
-            }
-        });
+
+        textAirflowValue.setText(p2FCUPoints.get("Discharge Airflow").toString());
 
         Spinner spinnerValue1 = viewPointRow1.findViewById(R.id.spinnerValue1);
         Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
@@ -2294,14 +2274,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
 
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
-        AsyncTask.execute(() -> {
-            double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and equipRef == \""+equipId+"\"");
-            if (dischargePoint >0){
-                textAirflowValue.setText(dischargePoint+" \u2109");
-            } else {
-                textAirflowValue.setText(0+" \u2109");
-            }
-        });
+
+        textAirflowValue.setText(p4FCUPoints.get("Discharge Airflow").toString());
 
 
         int conditionMode = 0;

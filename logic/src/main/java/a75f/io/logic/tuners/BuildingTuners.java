@@ -781,7 +781,7 @@ public class BuildingTuners
                                                .setEquipRef(equipRef)
                                                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                .addMarker("zone").addMarker("heating").addMarker("user").addMarker("limit").addMarker("min").addMarker("sp")
-                                               .setMinVal("60").setMaxVal("70").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                                               .setMinVal("67").setMaxVal("72").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                                .setUnit("\u00B0F")
                                                .setTz(tz)
                                                .build();
@@ -795,7 +795,7 @@ public class BuildingTuners
                                              .setEquipRef(equipRef)
                                              .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                                              .addMarker("zone").addMarker("heating").addMarker("user").addMarker("limit").addMarker("max").addMarker("sp")
-                                             .setMinVal("65").setMaxVal("75").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                                             .setMinVal("67").setMaxVal("72").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                              .setUnit("\u00B0F")
                                              .setTz(tz)
                                              .build();
@@ -809,7 +809,7 @@ public class BuildingTuners
                                              .setEquipRef(equipRef)
                                              .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis").setMinVal("70").setMaxVal("77").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                              .addMarker("zone").addMarker("cooling").addMarker("user").addMarker("limit").addMarker("min").addMarker("sp")
-                                             .setMinVal("70").setMaxVal("77").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                                             .setMinVal("72").setMaxVal("77").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                              .setUnit("\u00B0F")
                                              .setTz(tz)
                                              .build();
@@ -823,7 +823,7 @@ public class BuildingTuners
                                              .setEquipRef(equipRef)
                                              .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                                              .addMarker("zone").addMarker("cooling").addMarker("user").addMarker("limit").addMarker("max").addMarker("sp")
-                                             .setMinVal("72").setMaxVal("80").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                                             .setMinVal("72").setMaxVal("77").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                              .setUnit("\u00B0F")
                                              .setTz(tz)
                                              .build();

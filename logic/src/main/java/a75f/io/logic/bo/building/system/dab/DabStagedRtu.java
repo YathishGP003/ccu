@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.system.dab;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -21,6 +22,7 @@ import static a75f.io.logic.bo.building.hvac.Stage.COOLING_2;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_3;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_4;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_5;
+import static a75f.io.logic.bo.building.hvac.Stage.DEHUMIDIFIER;
 import static a75f.io.logic.bo.building.hvac.Stage.FAN_1;
 import static a75f.io.logic.bo.building.hvac.Stage.FAN_2;
 import static a75f.io.logic.bo.building.hvac.Stage.FAN_3;
@@ -157,7 +159,7 @@ public class DabStagedRtu extends DabSystemProfile
                     case COOLING_3:
                     case COOLING_4:
                     case COOLING_5:
-                        currState = getCmdSignal("relay" + i);
+                        currState = getCmdSignal("cooling and stage" + stage.ordinal()+1);
                         if (L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
                             stageThreshold = 100 * (stage.ordinal() +1) / (coolingStages + 1);
                         } else
@@ -172,13 +174,14 @@ public class DabStagedRtu extends DabSystemProfile
                         {
                             relayState = systemCoolingLoopOp > Math.max(stageThreshold - relayDeactHysteresis ,0 ) ? 1 :0;
                         }
+                        setCmdSignal("cooling and stage"+stage.ordinal()+1, relayState);
                         break;
                     case HEATING_1:
                     case HEATING_2:
                     case HEATING_3:
                     case HEATING_4:
                     case HEATING_5:
-                        currState = getCmdSignal("relay" + i);
+                        currState = getCmdSignal("heating and stage" + (stage.ordinal() - COOLING_5.ordinal()));
                         stageThreshold = 100 * (stage.ordinal() - HEATING_1.ordinal()) / heatingStages;
                         if (currState == 0)
                         {
@@ -189,6 +192,7 @@ public class DabStagedRtu extends DabSystemProfile
                             relayState = systemHeatingLoopOp > Math.max(stageThreshold - relayDeactHysteresis, 0) ? 1: 0;
                             
                         }
+                        setCmdSignal("heating and stage"+ (stage.ordinal() - COOLING_5.ordinal()), relayState);
                         break;
                     case FAN_1:
                         if ((systemMode != SystemMode.OFF && ((ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
@@ -199,6 +203,7 @@ public class DabStagedRtu extends DabSystemProfile
                         } else {
                             relayState = 0;
                         }
+                        setCmdSignal("fan and stage1", relayState);
                         break;
                     case FAN_2:
                         if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU) {
@@ -208,11 +213,12 @@ public class DabStagedRtu extends DabSystemProfile
                         {
                             relayState = systemFanLoopOp > 0 ? 1 : 0;
                         }
+                        setCmdSignal("fan and stage2", relayState);
                         break;
                     case FAN_3:
                     case FAN_4:
                     case FAN_5:
-                        currState = getCmdSignal("relay" + i);
+                        currState = getCmdSignal("fan and stage" + (stage.ordinal() - HEATING_5.ordinal()));
                         stageThreshold = 100 * (stage.ordinal() - FAN_2.ordinal()) / (fanStages - 1);
                         if (currState == 0)
                         {
@@ -222,6 +228,7 @@ public class DabStagedRtu extends DabSystemProfile
                         {
                             relayState = systemFanLoopOp > (stageThreshold - relayDeactHysteresis) ? 1 : 0;
                         }
+                        setCmdSignal("fan and stage"+(stage.ordinal() - HEATING_5.ordinal()), relayState);
                         break;
                     case HUMIDIFIER:
                     case DEHUMIDIFIER:
@@ -234,9 +241,9 @@ public class DabStagedRtu extends DabSystemProfile
                             double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");
                             double targetMaxHumidity = TunerUtil.readSystemUserIntentVal("target and max and inside and humidity");
                             double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis", getSystemEquipRef());
-                            currState = getCmdSignal("relay" + i);
                             if (stage == HUMIDIFIER)
                             {
+                                currState = getCmdSignal("humidifier");
                                 //Humidification
                                 if (humidity < targetMinHumidity)
                                 {
@@ -250,9 +257,11 @@ public class DabStagedRtu extends DabSystemProfile
                                 {
                                     relayState = currState;
                                 }
+                                setCmdSignal("humidifier", relayState);
                             }
                             else
                             {
+                                currState = getCmdSignal("dehumidifier");
                                 //Dehumidification
                                 if (humidity > targetMaxHumidity)
                                 {
@@ -266,6 +275,7 @@ public class DabStagedRtu extends DabSystemProfile
                                 {
                                     relayState = currState;
                                 }
+                                setCmdSignal("dehumidifier", relayState);
                             }
                             CcuLog.d(L.TAG_CCU_SYSTEM, "humidity :" + humidity + " targetMinHumidity: " + targetMinHumidity + " humidityHysteresis: " + humidityHysteresis + " targetMaxHumidity: " + targetMaxHumidity);
                         }
@@ -273,7 +283,6 @@ public class DabStagedRtu extends DabSystemProfile
                 }
             }
             stageStatus[stage.ordinal()] = (int)relayState;
-            setCmdSignal("relay"+i, relayState);
             ControlMote.setRelayState("relay"+i, relayState);
             CcuLog.d(L.TAG_CCU_SYSTEM, stage+ " Set Relay"+i+", threshold: "+stageThreshold+", state : "+relayState);
         }
@@ -415,27 +424,37 @@ public class DabStagedRtu extends DabSystemProfile
         String equipDis = siteMap.get("dis").toString()+"-SystemEquip";
         String siteRef = siteMap.get("id").toString();
         String tz = siteMap.get("tz").toString();
-        addCmdPoint(COOLING_1.displayName,"relay1", equipDis, siteRef, equipref, tz);
-        addCmdPoint(COOLING_2.displayName,"relay2", equipDis, siteRef, equipref, tz);
-        addCmdPoint(FAN_1.displayName,"relay3", equipDis, siteRef, equipref, tz);
-        addCmdPoint(HEATING_1.displayName,"relay4", equipDis, siteRef, equipref, tz);
-        addCmdPoint(HEATING_2.displayName,"relay5", equipDis, siteRef, equipref, tz);
-        addCmdPoint(FAN_2.displayName,"relay6", equipDis, siteRef, equipref, tz);
-        addCmdPoint(HUMIDIFIER.displayName,"relay7", equipDis, siteRef, equipref, tz);
+        addCmdPoint(COOLING_1.displayName,"cooling","stage1", equipDis, siteRef, equipref, tz);
+        addCmdPoint(COOLING_2.displayName,"cooling" ,"stage2", equipDis, siteRef, equipref, tz);
+        addCmdPoint(FAN_1.displayName,"fan","stage1", equipDis, siteRef, equipref, tz);
+        addCmdPoint(HEATING_1.displayName,"heating","stage1", equipDis, siteRef, equipref, tz);
+        addCmdPoint(HEATING_2.displayName,"heating","stage2", equipDis, siteRef, equipref, tz);
+        addCmdPoint(FAN_2.displayName,"fan","stage2", equipDis, siteRef, equipref, tz);
+        addHumidityCmdPoint(HUMIDIFIER.displayName,"humidifier", equipDis, siteRef, equipref, tz);
     }
     
-    private void addCmdPoint(String name, String relay, String equipDis, String siteRef, String equipref, String tz){
+    private void addCmdPoint(String name, String relayMap, String stage, String equipDis, String siteRef, String equipref, String tz){
         //Name to be updated
         Point relay1Op = new Point.Builder()
                                  .setDisplayName(equipDis+"-"+name)
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipref)
-                                 .addMarker("system").addMarker("cmd").addMarker(relay).addMarker("his").addMarker("equipHis")
+                                 .addMarker("system").addMarker("cmd").addMarker(relayMap).addMarker(stage).addMarker("his").addMarker("equipHis")
                                  .setTz(tz)
                                  .build();
         CCUHsApi.getInstance().addPoint(relay1Op);
     }
-    
+    private void addHumidityCmdPoint(String name, String relayMap, String equipDis, String siteRef, String equipref, String tz){
+        //Name to be updated
+        Point relay1Op = new Point.Builder()
+                .setDisplayName(equipDis+"-"+name)
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .addMarker("system").addMarker("cmd").addMarker(relayMap).addMarker("his").addMarker("equipHis")
+                .setTz(tz)
+                .build();
+        CCUHsApi.getInstance().addPoint(relay1Op);
+    }
     public double getCmdSignal(String cmd) {
         return CCUHsApi.getInstance().readHisValByQuery("point and system and cmd and his and "+cmd);
     }
@@ -508,16 +527,108 @@ public class DabStagedRtu extends DabSystemProfile
         return hayStack.readPointPriorityVal(configPoint.get("id").toString());
     }
     public void setConfigAssociation(String config, double val) {
-        
-        HashMap cmd = CCUHsApi.getInstance().read("point and system and cmd and "+config);
+        Stage curstage = Stage.values()[(int) getConfigAssociation(config)];
+        HashMap cmd = null;
+        Point newCmdPoint = null;
+        Point oldPoint = null;
         Stage updatedStage = Stage.values()[(int)val];
-        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-        String equipDis = siteMap.get("dis").toString()+"-SystemEquip";
-        Point cmdPoint = new Point.Builder().setHashMap(cmd).setDisplayName(equipDis+"-"+updatedStage.displayName).build();
-        CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point "+cmdPoint.getDisplayName());
-        CCUHsApi.getInstance().updatePoint(cmdPoint, cmdPoint.getId());
-        CCUHsApi.getInstance().syncEntityTree();
-        CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and association and "+config, val);
+
+        int newStageNum = 1;
+        int curStageNum = 0;
+        switch (updatedStage){
+            case COOLING_1:
+            case COOLING_2:
+            case COOLING_3:
+            case COOLING_4:
+            case COOLING_5:
+                newStageNum = updatedStage.ordinal() + 1;
+                break;
+            case HEATING_1:
+            case HEATING_2:
+            case HEATING_3:
+            case HEATING_4:
+            case HEATING_5:
+                newStageNum = updatedStage.ordinal() - COOLING_5.ordinal();
+                break;
+            case FAN_1:
+            case FAN_2:
+            case FAN_3:
+            case FAN_4:
+            case FAN_5:
+                newStageNum = updatedStage.ordinal() - HEATING_5.ordinal();
+                break;
+        }
+
+        CcuLog.d(L.TAG_CCU_SYSTEM, " DABStageRTU setConfigAssociation for relay ="+newStageNum+","+curstage+","+updatedStage);
+        if(curstage != updatedStage) {
+            HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+            String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
+            switch (curstage) {
+                case COOLING_1:
+                case COOLING_2:
+                case COOLING_3:
+                case COOLING_4:
+                case COOLING_5:
+                    curStageNum = curstage.ordinal() + 1;
+                    cmd = CCUHsApi.getInstance().read("point and system and cmd and cooling and stage" +curStageNum );
+                    oldPoint = new Point.Builder().setHashMap(cmd).build();
+                    break;
+                case HEATING_1:
+                case HEATING_2:
+                case HEATING_3:
+                case HEATING_4:
+                case HEATING_5:
+                    curStageNum = curstage.ordinal() - COOLING_5.ordinal();
+                    cmd = CCUHsApi.getInstance().read("point and system and cmd and heating and stage" + curStageNum);
+                    oldPoint = new Point.Builder().setHashMap(cmd).build();
+                    break;
+                case FAN_1:
+                case FAN_2:
+                case FAN_3:
+                case FAN_4:
+                case FAN_5:
+                    curStageNum = curstage.ordinal() - HEATING_5.ordinal();
+                    cmd = CCUHsApi.getInstance().read("point and system and cmd and fan and stage" + curStageNum);
+                    oldPoint = new Point.Builder().setHashMap(cmd).build();
+                    break;
+                case HUMIDIFIER:
+                    cmd = CCUHsApi.getInstance().read("point and system and cmd and humidifier");
+                    oldPoint = new Point.Builder().setHashMap(cmd).build();
+                    break;
+                case DEHUMIDIFIER:
+                    cmd = CCUHsApi.getInstance().read("point and system and cmd and dehumidifier");
+                    oldPoint = new Point.Builder().setHashMap(cmd).build();
+                    break;
+            }
+
+            if (val <= Stage.COOLING_5.ordinal() && val >= COOLING_1.ordinal()) {
+                newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).addMarker("system")
+                        .addMarker("cmd").addMarker("cooling").addMarker("stage" + newStageNum).addMarker("his").addMarker("equipHis").setTz(oldPoint.getTz()).build();
+                //CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + newCmdPoint.getDisplayName() + "," + newCmdPoint.getMarkers().toString()  + "," + oldPoint.getId()+","+newCmdPoint.getId());
+            } else if (val >= Stage.HEATING_1.ordinal() && val <= HEATING_5.ordinal()) {
+                newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).addMarker("system")
+                        .addMarker("cmd").addMarker("heating").addMarker("stage" + newStageNum).addMarker("his").addMarker("equipHis").setTz(oldPoint.getTz()).build();
+                //CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + newCmdPoint.getDisplayName() + "," + newCmdPoint.getMarkers().toString() + "," + oldPoint.getId()+","+newCmdPoint.getId());
+            } else if (val >= Stage.FAN_1.ordinal() && val <= Stage.FAN_5.ordinal()) {
+                newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).addMarker("system")
+                        .addMarker("cmd").addMarker("fan").addMarker("stage" + newStageNum).addMarker("his").addMarker("equipHis").setTz(oldPoint.getTz()).build();
+                //CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + newCmdPoint.getDisplayName() + "," + newCmdPoint.getMarkers().toString() + "," + oldPoint.getId()+","+newCmdPoint.getId());
+            } else if (val == HUMIDIFIER.ordinal()) {
+                newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).addMarker("system")
+                        .addMarker("cmd").addMarker("humidifier").addMarker("his").addMarker("equipHis").setTz(oldPoint.getTz()).build();
+                //CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + newCmdPoint.getDisplayName() + "," + newCmdPoint.getMarkers().toString()  + "," + oldPoint.getId()+","+newCmdPoint.getId());
+            } else if (val == DEHUMIDIFIER.ordinal()) {
+                newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).addMarker("system")
+                        .addMarker("cmd").addMarker("dehumidifier").addMarker("his").addMarker("equipHis").setTz(oldPoint.getTz()).build();
+                //CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + newCmdPoint.getDisplayName() + "," + newCmdPoint.getMarkers().toString()  + "," + oldPoint.getId()+","+newCmdPoint.getId());
+            }
+
+            if(oldPoint != null && oldPoint.getId() != null)CCUHsApi.getInstance().deleteEntity(oldPoint.getId());
+            if(newCmdPoint != null)CCUHsApi.getInstance().addPoint(newCmdPoint);
+
+            CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and association and " + config, val);
+            CCUHsApi.getInstance().syncEntityTree();
+        }
         
     }
 }

@@ -422,34 +422,34 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 setConfigBackground("analog2 and recirculate", Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
             case R.id.analog2CoolStage1:
-                setConfigBackground("analog2 and cool and stage1", Double.parseDouble(arg0.getSelectedItem().toString()));
+                setConfigBackground("analog2 and cooling and stage1", Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
             case R.id.analog2CoolStage2:
-                setConfigBackground("analog2 and cool and stage2", Double.parseDouble(arg0.getSelectedItem().toString()));
+                setConfigBackground("analog2 and cooling and stage2", Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
             case R.id.analog2CoolStage3:
-                setConfigBackground("analog2 and cool and stage3", Double.parseDouble(arg0.getSelectedItem().toString()));
+                setConfigBackground("analog2 and cooling and stage3", Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
             case R.id.analog2CoolStage4:
-                setConfigBackground("analog2 and cool and stage4", Double.parseDouble(arg0.getSelectedItem().toString()));
+                setConfigBackground("analog2 and cooling and stage4", Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
             case R.id.analog2CoolStage5:
-                setConfigBackground("analog2 and cool and stage5", Double.parseDouble(arg0.getSelectedItem().toString()));
+                setConfigBackground("analog2 and cooling and stage5", Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
             case R.id.analog2HeatStage1:
-                setConfigBackground("analog2 and cool and stage1", Double.parseDouble(arg0.getSelectedItem().toString()));
+                setConfigBackground("analog2 and heating and stage1", Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
             case R.id.analog2HeatStage2:
-                setConfigBackground("analog2 and cool and stage2", Double.parseDouble(arg0.getSelectedItem().toString()));
+                setConfigBackground("analog2 and heating and stage2", Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
             case R.id.analog2HeatStage3:
-                setConfigBackground("analog2 and cool and stage3", Double.parseDouble(arg0.getSelectedItem().toString()));
+                setConfigBackground("analog2 and heating and stage3", Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
             case R.id.analog2HeatStage4:
-                setConfigBackground("analog2 and cool and stage4", Double.parseDouble(arg0.getSelectedItem().toString()));
+                setConfigBackground("analog2 and heating and stage4", Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
             case R.id.analog2HeatStage5:
-                setConfigBackground("analog2 and cool and stage5", Double.parseDouble(arg0.getSelectedItem().toString()));
+                setConfigBackground("analog2 and heating and stage5", Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
             
         }
@@ -525,6 +525,11 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
     private void setConfigAssociationBackground(String config, double val) {
         new AsyncTask<String, Void, Void>() {
             @Override
+            protected void onPreExecute() {
+                ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB Configuration");
+                super.onPreExecute();
+            }
+            @Override
             protected Void doInBackground( final String ... params ) {
                 systemProfile.setConfigAssociation(config, val);
                 systemProfile.updateStagesSelected();
@@ -534,6 +539,7 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
             @Override
             protected void onPostExecute( final Void result ) {
                 updateSystemMode();
+                ProgressDialogUtils.hideProgressDialog();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }

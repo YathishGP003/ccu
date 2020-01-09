@@ -1,6 +1,5 @@
 package a75f.io.renatus;
 
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -28,7 +27,6 @@ import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.tuners.TunerUtil;
@@ -294,53 +292,52 @@ public class DABStagedProfile extends Fragment implements AdapterView.OnItemSele
     public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
                                long arg3)
     {
-        Stage s = Stage.getEnum(arg0.getSelectedItem().toString());
-        switch (arg0.getId())
-        {
-            case R.id.relay1Spinner:
-                if (relay1Cb.isChecked())
-                {
-                    setConfigAssociationBackground("relay1", relay1Spinner.getSelectedItemPosition());
-                }
-                break;
-            case R.id.relay2Spinner:
-                if (relay2Cb.isChecked())
-                {
-                    setConfigAssociationBackground("relay2", relay2Spinner.getSelectedItemPosition());
-                }
-                break;
-            case R.id.relay3Spinner:
-                if (relay3Cb.isChecked())
-                {
-                    setConfigAssociationBackground("relay3", relay3Spinner.getSelectedItemPosition());
-                }
-                break;
-            case R.id.relay4Spinner:
-                if (relay4Cb.isChecked())
-                {
-                    setConfigAssociationBackground("relay4", relay4Spinner.getSelectedItemPosition());
-                }
-                break;
-            case R.id.relay5Spinner:
-                if (relay5Cb.isChecked())
-                {
-                    setConfigAssociationBackground("relay5", relay5Spinner.getSelectedItemPosition());
-                }
-                break;
-            case R.id.relay6Spinner:
-                if (relay6Cb.isChecked())
-                {
-                    setConfigAssociationBackground("relay6", relay6Spinner.getSelectedItemPosition());
-                }
-                break;
-            case R.id.relay7Spinner:
-                if (relay7Cb.isChecked())
-                {
-                    setConfigAssociationBackground("relay7", relay7Spinner.getSelectedItemPosition());
-                }
-                break;
-            
-        }
+            switch (arg0.getId())
+            {
+                case R.id.relay1Spinner:
+                    if (relay1Cb.isChecked())
+                    {
+                        setConfigAssociationBackground("relay1", relay1Spinner.getSelectedItemPosition());
+                    }
+                    break;
+                case R.id.relay2Spinner:
+                    if (relay2Cb.isChecked())
+                    {
+                        setConfigAssociationBackground("relay2", relay2Spinner.getSelectedItemPosition());
+                    }
+                    break;
+                case R.id.relay3Spinner:
+                    if (relay3Cb.isChecked())
+                    {
+                        setConfigAssociationBackground("relay3", relay3Spinner.getSelectedItemPosition());
+                    }
+                    break;
+                case R.id.relay4Spinner:
+                    if (relay4Cb.isChecked())
+                    {
+                        setConfigAssociationBackground("relay4", relay4Spinner.getSelectedItemPosition());
+                    }
+                    break;
+                case R.id.relay5Spinner:
+                    if (relay5Cb.isChecked())
+                    {
+                        setConfigAssociationBackground("relay5", relay5Spinner.getSelectedItemPosition());
+                    }
+                    break;
+                case R.id.relay6Spinner:
+                    if (relay6Cb.isChecked())
+                    {
+                        setConfigAssociationBackground("relay6", relay6Spinner.getSelectedItemPosition());
+                    }
+                    break;
+                case R.id.relay7Spinner:
+                    if (relay7Cb.isChecked())
+                    {
+                        setConfigAssociationBackground("relay7", relay7Spinner.getSelectedItemPosition());
+                    }
+                    break;
+
+            }
     }
     
     @Override
@@ -413,6 +410,11 @@ public class DABStagedProfile extends Fragment implements AdapterView.OnItemSele
     private void setConfigAssociationBackground(String config, double val) {
         new AsyncTask<String, Void, Void>() {
             @Override
+            protected void onPreExecute() {
+                ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB Configuration");
+                super.onPreExecute();
+            }
+            @Override
             protected Void doInBackground( final String ... params ) {
                 systemProfile.setConfigAssociation(config, val);
                 systemProfile.updateStagesSelected();
@@ -422,6 +424,7 @@ public class DABStagedProfile extends Fragment implements AdapterView.OnItemSele
             @Override
             protected void onPostExecute( final Void result ) {
                 updateSystemMode();
+                ProgressDialogUtils.hideProgressDialog();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }

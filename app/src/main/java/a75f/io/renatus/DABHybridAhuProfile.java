@@ -593,6 +593,11 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
         new AsyncTask<String, Void, Void>()
         {
             @Override
+            protected void onPreExecute() {
+                ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB Configuration");
+                super.onPreExecute();
+            }
+            @Override
             protected Void doInBackground(final String... params)
             {
                 systemProfile.setConfigAssociation(config, val);
@@ -604,6 +609,7 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
             protected void onPostExecute(final Void result)
             {
                 updateSystemMode();
+                ProgressDialogUtils.hideProgressDialog();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }

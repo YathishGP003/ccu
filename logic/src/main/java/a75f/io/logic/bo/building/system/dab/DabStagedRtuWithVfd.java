@@ -12,7 +12,9 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 
+import static a75f.io.logic.bo.building.hvac.Stage.COOLING_5;
 import static a75f.io.logic.bo.building.hvac.Stage.FAN_1;
+import static a75f.io.logic.bo.building.hvac.Stage.HEATING_5;
 
 public class DabStagedRtuWithVfd extends DabStagedRtu
 {
@@ -83,12 +85,13 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
             {
                 for (int i = 1; i < 8; i++)
                 {
-                    if (getConfigEnabled("relay" + i) > 0 && getCmdSignal("relay" + i) > 0)
+                    if (getConfigEnabled("relay" + i) > 0)
                     {
                         int val = (int) getConfigAssociation("relay" + i);
                         if (val <= Stage.COOLING_5.ordinal())
                         {
-                            signal = getConfigVal("analog2 and cooling and stage" + (val + 1));
+                            if(getCmdSignal("cooling and stage" +Stage.values()[val]+1) > 0)
+                                signal = getConfigVal("analog2 and cooling and stage" + (val + 1));
                         }
                     }
                 }
@@ -97,12 +100,13 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
             {
                 for (int i = 1; i < 8; i++)
                 {
-                    if (getConfigEnabled("relay" + i) > 0 && getCmdSignal("relay" + i) > 0)
+                    if (getConfigEnabled("relay" + i) > 0 )
                     {
                         int val = (int) getConfigAssociation("relay" + i);
                         if (val >= Stage.HEATING_1.ordinal() && val <= Stage.HEATING_5.ordinal())
                         {
-                            signal = getConfigVal("analog2 and heating and stage" + (val - Stage.HEATING_1.ordinal() + 1));
+                            if(getCmdSignal("heating and stage" + (Stage.values()[val].ordinal() - COOLING_5.ordinal())) > 0)
+                                signal = getConfigVal("analog2 and heating and stage" + (val - Stage.HEATING_1.ordinal() + 1));
                         }
                     }
                 }
@@ -111,7 +115,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
             {
                 for (int i = 1; i < 8; i++)
                 {
-                    if (getConfigEnabled("relay" + i) > 0 && getCmdSignal("relay" + i) > 0)
+                    if (getConfigEnabled("relay" + i) > 0 && getCmdSignal("fan and stage1") > 0)
                     {
                         int val = (int) getConfigAssociation("relay" + i);
                         if (val == Stage.FAN_1.ordinal())
@@ -122,7 +126,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
                 }
             }
         }
-        setCmdSignal("analog2",10*signal);
+        setCmdSignal("fan and modulating",10*signal);
         ControlMote.setAnalogOut("analog2", 10 * signal);
         CcuLog.d(L.TAG_CCU_SYSTEM, " analog2 Signal : "+10 * signal);
     }
@@ -222,7 +226,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
         String siteRef = siteMap.get("id").toString();
         String tz = siteMap.get("tz").toString();
-        Point coolingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "anlog2Signal").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cmd").addMarker("analog2").addMarker("his").addMarker("equipHis").setUnit("%").setTz(tz).build();
+        Point coolingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "anlog2Signal").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").addMarker("equipHis").setUnit("%").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(coolingSignal);
     }
     

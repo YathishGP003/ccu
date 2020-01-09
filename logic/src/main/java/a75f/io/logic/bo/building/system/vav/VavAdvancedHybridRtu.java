@@ -145,7 +145,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         } else {
             signal = 0;
         }
-        setCmdSignal("cooling",signal);
+        setCmdSignal("cooling and modulating",signal);
         ControlMote.setAnalogOut("analog1", signal);
         
         if (getConfigEnabled("analog2") > 0)
@@ -166,7 +166,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         } else {
             signal = 0;
         }
-        setCmdSignal("fan", signal);
+        setCmdSignal("fan and modulating", signal);
         ControlMote.setAnalogOut("analog2", signal);
         
         if (getConfigEnabled("analog3") > 0)
@@ -186,7 +186,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         } else  {
             signal = 0;
         }
-        setCmdSignal("heating", signal);
+        setCmdSignal("heating and modulating", signal);
         ControlMote.setAnalogOut("analog3", signal);
         
         if (getConfigEnabled("analog4") > 0)
@@ -437,23 +437,23 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         Point coolingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "coolingSignal")
                                                  .setSiteRef(siteRef)
                                                  .setEquipRef(equipref)
-                                                 .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("analog1").addMarker("his").addMarker("equipHis")
+                                                 .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("his").addMarker("equipHis")
                                                  .setUnit("%").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(coolingSignal);
         Point heatingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "heatingSignal")
                                                  .setSiteRef(siteRef).setEquipRef(equipref)
-                                                 .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("modulating").addMarker("analog3").addMarker("his").addMarker("equipHis")
+                                                 .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("modulating").addMarker("his").addMarker("equipHis")
                                                  .setUnit("%").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(heatingSignal);
         Point fanSignal = new Point.Builder().setDisplayName(equipDis + "-" + "fanSignal")
                                              .setSiteRef(siteRef)
                                              .setEquipRef(equipref)
-                                             .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("analog2").addMarker("his").addMarker("modulating").addMarker("equipHis")
+                                             .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his").addMarker("modulating").addMarker("equipHis")
                                              .setTz(tz).build();
         CCUHsApi.getInstance().addPoint(fanSignal);
         Point compositeSignal = new Point.Builder().setDisplayName(equipDis + "-" + "CompositeSignal")
                                                    .setSiteRef(siteRef).setEquipRef(equipref)
-                                                   .addMarker("system").addMarker("cmd").addMarker("composite").addMarker("analog4").addMarker("his").addMarker("equipHis")
+                                                   .addMarker("system").addMarker("cmd").addMarker("composite").addMarker("modulating").addMarker("his").addMarker("equipHis")
                                                    .setUnit("%").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(compositeSignal);
     }

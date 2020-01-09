@@ -565,6 +565,11 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
         new AsyncTask<String, Void, Void>()
         {
             @Override
+            protected void onPreExecute() {
+                ProgressDialogUtils.showProgressDialog(getActivity(),"Saving VAV Configuration");
+                super.onPreExecute();
+            }
+            @Override
             protected Void doInBackground(final String... params)
             {
                 systemProfile.setConfigAssociation(config, val);
@@ -575,6 +580,7 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
             @Override
             protected void onPostExecute(final Void result)
             {
+                ProgressDialogUtils.hideProgressDialog();
                 updateSystemMode();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");

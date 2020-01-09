@@ -136,7 +136,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         } else {
             signal = 0;
         }
-        setCmdSignal("cooling",signal);
+        setCmdSignal("cooling and modulating",signal);
         ControlMote.setAnalogOut("analog1", signal);
         
         if (getConfigEnabled("analog2") > 0)
@@ -157,7 +157,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         } else {
             signal = 0;
         }
-        setCmdSignal("fan", signal);
+        setCmdSignal("fan and modulating", signal);
         ControlMote.setAnalogOut("analog2", signal);
         
         if (getConfigEnabled("analog3") > 0)
@@ -177,7 +177,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         } else  {
             signal = 0;
         }
-        setCmdSignal("heating", signal);
+        setCmdSignal("heating and modulating", signal);
         ControlMote.setAnalogOut("analog3", signal);
         
         if (getConfigEnabled("analog4") > 0)

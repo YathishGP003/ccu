@@ -754,7 +754,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
         double damperPosPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and damper and base and equipRef == \""+equipID+"\"");
         double reheatPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and reheat and cmd and equipRef == \""+equipID+"\"");
-        double supplyAirPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and entering and air and temp and equipRef == \""+equipID+"\"");
+        double enteringAirPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and entering and air and temp and equipRef == \""+equipID+"\"");
         double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and vav and equipRef == \""+equipID+"\"");
         if (equipStatusPoint.length() > 0)
         {
@@ -776,9 +776,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
         if (supplyAirPoint > 0)
         {
-            vavPoints.put("Supply Airfow",supplyAirPoint+" \u2109");
+            vavPoints.put("Entering Airfow",enteringAirPoint+" \u2109");
         }else{
-            vavPoints.put("Supply Airfow",0+" \u2109");
+            vavPoints.put("Entering Airfow",0+" \u2109");
         }
         if (dischargePoint > 0)
         {

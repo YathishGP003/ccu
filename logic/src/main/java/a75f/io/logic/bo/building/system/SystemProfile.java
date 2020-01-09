@@ -304,7 +304,7 @@ public abstract class SystemProfile
         }
 
         Point stage1CoolingAirflowTempLowerOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage1CoolingAirflowTempLowerOffset").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage1").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp").addMarker("equipHis")
-                .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setMinVal("-120").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage1CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage1CoolingAirflowTempLowerOffset);
@@ -656,7 +656,7 @@ public abstract class SystemProfile
         }
 
         Point ccuAlarmVolumeLevel = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "ccuAlarmVolumeLevel").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("alarm").addMarker("volume").addMarker("level").addMarker("sp").addMarker("equipHis")
-                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("7").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz).build();
         String ccuAlarmVolumeLevelId = hayStack.addPoint(ccuAlarmVolumeLevel);
         HashMap ccuAlarmVolumeLevelPoint = hayStack.read("point and tuner and default and alarm and volume and level");

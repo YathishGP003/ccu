@@ -84,7 +84,7 @@ public class BuildingTuners
                                                   .setEquipRef(equipRef)
                                                   .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                   .addMarker("system").addMarker("forced").addMarker("occupied").addMarker("time").addMarker("sp")
-                                                  .setMinVal("0").setMaxVal("360").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                                                  .setMinVal("30").setMaxVal("300").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                                   .setUnit("Min")
                                                   .setTz(tz)
                                                   .build();
@@ -126,6 +126,7 @@ public class BuildingTuners
                                                   .setEquipRef(equipRef)
                                                   .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                   .addMarker("system").addMarker("user").addMarker("limit").addMarker("spread").addMarker("sp")
+                                                  .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                                                   .setUnit("\u00B0F")
                                                   .setTz(tz)
                                                   .build();
@@ -139,7 +140,7 @@ public class BuildingTuners
                                         .setEquipRef(equipRef)
                                         .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                                         .addMarker("system").addMarker("building").addMarker("limit").addMarker("min").addMarker("sp")
-                                        .setMinVal("40").setMaxVal("65").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                                        .setMinVal("50").setMaxVal("90").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                         .setUnit("\u00B0F")
                                         .setTz(tz)
                                         .build();
@@ -153,7 +154,7 @@ public class BuildingTuners
                                          .setEquipRef(equipRef)
                                          .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                                          .addMarker("system").addMarker("building").addMarker("limit").addMarker("max").addMarker("sp")
-                                         .setMinVal("80").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                                         .setMinVal("50").setMaxVal("90").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                          .setUnit("\u00B0F")
                                          .setTz(tz)
                                          .build();
@@ -167,7 +168,7 @@ public class BuildingTuners
                                          .setEquipRef(equipRef)
                                          .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                                          .addMarker("system").addMarker("building").addMarker("zone").addMarker("differential").addMarker("sp")
-                                         .setMinVal("3").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                                         .setMinVal("58").setMaxVal("87").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                          .setTz(tz)
                                          .build();
         String buildingToZoneDifferentialId = hayStack.addPoint(buildingToZoneDifferential);
@@ -180,7 +181,7 @@ public class BuildingTuners
                                                    .setEquipRef(equipRef)
                                                    .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                    .addMarker("system").addMarker("zone").addMarker("temp").addMarker("dead").addMarker("leeway").addMarker("sp")
-                                                   .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                                                   .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                                    .setUnit("\u00B0F")
                                                    .setTz(tz)
                                                    .build();
@@ -214,388 +215,13 @@ public class BuildingTuners
         hayStack.writePoint(percentOfDeadZonesAllowedId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.CM_TEMP_INFLU_PERCENTILE_ZONE_DEAD, 0);
         hayStack.writeHisValById(percentOfDeadZonesAllowedId, TunerConstants.CM_TEMP_INFLU_PERCENTILE_ZONE_DEAD);
 
-        Point co2IgnoreRequest = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"co2IgnoreRequest")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .addMarker("system").addMarker("co2").addMarker("ignoreRequest").addMarker("sp")
-                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setTz(tz)
-                .build();
-        String co2IgnoreRequestId = hayStack.addPoint(co2IgnoreRequest);
-        hayStack.writePoint(co2IgnoreRequestId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 2.0, 0);
-        hayStack.writeHisValById(co2IgnoreRequestId,2.0);
-
-        Point co2SPInit = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"co2SPInit")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .addMarker("system").addMarker("co2").addMarker("spinit").addMarker("sp")
-                .setMinVal("0").setMaxVal("1500").setIncrementVal("10").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("ppm")
-                .setTz(tz)
-                .build();
-        String co2SPInitId = hayStack.addPoint(co2SPInit);
-        hayStack.writePoint(co2SPInitId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 800.0, 0);
-        hayStack.writeHisValById(co2SPInitId,800.0);
-
-        Point co2SPMax = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"co2SPMax")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .addMarker("system").addMarker("co2").addMarker("spmax").addMarker("sp")
-                .setMinVal("100").setMaxVal("2000").setIncrementVal("10").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("ppm")
-                .setTz(tz)
-                .build();
-        String co2SPMaxId = hayStack.addPoint(co2SPMax);
-        hayStack.writePoint(co2SPMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 1000.0, 0);
-        hayStack.writeHisValById(co2SPMaxId,1000.0);
-
-        Point co2SPMin = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"co2SPMin")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("co2").addMarker("spmin").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0").setMaxVal("1500").setIncrementVal("10").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("ppm")
-                .setTz(tz)
-                .build();
-        String co2SPMinId = hayStack.addPoint(co2SPMin);
-        hayStack.writePoint(co2SPMinId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 800.0,0 );
-        hayStack.writeHisValById(co2SPMinId,800.0);
-
-        Point co2SPRes = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"co2SPRes")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("co2").addMarker("spres").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("-30.0").setMaxVal("-1.0").setIncrementVal("1.0").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("ppm")
-                .setTz(tz)
-                .build();
-        String co2SPResId = hayStack.addPoint(co2SPRes);
-        hayStack.writePoint(co2SPResId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",-10.0,0 );
-        hayStack.writeHisValById(co2SPResId,-10.0);
-
-        Point co2SPResMax = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"co2SPResMax")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("co2").addMarker("spresmax").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("-50.0").setMaxVal("-1.0").setIncrementVal("1.0").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("ppm")
-                .setTz(tz)
-                .build();
-        String co2SPResMaxId = hayStack.addPoint(co2SPResMax);
-        hayStack.writePoint(co2SPResMaxId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -30.0,0 );
-        hayStack.writeHisValById(co2SPResMaxId,-30.0);
-
-        Point co2SPTrim = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"co2SPTrim")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("co2").addMarker("sptrim").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0").setMaxVal("50").setIncrementVal("1.0").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("ppm")
-                .setTz(tz)
-                .build();
-        String co2SPTrimId = hayStack.addPoint(co2SPTrim);
-        hayStack.writePoint(co2SPTrimId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 20.0,0 );
-        hayStack.writeHisValById(co2SPTrimId,20.0);
-
-        Point co2TimeDelay = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"co2TimeDelay")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("co2").addMarker("timeDelay").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("m")
-                .setTz(tz)
-                .build();
-        String co2TimeDelayId = hayStack.addPoint(co2TimeDelay);
-        hayStack.writePoint(co2TimeDelayId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",2.0,0 );
-        hayStack.writeHisValById(co2TimeDelayId,2.0);
-
-        Point co2TimeInterval = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"co2TimeInterval")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("co2").addMarker("timeInterval").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("m")
-                .setTz(tz)
-                .build();
-        String co2TimeIntervalId = hayStack.addPoint(co2TimeInterval);
-        hayStack.writePoint(co2TimeIntervalId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 2.0,0 );
-        hayStack.writeHisValById(co2TimeIntervalId,2.0);
-
-        Point satIgnoreRequest = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"satIgnoreRequest")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("sat").addMarker("ignoreRequest").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setTz(tz)
-                .build();
-        String satIgnoreRequestId = hayStack.addPoint(satIgnoreRequest);
-        hayStack.writePoint(satIgnoreRequestId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 2.0,0 );
-        hayStack.writeHisValById(satIgnoreRequestId,2.0);
-
-        Point satSPInit = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"satSPInit")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("sat").addMarker("spinit").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("50").setMaxVal("70").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("\u00B0F")
-                .setTz(tz)
-                .build();
-        String satSPInitId = hayStack.addPoint(satSPInit);
-        hayStack.writePoint(satSPInitId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 65.0,0 );
-        hayStack.writeHisValById(satSPInitId,65.0);
-
-        Point satSPMax = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"satSPMax")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("sat").addMarker("spmax").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("55").setMaxVal("75").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("\u00B0F")
-                .setTz(tz)
-                .build();
-        String satSPMaxId = hayStack.addPoint(satSPMax);
-        hayStack.writePoint(satSPMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",65.0,0 );
-        hayStack.writeHisValById(satSPMaxId,65.0);
-
-        Point satSPMin = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"satSPMin")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("sat").addMarker("spmin").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("45").setMaxVal("65").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("\u00B0F")
-                .setTz(tz)
-                .build();
-        String satSPMinId = hayStack.addPoint(satSPMin);
-        hayStack.writePoint(satSPMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",55.0,0 );
-        hayStack.writeHisValById(satSPMinId,55.0);
-
-        Point satSPRes = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"satSPRes")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("sat").addMarker("spres").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("-0.1").setMaxVal("-2.0").setIncrementVal("-0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("\u00B0F")
-                .setTz(tz)
-                .build();
-        String satSPResId = hayStack.addPoint(satSPRes);
-        hayStack.writePoint(satSPResId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -0.3,0 );
-        hayStack.writeHisValById(satSPResId,-0.3);
-
-        Point satSPResMax = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"satSPResMax")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("sat").addMarker("spresmax").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("-0.1").setMaxVal("-3.0").setIncrementVal("-0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("\u00B0F")
-                .setTz(tz)
-                .build();
-        String satSPResMaxId = hayStack.addPoint(satSPResMax);
-        hayStack.writePoint(satSPResMaxId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -1.0,0 );
-        hayStack.writeHisValById(satSPResMaxId,-1.0);
-
-        Point satSPTrim = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"satSPTrim")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("sat").addMarker("sptrim").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("-0.5").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("\u00B0F")
-                .setTz(tz)
-                .build();
-        String satSPTrimId = hayStack.addPoint(satSPTrim);
-        hayStack.writePoint(satSPTrimId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 0.2,0 );
-        hayStack.writeHisValById(satSPTrimId,0.2);
-
-        Point satTimeDelay = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"satTimeDelay")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("sat").addMarker("timeDelay").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0").setMaxVal("30").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("m")
-                .setTz(tz)
-                .build();
-        String satTimeDelayId = hayStack.addPoint(satTimeDelay);
-        hayStack.writePoint(satTimeDelayId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 2.0,0);
-        hayStack.writeHisValById(satTimeDelayId,2.0);
-
-        Point satTimeInterval = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"satTimeInterval")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("sat").addMarker("timeInterval").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("m")
-                .setTz(tz)
-                .build();
-        String satTimeIntervalId = hayStack.addPoint(satTimeInterval);
-        hayStack.writePoint(satTimeIntervalId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 2.0,0 );
-        hayStack.writeHisValById(satTimeIntervalId,2.0);
-
-        Point staticPressureIgnoreRequest = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"staticPressureIgnoreRequest")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("staticPressure").addMarker("ignoreRequest").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setTz(tz)
-                .build();
-        String staticPressureIgnoreRequestId = hayStack.addPoint(staticPressureIgnoreRequest);
-        hayStack.writePoint(staticPressureIgnoreRequestId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",2.0,0 );
-        hayStack.writeHisValById(staticPressureIgnoreRequestId,2.0);
-
-        Point staticPressureSPInit = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"staticPressureSPInit")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("staticPressure").addMarker("spinit").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0.1").setMaxVal("2.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("inch wc")
-                .setTz(tz)
-                .build();
-        String staticPressureSPInitId = hayStack.addPoint(staticPressureSPInit);
-        hayStack.writePoint(staticPressureSPInitId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",0.2,0);
-        hayStack.writeHisValById(staticPressureSPInitId,0.2);
-
-        Point staticPressureSPMax = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"staticPressureSPMax")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("staticPressure").addMarker("spmax").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0.1").setMaxVal("2.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("inch wc")
-                .setTz(tz)
-                .build();
-        String staticPressureSPMaxId = hayStack.addPoint(staticPressureSPMax);
-        hayStack.writePoint(staticPressureSPMaxId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 1.0,0 );
-        hayStack.writeHisValById(staticPressureSPMaxId,1.0);
-
-        Point staticPressureSPMin = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"staticPressureSPMin")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("staticPressure").addMarker("spmin").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0.1").setMaxVal("2.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("inch wc")
-                .setTz(tz)
-                .build();
-        String staticPressureSPMinId = hayStack.addPoint(staticPressureSPMin);
-        hayStack.writePoint(staticPressureSPMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",0.2 ,0);
-        hayStack.writeHisValById(staticPressureSPMinId,0.2);
-
-        Point staticPressureSPRes = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"staticPressureSPRes")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("staticPressure").addMarker("spres").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0.01").setMaxVal("0.2").setIncrementVal("0.01").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("inch wc")
-                .setTz(tz)
-                .build();
-        String staticPressureSPResId = hayStack.addPoint(staticPressureSPRes);
-        hayStack.writePoint(staticPressureSPResId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",0.05,0 );
-        hayStack.writeHisValById(staticPressureSPResId,0.05);
-
-        Point staticPressureSPResMax = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"staticPressureSPResMax")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("staticPressure").addMarker("spresmax").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0.05").setMaxVal("0.5").setIncrementVal("0.05").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("inch wc")
-                .setTz(tz)
-                .build();
-        String staticPressureSPResMaxId = hayStack.addPoint(staticPressureSPResMax);
-        hayStack.writePoint(staticPressureSPResMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",0.1,0 );
-        hayStack.writeHisValById(staticPressureSPResMaxId,0.1);
-
-        Point staticPressureSPTrim = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"staticPressureSPTrim")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("staticPressure").addMarker("sptrim").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("-0.01").setMaxVal("-0.5").setIncrementVal("-0.01").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("inch wc")
-                .setTz(tz)
-                .build();
-        String staticPressureSPTrimId = hayStack.addPoint(staticPressureSPTrim);
-        hayStack.writePoint(staticPressureSPTrimId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -0.02 ,0);
-        hayStack.writeHisValById(staticPressureSPTrimId,-0.02);
-
-        Point staticPressureTimeDelay = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"staticPressureTimeDelay")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("staticPressure").addMarker("timeDelay").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0").setMaxVal("30").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("m")
-                .setTz(tz)
-                .build();
-        String staticPressureTimeDelayId = hayStack.addPoint(staticPressureTimeDelay);
-        hayStack.writePoint(staticPressureTimeDelayId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",2.0,0 );
-        hayStack.writeHisValById(staticPressureTimeDelayId,2.0);
-
-        Point staticPressureTimeInterval = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"staticPressureTimeInterval")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("system").addMarker("tuner").addMarker("sp")
-                .addMarker("staticPressure").addMarker("timeInterval").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("0").setMaxVal("30").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
-                .setUnit("m")
-                .setTz(tz)
-                .build();
-        String staticPressureTimeIntervalId = hayStack.addPoint(staticPressureTimeInterval);
-        hayStack.writePoint(staticPressureTimeIntervalId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",2.0 ,0);
-        hayStack.writeHisValById(staticPressureTimeIntervalId,2.0);
-
         Point zoneDeadTime  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"zoneDeadTime")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("zone").addMarker("dead").addMarker("time").addMarker("sp")
-                .setMinVal("1").setMaxVal("15").setIncrementVal("1").setTunerGroup(TunerConstants.TIMER_TUNER)
+                .setMinVal("1").setMaxVal("300").setIncrementVal("1").setTunerGroup(TunerConstants.TIMER_TUNER)
                 .setUnit("m")
                 .setTz(tz)
                 .build();
@@ -609,7 +235,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("auto").addMarker("away").addMarker("time").addMarker("sp")
-                .setMinVal("40").setMaxVal("300").setIncrementVal("5").setTunerGroup(TunerConstants.TIMER_TUNER)
+                .setMinVal("40").setMaxVal("300").setIncrementVal("1").setTunerGroup(TunerConstants.TIMER_TUNER)
                 .setUnit("m")
                 .setTz(tz)
                 .build();
@@ -623,7 +249,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("forced").addMarker("occupied").addMarker("time").addMarker("sp")
-                .setMinVal("30").setMaxVal("300").setIncrementVal("10").setTunerGroup(TunerConstants.TIMER_TUNER)
+                .setMinVal("30").setMaxVal("300").setIncrementVal("1").setTunerGroup(TunerConstants.TIMER_TUNER)
                 .setUnit("m")
                 .setTz(tz)
                 .build();
@@ -637,7 +263,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("adr").addMarker("cooling").addMarker("deadband").addMarker("sp")
-                .setMinVal("0").setMaxVal("10").setIncrementVal("0.5").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -651,7 +277,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("adr").addMarker("heating").addMarker("deadband").addMarker("sp")
-                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -665,7 +291,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("sn").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("sp")
-                .setMinVal("35").setMaxVal("75").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                .setMinVal("35").setMaxVal("70").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -679,7 +305,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("sn").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("sp")
-                .setMinVal("65").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                .setMinVal("80").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -693,7 +319,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("building").addMarker("limit").addMarker("alert").addMarker("timer").addMarker("sp")
-                .setMinVal("0").setMaxVal("360").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setMinVal("0").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("m")
                 .setTz(tz)
                 .build();
@@ -707,7 +333,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("constant").addMarker("temp").addMarker("alert").addMarker("time").addMarker("sp")
-                .setMinVal("0").setMaxVal("360").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setMinVal("0").setMaxVal("60").setIncrementVal("5").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("m")
                 .setTz(tz)
                 .build();
@@ -721,7 +347,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("abnormal").addMarker("cur").addMarker("temp").addMarker("rise").addMarker("trigger").addMarker("sp")
-                .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setMinVal("1").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -740,8 +366,8 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String airflowSampleWaitTimeId = hayStack.addPoint(airflowSampleWaitTime);
-        hayStack.writePoint(airflowSampleWaitTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 100.0, 0);
-        hayStack.writeHisValById(airflowSampleWaitTimeId, 100.0);
+        hayStack.writePoint(airflowSampleWaitTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 5.0, 0);
+        hayStack.writeHisValById(airflowSampleWaitTimeId, 5.0);
 
         Point stage1CoolingAirflowTempLowerOffset  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"stage1CoolingAirflowTempLowerOffset")
@@ -749,13 +375,13 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("stage1").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
-                .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setMinVal("-120").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
         String stage1CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage1CoolingAirflowTempLowerOffset);
-        hayStack.writePoint(stage1CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -150.0, 0);
-        hayStack.writeHisValById(stage1CoolingAirflowTempLowerOffsetId, -150.0);
+        hayStack.writePoint(stage1CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -20.0, 0);
+        hayStack.writeHisValById(stage1CoolingAirflowTempLowerOffsetId, -20.0);
 
         Point stage1CoolingAirflowTempUpperOffset  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"stage1CoolingAirflowTempUpperOffset")
@@ -782,8 +408,8 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage1HeatingAirflowTempUpperOffsetId = hayStack.addPoint(stage1HeatingAirflowTempUpperOffset);
-        hayStack.writePoint(stage1HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 150.0, 0);
-        hayStack.writeHisValById(stage1HeatingAirflowTempUpperOffsetId, 150.0);
+        hayStack.writePoint(stage1HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 40.0, 0);
+        hayStack.writeHisValById(stage1HeatingAirflowTempUpperOffsetId, 40.0);
 
         Point stage1HeatingAirflowTempLowerOffset  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"stage1HeatingAirflowTempLowerOffset")
@@ -796,8 +422,8 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage1HeatingAirflowTempLowerOffsetId = hayStack.addPoint(stage1HeatingAirflowTempLowerOffset);
-        hayStack.writePoint(stage1HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 10.0, 0);
-        hayStack.writeHisValById(stage1HeatingAirflowTempLowerOffsetId, 10.0);
+        hayStack.writePoint(stage1HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 25.0, 0);
+        hayStack.writeHisValById(stage1HeatingAirflowTempLowerOffsetId, 25.0);
 
         Point stage2CoolingAirflowTempLowerOffset  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"stage2CoolingAirflowTempLowerOffset")
@@ -810,8 +436,8 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage2CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage2CoolingAirflowTempLowerOffset);
-        hayStack.writePoint(stage2CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -150.0, 0);
-        hayStack.writeHisValById(stage2CoolingAirflowTempLowerOffsetId, -150.0);
+        hayStack.writePoint(stage2CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -25.0, 0);
+        hayStack.writeHisValById(stage2CoolingAirflowTempLowerOffsetId, -25.0);
 
         Point stage2CoolingAirflowTempUpperOffset  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"stage2CoolingAirflowTempUpperOffset")
@@ -838,8 +464,8 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage2HeatingAirflowTempUpperOffsetId = hayStack.addPoint(stage2HeatingAirflowTempUpperOffset);
-        hayStack.writePoint(stage2HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 150.0, 0);
-        hayStack.writeHisValById(stage2HeatingAirflowTempUpperOffsetId, 150.0);
+        hayStack.writePoint(stage2HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 50.0, 0);
+        hayStack.writeHisValById(stage2HeatingAirflowTempUpperOffsetId, 50.0);
 
         Point stage2HeatingAirflowTempLowerOffset  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"stage2HeatingAirflowTempLowerOffset")
@@ -852,8 +478,8 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage2HeatingAirflowTempLowerOffsetId = hayStack.addPoint(stage2HeatingAirflowTempLowerOffset);
-        hayStack.writePoint(stage2HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 15.0, 0);
-        hayStack.writeHisValById(stage2HeatingAirflowTempLowerOffsetId, 15.0);
+        hayStack.writePoint(stage2HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 35.0, 0);
+        hayStack.writeHisValById(stage2HeatingAirflowTempLowerOffsetId, 35.0);
 
         Point stage3CoolingAirflowTempLowerOffset  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"stage3CoolingAirflowTempLowerOffset")
@@ -866,8 +492,8 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage3CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage3CoolingAirflowTempLowerOffset);
-        hayStack.writePoint(stage3CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -150.0, 0);
-        hayStack.writeHisValById(stage3CoolingAirflowTempLowerOffsetId, -150.0);
+        hayStack.writePoint(stage3CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -25.0, 0);
+        hayStack.writeHisValById(stage3CoolingAirflowTempLowerOffsetId, -25.0);
 
         Point stage3CoolingAirflowTempUpperOffset  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"stage3CoolingAirflowTempUpperOffset")
@@ -880,8 +506,8 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage3CoolingAirflowTempUpperOffsetId = hayStack.addPoint(stage3CoolingAirflowTempUpperOffset);
-        hayStack.writePoint(stage3CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -8.0, 0);
-        hayStack.writeHisValById(stage3CoolingAirflowTempUpperOffsetId, -8.0);
+        hayStack.writePoint(stage3CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -12.0, 0);
+        hayStack.writeHisValById(stage3CoolingAirflowTempUpperOffsetId, -12.0);
 
         Point stage3HeatingAirflowTempUpperOffset  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"stage3HeatingAirflowTempUpperOffset")
@@ -894,8 +520,8 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage3HeatingAirflowTempUpperOffsetId = hayStack.addPoint(stage3HeatingAirflowTempUpperOffset);
-        hayStack.writePoint(stage3HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 150.0, 0);
-        hayStack.writeHisValById(stage3HeatingAirflowTempUpperOffsetId, 150.0);
+        hayStack.writePoint(stage3HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 50.0, 0);
+        hayStack.writeHisValById(stage3HeatingAirflowTempUpperOffsetId, 50.0);
 
         Point stage3HeatingAirflowTempLowerOffset  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"stage3HeatingAirflowTempLowerOffset")
@@ -908,8 +534,8 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage3HeatingAirflowTempLowerOffsetId = hayStack.addPoint(stage3HeatingAirflowTempLowerOffset);
-        hayStack.writePoint(stage3HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 10.0, 0);
-        hayStack.writeHisValById(stage3HeatingAirflowTempLowerOffsetId, 10.0);
+        hayStack.writePoint(stage3HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 35.0, 0);
+        hayStack.writeHisValById(stage3HeatingAirflowTempLowerOffsetId, 35.0);
 
         Point stage4CoolingAirflowTempLowerOffset  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"stage4CoolingAirflowTempLowerOffset")
@@ -922,8 +548,8 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage4CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage4CoolingAirflowTempLowerOffset);
-        hayStack.writePoint(stage4CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -150.0, 0);
-        hayStack.writeHisValById(stage1CoolingAirflowTempLowerOffsetId, -150.0);
+        hayStack.writePoint(stage4CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -25.0, 0);
+        hayStack.writeHisValById(stage1CoolingAirflowTempLowerOffsetId, -25.0);
 
         Point stage4CoolingAirflowTempUpperOffset  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"stage4CoolingAirflowTempUpperOffset")
@@ -936,8 +562,8 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage4CoolingAirflowTempUpperOffsetId = hayStack.addPoint(stage4CoolingAirflowTempUpperOffset);
-        hayStack.writePoint(stage4CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -8.0, 0);
-        hayStack.writeHisValById(stage4CoolingAirflowTempUpperOffsetId, -8.0);
+        hayStack.writePoint(stage4CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -12.0, 0);
+        hayStack.writeHisValById(stage4CoolingAirflowTempUpperOffsetId, -12.0);
 
         Point stage4HeatingAirflowTempUpperOffset  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"stage4HeatingAirflowTempUpperOffset")
@@ -950,8 +576,8 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage4HeatingAirflowTempUpperOffsetId = hayStack.addPoint(stage4HeatingAirflowTempUpperOffset);
-        hayStack.writePoint(stage4HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 150.0, 0);
-        hayStack.writeHisValById(stage4HeatingAirflowTempUpperOffsetId, 150.0);
+        hayStack.writePoint(stage4HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 50.0, 0);
+        hayStack.writeHisValById(stage4HeatingAirflowTempUpperOffsetId, 50.0);
 
         Point stage4HeatingAirflowTempLowerOffset  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"stage4HeatingAirflowTempLowerOffset")
@@ -964,8 +590,8 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage4HeatingAirflowTempLowerOffsetId = hayStack.addPoint(stage4HeatingAirflowTempLowerOffset);
-        hayStack.writePoint(stage4HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 10.0, 0);
-        hayStack.writeHisValById(stage4HeatingAirflowTempLowerOffsetId, 10.0);
+        hayStack.writePoint(stage4HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 35.0, 0);
+        hayStack.writeHisValById(stage4HeatingAirflowTempLowerOffsetId, 35.0);
 
         Point stage5CoolingAirflowTempLowerOffset  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"stage5CoolingAirflowTempLowerOffset")
@@ -978,8 +604,8 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage5CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage5CoolingAirflowTempLowerOffset);
-        hayStack.writePoint(stage5CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -150.0, 0);
-        hayStack.writeHisValById(stage5CoolingAirflowTempLowerOffsetId, -150.0);
+        hayStack.writePoint(stage5CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -25.0, 0);
+        hayStack.writeHisValById(stage5CoolingAirflowTempLowerOffsetId, -25.0);
 
         Point stage5CoolingAirflowTempUpperOffset  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"stage5CoolingAirflowTempUpperOffset")
@@ -992,8 +618,8 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage5CoolingAirflowTempUpperOffsetId = hayStack.addPoint(stage5CoolingAirflowTempUpperOffset);
-        hayStack.writePoint(stage5CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -8.0, 0);
-        hayStack.writeHisValById(stage5CoolingAirflowTempUpperOffsetId, -8.0);
+        hayStack.writePoint(stage5CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -12.0, 0);
+        hayStack.writeHisValById(stage5CoolingAirflowTempUpperOffsetId, -12.0);
 
         Point stage5HeatingAirflowTempUpperOffset  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"stage5HeatingAirflowTempUpperOffset")
@@ -1006,8 +632,8 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage5HeatingAirflowTempUpperOffsetId = hayStack.addPoint(stage5HeatingAirflowTempUpperOffset);
-        hayStack.writePoint(stage5HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 150.0, 0);
-        hayStack.writeHisValById(stage5HeatingAirflowTempUpperOffsetId, 150.0);
+        hayStack.writePoint(stage5HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 50.0, 0);
+        hayStack.writeHisValById(stage5HeatingAirflowTempUpperOffsetId, 50.0);
 
         Point stage5HeatingAirflowTempLowerOffset  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"stage5HeatingAirflowTempLowerOffset")
@@ -1020,8 +646,8 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage5HeatingAirflowTempLowerOffsetId = hayStack.addPoint(stage5HeatingAirflowTempLowerOffset);
-        hayStack.writePoint(stage5HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 10.0, 0);
-        hayStack.writeHisValById(stage5HeatingAirflowTempLowerOffsetId, 10.0);
+        hayStack.writePoint(stage5HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 35.0, 0);
+        hayStack.writeHisValById(stage5HeatingAirflowTempLowerOffsetId, 35.0);
 
         Point lightingIntensityOccupancyDetect  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"lightingIntensityOccupancyDetect")
@@ -1029,7 +655,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("lighting").addMarker("intensity").addMarker("occupancy").addMarker("detect").addMarker("sp")
-                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.LCM_TUNER)
+                .setMinVal("0").setMaxVal("100").setIncrementVal("5").setTunerGroup(TunerConstants.LCM_TUNER)
                 .setUnit("%")
                 .setTz(tz)
                 .build();
@@ -1043,7 +669,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("min").addMarker("lighting").addMarker("control").addMarker("override").addMarker("sp")
-                .setMinVal("1").setMaxVal("360").setIncrementVal("1").setTunerGroup(TunerConstants.LCM_TUNER)
+                .setMinVal("0").setMaxVal("60").setIncrementVal("5").setTunerGroup(TunerConstants.LCM_TUNER)
                 .setUnit("m")
                 .setTz(tz)
                 .build();
@@ -1085,7 +711,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("alarm").addMarker("volume").addMarker("level").addMarker("sp")
-                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("7").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz)
                 .build();
         String ccuAlarmVolumeLevelId = hayStack.addPoint(ccuAlarmVolumeLevel);
@@ -1116,8 +742,8 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String heartBeatsToSkipId = hayStack.addPoint(heartBeatsToSkip);
-        hayStack.writePoint(heartBeatsToSkipId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 15.0, 0);
-        hayStack.writeHisValById(heartBeatsToSkipId, 15.0);
+        hayStack.writePoint(heartBeatsToSkipId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 5.0, 0);
+        hayStack.writeHisValById(heartBeatsToSkipId, 5.0);
 
         Point rebalanceHoldTime = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"rebalanceHoldTime")
@@ -1416,6 +1042,381 @@ public class BuildingTuners
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
         hayStack.writePoint(zoneVOCThresholdId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_VOC_THRESHOLD, 0);
         hayStack.writeHisValById(zoneVOCThresholdId, TunerConstants.ZONE_VOC_THRESHOLD);
+
+        Point co2IgnoreRequest = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"co2IgnoreRequest")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("co2").addMarker("ignoreRequest").addMarker("sp")
+                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setTz(tz)
+                .build();
+        String co2IgnoreRequestId = hayStack.addPoint(co2IgnoreRequest);
+        hayStack.writePoint(co2IgnoreRequestId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 2.0, 0);
+        hayStack.writeHisValById(co2IgnoreRequestId,2.0);
+
+        Point co2SPInit = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"co2SPInit")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("co2").addMarker("spinit").addMarker("sp")
+                .setMinVal("0").setMaxVal("1500").setIncrementVal("10").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("ppm")
+                .setTz(tz)
+                .build();
+        String co2SPInitId = hayStack.addPoint(co2SPInit);
+        hayStack.writePoint(co2SPInitId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 800.0, 0);
+        hayStack.writeHisValById(co2SPInitId,800.0);
+
+        Point co2SPMax = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"co2SPMax")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("default").addMarker("co2").addMarker("spmax").addMarker("sp")
+                .setMinVal("100").setMaxVal("2000").setIncrementVal("10").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("ppm")
+                .setTz(tz)
+                .build();
+        String co2SPMaxId = hayStack.addPoint(co2SPMax);
+        hayStack.writePoint(co2SPMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 1000.0, 0);
+        hayStack.writeHisValById(co2SPMaxId,1000.0);
+
+        Point co2SPMin = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"co2SPMin")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("co2").addMarker("spmin").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("0").setMaxVal("1500").setIncrementVal("10").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("ppm")
+                .setTz(tz)
+                .build();
+        String co2SPMinId = hayStack.addPoint(co2SPMin);
+        hayStack.writePoint(co2SPMinId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 800.0,0 );
+        hayStack.writeHisValById(co2SPMinId,800.0);
+
+        Point co2SPRes = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"co2SPRes")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("co2").addMarker("spres").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("-30.0").setMaxVal("-1.0").setIncrementVal("1.0").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("ppm")
+                .setTz(tz)
+                .build();
+        String co2SPResId = hayStack.addPoint(co2SPRes);
+        hayStack.writePoint(co2SPResId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",-10.0,0 );
+        hayStack.writeHisValById(co2SPResId,-10.0);
+
+        Point co2SPResMax = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"co2SPResMax")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("co2").addMarker("spresmax").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("-50.0").setMaxVal("-1.0").setIncrementVal("1.0").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("ppm")
+                .setTz(tz)
+                .build();
+        String co2SPResMaxId = hayStack.addPoint(co2SPResMax);
+        hayStack.writePoint(co2SPResMaxId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -30.0,0 );
+        hayStack.writeHisValById(co2SPResMaxId,-30.0);
+
+        Point co2SPTrim = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"co2SPTrim")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("co2").addMarker("sptrim").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("0").setMaxVal("50").setIncrementVal("1.0").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("ppm")
+                .setTz(tz)
+                .build();
+        String co2SPTrimId = hayStack.addPoint(co2SPTrim);
+        hayStack.writePoint(co2SPTrimId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 20.0,0 );
+        hayStack.writeHisValById(co2SPTrimId,20.0);
+
+        Point co2TimeDelay = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"co2TimeDelay")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("co2").addMarker("timeDelay").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("m")
+                .setTz(tz)
+                .build();
+        String co2TimeDelayId = hayStack.addPoint(co2TimeDelay);
+        hayStack.writePoint(co2TimeDelayId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",2.0,0 );
+        hayStack.writeHisValById(co2TimeDelayId,2.0);
+
+        Point co2TimeInterval = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"co2TimeInterval")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("co2").addMarker("timeInterval").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("m")
+                .setTz(tz)
+                .build();
+        String co2TimeIntervalId = hayStack.addPoint(co2TimeInterval);
+        hayStack.writePoint(co2TimeIntervalId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 2.0,0 );
+        hayStack.writeHisValById(co2TimeIntervalId,2.0);
+
+        Point satIgnoreRequest = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"satIgnoreRequest")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("sat").addMarker("ignoreRequest").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setTz(tz)
+                .build();
+        String satIgnoreRequestId = hayStack.addPoint(satIgnoreRequest);
+        hayStack.writePoint(satIgnoreRequestId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 2.0,0 );
+        hayStack.writeHisValById(satIgnoreRequestId,2.0);
+
+        Point satSPInit = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"satSPInit")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("sat").addMarker("spinit").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("50").setMaxVal("70").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String satSPInitId = hayStack.addPoint(satSPInit);
+        hayStack.writePoint(satSPInitId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 65.0,0 );
+        hayStack.writeHisValById(satSPInitId,65.0);
+
+        Point satSPMax = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"satSPMax")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("sat").addMarker("spmax").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("55").setMaxVal("75").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String satSPMaxId = hayStack.addPoint(satSPMax);
+        hayStack.writePoint(satSPMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",65.0,0 );
+        hayStack.writeHisValById(satSPMaxId,65.0);
+
+        Point satSPMin = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"satSPMin")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("sat").addMarker("spmin").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("45").setMaxVal("65").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String satSPMinId = hayStack.addPoint(satSPMin);
+        hayStack.writePoint(satSPMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",55.0,0 );
+        hayStack.writeHisValById(satSPMinId,55.0);
+
+        Point satSPRes = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"satSPRes")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("sat").addMarker("spres").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("-0.1").setMaxVal("-2.0").setIncrementVal("-0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String satSPResId = hayStack.addPoint(satSPRes);
+        hayStack.writePoint(satSPResId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -0.3,0 );
+        hayStack.writeHisValById(satSPResId,-0.3);
+
+        Point satSPResMax = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"satSPResMax")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("sat").addMarker("spresmax").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("-0.1").setMaxVal("-3.0").setIncrementVal("-0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String satSPResMaxId = hayStack.addPoint(satSPResMax);
+        hayStack.writePoint(satSPResMaxId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -1.0,0 );
+        hayStack.writeHisValById(satSPResMaxId,-1.0);
+
+        Point satSPTrim = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"satSPTrim")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("sat").addMarker("sptrim").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("-0.5").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String satSPTrimId = hayStack.addPoint(satSPTrim);
+        hayStack.writePoint(satSPTrimId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 0.2,0 );
+        hayStack.writeHisValById(satSPTrimId,0.2);
+
+        Point satTimeDelay = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"satTimeDelay")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("sat").addMarker("timeDelay").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("0").setMaxVal("30").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("m")
+                .setTz(tz)
+                .build();
+        String satTimeDelayId = hayStack.addPoint(satTimeDelay);
+        hayStack.writePoint(satTimeDelayId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 2.0,0);
+        hayStack.writeHisValById(satTimeDelayId,2.0);
+
+        Point satTimeInterval = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"satTimeInterval")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("sat").addMarker("timeInterval").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("m")
+                .setTz(tz)
+                .build();
+        String satTimeIntervalId = hayStack.addPoint(satTimeInterval);
+        hayStack.writePoint(satTimeIntervalId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 2.0,0 );
+        hayStack.writeHisValById(satTimeIntervalId,2.0);
+
+        Point staticPressureIgnoreRequest = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"staticPressureIgnoreRequest")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("staticPressure").addMarker("ignoreRequest").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setTz(tz)
+                .build();
+        String staticPressureIgnoreRequestId = hayStack.addPoint(staticPressureIgnoreRequest);
+        hayStack.writePoint(staticPressureIgnoreRequestId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",2.0,0 );
+        hayStack.writeHisValById(staticPressureIgnoreRequestId,2.0);
+
+        Point staticPressureSPInit = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"staticPressureSPInit")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("staticPressure").addMarker("spinit").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("0.1").setMaxVal("2.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("inch wc")
+                .setTz(tz)
+                .build();
+        String staticPressureSPInitId = hayStack.addPoint(staticPressureSPInit);
+        hayStack.writePoint(staticPressureSPInitId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",0.2,0);
+        hayStack.writeHisValById(staticPressureSPInitId,0.2);
+
+        Point staticPressureSPMax = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"staticPressureSPMax")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("staticPressure").addMarker("spmax").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("0.1").setMaxVal("2.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("inch wc")
+                .setTz(tz)
+                .build();
+        String staticPressureSPMaxId = hayStack.addPoint(staticPressureSPMax);
+        hayStack.writePoint(staticPressureSPMaxId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 1.0,0 );
+        hayStack.writeHisValById(staticPressureSPMaxId,1.0);
+
+        Point staticPressureSPMin = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"staticPressureSPMin")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("staticPressure").addMarker("spmin").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("0.1").setMaxVal("2.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("inch wc")
+                .setTz(tz)
+                .build();
+        String staticPressureSPMinId = hayStack.addPoint(staticPressureSPMin);
+        hayStack.writePoint(staticPressureSPMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",0.2 ,0);
+        hayStack.writeHisValById(staticPressureSPMinId,0.2);
+
+        Point staticPressureSPRes = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"staticPressureSPRes")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("staticPressure").addMarker("spres").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("0.01").setMaxVal("0.2").setIncrementVal("0.01").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("inch wc")
+                .setTz(tz)
+                .build();
+        String staticPressureSPResId = hayStack.addPoint(staticPressureSPRes);
+        hayStack.writePoint(staticPressureSPResId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",0.05,0 );
+        hayStack.writeHisValById(staticPressureSPResId,0.05);
+
+        Point staticPressureSPResMax = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"staticPressureSPResMax")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("staticPressure").addMarker("spresmax").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("0.05").setMaxVal("0.5").setIncrementVal("0.05").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("inch wc")
+                .setTz(tz)
+                .build();
+        String staticPressureSPResMaxId = hayStack.addPoint(staticPressureSPResMax);
+        hayStack.writePoint(staticPressureSPResMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",0.1,0 );
+        hayStack.writeHisValById(staticPressureSPResMaxId,0.1);
+
+        Point staticPressureSPTrim = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"staticPressureSPTrim")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("staticPressure").addMarker("sptrim").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("-0.01").setMaxVal("-0.5").setIncrementVal("-0.01").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("inch wc")
+                .setTz(tz)
+                .build();
+        String staticPressureSPTrimId = hayStack.addPoint(staticPressureSPTrim);
+        hayStack.writePoint(staticPressureSPTrimId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -0.02 ,0);
+        hayStack.writeHisValById(staticPressureSPTrimId,-0.02);
+
+        Point staticPressureTimeDelay = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"staticPressureTimeDelay")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("staticPressure").addMarker("timeDelay").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("0").setMaxVal("30").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("m")
+                .setTz(tz)
+                .build();
+        String staticPressureTimeDelayId = hayStack.addPoint(staticPressureTimeDelay);
+        hayStack.writePoint(staticPressureTimeDelayId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",2.0,0 );
+        hayStack.writeHisValById(staticPressureTimeDelayId,2.0);
+
+        Point staticPressureTimeInterval = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"staticPressureTimeInterval")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
+                .addMarker("staticPressure").addMarker("timeInterval").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setMinVal("0").setMaxVal("30").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setUnit("m")
+                .setTz(tz)
+                .build();
+        String staticPressureTimeIntervalId = hayStack.addPoint(staticPressureTimeInterval);
+        hayStack.writePoint(staticPressureTimeIntervalId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",2.0 ,0);
+        hayStack.writeHisValById(staticPressureTimeIntervalId,2.0);
     
         addDefaultVavSystemTuners();
         
@@ -1606,7 +1607,7 @@ public class BuildingTuners
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("1").setMaxVal("15").setIncrementVal("1").setTunerGroup(TunerConstants.TIMER_TUNER)
+                .setMinVal("1").setMaxVal("300").setIncrementVal("1").setTunerGroup(TunerConstants.TIMER_TUNER)
                 .addMarker("zone").addMarker("dead").addMarker("time").addMarker("sp")
                 .setUnit("m")
                 .setTz(tz)
@@ -1630,7 +1631,7 @@ public class BuildingTuners
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("40").setMaxVal("300").setIncrementVal("5").setTunerGroup(TunerConstants.TIMER_TUNER)
+                .setMinVal("40").setMaxVal("300").setIncrementVal("1").setTunerGroup(TunerConstants.TIMER_TUNER)
                 .addMarker("zone").addMarker("auto").addMarker("away").addMarker("time").addMarker("sp")
                 .setUnit("m")
                 .setTz(tz)
@@ -1654,7 +1655,7 @@ public class BuildingTuners
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("30").setMaxVal("300").setIncrementVal("10").setTunerGroup(TunerConstants.TIMER_TUNER)
+                .setMinVal("30").setMaxVal("300").setIncrementVal("1").setTunerGroup(TunerConstants.TIMER_TUNER)
                 .addMarker("zone").addMarker("forced").addMarker("occupied").addMarker("time").addMarker("sp")
                 .setUnit("m")
                 .setTz(tz)
@@ -1679,7 +1680,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("zone").addMarker("adr").addMarker("cooling").addMarker("deadband").addMarker("sp")
-                .setMinVal("0").setMaxVal("10").setIncrementVal("0.5").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -1703,7 +1704,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("zone").addMarker("adr").addMarker("heating").addMarker("deadband").addMarker("sp")
-                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -1727,7 +1728,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("zone").addMarker("sn").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("sp")
-                .setMinVal("35").setMaxVal("75").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                .setMinVal("35").setMaxVal("70").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -1751,7 +1752,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("zone").addMarker("sn").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("sp")
-                .setMinVal("65").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                .setMinVal("80").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -1823,7 +1824,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("zone").addMarker("lighting").addMarker("intensity").addMarker("occupancy").addMarker("detect").addMarker("sp")
-                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.LCM_TUNER)
+                .setMinVal("0").setMaxVal("100").setIncrementVal("5").setTunerGroup(TunerConstants.LCM_TUNER)
                 .setUnit("%")
                 .setTz(tz)
                 .build();
@@ -1847,7 +1848,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("zone").addMarker("min").addMarker("lighting").addMarker("control").addMarker("override").addMarker("sp")
-                .setMinVal("1").setMaxVal("360").setIncrementVal("1").setTunerGroup(TunerConstants.LCM_TUNER)
+                .setMinVal("0").setMaxVal("60").setIncrementVal("5").setTunerGroup(TunerConstants.LCM_TUNER)
                 .setUnit("m")
                 .setTz(tz)
                 .build();
@@ -2362,13 +2363,13 @@ public class BuildingTuners
                                   .setEquipRef(equipRef)
                                   .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
-                                  .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                  .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                   .setUnit("\u00B0F")
                                   .setTz(tz)
                                   .build();
         String coolingDbId = hayStack.addPoint(coolingDb);
-        hayStack.writePoint(coolingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_COOLING_DB, 0);
-        hayStack.writeHisValById(coolingDbId, TunerConstants.VAV_COOLING_DB);
+        hayStack.writePoint(coolingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
+        hayStack.writeHisValById(coolingDbId, 0.0);
     
         Point coolingDbMultiplier = new Point.Builder()
                                             .setDisplayName(equipDis+"-DAB-"+"coolingDeadbandMultiplier")
@@ -2389,13 +2390,13 @@ public class BuildingTuners
                                   .setEquipRef(equipRef)
                                   .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
-                                  .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                  .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                   .setUnit("\u00B0F")
                                   .setTz(tz)
                                   .build();
         String heatingDbId = hayStack.addPoint(heatingDb);
-        hayStack.writePoint(heatingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_HEATING_DB, 0);
-        hayStack.writeHisValById(heatingDbId, TunerConstants.VAV_HEATING_DB);
+        hayStack.writePoint(heatingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
+        hayStack.writeHisValById(heatingDbId, 0.0);
     
         Point heatingDbMultiplier = new Point.Builder()
                                             .setDisplayName(equipDis+"-DAB-"+"heatingDeadbandMultiplier")
@@ -2653,7 +2654,7 @@ public class BuildingTuners
                                   .setFloorRef(floorRef)
                                   .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
-                                  .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                  .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                   .setTz(tz)
                                   .setUnit("\u00B0F")
                                   .build();
@@ -2700,7 +2701,7 @@ public class BuildingTuners
                                   .setFloorRef(floorRef)
                                   .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
-                                  .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                  .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                   .setTz(tz)
                                   .setUnit("\u00B0F")
                                   .build();
@@ -3152,7 +3153,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("base").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("standalone").addMarker("heating").addMarker("deadband").addMarker("sp")
-                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -3175,7 +3176,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("cooling").addMarker("deadband").addMarker("sp")
-                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -3199,7 +3200,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("stage1").addMarker("hysteresis").addMarker("sp")
-                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0.5").setMaxVal("1.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("%")
                 .setTz(tz)
                 .build();
@@ -3271,7 +3272,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
-                .setMinVal("35").setMaxVal("70").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -3295,7 +3296,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
-                .setMinVal("35").setMaxVal("70").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -3319,7 +3320,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
-                .setMinVal("80").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -3343,7 +3344,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
-                .setMinVal("80").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -3367,7 +3368,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("airflow").addMarker("sample").addMarker("wait").addMarker("time").addMarker("sp")
-                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("m")
                 .setTz(tz)
                 .build();
@@ -3397,7 +3398,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("base").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("standalone").addMarker("heating").addMarker("threshold").addMarker("pipe2").addMarker("fcu").addMarker("sp")
-                .setMinVal("70").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("80").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -3413,7 +3414,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("base").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("standalone").addMarker("cooling").addMarker("threshold").addMarker("pipe2").addMarker("fcu").addMarker("sp")
-                .setMinVal("45").setMaxVal("70").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("35").setMaxVal("70").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -3429,7 +3430,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("base").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("standalone").addMarker("heating").addMarker("deadband").addMarker("sp")
-                .setMinVal("0").setMaxVal("10.0").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -3443,20 +3444,21 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("cooling").addMarker("deadband").addMarker("sp")
-                .setMinVal("0").setMaxVal("10.0").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
         String saCoolingDeadBandId = hayStack.addPoint(saCoolingDeadBand);
         hayStack.writePoint(saCoolingDeadBandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_COOLING_DEADBAND_DEFAULT, 0);
         hayStack.writeHisValById(saCoolingDeadBandId, TunerConstants.STANDALONE_COOLING_DEADBAND_DEFAULT);
+
         Point saStage1Hysteresis = new Point.Builder()
                 .setDisplayName(equipDis+"-standaloneStage1Hysteresis")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("stage1").addMarker("hysteresis").addMarker("sp")
-                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0.5").setMaxVal("1.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz)
                 .build();
         String saStage1HysteresisId = hayStack.addPoint(saStage1Hysteresis);
@@ -3536,7 +3538,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
                 .addMarker("cooling").addMarker("airflow").addMarker("lower").addMarker("sp").addMarker("temp").addMarker("offset")
-                .setMinVal("35").setMaxVal("70").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -3550,7 +3552,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
                 .addMarker("cooling").addMarker("airflow").addMarker("upper").addMarker("sp").addMarker("temp").addMarker("offset")
-                .setMinVal("35").setMaxVal("70").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -3564,7 +3566,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
                 .addMarker("heating").addMarker("airflow").addMarker("upper").addMarker("sp").addMarker("temp").addMarker("offset")
-                .setMinVal("80").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -3578,7 +3580,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
                 .addMarker("heating").addMarker("airflow").addMarker("lower").addMarker("sp").addMarker("temp").addMarker("offset")
-                .setMinVal("80").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -3592,13 +3594,13 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
                 .addMarker("airflow").addMarker("sample").addMarker("sp").addMarker("wait").addMarker("time")
-                .setMinVal("80").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("m")
                 .setTz(tz)
                 .build();
         String standaloneAirflowSampleWaitTimeId = hayStack.addPoint(standaloneAirflowSampleWaitTime);
-        hayStack.writePoint(standaloneAirflowSampleWaitTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_HEATING_STAGE1_LOWER_OFFSET, 0);
-        hayStack.writeHisValById(standaloneAirflowSampleWaitTimeId, TunerConstants.STANDALONE_HEATING_STAGE1_LOWER_OFFSET);
+        hayStack.writePoint(standaloneAirflowSampleWaitTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 30.0, 0);
+        hayStack.writeHisValById(standaloneAirflowSampleWaitTimeId, 30.0);
         //TODO Still need to add heating and stage 2 tuners //kumar
 
         CCUHsApi.getInstance().syncEntityTree();

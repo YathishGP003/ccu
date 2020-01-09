@@ -61,9 +61,9 @@ public class TunerConstants
 
     
     public static final double SYSTEM_PRECONDITION_RATE = 15.0;
-    public static final double USER_LIMIT_SPREAD = 3;
-    public static final double BUILDING_LIMIT_MIN = 85;
-    public static final double BUILDING_LIMIT_MAX = 60;
+    public static final double USER_LIMIT_SPREAD = 4;
+    public static final double BUILDING_LIMIT_MIN = 55;
+    public static final double BUILDING_LIMIT_MAX = 90;
     public static final double BUILDING_TO_ZONE_DIFFERENTIAL = 3;
     public static final double ZONE_TEMP_DEAD_LEEWAY = 10;
     public static final double CM_TEMP_INFLU_PERCENTILE_ZONE_DEAD = 50;
@@ -77,8 +77,8 @@ public class TunerConstants
     public static final int VAV_BUILDING_VAL_LEVEL = 16;
 	public static final int MANUAL_OVERRIDE_VAL_LEVEL = 7;
 
-    public static final double STANDALONE_HEATING_DEADBAND_DEFAULT = 1.0;//Default deadband value based on dual temp diff 70 and 74 ((74-70)/2.0)
-    public static final double STANDALONE_COOLING_DEADBAND_DEFAULT = 1.0;
+    public static final double STANDALONE_HEATING_DEADBAND_DEFAULT = 2.0;//Default deadband value based on dual temp diff 70 and 74 ((74-70)/2.0)
+    public static final double STANDALONE_COOLING_DEADBAND_DEFAULT = 2.0;
     public static final double STANDALONE_STAGE1_HYSTERESIS_DEFAULT = 0.5;
     public static final double STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME = 30;//in minutes
     public static final double STANDALONE_COOLING_STAGE1_LOWER_OFFSET = -150;

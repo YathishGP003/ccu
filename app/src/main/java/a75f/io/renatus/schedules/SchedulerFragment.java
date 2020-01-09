@@ -683,7 +683,10 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                         add = false;
                         break;
                     } else if (s.overlaps(z)) {
-                        if (z.getStartMillis() < s.getStartMillis()) {
+                        if(z.getStartMillis() < s.getStartMillis() && z.getEndMillis() > s.getEndMillis()){
+                            intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
+                            intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));
+                        } else if (z.getStartMillis() < s.getStartMillis()) {
                             intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
                         } else if (z.getEndMillis() > s.getEndMillis()) {
                             intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));

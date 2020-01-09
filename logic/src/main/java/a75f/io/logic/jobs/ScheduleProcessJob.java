@@ -776,9 +776,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
         if (enteringAirPoint > 0)
         {
-            vavPoints.put("Entering Airfow",enteringAirPoint+" \u2109");
+            vavPoints.put("Entering Airflow",enteringAirPoint+" \u2109");
         }else{
-            vavPoints.put("Entering Airfow",0+" \u2109");
+            vavPoints.put("Entering Airflow",0+" \u2109");
         }
         if (dischargePoint > 0)
         {
@@ -815,7 +815,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
         p2FCUPoints.put("Fan Mode",fanopModePoint);
         p2FCUPoints.put("Conditioning Mode",condtionModePoint);
-        p2FCUPoints.put("Discharge Airflow",dischargePoint+" \u2109");
+        if (dischargePoint > 0) {
+            p2FCUPoints.put("Discharge Airflow", dischargePoint + " \u2109");
+        } else {
+            p2FCUPoints.put("Discharge Airflow", 0 + " \u2109");
+        }
         if(isCoolingOn && !isHeatingOn)
             p2FCUPoints.put("condEnabled","Cool Only");
         else if(!isCoolingOn && isHeatingOn)
@@ -858,7 +862,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
         p4FCUPoints.put("Fan Mode",fanopModePoint);
         p4FCUPoints.put("Conditioning Mode",condtionModePoint);
-        p4FCUPoints.put("Discharge Airflow",dischargePoint+" \u2109");
+        if (dischargePoint > 0) {
+            p4FCUPoints.put("Discharge Airflow", dischargePoint + " \u2109");
+        } else {
+            p4FCUPoints.put("Discharge Airflow", 0 + " \u2109");
+        }
         if(isCoolingOn && !isHeatingOn)
             p4FCUPoints.put("condEnabled","Cool Only");
         else if(!isCoolingOn && isHeatingOn)
@@ -904,7 +912,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             }
             cpuPoints.put("Fan Mode",fanopModePoint);
             cpuPoints.put("Conditioning Mode",conditionModePoint);
-         cpuPoints.put("Discharge Airflow",dischargePoint+" \u2109");
+            if (dischargePoint > 0) {
+                cpuPoints.put("Discharge Airflow", dischargePoint + " \u2109");
+            } else {
+                cpuPoints.put("Discharge Airflow", 0 + " \u2109");
+            }
             if(fanHighHumdOption > 0){
                if(fanHighHumdOption > 1) isFanHighEnabled = false;
                 cpuPoints.put("Fan High Humidity",fanHighHumdOption);
@@ -966,7 +978,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
         hpuPoints.put("Fan Mode",fanopModePoint);
         hpuPoints.put("Conditioning Mode",conditionModePoint);
-        hpuPoints.put("Discharge Airflow",dischargePoint+" \u2109");
+        if (dischargePoint > 0) {
+            hpuPoints.put("Discharge Airflow", dischargePoint + " \u2109");
+        } else {
+            hpuPoints.put("Discharge Airflow", 0 + " \u2109");
+        }
         if(fanHighHumdOption > 0){
             if(fanHighHumdOption > 1)isFanHighEnabled = false; //Since relay 5 is mapped to humidity or dehumidity
             hpuPoints.put("Fan High Humidity",fanHighHumdOption);

@@ -1672,9 +1672,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         textViewValue1.setText(vavPoints.get("Damper").toString());
         textViewLabel2.setText("Reheat Coil : ");
         textViewValue2.setText(vavPoints.get("Reheat Coil").toString());
-        textViewLabel3.setText("Discharge Airfow : ");
-        textViewValue3.setText(vavPoints.get("Discharge Airfow").toString());
-        textViewLabel4.setText("Entering Airfow : ");
+        textViewLabel3.setText("Discharge Airflow : ");
+        textViewValue3.setText(vavPoints.get("Discharge Airflow").toString());
+        textViewLabel4.setText("Entering Airflow : ");
         textViewValue4.setText(vavPoints.get("Entering Airflow").toString());
 
         linearLayoutZonePoints.addView(viewTitle);

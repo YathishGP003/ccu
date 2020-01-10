@@ -168,7 +168,7 @@ public class BuildingTuners
                                          .setEquipRef(equipRef)
                                          .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
                                          .addMarker("system").addMarker("building").addMarker("zone").addMarker("differential").addMarker("sp")
-                                         .setMinVal("58").setMaxVal("87").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                                         .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                          .setTz(tz)
                                          .build();
         String buildingToZoneDifferentialId = hayStack.addPoint(buildingToZoneDifferential);
@@ -2368,8 +2368,8 @@ public class BuildingTuners
                                   .setTz(tz)
                                   .build();
         String coolingDbId = hayStack.addPoint(coolingDb);
-        hayStack.writePoint(coolingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
-        hayStack.writeHisValById(coolingDbId, 0.0);
+        hayStack.writePoint(coolingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_COOLING_DB, 0);
+        hayStack.writeHisValById(coolingDbId, TunerConstants.VAV_COOLING_DB);
     
         Point coolingDbMultiplier = new Point.Builder()
                                             .setDisplayName(equipDis+"-DAB-"+"coolingDeadbandMultiplier")
@@ -2395,8 +2395,8 @@ public class BuildingTuners
                                   .setTz(tz)
                                   .build();
         String heatingDbId = hayStack.addPoint(heatingDb);
-        hayStack.writePoint(heatingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
-        hayStack.writeHisValById(heatingDbId, 0.0);
+        hayStack.writePoint(heatingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_HEATING_DB, 0);
+        hayStack.writeHisValById(heatingDbId, TunerConstants.VAV_HEATING_DB);
     
         Point heatingDbMultiplier = new Point.Builder()
                                             .setDisplayName(equipDis+"-DAB-"+"heatingDeadbandMultiplier")

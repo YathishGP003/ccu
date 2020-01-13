@@ -29,6 +29,7 @@ import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Space;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -760,7 +761,10 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                         if (!contains) {
                             for (Interval s : systemIntervals) {
                                 if (s.overlaps(z)) {
-                                    if (z.getStartMillis() < s.getStartMillis()) {
+                                    if(z.getStartMillis() < s.getStartMillis() && z.getEndMillis() > s.getEndMillis()){
+                                        intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
+                                        intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));
+                                    } else if (z.getStartMillis() < s.getStartMillis()) {
                                         intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
                                     } else if (z.getEndMillis() > s.getEndMillis()) {
                                         intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));
@@ -889,7 +893,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
 
         AppCompatTextView textViewTemp = new AppCompatTextView(getActivity());
-        textViewTemp.setGravity(Gravity.CENTER);
+        textViewTemp.setGravity(Gravity.CENTER_HORIZONTAL);
         textViewTemp.setText(Html.fromHtml(strminTemp + " " + strmaxTemp));
 
         textViewTemp.setTypeface(typeface);

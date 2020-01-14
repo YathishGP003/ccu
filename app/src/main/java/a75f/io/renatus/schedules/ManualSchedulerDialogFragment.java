@@ -106,10 +106,12 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         rangeSeekBarView = view.findViewById(R.id.rangeSeekBar);
         rangeSeekBarView.setZoneSchedule(mSchedule);
 
-        if (mDay == null) {
+        if (mDay == null && mDays == null) {
             deleteButton.setVisibility(View.INVISIBLE);
-        } else {
+        } else if (mDay != null || mDays != null){
             deleteButton.setVisibility(View.VISIBLE);
+        } else {
+            deleteButton.setVisibility(View.INVISIBLE);
         }
 
         deleteButton.setOnClickListener(v -> showDeleteAlert());
@@ -131,7 +133,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         checkBoxSaturday = view.findViewById(R.id.checkBoxSat);
         checkBoxSunday = view.findViewById(R.id.checkBoxSun);
 
-        if (mDay != null){
+        if (mDay != null || mDays != null){
             checkBoxMonday.setEnabled(false);
             checkBoxTuesday.setEnabled(false);
             checkBoxWednesday.setEnabled(false);

@@ -169,7 +169,7 @@ public class TunerFragment extends Fragment
         new AsyncTask<String, Void, Void>() {
             @Override
             protected Void doInBackground( final String ... params ) {
-                CCUHsApi.getInstance().writePoint(id, TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", val, 0);
+                CCUHsApi.getInstance().writePoint(id, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL, "ccu", val, 0);
                 CCUHsApi.getInstance().writeHisValById(id, val);
                 return null;
             }

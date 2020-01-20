@@ -1542,7 +1542,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         CCUHsApi.getInstance().pointWrite(HRef.copy(heatDT.get("id").toString()), 4, "manual", HNum.make(0), HNum.make(1, "ms"));
         systemOccupancy = UNOCCUPIED;
         Occupied occupied = getOccupiedModeCache(equip.getRoomRef());
-        occupied.setForcedOccupied(false);
+        if(occupied != null)occupied.setForcedOccupied(false);
         putOccupiedModeCache(equip.getRoomRef(),occupied);
     }
 }

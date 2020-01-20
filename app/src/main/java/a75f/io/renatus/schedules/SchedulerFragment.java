@@ -607,11 +607,6 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                        .setIcon(android.R.drawable.ic_dialog_alert)
                        .setNegativeButton("Re-Edit", new DialogInterface.OnClickListener() {
                            public void onClick(DialogInterface dialog, int id) {
-                               if (removeEntry != null)
-                               {
-                                   schedule.getDays().add(position, removeEntry);
-                                   daysArrayList.add(removeEntry);
-                               }
                                showDialog(ID_DIALOG_SCHEDULE, position, daysArrayList);
                            }
                        })

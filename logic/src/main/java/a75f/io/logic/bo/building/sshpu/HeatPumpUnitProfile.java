@@ -523,10 +523,10 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                                 break;
                             case FAN_LOW_CURRENT_OCCUPIED:
                             case FAN_LOW_OCCUPIED:
-                                if(relayStages.containsKey("CoolingStage2") && occupied) {
+                                /*if(relayStages.containsKey("CoolingStage2") && occupied) {
                                     relayStages.put("FanStage2",1);
                                     setCmdSignal("fan and stage2", 1.0, addr);
-                                }else
+                                }else*/
                                     setCmdSignal("fan and stage2",0,addr);
                                 break;
                             case FAN_HIGH_CURRENT_OCCUPIED:
@@ -687,7 +687,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         HashMap<String, Integer> relayStages = new HashMap<String, Integer>();
         if(curTemp <= setTempHeating){
             if(isAuxHeatingEnabled){
-                if(curTemp <= (setTempHeating - (2 * heatingDeadband)) ) {
+                if(isCompressorStage1Enabled && isCompressorStage2Enabled && (curTemp <= (setTempHeating - (2 * heatingDeadband))) ) { //tunrs on 61 and below
                     relayStages.put("HeatingStage2", 1);
                     setCmdSignal("aux and heating ",1.0,addr);
                 }else if(!isCompressorStage2Enabled && (curTemp <= setTempHeating - heatingDeadband)){
@@ -704,8 +704,10 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     else if(isCompressorStage1Enabled && !isCompressorStage2Enabled && (curTemp >= setTempHeating))
                         setCmdSignal("aux and heating ",0,addr);
                     else {
-                        relayStages.put("HeatingStage2",1);
-                        relayStages.put("HeatingStage1",1);
+                        if(isCompressorStage2Enabled && isCompressorStage1Enabled)relayStages.put("HeatingStage2",1);
+                        else if(!isCompressorStage2Enabled && isCompressorStage1Enabled)relayStages.put("HeatingStage2",1);
+                        else if(!isCompressorStage1Enabled)relayStages.put("HeatingStage1",1);
+                        else relayStages.put("HeatingStage1",1);
                     }
                 }
             }else
@@ -788,10 +790,10 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                                 break;
                             case FAN_LOW_CURRENT_OCCUPIED:
                             case FAN_LOW_OCCUPIED:
-                                if(relayStages.containsKey("HeatingStage2") && occupied) {
+                                /*if(relayStages.containsKey("HeatingStage2") && occupied) {
                                     relayStages.put("FanStage2", 1);
                                     setCmdSignal("fan and stage2", 1.0, addr);
-                                }else
+                                }else*/
                                     setCmdSignal("fan and stage2",0,addr);
                                 break;
                             case FAN_HIGH_CURRENT_OCCUPIED:

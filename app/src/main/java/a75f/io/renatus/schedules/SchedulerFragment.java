@@ -527,7 +527,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             }
         
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setMessage("The current settings cannot be overridden because schedules are conflicting on \n"+overlapDays.toString())
+            builder.setMessage("The current settings cannot be overridden because the following duration of the schedules are overlapping \n"+overlapDays.toString())
                    .setCancelable(false)
                    .setIcon(android.R.drawable.ic_dialog_alert)
                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {

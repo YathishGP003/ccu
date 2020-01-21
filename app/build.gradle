@@ -48,7 +48,7 @@ android {
                 includeCompileClasspath true
             }
         }
-               missingDimensionStrategy 'dev', 'prod'
+               missingDimensionStrategy 'dev', 'prod','qa','staging'
         signingConfig signingConfigs.debug
 
 
@@ -60,6 +60,12 @@ android {
                     signingConfig signingConfigs.release
                 }
                 prod {
+                    signingConfig signingConfigs.release
+                }
+                qa {
+                    signingConfig signingConfigs.release
+                }
+                staging {
                     signingConfig signingConfigs.release
                 }
     }
@@ -95,9 +101,6 @@ android {
 
 
     dexOptions {
-    }
-    productFlavors {
-
     }
     sourceSets { main { assets.srcDirs = ['src/main/assets', 'src/androidTest/assets'] } }
     compileOptions {
@@ -165,6 +168,7 @@ def getCurrentFlavor() {
     Gradle gradle = getGradle()
     String tskReqStr = gradle.getStartParameter().getTaskRequests().toString()
 
+    println tskReqStr
     Pattern pattern;
 
     if (tskReqStr.contains("assemble"))
@@ -173,9 +177,16 @@ def getCurrentFlavor() {
         pattern = Pattern.compile("generate(\\w+)(Release|Debug)")
 
     Matcher matcher = pattern.matcher(tskReqStr)
-
-    if (matcher.find())
-        return matcher.group(1).toLowerCase()
+    if (matcher.find()){
+        //return matcher.group(1).toLowerCase()
+        String flavor = matcher.group(1)
+        // This makes first character to lowercase.
+        char[] c = flavor.toCharArray()
+        c[0] = Character.toLowerCase(c[0])
+        flavor = new String(c)
+        println "getCurrentFlavor:" + flavor
+        return flavor
+    }
     else {
         println "NO MATCH FOUND"
         return "";

@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -93,22 +95,30 @@ public class SplashActivity extends Activity {
     
         if (prefs.getString("SERVER_ENV").equals(""))
         {
-            String[] envList = {"PROD", "QA", "DEV"};
-            AlertDialog.Builder alertDlg = new AlertDialog.Builder(SplashActivity.this);
-            alertDlg.setIcon(R.drawable.x75f_new);
-            alertDlg.setTitle("Select Haystack Server");
-            alertDlg.setSingleChoiceItems(envList, -1, new DialogInterface.OnClickListener()
-            {
-                public void onClick(DialogInterface dialog, int item)
-                {
-                    prefs.setString("SERVER_ENV", envList[item]);
-                    dialog.dismiss();
-                    registrationThread.start();
+            String[] envList = {"PROD", "QA", "DEV","STAGING"};
+            PackageManager pm = getApplicationContext().getPackageManager();
+            PackageInfo pi; //RENATUS_CCU_dev_1.437.2
+            try {
+                pi = pm.getPackageInfo("a75f.io.renatus", 0);
+                String str = pi.versionName;
+                Log.d("SplashActivity","package info = "+pi.versionName+","+str.contains("_dev"));
+                if(str.contains("_prod")) {
+                    prefs.setString("SERVER_ENV", envList[0]);
+                }else if(str.contains("_qa")) {
+                    prefs.setString("SERVER_ENV", envList[1]);
+                }else if(str.contains("_dev")) {
+                    prefs.setString("SERVER_ENV", envList[2]);
+                }else if(str.contains("_staging")) {
+                    prefs.setString("SERVER_ENV", envList[3]);
                 }
-            });
-            
-            AlertDialog alert = alertDlg.create();
-            alert.show();
+
+                registrationThread.start();
+            }catch (PackageManager.NameNotFoundException e){
+
+                //default dev registration
+                prefs.setString("SERVER_ENV", envList[2]);
+                registrationThread.start();
+            }
         } else {
             registrationThread.start();
         }

@@ -21,12 +21,14 @@ public class HttpUtil
         SharedPreferences sprefs = PreferenceManager.getDefaultSharedPreferences(cxt);
         switch (sprefs.getString("SERVER_ENV", "")) {
             case "QA":
-                return "https://alerts75f-qa.azurewebsites.net/";
+                return "https://alerts-75f-service-qa.azurewebsites.net/";
             case "DEV":
-                return  "https://alerts75f-dev.azurewebsites.net/";
+                return  "https://alerts-75f-service-dev.azurewebsites.net/";
+            case "STAGING":
+                return  "https://alerts-75f-service-staging.azurewebsites.net/";
             case "PROD":
             default:
-                return  "https://alerts75f.azurewebsites.net/";
+                return  "https://alerts-75f-service.azurewebsites.net/";
         
         }
     }

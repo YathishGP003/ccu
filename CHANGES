@@ -1,0 +1,8 @@
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-905, crash when add schedule from facilisight
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-881, Humidifier point is not getting deleted once dehumidifier is selected
+ - #RENATUS-887, fan high turns on during fan low set
+ - #RENATUS-885, HPU | Relay 5 turns on when fan low is set
+ - Merge branch 'mahesh_renuts' into 'master'
+ - RENATUS-898, fixed

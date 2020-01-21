@@ -233,7 +233,7 @@ public class VavStagedRtu extends VavSystemProfile
                     case COOLING_3:
                     case COOLING_4:
                     case COOLING_5:
-                        currState = getCmdSignal("cooling and stage" + stage.ordinal() + 1);
+                        currState = getCmdSignal("cooling and stage" + (stage.ordinal() + 1));
                         if (L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
                             stageThreshold = 100 * (stage.ordinal() +1) / (coolingStages + 1);
                         } else
@@ -248,7 +248,7 @@ public class VavStagedRtu extends VavSystemProfile
                         {
                             relayState = systemCoolingLoopOp > Math.max(stageThreshold - relayDeactHysteresis ,0 ) ? 1 :0;
                         }
-                        setCmdSignal("cooling and stage"+stage.ordinal()+1, relayState);
+                        setCmdSignal("cooling and stage"+(stage.ordinal()+1), relayState);
                         break;
                     case HEATING_1:
                     case HEATING_2:

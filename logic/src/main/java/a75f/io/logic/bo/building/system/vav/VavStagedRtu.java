@@ -510,7 +510,11 @@ public class VavStagedRtu extends VavSystemProfile
         CCUHsApi.getInstance().addPoint(relay1Op);
     }
     public double getCmdSignal(String cmd) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and system and cmd and his and "+cmd);
+        try {
+            return CCUHsApi.getInstance().readHisValByQuery("point and system and cmd and his and " + cmd);
+        }catch (Exception e){
+            return 0;
+        }
     }
     public void setCmdSignal(String cmd, double val) {
         CCUHsApi.getInstance().writeHisValByQuery("point and system and cmd and his and "+cmd, val);

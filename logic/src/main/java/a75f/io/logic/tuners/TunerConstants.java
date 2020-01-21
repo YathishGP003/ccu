@@ -91,6 +91,8 @@ public class TunerConstants
     public static final double STANDALONE_HEATING_STAGE2_UPPER_OFFSET = 150;
     public static final double STANDALONE_HEATING_THRESHOLD_2PFCU_DEFAULT = 85.0;
     public static final double STANDALONE_COOLING_THRESHOLD_2PFCU_DEFAULT = 65.0;
+    public static final double STANDALONE_COOLING_PRECONDITIONING_RATE = 15;
+    public static final double STANDALONE_HEATING_PRECONDITIONING_RATE = 15;
 
     public static final double STANDALONE_TARGET_DEHUMIDIFIER = 45;
     public static final double STANDALONE_TARGET_HUMIDITY = 25;
@@ -108,7 +110,11 @@ public class TunerConstants
     public static final double OAO_ENTHALPY_DUCT_COMPENSATION_OFFSET = 0 ;
 	public static final String VAV_TUNER_GROUP = "VAV";
     public static final String DAB_TUNER_GROUP = "DAB";
+    public static final String OAO_TUNER_GROUP = "OAO";
     public static final String GENERIC_TUNER_GROUP = "GENERIC";
-    
-    
+    public static final String TIMER_TUNER = "TIMER";
+    public static final String TEMPERATURE_LIMIT = "TEMPERATURE";
+    public static final String ALERT_TUNER = "ALERT";
+    public static final String LCM_TUNER = "LCM";
+
 }

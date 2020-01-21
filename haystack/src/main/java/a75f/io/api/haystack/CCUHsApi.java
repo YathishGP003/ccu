@@ -117,14 +117,18 @@ public class CCUHsApi
             SharedPreferences sprefs = PreferenceManager.getDefaultSharedPreferences(cxt);
             switch (sprefs.getString("SERVER_ENV", "")) {
                 case "QA":
-                    hayStackUrl = "https://renatusv2-qa.azurewebsites.net/";
+                    hayStackUrl = "https://haystack-75f-service-qa.azurewebsites.net/";
                     break;
                 case "DEV":
-                    hayStackUrl = "https://renatusv2-dev.azurewebsites.net/";
+                    hayStackUrl = "https://haystack-75f-service-dev.azurewebsites.net/";
+                    break;
+
+                case "STAGING":
+                    hayStackUrl = "https://haystack-75f-service-staging.azurewebsites.net/";
                     break;
                 case "PROD":
                 default:
-                    hayStackUrl = "https://renatusv2.azurewebsites.net/";
+                    hayStackUrl = "https://haystack-75f-service.azurewebsites.net/";
                  
             }
         }
@@ -139,12 +143,18 @@ public class CCUHsApi
             
             switch (sprefs.getString("SERVER_ENV", "")) {
                 case "QA":
+                    influxUrl = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("influx-75f-objectstore-qa.northcentralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
+                    break;
                 case "DEV":
-                    influxUrl = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("influx.northcentralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("ccu").setPassword("7575").buildUrl();
+                    //influxUrl = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("influx.northcentralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("ccu").setPassword("7575").buildUrl();
+                    influxUrl = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("influx-75f-objectstore-dev.northcentralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
+                    break;
+                case "STAGING":
+                    influxUrl = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("influx-75f-objectstore-staging.northcentralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
                     break;
                 case "PROD":
                 default:
-                    influxUrl = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
+                    influxUrl = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("influx-75f-objectstore-prod.northcentralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
             }
         }
     

@@ -81,7 +81,19 @@ public class EntitySyncHandler
         }
         syncProgress = false;
     }
-    
+
+    public void syncPointEntity(){
+        pointAdapter.onSync();
+
+        if (CCUHsApi.getInstance().tagsDb.removeIdMap.size() > 0) {
+            CcuLog.i(TAG, "RemoveIDMap : "+CCUHsApi.getInstance().tagsDb.removeIdMap);
+            doSyncRemoveIds();
+        }
+        if (CCUHsApi.getInstance().tagsDb.updateIdMap.size() > 0) {
+            CcuLog.i(TAG, "UpdateIDMap : "+CCUHsApi.getInstance().tagsDb.updateIdMap);
+            doSyncUpdateEntities();
+        }
+    }
     public void doSyncWithWrite(){
         sync();
     

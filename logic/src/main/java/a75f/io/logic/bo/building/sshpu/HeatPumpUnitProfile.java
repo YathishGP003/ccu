@@ -346,6 +346,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 break;
             case FAN_LOW_ALL_TIMES:
                 setCmdSignal("fan and stage1", 1.0, node);
+                setCmdSignal("fan and stage2",0,node);
                 relayStages.put("FanStage1", 1);
             case FAN_HIGH_CURRENT_OCCUPIED:
             case FAN_HIGH_OCCUPIED:

@@ -332,7 +332,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
 
         Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().readMapById(equipId)).build();
-        boolean isZoneHasStandaloneEquip = equip.getMarkers().contains("smartstat") ? true :  equip.getMarkers().contains("sse") ? true : false;
+        boolean isZoneHasStandaloneEquip = equip.getMarkers().contains("smartstat") ? true :  (equip.getMarkers().contains("sse") ? true : false);
         Occupied cachedOccupied = getOccupiedModeCache(zoneId);
         if(cachedOccupied == null)
         {
@@ -343,7 +343,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             }
             return "Setting up..";
         }
-        if ((systemOccupancy == PRECONDITIONING) && !isZoneHasStandaloneEquip) {
+        if (!isZoneHasStandaloneEquip && (systemOccupancy == PRECONDITIONING) ) {
             return "In Preconditioning ";
         }
         //{Current Mode}, Changes to Energy Saving Range of %.1f-%.1fF at %s

@@ -6,7 +6,7 @@ package a75f.io.logic.tuners;
 
 public class TunerConstants
 {
-    public static final int TUNER_EQUIP_VAL_LEVEL = 7;
+    public static final int TUNER_EQUIP_VAL_LEVEL = 8;
     
     public static final double SYSTEM_ANALOG1_MIN = 0;
     public static final double SYSTEM_ANALOG1_MAX = 10;

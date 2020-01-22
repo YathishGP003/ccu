@@ -932,7 +932,25 @@ public class CCUHsApi
             }
         }.start();
     }
-    
+    public void syncPointEntityTree()
+    {
+        new Thread()
+        {
+            @Override
+            public void run()
+            {
+                if (!testHarnessEnabled)
+                {
+
+                        entitySyncHandler.syncPointEntity();
+
+                } else
+                {
+                    CcuLog.d("CCU_HS", " Test Harness Enabled , Skip PointEntity Sync");
+                }
+            }
+        }.start();
+    }
     public void syncEntityWithPointWrite() {
         new Thread()
         {

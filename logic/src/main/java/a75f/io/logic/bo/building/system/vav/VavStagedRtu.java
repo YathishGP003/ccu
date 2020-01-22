@@ -690,7 +690,7 @@ public class VavStagedRtu extends VavSystemProfile
             if(newCmdPoint != null)CCUHsApi.getInstance().addPoint(newCmdPoint);
 
             CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and association and " + config, val);
-            CCUHsApi.getInstance().syncEntityTree();
+            CCUHsApi.getInstance().syncPointEntityTree();
         }
         
     }

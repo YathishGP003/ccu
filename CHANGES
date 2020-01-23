@@ -1,6 +1,5 @@
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-884, System logical points remap
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-891, Enviroments specific URI and Pubnub changes
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-891, Enviroments specific URI and Pubnub changes
+ - #RENATUS-908, Device dead alert not gettting triggered
+ - #RENATUS-904, Precondition for standlone shouldnt happen following zone schedule
+ - #RENATUS-871, tags deletion not happening
+ - #RENATUS-885, relay 5 turns on always

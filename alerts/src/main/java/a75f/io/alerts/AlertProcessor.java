@@ -257,9 +257,11 @@ public class AlertProcessor
                             {
                                 offset = offsetCounter.get(def.alert.mTitle + p.get("id"));
                             }
+
                             if (offset++ >= Integer.parseInt(def.offset)) {
                                 CcuLog.d("CCU_ALERTS", "Point " + p.get("dis") + " addAlert " + def.toString());
                                 addAlert(AlertBuilder.build(def, AlertFormatter.getFormattedMessage(def, point), point));
+                                offset = 0;
                             } else
                             {
                                 CcuLog.d("CCU_ALERTS", "Point "+p.get("dis") + " offset " +offset);
@@ -287,6 +289,7 @@ public class AlertProcessor
         
                     if (offset++ >= Integer.parseInt(def.offset)) {
                         addAlert(AlertBuilder.build(def, AlertFormatter.getFormattedMessage(def)));
+                        offset = 0;
                     } else
                     {
                         CcuLog.d("CCU_ALERTS", " Alert offset " +offset);

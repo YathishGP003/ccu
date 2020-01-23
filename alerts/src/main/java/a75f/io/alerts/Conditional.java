@@ -8,6 +8,10 @@ import android.util.Log;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.udojava.evalex.Expression;
 
+import org.projecthaystack.HDateTime;
+import org.projecthaystack.HDateTimeRange;
+import org.projecthaystack.HTimeZone;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -229,14 +233,15 @@ public class Conditional
                         continue;
                     }
     
-                    List<HisItem> hisItems = CCUHsApi.getInstance().getHisItems(point.get("id").toString(), 0 ,2);
+                    List<HisItem> hisItems = CCUHsApi.getInstance().hisRead(point.get("id").toString(),HDateTimeRange.make(HDateTime.make(System.currentTimeMillis()-110000,HTimeZone.make(point.get("tz").toString())), HDateTime.make(System.currentTimeMillis(),HTimeZone.make(point.get("tz").toString()))));
+
                     if (hisItems.size() < 2) {
                         CcuLog.d("CCU_ALERTS"," Not enough his vals to evaluate conditional "+toString());
                         return;
                     }
                     
                     HisItem reading1 = hisItems.get(0);
-                    HisItem reading2 = hisItems.get(1);
+                    HisItem reading2 = hisItems.get(hisItems.size()-1);
     
                     if (value.contains("zone")) {
                         val = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value+" and equipRef == \""+q.get("id")+"\""));

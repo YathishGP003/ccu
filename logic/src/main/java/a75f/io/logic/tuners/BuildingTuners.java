@@ -3179,7 +3179,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("base").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("standalone").addMarker("heating").addMarker("deadband").addMarker("sp")
-                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -3202,7 +3202,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("cooling").addMarker("deadband").addMarker("sp")
-                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -3226,7 +3226,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("stage1").addMarker("hysteresis").addMarker("sp")
-                .setMinVal("0.5").setMaxVal("1.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0.5").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("%")
                 .setTz(tz)
                 .build();
@@ -3484,7 +3484,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("stage1").addMarker("hysteresis").addMarker("sp")
-                .setMinVal("0.5").setMaxVal("1.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0.5").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz)
                 .build();
         String saStage1HysteresisId = hayStack.addPoint(saStage1Hysteresis);

@@ -73,9 +73,12 @@ public class AlertFormatter
         int n = getConditionalIndex(token);
         Conditional c = n > 0 ? def.conditionals.get(n-1) : null;
         CCUHsApi hs = CCUHsApi.getInstance();
-        Point p = new Point.Builder().setHashMap(c != null ? hs.read(c.key) : hs.readMapById(point)).build();
-        if (p.getId() != null && point != null && !p.getId().equals(point)){
-           p =  new Point.Builder().setHashMap(hs.readMapById(point)).build();
+        Point p = null;
+        if ( c != null || point != null) {
+            p = new Point.Builder().setHashMap(c != null ? hs.read(c.key) : hs.readMapById(point)).build();
+            if (p.getId() != null && point != null && !p.getId().equals(point)) {
+                p = new Point.Builder().setHashMap(hs.readMapById(point)).build();
+            }
         }
         switch (getEntity(token)) {
             case "point":

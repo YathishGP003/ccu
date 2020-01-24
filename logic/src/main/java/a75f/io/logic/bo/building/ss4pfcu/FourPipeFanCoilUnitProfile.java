@@ -638,4 +638,12 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
         ZoneState state = relayStates.size() > 0 ? (relayStates.containsKey("HeatingStage") ? HEATING : DEADBAND) : DEADBAND;
         StandaloneScheduler.updateSmartStatStatus(equipId, state,relayStates,ZoneTempState.NONE);
     }
+    @Override
+    public void reset(){
+        for (short node : fourPfcuDeviceMap.keySet())
+        {
+            fourPfcuDeviceMap.get(node).setCurrentTemp(0);
+
+        }
+    }
 }

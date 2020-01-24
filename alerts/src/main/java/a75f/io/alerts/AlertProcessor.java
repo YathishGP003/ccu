@@ -1,7 +1,9 @@
 package a75f.io.alerts;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.StrictMode;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -102,6 +104,14 @@ public class AlertProcessor
         for (Alert a:alertList){
             //clear alerts after 24 hours
             if ((System.currentTimeMillis() - a.getStartTime()) >= 86400000){
+                alertBox.remove(a.id);
+            }
+        }
+
+        ArrayList<Alert> cmErrorAlertList = new ArrayList<>(getCmErrorAlerts());
+        for (Alert a:cmErrorAlertList){
+            //clear alerts after every hours
+            if ((System.currentTimeMillis() - a.getStartTime()) >= 3600000){
                 alertBox.remove(a.id);
             }
         }
@@ -306,6 +316,13 @@ public class AlertProcessor
             if (!activeAlertRefs.contains(a.mTitle+ (a.ref != null ? a.ref :""))) {
                 fixAlert(a);
             }
+            if (a.mTitle.equalsIgnoreCase("CCU RESTART")){
+                if ((System.currentTimeMillis() - a.getStartTime()) > 900000 ){
+                    fixAlert(a);
+                    SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(AlertManager.getInstance().getApplicationContext());
+                    spDefaultPrefs.edit().putBoolean("APP_RESTART", false).apply();
+                }
+            }
         }
         clearElapsedAlerts();
         
@@ -432,7 +449,13 @@ public class AlertProcessor
     public List<Alert> getAllAlerts(){
         QueryBuilder<Alert> alertQuery = alertBox.query();
         alertQuery.orderDesc(Alert_.startTime);
-    
+        return alertQuery.build().find();
+    }
+
+    public List<Alert> getCmErrorAlerts(){
+        QueryBuilder<Alert> alertQuery = alertBox.query();
+        alertQuery.contains(Alert_.mTitle,"CM ERROR REPORT")
+                  .orderDesc(Alert_.startTime);
         return alertQuery.build().find();
     }
     

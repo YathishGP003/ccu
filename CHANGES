@@ -1,5 +1,3 @@
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-908, Device dead alert not gettting triggered
- - #RENATUS-904, Precondition for standlone shouldnt happen following zone schedule
- - #RENATUS-871, tags deletion not happening
- - #RENATUS-885, relay 5 turns on always
+ - Update ci.config
+ - Merge branch 'mahesh_renatus' into 'master'
+ - fixed RENATUS-901, RENATUS-902, RENATUS-877

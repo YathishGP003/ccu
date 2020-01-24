@@ -190,6 +190,7 @@ public class HttpUtil
                 response.append('\n');
             }
             rd.close();
+            is.close();
             return connection.getResponseCode() == 200 ? response.toString() : null;
 
         } catch (Exception e) {

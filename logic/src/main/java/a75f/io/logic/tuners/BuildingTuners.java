@@ -67,30 +67,15 @@ public class BuildingTuners
         equipDis = siteDis+"-BuildingTuner";
         tz = siteMap.get("tz").toString();
         
-        //addSettingTuners();
         addDefaultBuildingTuners();
         addDefaultVavTuners();
         addDefaultPlcTuners();
         addDefaultStandaloneTuners();
         addDefaultDabTuners();
         OAOTuners.addDefaultTuners(equipDis, siteRef, equipRef, tz);
+        CCUHsApi.getInstance().syncEntityTree();
     }
     
-    public void addSettingTuners() {
-        Point forcedOccupiedTime = new Point.Builder()
-                                                  .setDisplayName(equipDis+"-"+"forcedOccupiedTime")
-                                                  .setSiteRef(siteRef)
-                                                  .setEquipRef(equipRef)
-                                                  .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
-                                                  .addMarker("system").addMarker("forced").addMarker("occupied").addMarker("time").addMarker("sp")
-                                                  .setMinVal("30").setMaxVal("300").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                                                  .setUnit("m")
-                                                  .setTz(tz)
-                                                  .build();
-        String forcedOccupiedTimeId = hayStack.addPoint(forcedOccupiedTime);
-        hayStack.writePoint(forcedOccupiedTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 120.0, 0);
-        hayStack.writeHisValById(forcedOccupiedTimeId, 120.0);
-    }
     
     public void addDefaultBuildingTuners() {
         Point heatingPreconditioingRate = new Point.Builder()
@@ -827,6 +812,8 @@ public class BuildingTuners
         String rebalanceHoldTimeId = hayStack.addPoint(rebalanceHoldTime);
         hayStack.writePoint(rebalanceHoldTimeId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", 20.0, 0);
         hayStack.writeHisValById(rebalanceHoldTimeId, 20.0);
+
+        CCUHsApi.getInstance().syncEntityTree();
     }
     public void addDefaultVavTuners() {
         

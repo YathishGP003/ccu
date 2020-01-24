@@ -629,6 +629,10 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             }else{
                 if((getCmdSignal("compressor and stage1", addr) > 0) || ((hpChangeOverType == SmartStatHeatPumpChangeOverType.ENERGIZE_IN_COOLING) && (getCmdSignal("changeover and cooling and stage1",addr) > 0)))
                     relayStages.put("CoolingStage1",1);
+                else{
+                    setCmdSignal("compressor and stage1",0,addr);
+                    setCmdSignal("compressor and stage2",0,addr);
+                }
                 if(getCmdSignal("fan and stage1", addr) > 0)relayStages.put("FanStage1",1);
             }
         }

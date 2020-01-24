@@ -797,4 +797,12 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
         }
         return false;
     }
+    @Override
+    public void reset(){
+        for (short node : twoPfcuDeviceMap.keySet())
+        {
+            twoPfcuDeviceMap.get(node).setCurrentTemp(0);
+
+        }
+    }
 }

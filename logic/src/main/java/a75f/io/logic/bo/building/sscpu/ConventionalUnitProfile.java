@@ -549,5 +549,12 @@ public class ConventionalUnitProfile extends ZoneProfile {
                 break;
         }
     }
+    @Override
+    public void reset(){
+        for (short node : cpuDeviceMap.keySet())
+        {
+            cpuDeviceMap.get(node).setCurrentTemp(0);
 
+        }
+    }
 }

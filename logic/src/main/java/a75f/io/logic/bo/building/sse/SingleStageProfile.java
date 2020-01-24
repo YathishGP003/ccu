@@ -221,4 +221,11 @@ public class SingleStageProfile extends ZoneProfile
         if(getCmdSignal("cooling and stage1", node) > 0)
             setCmdSignal("cooling and stage1",0,node);
     }
+    @Override
+    public void reset(){
+        if(sseEquip != null){
+            sseEquip.setCurrentTemp(0);
+
+        }
+    }
 }

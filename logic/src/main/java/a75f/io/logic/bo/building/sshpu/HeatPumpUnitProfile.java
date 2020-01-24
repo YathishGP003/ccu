@@ -977,5 +977,13 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 break;
         }
     }
+    @Override
+    public void reset(){
+        for (short node : hpuDeviceMap.keySet())
+        {
+            hpuDeviceMap.get(node).setCurrentTemp(0);
+
+        }
+    }
 }
 

@@ -127,11 +127,16 @@ public class Conditional
                     val = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value+" and equipRef == \""+q.get("id")+"\""));
                 }
                 resVal = CCUHsApi.getInstance().readHisValById(point.get("id").toString());
+                if ((value.contains("co2")&& value.contains("target")) || (value.contains("voc")&& value.contains("target"))){
+                    val = String.valueOf(Double.parseDouble(val) + (Double.parseDouble(val)/10.0));
+                }
                 Expression expression = new Expression(resVal+ " "+condition+" " + val);
                 if (expression.eval().intValue() > 0) {
                     pointList.add(point.get("id").toString());
+                    if ((value.contains("co2")&& value.contains("target")) || (value.contains("voc")&& value.contains("target"))){
+                        val = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value+" and equipRef == \""+q.get("id")+"\""));
+                    }
                     pointValList.add(new PointVal(point.get("id").toString(), Double.parseDouble(val)));
-                    
                 }
             }
         } else if (grpOperation.contains("oao")){

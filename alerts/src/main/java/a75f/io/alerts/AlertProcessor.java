@@ -316,13 +316,6 @@ public class AlertProcessor
             if (!activeAlertRefs.contains(a.mTitle+ (a.ref != null ? a.ref :""))) {
                 fixAlert(a);
             }
-            if (a.mTitle.equalsIgnoreCase("CCU RESTART")){
-                if ((System.currentTimeMillis() - a.getStartTime()) > 900000 ){
-                    fixAlert(a);
-                    SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(AlertManager.getInstance().getApplicationContext());
-                    spDefaultPrefs.edit().putBoolean("APP_RESTART", false).apply();
-                }
-            }
         }
         clearElapsedAlerts();
         
@@ -491,6 +484,11 @@ public class AlertProcessor
         alert.setFixed(true);
         alert.setSyncStatus(false);
         alertBox.put(alert);
+
+        if (alert.mTitle.equalsIgnoreCase("CCU RESTART")){
+            SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(AlertManager.getInstance().getApplicationContext());
+            spDefaultPrefs.edit().putBoolean("APP_RESTART", false).apply();
+        }
     }
     
     public void deleteAlert(Alert alert) {

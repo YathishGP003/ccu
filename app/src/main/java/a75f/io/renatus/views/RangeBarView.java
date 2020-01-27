@@ -142,8 +142,8 @@ public class RangeBarView extends LinearLayout {
 
         Equip p = HSUtil.getEquipFromZone(mSchedule.getRoomRef());
 
-        hdb = TunerUtil.getHeatingDeadband(p.getId());
-        cdb = TunerUtil.getCoolingDeadband(p.getId());
+        hdb = TunerUtil.getZoneHeatingDeadband(mSchedule.getRoomRef());
+        cdb = TunerUtil.getZoneCoolingDeadband(mSchedule.getRoomRef());
         HashMap coolULMap = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
         HashMap heatULMap = CCUHsApi.getInstance().read("point and limit and max and heating and user");
         HashMap coolLLMap = CCUHsApi.getInstance().read("point and limit and min and cooling and user");

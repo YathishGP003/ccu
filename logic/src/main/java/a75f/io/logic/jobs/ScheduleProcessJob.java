@@ -692,7 +692,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }else{
             dabPoints.put("Damper",0+"% Open");
         }
-        if (dischargePoint  > 0)
+        if (dischargePoint  != 0)
         {
 
             dabPoints.put("Discharge Airflow",dischargePoint+" \u2109");
@@ -736,7 +736,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }else{
             ssePoints.put("Status","OFF");
         }
-        if (dischargePoint  > 0)
+        if (dischargePoint  != 0)
         {
 
             ssePoints.put("Discharge Airflow",dischargePoint+" \u2109");
@@ -774,13 +774,13 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }else{
             vavPoints.put("Reheat Coil",0);
         }
-        if (enteringAirPoint > 0)
+        if (enteringAirPoint != 0)
         {
             vavPoints.put("Entering Airflow",enteringAirPoint+" \u2109");
         }else{
             vavPoints.put("Entering Airflow",0+" \u2109");
         }
-        if (dischargePoint > 0)
+        if (dischargePoint != 0)
         {
             vavPoints.put("Discharge Airflow",dischargePoint+" \u2109");
         }else{
@@ -815,7 +815,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
         p2FCUPoints.put("Fan Mode",fanopModePoint);
         p2FCUPoints.put("Conditioning Mode",condtionModePoint);
-        if (dischargePoint > 0) {
+        if (dischargePoint != 0) {
             p2FCUPoints.put("Discharge Airflow", dischargePoint + " \u2109");
         } else {
             p2FCUPoints.put("Discharge Airflow", 0 + " \u2109");
@@ -862,7 +862,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
         p4FCUPoints.put("Fan Mode",fanopModePoint);
         p4FCUPoints.put("Conditioning Mode",condtionModePoint);
-        if (dischargePoint > 0) {
+        if (dischargePoint != 0) {
             p4FCUPoints.put("Discharge Airflow", dischargePoint + " \u2109");
         } else {
             p4FCUPoints.put("Discharge Airflow", 0 + " \u2109");
@@ -912,7 +912,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             }
             cpuPoints.put("Fan Mode",fanopModePoint);
             cpuPoints.put("Conditioning Mode",conditionModePoint);
-            if (dischargePoint > 0) {
+            if (dischargePoint != 0) {
                 cpuPoints.put("Discharge Airflow", dischargePoint + " \u2109");
             } else {
                 cpuPoints.put("Discharge Airflow", 0 + " \u2109");
@@ -978,7 +978,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
         hpuPoints.put("Fan Mode",fanopModePoint);
         hpuPoints.put("Conditioning Mode",conditionModePoint);
-        if (dischargePoint > 0) {
+        if (dischargePoint != 0) {
             hpuPoints.put("Discharge Airflow", dischargePoint + " \u2109");
         } else {
             hpuPoints.put("Discharge Airflow", 0 + " \u2109");

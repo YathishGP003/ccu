@@ -178,6 +178,7 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
         setCmdSignal("water and valve and heating",0,node);
             setCmdSignal("water and valve and cooling",0,node);
         StandaloneScheduler.updateSmartStatStatus(equipId, DEADBAND,new HashMap<String, Integer>() ,temperatureState);
+        fourPfcuDeviceMap.get(node).setStatus(DEADBAND.ordinal());
     }
     @Override
     public ZoneState getState() {
@@ -362,6 +363,7 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
                 break;
         }
         StandaloneScheduler.updateSmartStatStatus(equipId, DEADBAND,relayStates,ZoneTempState.NONE);
+            fourPfcuDeviceMap.get(addr).setStatus(DEADBAND.ordinal());
     }
 
     private void fcu4CoolOnlyMode(String equipId, short addr,double roomTemp, Occupied occuStatus,StandaloneLogicalFanSpeeds fanSpeed){
@@ -502,6 +504,7 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
         }
         ZoneState state = relayStates.size() > 0 ? (relayStates.containsKey("CoolingStage") ? COOLING : DEADBAND) : DEADBAND;
         StandaloneScheduler.updateSmartStatStatus(equipId, state,relayStates,ZoneTempState.NONE);
+        fourPfcuDeviceMap.get(addr).setStatus(state.ordinal());
     }
     private void fcu4HeatOnlyMode(String equipId, short addr,double roomTemp, Occupied occuStatus,StandaloneLogicalFanSpeeds fanSpeed){
         double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equipId);
@@ -637,6 +640,7 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
         }
         ZoneState state = relayStates.size() > 0 ? (relayStates.containsKey("HeatingStage") ? HEATING : DEADBAND) : DEADBAND;
         StandaloneScheduler.updateSmartStatStatus(equipId, state,relayStates,ZoneTempState.NONE);
+        fourPfcuDeviceMap.get(addr).setStatus(state.ordinal());
     }
     @Override
     public void reset(){

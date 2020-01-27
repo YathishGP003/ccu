@@ -325,6 +325,7 @@ public class ConventionalUnitLogicalMap {
                 .setTz(tz)
                 .build();
         String r1ID = CCUHsApi.getInstance().addPoint(coolingStage1);
+        CCUHsApi.getInstance().writeHisValById(r1ID, 0.0);
 
         Point coolingStage2 = new Point.Builder()
                 .setDisplayName(equipDis+"-coolingStage2")
@@ -338,6 +339,7 @@ public class ConventionalUnitLogicalMap {
                 .setTz(tz)
                 .build();
         String r2ID = CCUHsApi.getInstance().addPoint(coolingStage2);
+        CCUHsApi.getInstance().writeHisValById(r2ID, 0.0);
 
         Point heatingStage1 = new Point.Builder()
                 .setDisplayName(equipDis+"-heatingStage1")
@@ -351,6 +353,7 @@ public class ConventionalUnitLogicalMap {
                 .setTz(tz)
                 .build();
         String r4ID = CCUHsApi.getInstance().addPoint(heatingStage1);
+        CCUHsApi.getInstance().writeHisValById(r4ID, 0.0);
 
         Point heatingStage2 = new Point.Builder()
                 .setDisplayName(equipDis+"-heatingStage2")
@@ -364,6 +367,7 @@ public class ConventionalUnitLogicalMap {
                 .setTz(tz)
                 .build();
         String r5ID = CCUHsApi.getInstance().addPoint(heatingStage2);
+        CCUHsApi.getInstance().writeHisValById(r5ID, 0.0);
 
         Point fanStage1 = new Point.Builder()
                 .setDisplayName(equipDis+"-fanStage1")
@@ -377,6 +381,7 @@ public class ConventionalUnitLogicalMap {
                 .setTz(tz)
                 .build();
         String r3ID = CCUHsApi.getInstance().addPoint(fanStage1);
+        CCUHsApi.getInstance().writeHisValById(r3ID, 0.0);
 
         /*Point fanStage2 = new Point.Builder()
                 .setDisplayName(equipDis+"-fanStage2")

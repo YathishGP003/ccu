@@ -325,6 +325,7 @@ public class HeatPumpUnitEquip{
                 .setTz(tz)
                 .build();
         String r1ID = CCUHsApi.getInstance().addPoint(compressorStage1);
+        CCUHsApi.getInstance().writeHisValById(r1ID, 0.0);
 
         Point compressorStage2 = new Point.Builder()
                 .setDisplayName(equipDis+"-compressorStage2")
@@ -338,6 +339,7 @@ public class HeatPumpUnitEquip{
                 .setTz(tz)
                 .build();
         String r2ID = CCUHsApi.getInstance().addPoint(compressorStage2);
+        CCUHsApi.getInstance().writeHisValById(r2ID, 0.0);
 
         Point heatingStage1 = new Point.Builder()
                 .setDisplayName(equipDis+"-auxHeating")
@@ -351,6 +353,7 @@ public class HeatPumpUnitEquip{
                 .setTz(tz)
                 .build();
         String r4ID = CCUHsApi.getInstance().addPoint(heatingStage1);
+        CCUHsApi.getInstance().writeHisValById(r4ID, 0.0);
 
         /*Point heatpumpChangeover = new Point.Builder()
                 .setDisplayName(equipDis+"-heatpumpChangeover")
@@ -377,6 +380,7 @@ public class HeatPumpUnitEquip{
                 .setTz(tz)
                 .build();
         String r3ID = CCUHsApi.getInstance().addPoint(fanStage1);
+        CCUHsApi.getInstance().writeHisValById(r3ID, 0.0);
 
         /*Point fanStage2 = new Point.Builder()
                 .setDisplayName(equipDis+"-fanStage2")

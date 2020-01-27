@@ -358,6 +358,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setTz(tz)
                 .build();
         String r4ID = CCUHsApi.getInstance().addPoint(heatingStage1);
+        CCUHsApi.getInstance().writeHisValById(r4ID, 0.0);
 
         Point waterValve = new Point.Builder()
                 .setDisplayName(equipDis+"-waterValve")
@@ -371,6 +372,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setTz(tz)
                 .build();
         String r6ID = CCUHsApi.getInstance().addPoint(waterValve);
+        CCUHsApi.getInstance().writeHisValById(r6ID, 0.0);
 
         Point fanStage1 = new Point.Builder()
                 .setDisplayName(equipDis+"-fanLow")

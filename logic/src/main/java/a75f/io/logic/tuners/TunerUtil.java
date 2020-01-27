@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 
 /**
  * Created by samjithsadasivan on 1/16/19.
@@ -136,6 +138,54 @@ public class TunerUtil
             }
         }
         return 0;
+    }
+
+    public static double getZoneCoolingDeadband(String roomRef) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        ArrayList<Equip> zoneEquips  = HSUtil.getEquips(roomRef);
+        double maxDb = 0;
+        for (Equip q : zoneEquips){
+            HashMap cdb = hayStack.read("point and tuner and deadband and cooling and not adr and equipRef == \""+q.getId()+"\"");
+
+            ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+            if (values != null && values.size() > 0)
+            {
+                for (int l = 1; l <= values.size() ; l++ ) {
+                    HashMap valMap = ((HashMap) values.get(l-1));
+                    if (valMap.get("val") != null) {
+                        if (maxDb < Double.parseDouble(valMap.get("val").toString())){
+                            maxDb = Double.parseDouble(valMap.get("val").toString());
+                        }
+                    }
+                }
+            }
+        }
+
+        return maxDb;
+    }
+
+    public static double getZoneHeatingDeadband(String roomRef) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        ArrayList<Equip> zoneEquips  = HSUtil.getEquips(roomRef);
+        double maxDb = 0;
+        for (Equip q : zoneEquips){
+            HashMap cdb = hayStack.read("point and tuner and deadband and heating and not adr and equipRef == \""+q.getId()+"\"");
+
+            ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+            if (values != null && values.size() > 0)
+            {
+                for (int l = 1; l <= values.size() ; l++ ) {
+                    HashMap valMap = ((HashMap) values.get(l-1));
+                    if (valMap.get("val") != null) {
+                        if (maxDb < Double.parseDouble(valMap.get("val").toString())){
+                            maxDb = Double.parseDouble(valMap.get("val").toString());
+                        }
+                    }
+                }
+            }
+        }
+        
+        return maxDb;
     }
     
     public static void setCoolingDeadband(String equipRef, double dbVal, int level) {

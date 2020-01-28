@@ -1,31 +1,6 @@
  - Merge branch 'mahesh_renatus' into 'master'
- - fixed RENATUS-880,RENATUS-893,RENATUS-900,RENATUS-910
+ - RENATUS-910, RENATUS-900 fixed
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-821 - Tuners implementation
- - #RENATUS-821 - Tuners implementation
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-885, HPU Fan low all times, turns on RELAY5
- - #RENATUS-885, HPU Fan low all times, turns on RELAY5
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-821 - Tuners implementation
- - Merge branch 'mahesh_tuner' into 'master'
- - rewrite point write many
- - update standalone points
- - update system marker
- - update min max value for pid
- - update base marker
- - fix and update min, max values
- - fix tuner default write level
- - revert few default values for tuners
- - revert few default values for tuners
- - revert heat and cool default values
- - revert to old value
- - fix default, min, max value
- - update vav points
- - remove log
- - fixes
- - fixes
- - update equip tuners
- - updating system and building tuners
- - add new points
- - Tuner implementation initial stage
+ - #RENATUS-913, 2PFCU and 4PFCU equipStatus not updated
+ - #RENATUS-885, hpu compressor stage his values initialize
+ - #RENATUS-912, discharge air temp negative value is ignored

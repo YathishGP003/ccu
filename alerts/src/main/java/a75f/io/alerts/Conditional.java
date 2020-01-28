@@ -48,7 +48,9 @@ public class Conditional
     String grpOperation;
     
     ArrayList<PointVal> pointValList;
-    
+    ArrayList<PointVal>  lastValue = new ArrayList<>();
+    ArrayList<PointVal>  presentValue = new ArrayList<>();
+
     ArrayList<String> pointList;
     
     double resVal;
@@ -231,6 +233,8 @@ public class Conditional
             {
                 pointList = new ArrayList<>();
                 pointValList = new ArrayList<>();
+                lastValue.clear();
+                presentValue.clear();
                 ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("zone and equip");
                 for (Map q : equips) {
                     HashMap point = CCUHsApi.getInstance().read(key+" and equipRef == \""+q.get("id")+"\"");
@@ -258,6 +262,8 @@ public class Conditional
                         CcuLog.d("CCU_ALERTS", " Add to pointList");
                         pointList.add(point.get("id").toString());
                         pointValList.add(new PointVal(point.get("id").toString(), Double.parseDouble(val)));
+                        lastValue.add(new PointVal(point.get("id").toString(), reading1.getVal()));
+                        presentValue.add(new PointVal(point.get("id").toString(), reading2.getVal()));
                     }
                 }
     

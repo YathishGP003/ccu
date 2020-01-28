@@ -38,6 +38,9 @@ public class AlertFormatter
         entitySet.add("system");
         entitySet.add("cond");
         entitySet.add("ccu");
+        entitySet.add("old");
+        entitySet.add("offset");
+        entitySet.add("present");
     }
     
     public static String getFormattedMessage(AlertDefinition def) {
@@ -88,6 +91,24 @@ public class AlertFormatter
                 {
                     return token.contains("name") ? p.getDisplayName() : ((c.grpOperation.contains("min") || c.grpOperation.contains("max") || c.grpOperation.contains("average")) ? String.valueOf(c.resVal) : hs.readHisValById(p.getId()).toString());
                 }
+            case "present":
+                for (Conditional d : def.conditionals) {
+                    for (PointVal v : d.presentValue) {
+                        if (v.id.equals(point)) {
+                            return String.valueOf(v.val);
+                        }
+                    }
+                }
+            case "old":
+                for (Conditional d : def.conditionals) {
+                    for (PointVal v : d.lastValue) {
+                        if (v.id.equals(point)) {
+                            return String.valueOf(v.val);
+                        }
+                    }
+                }
+            case "offset":
+                return def.offset;
             case "equip":
                 HashMap q = hs.readMapById(p.getEquipRef());
                 return q.get("dis").toString();

@@ -965,10 +965,11 @@ public class Pulse
 	}
 
 	public static void checkForDeviceDead(){
-		if (mDeviceUpdate == null){
-			return;
-		}
+
 		for (Short address: mDeviceUpdate.keySet()){
+			if (mDeviceUpdate.get(address) == null){
+				return;
+			}
              long lastUpdateTime = mDeviceUpdate.get(address);
              long currentTime = Calendar.getInstance().getTimeInMillis();
              //trigger device dead alert if no signal update over 15min
@@ -981,8 +982,9 @@ public class Pulse
 				 if (device != null && device.size() > 0) {
 					 Device deviceInfo = new Device.Builder().setHashMap(device).build();
 					 AlertGenerateHandler.handleMessage(DEVICE_DEAD, "For"+" "+ccuName + "," +deviceInfo.getDisplayName() +" has stopped reporting data. Please contact 75F support.");
-					 mDeviceUpdate.remove(address);
-					 mDeviceUpdate.put(address,Calendar.getInstance().getTimeInMillis());
+					// mDeviceUpdate.put(address,Calendar.getInstance().getTimeInMillis());
+					mDeviceUpdate.remove(address);
+					break;
 				 }
 			 }
 		}

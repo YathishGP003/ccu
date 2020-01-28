@@ -18,6 +18,7 @@ import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.hvac.SSEStage;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.BuildingTuners;
@@ -649,13 +650,11 @@ public class SingleStageEquip {
 
 
     public double getStatus() {
-        return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and status and not message and his and group == \""+nodeAddr+"\"");
     }
     public void setStatus(String sseStatus, double status, boolean emergency) {
-        if (getStatus() != status )
-        {
-            CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + nodeAddr + "\"", status);
-        }
+        CCUHsApi.getInstance().writeHisValByQuery("point and status and not message and his and group == \"" + nodeAddr + "\"", status);
+
 
         String message;
         if (emergency) {

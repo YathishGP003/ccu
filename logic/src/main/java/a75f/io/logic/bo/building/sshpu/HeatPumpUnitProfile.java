@@ -355,6 +355,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 if (fanStage2Type == SmartStatFanRelayType.FAN_STAGE2.ordinal()) {
                     setCmdSignal("fan and stage2", 0, node);
                 }
+                break;
             case FAN_HIGH_CURRENT_OCCUPIED:
             case FAN_HIGH_OCCUPIED:
                 if (occupied && (fanStage2Type == SmartStatFanRelayType.FAN_STAGE2.ordinal())) {
@@ -807,6 +808,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                                 break;
                             case FAN_LOW_CURRENT_OCCUPIED:
                             case FAN_LOW_OCCUPIED:
+                            case FAN_LOW_ALL_TIMES:
                                 /*if(relayStages.containsKey("HeatingStage2") && occupied) {
                                     relayStages.put("FanStage2", 1);
                                     setCmdSignal("fan and stage2", 1.0, addr);

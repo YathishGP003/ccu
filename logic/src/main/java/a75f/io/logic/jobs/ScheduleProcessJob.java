@@ -679,7 +679,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         dabPoints.put("Profile","DAB");
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
         double damperPosPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and damper and base and equipRef == \""+equipID+"\"");
-        double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and equipRef == \""+equipID+"\"");
+        double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and primary and equipRef == \""+equipID+"\"");
         if (equipStatusPoint.length() > 0)
         {
             dabPoints.put("Status",equipStatusPoint);

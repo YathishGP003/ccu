@@ -326,7 +326,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                     if (currentTempSensor > 0 && zoneEquips.size() >1) {
                                             currentTempSensor = currentTempSensor / (zoneEquips.size() - noTempSensor);
                                             DecimalFormat decimalFormat = new DecimalFormat("#.#");
-                                            currentTempSensor = Double.parseDouble(decimalFormat.format(currentTempSensor));
+                                            currentTempSensor = Double.parseDouble(decimalFormat.format(Math.round(currentTempSensor)));
                                     }
                                     if(currentTempSensor > 0) {
                                         return currentTempSensor;
@@ -621,7 +621,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         if(zoneMap.size() > 1 && currentAverageTemp != 0){
             currentAverageTemp = currentAverageTemp/(zoneMap.size()-noTempSensor);
             DecimalFormat decimalFormat = new DecimalFormat("#.#");
-            currentAverageTemp = Double.parseDouble(decimalFormat.format(currentAverageTemp));
+            currentAverageTemp = Double.parseDouble(decimalFormat.format(Math.round(currentAverageTemp)));
         }
         Log.i("EachzoneData"," currentAvg:"+currentAverageTemp);
         final String[] equipId = {p.getId()};

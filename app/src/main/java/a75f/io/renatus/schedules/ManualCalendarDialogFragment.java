@@ -37,8 +37,7 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
     private ImageView            clearText;
     private String               mVacationName;
     private String               mId;
-
-    private Schedule schedule;
+    private String               roomRef;
 
 
     public ManualCalendarDialogFragment() {}
@@ -54,14 +53,14 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
     private ManualCalendarDialogListener mListener;
 
     @SuppressLint("ValidFragment")
-    public ManualCalendarDialogFragment(Schedule schedule, String id, String name, DateTime startDate, DateTime endDate, ManualCalendarDialogListener mListener)
+    public ManualCalendarDialogFragment(String id, String name, DateTime startDate, DateTime endDate,String roomRef, ManualCalendarDialogListener mListener)
     {
         this.mListener = mListener;
         this.mStartDate = startDate;
         this.mEndDate = endDate;
         this.mId = id;
         this.mVacationName = name;
-        this.schedule = schedule;
+        this.roomRef = roomRef;
     }
 
     @Override
@@ -82,6 +81,7 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
         if (mVacationName != null)
         {
             mVacationNameEditText.setText(this.mVacationName);
+            mVacationNameEditText.setSelection(this.mVacationName.length());
         }
 
         if (mStartDate != null && mEndDate != null)
@@ -227,8 +227,8 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
         }
     
         ArrayList<Schedule> vacations;
-        if (schedule.isZoneSchedule()) {
-            vacations = CCUHsApi.getInstance().getZoneSchedule(schedule.getRoomRef(), true);
+        if (this.roomRef != null) {
+            vacations = CCUHsApi.getInstance().getZoneSchedule(roomRef, true);
             for (Schedule v : vacations) {
                 if (!v.getId().equals(mId))
                 {

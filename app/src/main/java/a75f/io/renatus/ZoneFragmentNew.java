@@ -278,13 +278,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             vacationStatusTV.setText(vacationStatus);
                             scheduleStatus.setText(status);
 
-                            if (vacationStatus.equals("Active Vacation"))
+                           /* if (vacationStatus.equals("Active Vacation"))
                             {
                                 vacationImageButton.setVisibility(View.VISIBLE);
                             } else
                             {
                                 vacationImageButton.setVisibility(View.GONE);
-                            }
+                            }*/
                         }
                     });
                 }
@@ -667,16 +667,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             scheduleImageButton.setVisibility(View.GONE);
         }
 
-        if (vacationStatus.equals("Active Vacation"))
+       /* if (vacationStatus.equals("Active Vacation"))
         {
             vacationImageButton.setVisibility(View.VISIBLE);
         } else
         {
             vacationImageButton.setVisibility(View.GONE);
-        }
+        }*/
         scheduleImageButton.setOnClickListener(v ->
         {
-            SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance((String) v.getTag());
+            SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId);
             FragmentManager childFragmentManager = getFragmentManager();
             childFragmentManager.beginTransaction();
             schedulerFragment.show(childFragmentManager,"dialog");
@@ -1025,13 +1025,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
                     String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);
                     vacationStatusTV.setText(vacationStatus);
-                    if (vacationStatus.equals("Active Vacation"))
+                  /*  if (vacationStatus.equals("Active Vacation"))
                     {
                         vacationImageButton.setVisibility(View.VISIBLE);
                     } else
                     {
                         vacationImageButton.setVisibility(View.GONE);
-                    }
+                    }*/
 
                     {
                         for(int k=0;k<zoneMap.size();k++)
@@ -1155,7 +1155,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         });
         scheduleImageButton.setOnClickListener(v ->
         {
-            SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance((String) v.getTag());
+            SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId);
             FragmentManager childFragmentManager = getFragmentManager();
             childFragmentManager.beginTransaction();
             schedulerFragment.show(childFragmentManager, "dialog");
@@ -1175,13 +1175,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             scheduleImageButton.setVisibility(View.GONE);
         }
 
-        if (vacationStatus.equals("Active Vacation"))
+       /* if (vacationStatus.equals("Active Vacation"))
         {
             vacationImageButton.setVisibility(View.VISIBLE);
         } else
         {
             vacationImageButton.setVisibility(View.GONE);
-        }
+        }*/
 
 
         scheduleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()

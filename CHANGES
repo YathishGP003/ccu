@@ -1,6 +1,8 @@
  - Merge branch 'mahesh_renatus' into 'master'
- - RENATUS-910, RENATUS-900 fixed
+ - fixed RENATUS-914, device dead alert
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-913, 2PFCU and 4PFCU equipStatus not updated
- - #RENATUS-885, hpu compressor stage his values initialize
- - #RENATUS-912, discharge air temp negative value is ignored
+ - #RENATUS-917, SSE | Relay1 naming correction
+ - #RENATUS-916, SSE | Fan Stage Relay needs to turn OFF
+ - #RENATUS-915 equip status sse not changes
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-885, hpu fan modes doesnt turn off

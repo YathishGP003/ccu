@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -19,6 +20,7 @@ import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -149,6 +151,14 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             setShowsDialog(true);
         } else {
             setShowsDialog(false);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (getArguments()!= null) {
+            outState.putString(PARAM_ROOM_REF, getArguments().getString(PARAM_ROOM_REF));
         }
     }
 
@@ -382,17 +392,19 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             ft.remove(vacationFragment);
         }
 
-        ManualCalendarDialogFragment calendarDialogFragment = new ManualCalendarDialogFragment(schedule, vacationSchedule != null ? vacationSchedule.getId() : null,
+        ManualCalendarDialogFragment calendarDialogFragment = new ManualCalendarDialogFragment(vacationSchedule != null ? vacationSchedule.getId() : null,
                 vacationSchedule != null ? vacationSchedule.getDis() : null,
-                vacationSchedule != null ? vacationSchedule.getStartDate() : null, vacationSchedule != null ? vacationSchedule.getEndDate() : null,
+                vacationSchedule != null ? vacationSchedule.getStartDate() : null, vacationSchedule != null ? vacationSchedule.getEndDate() : null, getArguments() != null ? getArguments().getString(PARAM_ROOM_REF) : null,
                 new ManualCalendarDialogFragment.ManualCalendarDialogListener() {
             @Override
             public boolean onClickSave(String vacationId, String vacationName, DateTime startDate, DateTime endDate)
             {
-
-                if (schedule != null && schedule.isZoneSchedule()) {
-                    DefaultSchedules.upsertZoneVacation(vacationId, vacationName, startDate, endDate, schedule.getRoomRef());
-                } else
+                if (vacationSchedule != null && !TextUtils.isEmpty(vacationSchedule.getRoomRef()) && vacationSchedule.getRoomRef()!= null) {
+                    DefaultSchedules.upsertZoneVacation(vacationId, vacationName, startDate, endDate, vacationSchedule.getRoomRef());
+                } else if ((vacationSchedule == null && getArguments() != null && getArguments().containsKey(PARAM_ROOM_REF))){
+                    DefaultSchedules.upsertZoneVacation(vacationId, vacationName, startDate, endDate, getArguments().getString(PARAM_ROOM_REF));
+                }
+                else
                 {
                     DefaultSchedules.upsertVacation(vacationId, vacationName, startDate, endDate);
                 }
@@ -431,6 +443,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         ArrayList<Schedule> vacations;
         if (schedule.isZoneSchedule() && schedule.getRoomRef()!= null) {
             vacations = CCUHsApi.getInstance().getZoneSchedule(schedule.getRoomRef(), true);
+            textViewVacations.setText("Zone Vacations");
         } else if (getArguments() != null && getArguments().containsKey(PARAM_ROOM_REF)){
             String roomRef = getArguments().getString(PARAM_ROOM_REF);
             vacations = CCUHsApi.getInstance().getZoneSchedule(roomRef, true);
@@ -438,6 +451,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         } else
         {
             vacations = CCUHsApi.getInstance().getSystemSchedule(true);
+            textViewVacations.setText("Vacations");
         }
         
         if(vacations != null) {

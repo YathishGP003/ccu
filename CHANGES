@@ -1,8 +1,5 @@
+ - Merge branch 'kumar_renatus' into 'master'
+ - Merge branch 'kumar_renatus' of https://gitlab.com/75f/android/renatus into kumar_renatus
+ - #RENATUS-919, Discharge airflow temp fetch for multi module
  - Merge branch 'mahesh_renatus' into 'master'
- - fixed RENATUS-914, device dead alert
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-917, SSE | Relay1 naming correction
- - #RENATUS-916, SSE | Fan Stage Relay needs to turn OFF
- - #RENATUS-915 equip status sse not changes
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-885, hpu fan modes doesnt turn off
+ - RENATUS-907 fixed

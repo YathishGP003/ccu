@@ -332,7 +332,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
 
         Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().readMapById(equipId)).build();
-        boolean isZoneHasStandaloneEquip = equip.getMarkers().contains("smartstat") ? true :  (equip.getMarkers().contains("sse") ? true : false);
+        boolean isZoneHasStandaloneEquip = (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse") );
         Occupied cachedOccupied = getOccupiedModeCache(zoneId);
         if(cachedOccupied == null)
         {
@@ -345,7 +345,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
         if (!isZoneHasStandaloneEquip && (systemOccupancy == PRECONDITIONING) ) {
             return "In Preconditioning ";
-        }
+        }else if(isZoneHasStandaloneEquip && cachedOccupied.isPreconditioning())
+            return  "In Preconditioning";
         //{Current Mode}, Changes to Energy Saving Range of %.1f-%.1fF at %s
         if(cachedOccupied.isOccupied())
         {
@@ -1161,8 +1162,14 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             c = VACATION;
         }else if((cachedOccupied != null) && cachedOccupied.isOccupancySensed()){
             c = OCCUPANCYSENSING;
-        }else if(ScheduleProcessJob.getSystemOccupancy() == Occupancy.PRECONDITIONING || (cachedOccupied != null && cachedOccupied.isPreconditioning())) {
-            c = PRECONDITIONING;
+        }else{
+            //if(ScheduleProcessJob.getSystemOccupancy() == Occupancy.PRECONDITIONING || (cachedOccupied != null && cachedOccupied.isPreconditioning())) {
+                boolean isZoneHasStandaloneEquip = (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse") );
+                if(isZoneHasStandaloneEquip && (cachedOccupied != null) &&  (cachedOccupied.isPreconditioning()))
+                    c = PRECONDITIONING;
+                else if (!isZoneHasStandaloneEquip && getSystemOccupancy() == PRECONDITIONING)
+                    c = PRECONDITIONING;
+            //}
         }
         if((zoneDataInterface != null) && (cachedOccupied != null)){
             Log.d("Scheduler","updateZoneOccupancy==>>"+cachedOccupied.isForcedOccupied()+","+cachedOccupied.isOccupied()+","+cachedOccupied.isPreconditioning());

@@ -181,7 +181,7 @@ public class VavTRTuners
                                   .setEquipRef(equipRef)
                                   .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
                                   .addMarker("sat").addMarker("spres").addMarker("writable").addMarker("his").addMarker("equipHis")
-                                  .setMinVal("-0.1").setMaxVal("-2.0").setIncrementVal("-0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                  .setMaxVal("-0.1").setMinVal("-2.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                   .setUnit("\u00B0F")
                                   .setTz(tz)
                                   .build();
@@ -203,7 +203,7 @@ public class VavTRTuners
                                   .setEquipRef(equipRef)
                                   .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
                                   .addMarker("sat").addMarker("spresmax").addMarker("writable").addMarker("his").addMarker("equipHis")
-                                  .setMinVal("-0.1").setMaxVal("-3.0").setIncrementVal("-0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                  .setMaxVal("-0.1").setMinVal("-3.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                   .setUnit("\u00B0F")
                                   .setTz(tz)
                                   .build();
@@ -383,7 +383,7 @@ public class VavTRTuners
                                   .setEquipRef(equipRef)
                                   .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
                                   .addMarker("staticPressure").addMarker("sptrim").addMarker("writable").addMarker("his").addMarker("equipHis")
-                                  .setMinVal("-0.01").setMaxVal("-0.5").setIncrementVal("-0.01").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                  .setMaxVal("-0.01").setMinVal("-0.5").setIncrementVal("0.01").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                   .setUnit("inch wc")
                                   .setTz(tz)
                                   .build();

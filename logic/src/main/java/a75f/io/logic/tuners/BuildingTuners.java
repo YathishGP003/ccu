@@ -1212,7 +1212,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
                 .addMarker("sat").addMarker("spres").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("-0.1").setMaxVal("-2.0").setIncrementVal("-0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setMaxVal("-0.1").setMinVal("-2.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -1226,7 +1226,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
                 .addMarker("sat").addMarker("spresmax").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setMinVal("-0.1").setMaxVal("-3.0").setIncrementVal("-0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setMaxVal("-0.1").setMinVal("-3.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();

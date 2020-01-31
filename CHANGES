@@ -1,5 +1,4 @@
  - Merge branch 'kumar_renatus' into 'master'
- - Merge branch 'kumar_renatus' of https://gitlab.com/75f/android/renatus into kumar_renatus
- - #RENATUS-919, Discharge airflow temp fetch for multi module
- - Merge branch 'mahesh_renatus' into 'master'
- - RENATUS-907 fixed
+ - #RENATUS-685, Preconditiong in multi modules
+ - #RENATUS-685, Preconditiong in multi modules
+ - #RENATUS-821, Tuners min max update

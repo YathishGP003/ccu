@@ -9,38 +9,38 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
-import a75f.io.renatus.util.Marker2;
+import a75f.io.renatus.util.Marker;
 
-public class ScheduleUtil
-{
+public class ScheduleUtil {
     public static void trimZoneSchedules(HashMap<String, ArrayList<Interval>> spillsMap) {
-        
+
         for (String zoneId : spillsMap.keySet()) {
-            
+
             Zone z = new Zone.Builder().setHashMap(CCUHsApi.getInstance().readMapById(zoneId)).build();
             Schedule zoneSchedule = CCUHsApi.getInstance().getScheduleById(z.getScheduleRef());
             ArrayList<Interval> spills = spillsMap.get(zoneId);
-            
+
             Iterator daysIterator = zoneSchedule.getDays().iterator();
-            while(daysIterator.hasNext()) {
+            while (daysIterator.hasNext()) {
                 Schedule.Days d = (Schedule.Days) daysIterator.next();
                 Interval i = zoneSchedule.getScheduledInterval(d);
-        
+
                 for (Interval spill : spills) {
                     if (!i.contains(spill)) {
                         continue;
                     }
                     if (spill.getStartMillis() <= i.getStartMillis() &&
-                        spill.getEndMillis() >= i.getEndMillis()) {
+                            spill.getEndMillis() >= i.getEndMillis()) {
                         daysIterator.remove();
                         continue;
                     }
-            
+
                     if (spill.getStartMillis() <= i.getStartMillis()) {
                         d.setSthh(spill.getEnd().getHourOfDay());
                         d.setStmm(spill.getEnd().getMinuteOfHour());
@@ -50,18 +50,19 @@ public class ScheduleUtil
                     }
                 }
             }
-            
-            Log.d("CCU_UI "," Trimmed Zone Schedule"+zoneSchedule.toString());
+
+            Log.d("CCU_UI ", " Trimmed Zone Schedule" + zoneSchedule.toString());
             CCUHsApi.getInstance().updateZoneSchedule(zoneSchedule, zoneSchedule.getRoomRef());
         }
     }
-    
+
     public static void trimZoneSchedule(Schedule s, HashMap<String, ArrayList<Interval>> spillsMap) {
-    
+
         ArrayList<Interval> spills = spillsMap.get(s.getRoomRef());
-        ArrayList<Interval> validSpills = new ArrayList<>();
+        HashMap<Schedule.Days, ArrayList<Interval>> validSpills = new HashMap<>();
         CopyOnWriteArrayList<Schedule.Days> days = new CopyOnWriteArrayList<>(s.getDays());
-        for(Schedule.Days d: days) {
+        CopyOnWriteArrayList<Schedule.Days> conflictDays = new CopyOnWriteArrayList<>();
+        for (Schedule.Days d : days) {
             Interval i = s.getScheduledInterval(d);
 
             for (Interval spill : spills) {
@@ -69,11 +70,12 @@ public class ScheduleUtil
                     continue;
                 }
                 if (spill.getStartMillis() <= i.getStartMillis() &&
-                    spill.getEndMillis() >= i.getEndMillis()) {
+                        spill.getEndMillis() >= i.getEndMillis()) {
+                    conflictDays.add(d);
                     continue;
                 }
-                validSpills.clear();
-                validSpills.addAll(disconnectedIntervals(spills, i));
+                validSpills.put(d, disconnectedIntervals(spills, i));
+                conflictDays.add(d);
                 /*if (spill.getStartMillis() <= i.getStartMillis()) {
                     d.setSthh(spill.getEnd().getHourOfDay());
                     d.setStmm(spill.getEnd().getMinuteOfHour());
@@ -82,7 +84,10 @@ public class ScheduleUtil
                     d.setEtmm(spill.getStart().getMinuteOfHour());
                 }*/
             }
-            for (Interval in:validSpills){
+        }
+        for (Map.Entry<Schedule.Days, ArrayList<Interval>> entry : validSpills.entrySet()) {
+            for (Interval in : entry.getValue()) {
+                Schedule.Days d = entry.getKey();
                 Schedule.Days dayBO = new Schedule.Days();
                 dayBO.setEthh(in.getEnd().getHourOfDay());
                 dayBO.setSthh(in.getStart().getHourOfDay());
@@ -95,22 +100,25 @@ public class ScheduleUtil
                 dayBO.setDay(d.getDay());
                 s.getDays().remove(d);
                 s.getDays().add(dayBO);
-
-                Log.d("CCU_UI "," Trimmed Zone Schedule"+s.toString());
-                CCUHsApi.getInstance().updateZoneSchedule(s, s.getRoomRef());
             }
+
         }
 
+        for (Schedule.Days d : conflictDays) {
+            s.getDays().remove(d);
+        }
+
+        CCUHsApi.getInstance().updateZoneSchedule(s, s.getRoomRef());
     }
 
-    public static List<Interval> disconnectedIntervals(List<Interval> intervals, Interval r) {
-        List<Interval> result = new ArrayList<>();
+    public static ArrayList<Interval> disconnectedIntervals(List<Interval> intervals, Interval r) {
+        ArrayList<Interval> result = new ArrayList<>();
 
-        ArrayList<Marker2> markers = new ArrayList<>();
+        ArrayList<Marker> markers = new ArrayList<>();
 
         for (Interval i : intervals) {
-            markers.add(new Marker2(i.getStartMillis(), true));
-            markers.add(new Marker2(i.getEndMillis(), false));
+            markers.add(new Marker(i.getStartMillis(), true));
+            markers.add(new Marker(i.getEndMillis(), false));
         }
 
         Collections.sort(markers, (a, b) -> Long.compare(a.val, b.val));
@@ -124,10 +132,10 @@ public class ScheduleUtil
         }
 
         for (int i = 0; i < markers.size() - 1; i++) {
-            Marker2 m = markers.get(i);
+            Marker m = markers.get(i);
 
             overlap += m.start ? 1 : -1;
-            Marker2 next = markers.get(i + 1);
+            Marker next = markers.get(i + 1);
 
             if (m.val != next.val && overlap == 0 && next.val > r.getStartMillis()) {
                 long start = m.val > r.getStartMillis() ? m.val : r.getStartMillis();
@@ -145,7 +153,7 @@ public class ScheduleUtil
         }
 
         if (!endReached) {
-            Marker2 m = markers.get(markers.size() - 1);
+            Marker m = markers.get(markers.size() - 1);
             if (m.val != r.getEndMillis() && m.val < r.getEndMillis()) {
                 result.add(new Interval(m.val, r.getEndMillis()));
             }
@@ -153,7 +161,7 @@ public class ScheduleUtil
 
         return result;
     }
-    
+
     public static String getDayString(int day) {
         switch (day) {
             case 1:

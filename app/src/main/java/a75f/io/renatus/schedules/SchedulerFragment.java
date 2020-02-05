@@ -31,7 +31,6 @@ import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Space;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,7 +41,6 @@ import org.joda.time.Interval;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -60,7 +58,7 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.renatus.R;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
 import a75f.io.renatus.util.FontManager;
-import a75f.io.renatus.util.Marker2;
+import a75f.io.renatus.util.Marker;
 
 public class SchedulerFragment extends DialogFragment implements ManualScheduleDialogListener {
 
@@ -564,7 +562,6 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                                                                               getScheduleSpills(daysArrayList);
         if (spillsMap != null && spillsMap.size() > 0) {
             if (schedule.isZoneSchedule()) {
-    
                 StringBuilder spillZones = new StringBuilder();
                 for (String zone : spillsMap.keySet())
                 {
@@ -691,28 +688,33 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             
             for(Interval z : zoneIntervals) {
                 boolean add = true;
-                intervalSpills.addAll(disconnectedIntervals(systemIntervals,z));
-               /* for (Interval s: systemIntervals) {
+               for (Interval s: systemIntervals) {
                     if (s.contains(z)) {
                         add = false;
                         break;
                     } else if (s.overlaps(z)) {
-                        *//*if(z.getStartMillis() < s.getStartMillis() && z.getEndMillis() > s.getEndMillis()){
+                        /*if(z.getStartMillis() < s.getStartMillis() && z.getEndMillis() > s.getEndMillis()){
                             intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
                             intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));
                         } else if (z.getStartMillis() < s.getStartMillis()) {
                             intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
                         } else if (z.getEndMillis() > s.getEndMillis()) {
                             intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));
-                        }*//*
+                        }*/
                         add = false;
+                        for (Interval i: disconnectedIntervals(systemIntervals,z)){
+                            if (!intervalSpills.contains(i)){
+                                intervalSpills.add(i);
+                            }
+                        }
+
                     }
                 }
                 if (add)
                 {
                     intervalSpills.add(z);
                     CcuLog.d(L.TAG_CCU_UI, " Zone Interval not contained "+z);
-                }*/
+                }
             }
             if (intervalSpills.size() > 0)
             {
@@ -772,16 +774,20 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                         }
 
                         if (!contains) {
-                            Log.d("Mahesh","disconnected intervals" + disconnectedIntervals(systemIntervals,z));
                             for (Interval s : systemIntervals) {
                                 if (s.overlaps(z)) {
-                                    if(z.getStartMillis() < s.getStartMillis() && z.getEndMillis() > s.getEndMillis()){
+                                    /*if(z.getStartMillis() < s.getStartMillis() && z.getEndMillis() > s.getEndMillis()){
                                         intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
                                         intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));
                                     } else if (z.getStartMillis() < s.getStartMillis()) {
                                         intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
                                     } else if (z.getEndMillis() > s.getEndMillis()) {
                                         intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));
+                                    }*/
+                                    for (Interval i: disconnectedIntervals(systemIntervals,z)){
+                                        if (!intervalSpills.contains(i)){
+                                            intervalSpills.add(i);
+                                        }
                                     }
                                     contains = true;
                                     break;
@@ -807,29 +813,27 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
     public List<Interval> disconnectedIntervals(List<Interval> intervals, Interval r) {
         List<Interval> result = new ArrayList<>();
-
-        ArrayList<Marker2> markers = new ArrayList<>();
+        ArrayList<Marker> markers = new ArrayList<>();
 
         for (Interval i : intervals) {
-            markers.add(new Marker2(i.getStartMillis(), true));
-            markers.add(new Marker2(i.getEndMillis(), false));
+            markers.add(new Marker(i.getStartMillis(), true));
+            markers.add(new Marker(i.getEndMillis(), false));
         }
 
         Collections.sort(markers, (a, b) -> Long.compare(a.val, b.val));
 
-
         int overlap = 0;
         boolean endReached = false;
 
-        if (markers.get(0).val > r.getStartMillis()) {
+        if (markers.size() > 0 && markers.get(0).val > r.getStartMillis()) {
             result.add(new Interval(r.getStartMillis(), markers.get(0).val));
         }
 
         for (int i = 0; i < markers.size() - 1; i++) {
-            Marker2 m = markers.get(i);
+            Marker m = markers.get(i);
 
             overlap += m.start ? 1 : -1;
-            Marker2 next = markers.get(i + 1);
+            Marker next = markers.get(i + 1);
 
             if (m.val != next.val && overlap == 0 && next.val > r.getStartMillis()) {
                 long start = m.val > r.getStartMillis() ? m.val : r.getStartMillis();
@@ -838,7 +842,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                     end = r.getEndMillis();
                     endReached = true;
                 }
-                if (start != end) {
+                if (end > start) {
                     result.add(new Interval(start, end));
                 }
                 if (endReached)
@@ -847,8 +851,8 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         }
 
         if (!endReached) {
-            Marker2 m = markers.get(markers.size() - 1);
-            if (m.val != r.getEndMillis() && m.val < r.getEndMillis()) {
+            Marker m = markers.get(markers.size() - 1);
+            if (r.getEndMillis() > m.val) {
                 result.add(new Interval(m.val, r.getEndMillis()));
             }
         }

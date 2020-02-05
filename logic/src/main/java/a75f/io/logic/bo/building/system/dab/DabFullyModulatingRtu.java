@@ -102,11 +102,11 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             {
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemCoolingLoopOp/100)));
             }
-            
+
+            setCmdSignal("cooling",signal);
         } else {
             signal = 0;
         }
-        setCmdSignal("cooling",signal);
         ControlMote.setAnalogOut("analog1", signal);
         
         if (dabSystem.getSystemState() == HEATING)
@@ -132,10 +132,10 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             {
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemHeatingLoopOp / 100)));
             }
+            setCmdSignal("heating", signal);
         } else {
             signal = 0;
         }
-        setCmdSignal("heating", signal);
         ControlMote.setAnalogOut("analog3", signal);
         
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
@@ -176,21 +176,22 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             {
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemFanLoopOp/100)));
             }
-            
+
+            setCmdSignal("fan", signal);
         } else {
             signal = 0;
         }
-        setCmdSignal("fan", signal);
         ControlMote.setAnalogOut("analog2", signal);
     
         SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("rtu and mode")];
         if (getConfigVal("relay3 and output and enabled") > 0 && systemMode != SystemMode.OFF)
         {
             signal = ((ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION) || systemFanLoopOp > 0) ? 1 : 0;
+
+            setCmdSignal("occupancy",signal);
         }else {
             signal = 0;
         }
-        setCmdSignal("occupancy",signal);
         ControlMote.setRelayState("relay3", signal);
         
         if (getConfigVal("relay7 and output and enabled") > 0 && systemMode != SystemMode.OFF
@@ -550,7 +551,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         if(curHumidifierType != val) {
             //CCUHsApi.getInstance().writeDefaultVal("point and system and config and "+tags, val);
             if (val > 0) {//dehumidifier
-                HashMap cmd = CCUHsApi.getInstance().read("point and system and cmd and humidifier and relay7");
+                HashMap cmd = CCUHsApi.getInstance().read("point and system and cmd and humidifier");
                 if(cmd != null &&(cmd.size() > 0)) {
                     HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
                     String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
@@ -564,7 +565,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
 
 
             } else {//humidifier
-                HashMap cmd = CCUHsApi.getInstance().read("point and system and cmd and dehumidifier and relay7");
+                HashMap cmd = CCUHsApi.getInstance().read("point and system and cmd and dehumidifier");
                 if(cmd != null && (cmd.size() > 0)) {
                     HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
                     String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
@@ -588,8 +589,109 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         return hayStack.readPointPriorityVal(configPoint.get("id").toString());
         
     }
-    public void setConfigEnabled(String config, double val) {
-        //sysEquip.setConfigEnabled(config, val);
-        CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and enabled and "+config, val);
+
+    public void setConfigEnabled(String tags, double val) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap configPoint = hayStack.read("point and system and config and output and enabled and "+tags);
+        Point configEnabledPt = new Point.Builder().setHashMap(configPoint).build();
+        double curConfig = hayStack.readPointPriorityVal(configEnabledPt.getId());
+        CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and enabled and "+tags, val);
+        if(curConfig != val){
+            HashMap siteMap = hayStack.read(Tags.SITE);
+            String equipDis = siteMap.get("dis").toString()+"-SystemEquip";
+            String siteRef = siteMap.get("id").toString();
+            String tz = siteMap.get("tz").toString();
+            switch (tags){
+                case "analog1":
+                    HashMap cmdCool = CCUHsApi.getInstance().read("point and system and cmd and cooling and modulating");
+                    if(cmdCool != null && cmdCool.size() > 0) {
+                        if(val == 0) {
+                            CCUHsApi.getInstance().deleteEntityTree(cmdCool.get("id").toString());
+                        }
+                    }else {
+                        Point coolingSignal = new Point.Builder()
+                                .setDisplayName(equipDis + "-" + "coolingSignal")
+                                .setSiteRef(siteRef)
+                                .setEquipRef(configEnabledPt.getEquipRef())
+                                .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("his").addMarker("equipHis").setUnit("%")
+                                .setTz(tz)
+                                .build();
+                        CCUHsApi.getInstance().addPoint(coolingSignal);
+                    }
+                    break;
+                case "analog2":
+                    HashMap cmdFan = CCUHsApi.getInstance().read("point and system and cmd and fan and modulating");
+                    if(cmdFan != null && cmdFan.size() > 0) {
+                        if(val == 0) {
+                            CCUHsApi.getInstance().deleteEntityTree(cmdFan.get("id").toString());
+                        }
+                    }else {
+                        Point fanSignal = new Point.Builder()
+                                .setDisplayName(equipDis + "-" + "fanSignal")
+                                .setSiteRef(siteRef)
+                                .setEquipRef(configEnabledPt.getEquipRef())
+                                .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").addMarker("equipHis").setUnit("%")
+                                .setTz(tz)
+                                .build();
+                        CCUHsApi.getInstance().addPoint(fanSignal);
+                    }
+                    break;
+                case "analog3":
+                    HashMap cmdHeat = CCUHsApi.getInstance().read("point and system and cmd and heating and modulating");
+                    if(cmdHeat != null && cmdHeat.size() > 0) {
+                        if(val == 0) {
+                            CCUHsApi.getInstance().deleteEntityTree(cmdHeat.get("id").toString());
+                        }
+                    }else {
+                        Point heatSignal = new Point.Builder()
+                                .setDisplayName(equipDis + "-" + "heatingSignal")
+                                .setSiteRef(siteRef)
+                                .setEquipRef(configEnabledPt.getEquipRef())
+                                .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("modulating").addMarker("his").addMarker("equipHis").setUnit("%")
+                                .setTz(tz)
+                                .build();
+                        CCUHsApi.getInstance().addPoint(heatSignal);
+                    }
+                    break;
+                case "analog4":
+                    HashMap cmd = CCUHsApi.getInstance().read("point and system and cmd and co2 and modulating");
+                    if(cmd != null && cmd.size() > 0) {
+                        if(val == 0) {
+                            CCUHsApi.getInstance().deleteEntityTree(cmd.get("id").toString());
+                        }
+                    }else {
+                        Point co2Signal = new Point.Builder()
+                                .setDisplayName(equipDis + "-" + "co2Signal")
+                                .setSiteRef(siteRef)
+                                .setEquipRef(configEnabledPt.getEquipRef())
+                                .addMarker("system").addMarker("cmd").addMarker("co2").addMarker("modulating").addMarker("his").addMarker("equipHis").setUnit("%")
+                                .setTz(tz)
+                                .build();
+                        CCUHsApi.getInstance().addPoint(co2Signal);
+                    }
+                    break;
+                case "relay3":
+                    HashMap cmdOccu = CCUHsApi.getInstance().read("point and system and cmd and occupancy");
+                    if(cmdOccu != null && cmdOccu.size() > 0) {
+                        if(val == 0) {
+                            CCUHsApi.getInstance().deleteEntityTree(cmdOccu.get("id").toString());
+                        }
+                    }else {
+                        Point occupancySignal = new Point.Builder()
+                                .setDisplayName(equipDis+"-"+"occupancySignal")
+                                .setSiteRef(siteRef)
+                                .setEquipRef(configEnabledPt.getEquipRef())
+                                .addMarker("system").addMarker("cmd").addMarker("occupancy").addMarker("his").addMarker("equipHis")
+                                .setTz(tz)
+                                .build();
+                        CCUHsApi.getInstance().addPoint(occupancySignal);
+                    }
+                    break;
+                case "relay7":
+                    break;
+            }
+
+            CCUHsApi.getInstance().syncEntityTree();
+        }
     }
 }

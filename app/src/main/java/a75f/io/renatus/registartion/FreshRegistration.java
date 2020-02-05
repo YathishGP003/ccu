@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
@@ -29,8 +30,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+
 import a75f.io.alerts.AlertManager;
 import a75f.io.alerts.AlertProcessor;
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.renatus.DABFullyAHUProfile;
 import a75f.io.renatus.DABHybridAhuProfile;
 import a75f.io.renatus.DABStagedProfile;
@@ -314,6 +322,8 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 }
                 if (currentFragment instanceof CongratsFragment) {
                     prefs.setBoolean("REGISTRATION", true);
+                    updateCCURegistrationInfo();
+
                     AlertManager.getInstance().fetchAllPredefinedAlerts();
                     Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
                     i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -1235,5 +1245,63 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         }
     }
 
+    private void updateCCURegistrationInfo() {
+        AsyncTask<Void, Void, String> updateCCUReg = new AsyncTask<Void, Void, String>() {
+
+            @Override
+            protected String doInBackground(Void... voids) {
+
+                String response = "";
+                try {
+                    HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
+                    HashMap site = CCUHsApi.getInstance().read("site");
+                    JSONObject ccuRegInfo = new JSONObject();
+                    ccuRegInfo.put("deviceId", ccu.get("id").toString());
+                    ccuRegInfo.put("deviceName",ccu.get("dis").toString());
+                    ccuRegInfo.put("siteId","@"+site.get("id").toString());
+                    ccuRegInfo.put("siteName",site.get("dis").toString());
+                    ccuRegInfo.put("facilityManagerEmail",ccu.get("fmEmail").toString());
+                    ccuRegInfo.put("installerEmail",ccu.get("fmEmail").toString());
+                    JSONObject locInfo = new JSONObject();
+                    locInfo.put("geoCity",site.get("geoCity").toString());
+                    locInfo.put("geoCountry",site.get("geoCountry").toString());
+                    locInfo.put("geoState",site.get("geoState").toString());
+                    locInfo.put("geoAddr",site.get("geoAddr").toString());
+                    locInfo.put("geoPostalCode",site.get("geoPostalCode").toString());
+                    ccuRegInfo.put("locationDetails",locInfo);
+
+
+                    response = HttpUtil.executeJSONPost("https://caretaker-75f-service-dev.azurewebsites.net/api/v1/device/register",ccuRegInfo.toString());
+                    Log.d("CCURegistration", " Response : "+response);
+                }catch (JSONException e){
+                    e.printStackTrace();
+                }
+                return response;
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+                super.onPostExecute(result);
+                if(!result.equals("")){
+
+                    try {
+                        JSONObject resString = new JSONObject(result);
+                        if(resString.getBoolean("success")){
+
+                            Toast.makeText(getApplicationContext(), "CCU Registered Successfully "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();
+                        }else
+                            Toast.makeText(getApplicationContext(), "CCU Registration is not Successful "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }else {
+                    Toast.makeText(getApplicationContext(), "CCU Registration is not Successful", Toast.LENGTH_LONG).show();
+                }
+            }
+        };
+
+        updateCCUReg.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
 
 }

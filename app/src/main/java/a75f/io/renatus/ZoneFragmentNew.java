@@ -2714,7 +2714,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 if(zoneMap.size() > 1) {
                     for (int i = 0; i < zoneMap.size(); i++) {
                         Equip equip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
-                        String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \"" + equip + "\"");
+                        String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \"" + equip.getId() + "\"");
                         CCUHsApi.getInstance().writeDefaultValById(scheduleTypeId, (double) schedule.ordinal());
                     }
                 }else

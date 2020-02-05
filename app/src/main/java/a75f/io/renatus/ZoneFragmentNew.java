@@ -721,7 +721,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     scheduleImageButton.setVisibility(View.GONE);
 
                     if (mScheduleTypeMap.get(equipId[0]) != ScheduleType.BUILDING.ordinal()) {
-                        setScheduleType(scheduleTypeId, ScheduleType.BUILDING);
+                        setScheduleType(scheduleTypeId, ScheduleType.BUILDING, zoneMap);
                         mScheduleTypeMap.put(equipId[0], ScheduleType.BUILDING.ordinal());
                     }
                     scheduleImageButton.setTag(mSchedule.getId());
@@ -763,7 +763,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         CCUHsApi.getInstance().scheduleSync();
                     }
                     if (mScheduleTypeMap.get(equipId[0]) != ScheduleType.ZONE.ordinal()) {
-                        setScheduleType(scheduleTypeId, ScheduleType.ZONE);
+                        setScheduleType(scheduleTypeId, ScheduleType.ZONE, zoneMap);
                         mScheduleTypeMap.put(equipId[0], ScheduleType.ZONE.ordinal());
                     }
                 } else if(position == 2 && (mScheduleType != -1)){
@@ -1199,7 +1199,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     scheduleImageButton.setVisibility(View.GONE);
 
                     if (mScheduleTypeMap.get(equipId) != ScheduleType.BUILDING.ordinal()) {
-                        setScheduleType(scheduleTypeId, ScheduleType.BUILDING);
+                        setScheduleType(scheduleTypeId, ScheduleType.BUILDING,openZoneMap);
                         mScheduleTypeMap.put(equipId, ScheduleType.BUILDING.ordinal());
                     }
 
@@ -1242,7 +1242,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         CCUHsApi.getInstance().scheduleSync();
                     }
                     if (mScheduleTypeMap.get(equipId) != ScheduleType.ZONE.ordinal()) {
-                        setScheduleType(scheduleTypeId, ScheduleType.ZONE);
+                        setScheduleType(scheduleTypeId, ScheduleType.ZONE, openZoneMap);
                         mScheduleTypeMap.put(equipId, ScheduleType.ZONE.ordinal());
                     }
                 } else if(position == 2 && (mScheduleType != -1)){
@@ -2704,14 +2704,22 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         return isShown;
     }
 
-    private void setScheduleType(String id, ScheduleType schedule) {
+    private void setScheduleType(String id, ScheduleType schedule, ArrayList<HashMap> zoneMap) {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                CCUHsApi.getInstance().writeDefaultValById(id, (double)schedule.ordinal());
                 CcuLog.d("CCU_UI"," Set Schedule type "+schedule.ordinal());
                 CCUHsApi.getInstance().writeHisValById(id, (double)schedule.ordinal());
-                ScheduleProcessJob.handleScheduleTypeUpdate(new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build());
+                Point p = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build();
+                if(zoneMap.size() > 1) {
+                    for (int i = 0; i < zoneMap.size(); i++) {
+                        Equip equip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
+                        String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \"" + equip + "\"");
+                        CCUHsApi.getInstance().writeDefaultValById(scheduleTypeId, (double) schedule.ordinal());
+                    }
+                }else
+                    CCUHsApi.getInstance().writeDefaultValById(id, (double)schedule.ordinal());
+                ScheduleProcessJob.handleScheduleTypeUpdate(p);
             }
         });
         thread.start();

@@ -2,6 +2,7 @@ package a75f.io.renatus.registartion;
 
 import android.app.AlarmManager;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
@@ -23,6 +24,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HRef;
 
@@ -32,6 +35,8 @@ import java.util.TimeZone;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Site;
+import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.diag.DiagEquip;
@@ -319,6 +324,30 @@ public class CreateNewSite extends Fragment {
                         L.ccu().setCCUName(ccuName);
                         CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                     }
+                    try {
+                        JSONObject ccuRegInfo = new JSONObject();
+                        if(site.size() > 0) {
+                            JSONObject locInfo = new JSONObject();
+                            locInfo.put("geoCity", siteCity);
+                            locInfo.put("geoCountry", siteCountry);
+                            locInfo.put("geoState", siteState);
+                            locInfo.put("geoAddr", siteAddress);
+                            locInfo.put("geoPostalCode", siteZip);
+                            ccuRegInfo.put("siteName",siteName);
+                            ccuRegInfo.put("siteId", "@" + site.get("id").toString());
+                            if(ccu.size() > 0) {
+                                ccuRegInfo.put("deviceId", ccu.get("id").toString());
+                                ccuRegInfo.put("deviceName", ccuName);
+                                ccuRegInfo.put("facilityManagerEmail", installerEmail);
+                                ccuRegInfo.put("installerEmail", installerEmail);
+                                ccuRegInfo.put("locationDetails", locInfo);
+
+                                updateCCURegistrationInfo(ccuRegInfo.toString());
+                            }
+                        }
+                    }catch (JSONException e){
+                        e.printStackTrace();
+                    }
                 }
                 L.saveCCUState();
                 CCUHsApi.getInstance().syncEntityTree();
@@ -392,7 +421,42 @@ public class CreateNewSite extends Fragment {
         mTextTimeZone.setTextColor(getResources().getColor(R.color.hint_color));
 
     }
+    private void updateCCURegistrationInfo(final String ccuRegInfo) {
+        AsyncTask<Void, Void, String> updateCCUReg = new AsyncTask<Void, Void, String>() {
 
+
+            @Override
+            protected String doInBackground(Void... voids) {
+
+                Log.d("CCURegInfo","createNewSite Edit backgroundtask="+ccuRegInfo);
+                return  HttpUtil.executeJSONPost("https://caretaker-75f-service-dev.azurewebsites.net/api/v1/device/register",ccuRegInfo);
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+
+                Log.d("CCURegInfo","createNewSite Edit onPostExecute="+result);
+                if((result != null) && (!result.equals(""))){
+
+                    try {
+                        JSONObject resString = new JSONObject(result);
+                        if(resString.getBoolean("success")){
+
+                            Toast.makeText(getActivity(), "CCU Registered Successfully "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();
+                        }else
+                            Toast.makeText(getActivity(), "CCU Registration is not Successful "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }else {
+                    Toast.makeText(getActivity(), "CCU Registration is not Successful", Toast.LENGTH_LONG).show();
+                }
+            }
+        };
+
+        updateCCUReg.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
     private class EditTextWatcher implements TextWatcher {
 
         private View view;

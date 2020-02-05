@@ -171,12 +171,12 @@ public class VavIERtu extends VavSystemProfile
             {
                 signal = (int) (coolingDatMin - (coolingDatMin - coolingDatMax) * (systemCoolingLoopOp/100));
             }
+
+            setCmdSignal("cooling",signal);
             
         } else {
             signal = 0;
         }
-        
-        setCmdSignal("cooling",signal);
         
         if (VavSystemController.getInstance().getSystemState() == HEATING)
         {
@@ -199,10 +199,10 @@ public class VavIERtu extends VavSystemProfile
             {
                 signal = (int) (heatingDatMin - (heatingDatMax - heatingDatMin) * (systemHeatingLoopOp / 100));
             }
+            setCmdSignal("heating", signal);
         } else {
             signal = 0;
         }
-        setCmdSignal("heating", signal);
     
         double datSp = VavSystemController.getInstance().getSystemState() == COOLING ? getCmdSignal("cooling") : getCmdSignal("heating");
         setCmdSignal("dat", datSp);
@@ -239,10 +239,10 @@ public class VavIERtu extends VavSystemProfile
             {
                 spSignal = CCUUtils.roundToTwoDecimal(staticPressureMin - (staticPressureMin - staticPressureMax) * (systemFanLoopOp/100));
             }
+            setCmdSignal("fan", spSignal);
         } else {
             spSignal = 0;
         }
-        setCmdSignal("fan", spSignal);
         ControlMote.setAnalogOut("analog2", spSignal);
         
         ControlMote.setAnalogOut("analog3", VavSystemController.getInstance().getAverageSystemHumidity());
@@ -489,13 +489,81 @@ public class VavIERtu extends VavSystemProfile
         return hayStack.readPointPriorityVal(configPoint.get("id").toString());
         
     }
-    public void setConfigEnabled(String config, double val) {
+    /*public void setConfigEnabled(String config, double val) {
         CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and enabled and "+config, val);
-    }
+    }*/
     
     public void addTunerPoints(String equipref) {
         VavTRTuners.addSatTRTunerPoints(equipref);
         VavTRTuners.addStaticPressureTRTunerPoints(equipref);
         VavTRTuners.addCO2TRTunerPoints(equipref);
+    }
+    public void setConfigEnabled(String tags, double val) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap configPoint = hayStack.read("point and system and config and output and enabled and "+tags);
+        Point configEnabledPt = new Point.Builder().setHashMap(configPoint).build();
+        double curConfig = hayStack.readPointPriorityVal(configEnabledPt.getId());
+        CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and enabled and "+tags, val);
+        if(curConfig != val){
+            HashMap siteMap = hayStack.read(Tags.SITE);
+            String equipDis = siteMap.get("dis").toString()+"-SystemEquip";
+            String siteRef = siteMap.get("id").toString();
+            String tz = siteMap.get("tz").toString();
+            switch (tags){
+                case "analog1":
+                    HashMap cmdCool = CCUHsApi.getInstance().read("point and system and cmd and cooling and modulating");
+                    if(cmdCool != null && cmdCool.size() > 0) {
+                        if(val == 0) {
+                            CCUHsApi.getInstance().deleteEntityTree(cmdCool.get("id").toString());
+                        }
+                    }else {
+                        Point coolingSignal = new Point.Builder()
+                                .setDisplayName(equipDis+"-"+"coolingDat")
+                                .setSiteRef(siteRef)
+                                .setEquipRef(configEnabledPt.getEquipRef())
+                                .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("discharge").addMarker("air").addMarker("temp").addMarker("his").addMarker("equipHis")
+                                .setUnit("\u00B0F").setTz(tz)
+                                .build();
+                        CCUHsApi.getInstance().addPoint(coolingSignal);
+                    }
+                    break;
+                case "analog2":
+                    HashMap cmdFan = CCUHsApi.getInstance().read("point and system and cmd and fan and modulating");
+                    if(cmdFan != null && cmdFan.size() > 0) {
+                        if(val == 0) {
+                            CCUHsApi.getInstance().deleteEntityTree(cmdFan.get("id").toString());
+                        }
+                    }else {
+                        Point fanSignal = new Point.Builder()
+                                .setDisplayName(equipDis+"-"+"ductStaticPressure")
+                                .setSiteRef(siteRef)
+                                .setEquipRef(configEnabledPt.getEquipRef())
+                                .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his").addMarker("equipHis")
+                                .setUnit("inch wc").setTz(tz)
+                                .build();
+                        CCUHsApi.getInstance().addPoint(fanSignal);
+                    }
+                    break;
+                case "analog3":
+                    HashMap cmdHeat = CCUHsApi.getInstance().read("point and system and cmd and heating and modulating");
+                    if(cmdHeat != null && cmdHeat.size() > 0) {
+                        if(val == 0) {
+                            CCUHsApi.getInstance().deleteEntityTree(cmdHeat.get("id").toString());
+                        }
+                    }else {
+                        Point heatingSignal = new Point.Builder()
+                                .setDisplayName(equipDis+"-"+"heatingDat")
+                                .setSiteRef(siteRef)
+                                .setEquipRef(configEnabledPt.getEquipRef())
+                                .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("discharge").addMarker("air").addMarker("temp").addMarker("his").addMarker("equipHis")
+                                .setUnit("\u00B0F").setTz(tz)
+                                .build();
+                        CCUHsApi.getInstance().addPoint(heatingSignal);
+                    }
+                    break;
+            }
+
+            CCUHsApi.getInstance().syncEntityTree();
+        }
     }
 }

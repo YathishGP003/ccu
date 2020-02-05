@@ -191,9 +191,18 @@ public class Schedule extends Entity
                     {
                         overLaps.add(new Interval(current.getStartMillis(), intervalOfAddition.getEndMillis()));
                     }
-                    else if (intervalOfAddition.getStartMillis() < current.getEndMillis())
+                    else if (intervalOfAddition.getStartMillis() < current.getStartMillis() && intervalOfAddition.getStartMillis() < current.getEndMillis())
                     {
                         overLaps.add(new Interval(intervalOfAddition.getStartMillis(), current.getEndMillis()));
+                      //  overLaps.add(new Interval(intervalOfAddition.getStartMillis(), intervalOfAddition.getEndMillis()));
+                    }
+                    else if (current.getStartMillis() < intervalOfAddition.getStartMillis() && current.getEndMillis() < intervalOfAddition.getEndMillis())
+                    {
+                        overLaps.add(new Interval(intervalOfAddition.getStartMillis(), current.getEndMillis()));
+                    }
+                    else if (intervalOfAddition.getStartMillis() < current.getEndMillis())
+                    {
+                        overLaps.add(new Interval(intervalOfAddition.getStartMillis(), intervalOfAddition.getEndMillis()));
                     }
                 }
             }

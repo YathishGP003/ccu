@@ -119,7 +119,86 @@ public class HttpUtil
         }
     }
 
+    public static synchronized String executeJSONPost(String targetURL, String urlParameters)
+    {
+        if (clientToken.equalsIgnoreCase(""))
+        {
+            String jsonToken = authorizeToken(CLIENT_ID, "", CLIENT_SECRET, TENANT_ID);
+            if (jsonToken == null)
+            {
+                return null;
+            }
+            clientToken = parseToken(jsonToken);
+            CcuLog.i("CCU_HS","Client Token: " + clientToken);
+        }
+        URL url;
+        HttpsURLConnection connection = null;
+        try {
+            //Create connection
+            url = new URL(targetURL);
+            //connection = (HttpsURLConnection)url.openConnection();
+            connection = NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type",
+                    "application/json");
 
+            CcuLog.i("CCU_HS",url.toString());
+            CcuLog.i("CCU_HS",urlParameters);
+            //System.out.println(targetURL);
+            //System.out.println(urlParameters);
+            connection.setRequestProperty("Content-Length", "" +
+                    Integer.toString(urlParameters.getBytes("UTF-8").length));
+            connection.setRequestProperty("Content-Language", "en-US");
+            connection.setRequestProperty("Authorization", " Bearer " + clientToken);
+            connection.setUseCaches (false);
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+
+            //Send request
+            DataOutputStream wr = new DataOutputStream (connection.getOutputStream());
+            wr.write (urlParameters.getBytes("UTF-8"));
+            wr.flush ();
+            wr.close ();
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode != 200) {
+                CcuLog.i("CCU_HS","HttpError: responseCode "+responseCode);
+            }
+            if(responseCode == 401 && retry)
+            {
+                retry = false;
+                clientToken = parseToken(authorizeToken(CLIENT_ID, "", CLIENT_SECRET, TENANT_ID));
+                CcuLog.i("CCU_HS","Client Token: " + clientToken);
+                connection.disconnect();
+                return executePost(targetURL, urlParameters);
+            }
+            retry = true;
+            //Get Response
+            InputStream is = connection.getInputStream();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            String line;
+            StringBuffer response = new StringBuffer();
+            while((line = rd.readLine()) != null) {
+                response.append(line);
+                response.append('\n');
+            }
+            rd.close();
+            is.close();
+
+            return responseCode == 200 ? response.toString() : null;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+            return null;
+
+        } finally {
+
+            if(connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
     public static String parseToken(String jsonResponse)
     {
         CcuLog.i("CCU_HS","JsonResponse: " + jsonResponse);

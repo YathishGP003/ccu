@@ -1,0 +1,10 @@
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-928, Schedule type in a zone has to be updated across all equips for multi module
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-923, logical points has to be deleted for analog
+ - #RENATUS-911, CCU Registration details to be updated
+ - #RENATUS-928, Schedule type in a zone has to be updated across all equips for multi module
+ - #RENATUS-911, CCU Registration details to be updated
+ - Merge branch 'mahesh_renatus' into 'master'
+ - RENATUS-896 fixed
+ - fix schedule conflict

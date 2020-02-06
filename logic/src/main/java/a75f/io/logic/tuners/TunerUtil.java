@@ -9,6 +9,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.logic.L;
 
 /**
  * Created by samjithsadasivan on 1/16/19.
@@ -124,9 +125,21 @@ public class TunerUtil
     }
     
     public static double getCoolingDeadband(String equipRef) {
+        String systemProfile = "";
+        if (L.ccu().systemProfile != null) {
+            if (L.ccu().systemProfile.getProfileName().contains("VAV")) {
+                systemProfile = "and vav";
+            } else if (L.ccu().systemProfile.getProfileName().contains("DAB")) {
+                systemProfile = "and dab";
+            } else if (L.ccu().systemProfile.getProfileName().contains("Default")) {
+                systemProfile = "and standalone";
+            }
+        } else {
+            systemProfile = "";
+        }
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and deadband and base and cooling and equipRef == \""+equipRef+"\"");
-        
+        HashMap cdb = hayStack.read("point and tuner and deadband "+systemProfile+" and cooling and not adr and not multiplier and equipRef == \""+equipRef+"\"");;
+
         ArrayList values = hayStack.readPoint(cdb.get("id").toString());
         if (values != null && values.size() > 0)
         {
@@ -145,7 +158,7 @@ public class TunerUtil
         ArrayList<Equip> zoneEquips  = HSUtil.getEquips(roomRef);
         double maxDb = 0;
         for (Equip q : zoneEquips){
-            HashMap cdb = hayStack.read("point and tuner and deadband and cooling and not adr and equipRef == \""+q.getId()+"\"");
+            HashMap cdb = hayStack.read("point and tuner and deadband and cooling and not adr and not multiplier and equipRef == \""+q.getId()+"\"");
 
             ArrayList values = hayStack.readPoint(cdb.get("id").toString());
             if (values != null && values.size() > 0)
@@ -169,7 +182,7 @@ public class TunerUtil
         ArrayList<Equip> zoneEquips  = HSUtil.getEquips(roomRef);
         double maxDb = 0;
         for (Equip q : zoneEquips){
-            HashMap cdb = hayStack.read("point and tuner and deadband and heating and not adr and equipRef == \""+q.getId()+"\"");
+            HashMap cdb = hayStack.read("point and tuner and deadband and heating and not adr and not multiplier and equipRef == \""+q.getId()+"\"");
 
             ArrayList values = hayStack.readPoint(cdb.get("id").toString());
             if (values != null && values.size() > 0)
@@ -201,9 +214,21 @@ public class TunerUtil
     }
     
     public static double getHeatingDeadband(String equipRef) {
+        String systemProfile = "";
+        if (L.ccu().systemProfile != null) {
+            if (L.ccu().systemProfile.getProfileName().contains("VAV")) {
+                systemProfile = "and vav";
+            } else if (L.ccu().systemProfile.getProfileName().contains("DAB")) {
+                systemProfile = "and dab";
+            } else if (L.ccu().systemProfile.getProfileName().contains("Default")) {
+                systemProfile = "and standalone";
+            }
+        } else {
+            systemProfile = "";
+        }
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and deadband and base and heating and equipRef == \""+equipRef+"\"");
-        
+        HashMap cdb = hayStack.read("point and tuner and deadband "+systemProfile+" and heating and not adr and not multiplier and equipRef == \""+equipRef+"\"");
+
         ArrayList values = hayStack.readPoint(cdb.get("id").toString());
         if (values != null && values.size() > 0)
         {

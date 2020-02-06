@@ -115,6 +115,7 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 			@Override
 			protected void onPostExecute( final Void result ) {
 				// continue what you are doing...
+				floorPlanActivity.getBuildingFloorsZones("");
 			}
 		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 	}
@@ -129,6 +130,7 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 			Zone sZone = selectedRoom.get(nCount);
 			floorPlanActivity.renameZone(sZone);
 		}
+		floorPlanActivity.getBuildingFloorsZones("");
 	}
 	
 	

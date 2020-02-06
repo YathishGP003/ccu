@@ -1,7 +1,6 @@
 package a75f.io.renatus;
 
 import android.os.AsyncTask;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -121,6 +120,7 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 			@Override
 			protected void onPostExecute( final Void result ) {
 				// continue what you are doing...
+				floorPlanActivity.getBuildingFloorsZones("");
 			}
 		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 	}
@@ -130,6 +130,7 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 	{
 		////selectedFloor.get(0).mFloorName = selectedFloor.get(0).mFloorName;
 		floorPlanActivity.renameFloor(selectedFloor.get(0));
+		floorPlanActivity.getBuildingFloorsZones("");
 	}
 	
 	

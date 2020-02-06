@@ -4,18 +4,16 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -35,7 +33,6 @@ import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
-import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
 import org.projecthaystack.client.CallException;
 import org.projecthaystack.client.HClient;
@@ -45,18 +42,15 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.UUID;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
-import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.LSerial;
-import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
@@ -64,6 +58,7 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
+import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -198,7 +193,7 @@ public class FloorPlanFragment extends Fragment
 		View rootView = inflater.inflate(R.layout.floorplan, container, false);
 		ButterKnife.bind(this, rootView);
 
-		getBuildingFloorsZones();
+		//getBuildingFloorsZones();
 		return rootView;
 	}
 
@@ -335,7 +330,8 @@ public class FloorPlanFragment extends Fragment
 
 
 	@SuppressLint("StaticFieldLeak")
-	private void getBuildingFloorsZones() {
+	public void getBuildingFloorsZones(String enableKeyboard) {
+		ProgressDialogUtils.showProgressDialog(getContext(), "Fetching floors and zones...");
 		new AsyncTask<String, Void,Void>(){
 
 			@Override
@@ -392,8 +388,10 @@ public class FloorPlanFragment extends Fragment
 							siteRoomList.add(zr.getStr("dis"));
 						}
 					}
+
 				} catch (CallException e) {
 					Log.d(L.TAG_CCU_UI, "Failed to fetch room data "+e.getMessage());
+					ProgressDialogUtils.hideProgressDialog();
 					e.printStackTrace();
 				}
 				
@@ -403,6 +401,12 @@ public class FloorPlanFragment extends Fragment
 
 			@Override
 			protected void onPostExecute(Void aVoid) {
+				ProgressDialogUtils.hideProgressDialog();
+				if (!TextUtils.isEmpty(enableKeyboard) && (enableKeyboard.contains("room") || enableKeyboard.contains("floor"))){
+					InputMethodManager mgr =
+							(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+					mgr.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+				}
 				super.onPostExecute(aVoid);
 			}
 		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -523,7 +527,6 @@ public class FloorPlanFragment extends Fragment
 	@OnClick(R.id.lt_addfloor)
 	public void addFloorBtn()
 	{
-		getBuildingFloorsZones();
 		enableFloorEdit();
 		addFloorEdit.setText("");
 		addFloorEdit.requestFocus();
@@ -637,6 +640,7 @@ public class FloorPlanFragment extends Fragment
 		addFloorlt.setVisibility(View.INVISIBLE);
 		addFloorBtn.setVisibility(View.INVISIBLE);
 		addFloorEdit.setVisibility(View.VISIBLE);
+		getBuildingFloorsZones("floor");
 	}
 	
 	
@@ -798,7 +802,6 @@ public class FloorPlanFragment extends Fragment
 	@OnClick(R.id.lt_addzone)
 	public void addRoomBtn()
 	{
-		getBuildingFloorsZones();
 		enableRoomEdit();
 		addRoomEdit.setText("");
 		addRoomEdit.requestFocus();
@@ -812,6 +815,7 @@ public class FloorPlanFragment extends Fragment
 		addZonelt.setVisibility(View.INVISIBLE);
 		addRoomBtn.setVisibility(View.INVISIBLE);
 		addRoomEdit.setVisibility(View.VISIBLE);
+		getBuildingFloorsZones("room");
 	}
 	
 	

@@ -326,7 +326,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                     if (currentTempSensor > 0 && zoneEquips.size() >1) {
                                             currentTempSensor = currentTempSensor / (zoneEquips.size() - noTempSensor);
                                             DecimalFormat decimalFormat = new DecimalFormat("#.#");
-                                            currentTempSensor = Double.parseDouble(decimalFormat.format(Math.round(currentTempSensor*100.0)/100));
+                                            currentTempSensor = Double.parseDouble(decimalFormat.format(Math.round(currentTempSensor*10.0)/10.0));
                                     }
                                     if(currentTempSensor > 0) {
                                         return currentTempSensor;
@@ -581,8 +581,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             Equip avgTempEquip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
             double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + avgTempEquip.getId() + "\"");
 
-            double heatDB = CCUHsApi.getInstance().readPointPriorityValByQuery("point and heating and deadband and base and equipRef == \"" + avgTempEquip.getId() + "\"");
-            double coolDB = CCUHsApi.getInstance().readPointPriorityValByQuery("point and cooling and deadband and base and equipRef == \"" + avgTempEquip.getId() + "\"");
+            double heatDB = TunerUtil.getZoneHeatingDeadband(avgTempEquip.getRoomRef());
+            double coolDB = TunerUtil.getZoneCoolingDeadband(avgTempEquip.getRoomRef());
 
             double coolUL = TunerUtil.readBuildingTunerValByQuery("point and limit and max and cooling and user");
             double heatUL = TunerUtil.readBuildingTunerValByQuery("point and limit and max and heating and user");
@@ -621,7 +621,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         if(zoneMap.size() > 1 && currentAverageTemp != 0){
             currentAverageTemp = currentAverageTemp/(zoneMap.size()-noTempSensor);
             DecimalFormat decimalFormat = new DecimalFormat("#.#");
-            currentAverageTemp = Double.parseDouble(decimalFormat.format(Math.round(currentAverageTemp * 100.0)/100));
+            currentAverageTemp = Double.parseDouble(decimalFormat.format(Math.round(currentAverageTemp * 10.0)/10.0));
         }
         Log.i("EachzoneData"," currentAvg:"+currentAverageTemp);
         final String[] equipId = {p.getId()};
@@ -1280,8 +1280,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         double pointheatUL = CCUHsApi.getInstance().readPointPriorityValByQuery("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
         double pointcoolLL = CCUHsApi.getInstance().readPointPriorityValByQuery("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
         double pointheatLL = CCUHsApi.getInstance().readPointPriorityValByQuery("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");*/
-        double pointheatDB = CCUHsApi.getInstance().readPointPriorityValByQuery("point and heating and deadband and base and equipRef == \"" + p.getId() + "\"");
-        double pointcoolDB = CCUHsApi.getInstance().readPointPriorityValByQuery("point and cooling and deadband and base and equipRef == \"" + p.getId() + "\"");
+        double pointheatDB = TunerUtil.getZoneHeatingDeadband(p.getRoomRef());
+        double pointcoolDB = TunerUtil.getZoneCoolingDeadband(p.getRoomRef());
 
         //float pointbuildingMin = (float)getPointVal(buildingMin.get("id").toString());
         //float pointbuildingMax = (float)getPointVal(buildingMax.get("id").toString());

@@ -1156,27 +1156,44 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         
         Occupied cachedOccupied = getOccupiedModeCache(equip.getRoomRef());
         Occupancy c = UNOCCUPIED;
-        
-        if (cachedOccupied != null && cachedOccupied.isOccupied())
-        {
-            c = OCCUPIED;
-        } else if (getTemporaryHoldExpiry(equip) > 0){
-            c = FORCEDOCCUPIED;
-        }else if((cachedOccupied != null) && cachedOccupied.getVacation() != null) {
-            c = VACATION;
-        }else if((cachedOccupied != null) && cachedOccupied.isOccupancySensed()){
-            c = OCCUPANCYSENSING;
-        }else{
-            //if(ScheduleProcessJob.getSystemOccupancy() == Occupancy.PRECONDITIONING || (cachedOccupied != null && cachedOccupied.isPreconditioning())) {
-                boolean isZoneHasStandaloneEquip = (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse") );
-                if(isZoneHasStandaloneEquip && (cachedOccupied != null) &&  (cachedOccupied.isPreconditioning()))
-                    c = PRECONDITIONING;
-                else if (!isZoneHasStandaloneEquip && getSystemOccupancy() == PRECONDITIONING)
-                    c = PRECONDITIONING;
-            //}
+
+
+        ArrayList occ = CCUHsApi.getInstance().readAll("point and occupancy and mode and equipRef == \""+equip.getId()+"\"");
+        if (occ != null && occ.size() > 0) {
+            String id = ((HashMap) occ.get(0)).get("id").toString();
+            if (cachedOccupied != null && cachedOccupied.isOccupied())
+            {
+                c = OCCUPIED;
+            } else if (getTemporaryHoldExpiry(equip) > 0){
+                c = FORCEDOCCUPIED;
+            }else if((cachedOccupied != null) && cachedOccupied.getVacation() != null) {
+                c = VACATION;
+            }else if((cachedOccupied != null) && cachedOccupied.isOccupancySensed()){
+                c = OCCUPANCYSENSING;
+            }else{
+                double occuStatus = CCUHsApi.getInstance().readHisValById(id);
+                Occupancy prevStatus = Occupancy.values()[(int)occuStatus];
+                Log.d("Schedule","Precond:"+occuStatus+","+prevStatus.name()+","+cachedOccupied.isForcedOccupied()+","+cachedOccupied.isPreconditioning()+","+cachedOccupied.isSystemZone());
+                if((prevStatus == OCCUPIED)){
+                    //Reset when schedule is changed from occupied to unoccupied
+                    cachedOccupied.setForcedOccupied(false);
+                    cachedOccupied.setPreconditioning(false);
+                    clearTempOverrides(equip.getId());
+                }else {
+                    boolean isZoneHasStandaloneEquip = (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse") );
+                    if(isZoneHasStandaloneEquip && (cachedOccupied != null) && (cachedOccupied.isPreconditioning()))
+                        c = PRECONDITIONING;
+                    else if (!isZoneHasStandaloneEquip && getSystemOccupancy() == PRECONDITIONING)
+                        c = PRECONDITIONING;
+                    else if (prevStatus == PRECONDITIONING)
+                        c = PRECONDITIONING;
+                }
+            }
+
+            CCUHsApi.getInstance().writeHisValById(id, (double) c.ordinal());
         }
         if((zoneDataInterface != null) && (cachedOccupied != null)){
-            Log.d("Scheduler","updateZoneOccupancy==>>"+cachedOccupied.isForcedOccupied()+","+cachedOccupied.isOccupied()+","+cachedOccupied.isPreconditioning());
+            Log.d("Scheduler","updateZoneOccupancy==>>"+equip.getDisplayName()+","+cachedOccupied.isForcedOccupied()+","+cachedOccupied.isOccupied()+","+cachedOccupied.isPreconditioning());
             zoneDataInterface.refreshDesiredTemp(equip.getGroup(), "","");
         }
         

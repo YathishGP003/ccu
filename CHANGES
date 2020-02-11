@@ -1,2 +1,4 @@
- - Update .gitlab-ci.yml
- - Update .gitlab-ci.yml
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-927, Multi Module - Forced occupied issue
+ - #RENATUS-926, SmartStat | Once preconditioning is reached, it should not go back to unoccupied state
+ - #RENATUS-685, Preconditioning for multi modules in a zone

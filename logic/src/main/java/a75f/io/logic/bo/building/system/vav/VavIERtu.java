@@ -513,7 +513,7 @@ public class VavIERtu extends VavSystemProfile
                 case "analog1":
                     HashMap cmdCool = CCUHsApi.getInstance().read("point and system and cmd and cooling and modulating");
                     if(cmdCool != null && cmdCool.size() > 0) {
-                        if(val == 0) {
+                        if(val == 0.0) {
                             CCUHsApi.getInstance().deleteEntityTree(cmdCool.get("id").toString());
                         }
                     }else {
@@ -530,7 +530,7 @@ public class VavIERtu extends VavSystemProfile
                 case "analog2":
                     HashMap cmdFan = CCUHsApi.getInstance().read("point and system and cmd and fan and modulating");
                     if(cmdFan != null && cmdFan.size() > 0) {
-                        if(val == 0) {
+                        if(val == 0.0) {
                             CCUHsApi.getInstance().deleteEntityTree(cmdFan.get("id").toString());
                         }
                     }else {
@@ -547,7 +547,7 @@ public class VavIERtu extends VavSystemProfile
                 case "analog3":
                     HashMap cmdHeat = CCUHsApi.getInstance().read("point and system and cmd and heating and modulating");
                     if(cmdHeat != null && cmdHeat.size() > 0) {
-                        if(val == 0) {
+                        if(val == 0.0) {
                             CCUHsApi.getInstance().deleteEntityTree(cmdHeat.get("id").toString());
                         }
                     }else {

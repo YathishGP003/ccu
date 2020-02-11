@@ -580,8 +580,13 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             if ( (preconDegree != 0) && (millisToOccupancy > 0) && (preconDegree * preconRate * 60 * 1000 >= millisToOccupancy))
             {
                 systemOccupancy = PRECONDITIONING;
+            }else{
+                double sysOccValue = CCUHsApi.getInstance().readHisValByQuery("point and system and his and occupancy and mode");
+                Occupancy prevOccuStatus = Occupancy.values()[(int)sysOccValue];
+                if(prevOccuStatus == PRECONDITIONING)
+                    systemOccupancy = PRECONDITIONING;
             }
-            CcuLog.d(L.TAG_CCU_JOB, "preconRate : "+preconRate+" preconDegree: "+preconDegree);
+            CcuLog.d(L.TAG_CCU_JOB, "preconRate : "+preconRate+" preconDegree: "+preconDegree+","+systemOccupancy.name());
         }
     
         if (systemOccupancy == UNOCCUPIED && getSystemTemporaryHoldExpiry() > 0) {
@@ -589,7 +594,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
         
         CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and mode",(double)systemOccupancy.ordinal());
-        CcuLog.d(TAG_CCU_JOB, "systemOccupancy status : " + systemOccupancy);
+        CcuLog.d(TAG_CCU_JOB, "systemOccupancy status : " + systemOccupancy.name());
     }
     
     public static Occupancy getSystemOccupancy() {
@@ -1161,17 +1166,25 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         ArrayList occ = CCUHsApi.getInstance().readAll("point and occupancy and mode and equipRef == \""+equip.getId()+"\"");
         if (occ != null && occ.size() > 0) {
             String id = ((HashMap) occ.get(0)).get("id").toString();
+            double occuStatus = CCUHsApi.getInstance().readHisValById(id);
             if (cachedOccupied != null && cachedOccupied.isOccupied())
             {
                 c = OCCUPIED;
             } else if (getTemporaryHoldExpiry(equip) > 0){
-                c = FORCEDOCCUPIED;
+                Occupancy prevStatus = Occupancy.values()[(int)occuStatus];
+                if((prevStatus == OCCUPIED)){
+                    //Reset when schedule is changed from occupied to unoccupied
+                    cachedOccupied.setForcedOccupied(false);
+                    cachedOccupied.setPreconditioning(false);
+                    clearTempOverrides(equip.getId());
+                }else {
+                    c = FORCEDOCCUPIED;
+                }
             }else if((cachedOccupied != null) && cachedOccupied.getVacation() != null) {
                 c = VACATION;
             }else if((cachedOccupied != null) && cachedOccupied.isOccupancySensed()){
                 c = OCCUPANCYSENSING;
             }else{
-                double occuStatus = CCUHsApi.getInstance().readHisValById(id);
                 Occupancy prevStatus = Occupancy.values()[(int)occuStatus];
                 Log.d("Schedule","Precond:"+occuStatus+","+prevStatus.name()+","+cachedOccupied.isForcedOccupied()+","+cachedOccupied.isPreconditioning()+","+cachedOccupied.isSystemZone());
                 if((prevStatus == OCCUPIED)){

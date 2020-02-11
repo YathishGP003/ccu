@@ -359,6 +359,11 @@ public class DabAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 	private void setSelectionBackground(String analog, boolean selected) {
 		new AsyncTask<String, Void, Void>() {
 			@Override
+			protected void onPreExecute() {
+				ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB System Configuration");
+				super.onPreExecute();
+			}
+			@Override
 			protected Void doInBackground( final String ... params ) {
 				systemProfile.setConfigEnabled(analog, selected ? 1: 0);
 				return null;
@@ -369,6 +374,7 @@ public class DabAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 				if (!selected) {
 					updateSystemMode();
 				}
+				ProgressDialogUtils.hideProgressDialog();
 			}
 		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 	}

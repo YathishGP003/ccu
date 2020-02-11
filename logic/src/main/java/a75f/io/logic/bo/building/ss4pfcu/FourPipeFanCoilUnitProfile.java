@@ -96,7 +96,7 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
             Equip fourPfcuEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
             if (isZoneDead()) {
                 resetRelays(fourPfcuEquip.getId(), node, ZoneTempState.TEMP_DEAD);
-                fourPfcuDevice.setStatus(state.ordinal());
+                fourPfcuDevice.setStatus(TEMPDEAD.ordinal());
                 String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \"" + node + "\"");
                 if (!curStatus.equals("Zone Temp Dead")) {
                     CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
@@ -502,9 +502,10 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
                 }
                 break;
         }
-        ZoneState state = relayStates.size() > 0 ? (relayStates.containsKey("CoolingStage") ? COOLING : DEADBAND) : DEADBAND;
-        StandaloneScheduler.updateSmartStatStatus(equipId, state,relayStates,ZoneTempState.NONE);
-        fourPfcuDeviceMap.get(addr).setStatus(state.ordinal());
+        //ZoneState state = relayStates.size() > 0 ? (relayStates.containsKey("CoolingStage") ? COOLING : DEADBAND) : DEADBAND;
+        StandaloneScheduler.updateSmartStatStatus(equipId, COOLING,relayStates,ZoneTempState.NONE);
+        //if(fourPfcuDeviceMap.get(addr).getStatus() != state.ordinal())
+            fourPfcuDeviceMap.get(addr).setStatus(COOLING.ordinal());
     }
     private void fcu4HeatOnlyMode(String equipId, short addr,double roomTemp, Occupied occuStatus,StandaloneLogicalFanSpeeds fanSpeed){
         double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equipId);
@@ -638,9 +639,9 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
                 }
                 break;
         }
-        ZoneState state = relayStates.size() > 0 ? (relayStates.containsKey("HeatingStage") ? HEATING : DEADBAND) : DEADBAND;
-        StandaloneScheduler.updateSmartStatStatus(equipId, state,relayStates,ZoneTempState.NONE);
-        fourPfcuDeviceMap.get(addr).setStatus(state.ordinal());
+        //ZoneState state = relayStates.size() > 0 ? (relayStates.containsKey("HeatingStage") ? HEATING : DEADBAND) : DEADBAND;
+        StandaloneScheduler.updateSmartStatStatus(equipId, HEATING,relayStates,ZoneTempState.NONE);
+        fourPfcuDeviceMap.get(addr).setStatus(HEATING.ordinal());
     }
     @Override
     public void reset(){

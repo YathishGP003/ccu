@@ -98,7 +98,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             Equip twoPfcuEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
             if (isZoneDead()) {
                 resetRelays(twoPfcuEquip.getId(), node,ZoneTempState.TEMP_DEAD);
-                twoPfcuDevice.setStatus(state.ordinal());
+                twoPfcuDevice.setStatus(TEMPDEAD.ordinal());
                 String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \"" + node + "\"");
                 if (!curStatus.equals("Zone Temp Dead")) {
                     CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
@@ -604,9 +604,10 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             }
         }
 
-        ZoneState curstate = relayStates.size() > 0 ?  (relayStates.containsKey("CoolingStage1") ? COOLING : DEADBAND ) : DEADBAND;
-        StandaloneScheduler.updateSmartStatStatus(equipId, curstate,relayStates,ZoneTempState.NONE);
-        twoPfcuDeviceMap.get(addr).setStatus(curstate.ordinal());
+        //ZoneState curstate = relayStates.size() > 0 ?  (relayStates.containsKey("CoolingStage1") ? COOLING : DEADBAND ) : DEADBAND;
+        StandaloneScheduler.updateSmartStatStatus(equipId, COOLING,relayStates,ZoneTempState.NONE);
+        //if(twoPfcuDeviceMap.get(addr).getStatus() != curstate.ordinal())
+            twoPfcuDeviceMap.get(addr).setStatus(COOLING.ordinal());
     }
 
     private void twoPipeFCUHeatOnlyMode(String equipId, short addr, double roomTemp,Occupied occuStatus,StandaloneLogicalFanSpeeds fanSpeed){
@@ -752,9 +753,10 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                 setCmdSignal("aux and heating",0,addr);
         }
 
-        ZoneState curstate = relayStates.size() > 0 ?  (relayStates.containsKey("CoolingStage1") ? COOLING : DEADBAND ) : DEADBAND;
-        StandaloneScheduler.updateSmartStatStatus(equipId, curstate,relayStates ,ZoneTempState.NONE);
-        twoPfcuDeviceMap.get(addr).setStatus(curstate.ordinal());
+        //ZoneState curstate = relayStates.size() > 0 ?  (relayStates.containsKey("CoolingStage1") ? COOLING : DEADBAND ) : DEADBAND;
+        StandaloneScheduler.updateSmartStatStatus(equipId, HEATING,relayStates ,ZoneTempState.NONE);
+       //if(twoPipeFanCoilUnitEquip.getStatus() != curstate.ordinal())
+            twoPfcuDeviceMap.get(addr).setStatus(HEATING.ordinal());
     }
     private void updateThresholdsForTwoPipe(String equipId){
         try {

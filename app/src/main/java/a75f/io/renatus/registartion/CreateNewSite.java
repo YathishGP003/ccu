@@ -146,7 +146,7 @@ public class CreateNewSite extends Fragment {
         prefs = new Prefs(mContext);
 
         HashMap site = CCUHsApi.getInstance().read("site");
-        HashMap ccu = CCUHsApi.getInstance().read("ccu");
+        HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
 
         //imageGoback = rootView.findViewById(R.id.imageGoback);
 
@@ -327,6 +327,7 @@ public class CreateNewSite extends Fragment {
                     try {
                         JSONObject ccuRegInfo = new JSONObject();
                         if(site.size() > 0) {
+                            String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
                             JSONObject locInfo = new JSONObject();
                             locInfo.put("geoCity", siteCity);
                             locInfo.put("geoCountry", siteCountry);
@@ -334,9 +335,10 @@ public class CreateNewSite extends Fragment {
                             locInfo.put("geoAddr", siteAddress);
                             locInfo.put("geoPostalCode", siteZip);
                             ccuRegInfo.put("siteName",siteName);
-                            ccuRegInfo.put("siteId", "@" + site.get("id").toString());
+                            ccuRegInfo.put("siteId",  siteGUID);
                             if(ccu.size() > 0) {
-                                ccuRegInfo.put("deviceId", ccu.get("id").toString());
+                                String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
+                                ccuRegInfo.put("deviceId", ccuGUID);
                                 ccuRegInfo.put("deviceName", ccuName);
                                 ccuRegInfo.put("facilityManagerEmail", installerEmail);
                                 ccuRegInfo.put("installerEmail", installerEmail);

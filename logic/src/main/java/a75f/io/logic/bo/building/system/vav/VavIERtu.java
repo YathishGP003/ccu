@@ -561,6 +561,23 @@ public class VavIERtu extends VavSystemProfile
                         CCUHsApi.getInstance().addPoint(heatingSignal);
                     }
                     break;
+                case "humidification":
+                    HashMap cmdHumid = CCUHsApi.getInstance().read("point and system and cmd and humidifier");
+                    if(cmdHumid != null && cmdHumid.size() > 0) {
+                        if(val == 0.0) {
+                            CCUHsApi.getInstance().deleteEntityTree(cmdHumid.get("id").toString());
+                        }
+                    }else {
+                        Point heatingSignal = new Point.Builder()
+                                .setDisplayName(equipDis+"-"+"humidifier")
+                                .setSiteRef(siteRef)
+                                .setEquipRef(configEnabledPt.getEquipRef())
+                                .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his").addMarker("equipHis")
+                                .setUnit("%").setTz(tz)
+                                .build();
+                        CCUHsApi.getInstance().addPoint(heatingSignal);
+                    }
+                    break;
             }
 
             CCUHsApi.getInstance().syncEntityTree();

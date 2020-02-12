@@ -1255,10 +1255,12 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 try {
                     HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
                     HashMap site = CCUHsApi.getInstance().read("site");
+                    String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
+                    String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
                     JSONObject ccuRegInfo = new JSONObject();
-                    ccuRegInfo.put("deviceId", ccu.get("id").toString());
+                    ccuRegInfo.put("deviceId", ccuGUID);
                     ccuRegInfo.put("deviceName",ccu.get("dis").toString());
-                    ccuRegInfo.put("siteId","@"+site.get("id").toString());
+                    ccuRegInfo.put("siteId",siteGUID);
                     ccuRegInfo.put("siteName",site.get("dis").toString());
                     ccuRegInfo.put("facilityManagerEmail",ccu.get("fmEmail").toString());
                     ccuRegInfo.put("installerEmail",ccu.get("fmEmail").toString());
@@ -1282,7 +1284,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             @Override
             protected void onPostExecute(String result) {
                 super.onPostExecute(result);
-                if(!result.equals("")){
+                if( (result != null) && (!result.equals(""))){
 
                     try {
                         JSONObject resString = new JSONObject(result);

@@ -425,6 +425,11 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 	}
 	private void setHumidifierConfigBackground(String tags, double val) {
 		new AsyncTask<String, Void, Void>() {
+			@Override
+			protected void onPreExecute() {
+				ProgressDialogUtils.showProgressDialog(getActivity(),"Saving VAV System Configuration");
+				super.onPreExecute();
+			}
 
 			@Override
 			protected Void doInBackground( final String ... params ) {
@@ -435,6 +440,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			@Override
 			protected void onPostExecute( final Void result ) {
 				// continue what you are doing...
+				ProgressDialogUtils.hideProgressDialog();
 			}
 		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 	}

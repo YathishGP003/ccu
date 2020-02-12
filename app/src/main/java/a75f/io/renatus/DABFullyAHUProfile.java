@@ -362,6 +362,12 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         new AsyncTask<String, Void, Void>() {
             
             @Override
+            protected void onPreExecute() {
+                ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB System Configuration");
+                super.onPreExecute();
+            }
+            
+            @Override
             protected Void doInBackground( final String ... params ) {
                 systemProfile.setHumidifierConfigVal(tags, val);
                 return null;
@@ -370,6 +376,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             @Override
             protected void onPostExecute( final Void result ) {
                 // continue what you are doing...
+                ProgressDialogUtils.hideProgressDialog();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }

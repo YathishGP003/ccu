@@ -688,6 +688,42 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                     }
                     break;
                 case "relay7":
+
+                    double curHumidifierType = CCUHsApi.getInstance().readDefaultVal("point and system and config and relay7 and humidifier and type");
+                    if(curHumidifierType == 0.0) {
+                        HashMap cmdHumid = CCUHsApi.getInstance().read("point and system and cmd and humidifier");
+                        if (cmdHumid != null && cmdHumid.size() > 0) {
+                            if (val == 0.0) {
+                                CCUHsApi.getInstance().deleteEntityTree(cmdHumid.get("id").toString());
+                            }
+                        } else {
+                            Point humidPt = new Point.Builder()
+                                    .setDisplayName(equipDis + "-" + "humidifier")
+                                    .setSiteRef(siteRef)
+                                    .setEquipRef(configEnabledPt.getEquipRef())
+                                    .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his").addMarker("equipHis")
+                                    .setTz(tz)
+                                    .build();
+                            CCUHsApi.getInstance().addPoint(humidPt);
+                        }
+                    }else {
+
+                        HashMap cmdDeHumid = CCUHsApi.getInstance().read("point and system and cmd and dehumidifier");
+                        if (cmdDeHumid != null && cmdDeHumid.size() > 0) {
+                            if (val == 0.0) {
+                                CCUHsApi.getInstance().deleteEntityTree(cmdDeHumid.get("id").toString());
+                            }
+                        } else {
+                            Point dehumidPt = new Point.Builder()
+                                    .setDisplayName(equipDis + "-" + "dehumidifier")
+                                    .setSiteRef(siteRef)
+                                    .setEquipRef(configEnabledPt.getEquipRef())
+                                    .addMarker("system").addMarker("cmd").addMarker("dehumidifier").addMarker("his").addMarker("equipHis")
+                                    .setTz(tz)
+                                    .build();
+                            CCUHsApi.getInstance().addPoint(dehumidPt);
+                        }
+                    }
                     break;
             }
 

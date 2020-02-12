@@ -1,4 +1,2 @@
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-927, Multi Module - Forced occupied issue
- - #RENATUS-926, SmartStat | Once preconditioning is reached, it should not go back to unoccupied state
- - #RENATUS-685, Preconditioning for multi modules in a zone
+ - #RENATUS-923, logical points to be deleted

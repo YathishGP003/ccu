@@ -365,7 +365,7 @@ public class MasterControlView extends LinearLayout {
         //TODO:
         for (Schedule schedule : schedules) {
             if (schedule.isZoneSchedule() && schedule.getRoomRef()!= null) {
-                    setZoneData(masterControlDialog, schedule.getRoomRef());
+                   // setZoneData(masterControlDialog, schedule.getRoomRef());
                     String scheduleLuid = CCUHsApi.getInstance().getLUID("@" + schedule.getId());
                     if (scheduleLuid != null && schedule.getRoomRef() != null) {
                         schedule.setId(scheduleLuid.replace("@", ""));
@@ -610,12 +610,12 @@ public class MasterControlView extends LinearLayout {
                 Equip p = new Equip.Builder().setHashMap(tuner).build();
                 String gUid  = CCUHsApi.getInstance().getGUID(p.getId());
 
-                HashMap buildingCoolUL = read("point and limit and max and cooling and user");
-                HashMap buildingHeatUL = read("point and limit and max and heating and user");
-                HashMap buildingCoolLL = read("point and limit and min and cooling and user");
-                HashMap buildingHeatLL = read("point and limit and min and heating and user");
-                HashMap buildingMin = read("building and limit and min");
-                HashMap buildingMax = read("building and limit and max");
+                HashMap buildingCoolUL = read("point and limit and max and cooling and user and equipRef == "+gUid);
+                HashMap buildingHeatUL = read("point and limit and max and heating and user and equipRef == "+gUid);
+                HashMap buildingCoolLL = read("point and limit and min and cooling and user and equipRef == "+gUid);
+                HashMap buildingHeatLL = read("point and limit and min and heating and user and equipRef == "+gUid);
+                HashMap buildingMin = read("building and limit and min and equipRef == "+gUid);
+                HashMap buildingMax = read("building and limit and max and equipRef == "+gUid);
 
                 if (buildingCoolUL.size() != 0) {
                     writePoint(buildingCoolUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) coolTempUL, 0);

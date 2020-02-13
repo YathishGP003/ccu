@@ -322,7 +322,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 }
                 if (currentFragment instanceof CongratsFragment) {
                     prefs.setBoolean("REGISTRATION", true);
-                    updateCCURegistrationInfo();
+                    //updateCCURegistrationInfo();
 
                     AlertManager.getInstance().fetchAllPredefinedAlerts();
                     Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);

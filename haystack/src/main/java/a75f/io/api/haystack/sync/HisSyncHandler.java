@@ -150,53 +150,70 @@ public class HisSyncHandler
                     continue;
         
                 }
-                
-                
-                /*ArrayList<HisItem> hisItems = (ArrayList<HisItem>) hayStack.tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
-                if (hisItems.size() == 0) {
+
+
+                ArrayList<HisItem> hisItems = (ArrayList<HisItem>) hayStack.tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
+                if ((now.getMinuteOfDay() % 15) == 0) {//Sync all his items
+                    HisItem hisVal = hayStack.tagsDb.getLastHisItem(HRef.copy(pointID));
+                    if (hisVal == null || !hisVal.initialized) {
+                        CcuLog.d(TAG, "His val not found : "+m.get("dis"));
+                        continue;
+                    }
+                    tsData.put( pointGUID.replace("@",""), String.valueOf(hisVal.getVal()));
+                    if (now.getMinuteOfDay() == 0)
+                    {
+                        hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
+                    }
+                }else if (hisItems.size() > 0) {
+                    HisItem sItem = hisItems.get(hisItems.size()-1); //Writing just the recent val?
+                    tsData.put( pointGUID.replace("@",""), String.valueOf(sItem.getVal()));
+                    for (HisItem item: hisItems)
+                    {
+                        item.setSyncStatus(true);
+                    }
+                    hayStack.tagsDb.setHisItemSyncStatus(hisItems);
+                    if (now.getMinuteOfDay() == 0)
+                    {
+                        hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
+                    }
+                }else
                     continue;
-                }
     
-                HisItem sItem = hisItems.get(hisItems.size()-1); //Writing just the recent val?
-                tsData.put( pointGUID.replace("@",""), String.valueOf(sItem.getVal()));
-                for (HisItem item: hisItems)
-                {
-                    item.setSyncStatus(true);
-                }
-                hayStack.tagsDb.setHisItemSyncStatus(hisItems);*/
+
                 
                 //Write recent his val for all points even if it was not updated.
-                HisItem hisVal = hayStack.tagsDb.getLastHisItem(HRef.copy(pointID));
+                /*HisItem hisVal = hayStack.tagsDb.getLastHisItem(HRef.copy(pointID));
                 if (hisVal == null || !hisVal.initialized) {
                     CcuLog.d(TAG, "His val not found : "+m.get("dis"));
                     continue;
                 }
                 tsData.put( pointGUID.replace("@",""), String.valueOf(hisVal.getVal()));
-                
+
                 if (now.getMinuteOfDay() == 0)
                 {
                     hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
-                }
+                }*/
             
             }
             
             if (tsData.size() > 0)
             {
+                CcuLog.d(TAG," sendHisToInflux tsData111= "+tsData.size()+","+tsData.toString());
                 //String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
                 InfluxDbUtil.writeData(CCUHsApi.getInstance().getInfluxUrl(), CCUHsApi.getInstance().getGUID(equip.get("id").toString()).toString().replace("@","")
                                                 , tsData, System.currentTimeMillis());
             }
         
         }
-        
+        boolean syncAllHisItemsNow = ((now.getMinuteOfDay() % 15) == 0); //Every 15 mins we sync all his data
         //Send device data once in 5 mins
         //if (now.getMinuteOfDay() % 5 == 0) {
-            sendDeviceHisData();
+            sendDeviceHisData(syncAllHisItemsNow);
         //}
         
     }
     
-    private void sendDeviceHisData() {
+    private void sendDeviceHisData(boolean syncAllHisItemsNow) {
         ArrayList<HashMap> devices = hayStack.readAll("device");
         for (HashMap device : devices) {
             if (device.get("ccu") != null) {
@@ -225,34 +242,43 @@ public class HisSyncHandler
                     continue;
                 
                 }
-                /*ArrayList<HisItem> hisItems = (ArrayList<HisItem>) hayStack.tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
-                if (hisItems.size() == 0) {
+                ArrayList<HisItem> hisItems = (ArrayList<HisItem>) hayStack.tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
+                if(syncAllHisItemsNow){
+                    HisItem hisVal = hayStack.tagsDb.getLastHisItem(HRef.copy(pointID));
+                    if (hisVal == null || !hisVal.initialized) {
+                        CcuLog.d(TAG, "His val not found : "+m.get("dis"));
+                        continue;
+                    }
+                    tsData.put( pointGUID.replace("@",""), String.valueOf(hisVal.getVal()));
+
+                    hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
+                }else if (hisItems.size() > 0) {
+                    HisItem sItem = hisItems.get(hisItems.size()-1);//TODO - Writing just the recent his val?
+                    tsData.put( pointGUID.replace("@",""), String.valueOf(sItem.getVal()));
+
+                    for (HisItem item: hisItems)
+                    {
+                        item.setSyncStatus(true);
+                    }
+                    hayStack.tagsDb.setHisItemSyncStatus(hisItems);
+                    hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
+                }else
                     continue;
-                }
             
-                HisItem sItem = hisItems.get(hisItems.size()-1);//TODO - Writing just the recent his val?
-                tsData.put( pointGUID.replace("@",""), String.valueOf(sItem.getVal()));
-            
-                for (HisItem item: hisItems)
-                {
-                    item.setSyncStatus(true);
-                }
-                hayStack.tagsDb.setHisItemSyncStatus(hisItems);
-                hayStack.tagsDb.removeHisItems(HRef.copy(pointID));*/
-            
-                HisItem hisVal = hayStack.tagsDb.getLastHisItem(HRef.copy(pointID));
+                /*HisItem hisVal = hayStack.tagsDb.getLastHisItem(HRef.copy(pointID));
                 if (hisVal == null || !hisVal.initialized) {
                     CcuLog.d(TAG, "His val not found : "+m.get("dis"));
                     continue;
                 }
                 tsData.put( pointGUID.replace("@",""), String.valueOf(hisVal.getVal()));
             
-                hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
+                hayStack.tagsDb.removeHisItems(HRef.copy(pointID));*/
             
             }
         
             if (tsData.size() > 0)
             {
+                CcuLog.d(TAG," sendHisToInflux device tsData= "+tsData.size()+","+tsData.toString());
                 //String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
                 InfluxDbUtil.writeData(CCUHsApi.getInstance().getInfluxUrl(), CCUHsApi.getInstance().getGUID(device.get("id").toString()).toString().replace("@","")
                         , tsData, System.currentTimeMillis());

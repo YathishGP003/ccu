@@ -343,7 +343,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             }
             return "Setting up..";
         }
-        Log.d("ZoneSchedule","zoneStatusString = "+isZoneHasStandaloneEquip+",occ="+cachedOccupied.isOccupied()+",precon="+cachedOccupied.isPreconditioning()+",fc="+cachedOccupied.isForcedOccupied());
+        Log.d("ZoneSchedule","zoneStatusString = "+equip.getDisplayName()+","+isZoneHasStandaloneEquip+",occ="+cachedOccupied.isOccupied()+",precon="+cachedOccupied.isPreconditioning()+",fc="+cachedOccupied.isForcedOccupied());
         if (!isZoneHasStandaloneEquip && (systemOccupancy == PRECONDITIONING) ) {
             return "In Preconditioning ";
         }else if(isZoneHasStandaloneEquip && (!cachedOccupied.isOccupied()) && cachedOccupied.isPreconditioning()) {

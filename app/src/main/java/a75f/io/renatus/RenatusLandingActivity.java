@@ -2,6 +2,7 @@ package a75f.io.renatus;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
@@ -15,6 +16,7 @@ import android.text.InputType;
 import android.text.SpannableString;
 import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,9 +28,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
@@ -165,10 +172,37 @@ public class RenatusLandingActivity extends AppCompatActivity {
             setViewPager();
             ScheduleProcessJob.updateSchedules();
             HashMap site = CCUHsApi.getInstance().read("site");
+            HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
             String siteCountry = site.get("geoCountry").toString();
             String siteZipCode = site.get("geoPostalCode").toString();
             CCUUtils.getLocationInfo(siteCountry + " " + siteZipCode);
+            try {
+                JSONObject ccuRegInfo = new JSONObject();
+                JSONObject locInfo = new JSONObject();
+                locInfo.put("geoCity", site.get("geoCity").toString());
+                locInfo.put("geoCountry", siteCountry);
+                locInfo.put("geoState", site.get("geoState").toString());
+                locInfo.put("geoAddr", site.get("geoAddr").toString());
+                locInfo.put("geoPostalCode", siteZipCode);
+                if(site.size() > 0) {
+                    ccuRegInfo.put("siteName", site.get("dis").toString());
+                    String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
+                    ccuRegInfo.put("siteId", siteGUID);
+                    if (ccu.size() > 0) {
+                        String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
+                        ccuRegInfo.put("deviceId", ccuGUID);
+                        ccuRegInfo.put("deviceName", ccu.get("dis").toString());
+                        ccuRegInfo.put("facilityManagerEmail", ccu.get("fmEmail").toString());
+                        ccuRegInfo.put("installerEmail", ccu.get("fmEmail").toString());
+                        ccuRegInfo.put("locationDetails", locInfo);
+                        CcuLog.d("CCURegInfo", "createNewSite json Edit =" + ccuRegInfo.toString());
 
+                        updateCCURegistrationInfo(ccuRegInfo.toString());
+                    }
+                }
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
             floorMenu.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -442,5 +476,43 @@ public class RenatusLandingActivity extends AppCompatActivity {
 
     private boolean isSetupPassWordRequired(){
         return (prefs.getBoolean(getString(R.string.SET_SETUP_PASSWORD))&& !prefs.getString(getString(R.string.USE_SETUP_PASSWORD_KEY)).isEmpty());
+    }
+
+
+    private void updateCCURegistrationInfo(final String ccuRegInfo) {
+        AsyncTask<Void, Void, String> updateCCUReg = new AsyncTask<Void, Void, String>() {
+
+
+            @Override
+            protected String doInBackground(Void... voids) {
+
+                Log.d("CCURegInfo","RenatusLA backgroundtask="+ccuRegInfo);
+                return  HttpUtil.executeJSONPost("https://caretaker-75f-service-dev.azurewebsites.net/api/v1/device/register",ccuRegInfo);
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+
+                Log.d("CCURegInfo","RenatusLA Edit onPostExecute="+result);
+                if((result != null) && (!result.equals(""))){
+
+                    try {
+                        JSONObject resString = new JSONObject(result);
+                        if(resString.getBoolean("success")){
+
+                            Toast.makeText(getApplicationContext(), "CCU Registered Successfully "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();
+                        }else
+                            Toast.makeText(getApplicationContext(), "CCU Registration is not Successful "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }else {
+                    Toast.makeText(getApplicationContext(), "CCU Registration is not Successful", Toast.LENGTH_LONG).show();
+                }
+            }
+        };
+
+        updateCCUReg.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 }

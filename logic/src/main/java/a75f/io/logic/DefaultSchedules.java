@@ -171,8 +171,9 @@ public class DefaultSchedules {
 
         double diffValue = (coolLL - heatLL);
         if (diffValue <= (hdb + cdb)){
-            DEFAULT_COOLING_TEMP = coolLL + cdb;
-            DEFAULT_HEATING_TEMP = heatLL - hdb;
+            double value = ((hdb + cdb) - diffValue)/2;
+            DEFAULT_COOLING_TEMP = coolLL + value;
+            DEFAULT_HEATING_TEMP = heatLL - value;
         }else {
             DEFAULT_COOLING_TEMP = coolLL;
             DEFAULT_HEATING_TEMP = heatLL;

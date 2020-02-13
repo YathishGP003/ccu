@@ -19,6 +19,7 @@ public class Site extends Entity
     private String geoPostalCode;
     private String tz;
     private double area;
+    public String  organization;
     private String id;
     public String getId()
     {
@@ -57,6 +58,7 @@ public class Site extends Entity
         return area;
     }
     public String getGeoCountry() {return geoCountry;}
+    public String getOrganization() {return organization;}
     public String toString() {
         return displayName;
     }
@@ -76,6 +78,7 @@ public class Site extends Entity
         private String id;
         private String geoCountry;
         private double area;
+        public String  organization;
 
 
         public Builder setGeoZip(String siteZip) {
@@ -127,6 +130,12 @@ public class Site extends Entity
             this.geoCountry = geoCountry;
             return this;
         }
+
+        public Builder setOrgnization(String organization) {
+            this.organization = organization;
+            return this;
+        }
+
         public Site build()
         {
             Site s = new Site();
@@ -140,6 +149,7 @@ public class Site extends Entity
             s.geoPostalCode = this.geoPostalCode;
             s.id = this.id;
             s.geoCountry = this.geoCountry;
+            s.organization = this.organization;
             return s;
         }
 
@@ -184,6 +194,10 @@ public class Site extends Entity
                 else if(pair.getKey().equals("area"))
                 {
                     this.area = Double.parseDouble(pair.getValue().toString().replaceAll("[^0-9]", ""));
+                }
+                else if(pair.getKey().equals("organization"))
+                {
+                    this.organization = pair.getValue().toString();
                 }
 
                 //it.remove();

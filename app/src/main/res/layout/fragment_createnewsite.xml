@@ -49,7 +49,7 @@
             android:id="@+id/rlFields"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginRight="78dp"
+            android:layout_marginEnd="78dp"
             android:scrollbars="vertical">
 
             <android.support.design.widget.TextInputLayout
@@ -262,11 +262,31 @@
                     android:textSize="19.5dp" />
             </android.support.design.widget.TextInputLayout>
 
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/textInputOrganization"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textInputEmail"
+                android:layout_marginTop="-9dp"
+                app:errorTextAppearance="@style/error_appearance">
+
+                <EditText
+                    android:id="@+id/editFacilityOrganization"
+                    android:layout_width="match_parent"
+                    android:layout_height="42dp"
+                    android:fontFamily="@font/lato_regular"
+                    android:gravity="left|center_vertical"
+                    android:inputType="text"
+                    android:singleLine="true"
+                    android:textColor="@color/input_textcolor"
+                    android:textSize="19.5dp" />
+            </android.support.design.widget.TextInputLayout>
+
             <LinearLayout
                 android:id="@+id/btnSetting"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/textInputEmail"
+                android:layout_below="@+id/textInputOrganization"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentBottom="true"
                 android:layout_marginTop="20dp"
@@ -280,9 +300,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:drawableEnd="@drawable/ic_square_edit_outline"
-                    android:drawablePadding="50dp"
                     android:gravity="center"
+                    android:drawablePadding="50dp"
+                    android:drawableEnd="@drawable/ic_edit_site"
                     android:text="@string/title_edit" />
 
                 <View
@@ -302,17 +322,17 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:drawableEnd="@drawable/ic_link_variant_off"
-                    android:drawablePadding="30dp"
                     android:gravity="center"
-                    android:text="@string/title_unregister"/>
+                    android:drawablePadding="50dp"
+                    android:drawableEnd="@drawable/ic_unregister"
+                    android:text="@string/title_unregister" />
             </LinearLayout>
 
             <Button
                 android:id="@+id/buttonNext"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/textInputEmail"
+                android:layout_below="@+id/textInputOrganization"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentBottom="true"
                 android:layout_marginTop="5dp"

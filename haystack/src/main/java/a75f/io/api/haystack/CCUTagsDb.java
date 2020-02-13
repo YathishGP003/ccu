@@ -302,7 +302,7 @@ public class CCUTagsDb extends HServer {
         }
     }
 
-    public HDict addSite(String dis, String geoCity, String geoState, String timeZone, int area) {
+    public HDict addSite(String dis, String geoCity, String geoState, String timeZone, int area, String org) {
         HDict site = new HDictBuilder()
                 .add("id", HRef.make(dis))
                 .add("dis", dis)
@@ -312,6 +312,7 @@ public class CCUTagsDb extends HServer {
                 .add("geoAddr", "" + geoCity + "," + geoState)
                 .add("tz", timeZone)
                 .add("area", HNum.make(area, "ft\u00B2"))
+                .add("organization", org)
                 .toDict();
         tagsMap.put(dis, site);
         return site;
@@ -333,6 +334,7 @@ public class CCUTagsDb extends HServer {
                 .add("geoPostalCode", s.getGeoPostalCode())
                 .add("geoAddr", "" + s.getGeoAddress())
                 .add("tz", s.getTz())
+                .add("organization", s.getOrganization())
                 .add("area", HNum.make(s.getArea(), "ft\u00B2"));
 
         for (String m : s.getMarkers()) {
@@ -355,6 +357,7 @@ public class CCUTagsDb extends HServer {
                 .add("geoPostalCode", s.getGeoPostalCode())
                 .add("geoAddr", "" + s.getGeoAddress())
                 .add("tz", s.getTz())
+                .add("organization", s.getOrganization())
                 .add("area", HNum.make(s.getArea(), "ft\u00B2"));
 
         for (String m : s.getMarkers()) {

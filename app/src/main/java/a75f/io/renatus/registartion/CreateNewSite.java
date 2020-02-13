@@ -36,7 +36,6 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.sync.HttpUtil;
-import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.diag.DiagEquip;
@@ -84,6 +83,9 @@ public class CreateNewSite extends Fragment {
 
     TextInputLayout mTextInputEmail;
     EditText mSiteEmailId;
+
+    TextInputLayout mTextInputOrg;
+    EditText mSiteOrg;
 
     Button mNext;
     TextView btnEditSite;
@@ -177,6 +179,9 @@ public class CreateNewSite extends Fragment {
         mTextInputEmail = rootView.findViewById(R.id.textInputEmail);
         mSiteEmailId = rootView.findViewById(R.id.editFacilityEmail);
 
+        mTextInputOrg = rootView.findViewById(R.id.textInputOrganization);
+        mSiteOrg = rootView.findViewById(R.id.editFacilityOrganization);
+
         mNext = rootView.findViewById(R.id.buttonNext);
         btnSetting = rootView.findViewById(R.id.btnSetting);
         btnEditSite = rootView.findViewById(R.id.btnEditSite);
@@ -200,6 +205,7 @@ public class CreateNewSite extends Fragment {
         mSiteZip.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_zip) + "</font></big>"));
         mSiteCCU.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_ccuname) + "</font></big>"));
         mSiteEmailId.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_facilityemail) + "</font></big>"));
+        mSiteOrg.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_facilityorg) + "</font></big>"));
 
 
         mTextInputSitename.setHintEnabled(true);
@@ -212,6 +218,7 @@ public class CreateNewSite extends Fragment {
         mTextInputZip.setErrorEnabled(true);
         mTextInputCCU.setErrorEnabled(true);
         mTextInputEmail.setErrorEnabled(true);
+        mTextInputOrg.setErrorEnabled(true);
 
         mTextInputSitename.setError(getString(R.string.hint_sitename));
         mTextInputStreetAdd.setError("");
@@ -221,6 +228,7 @@ public class CreateNewSite extends Fragment {
         mTextInputZip.setError("");
         mTextInputCCU.setError("");
         mTextInputEmail.setError("");
+        mTextInputOrg.setError("");
 
 
         mSiteName.addTextChangedListener(new EditTextWatcher(mSiteName));
@@ -231,6 +239,7 @@ public class CreateNewSite extends Fragment {
         mSiteZip.addTextChangedListener(new EditTextWatcher(mSiteZip));
         mSiteCCU.addTextChangedListener(new EditTextWatcher(mSiteCCU));
         mSiteEmailId.addTextChangedListener(new EditTextWatcher(mSiteEmailId));
+        mSiteOrg.addTextChangedListener(new EditTextWatcher(mSiteOrg));
 
 
         mNext.setOnClickListener(new View.OnClickListener() {
@@ -246,6 +255,7 @@ public class CreateNewSite extends Fragment {
                                 R.id.editZip,
                                 R.id.editCCU,
                                 R.id.editFacilityEmail,
+                                R.id.editFacilityOrganization,
                         };
                 if (!validateEditText(mandotaryIds) && Patterns.EMAIL_ADDRESS.matcher(mSiteEmailId.getText().toString()).matches()) {
                     String siteName = mSiteName.getText().toString();
@@ -256,13 +266,14 @@ public class CreateNewSite extends Fragment {
                     String siteCountry = mSiteCountry.getText().toString();
 
                     String installerEmail = mSiteEmailId.getText().toString();
+                    String installerOrg = mSiteOrg.getText().toString();
                     String ccuName = mSiteCCU.getText().toString();
 
                     if (site.size() > 0) {
                         String siteId = site.get("id").toString();
-                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId);
+                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId,installerOrg);
                     } else {
-                        saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry);
+                        saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, installerOrg);
                     }
 
                     if (ccu.size() > 0) {
@@ -296,6 +307,7 @@ public class CreateNewSite extends Fragment {
                                 R.id.editZip,
                                 R.id.editCCU,
                                 R.id.editFacilityEmail,
+                                R.id.editFacilityOrganization,
                         };
                 if (!validateEditText(mandotaryIds)) {
                     String siteName = mSiteName.getText().toString();
@@ -306,13 +318,14 @@ public class CreateNewSite extends Fragment {
                     String siteCountry = mSiteCountry.getText().toString();
 
                     String installerEmail = mSiteEmailId.getText().toString();
+                    String installerOrg = mSiteOrg.getText().toString();
                     String ccuName = mSiteCCU.getText().toString();
 
                     if (site.size() > 0) {
                         String siteId = site.get("id").toString();
-                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId);
+                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId, installerOrg);
                     } else {
-                        saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry);
+                        saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry,installerOrg);
                     }
 
                     if (ccu.size() > 0) {
@@ -334,6 +347,7 @@ public class CreateNewSite extends Fragment {
                             locInfo.put("geoState", siteState);
                             locInfo.put("geoAddr", siteAddress);
                             locInfo.put("geoPostalCode", siteZip);
+                            locInfo.put("organization", installerOrg);
                             ccuRegInfo.put("siteName",siteName);
                             ccuRegInfo.put("siteId",  siteGUID);
                             if(ccu.size() > 0) {
@@ -367,6 +381,7 @@ public class CreateNewSite extends Fragment {
             String siteCountry = site.get("geoCountry").toString();
             String siteZipCode = site.get("geoPostalCode").toString();
             String siteTz = site.get("tz").toString();
+            String siteOrg = site.get("organization").toString();
 
             mSiteName.setText(siteName);
             mStreetAdd.setText(siteAdd);
@@ -374,6 +389,7 @@ public class CreateNewSite extends Fragment {
             mSiteState.setText(siteState);
             mSiteCountry.setText(siteCountry);
             mSiteZip.setText(siteZipCode);
+            mSiteOrg.setText(siteOrg);
 
             String[] tzIds = TimeZone.getAvailableIDs();
             for (String timeZone : tzIds) {
@@ -407,6 +423,7 @@ public class CreateNewSite extends Fragment {
         mSiteZip.setEnabled(isEnable);
         mSiteCCU.setEnabled(isEnable);
         mSiteEmailId.setEnabled(isEnable);
+        mSiteOrg.setEnabled(isEnable);
     }
 
 
@@ -538,7 +555,14 @@ public class CreateNewSite extends Fragment {
                     } else {
                         mTextInputCCU.setError("");
                     }
-
+                case R.id.editFacilityOrganization:
+                    if (mSiteOrg.getText().length() > 0) {
+                        mTextInputOrg.setErrorEnabled(true);
+                        mTextInputOrg.setError(getString(R.string.input_facilityorg));
+                        mSiteOrg.setError(null);
+                    } else {
+                        mTextInputOrg.setError("");
+                    }
                 case R.id.editFacilityEmail:
                     if (mSiteEmailId.getText().length() > 0) {
                         mTextInputEmail.setErrorEnabled(true);
@@ -585,7 +609,7 @@ public class CreateNewSite extends Fragment {
     }
     /* This site never existed we are creating a new orphaned site. */
 
-    public String saveSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState, String siteCountry) {
+    public String saveSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState, String siteCountry, String org) {
         HashMap site = CCUHsApi.getInstance().read("site");
 
         String tzID = mTimeZoneSelector.getSelectedItem().toString();
@@ -601,6 +625,7 @@ public class CreateNewSite extends Fragment {
                 .setTz(tzID.substring(tzID.lastIndexOf("/") + 1))//Haystack requires tz area string.
                 .setGeoZip(siteZip)
                 .setGeoCountry(siteCountry)
+                .setOrgnization(org)
                 .setGeoAddress(geoAddress)
                 .setArea(10000).build();
 
@@ -620,7 +645,7 @@ public class CreateNewSite extends Fragment {
         return localSiteId;
     }
 
-    public void updateSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState, String siteCountry, String siteId) {
+    public void updateSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState, String siteCountry, String siteId, String org) {
 
         String tzID = mTimeZoneSelector.getSelectedItem().toString();
         AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
@@ -636,6 +661,7 @@ public class CreateNewSite extends Fragment {
                 .setGeoZip(siteZip)
                 .setGeoCountry(siteCountry)
                 .setGeoAddress(geoAddress)
+                .setOrgnization(org)
                 .setArea(10000).build();
 
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();

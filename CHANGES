@@ -1,2 +1,4 @@
+ - Merge branch 'mahesh_renatus' into 'master'
+ - fixed building heat and cool limit
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-923, logical points to be deleted
+ - #RENATUS-923, Logical points to be deleted for fully modulating

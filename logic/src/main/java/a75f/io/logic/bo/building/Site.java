@@ -17,12 +17,13 @@ public class Site
     public String            geoPostalCode;
     public String            geoZip;
     public String            tz;
+    public String            organization;
     public double            area;
     
     public Site() {
     
     }
-    public Site(String name,String city, String state, String country,String zip, String tz, double area) {
+    public Site(String name,String city, String state, String country,String zip, String tz, double area, String org) {
         this.displayName = name;
         this.geoCity = city;
         this.geoState = state;
@@ -30,6 +31,7 @@ public class Site
         this.geoPostalCode = zip;
         this.tz = tz;
         this.area = area;
+        this.organization = org;
     }
     
     public Site (a75f.io.api.haystack.Site s) {
@@ -41,5 +43,6 @@ public class Site
         this.geoAddr = s.getGeoAddress();
         this.tz = s.getTz();
         this.area = s.getArea();
+        this.organization = s.getOrganization();
     }
 }

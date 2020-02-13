@@ -262,11 +262,31 @@
                     android:textSize="19.5dp" />
             </android.support.design.widget.TextInputLayout>
 
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/textInputOrganization"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textInputEmail"
+                android:layout_marginTop="-9dp"
+                app:errorTextAppearance="@style/error_appearance">
+
+                <EditText
+                    android:id="@+id/editFacilityOrganization"
+                    android:layout_width="match_parent"
+                    android:layout_height="42dp"
+                    android:fontFamily="@font/lato_regular"
+                    android:gravity="left|center_vertical"
+                    android:inputType="text"
+                    android:singleLine="true"
+                    android:textColor="@color/input_textcolor"
+                    android:textSize="19.5dp" />
+            </android.support.design.widget.TextInputLayout>
+
             <LinearLayout
                 android:id="@+id/btnSetting"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/textInputEmail"
+                android:layout_below="@+id/textInputOrganization"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentBottom="true"
                 android:layout_marginTop="20dp"
@@ -312,7 +332,7 @@
                 android:id="@+id/buttonNext"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/textInputEmail"
+                android:layout_below="@+id/textInputOrganization"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentBottom="true"
                 android:layout_marginTop="5dp"

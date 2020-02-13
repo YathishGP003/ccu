@@ -295,6 +295,7 @@
     <string name="input_zip">Zip</string>
     <string name="input_ccuname">CCU Name</string>
     <string name="input_facilityemail">Facility Manager Email ID</string>
+    <string name="input_facilityorg">Organization</string>
     <string name="button_next">Next </string>
 
     <!--Installer Option-->

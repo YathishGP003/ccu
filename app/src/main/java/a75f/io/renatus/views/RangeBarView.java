@@ -127,8 +127,9 @@ public class RangeBarView extends LinearLayout {
 
         double diffValue = (coolLL - heatLL);
         if (diffValue <= (hdb + cdb)){
-            coolValue = coolLL + cdb;
-            heatValue = heatLL - hdb;
+            double value = ((hdb + cdb) - diffValue)/2;
+            coolValue = coolLL + value;
+            heatValue = heatLL - value;
         } else {
             coolValue = coolLL;
             heatValue = heatLL;
@@ -161,8 +162,9 @@ public class RangeBarView extends LinearLayout {
 
         double diffValue = (coolLL - heatLL);
         if (diffValue <= (hdb + cdb)){
-            coolValue = coolLL + cdb;
-            heatValue = heatLL - hdb;
+            double value = ((hdb + cdb) - diffValue)/2;
+            coolValue = coolLL + value;
+            heatValue = heatLL - value;
         }else {
             coolValue = coolLL;
             heatValue = heatLL;

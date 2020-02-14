@@ -327,7 +327,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("standalone").addMarker("fan").addMarker("medium").addMarker("his").addMarker("zone")
-                .addMarker("logical").addMarker(profile).addMarker("fcu").addMarker("equipHis").addMarker("cmd")
+                .addMarker("logical").addMarker(profile).addMarker("fcu").addMarker("equipHis").addMarker("cmd").addMarker("runtime")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -340,7 +340,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("standalone").addMarker("fan").addMarker("high").addMarker("his").addMarker("zone")
-                .addMarker("logical").addMarker(profile).addMarker("fcu").addMarker("equipHis").addMarker("cmd")
+                .addMarker("logical").addMarker(profile).addMarker("fcu").addMarker("equipHis").addMarker("cmd").addMarker("runtime")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -353,7 +353,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("standalone").addMarker("aux").addMarker("heating").addMarker("his").addMarker("zone")
-                .addMarker("logical").addMarker(profile).addMarker("fcu").addMarker("equipHis").addMarker("cmd")
+                .addMarker("logical").addMarker(profile).addMarker("fcu").addMarker("equipHis").addMarker("cmd").addMarker("runtime")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -367,7 +367,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("standalone").addMarker("water").addMarker("valve").addMarker("his").addMarker("zone")
-                .addMarker("logical").addMarker(profile).addMarker("fcu").addMarker("equipHis").addMarker("cmd")
+                .addMarker("logical").addMarker(profile).addMarker("fcu").addMarker("equipHis").addMarker("cmd").addMarker("runtime")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -381,7 +381,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("standalone").addMarker("fan").addMarker("low").addMarker("his").addMarker("zone")
-                .addMarker("logical").addMarker(profile).addMarker("fcu").addMarker("equipHis").addMarker("cmd")
+                .addMarker("logical").addMarker(profile).addMarker("fcu").addMarker("equipHis").addMarker("cmd").addMarker("runtime")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();

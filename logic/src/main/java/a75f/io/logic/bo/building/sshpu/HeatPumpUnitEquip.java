@@ -320,7 +320,7 @@ public class HeatPumpUnitEquip{
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("standalone").addMarker("compressor").addMarker("stage1").addMarker("his").addMarker("zone")
-                .addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd")
+                .addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd").addMarker("runtime")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -334,7 +334,7 @@ public class HeatPumpUnitEquip{
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("standalone").addMarker("compressor").addMarker("stage2").addMarker("his").addMarker("zone")
-                .addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd")
+                .addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd").addMarker("runtime")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -348,7 +348,7 @@ public class HeatPumpUnitEquip{
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("standalone").addMarker("aux").addMarker("heating").addMarker("his").addMarker("zone")
-                .addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd")
+                .addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd").addMarker("runtime")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -375,7 +375,7 @@ public class HeatPumpUnitEquip{
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("standalone").addMarker("fan").addMarker("stage1").addMarker("his").addMarker("zone")
-                .addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd")
+                .addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd").addMarker("runtime")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -500,7 +500,7 @@ public class HeatPumpUnitEquip{
         switch (fanRelayType){
             case FAN_STAGE2:
                 Point fanStage2 = new Point.Builder().setDisplayName(equipDis+"-fanStage2").setEquipRef(equipRef).setSiteRef(siteRef).setRoomRef(room).setFloorRef(floor)
-                        .addMarker("standalone").addMarker("fan").addMarker("stage2").addMarker("his").addMarker("zone").addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd")
+                        .addMarker("standalone").addMarker("fan").addMarker("stage2").addMarker("his").addMarker("zone").addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd").addMarker("runtime")
                         .setGroup(String.valueOf(nodeAddr))
                         .setTz(tz)
                         .build();
@@ -510,7 +510,7 @@ public class HeatPumpUnitEquip{
                 break;
             case HUMIDIFIER:
                 Point humidifier = new Point.Builder().setDisplayName(equipDis+"-humidifier").setEquipRef(equipRef).setSiteRef(siteRef).setRoomRef(room).setFloorRef(floor)
-                        .addMarker("standalone").addMarker("humidifier").addMarker("his").addMarker("zone").addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd")
+                        .addMarker("standalone").addMarker("humidifier").addMarker("his").addMarker("zone").addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd").addMarker("runtime")
                         .setGroup(String.valueOf(nodeAddr))
                         .setTz(tz)
                         .build();
@@ -520,7 +520,7 @@ public class HeatPumpUnitEquip{
                 break;
             case DE_HUMIDIFIER:
                 Point dehumidifier = new Point.Builder().setDisplayName(equipDis+"-deHumidifier").setEquipRef(equipRef).setSiteRef(siteRef).setRoomRef(room).setFloorRef(floor)
-                        .addMarker("standalone").addMarker("dehumidifier").addMarker("his").addMarker("zone").addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd")
+                        .addMarker("standalone").addMarker("dehumidifier").addMarker("his").addMarker("zone").addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd").addMarker("runtime")
                         .setGroup(String.valueOf(nodeAddr))
                         .setTz(tz)
                         .build();
@@ -541,7 +541,7 @@ public class HeatPumpUnitEquip{
                         .setSiteRef(siteRef)
                         .setRoomRef(room)
                         .setFloorRef(floor)
-                        .addMarker("standalone").addMarker("heatpump").addMarker("cooling").addMarker("changeover").addMarker("stage1").addMarker("his").addMarker("zone")
+                        .addMarker("standalone").addMarker("heatpump").addMarker("cooling").addMarker("changeover").addMarker("stage1").addMarker("his").addMarker("zone").addMarker("runtime")
                         .addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd")
                         .setGroup(String.valueOf(nodeAddr))
                         .setTz(tz)
@@ -557,7 +557,7 @@ public class HeatPumpUnitEquip{
                         .setSiteRef(siteRef)
                         .setRoomRef(room)
                         .setFloorRef(floor)
-                        .addMarker("standalone").addMarker("heatpump").addMarker("heating").addMarker("changeover").addMarker("stage1").addMarker("his").addMarker("zone")
+                        .addMarker("standalone").addMarker("heatpump").addMarker("heating").addMarker("changeover").addMarker("stage1").addMarker("his").addMarker("zone").addMarker("runtime")
                         .addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd")
                         .setGroup(String.valueOf(nodeAddr))
                         .setTz(tz)
@@ -879,7 +879,7 @@ public class HeatPumpUnitEquip{
                         if ((dehumidifierPt != null) && (dehumidifierPt.size() > 0))
                             CCUHsApi.getInstance().deleteEntityTree(dehumidifierPt.get("id").toString());
                         Point fanStage2 = new Point.Builder().setDisplayName(equip.getDisplayName() + "-fanStage2").setEquipRef(equip.getId()).setSiteRef(siteRef).setRoomRef(equip.getRoomRef()).setFloorRef(equip.getFloorRef())
-                                .addMarker("standalone").addMarker("fan").addMarker("stage2").addMarker("his").addMarker("zone").addMarker("logical").addMarker("hpu").addMarker("equipHis").addMarker("cmd")
+                                .addMarker("standalone").addMarker("fan").addMarker("stage2").addMarker("his").addMarker("zone").addMarker("logical").addMarker("hpu").addMarker("equipHis").addMarker("cmd").addMarker("runtime")
                                 .setGroup(String.valueOf(nodeAddr))
                                 .setTz(equip.getTz())
                                 .build();
@@ -895,7 +895,7 @@ public class HeatPumpUnitEquip{
                         if ((fnStg2Pt != null) && (fnStg2Pt.size() > 0))
                             CCUHsApi.getInstance().deleteEntityTree(fnStg2Pt.get("id").toString());
                         Point humidifier = new Point.Builder().setDisplayName(equipDis + "-humidifier").setEquipRef(equip.getId()).setSiteRef(siteRef).setRoomRef(equip.getRoomRef()).setFloorRef(equip.getFloorRef())
-                                .addMarker("standalone").addMarker("humidifier").addMarker("his").addMarker("zone").addMarker("logical").addMarker("hpu").addMarker("equipHis").addMarker("cmd")
+                                .addMarker("standalone").addMarker("humidifier").addMarker("his").addMarker("zone").addMarker("logical").addMarker("hpu").addMarker("equipHis").addMarker("cmd").addMarker("runtime")
                                 .setGroup(String.valueOf(nodeAddr))
                                 .setTz(tz)
                                 .build();
@@ -911,7 +911,7 @@ public class HeatPumpUnitEquip{
                         if ((fanStage2Pt != null) && (fanStage2Pt.size() > 0))
                             CCUHsApi.getInstance().deleteEntityTree(fanStage2Pt.get("id").toString());
                         Point dehumidifier = new Point.Builder().setDisplayName(equipDis + "-deHumidifier").setEquipRef(equip.getId()).setSiteRef(siteRef).setRoomRef(equip.getRoomRef()).setFloorRef(equip.getFloorRef())
-                                .addMarker("standalone").addMarker("dehumidifier").addMarker("his").addMarker("zone").addMarker("logical").addMarker("hpu").addMarker("equipHis").addMarker("cmd")
+                                .addMarker("standalone").addMarker("dehumidifier").addMarker("his").addMarker("zone").addMarker("logical").addMarker("hpu").addMarker("equipHis").addMarker("cmd").addMarker("runtime")
                                 .setGroup(String.valueOf(nodeAddr))
                                 .setTz(tz)
                                 .build();
@@ -949,7 +949,7 @@ public class HeatPumpUnitEquip{
                                 .setSiteRef(siteRef)
                                 .setRoomRef(equip.getRoomRef())
                                 .setFloorRef(equip.getFloorRef())
-                                .addMarker("standalone").addMarker("heatpump").addMarker("cooling").addMarker("changeover").addMarker("stage1").addMarker("his").addMarker("zone")
+                                .addMarker("standalone").addMarker("heatpump").addMarker("cooling").addMarker("changeover").addMarker("stage1").addMarker("his").addMarker("zone").addMarker("runtime")
                                 .addMarker("logical").addMarker("hpu").addMarker("equipHis").addMarker("cmd")
                                 .setGroup(String.valueOf(nodeAddr))
                                 .setTz(tz)
@@ -969,7 +969,7 @@ public class HeatPumpUnitEquip{
                                 .setSiteRef(siteRef)
                                 .setRoomRef(equip.getRoomRef())
                                 .setFloorRef(equip.getFloorRef())
-                                .addMarker("standalone").addMarker("heatpump").addMarker("heating").addMarker("changeover").addMarker("stage1").addMarker("his").addMarker("zone")
+                                .addMarker("standalone").addMarker("heatpump").addMarker("heating").addMarker("changeover").addMarker("stage1").addMarker("his").addMarker("zone").addMarker("runtime")
                                 .addMarker("logical").addMarker("hpu").addMarker("equipHis").addMarker("cmd")
                                 .setGroup(String.valueOf(nodeAddr))
                                 .setTz(tz)

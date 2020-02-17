@@ -1,6 +1,2 @@
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-911, CCU Registration update device id and organization
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-922, COV changes
- - Merge branch 'mahesh_renatus' into 'master'
- - RENATUS-921, RENATUS-612 fixed
+ - #RENATUS-923, Logical points didnt create

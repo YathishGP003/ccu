@@ -19,6 +19,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.ZoneTempState;
 import a75f.io.logic.pubnub.ZoneDataInterface;
@@ -54,8 +55,10 @@ public class StandaloneScheduler {
         if(curOccu != null) {
             occ.setPreconditioning(curOccu.isPreconditioning());
             occ.setForcedOccupied(curOccu.isForcedOccupied());
+            occ.setSystemZone(curOccu.isSystemZone());
         }
 
+        double occuStatus = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and mode and equipRef == \""+equip.getId()+"\"");
 
         double heatingDeadBand = StandaloneTunerUtil.readTunerValByQuery("heating and deadband", equip.getId());
         double coolingDeadBand = StandaloneTunerUtil.readTunerValByQuery("cooling and deadband", equip.getId());
@@ -64,6 +67,12 @@ public class StandaloneScheduler {
         occ.setUnoccupiedZoneSetback(setback);
         occ.setHeatingDeadBand(heatingDeadBand);
         occ.setCoolingDeadBand(coolingDeadBand);
+        Occupancy curOccupancy = Occupancy.values()[(int)occuStatus];
+        if(curOccupancy == Occupancy.PRECONDITIONING)
+            occ.setPreconditioning(true);
+        else if(curOccupancy == Occupancy.FORCEDOCCUPIED)
+            occ.setForcedOccupied(true);
+        CcuLog.d("ZoneScheduler", "Equip: " + equip.getDisplayName()+","+occ.isPreconditioning()+","+occ.isForcedOccupied()+","+equip.getId());
         if (occ != null && ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ)) {
             double avgTemp = (occ.getCoolingVal()+occ.getHeatingVal())/2.0;
             double deadbands = (occ.getCoolingVal() - occ.getHeatingVal()) / 2.0 ;

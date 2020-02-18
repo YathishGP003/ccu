@@ -150,9 +150,6 @@ public class HisSyncHandler
                     continue;
         
                 }
-
-
-                ArrayList<HisItem> hisItems = (ArrayList<HisItem>) hayStack.tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
                 if ((now.getMinuteOfDay() % 15) == 0) {//Sync all his items
                     HisItem hisVal = hayStack.tagsDb.getLastHisItem(HRef.copy(pointID));
                     if (hisVal == null || !hisVal.initialized) {
@@ -164,20 +161,21 @@ public class HisSyncHandler
                     {
                         hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
                     }
-                }else if (hisItems.size() > 0) {
-                    HisItem sItem = hisItems.get(hisItems.size()-1); //Writing just the recent val?
-                    tsData.put( pointGUID.replace("@",""), String.valueOf(sItem.getVal()));
-                    for (HisItem item: hisItems)
-                    {
-                        item.setSyncStatus(true);
-                    }
-                    hayStack.tagsDb.setHisItemSyncStatus(hisItems);
-                    if (now.getMinuteOfDay() == 0)
-                    {
-                        hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
-                    }
-                }else
-                    continue;
+                }else {
+                    ArrayList<HisItem> hisItems = (ArrayList<HisItem>) hayStack.tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
+                    if (hisItems.size() > 0) {
+                        HisItem sItem = hisItems.get(hisItems.size() - 1); //Writing just the recent val?
+                        tsData.put(pointGUID.replace("@", ""), String.valueOf(sItem.getVal()));
+                        for (HisItem item : hisItems) {
+                            item.setSyncStatus(true);
+                        }
+                        hayStack.tagsDb.setHisItemSyncStatus(hisItems);
+                        if (now.getMinuteOfDay() == 0) {
+                            hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
+                        }
+                    }else
+                        continue;
+                }
     
 
                 
@@ -242,7 +240,6 @@ public class HisSyncHandler
                     continue;
                 
                 }
-                ArrayList<HisItem> hisItems = (ArrayList<HisItem>) hayStack.tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
                 if(syncAllHisItemsNow){
                     HisItem hisVal = hayStack.tagsDb.getLastHisItem(HRef.copy(pointID));
                     if (hisVal == null || !hisVal.initialized) {
@@ -252,18 +249,20 @@ public class HisSyncHandler
                     tsData.put( pointGUID.replace("@",""), String.valueOf(hisVal.getVal()));
 
                     hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
-                }else if (hisItems.size() > 0) {
-                    HisItem sItem = hisItems.get(hisItems.size()-1);//TODO - Writing just the recent his val?
-                    tsData.put( pointGUID.replace("@",""), String.valueOf(sItem.getVal()));
+                }else {
+                    ArrayList<HisItem> hisItems = (ArrayList<HisItem>) hayStack.tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
+                    if (hisItems.size() > 0) {
+                        HisItem sItem = hisItems.get(hisItems.size() - 1);//TODO - Writing just the recent his val?
+                        tsData.put(pointGUID.replace("@", ""), String.valueOf(sItem.getVal()));
 
-                    for (HisItem item: hisItems)
-                    {
-                        item.setSyncStatus(true);
-                    }
-                    hayStack.tagsDb.setHisItemSyncStatus(hisItems);
-                    hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
-                }else
-                    continue;
+                        for (HisItem item : hisItems) {
+                            item.setSyncStatus(true);
+                        }
+                        hayStack.tagsDb.setHisItemSyncStatus(hisItems);
+                        hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
+                    }else
+                        continue;
+                }
             
                 /*HisItem hisVal = hayStack.tagsDb.getLastHisItem(HRef.copy(pointID));
                 if (hisVal == null || !hisVal.initialized) {

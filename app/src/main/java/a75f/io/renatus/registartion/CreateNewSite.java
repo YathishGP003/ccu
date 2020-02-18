@@ -381,7 +381,7 @@ public class CreateNewSite extends Fragment {
             String siteCountry = site.get("geoCountry").toString();
             String siteZipCode = site.get("geoPostalCode").toString();
             String siteTz = site.get("tz").toString();
-            String siteOrg = site.get("organization").toString();
+            String siteOrg = site.get("organization") != null ? site.get("organization").toString(): "";
 
             mSiteName.setText(siteName);
             mStreetAdd.setText(siteAdd);
@@ -448,7 +448,7 @@ public class CreateNewSite extends Fragment {
             protected String doInBackground(Void... voids) {
 
                 Log.d("CCURegInfo","createNewSite Edit backgroundtask="+ccuRegInfo);
-                return  HttpUtil.executeJSONPost("https://caretaker-75f-service-dev.azurewebsites.net/api/v1/device/register",ccuRegInfo);
+                return  HttpUtil.executeJSONPost(CCUHsApi.getInstance().getAuthenticationUrl()+"api/v1/device/register",ccuRegInfo);
             }
 
             @Override
@@ -630,8 +630,6 @@ public class CreateNewSite extends Fragment {
                 .setArea(10000).build();
 
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
-        ccuHsApi = CCUHsApi.getInstance();
-        //String localSiteId = CCUHsApi.getInstance().addSite(s75f);
         String localSiteId = ccuHsApi.addSite(s75f);
         Log.i(TAG, "LocalSiteID: " + localSiteId + " tz " + s75f.getTz());
         BuildingTuners.getInstance();

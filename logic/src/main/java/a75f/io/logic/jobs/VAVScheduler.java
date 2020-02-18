@@ -45,6 +45,7 @@ public class VAVScheduler {
         occ.setVacation(vacation);
         occ.setSystemZone(true);
 
+        double occuStatus = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and mode and equipRef == \""+equip.getId()+"\"");
         double heatingDeadBand = TunerUtil.readTunerValByQuery("heating and deadband and base", equip.getId());
         double coolingDeadBand = TunerUtil.readTunerValByQuery("cooling and deadband and base", equip.getId());
         double setback = TunerUtil.readTunerValByQuery("unoccupied and setback", equip.getId());
@@ -52,16 +53,21 @@ public class VAVScheduler {
         occ.setHeatingDeadBand(heatingDeadBand);
         occ.setCoolingDeadBand(coolingDeadBand);
         occ.setUnoccupiedZoneSetback(setback);
+        Occupancy curOccupancy = Occupancy.values()[(int)occuStatus];
+        if(curOccupancy == Occupancy.PRECONDITIONING)
+            occ.setPreconditioning(true);
+        else if(curOccupancy == Occupancy.FORCEDOCCUPIED)
+            occ.setForcedOccupied(true);
         if (occ != null && ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ)) {
             double avgTemp = (occ.getCoolingVal()+occ.getHeatingVal())/2.0;
             double deadbands = (occ.getCoolingVal() - occ.getHeatingVal()) / 2.0 ;
             occ.setCoolingDeadBand(deadbands);
             occ.setHeatingDeadBand(deadbands);
-            Double coolingTemp = (occ.isOccupied() || (systemOcc == Occupancy.PRECONDITIONING) || (systemOcc == Occupancy.FORCEDOCCUPIED)) ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback());
+            Double coolingTemp = (occ.isOccupied() || occ.isPreconditioning() || occ.isForcedOccupied() || (systemOcc == Occupancy.PRECONDITIONING) || (systemOcc == Occupancy.FORCEDOCCUPIED)) ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback());
 
             setDesiredTemp(equip, coolingTemp, "cooling");
 
-            Double heatingTemp = (occ.isOccupied() || (systemOcc == Occupancy.PRECONDITIONING) || (systemOcc == Occupancy.FORCEDOCCUPIED)) ? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
+            Double heatingTemp = (occ.isOccupied() || occ.isPreconditioning() || occ.isForcedOccupied() || (systemOcc == Occupancy.PRECONDITIONING) || (systemOcc == Occupancy.FORCEDOCCUPIED)) ? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
             setDesiredTemp(equip, heatingTemp, "heating");
             setDesiredTemp(equip, avgTemp, "average");
         }

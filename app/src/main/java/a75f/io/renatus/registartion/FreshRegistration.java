@@ -322,7 +322,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 }
                 if (currentFragment instanceof CongratsFragment) {
                     prefs.setBoolean("REGISTRATION", true);
-                    //updateCCURegistrationInfo();
+                    updateCCURegistrationInfo();
 
                     AlertManager.getInstance().fetchAllPredefinedAlerts();
                     Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
@@ -1255,26 +1255,32 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 try {
                     HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
                     HashMap site = CCUHsApi.getInstance().read("site");
-                    String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
-                    String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
-                    JSONObject ccuRegInfo = new JSONObject();
-                    ccuRegInfo.put("deviceId", ccuGUID);
-                    ccuRegInfo.put("deviceName",ccu.get("dis").toString());
-                    ccuRegInfo.put("siteId",siteGUID);
-                    ccuRegInfo.put("siteName",site.get("dis").toString());
-                    ccuRegInfo.put("facilityManagerEmail",ccu.get("fmEmail").toString());
-                    ccuRegInfo.put("installerEmail",ccu.get("fmEmail").toString());
-                    JSONObject locInfo = new JSONObject();
-                    locInfo.put("geoCity",site.get("geoCity").toString());
-                    locInfo.put("geoCountry",site.get("geoCountry").toString());
-                    locInfo.put("geoState",site.get("geoState").toString());
-                    locInfo.put("geoAddr",site.get("geoAddr").toString());
-                    locInfo.put("geoPostalCode",site.get("geoPostalCode").toString());
-                    ccuRegInfo.put("locationDetails",locInfo);
+                    if(site.size() > 0) {
+                        String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
+                        JSONObject ccuRegInfo = new JSONObject();
+                        ccuRegInfo.put("siteId", siteGUID);
+                        ccuRegInfo.put("siteName", site.get("dis").toString());
+                        JSONObject locInfo = new JSONObject();
+                        locInfo.put("geoCity", site.get("geoCity").toString());
+                        locInfo.put("geoCountry", site.get("geoCountry").toString());
+                        locInfo.put("geoState", site.get("geoState").toString());
+                        locInfo.put("geoAddr", site.get("geoAddr").toString());
+                        locInfo.put("geoPostalCode", site.get("geoPostalCode").toString());
+                        if(site.get("organization") != null)
+                            locInfo.put("organization", site.get("organization").toString());
+                        if(ccu.size() > 0) {
+                            String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
+                            ccuRegInfo.put("deviceId", ccuGUID);
+                            ccuRegInfo.put("deviceName", ccu.get("dis").toString());
+                            ccuRegInfo.put("facilityManagerEmail", ccu.get("fmEmail").toString());
+                            ccuRegInfo.put("installerEmail", ccu.get("fmEmail").toString());
+                            ccuRegInfo.put("locationDetails", locInfo);
 
 
-                    response = HttpUtil.executeJSONPost("https://caretaker-75f-service-dev.azurewebsites.net/api/v1/device/register",ccuRegInfo.toString());
-                    Log.d("CCURegistration", " Response : "+response);
+                            response = HttpUtil.executeJSONPost(CCUHsApi.getInstance().getAuthenticationUrl() + "api/v1/device/register", ccuRegInfo.toString());
+                            Log.d("CCURegistration", " Response : " + response);
+                        }
+                    }
                 }catch (JSONException e){
                     e.printStackTrace();
                 }

@@ -63,6 +63,7 @@ public class CCUHsApi
     
     String hayStackUrl = "";
     String influxUrl = "";
+    String careTakerUrl ="";
     
     HRef tempWeatherRef = null;
     HRef humidityWeatherRef = null;
@@ -129,13 +130,38 @@ public class CCUHsApi
                 case "PROD":
                 default:
                     hayStackUrl = "https://haystack-75f-service.azurewebsites.net/";
+                    break;
                  
             }
         }
         
         return hayStackUrl;
     }
-    
+    public String getAuthenticationUrl() {
+        if (careTakerUrl.equals(""))
+        {
+            SharedPreferences sprefs = PreferenceManager.getDefaultSharedPreferences(cxt);
+            switch (sprefs.getString("SERVER_ENV", "")) {
+                case "QA":
+                    careTakerUrl = "https://caretaker-75f-service-qa.azurewebsites.net/";
+                    break;
+                case "DEV":
+                    careTakerUrl = "https://caretaker-75f-service-dev.azurewebsites.net/";
+                    break;
+
+                case "STAGING":
+                    careTakerUrl = "https://caretaker-75f-service-staging.azurewebsites.net/";
+                    break;
+                case "PROD":
+                default:
+                    careTakerUrl = "https://caretaker-75f-service.azurewebsites.net/";
+                    break;
+
+            }
+        }
+        Log.d("PRODUCT FLAVOUR","careTakerUrl url="+careTakerUrl);
+        return careTakerUrl;
+    }
     public String getInfluxUrl() {
         if (influxUrl.equals(""))
         {
@@ -155,6 +181,7 @@ public class CCUHsApi
                 case "PROD":
                 default:
                     influxUrl = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("influx-75f-objectstore-prod.northcentralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
+                    break;
             }
         }
     

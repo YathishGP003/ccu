@@ -493,7 +493,7 @@ public class DabSystemController extends SystemController
             if(equip.getMarkers().contains("dab") || equip.getMarkers().contains("ti")) {
                 double tempVal = hayStack.readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + q.get("id") + "\"");
                 hasTi = !hasTi ? equip.getMarkers().contains("ti") : true;
-                if (!isZoneDead(equip) && tempVal > 0) {
+                if (!isZoneDead(equip) && (tempVal > 0)) {
                     tempSum += tempVal;
                     tempZones++;
                 }

@@ -224,7 +224,7 @@ public abstract class SystemProfile
                 .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz).build();
         String cmTempInfPercentileZonesDeadId = hayStack.addPoint(cmTempInfPercentileZonesDead);
-        HashMap cmTempInfPercentileZonesDeadPoint = hayStack.read("point and tuner and default and zone and percent and dead and influence");
+        HashMap cmTempInfPercentileZonesDeadPoint = hayStack.read("point and tuner and default and percent and dead and influence");
         ArrayList<HashMap> cmTempInfPercentileZonesDeadPointArr = hayStack.readPoint(cmTempInfPercentileZonesDeadPoint.get("id").toString());
         for (HashMap valMap : cmTempInfPercentileZonesDeadPointArr)
         {

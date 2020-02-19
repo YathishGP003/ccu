@@ -164,7 +164,7 @@ public class BuildingTuners
                                                    .setSiteRef(siteRef)
                                                    .setEquipRef(equipRef)
                                                    .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
-                                                   .addMarker("system").addMarker("zone").addMarker("temp").addMarker("dead").addMarker("leeway").addMarker("sp")
+                                                   .addMarker("temp").addMarker("dead").addMarker("leeway").addMarker("sp")
                                                    .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                                    .setUnit("\u00B0F")
                                                    .setTz(tz)
@@ -261,7 +261,7 @@ public class BuildingTuners
                                                 .setSiteRef(siteRef)
                                                 .setEquipRef(equipRef)
                                                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
-                                                .addMarker("system").addMarker("zone").addMarker("dead").addMarker("percent").addMarker("influence").addMarker("sp")
+                                                .addMarker("dead").addMarker("percent").addMarker("influence").addMarker("sp")
                                                 .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                                 .setTz(tz)
                                                 .build();
@@ -310,6 +310,20 @@ public class BuildingTuners
         String forcedOccupiedTimeId = hayStack.addPoint(forcedOccupiedTime);
         hayStack.writePoint(forcedOccupiedTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 120.0, 0);
         hayStack.writeHisValById(forcedOccupiedTimeId, 120.0);
+
+        Point cmResetCommand  = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"cmResetCommandTimer")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("reset").addMarker("command").addMarker("time").addMarker("sp")
+                .setMinVal("0").setMaxVal("300").setIncrementVal("1").setTunerGroup(TunerConstants.TIMER_TUNER)
+                .setUnit("m")
+                .setTz(tz)
+                .build();
+        String cmResetCommandId = hayStack.addPoint(cmResetCommand);
+        hayStack.writePoint(cmResetCommandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 90.0, 0);
+        hayStack.writeHisValById(cmResetCommandId, 90.0);
 
         Point adrCoolingDeadband  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"adrCoolingDeadband")
@@ -2908,7 +2922,7 @@ public class BuildingTuners
         }
         hayStack.writeHisValById(zoneVOCThresholdId, HSUtil.getPriorityVal(zoneVOCThresholdId));
 
-        Point rebalanceHoldTime = new Point.Builder()
+        /*Point rebalanceHoldTime = new Point.Builder()
                 .setDisplayName(equipDis+"-DAB-"+"rebalanceHoldTime")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
@@ -2928,7 +2942,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(rebalanceHoldTimeId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
-        hayStack.writeHisValById(rebalanceHoldTimeId, HSUtil.getPriorityVal(rebalanceHoldTimeId));
+        hayStack.writeHisValById(rebalanceHoldTimeId, HSUtil.getPriorityVal(rebalanceHoldTimeId));*/
     
     }
     public void addEquipTiTuners(String equipdis, String equipref, String roomRef, String floorRef) {

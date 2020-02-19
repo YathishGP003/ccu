@@ -122,19 +122,27 @@ public abstract class DabSystemProfile extends SystemProfile
         }
         hayStack.writeHisValById(relayDeactivationHysteresisId, HSUtil.getPriorityVal(relayDeactivationHysteresisId));
     
-        Point humidityCompensationOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "humidityCompensationOffset").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("humidity").addMarker("compensation").addMarker("offset").addMarker("sp").addMarker("equipHis").setTz(tz).build();
-        String humidityCompensationOffsetId = hayStack.addPoint(humidityCompensationOffset);
-        HashMap humidityCompensationOffsetPoint = hayStack.read("point and tuner and default and humidity and compensation and offset");
-        ArrayList<HashMap> humidityCompensationOffsetArr = hayStack.readPoint(humidityCompensationOffsetPoint.get("id").toString());
-        for (HashMap valMap : humidityCompensationOffsetArr)
-        {
+        Point rebalanceHoldTime = new Point.Builder()
+                .setDisplayName(HSUtil.getDis(equipref)+"-DAB-"+"rebalanceHoldTime")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("rebalance").addMarker("hold").addMarker("time").addMarker("sp").addMarker("system")
+                .setMinVal("1").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                .setUnit("m")
+                .setTz(tz)
+                .build();
+        String rebalanceHoldTimeId = hayStack.addPoint(rebalanceHoldTime);
+
+        HashMap rebalanceHoldTimePoint = hayStack.read("point and tuner and default and rebalance and hold and time");
+        ArrayList<HashMap> rebalanceHoldTimeArr = hayStack.readPoint(rebalanceHoldTimePoint.get("id").toString());
+        for (HashMap valMap : rebalanceHoldTimeArr) {
             if (valMap.get("val") != null)
             {
-                hayStack.pointWrite(HRef.copy(humidityCompensationOffsetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                //hayStack.writeHisValById(humidityCompensationOffsetId, Double.parseDouble(valMap.get("val").toString()));
+                hayStack.pointWrite(HRef.copy(rebalanceHoldTimeId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
-        hayStack.writeHisValById(humidityCompensationOffsetId, HSUtil.getPriorityVal(humidityCompensationOffsetId));
+        hayStack.writeHisValById(rebalanceHoldTimeId, HSUtil.getPriorityVal(rebalanceHoldTimeId));
     }
     
     protected void addUserIntentPoints(String equipref)

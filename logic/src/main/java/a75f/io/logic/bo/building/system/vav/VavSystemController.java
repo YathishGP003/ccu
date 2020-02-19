@@ -151,7 +151,7 @@ public class VavSystemController extends SystemController
             }
         
         }
-        double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("zone and dead and percent and influence",L.ccu().systemProfile.getSystemEquipRef());
+        double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("dead and percent and influence",L.ccu().systemProfile.getSystemEquipRef());
         if(zoneDeadCount > 0 )
             CcuLog.d(L.TAG_CCU_SYSTEM, "VavSysController = "+hasTi+","+zoneDeadCount+","+zoneCount+","+cmTempInfForPercentileZonesDead+","+((zoneDeadCount*100)/(zoneDeadCount + zoneCount)));
         if((zoneCount == 0) || (!hasTi && ((zoneDeadCount > 0) && (((zoneDeadCount*100)/(zoneDeadCount + zoneCount)) >= cmTempInfForPercentileZonesDead)))){
@@ -579,7 +579,7 @@ public class VavSystemController extends SystemController
                 totalEquips++;
             }
         }
-        double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("zone and dead and percent and influence",L.ccu().systemProfile.getSystemEquipRef());
+        double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("dead and percent and influence",L.ccu().systemProfile.getSystemEquipRef());
 
 
         if(totalEquips > 0)

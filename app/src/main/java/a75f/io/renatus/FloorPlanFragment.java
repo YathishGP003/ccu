@@ -331,7 +331,8 @@ public class FloorPlanFragment extends Fragment
 
 	@SuppressLint("StaticFieldLeak")
 	public void getBuildingFloorsZones(String enableKeyboard) {
-		ProgressDialogUtils.showProgressDialog(getContext(), "Fetching floors and zones...");
+		loadExistingZones();
+	//	ProgressDialogUtils.showProgressDialog(getContext(), "Fetching floors and zones...");
 		new AsyncTask<String, Void,Void>(){
 
 			@Override
@@ -391,7 +392,7 @@ public class FloorPlanFragment extends Fragment
 
 				} catch (CallException e) {
 					Log.d(L.TAG_CCU_UI, "Failed to fetch room data "+e.getMessage());
-					ProgressDialogUtils.hideProgressDialog();
+					//ProgressDialogUtils.hideProgressDialog();
 					e.printStackTrace();
 				}
 				
@@ -401,17 +402,30 @@ public class FloorPlanFragment extends Fragment
 
 			@Override
 			protected void onPostExecute(Void aVoid) {
-				ProgressDialogUtils.hideProgressDialog();
+				/*ProgressDialogUtils.hideProgressDialog();
 				if (!TextUtils.isEmpty(enableKeyboard) && (enableKeyboard.contains("room") || enableKeyboard.contains("floor"))){
 					InputMethodManager mgr =
 							(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 					mgr.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
-				}
+				}*/
 				super.onPostExecute(aVoid);
 			}
 		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
-	
+
+	private void loadExistingZones() {
+		siteFloorList.clear();
+		siteRoomList.clear();
+		ArrayList<Floor> floorList = HSUtil.getFloors();
+		siteFloorList.addAll(floorList);
+		for (Floor f: floorList){
+			ArrayList<Zone> zoneList = HSUtil.getZones(f.getId());
+			for (Zone zone:zoneList){
+				siteRoomList.add(zone.getDisplayName());
+			}
+		}
+	}
+
 	private void selectRoom(int position)
 	{
 		mRoomListAdapter.setSelectedItem(position);

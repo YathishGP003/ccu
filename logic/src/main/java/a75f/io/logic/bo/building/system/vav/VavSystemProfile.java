@@ -136,7 +136,7 @@ public abstract class VavSystemProfile extends SystemProfile
         }
         hayStack.writeHisValById(relayDeactivationHysteresisId, HSUtil.getPriorityVal(relayDeactivationHysteresisId));
     
-        Point humidityCompensationOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "humidityCompensationOffset").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("humidity").addMarker("compensation").addMarker("offset").addMarker("sp").addMarker("equipHis")
+        /*Point humidityCompensationOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "humidityCompensationOffset").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("humidity").addMarker("compensation").addMarker("offset").addMarker("sp").addMarker("equipHis")
                 .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setTz(tz).build();
         String humidityCompensationOffsetId = hayStack.addPoint(humidityCompensationOffset);
@@ -150,7 +150,7 @@ public abstract class VavSystemProfile extends SystemProfile
                 //hayStack.writeHisValById(humidityCompensationOffsetId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-        hayStack.writeHisValById(humidityCompensationOffsetId, HSUtil.getPriorityVal(humidityCompensationOffsetId));
+        hayStack.writeHisValById(humidityCompensationOffsetId, HSUtil.getPriorityVal(humidityCompensationOffsetId));*/
     }
     
     protected void addUserIntentPoints(String equipref)

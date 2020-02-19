@@ -190,61 +190,6 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(userLimitSpreadId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-    
-        /*Point buildingLimitMin = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "buildingLimitMin").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("building").addMarker("limit").addMarker("min").addMarker("sp").addMarker("equipHis").setUnit("\u00B0F").setTz(tz).build();
-        String buildingLimitMinId = hayStack.addPoint(buildingLimitMin);
-        HashMap buildingLimitMinPoint = hayStack.read("point and tuner and default and building and limit and min");
-        ArrayList<HashMap> buildingLimitMinPointArr = hayStack.readPoint(buildingLimitMinPoint.get("id").toString());
-        for (HashMap valMap : buildingLimitMinPointArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(buildingLimitMinId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(buildingLimitMinId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
-    
-        Point buildingLimitMax = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "buildingLimitMax").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("building").addMarker("limit").addMarker("max").addMarker("sp").addMarker("equipHis").setUnit("\u00B0F").setTz(tz).build();
-        String buildingLimitMaxId = hayStack.addPoint(buildingLimitMax);
-        HashMap buildingLimitMaxPoint = hayStack.read("point and tuner and default and building and limit and max");
-        ArrayList<HashMap> buildingLimitMaxPointArr = hayStack.readPoint(buildingLimitMaxPoint.get("id").toString());
-        for (HashMap valMap : buildingLimitMaxPointArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(buildingLimitMaxId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(buildingLimitMaxId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
-    
-        Point buildingToZoneDifferential = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "buildingToZoneDifferential").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("building").addMarker("zone").addMarker("differential").addMarker("sp").addMarker("equipHis").setTz(tz).build();
-        String buildingToZoneDifferentialId = hayStack.addPoint(buildingToZoneDifferential);
-        HashMap buildingToZoneDifferentialPoint = hayStack.read("point and tuner and default and building and zone and differential");
-        ArrayList<HashMap> buildingToZoneDifferentialPointArr = hayStack.readPoint(buildingToZoneDifferentialPoint.get("id").toString());
-        for (HashMap valMap : buildingToZoneDifferentialPointArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(buildingToZoneDifferentialId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(buildingToZoneDifferentialId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
-    
-        Point zoneTemperatureDeadLeeway = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "zoneTemperatureDeadLeeway").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("zone").addMarker("temp").addMarker("dead").addMarker("leeway").addMarker("sp").addMarker("equipHis").setTz(tz).build();
-        Point zoneTemperatureDeadLeeway = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "zoneTemperatureDeadLeeway").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("zone").addMarker("temp").addMarker("dead").addMarker("leeway").addMarker("sp").addMarker("equipHis")
-                .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                .setTz(tz).build();
-        String zoneTemperatureDeadLeewayId = hayStack.addPoint(zoneTemperatureDeadLeeway);
-        HashMap zoneTemperatureDeadLeewayPoint = hayStack.read("point and tuner and default and zone and temp and dead and leeway");
-        ArrayList<HashMap> zoneTemperatureDeadLeewayPointArr = hayStack.readPoint(zoneTemperatureDeadLeewayPoint.get("id").toString());
-        for (HashMap valMap : zoneTemperatureDeadLeewayPointArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(zoneTemperatureDeadLeewayId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(zoneTemperatureDeadLeewayId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }*/
         
         Point heatingPreconditioningRate = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "heatingPreconditioningRate").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("heating").addMarker("precon").addMarker("rate").addMarker("sp").addMarker("equipHis")
                 .setMinVal("0").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
@@ -703,92 +648,47 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(heartBeatsToSkipId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-
-        addDefaultDabSystemTuners();
-    }
-
-    public void addDefaultDabSystemTuners() {
-        Point targetCumulativeDamper = new Point.Builder()
-                .setDisplayName(equipDis + "-DAB-" + "targetCumulativeDamper")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("system")
-                .addMarker("target").addMarker("cumulative").addMarker("damper").addMarker("sp")
-                .setUnit("%")
-                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
-                .setTz(tz)
-                .build();
-        String targetCumulativeDamperId = hayStack.addPoint(targetCumulativeDamper);
-        hayStack.writePoint(targetCumulativeDamperId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.TARGET_CUMULATIVE_DAMPER, 0);
-        hayStack.writeHisValById(targetCumulativeDamperId, TunerConstants.TARGET_CUMULATIVE_DAMPER);
-
-        Point analogFanSpeedMultiplier = new Point.Builder()
-                .setDisplayName(equipDis + "-DAB-" + "analogFanSpeedMultiplier")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("system")
-                .addMarker("analog").addMarker("fan").addMarker("speed").addMarker("multiplier").addMarker("sp")
-                .setMinVal("0.1").setMaxVal("3.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
-                .setTz(tz)
-                .build();
-        String analogFanSpeedMultiplierId = hayStack.addPoint(analogFanSpeedMultiplier);
-        hayStack.writePoint(analogFanSpeedMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ANALOG_FANSPEED_MULTIPLIER, 0);
-        hayStack.writeHisValById(analogFanSpeedMultiplierId, TunerConstants.ANALOG_FANSPEED_MULTIPLIER);
-
-        Point humidityHysteresis = new Point.Builder()
-                .setDisplayName(equipDis + "-DAB-" + "humidityHysteresis")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("system")
-                .addMarker("humidity").addMarker("hysteresis").addMarker("sp")
-                .setUnit("%")
-                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
-                .setTz(tz)
-                .build();
-        String humidityHysteresisId = hayStack.addPoint(humidityHysteresis);
-        hayStack.writePoint(humidityHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.HUMIDITY_HYSTERESIS_PERCENT, 0);
-        hayStack.writeHisValById(humidityHysteresisId, TunerConstants.HUMIDITY_HYSTERESIS_PERCENT);
-
-        Point relayDeactivationHysteresis = new Point.Builder()
-                .setDisplayName(equipDis + "-DAB-" + "relayDeactivationHysteresis")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("system")
-                .addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp")
-                .setUnit("%")
-                .setMinVal("0").setMaxVal("10").setIncrementVal("0.5").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
-                .setTz(tz)
-                .build();
-        String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
-        hayStack.writePoint(relayDeactivationHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.RELAY_DEACTIVATION_HYSTERESIS, 0);
-        hayStack.writeHisValById(relayDeactivationHysteresisId, TunerConstants.RELAY_DEACTIVATION_HYSTERESIS);
-
-        Point humidityCompensationOffset = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"humidityCompensationOffset")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("system")
-                .addMarker("system").addMarker("humidity").addMarker("compensation").addMarker("offset").addMarker("sp")
-                .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                .setTz(tz)
-                .build();
+        Point cmResetCommandTime = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "cmResetCommandTimer").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("reset").addMarker("command").addMarker("time").addMarker("equipHis")
+                .setMinVal("0").setMaxVal("300").setIncrementVal("1").setTunerGroup(TunerConstants.TIMER_TUNER).setUnit("m")
+                .setTz(tz).build();
+        String cmResetCommandTimeId = hayStack.addPoint(cmResetCommandTime);
+        HashMap cmResetCommandTimePoint = hayStack.read("point and tuner and default and reset and command and time");
+        ArrayList<HashMap> cmResetCommandTimeArr = hayStack.readPoint(cmResetCommandTimePoint.get("id").toString());
+        for (HashMap valMap : cmResetCommandTimeArr)
+        {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(cmResetCommandTimeId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                hayStack.writeHisValById(cmResetCommandTimeId, Double.parseDouble(valMap.get("val").toString()));
+            }
+        }
+        Point zoneTempDeadLeeway = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "zoneTemperatureDeadLeeway").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("temp").addMarker("dead").addMarker("leeway").addMarker("sp").addMarker("equipHis")
+                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP).setUnit("\u00B0F")
+                .setTz(tz).build();
+        String zoneTempDeadLeewayId = hayStack.addPoint(zoneTempDeadLeeway);
+        HashMap zoneTempDeadLeewayPoint = hayStack.read("point and tuner and default and temp and dead and leeway");
+        ArrayList<HashMap> zoneTempDeadLeewayArr = hayStack.readPoint(zoneTempDeadLeewayPoint.get("id").toString());
+        for (HashMap valMap : zoneTempDeadLeewayArr)
+        {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(zoneTempDeadLeewayId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                hayStack.writeHisValById(zoneTempDeadLeewayId, Double.parseDouble(valMap.get("val").toString()));
+            }
+        }
+        Point humidityCompensationOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "humidityCompensationOffset").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("humidity").addMarker("compensation").addMarker("offset").addMarker("sp").addMarker("equipHis").setTz(tz).build();
         String humidityCompensationOffsetId = hayStack.addPoint(humidityCompensationOffset);
-        hayStack.writePoint(humidityCompensationOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
-        hayStack.writeHisValById(humidityCompensationOffsetId, 0.0);
-
-        Point rebalanceHoldTime = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"rebalanceHoldTime")
-                .setSiteRef(siteRef)
-                .setEquipRef(equipRef)
-                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("system")
-                .addMarker("system").addMarker("rebalance").addMarker("hold").addMarker("time").addMarker("sp")
-                .setMinVal("1").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
-                .setUnit("m")
-                .setTz(tz)
-                .build();
-        String rebalanceHoldTimeId = hayStack.addPoint(rebalanceHoldTime);
-        hayStack.writePoint(rebalanceHoldTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 20.0, 0);
-        hayStack.writeHisValById(rebalanceHoldTimeId, 20.0);
+        HashMap humidityCompensationOffsetPoint = hayStack.read("point and tuner and default and humidity and compensation and offset");
+        ArrayList<HashMap> humidityCompensationOffsetArr = hayStack.readPoint(humidityCompensationOffsetPoint.get("id").toString());
+        for (HashMap valMap : humidityCompensationOffsetArr)
+        {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(humidityCompensationOffsetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                //hayStack.writeHisValById(humidityCompensationOffsetId, Double.parseDouble(valMap.get("val").toString()));
+            }
+        }
+        hayStack.writeHisValById(humidityCompensationOffsetId, HSUtil.getPriorityVal(humidityCompensationOffsetId));
     }
     
     public void updateGatewayRef(String systemEquipId)

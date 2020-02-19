@@ -143,7 +143,7 @@ public class DabSystemController extends SystemController
             }
             
         }
-        double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("zone and dead and percent and influence",L.ccu().systemProfile.getSystemEquipRef());
+        double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("dead and percent and influence",L.ccu().systemProfile.getSystemEquipRef());
         if(zoneDeadCount > 0)
         CcuLog.d(L.TAG_CCU_SYSTEM, "DabSysController = "+hasTi+","+zoneDeadCount+","+zoneCount+","+cmTempInfForPercentileZonesDead);
         if( (zoneCount == 0) || (!hasTi && ((zoneDeadCount > 0) && (((zoneDeadCount*100)/(zoneDeadCount + zoneCount)) >= cmTempInfForPercentileZonesDead)))){
@@ -500,7 +500,7 @@ public class DabSystemController extends SystemController
                 totalEquips++;
             }
         }
-        double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("zone and dead and percent and influence",L.ccu().systemProfile.getSystemEquipRef());
+        double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("dead and percent and influence",L.ccu().systemProfile.getSystemEquipRef());
         if( (totalEquips == 0) || (!hasTi && ((((totalEquips -tempZones )*100)/(totalEquips)) >= cmTempInfForPercentileZonesDead))){
             double cmTemp = getCMCurrentTemp(L.ccu().systemProfile.getSystemEquipRef());
             if(!isCMTempDead(cmTemp)) {

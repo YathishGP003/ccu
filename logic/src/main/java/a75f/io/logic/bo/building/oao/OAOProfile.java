@@ -199,7 +199,7 @@ public class OAOProfile
     
     public void doDcvControl() {
         double dcvCalculatedMinDamper = 0;
-        boolean usePerRoomCO2Sensing = oaoEquip.getConfigNumVal("room and co2 and sensing") > 0? true : false;
+        boolean usePerRoomCO2Sensing = oaoEquip.getConfigNumVal("config and oao and co2 and sensing") > 0? true : false;
         if (usePerRoomCO2Sensing)
         {
             dcvCalculatedMinDamper = L.ccu().systemProfile.getCo2LoopOp();

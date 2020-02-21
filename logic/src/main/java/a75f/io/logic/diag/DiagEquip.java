@@ -28,6 +28,7 @@ import a75f.io.logic.R;
 public class DiagEquip
 {
     private static DiagEquip instance = null;
+    private static String curVersionInDb;
     private DiagEquip(){
     }
     
@@ -254,7 +255,11 @@ public class DiagEquip
             String version = pi.versionName.substring(pi.versionName.lastIndexOf('_')+1,pi.versionName.length() - 2);
             setDiagHisVal("app and version",Double.parseDouble(version));
             Log.d("DiagEquip","version ="+version+","+pi.versionName+","+pi.versionName.substring(pi.versionName.lastIndexOf('_')+1));
-            CCUHsApi.getInstance().writeDefaultVal("point and diag and app and version",pi.versionName.substring(pi.versionName.lastIndexOf('_')+1));
+            String hisVersion = pi.versionName.substring(pi.versionName.lastIndexOf('_')+1);
+            if((curVersionInDb == null) || (curVersionInDb != hisVersion)) {
+                curVersionInDb = hisVersion;
+                CCUHsApi.getInstance().writeDefaultVal("point and diag and app and version", hisVersion);
+            }
 
         } catch (PackageManager.NameNotFoundException e) {
             // TODO Auto-generated catch block

@@ -84,6 +84,9 @@ public class CreateNewSite extends Fragment {
     TextInputLayout mTextInputEmail;
     EditText mSiteEmailId;
 
+    TextInputLayout mTextInputInstallerEmail;
+    EditText mSiteInstallerEmailId;
+
     TextInputLayout mTextInputOrg;
     EditText mSiteOrg;
 
@@ -179,6 +182,9 @@ public class CreateNewSite extends Fragment {
         mTextInputEmail = rootView.findViewById(R.id.textInputEmail);
         mSiteEmailId = rootView.findViewById(R.id.editFacilityEmail);
 
+        mTextInputInstallerEmail = rootView.findViewById(R.id.textInputInstallerEmail);
+        mSiteInstallerEmailId = rootView.findViewById(R.id.editInstallerEmail);
+
         mTextInputOrg = rootView.findViewById(R.id.textInputOrganization);
         mSiteOrg = rootView.findViewById(R.id.editFacilityOrganization);
 
@@ -206,6 +212,7 @@ public class CreateNewSite extends Fragment {
         mSiteCCU.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_ccuname) + "</font></big>"));
         mSiteEmailId.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_facilityemail) + "</font></big>"));
         mSiteOrg.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_facilityorg) + "</font></big>"));
+        mSiteInstallerEmailId.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_installer_email) + "</font></big>"));
 
 
         mTextInputSitename.setHintEnabled(true);
@@ -218,6 +225,7 @@ public class CreateNewSite extends Fragment {
         mTextInputZip.setErrorEnabled(true);
         mTextInputCCU.setErrorEnabled(true);
         mTextInputEmail.setErrorEnabled(true);
+        mTextInputInstallerEmail.setErrorEnabled(true);
         mTextInputOrg.setErrorEnabled(true);
 
         mTextInputSitename.setError(getString(R.string.hint_sitename));
@@ -228,6 +236,7 @@ public class CreateNewSite extends Fragment {
         mTextInputZip.setError("");
         mTextInputCCU.setError("");
         mTextInputEmail.setError("");
+        mTextInputInstallerEmail.setError("");
         mTextInputOrg.setError("");
 
 
@@ -239,6 +248,7 @@ public class CreateNewSite extends Fragment {
         mSiteZip.addTextChangedListener(new EditTextWatcher(mSiteZip));
         mSiteCCU.addTextChangedListener(new EditTextWatcher(mSiteCCU));
         mSiteEmailId.addTextChangedListener(new EditTextWatcher(mSiteEmailId));
+        mSiteInstallerEmailId.addTextChangedListener(new EditTextWatcher(mSiteInstallerEmailId));
         mSiteOrg.addTextChangedListener(new EditTextWatcher(mSiteOrg));
 
 
@@ -256,6 +266,7 @@ public class CreateNewSite extends Fragment {
                                 R.id.editCCU,
                                 R.id.editFacilityEmail,
                                 R.id.editFacilityOrganization,
+                                R.id.editInstallerEmail,
                         };
                 if (!validateEditText(mandotaryIds) && Patterns.EMAIL_ADDRESS.matcher(mSiteEmailId.getText().toString()).matches()) {
                     String siteName = mSiteName.getText().toString();
@@ -265,7 +276,8 @@ public class CreateNewSite extends Fragment {
                     String siteState = mSiteState.getText().toString();
                     String siteCountry = mSiteCountry.getText().toString();
 
-                    String installerEmail = mSiteEmailId.getText().toString();
+                    String managerEmail = mSiteEmailId.getText().toString();
+                    String installerEmail = mSiteInstallerEmailId.getText().toString();
                     String installerOrg = mSiteOrg.getText().toString();
                     String ccuName = mSiteCCU.getText().toString();
 
@@ -278,10 +290,10 @@ public class CreateNewSite extends Fragment {
 
                     if (ccu.size() > 0) {
                         String ahuRef = ccu.get("ahuRef").toString();
-                        CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef);
+                        CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, managerEmail);
                         L.ccu().setCCUName(ccuName);
                     } else {
-                        String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create());
+                        String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(),managerEmail);
                         L.ccu().setCCUName(ccuName);
                         CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                     }
@@ -308,6 +320,7 @@ public class CreateNewSite extends Fragment {
                                 R.id.editCCU,
                                 R.id.editFacilityEmail,
                                 R.id.editFacilityOrganization,
+                                R.id.editInstallerEmail,
                         };
                 if (!validateEditText(mandotaryIds)) {
                     String siteName = mSiteName.getText().toString();
@@ -317,7 +330,8 @@ public class CreateNewSite extends Fragment {
                     String siteState = mSiteState.getText().toString();
                     String siteCountry = mSiteCountry.getText().toString();
 
-                    String installerEmail = mSiteEmailId.getText().toString();
+                    String installerEmail = mSiteInstallerEmailId.getText().toString();
+                    String managerEmail = mSiteEmailId.getText().toString();
                     String installerOrg = mSiteOrg.getText().toString();
                     String ccuName = mSiteCCU.getText().toString();
 
@@ -330,10 +344,10 @@ public class CreateNewSite extends Fragment {
 
                     if (ccu.size() > 0) {
                         String ahuRef = ccu.get("ahuRef").toString();
-                        CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef);
+                        CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, managerEmail);
                         L.ccu().setCCUName(ccuName);
                     } else {
-                        String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create());
+                        String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(), managerEmail);
                         L.ccu().setCCUName(ccuName);
                         CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                     }
@@ -354,7 +368,7 @@ public class CreateNewSite extends Fragment {
                                 String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
                                 ccuRegInfo.put("deviceId", ccuGUID);
                                 ccuRegInfo.put("deviceName", ccuName);
-                                ccuRegInfo.put("facilityManagerEmail", installerEmail);
+                                ccuRegInfo.put("facilityManagerEmail", managerEmail);
                                 ccuRegInfo.put("installerEmail", installerEmail);
                                 ccuRegInfo.put("locationDetails", locInfo);
 
@@ -402,8 +416,10 @@ public class CreateNewSite extends Fragment {
                 //if CCU Exists
                 String ccuName = ccu.get("dis").toString();
                 String ccuFmEmail = ccu.get("fmEmail").toString();
+                String ccuInstallerEmail = ccu.get("installerEmail") != null ? ccu.get("installerEmail").toString() : "";
                 mSiteCCU.setText(ccuName);
                 mSiteEmailId.setText(ccuFmEmail);
+                mSiteInstallerEmailId.setText(ccuInstallerEmail);
             }
 
         }
@@ -423,6 +439,7 @@ public class CreateNewSite extends Fragment {
         mSiteZip.setEnabled(isEnable);
         mSiteCCU.setEnabled(isEnable);
         mSiteEmailId.setEnabled(isEnable);
+        mSiteInstallerEmailId.setEnabled(isEnable);
         mSiteOrg.setEnabled(isEnable);
     }
 
@@ -577,6 +594,21 @@ public class CreateNewSite extends Fragment {
                     } else {
                         mTextInputEmail.setError("");
                         mSiteEmailId.setError(null);
+                    }
+                case R.id.editInstallerEmail:
+                    if (mSiteInstallerEmailId.getText().length() > 0) {
+                        mTextInputInstallerEmail.setErrorEnabled(true);
+                        mTextInputInstallerEmail.setError(getString(R.string.input_installer_email));
+                        mSiteInstallerEmailId.setError(null);
+                        String emailID = mSiteInstallerEmailId.getText().toString();
+                        if (Patterns.EMAIL_ADDRESS.matcher(emailID).matches()) {
+
+                        } else {
+                            mSiteInstallerEmailId.setError("Invalid Email Address");
+                        }
+                    } else {
+                        mTextInputInstallerEmail.setError("");
+                        mSiteInstallerEmailId.setError(null);
                     }
             }
         }

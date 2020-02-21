@@ -52,6 +52,7 @@ public class RegisterGatherCCUDetails extends Activity {
     Button      mUseExistingCCUButton;
     EditText    mCCUNameET;
     EditText    mInstallerEmailET;
+    EditText    mManagerEmailET;
     Spinner     mAddressBandSpinner;
     Button      mCreateNewCCU;
     HGrid       mCCUS;
@@ -69,6 +70,7 @@ public class RegisterGatherCCUDetails extends Activity {
         prefs = new Prefs(getApplicationContext());
         getRegisteredAddressBands();
         mInstallerEmailET = findViewById(R.id.installer_email_et);
+        mManagerEmailET = findViewById(R.id.manager_email_et);
         mOrTextView = findViewById(R.id.or_textview);
         mUseExistingCCUButton = findViewById(R.id.use_existing_ccu);
         mAddressBandSpinner = findViewById(R.id.addressBandSpinner);
@@ -113,8 +115,9 @@ public class RegisterGatherCCUDetails extends Activity {
                     return;
                 }
                 String installerEmail = mInstallerEmailET.getText().toString();
+                String managerEmail = mManagerEmailET.getText().toString();
                 L.ccu().setCCUName(ccuName);
-                String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create());
+                String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(), managerEmail);
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
 
                 HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);

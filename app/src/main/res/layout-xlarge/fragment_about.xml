@@ -11,6 +11,30 @@
         android:layout_marginStart="30dp"
         android:layout_marginTop="70dp"
         android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="82dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:weightSum="1">
+
+            <TextView
+                style="@style/title_normal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@string/title_site_id" />
+
+            <TextView
+                android:id="@+id/tvSiteId"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="30dp"
+                android:layout_weight="0.7"
+                android:textSize="18sp"
+                tools:text="3a97d7ba56025062" />
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

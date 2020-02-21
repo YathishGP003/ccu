@@ -43,6 +43,8 @@ public class AboutFragment extends Fragment {
     TextView tvSerialNumber;
     @BindView(R.id.tvCcuVersion)
     TextView tvCcuVersion;
+    @BindView(R.id.tvSiteId)
+    TextView tvSiteId;
 
     ProgressBar loading;
     private AlertDialog.Builder builder;
@@ -120,7 +122,10 @@ public class AboutFragment extends Fragment {
         }
 
         String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
-        tvSerialNumber.setText(siteGUID == null? site.get("id").toString() :siteGUID);
+        tvSiteId.setText(siteGUID == null? site.get("id").toString() :siteGUID);
+
+        String ccuGUID = CCUHsApi.getInstance().getGUID(CCUHsApi.getInstance().getCcuId().toString());
+        tvSerialNumber.setText(ccuGUID == null ? CCUHsApi.getInstance().getCcuId().toString() :ccuGUID);
 
         return rootView;
     }

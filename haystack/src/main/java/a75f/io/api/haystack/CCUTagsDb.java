@@ -1,6 +1,8 @@
 package a75f.io.api.haystack;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -42,6 +44,7 @@ import java.lang.reflect.Type;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -899,6 +902,9 @@ public class CCUTagsDb extends HServer {
     }
 
     public void onHisWrite(HDict rec, HHisItem[] items) {
+        if (boxStore != null && boxStore.isClosed()){
+            return;
+        }
         for (HHisItem item : items) {
             HisItem hisItem = new HisItem();
             hisItem.setDate(new Date(item.ts.millis()));
@@ -920,7 +926,6 @@ public class CCUTagsDb extends HServer {
     }
 
     public List<HisItem> getUnSyncedHisItems(HRef id) {
-
         HDict entity = readById(id);
 
         QueryBuilder<HisItem> hisQuery = hisBox.query();
@@ -991,13 +996,46 @@ public class CCUTagsDb extends HServer {
             hisBox.remove(hisItems);
         }
     }
-    
+
+    public void dropDbAndUpdate() {
+        ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and his");
+        List<HisItem> hisItems = new ArrayList<>();
+        if (points.size() > 0) {
+            for (Map m : points) {
+                HDict entity = readById(HRef.copy(m.get("id").toString()));
+                QueryBuilder<HisItem> hisQuery = hisBox.query();
+
+                hisQuery.equal(HisItem_.rec, entity.get("id").toString())
+                        .order(HisItem_.date);
+
+                hisItems = hisQuery.build().find();
+            }
+        }
+
+        if (boxStore != null && !boxStore.isClosed()) {
+            boxStore.close();
+        }
+
+        // drop db
+        boxStore.deleteAllFiles();
+
+        init(appContext);
+
+        for (HisItem hisItem : hisItems) {
+            hisBox.put(hisItem);
+        }
+    }
+
     public void removeAllHisItems(HRef id) {
         HDict entity = readById(id);
-        
+
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, entity.get("id").toString())
                 .order(HisItem_.date);
-        hisBox.remove(hisQuery.build().find());
+      List<HisItem>  hisItems = hisQuery.build().find();
+
+      if (hisItems.size() > 0){
+          hisBox.remove(hisItems);
+      }
     }
 }

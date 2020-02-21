@@ -296,6 +296,7 @@
     <string name="input_ccuname">CCU Name</string>
     <string name="input_facilityemail">Facility Manager Email ID</string>
     <string name="input_facilityorg">Organization</string>
+    <string name="input_installer_email">Installer Email ID</string>
     <string name="button_next">Next </string>
 
     <!--Installer Option-->
@@ -594,6 +595,7 @@
     <string name="title_pairss">SMART STAT | PAIRING STEPS </string>
     <string name="button_pair">PAIR</string>
 
+    <string name="title_site_id">Site Id</string>
     <string name="title_serial_number">Serial Number</string>
     <string name="title_ccu_version">CCU Version</string>
     <string name="title_update_install">Check for Updates and Install</string>

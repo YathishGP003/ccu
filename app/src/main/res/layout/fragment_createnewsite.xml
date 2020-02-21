@@ -263,10 +263,30 @@
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
-                android:id="@+id/textInputOrganization"
+                android:id="@+id/textInputInstallerEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textInputEmail"
+                android:layout_marginTop="-9dp"
+                app:errorTextAppearance="@style/error_appearance">
+
+                <EditText
+                    android:id="@+id/editInstallerEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="42dp"
+                    android:fontFamily="@font/lato_regular"
+                    android:gravity="left|center_vertical"
+                    android:inputType="textWebEmailAddress"
+                    android:singleLine="true"
+                    android:textColor="@color/input_textcolor"
+                    android:textSize="19.5dp" />
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/textInputOrganization"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textInputInstallerEmail"
                 android:layout_marginTop="-9dp"
                 app:errorTextAppearance="@style/error_appearance">
 

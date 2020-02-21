@@ -34,6 +34,14 @@
         android:inputType="textEmailAddress"
         android:hint="Installer Email" />
 
+    <EditText
+        android:id="@+id/manager_email_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:inputType="textEmailAddress"
+        android:hint="Manager Email" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -54,7 +54,6 @@ public class HisSyncHandler
             entitySyncRequired = false;
         }
         CcuLog.d(TAG,"<- doHisSync");
-        
     }
     
     /**
@@ -122,7 +121,6 @@ public class HisSyncHandler
     * All the local history entries marked 'synced' once the data is wrote to influx.
     * */
     private void sendHisToInflux() {
-        
         ArrayList<HashMap> equips = hayStack.readAll("equip");
         DateTime now = new DateTime();
         
@@ -208,7 +206,13 @@ public class HisSyncHandler
         //if (now.getMinuteOfDay() % 5 == 0) {
             sendDeviceHisData(syncAllHisItemsNow);
         //}
-        
+
+        //every 12 hours we update the db
+        if (now.getHourOfDay() == 0 || now.getHourOfDay() == 12){
+            if (now.getMinuteOfHour() == 0){
+                hayStack.tagsDb.dropDbAndUpdate();
+            }
+        }
     }
     
     private void sendDeviceHisData(boolean syncAllHisItemsNow) {

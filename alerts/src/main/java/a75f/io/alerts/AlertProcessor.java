@@ -183,6 +183,11 @@ public class AlertProcessor
     public void processAlerts() {
         
         CcuLog.d("CCU_ALERTS", "processAlerts ");
+        if (boxStore != null && boxStore.isClosed()){
+            boxStore = CCUHsApi.getInstance().tagsDb.getBoxStore();
+            alertBox = boxStore.boxFor(Alert.class);
+        }
+
         activeAlertRefs = new HashSet<>();
         for (AlertDefinition def : getAlertDefinitions())
         {
@@ -440,6 +445,9 @@ public class AlertProcessor
     }
     
     public List<Alert> getAllAlerts(){
+        if (boxStore != null && boxStore.isClosed()){
+            return new ArrayList<Alert>();
+        }
         QueryBuilder<Alert> alertQuery = alertBox.query();
         alertQuery.orderDesc(Alert_.startTime);
         return alertQuery.build().find();

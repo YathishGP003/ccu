@@ -985,7 +985,7 @@ public class CCUTagsDb extends HServer {
     
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, entity.get("id").toString())
-                .less(HisItem_.date, System.currentTimeMillis() - 24*60*60*1000)
+                .less(HisItem_.date, System.currentTimeMillis() - 12*60*60*1000)
                 .order(HisItem_.date);
         
         //Leave one hisItem to make sure his data is not empty if there was no more recent entries

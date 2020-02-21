@@ -1288,7 +1288,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             
         }else if (occ!= null && !occ.isOccupied()) {
             
-            double forcedOccupiedMins = TunerUtil.readTunerValByQuery("forced and occupied and time");
+            double forcedOccupiedMins = TunerUtil.readTunerValByQuery("forced and occupied and time",point.getEquipRef());
             
             if (manual) {
                 CCUHsApi.getInstance().pointWrite(HRef.copy(point.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "manual", HNum.make(val) , HNum.make(forcedOccupiedMins * 60 * 1000, "ms"));
@@ -1379,7 +1379,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             
         }else if (occ!= null && !occ.isOccupied()) {
             
-            double forcedOccupiedMins = TunerUtil.readTunerValByQuery("forced and occupied and time");
+            double forcedOccupiedMins = TunerUtil.readTunerValByQuery("forced and occupied and time",coolpoint.getEquipRef());
             
                 if((coolpoint != null) && (coolval != 0))
                     CCUHsApi.getInstance().pointWrite(HRef.copy(coolpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "manual", HNum.make(coolval) , HNum.make(forcedOccupiedMins * 60 * 1000, "ms"));

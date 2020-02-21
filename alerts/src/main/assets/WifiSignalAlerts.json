@@ -14,7 +14,7 @@
       "mTitle": "CCU Server No Communication",
       "mMessage": "CCU doesn't have communication with server",
       "mNotificationMsg": "CCU doesn't have communication with server",
-      "mSeverity": "WARN",
+      "mSeverity": "LOW",
       "mEnabled": "true"
     }
   }

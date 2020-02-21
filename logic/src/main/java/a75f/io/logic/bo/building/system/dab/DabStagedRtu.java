@@ -174,7 +174,8 @@ public class DabStagedRtu extends DabSystemProfile
                         {
                             relayState = systemCoolingLoopOp > Math.max(stageThreshold - relayDeactHysteresis ,0 ) ? 1 :0;
                         }
-                        setCmdSignal("cooling and stage"+(stage.ordinal()+1), relayState);
+                        if(currState != relayState)
+                            setCmdSignal("cooling and stage"+(stage.ordinal()+1), relayState);
                         break;
                     case HEATING_1:
                     case HEATING_2:
@@ -192,7 +193,8 @@ public class DabStagedRtu extends DabSystemProfile
                             relayState = systemHeatingLoopOp > Math.max(stageThreshold - relayDeactHysteresis, 0) ? 1: 0;
                             
                         }
-                        setCmdSignal("heating and stage"+ (stage.ordinal() - COOLING_5.ordinal()), relayState);
+                        if(currState != relayState)
+                            setCmdSignal("heating and stage"+ (stage.ordinal() - COOLING_5.ordinal()), relayState);
                         break;
                     case FAN_1:
                         if ((systemMode != SystemMode.OFF && ((ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
@@ -203,7 +205,8 @@ public class DabStagedRtu extends DabSystemProfile
                         } else {
                             relayState = 0;
                         }
-                        setCmdSignal("fan and stage1", relayState);
+                        if(relayState != getCmdSignal("fan and stage1"))
+                            setCmdSignal("fan and stage1", relayState);
                         break;
                     case FAN_2:
                         if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU) {
@@ -213,7 +216,8 @@ public class DabStagedRtu extends DabSystemProfile
                         {
                             relayState = systemFanLoopOp > 0 ? 1 : 0;
                         }
-                        setCmdSignal("fan and stage2", relayState);
+                        if(relayState != getCmdSignal("fan and stage2"))
+                            setCmdSignal("fan and stage2", relayState);
                         break;
                     case FAN_3:
                     case FAN_4:
@@ -228,7 +232,8 @@ public class DabStagedRtu extends DabSystemProfile
                         {
                             relayState = systemFanLoopOp > (stageThreshold - relayDeactHysteresis) ? 1 : 0;
                         }
-                        setCmdSignal("fan and stage"+(stage.ordinal() - HEATING_5.ordinal()), relayState);
+                        if(currState != relayState)
+                            setCmdSignal("fan and stage"+(stage.ordinal() - HEATING_5.ordinal()), relayState);
                         break;
                     case HUMIDIFIER:
                     case DEHUMIDIFIER:
@@ -257,7 +262,8 @@ public class DabStagedRtu extends DabSystemProfile
                                 {
                                     relayState = currState;
                                 }
-                                setCmdSignal("humidifier", relayState);
+                                if(currState != relayState)
+                                    setCmdSignal("humidifier", relayState);
                             }
                             else
                             {
@@ -275,7 +281,8 @@ public class DabStagedRtu extends DabSystemProfile
                                 {
                                     relayState = currState;
                                 }
-                                setCmdSignal("dehumidifier", relayState);
+                                if(currState != relayState)
+                                    setCmdSignal("dehumidifier", relayState);
                             }
                             CcuLog.d(L.TAG_CCU_SYSTEM, "humidity :" + humidity + " targetMinHumidity: " + targetMinHumidity + " humidityHysteresis: " + humidityHysteresis + " targetMaxHumidity: " + targetMaxHumidity);
                         }

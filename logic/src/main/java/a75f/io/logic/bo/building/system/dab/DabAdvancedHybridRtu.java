@@ -136,8 +136,10 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         } else {
             signal = 0;
         }
-        setCmdSignal("cooling and modulating",signal);
-        ControlMote.setAnalogOut("analog1", signal);
+        if(signal != getCmdSignal("cooling and modulating")) {
+            setCmdSignal("cooling and modulating", signal);
+            ControlMote.setAnalogOut("analog1", signal);
+        }
         
         if (getConfigEnabled("analog2") > 0)
         {
@@ -157,8 +159,10 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         } else {
             signal = 0;
         }
-        setCmdSignal("fan and modulating", signal);
-        ControlMote.setAnalogOut("analog2", signal);
+        if(signal != getCmdSignal("fan and modulating")) {
+            setCmdSignal("fan and modulating", signal);
+            ControlMote.setAnalogOut("analog2", signal);
+        }
         
         if (getConfigEnabled("analog3") > 0)
         {
@@ -177,8 +181,10 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         } else  {
             signal = 0;
         }
-        setCmdSignal("heating and modulating", signal);
-        ControlMote.setAnalogOut("analog3", signal);
+        if(signal != getCmdSignal("heating and modulating")) {
+            setCmdSignal("heating and modulating", signal);
+            ControlMote.setAnalogOut("analog3", signal);
+        }
         
         if (getConfigEnabled("analog4") > 0)
         {
@@ -213,8 +219,10 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
             signal = 0;
             
         }
-        setCmdSignal("composite",signal);
-        ControlMote.setAnalogOut("analog4", signal);
+        if(signal != getCmdSignal("composite")) {
+            setCmdSignal("composite", signal);
+            ControlMote.setAnalogOut("analog4", signal);
+        }
         
     }
     

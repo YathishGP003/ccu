@@ -34,10 +34,10 @@
       ],
       "offset": "0",
       "alert": {
-        "mTitle": "Battery level low on CCU [Warn]",
+        "mTitle": "Battery level low on CCU [LOW]",
         "mMessage": "The battery level of your CCU [%s] has dropped below 75%% and is not charging.Please check that the tablet is secured to it's mount. if it is plugged in, please contact 75F support.",
         "mNotificationMsg": "The battery level of your CCU has dropped below 75% and is not charging.Please check that the tablet is secured to it's mount. If it is plugged in, please contact 75F support.",
-        "mSeverity": "WARN",
+        "mSeverity": "LOW",
         "mEnabled": "true"
       }
     },
@@ -76,10 +76,10 @@
     ],
     "offset": "0",
     "alert": {
-      "mTitle": "Battery level low on CCU [Error]",
+      "mTitle": "Battery level low on CCU [MODERATE]",
       "mMessage": "The battery level of your CCU [%s] has dropped below 50%% and is not charging.Please check that the tablet is secured to it's mount. if it is plugged in, please contact 75F support.",
       "mNotificationMsg": "The battery level of your CCU has dropped below 50% and is not charging.Please check that the tablet is secured to it's mount. If it is plugged in, please contact 75F support.",
-      "mSeverity": "ERROR",
+      "mSeverity": "MODERATE",
       "mEnabled": "true"
     }
     },
@@ -95,10 +95,10 @@
     ],
     "offset": "0",
     "alert": {
-      "mTitle": "Battery level low on CCU [Fatal]",
+      "mTitle": "Battery level low on CCU [SEVERE]",
       "mMessage": "The battery level of your CCU [%s] has dropped below 20%% and is not charging.Please check that the tablet is secured to it's mount. if it is plugged in, please contact 75F support.",
       "mNotificationMsg": "The battery level of your CCU has dropped below 20% and is not charging.Please check that the tablet is secured to it's mount. If it is plugged in, please contact 75F support.",
-      "mSeverity": "FATAL",
+      "mSeverity": "SEVERE",
       "mEnabled": "true"
     }
   }

@@ -34,8 +34,20 @@
             android:layout_width="wrap_content"
             android:layout_height="?actionBarSize"
             android:layout_marginStart="16dp"
+            android:padding="8dp"
             android:layout_gravity="center_vertical"
+            android:visibility="gone"
             app:srcCompat="@drawable/ic_daikin_logo" />
+
+        <ImageView
+            android:id="@+id/logo_75f"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:padding="8dp"
+            android:scaleType="center"
+            android:layout_gravity="center_vertical"
+            app:srcCompat="@drawable/ic_75f_logo" />
 
         <android.support.design.widget.TabLayout
             android:id="@+id/tabs"
@@ -58,7 +70,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:layout_gravity="center_vertical"
+            android:layout_gravity="center"
+            android:visibility="gone"
             app:srcCompat="@drawable/ic_powered_by_75f" />
 
         <android.support.design.widget.TabLayout

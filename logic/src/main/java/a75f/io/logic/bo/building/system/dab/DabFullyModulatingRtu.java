@@ -103,7 +103,8 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemCoolingLoopOp/100)));
             }
 
-            setCmdSignal("cooling",signal);
+            if(signal != getCmdSignal("cooling"))
+                setCmdSignal("cooling",signal);
         } else {
             signal = 0;
         }
@@ -132,7 +133,8 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             {
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemHeatingLoopOp / 100)));
             }
-            setCmdSignal("heating", signal);
+            if(signal != getCmdSignal("heating"))
+                setCmdSignal("heating", signal);
         } else {
             signal = 0;
         }
@@ -177,7 +179,8 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemFanLoopOp/100)));
             }
 
-            setCmdSignal("fan", signal);
+            if(signal != getCmdSignal("fan"))
+                setCmdSignal("fan", signal);
         } else {
             signal = 0;
         }
@@ -188,7 +191,8 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         {
             signal = ((ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION) || systemFanLoopOp > 0) ? 1 : 0;
 
-            setCmdSignal("occupancy",signal);
+            if(signal != getCmdSignal("occupancy"))
+                setCmdSignal("occupancy",signal);
         }else {
             signal = 0;
         }
@@ -216,7 +220,8 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                 } else {
                     signal = curSignal;
                 }
-                setCmdSignal("humidifier",signal);
+                if(signal != getCmdSignal("humidifier"))
+                    setCmdSignal("humidifier",signal);
                 //setCmdSignal("dehumidifier and relay7",0);
             } else {
                 //Dehumidification
@@ -228,7 +233,8 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                 } else {
                     signal = curSignal;
                 }
-                setCmdSignal("dehumidifier",signal);
+                if(signal != getCmdSignal("dehumidifier"))
+                    setCmdSignal("dehumidifier",signal);
                 //setCmdSignal("humidifier",0);
             }
             CcuLog.d(L.TAG_CCU_SYSTEM,"humidity :"+humidity+" targetMinHumidity: "+targetMinHumidity+" humidityHysteresis: "+humidityHysteresis+

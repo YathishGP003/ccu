@@ -394,8 +394,8 @@ public class DabSystemController extends SystemController
 
     public double getCMDynamicPriority(double zoneLoad){
         ZonePriority p = ZonePriority.NORMAL;
-        double zonePrioritySpread = TunerUtil.readTunerValByQuery("point and default and tuner and zone and priority and spread and vav");
-        double zonePriorityMultiplier = TunerUtil.readTunerValByQuery("point and default and tuner and zone and priority and multiplier and vav");
+        double zonePrioritySpread = TunerUtil.readTunerValByQuery("point and default and tuner and zone and priority and spread and dab");
+        double zonePriorityMultiplier = TunerUtil.readTunerValByQuery("point and default and tuner and zone and priority and multiplier and dab");
         return p.val * Math.pow(zonePriorityMultiplier, (zoneLoad/zonePrioritySpread) > 10 ? 10 : (zoneLoad/zonePrioritySpread));
     }
     public double getEquipDynamicPriority(double zoneLoad, String equipRef) {

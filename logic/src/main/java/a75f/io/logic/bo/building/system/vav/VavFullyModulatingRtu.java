@@ -149,8 +149,9 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         } else {
             signal = 0;
         }
-    
-        setCmdSignal("cooling",signal);
+
+        if(signal != getCmdSignal("cooling"))
+            setCmdSignal("cooling",signal);
         ControlMote.setAnalogOut("analog1", signal);
         
     
@@ -175,7 +176,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             {
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemHeatingLoopOp / 100)));
             }
-            setCmdSignal("heating", signal);
+            if(signal != getCmdSignal("heating"))
+                setCmdSignal("heating", signal);
         } else {
             signal = 0;
         }
@@ -212,7 +214,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             {
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemFanLoopOp/100)));
             }
-            setCmdSignal("fan", signal);
+            if(signal != getCmdSignal("fan"))
+                setCmdSignal("fan", signal);
         } else {
             signal = 0;
         }
@@ -232,7 +235,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             } else {
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * systemCo2LoopOp/100));
             }
-            setCmdSignal("co2",signal);
+            if(signal != getCmdSignal("co2"))
+                setCmdSignal("co2",signal);
         } else {
             signal = 0;
         }
@@ -242,8 +246,10 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         if ((getConfigVal("relay3 and output and enabled") > 0) && (systemMode != SystemMode.OFF))
         {
             double staticPressuremOp = getStaticPressure() - SystemConstants.SP_CONFIG_MIN;
-			signal = ((ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION) || (staticPressuremOp > 0)) ? 1 : 0;
-            setCmdSignal("occupancy",signal);
+
+            signal = ((ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION) || (staticPressuremOp > 0)) ? 1 : 0;
+            if(signal != getCmdSignal("occupancy"))
+                setCmdSignal("occupancy",signal);
         } else {
             signal = 0;
         }

@@ -174,13 +174,13 @@ public class Alert
     
     public enum AlertSeverity
     {
-        FATAL,
-        ERROR,
-        WARN,
+        SEVERE,
+        MODERATE,
+        LOW,
         INFO,
-        INTERNAL_FATAL,
-        INTERNAL_ERROR,
-        INTERNAL_WARN,
+        INTERNAL_SEVERE,
+        INTERNAL_MODERATE,
+        INTERNAL_LOW,
         INTERNAL_INFO
     }
     

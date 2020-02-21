@@ -169,6 +169,10 @@ public class RenatusLandingActivity extends AppCompatActivity {
                     return true;
                 }
             });
+            findViewById(R.id.logo_75f).setOnLongClickListener(view -> {
+                startActivity(new Intent(view.getContext(), RenatusEngineeringActivity.class));
+                return true;
+            });
             setViewPager();
             ScheduleProcessJob.updateSchedules();
             HashMap site = CCUHsApi.getInstance().read("site");

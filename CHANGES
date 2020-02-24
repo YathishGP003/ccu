@@ -1,7 +1,5 @@
- - Merge branch 'mahesh_renatus' into 'master'
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-922, COV changes
- - #RENATUS-944, AlertDefinition severity changes Error to Moderate
- - logo change
- - Merge branch 'mahesh_renatus' into 'master'
- - fixed RENATUS-880, added RENATUS-943
+ - #RENATUS-946, object box issues
+ - #RENATUS-946, object box issues
+ - Merge branch 'kumar_renatus' into 'master'
+ - update diag version only on changes

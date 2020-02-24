@@ -210,11 +210,11 @@ public class HisSyncHandler
         //}
 
         //every 12 hours we update the db
-        if (now.getHourOfDay() == 0 || now.getHourOfDay() == 12){
+        /*if (now.getHourOfDay() == 0 || now.getHourOfDay() == 12){
             if (now.getMinuteOfHour() == 0){
                 hayStack.tagsDb.dropDbAndUpdate();
             }
-        }
+        }*/
     }
     
     private void sendDeviceHisData(boolean syncAllHisItemsNow) {

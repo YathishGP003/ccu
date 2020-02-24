@@ -88,8 +88,11 @@ public class PlcProfile extends ZoneProfile
                 cv = 0;
             }
         }
-        plcEquip.setControlVariable(Math.round(100*cv)/100);
-        plcEquip.setEquipStatus((int)(Math.round(100*cv)/100));
+        double curCv = Math.round(100*cv)/100;
+        int eStatus = (int)(Math.round(100*cv)/100);
+        if(plcEquip.getControlVariable() != curCv )
+            plcEquip.setControlVariable(curCv);
+        plcEquip.setEquipStatus(eStatus);
         plcEquip.getPIController().dump();
         Log.d(L.TAG_CCU_ZONE, "PlcProfile, pv: "+pv+", tv: "+tv+", cv: "+cv);
     }

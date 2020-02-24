@@ -1267,7 +1267,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                         locInfo.put("geoAddr", site.get("geoAddr").toString());
                         locInfo.put("geoPostalCode", site.get("geoPostalCode").toString());
                         if(site.get("organization") != null)
-                            locInfo.put("organization", site.get("organization").toString());
+                            ccuRegInfo.put("organization", site.get("organization").toString());
                         if(ccu.size() > 0) {
                             String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
                             ccuRegInfo.put("deviceId", ccuGUID);

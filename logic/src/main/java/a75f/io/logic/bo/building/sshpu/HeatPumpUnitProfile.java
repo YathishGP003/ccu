@@ -139,9 +139,9 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 }
             }
             if(occuStatus != null){
-                hpuDevice.setProfilePoint("occupancy and status", occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCEDOCCUPIED.ordinal() : 0)));
+                hpuDevice.setProfilePoint("occupancy and mode", occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCEDOCCUPIED.ordinal() : 0)));
             }else {
-                hpuDevice.setProfilePoint("occupancy and status", occupied ? 1 : 0);
+                hpuDevice.setProfilePoint("occupancy and mode", occupied ? 1 : 0);
             }
             Log.d(TAG, " smartstat hpu, updates =" + node+","+roomTemp+","+occupied+","+","+state);
 

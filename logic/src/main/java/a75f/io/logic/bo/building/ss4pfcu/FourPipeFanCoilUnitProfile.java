@@ -162,9 +162,9 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
                 resetRelays(fourPfcuEquip.getId(),node,ZoneTempState.FAN_OP_MODE_OFF);
             }
             if (occuStatus != null) {
-                fourPfcuDevice.setProfilePoint("occupancy and status", occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCEDOCCUPIED.ordinal() : 0)));
+                fourPfcuDevice.setProfilePoint("occupancy and mode", occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCEDOCCUPIED.ordinal() : 0)));
             } else {
-                fourPfcuDevice.setProfilePoint("occupancy and status", occupied ? 1 : 0);
+                fourPfcuDevice.setProfilePoint("occupancy and mode", occupied ? 1 : 0);
             }
         }
     }

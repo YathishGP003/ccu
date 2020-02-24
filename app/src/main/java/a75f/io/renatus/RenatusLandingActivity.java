@@ -142,14 +142,14 @@ public class RenatusLandingActivity extends AppCompatActivity {
                     SettingsFragment.slidingPane.openPane();
                 }
             });
-            setupButton = findViewById(R.id.logo_daikin);
+            /*setupButton = findViewById(R.id.logo_daikin);
             setupButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-/*				if (settingView == true && mTabLayout.getSelectedTabPosition() == 0)
+*//*				if (settingView == true && mTabLayout.getSelectedTabPosition() == 0)
                 {
 					DefaultFragment.getInstance().show(getSupportFragmentManager(), "setup");
-				}*/
+				}*//*
                     //				else if (settingView == true && mTabLayout.getSelectedTabPosition() == 1)
                     //				{
                     //					Intent i = new Intent(RenatusLandingActivity.this, MainActivity.class);
@@ -168,7 +168,7 @@ public class RenatusLandingActivity extends AppCompatActivity {
                     startActivity(new Intent(view.getContext(), RenatusEngineeringActivity.class));
                     return true;
                 }
-            });
+            });*/
             findViewById(R.id.logo_75f).setOnLongClickListener(view -> {
                 startActivity(new Intent(view.getContext(), RenatusEngineeringActivity.class));
                 return true;

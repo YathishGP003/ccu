@@ -157,10 +157,10 @@ public class HisSyncHandler
                         continue;
                     }
                     tsData.put( pointGUID.replace("@",""), String.valueOf(hisVal.getVal()));
-                    //if (now.getMinuteOfDay() == 0)
-                    //{
+                    if (now.getMinuteOfDay() == 0)
+                    {
                         hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
-                    //}
+                    }
                 }else {
                     ArrayList<HisItem> hisItems = (ArrayList<HisItem>) hayStack.tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
                     if (hisItems.size() > 0) {
@@ -170,9 +170,9 @@ public class HisSyncHandler
                             item.setSyncStatus(true);
                         }
                         hayStack.tagsDb.setHisItemSyncStatus(hisItems);
-                        //if (now.getMinuteOfDay() == 0) {
+                        if (now.getMinuteOfDay() == 0) {
                             hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
-                        //}
+                        }
                     }else
                         continue;
                 }

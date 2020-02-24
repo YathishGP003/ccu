@@ -28,7 +28,6 @@ import a75f.io.logic.R;
 public class DiagEquip
 {
     private static DiagEquip instance = null;
-    private static String curVersionInDb;
     private DiagEquip(){
     }
     
@@ -253,10 +252,10 @@ public class DiagEquip
         try {
             pi = pm.getPackageInfo("a75f.io.renatus", 0);
             String version = pi.versionName.substring(pi.versionName.lastIndexOf('_')+1,pi.versionName.length() - 2);
-            Log.d("DiagEquip","version ="+version+","+pi.versionName+","+pi.versionName.substring(pi.versionName.lastIndexOf('_')+1));
+            String prevVersion = CCUHsApi.getInstance().readDefaultStrVal("point and diag and app and version");
             String hisVersion = pi.versionName.substring(pi.versionName.lastIndexOf('_')+1);
-            if((curVersionInDb == null) || (curVersionInDb != hisVersion)) {
-                curVersionInDb = hisVersion;
+            Log.d("DiagEquip","version ="+version+","+pi.versionName+","+pi.versionName.substring(pi.versionName.lastIndexOf('_')+1)+",prevVer="+prevVersion+prevVersion.equals( hisVersion));
+            if(!prevVersion.equals( hisVersion)) {
                 setDiagHisVal("app and version",Double.parseDouble(version));
                 CCUHsApi.getInstance().writeDefaultVal("point and diag and app and version", hisVersion);
             }

@@ -1577,6 +1577,10 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             }
             Log.d("ZoneSchedule","isZone in precon = "+preconRate+","+tempDiff +","+occu.getMillisecondsUntilNextChange()+","+currentTemp+","+desiredTemp+","+occu.isPreconditioning());
 
+            if(currentTemp == 0) {
+                occu.setPreconditioning(false);
+                return false;
+            }
             if(occu.isPreconditioning())
                 return true;
             else if ((occu.getMillisecondsUntilNextChange() > 0)&& (tempDiff > 0) && (tempDiff * preconRate * 60 * 1000 >= occu.getMillisecondsUntilNextChange()))

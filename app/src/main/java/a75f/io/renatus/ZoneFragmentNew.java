@@ -727,7 +727,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     scheduleImageButton.setTag(mSchedule.getId());
                     vacationImageButton.setTag(mSchedule.getId());
                     CCUHsApi.getInstance().scheduleSync();
-                } else if (position == 1 && (mScheduleType != -1))
+                } else if (position == 1 && (mScheduleType != -1)&& (mScheduleType != position))
                 {
                     clearTempOverride(equipId[0]);
                     if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled"))
@@ -1206,7 +1206,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     CCUHsApi.getInstance().scheduleSync();
                     scheduleImageButton.setTag(mSchedule.getId());
                     vacationImageButton.setTag(mSchedule.getId());
-                } else if (position == 1 && (mScheduleType != -1))
+                } else if (position == 1 && (mScheduleType != -1)&& (mScheduleType != position))
                 {
                     clearTempOverride(equipId);
                     if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled"))
@@ -1674,7 +1674,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         textViewValue2.setText(vavPoints.get("Reheat Coil").toString());
         textViewLabel3.setText("Discharge Airflow : ");
         textViewValue3.setText(vavPoints.get("Discharge Airflow").toString());
-        textViewLabel4.setText("Entering Airflow : ");
+        textViewLabel4.setText("Supply Airflow : ");
         textViewValue4.setText(vavPoints.get("Entering Airflow").toString());
 
         linearLayoutZonePoints.addView(viewTitle);
@@ -2549,7 +2549,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     CcuLog.d(L.TAG_CCU_UI, "Set His Val "+heatid+": " +heatval);
                     hayStack.writeHisValById(heatid, heatval);
                 }
-                if (avgpoint.getMarkers().contains("his"))
+                if (avgpoint.getMarkers().contains("his") && (ScheduleProcessJob.getSystemOccupancy() == Occupancy.OCCUPIED))
                 {
                     CcuLog.d(L.TAG_CCU_UI, "Set His Val "+avgid+": " +avgval);
                     hayStack.writeHisValById(avgid, avgval);

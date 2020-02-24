@@ -902,9 +902,9 @@ public class CCUTagsDb extends HServer {
     }
 
     public void onHisWrite(HDict rec, HHisItem[] items) {
-        if (boxStore != null && boxStore.isClosed()){
+        /*if (boxStore != null && boxStore.isClosed()){
             return;
-        }
+        }*/
         for (HHisItem item : items) {
             HisItem hisItem = new HisItem();
             hisItem.setDate(new Date(item.ts.millis()));

@@ -97,7 +97,7 @@ public class StandaloneScheduler {
         }
         final String id = ((HashMap) points.get(0)).get("id").toString();
         if(isForcedOccupied){
-            CcuLog.d(L.TAG_CCU_SCHEDULER, flag+"FC DesiredTemp not changed : Skip PointWrite="+getOverRideValues(id));
+            CcuLog.d(L.TAG_CCU_SCHEDULER, flag+"FC DesiredTemp not changed : Skip PointWrite=");
             return;
         }else if (HSUtil.getPriorityLevelVal(id,8) == desiredTemp) {
             CcuLog.d(L.TAG_CCU_SCHEDULER, flag+"DesiredTemp not changed : Skip PointWrite");

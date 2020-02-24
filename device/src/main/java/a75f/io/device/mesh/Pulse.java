@@ -973,7 +973,7 @@ public class Pulse
              long lastUpdateTime = mDeviceUpdate.get(address);
              long currentTime = Calendar.getInstance().getTimeInMillis();
              //trigger device dead alert if no signal update over 15min
-             if ((currentTime - lastUpdateTime) > 900000){
+             if ((currentTime - lastUpdateTime) > ( TunerUtil.readTunerValByQuery("zone and dead and time and group == \""+address+"\"")*60 * 1000)){
 				 HashMap ccu = CCUHsApi.getInstance().read("ccu");
 				 String ccuName = ccu.get("dis").toString();
 

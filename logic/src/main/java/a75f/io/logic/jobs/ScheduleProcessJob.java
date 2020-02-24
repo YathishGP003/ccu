@@ -592,7 +592,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             CcuLog.d(L.TAG_CCU_JOB, "preconRate : "+preconRate+" preconDegree: "+preconDegree+","+systemOccupancy.name());
         }
     
-        if (systemOccupancy == UNOCCUPIED && getSystemTemporaryHoldExpiry() > 0) {
+        if ((systemOccupancy == UNOCCUPIED )&& (getSystemTemporaryHoldExpiry() > 0)) {
             systemOccupancy = FORCEDOCCUPIED;
         }
         
@@ -1169,7 +1169,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         ArrayList<HashMap> zonedetails = CCUHsApi.getInstance().readAll("equip and zone and roomRef == \""+equip.getRoomRef()+"\"");
         if((occ != null) && occ.size() > 0)
             totEquipsInZone.add(((HashMap) occ.get(0)).get("id").toString());
-        totEquipsInZone.add(equip.getId());
+        //totEquipsInZone.add(equip.getId());
         if(zonedetails.size() > 0){
             Log.d("ZoneSchedule","getZoneStatus ="+zonedetails.size()+","+zonedetails.get(0).toString());
             for(int i = 0; i < zonedetails.size(); i++){

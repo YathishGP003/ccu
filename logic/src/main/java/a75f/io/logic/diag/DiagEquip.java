@@ -253,11 +253,11 @@ public class DiagEquip
         try {
             pi = pm.getPackageInfo("a75f.io.renatus", 0);
             String version = pi.versionName.substring(pi.versionName.lastIndexOf('_')+1,pi.versionName.length() - 2);
-            setDiagHisVal("app and version",Double.parseDouble(version));
             Log.d("DiagEquip","version ="+version+","+pi.versionName+","+pi.versionName.substring(pi.versionName.lastIndexOf('_')+1));
             String hisVersion = pi.versionName.substring(pi.versionName.lastIndexOf('_')+1);
             if((curVersionInDb == null) || (curVersionInDb != hisVersion)) {
                 curVersionInDb = hisVersion;
+                setDiagHisVal("app and version",Double.parseDouble(version));
                 CCUHsApi.getInstance().writeDefaultVal("point and diag and app and version", hisVersion);
             }
 

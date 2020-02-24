@@ -361,7 +361,7 @@ public class CreateNewSite extends Fragment {
                             locInfo.put("geoState", siteState);
                             locInfo.put("geoAddr", siteAddress);
                             locInfo.put("geoPostalCode", siteZip);
-                            locInfo.put("organization", installerOrg);
+                            ccuRegInfo.put("organization", installerOrg);
                             ccuRegInfo.put("siteName",siteName);
                             ccuRegInfo.put("siteId",  siteGUID);
                             if(ccu.size() > 0) {

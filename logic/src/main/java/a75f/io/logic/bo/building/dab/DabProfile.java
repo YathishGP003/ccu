@@ -186,12 +186,14 @@ public class DabProfile extends ZoneProfile
         }
     
         
-        damper.currentPosition = (int)(damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * (damperOpController.getControlVariable() / damperOpController.getMaxAllowedError()));
-        
-        dabEquip.setDamperPos(damper.currentPosition, "primary");
-        dabEquip.setDamperPos(damper.currentPosition, "secondary");
-        
-        dabEquip.setStatus(state.ordinal(), DabSystemController.getInstance().isEmergencyMode() && (state == HEATING ? buildingLimitMinBreached()
+        int damperPos = (int)(damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * (damperOpController.getControlVariable() / damperOpController.getMaxAllowedError()));
+        if(damper.currentPosition != damperPos) {
+            damper.currentPosition = damperPos;
+            dabEquip.setDamperPos(damper.currentPosition, "primary");
+            dabEquip.setDamperPos(damper.currentPosition, "secondary");
+        }
+        if(dabEquip.getStatus() != state.ordinal())
+            dabEquip.setStatus(state.ordinal(), DabSystemController.getInstance().isEmergencyMode() && (state == HEATING ? buildingLimitMinBreached()
                                                     : state == COOLING ? buildingLimitMaxBreached() : false));
         CcuLog.d(L.TAG_CCU_ZONE, "System STATE :" + DabSystemController.getInstance().getSystemState() + " ZoneState : " + getState() + " ,CV: " + damperOpController.getControlVariable() + " ,damper:" + damper.currentPosition);
     

@@ -78,25 +78,28 @@ public class StandaloneScheduler {
             double deadbands = (occ.getCoolingVal() - occ.getHeatingVal()) / 2.0 ;
             occ.setCoolingDeadBand(deadbands);
             occ.setHeatingDeadBand(deadbands);
-            Double coolingTemp = ((occ.isOccupied() || occ.isPreconditioning() || occ.isForcedOccupied()) ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback()));
-            setDesiredTemp(equip, coolingTemp, "cooling");
+            Double coolingTemp = ((occ.isOccupied() || occ.isPreconditioning() ) ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback()));
+            setDesiredTemp(equip, coolingTemp, "cooling",occ.isForcedOccupied());
             Double heatingTemp = (occ.isOccupied() || occ.isPreconditioning() || occ.isForcedOccupied())? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
-            setDesiredTemp(equip, heatingTemp, "heating");
-            setDesiredTemp(equip, avgTemp, "average");
+            setDesiredTemp(equip, heatingTemp, "heating",occ.isForcedOccupied());
+            setDesiredTemp(equip, avgTemp, "average",occ.isForcedOccupied());
         }
 
         return occ;
     }
 
 
-    public static void setDesiredTemp(Equip equip, Double desiredTemp, String flag) {
+    public static void setDesiredTemp(Equip equip, Double desiredTemp, String flag, boolean isForcedOccupied) {
         //CcuLog.d(L.TAG_CCU_SCHEDULER, "Equip: " + equip.getId() + " Temp: " + desiredTemp + " Flag: " + flag);
         ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and " + flag + " and desired and sp and equipRef == \"" + equip.getId() + "\"");
         if (points == null || points.size() == 0) {
             return; //Equip might have been deleted.
         }
         final String id = ((HashMap) points.get(0)).get("id").toString();
-        if (HSUtil.getPriorityLevelVal(id,8) == desiredTemp) {
+        if(isForcedOccupied){
+            CcuLog.d(L.TAG_CCU_SCHEDULER, flag+"FC DesiredTemp not changed : Skip PointWrite=");
+            return;
+        }else if (HSUtil.getPriorityLevelVal(id,8) == desiredTemp) {
             CcuLog.d(L.TAG_CCU_SCHEDULER, flag+"DesiredTemp not changed : Skip PointWrite");
             return;
         }

@@ -990,10 +990,10 @@ public class FourPipeFanCoilUnitEquip  {
         return CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and fcu and pipe4 and "+tags+" and group == \""+nodeAddr+"\"");
     }
     public double getStatus() {
-        return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and status and not message and his and group == \""+nodeAddr+"\"");
     }
     public void setStatus(double status) {
-        CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \""+nodeAddr+"\"", status);
+        CCUHsApi.getInstance().writeHisValByQuery("point and status and not message and his and group == \""+nodeAddr+"\"", status);
     }
 
     public void setScheduleStatus(String status)

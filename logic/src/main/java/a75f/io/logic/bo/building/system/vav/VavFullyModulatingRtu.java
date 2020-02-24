@@ -145,13 +145,12 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             {
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemCoolingLoopOp/100)));
             }
-            setCmdSignal("cooling",signal);
+
+            if(signal != getCmdSignal("cooling"))
+                setCmdSignal("cooling",signal);
         } else {
             signal = 0;
         }
-
-        if(signal != getCmdSignal("cooling"))
-            setCmdSignal("cooling",signal);
         ControlMote.setAnalogOut("analog1", signal);
         
     

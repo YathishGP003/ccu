@@ -179,9 +179,9 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
 
             }
             if(occuStatus != null){
-                twoPfcuDevice.setProfilePoint("occupancy and status", occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCEDOCCUPIED.ordinal() : 0)));
+                twoPfcuDevice.setProfilePoint("occupancy and mode", occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCEDOCCUPIED.ordinal() : 0)));
             }else {
-                twoPfcuDevice.setProfilePoint("occupancy and status", occupied ? 1 : 0);
+                twoPfcuDevice.setProfilePoint("occupancy and mode", occupied ? 1 : 0);
             }
         }
 
@@ -632,16 +632,20 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                 if(isFanLowEnabled){
                     if((roomTemp <= setTempHeating) &&(roomTemp > (setTempHeating - heatingDeadband)) ){
                         if(getCmdSignal("fan and medium",addr) == 0) {
-                            setCmdSignal("fan and low", 1.0, addr);
-                            setCmdSignal("fan and medium", 0, addr);
-                            setCmdSignal("fan and high", 0, addr);
+                            if(getCmdSignal("fan and low",addr) == 0)
+                                setCmdSignal("fan and low", 1.0, addr);
+                            if(getCmdSignal("fan and medium",addr) > 0)
+                                setCmdSignal("fan and medium", 0, addr);
+                            if(getCmdSignal("fan and high",addr) > 0)
+                                setCmdSignal("fan and high", 0, addr);
                             fanstages = "FanStage1";
                         }else if((getCmdSignal("fan and low",addr) == 0) && (roomTemp == setTempHeating)) {
                             setCmdSignal("fan and low", 1.0, addr);
                             fanstages = "FanStage1";
                         }
                     }else if(roomTemp >= setTempHeating + hysteresis){
-                        setCmdSignal("fan and low",0,addr);
+                        if(getCmdSignal("fan and low",addr) > 0)
+                            setCmdSignal("fan and low",0,addr);
                     }else {
                         if(getCmdSignal("fan and low",addr) > 0)
                             fanstages = "FanStage1";
@@ -649,12 +653,13 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                 }
                 if(isFanMediumEnabled){
                     if(roomTemp <= (setTempHeating - heatingDeadband)){
-                        setCmdSignal("fan and low",0,addr);
-                        setCmdSignal("fan and high",0,addr);
-                        setCmdSignal("fan and medium", 1.0 , addr);
+                        if(getCmdSignal("fan and low",addr) > 0)setCmdSignal("fan and low",0,addr);
+                        if(getCmdSignal("fan and high",addr) > 0)setCmdSignal("fan and high",0,addr);
+                        if(getCmdSignal("fan and medium",addr) == 0)setCmdSignal("fan and medium", 1.0 , addr);
                         fanstages = "FanStage2";
                     }else if(roomTemp >= setTempHeating){
-                        setCmdSignal("fan and medium",0,addr);
+                        if(getCmdSignal("fan and medium",addr) > 0)
+                            setCmdSignal("fan and medium",0,addr);
                     }else {
                         if(getCmdSignal("fan and medium",addr) > 0)
                             fanstages = "FanStage2";
@@ -662,13 +667,17 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                 }
                 if(isFanHighEnabled){
                     if(roomTemp <= (setTempHeating - (heatingDeadband * 2.0))){
-                        setCmdSignal("fan and high", 1.0 , addr);
-                        setCmdSignal("fan and low",0,addr);
-                        setCmdSignal("fan and medium",0,addr);
+                        if(getCmdSignal("fan and high",addr) == 0)
+                            setCmdSignal("fan and high", 1.0 , addr);
+                        if(getCmdSignal("fan and low",addr) > 0)
+                            setCmdSignal("fan and low",0,addr);
+                        if(getCmdSignal("fan and medium",addr) > 0)
+                            setCmdSignal("fan and medium",0,addr);
                         fanstages = "FanStage3";
                         relayStates.put("FanStage3",1);
                     }else if(roomTemp >= (setTempHeating - heatingDeadband)){
-                        setCmdSignal("fan and high",0,addr);
+                        if(getCmdSignal("fan and high",addr) == 0)
+                            setCmdSignal("fan and high",0,addr);
                     }else {
                         if(getCmdSignal("fan and high",addr) > 0)
                             fanstages = "FanStage3";
@@ -682,7 +691,8 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
 
                 if (isFanLowEnabled) {
                     if(occupied) {
-                        setCmdSignal("fan and low", 0, addr);
+                        if(getCmdSignal("fan and low",addr) > 0)
+                            setCmdSignal("fan and low", 0, addr);
                     }
                 }
                 if(isFanMediumEnabled){
@@ -702,7 +712,8 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             case FAN_HIGH2_ALL_TIMES:
 
                 if (isFanLowEnabled) {
-                    setCmdSignal("fan and low",0,addr);
+                    if(getCmdSignal("fan and low",addr) > 0)
+                        setCmdSignal("fan and low",0,addr);
                 }
                 if(isFanMediumEnabled){
                     if(getCmdSignal("fan and medium",addr) > 0)

@@ -58,9 +58,10 @@ public class AlertProcessor
     Context mContext;
     private BoxStore     boxStore;
     private Box<Alert> alertBox;
+    private static int alerts_db_version = 1;
     
-    private static final File TEST_DIRECTORY = new File("objectbox-test/alert-db");
-    
+    //private static final File TEST_DIRECTORY = new File("objectbox-test/alert-db");
+    private static final File ALERT_DIRECTORY = new File("objectbox-alert/alert-db");
     private static final String PREFS_ALERT_DEFS = "ccu_alerts";
     private static final String PREFS_ALERTS_CUSTOM = "custom_alerts";
     private static final String PREFS_ALERTS_PREDEFINED = "predef_alerts";
@@ -121,10 +122,10 @@ public class AlertProcessor
     AlertProcessor(String alertDef) {
         if (boxStore == null)
         {
-            BoxStore.deleteAllFiles(TEST_DIRECTORY);
+            BoxStore.deleteAllFiles(ALERT_DIRECTORY);
             boxStore = MyObjectBox.builder()
                                   // add directory flag to change where ObjectBox puts its database files
-                                  .directory(TEST_DIRECTORY)
+                                  .directory(ALERT_DIRECTORY)
                                   // optional: add debug flags for more detailed ObjectBox log output
                                   .debugFlags(DebugFlags.LOG_QUERIES | DebugFlags.LOG_QUERY_PARAMETERS).build();
             alertBox = boxStore.boxFor(Alert.class);

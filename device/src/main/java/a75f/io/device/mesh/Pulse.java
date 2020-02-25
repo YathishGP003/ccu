@@ -73,7 +73,9 @@ public class Pulse
 
 		if(mTimeSinceCMDead > 15){
 			mTimeSinceCMDead = 0;
-			AlertGenerateHandler.handleMessage(CM_DEAD, L.ccu().getCCUName() +" has stopped reporting data properly and needs to be serviced. Please contact 75F support for assistance.");
+			HashMap ccu = CCUHsApi.getInstance().read("ccu");
+			String ccuName = ccu.get("dis").toString();
+			AlertGenerateHandler.handleMessage(CM_DEAD, ccuName +" has stopped reporting data properly and needs to be serviced. Please contact 75F support for assistance.");
 		}
 	}
 	public static void regularSNUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t smartNodeRegularUpdateMessage_t)
@@ -145,7 +147,7 @@ public class Pulse
 							double curEntTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
 							curEntTempVal = CCUUtils.roundTo2Decimal(curEntTempVal);
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-							if(oldEntTempVal != curEntTempVal)
+							if((oldEntTempVal != curEntTempVal) && !isSse)
 								hayStack.writeHisValById(logPoint.get("id").toString(), curEntTempVal);
 						}
 						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : Thermistor2 "+th2TempVal+","+(val*10)+","+logicalCurTempPoint+","+isTh2Enabled+","+logPointInfo.getMarkers().toString());

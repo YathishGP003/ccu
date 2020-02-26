@@ -233,11 +233,11 @@ public class VavIERtu extends VavSystemProfile
             
             if (staticPressureMax > staticPressureMin)
             {
-                spSignal = CCUUtils.roundToTwoDecimal(staticPressureMin + (staticPressureMax - staticPressureMin) * (systemFanLoopOp / 100));
+                spSignal = CCUUtils.roundToTwoDecimal(staticPressureMin + (staticPressureMax - staticPressureMin) * (systemFanLoopOp / 100.0));
             }
             else
             {
-                spSignal = CCUUtils.roundToTwoDecimal(staticPressureMin - (staticPressureMin - staticPressureMax) * (systemFanLoopOp/100));
+                spSignal = CCUUtils.roundToTwoDecimal(staticPressureMin - (staticPressureMin - staticPressureMax) * (systemFanLoopOp/100.0));
             }
             setCmdSignal("fan", spSignal);
         } else {

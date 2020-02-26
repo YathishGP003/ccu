@@ -1,8 +1,6 @@
 package a75f.io.api.haystack;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.util.Log;
 
 import com.google.gson.Gson;

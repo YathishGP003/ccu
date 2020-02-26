@@ -60,6 +60,7 @@ public class AlertProcessor
     private Box<Alert> alertBox;
     
     private static final File TEST_DIRECTORY = new File("objectbox-test/alert-db");
+    //private static final File ALERT_DIRECTORY = new File("objectbox-alert/alert-db");
     private static final String PREFS_ALERT_DEFS = "ccu_alerts";
     private static final String PREFS_ALERTS_CUSTOM = "custom_alerts";
     private static final String PREFS_ALERTS_PREDEFINED = "predef_alerts";
@@ -518,10 +519,12 @@ public class AlertProcessor
     public void generateAlert(String title, String msg){
         ArrayList<AlertDefinition> alertDefinition = getAlertDefinitions();
         for (AlertDefinition ad :alertDefinition) {
-            if (ad.alert.mTitle.equals(title)) {
-                ad.alert.setmMessage(msg);
-                ad.alert.setmNotificationMsg(msg);
-                addAlert(AlertBuilder.build(ad, AlertFormatter.getFormattedMessage(ad)));
+            if(ad.alert.ismEnabled()) {
+                if (ad.alert.mTitle.equals(title)) {
+                    ad.alert.setmMessage(msg);
+                    ad.alert.setmNotificationMsg(msg);
+                    addAlert(AlertBuilder.build(ad, AlertFormatter.getFormattedMessage(ad)));
+                }
             }
         }
     }

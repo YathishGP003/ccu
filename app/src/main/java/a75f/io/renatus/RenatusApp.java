@@ -1,6 +1,9 @@
 package a75f.io.renatus;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.support.multidex.MultiDex;
 import android.support.v7.app.AppCompatDelegate;
@@ -8,11 +11,13 @@ import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-
+import java.io.InputStreamReader;
+import a75f.io.logic.SystemProperties;
 import a75f.io.renatus.util.ActivityLifecycleHandler;
 import io.fabric.sdk.android.Fabric;
 
@@ -106,4 +111,50 @@ public class RenatusApp extends UtilityApplication
 		});
 		thread.start();
 	}
+	public static void setIntentToRestartCCU() {
+		Intent intent = new Intent(getAppContext(), SplashActivity.class);
+		PendingIntent pending = PendingIntent.getActivity(getAppContext(), 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+		AlarmManager alarmManager = (AlarmManager) getAppContext().getSystemService(Context.ALARM_SERVICE);
+		alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 5000, pending);
+	}
+
+	public static void rebootTablet() {
+
+		setIntentToRestartCCU();
+		try {
+			Log.d("CCU_DEBUG", "************Houston, May Day, May Day, May Day, Bailing Out!!!************");
+			//Runtime.getRuntime().exec("su -c reboot"); //su -c 'setprop sys.powerctl reboot,recovery'
+			Runtime.getRuntime().exec("su -c 'setprop sys.powerctl reboot");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void closeApp() {
+		setIntentToRestartCCU();
+
+		Log.d("CCU_DEBUG", "************Houston, CCU Is Going Down!!!************");
+		NotificationHandler.clearAllNotifications();
+		android.os.Process.killProcess(android.os.Process.myPid());
+		System.exit(0);
+	}
+	public static void saveLogcat() {
+		try {
+			Process process = Runtime.getRuntime().exec("logcat -v threadtime -d");
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			StringBuilder log = new StringBuilder();
+			String line = "";
+			while ((line = bufferedReader.readLine()) != null) {
+				if (line.contains("CCU") || line.contains("Schedule"))
+					log.append(line + "\n");
+			}
+			//TODO need to save this logs to server
+			//CCUHsApi.getInstance().uploadLogs(log.toString());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
 }

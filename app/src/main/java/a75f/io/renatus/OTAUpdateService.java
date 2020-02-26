@@ -23,6 +23,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
@@ -237,16 +238,13 @@ public class OTAUpdateService extends IntentService {
      * @param intent The Intent which started this OTA update
      */
     private void handleOtaUpdateStartRequest(Intent intent) {
-        String nodeAddressStr = intent.getStringExtra("lwMeshAddress");
+        String id = intent.getStringExtra("id");
         String firmwareVersion = intent.getStringExtra("firmwareVersion");
         String cmdLevel = intent.getStringExtra("cmdLevel");
 
-        Log.d(TAG,"handleOtaUpdateStartRequest "+firmwareVersion+" Node "+nodeAddressStr);
-        if(nodeAddressStr == null || firmwareVersion == null) {
+        if(id == null || firmwareVersion == null) {
             return;
         }
-
-        int nodeAddress = Integer.parseInt(nodeAddressStr);
 
         try {
             String versionNumStr = firmwareVersion.split("_v")[1];                 // e.g. "SmartNode_v1.0" -> "1.0"
@@ -265,14 +263,14 @@ public class OTAUpdateService extends IntentService {
 
         if(firmwareVersion.startsWith("SmartNode_")) {
             mFirmwareDeviceType = FirmwareDeviceType_t.SMART_NODE_DEVICE_TYPE;
-            startUpdate(nodeAddress, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
+            startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
         }
         else if(firmwareVersion.startsWith("Itm_") || firmwareVersion.startsWith("itm_")) {
             mFirmwareDeviceType = FirmwareDeviceType_t.ITM_DEVICE_TYPE;
-            startUpdate(nodeAddress, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
+            startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
         } else if(firmwareVersion.startsWith("SmartStatV2_") || firmwareVersion.startsWith("smartstatv2_")) {
             mFirmwareDeviceType = FirmwareDeviceType_t.SMART_STAT_V2;
-            startUpdate(nodeAddress, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
+            startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
         }
     }
 
@@ -281,23 +279,17 @@ public class OTAUpdateService extends IntentService {
      * Fails if the address is invalid, if there is currently an update in progress, or if the files
      * do not exist
      *
-     * @param address      The address of the device to be updated
+     * @param id      The guid of corresponding level
      * @param versionMajor The major version of the new firmware
      * @param versionMinor The minor version of the new firmware
      * @param deviceType   The type of device being updated
      */
-    private void startUpdate(int address, String updateLevel, int versionMajor, int versionMinor, FirmwareDeviceType_t deviceType) {
+    private void startUpdate(String id, String updateLevel, int versionMajor, int versionMinor, FirmwareDeviceType_t deviceType) {
         String filename = makeFileName(versionMajor, versionMinor, deviceType);
 
         Log.d(TAG, "[VALIDATION] Validating update instructions: " + filename);
         if (mUpdateInProgress) {
             Log.d(TAG, "[VALIDATION] Update already in progress");
-            return;
-        }
-
-        if (!(address > 0)) {
-            Log.d(TAG, "[VALIDATION] Address " + address + " is invalid");
-            resetUpdateVariables();
             return;
         }
 
@@ -307,7 +299,7 @@ public class OTAUpdateService extends IntentService {
             return;
         }
 
-        Log.d(TAG, "[VALIDATION] Valid address and version");
+        Log.d(TAG, "[VALIDATION] Valid version");
 
         if(mLwMeshAddresses == null) {
             mLwMeshAddresses = new ArrayList<>();
@@ -334,9 +326,7 @@ public class OTAUpdateService extends IntentService {
 
             case "zone":
                 //update all nodes in the same zone as the specified node
-                Device d = HSUtil.getDevice((short) address);
-                for(Device device : HSUtil.getDevices(d.getRoomRef())) {
-
+                for(Device device : HSUtil.getDevices(CCUHsApi.getInstance().getLUID("@"+id))) {
                     if(device.getMarkers().contains( deviceType.getHsMarkerName() )) {
                         Log.d(TAG, "[VALIDATION] Adding device " + device.getAddr() + " to update");
                         mLwMeshAddresses.add(Integer.parseInt(device.getAddr()));
@@ -345,15 +335,17 @@ public class OTAUpdateService extends IntentService {
                 break;
 
             case "equip":
-            default:
                 //update just the one node
-                Log.d(TAG, "[VALIDATION] Adding device " + address + " to update");
-                mLwMeshAddresses.add(address);
+                    Equip equip = HSUtil.getEquipInfo(CCUHsApi.getInstance().getLUID("@"+id));
+                    if(equip.getMarkers().contains( deviceType.getHsMarkerName() )) {
+                        Log.d(TAG, "[VALIDATION] Adding device " + equip.getGroup() + " to update");
+                        mLwMeshAddresses.add(Integer.parseInt(equip.getGroup()));
+                    }
                 break;
         }
 
         if(mLwMeshAddresses.isEmpty()) {
-            Log.d(TAG, "[VALIDATION] Could not find device " + address + " at level " + updateLevel);
+            Log.d(TAG, "[VALIDATION] Could not find device " + id + " at level " + updateLevel);
             resetUpdateVariables();
             return;
         }

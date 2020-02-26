@@ -1,9 +1,14 @@
 package a75f.io.renatus;
 
 import android.app.AlertDialog;
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -34,17 +39,30 @@ import org.json.JSONObject;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Device;
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Floor;
+import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.device.mesh.MeshUtil;
+import a75f.io.device.serial.CcuToCmOverUsbCmResetMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
+import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.pubnub.RemoteCommandHandleInterface;
+import a75f.io.logic.pubnub.RemoteCommandUpdateHandler;
+import a75f.io.renatus.ENGG.AppInstaller;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 import a75f.io.renatus.registartion.CustomViewPager;
 import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.Prefs;
 
-public class RenatusLandingActivity extends AppCompatActivity {
+public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface {
 
     private static final String TAG = RenatusLandingActivity.class.getSimpleName();
     //TODO - refactor
@@ -346,10 +364,15 @@ public class RenatusLandingActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
+    @Override
+    public void onResume() {
+        super.onResume();
+        RemoteCommandUpdateHandler.setRemoteCommandInterface(this);
+    }
     @Override
     public void onPause() {
         super.onPause();
+        RemoteCommandUpdateHandler.setRemoteCommandInterface(null);
     }
 
     @Override
@@ -520,5 +543,110 @@ public class RenatusLandingActivity extends AppCompatActivity {
         };
 
         updateCCUReg.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    @Override
+    public void updateRemoteCommands(String commands,String cmdLevel,String id) {
+        CcuLog.d("RemoteCommand","PUBNUB RenatusLandingActivity="+commands+","+cmdLevel);
+        if(!commands.isEmpty() && commands.equals("restart_ccu")){
+            RenatusApp.closeApp();
+        }else if(!commands.isEmpty() && commands.equals("restart_tablet")){
+            RenatusApp.rebootTablet();
+        }else if(!commands.isEmpty() && commands.equals("save_log_cat")){
+            RenatusApp.saveLogcat();
+        }else if(!commands.isEmpty() && commands.equals("reset_cm")){
+            CcuToCmOverUsbCmResetMessage_t msg = new CcuToCmOverUsbCmResetMessage_t();
+            msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_CM_RESET);
+            msg.reset.set((short)1);
+            MeshUtil.sendStructToCM(msg);
+        }else if(!commands.isEmpty() && commands.equals("update_ccu")){
+            String apkName = id;
+            Log.d("CCU_DOWNLOAD", "got command to install update--"+ DownloadManager.EXTRA_DOWNLOAD_ID +","+apkName);
+            RenatusApp.getAppContext().registerReceiver(new BroadcastReceiver() {
+
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String action = intent.getAction();
+                    if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
+                        long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+                        Log.d("CCU_DOWNLOAD", String.format("Received download complete for %d from %d and %d", downloadId, AppInstaller.getHandle().getCCUAppDownloadId(), AppInstaller.getHandle().getDownloadedFileVersion(downloadId)));
+                        if (downloadId == AppInstaller.getHandle().getCCUAppDownloadId()) {
+                            if (AppInstaller.getHandle().getDownloadedFileVersion(downloadId) > 0)
+                                AppInstaller.getHandle().install(null, false, true, true);
+                        }else if(downloadId == AppInstaller.getHandle().getHomeAppDownloadId()){
+                            int homeAppVersion = AppInstaller.getHandle().getDownloadedFileVersion(downloadId);
+                            if(homeAppVersion >= 1) {
+                                PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit().putInt("home_app_version", homeAppVersion).commit();
+                                AppInstaller.getHandle().install(null, true, false, true);
+                            }
+                        }
+                    }
+                }
+
+            }, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+            if(apkName.startsWith("75f") || apkName.startsWith("75F"))
+                AppInstaller.getHandle().downloadHomeInstall(apkName);
+            else if(apkName.startsWith("RENATUS_CCU"))
+                AppInstaller.getHandle().downloadCCUInstall(apkName);
+        }else if(!commands.isEmpty() && commands.equals("restart_module")){
+
+            //TODO Send commands to SmartNode
+            switch (cmdLevel){
+                case "system":
+                    for (Floor floor : HSUtil.getFloors()) {
+                        for (Zone zone : HSUtil.getZones(floor.getId())) {
+                            for(Device d : HSUtil.getDevices(zone.getId())) {
+                                if(d.getMarkers().contains("smartstat")) {
+                                    CcuToCmOverUsbSmartStatControlsMessage_t ssControlsMessage_t = new CcuToCmOverUsbSmartStatControlsMessage_t();
+                                    ssControlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);
+                                    ssControlsMessage_t.address.set(Short.parseShort(d.getAddr()));
+                                    ssControlsMessage_t.controls.reset.set((short) 1);
+                                    MeshUtil.sendStructToNodes(ssControlsMessage_t);
+                                }else {
+                                    CcuToCmOverUsbSnControlsMessage_t snControlsMessage_t = new CcuToCmOverUsbSnControlsMessage_t();
+                                    snControlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
+                                    snControlsMessage_t.smartNodeAddress.set(Short.parseShort(d.getAddr()));
+                                    snControlsMessage_t.controls.reset.set((short) 1);
+                                    MeshUtil.sendStructToNodes(snControlsMessage_t);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case "zone":
+                    for(Device d : HSUtil.getDevices(CCUHsApi.getInstance().getLUID("@"+id))) {
+                        if(d.getMarkers().contains("smartstat")) {
+                            CcuToCmOverUsbSmartStatControlsMessage_t ssControlsMessage_t = new CcuToCmOverUsbSmartStatControlsMessage_t();
+                            ssControlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);
+                            ssControlsMessage_t.address.set(Short.parseShort(d.getAddr()));
+                            ssControlsMessage_t.controls.reset.set((short) 1);
+                            MeshUtil.sendStructToNodes(ssControlsMessage_t);
+                        }else if(d.getMarkers().contains("smartnode")) {
+                            CcuToCmOverUsbSnControlsMessage_t snControlsMessage_t = new CcuToCmOverUsbSnControlsMessage_t();
+                            snControlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
+                            snControlsMessage_t.smartNodeAddress.set(Short.parseShort(d.getAddr()));
+                            snControlsMessage_t.controls.reset.set((short) 1);
+                            MeshUtil.sendStructToNodes(snControlsMessage_t);
+                        }
+                    }
+                    break;
+                case "module":
+                    Equip equip = HSUtil.getEquipInfo(CCUHsApi.getInstance().getLUID("@"+id));
+                    if(equip.getMarkers().contains("smartstat")) {
+                        CcuToCmOverUsbSmartStatControlsMessage_t ssControlsMessage_t = new CcuToCmOverUsbSmartStatControlsMessage_t();
+                        ssControlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);
+                        ssControlsMessage_t.address.set(Short.parseShort(equip.getGroup()));
+                        ssControlsMessage_t.controls.reset.set((short) 1);
+                        MeshUtil.sendStructToNodes(ssControlsMessage_t);
+                    }else if(equip.getMarkers().contains("smartnode")){
+                        CcuToCmOverUsbSnControlsMessage_t snControlsMessage_t = new CcuToCmOverUsbSnControlsMessage_t();
+                        snControlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
+                        snControlsMessage_t.smartNodeAddress.set(Short.parseShort(equip.getGroup()));
+                        snControlsMessage_t.controls.reset.set((short) 1);
+                        MeshUtil.sendStructToNodes(snControlsMessage_t);
+                    }
+                    break;
+            }
+        }
     }
 }

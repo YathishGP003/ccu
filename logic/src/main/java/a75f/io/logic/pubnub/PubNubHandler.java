@@ -44,11 +44,6 @@ public class PubNubHandler
             case AlertRemoveHandler.CLR_SITEDEF_CMD:
                 AlertRemoveHandler.handleMessage(cmd, msg);
                 break;
-            case CM_RESET:
-                HashMap ccu = CCUHsApi.getInstance().read("ccu");
-                String ccuName = ccu.get("dis").toString();
-                AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(CM_RESET,"CM Reset request sent for  - "+ccuName);
-                break;
             case PRE_DEF_ALERT:
                 AlertManager.getInstance(Globals.getInstance().getApplicationContext()).fetchPredefinedAlerts();
                 break;

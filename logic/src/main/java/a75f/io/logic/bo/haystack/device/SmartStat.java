@@ -250,7 +250,7 @@ public class SmartStat {
                                  .setEquipRef(q.getId())
                                  .setSiteRef(siteRef)
                                  .setRoomRef(roomRef)
-                                 .setFloorRef(floorRef)
+                                 .setFloorRef(floorRef).setHisInterpolate("cov")
                                  .addMarker("zone").addMarker("sensor").addMarker(p.getPortSensor()).addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
                                  .setGroup(String.valueOf(smartNodeAddress))
                                  .setTz(tz)

@@ -135,14 +135,6 @@ public class LSerial
                 CmToCcuOverUsbFirmwarePacketRequest_t msg = new CmToCcuOverUsbFirmwarePacketRequest_t();
                 msg.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
                 LogdStructAsJson(msg);
-            }else if(messageType == MessageType.CM_ERROR_REPORT){
-                CmToCcuOverUsbErrorReportMessage_t msg = new CmToCcuOverUsbErrorReportMessage_t();
-                msg.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN),0);
-                LogdStructAsJson(msg);
-                String str = "error type:"+msg.errorType.get().name();
-                str+= ", error detail:" +msg.errorDetail;
-                AlertGenerateHandler.handleMessage(CM_ERROR_REPORT, "CM error:"+str);
-
             }else if(messageType == MessageType.CM_TO_CCU_OVER_USB_CM4_REGULAR_UPDATE){
 
             }else if(messageType == MessageType.CM_TO_CCU_OVER_USB_SN_REBOOT){

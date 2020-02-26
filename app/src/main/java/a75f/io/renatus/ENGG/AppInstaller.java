@@ -368,7 +368,7 @@ public class AppInstaller
         return -1;
     }
     
-    int getDownloadedFileVersion(long downloadId)
+    public int getDownloadedFileVersion(long downloadId)
     {
         try
         {

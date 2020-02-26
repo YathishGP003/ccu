@@ -251,7 +251,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
         String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
         String siteRef = siteMap.get("id").toString();
         String tz = siteMap.get("tz").toString();
-        Point coolingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "analog2Signal").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").addMarker("equipHis").addMarker("runtime").setUnit("%").setTz(tz).build();
+        Point coolingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "analog2Signal").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").addMarker("equipHis").addMarker("runtime").setUnit("%").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(coolingSignal);
     }
     

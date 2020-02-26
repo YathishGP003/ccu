@@ -80,7 +80,11 @@ public class HSUtil
         Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
         return equip.getRoomRef();
     }
-    
+    public static Equip getEquipInfo(String equipId) {
+        HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
+        Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
+        return equip;
+    }
     public static HDict mapToHDict(Map<String, Object> m)
     {
         HDictBuilder b = new HDictBuilder();

@@ -449,6 +449,10 @@ public class AlertProcessor
             return new ArrayList<Alert>();
         }*/
         QueryBuilder<Alert> alertQuery = alertBox.query();
+        alertQuery.notEqual(Alert_.mSeverity, Alert.AlertSeverity.INTERNAL_INFO.ordinal());
+        alertQuery.notEqual(Alert_.mSeverity, Alert.AlertSeverity.INTERNAL_LOW.ordinal());
+        alertQuery.notEqual(Alert_.mSeverity, Alert.AlertSeverity.INTERNAL_MODERATE.ordinal());
+        alertQuery.notEqual(Alert_.mSeverity, Alert.AlertSeverity.INTERNAL_SEVERE.ordinal());
         alertQuery.orderDesc(Alert_.startTime);
         return alertQuery.build().find();
     }

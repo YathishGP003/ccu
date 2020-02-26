@@ -448,12 +448,16 @@ public class AlertProcessor
         /*if (boxStore != null && boxStore.isClosed()){
             return new ArrayList<Alert>();
         }*/
+        if (boxStore != null && boxStore.isClosed()){
+            return new ArrayList<>();
+        }
         QueryBuilder<Alert> alertQuery = alertBox.query();
         alertQuery.notEqual(Alert_.mSeverity, Alert.AlertSeverity.INTERNAL_INFO.ordinal());
         alertQuery.notEqual(Alert_.mSeverity, Alert.AlertSeverity.INTERNAL_LOW.ordinal());
         alertQuery.notEqual(Alert_.mSeverity, Alert.AlertSeverity.INTERNAL_MODERATE.ordinal());
         alertQuery.notEqual(Alert_.mSeverity, Alert.AlertSeverity.INTERNAL_SEVERE.ordinal());
         alertQuery.orderDesc(Alert_.startTime);
+        alertQuery.notEqual(Alert_.mSeverity, )
         return alertQuery.build().find();
     }
 

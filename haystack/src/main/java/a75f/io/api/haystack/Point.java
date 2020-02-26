@@ -27,6 +27,7 @@ public class Point extends Entity
     private String            maxVal;
     private String            incrementVal;
     private String            tunerGroup;
+    private String            hisInterpolate;
     
     public void setDisplayName(String displayName)
     {
@@ -104,6 +105,7 @@ public class Point extends Entity
     public String getMaxVal(){return maxVal;}
     public String getIncrementVal(){return incrementVal;}
     public String getTunerGroup(){return tunerGroup;}
+    public String getHisInterpolate(){return hisInterpolate;}
     public void setEnums(String enums)
     {
         this.enums = enums;
@@ -126,6 +128,7 @@ public class Point extends Entity
         private String maxVal;
         private String incrementVal;
         private String tunerGroup;
+        private String hisInterpolate;
         public Builder setKind(String kind)
         {
             this.kind = kind;
@@ -213,6 +216,11 @@ public class Point extends Entity
             this.tunerGroup = tg;
             return this;
         }
+        public Builder setHisInterpolate(String ipolate)
+        {
+            this.hisInterpolate = ipolate;
+            return this;
+        }
         public Point build(){
             Point p = new Point();
             p.displayName = this.displayName;
@@ -231,6 +239,7 @@ public class Point extends Entity
             p.maxVal = this.maxVal;
             p.incrementVal = this.incrementVal;
             p.tunerGroup = this.tunerGroup;
+            p.hisInterpolate = this.hisInterpolate;
             return p;
         }
     
@@ -304,6 +313,10 @@ public class Point extends Entity
                 else if (pair.getKey().equals("tunerGroup"))
                 {
                     this.tunerGroup = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("hisInterpolate"))
+                {
+                    this.hisInterpolate = pair.getValue().toString();
                 }
                 //it.remove();
             }

@@ -250,7 +250,7 @@ public class SmartNode
                                  .setEquipRef(q.getId())
                                  .setSiteRef(siteRef)
                                  .setRoomRef(roomRef)
-                                 .setFloorRef(floorRef)
+                                 .setFloorRef(floorRef).setHisInterpolate("cov")
                                  .addMarker("zone").addMarker("sensor").addMarker(p.getPortSensor()).addMarker("his").addMarker("cur").addMarker("current").addMarker("logical").addMarker("equipHis")
                                  .setUnit(sensorUnit)
                                  .setGroup(String.valueOf(smartNodeAddress))

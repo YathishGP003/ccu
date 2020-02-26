@@ -712,7 +712,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                         Point coolingSignal = new Point.Builder()
                                 .setDisplayName(equipDis + "-" + "coolingSignal")
                                 .setSiteRef(siteRef)
-                                .setEquipRef(configEnabledPt.getEquipRef())
+                                .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                 .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("his").addMarker("equipHis").addMarker("runtime").setUnit("%")
                                 .setTz(tz)
                                 .build();
@@ -729,7 +729,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                         Point fanSignal = new Point.Builder()
                                 .setDisplayName(equipDis + "-" + "fanSignal")
                                 .setSiteRef(siteRef)
-                                .setEquipRef(configEnabledPt.getEquipRef())
+                                .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                 .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").addMarker("equipHis").addMarker("runtime").setUnit("%")
                                 .setTz(tz)
                                 .build();
@@ -746,7 +746,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                         Point heatSignal = new Point.Builder()
                                 .setDisplayName(equipDis + "-" + "heatingSignal")
                                 .setSiteRef(siteRef)
-                                .setEquipRef(configEnabledPt.getEquipRef())
+                                .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                 .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("modulating").addMarker("his").addMarker("equipHis").addMarker("runtime").setUnit("%")
                                 .setTz(tz)
                                 .build();
@@ -763,7 +763,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                         Point co2Signal = new Point.Builder()
                                 .setDisplayName(equipDis + "-" + "co2Signal")
                                 .setSiteRef(siteRef)
-                                .setEquipRef(configEnabledPt.getEquipRef())
+                                .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                 .addMarker("system").addMarker("cmd").addMarker("co2").addMarker("modulating").addMarker("his").addMarker("equipHis").addMarker("runtime").setUnit("%")
                                 .setTz(tz)
                                 .build();
@@ -780,7 +780,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                         Point occupancySignal = new Point.Builder()
                                 .setDisplayName(equipDis+"-"+"occupancySignal")
                                 .setSiteRef(siteRef)
-                                .setEquipRef(configEnabledPt.getEquipRef())
+                                .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                 .addMarker("system").addMarker("cmd").addMarker("occupancy").addMarker("his").addMarker("equipHis").addMarker("runtime")
                                 .setTz(tz)
                                 .build();
@@ -801,7 +801,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                             Point humidPt = new Point.Builder()
                                     .setDisplayName(equipDis + "-" + "humidifier")
                                     .setSiteRef(siteRef)
-                                    .setEquipRef(configEnabledPt.getEquipRef())
+                                    .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                     .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his").addMarker("equipHis").addMarker("runtime")
                                     .setTz(tz)
                                     .build();
@@ -818,7 +818,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                             Point dehumidPt = new Point.Builder()
                                     .setDisplayName(equipDis + "-" + "dehumidifier")
                                     .setSiteRef(siteRef)
-                                    .setEquipRef(configEnabledPt.getEquipRef())
+                                    .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                     .addMarker("system").addMarker("cmd").addMarker("dehumidifier").addMarker("his").addMarker("equipHis").addMarker("runtime")
                                     .setTz(tz)
                                     .build();

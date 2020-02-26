@@ -520,7 +520,7 @@ public class VavIERtu extends VavSystemProfile
                         Point coolingSignal = new Point.Builder()
                                 .setDisplayName(equipDis+"-"+"coolingDat")
                                 .setSiteRef(siteRef)
-                                .setEquipRef(configEnabledPt.getEquipRef())
+                                .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                 .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("discharge").addMarker("air").addMarker("temp").addMarker("his").addMarker("equipHis").addMarker("runtime")
                                 .setUnit("\u00B0F").setTz(tz)
                                 .build();
@@ -537,7 +537,7 @@ public class VavIERtu extends VavSystemProfile
                         Point fanSignal = new Point.Builder()
                                 .setDisplayName(equipDis+"-"+"ductStaticPressure")
                                 .setSiteRef(siteRef)
-                                .setEquipRef(configEnabledPt.getEquipRef())
+                                .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                 .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his").addMarker("equipHis").addMarker("runtime")
                                 .setUnit("inch wc").setTz(tz)
                                 .build();
@@ -554,7 +554,7 @@ public class VavIERtu extends VavSystemProfile
                         Point heatingSignal = new Point.Builder()
                                 .setDisplayName(equipDis+"-"+"heatingDat")
                                 .setSiteRef(siteRef)
-                                .setEquipRef(configEnabledPt.getEquipRef())
+                                .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                 .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("discharge").addMarker("air").addMarker("temp").addMarker("his").addMarker("equipHis").addMarker("runtime")
                                 .setUnit("\u00B0F").setTz(tz)
                                 .build();
@@ -571,7 +571,7 @@ public class VavIERtu extends VavSystemProfile
                         Point heatingSignal = new Point.Builder()
                                 .setDisplayName(equipDis+"-"+"humidifier")
                                 .setSiteRef(siteRef)
-                                .setEquipRef(configEnabledPt.getEquipRef())
+                                .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
                                 .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his").addMarker("equipHis").addMarker("runtime")
                                 .setUnit("%").setTz(tz)
                                 .build();

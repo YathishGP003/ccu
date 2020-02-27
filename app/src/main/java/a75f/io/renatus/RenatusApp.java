@@ -38,7 +38,7 @@ public class RenatusApp extends UtilityApplication
 		mContext = getApplicationContext();
 		registerActivityLifecycleCallbacks(new ActivityLifecycleHandler());
 		AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
-		Fabric.with(this, new Crashlytics());
+		//Fabric.with(this, new Crashlytics());
 	}
 
 	public static Context getAppContext() {

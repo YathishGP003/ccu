@@ -129,9 +129,9 @@
         </activity>
 
 
-        <meta-data
+       <!-- <meta-data
             android:name="io.fabric.ApiKey"
-            android:value="a3eaad5c6571007c20544f5e3ead9179ddcdb218" />
+            android:value="a3eaad5c6571007c20544f5e3ead9179ddcdb218" />-->
 
         <service android:name=".WeatherDataDownloadService" />
     </application>

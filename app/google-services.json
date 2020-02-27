@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "156028260708",
+    "firebase_url": "https://renatus-53492.firebaseio.com",
+    "project_id": "renatus-53492",
+    "storage_bucket": "renatus-53492.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:156028260708:android:1ba3e3aabac1b839ea2a71",
+        "android_client_info": {
+          "package_name": "a75f.io.renatus"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "156028260708-fbhs71k5afplp7jqniaj7lj78fgenshv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyASsqZ8OGllVUEcdRtdo_E_cM5_iJGTlG8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "156028260708-fbhs71k5afplp7jqniaj7lj78fgenshv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

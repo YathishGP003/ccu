@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 apply plugin: 'io.objectbox'
+apply plugin: 'com.google.gms.google-services'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
@@ -128,7 +129,7 @@ dependencies {
     annotationProcessor('com.jakewharton:butterknife-compiler:8.7.0') {
             exclude group: 'com.google.guava'
     }
-    implementation('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
+    implementation('com.crashlytics.sdk.android:crashlytics:2.10.1') {
         transitive = true
     }
     implementation 'com.opencsv:opencsv:4.0'

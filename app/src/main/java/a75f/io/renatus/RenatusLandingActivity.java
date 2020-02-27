@@ -45,6 +45,7 @@ import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.device.mesh.LSerial;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbCmResetMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
@@ -559,6 +560,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_CM_RESET);
             msg.reset.set((short)1);
             MeshUtil.sendStructToCM(msg);
+            LSerial.getInstance().setResetSeedMessage(true);
         }else if(!commands.isEmpty() && commands.equals("update_ccu")){
             String apkName = id;
             Log.d("CCU_DOWNLOAD", "got command to install update--"+ DownloadManager.EXTRA_DOWNLOAD_ID +","+apkName);

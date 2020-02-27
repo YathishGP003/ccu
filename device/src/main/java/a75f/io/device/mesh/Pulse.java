@@ -975,19 +975,13 @@ public class Pulse
              long lastUpdateTime = mDeviceUpdate.get(address);
              long currentTime = Calendar.getInstance().getTimeInMillis();
              //trigger device dead alert if no signal update over 15min
-             if ((currentTime - lastUpdateTime) > 900000){
+			 Device d = HSUtil.getDevice(address);
+             if ((currentTime - lastUpdateTime) > ( TunerUtil.readTunerValByQuery("zone and dead and time",d.getEquipRef())*60 * 1000)){
 				 HashMap ccu = CCUHsApi.getInstance().read("ccu");
 				 String ccuName = ccu.get("dis").toString();
 
-				 CCUHsApi hayStack = CCUHsApi.getInstance();
-				 HashMap device = hayStack.read("device and addr == \""+address+"\"");
-				 if (device != null && device.size() > 0) {
-					 Device deviceInfo = new Device.Builder().setHashMap(device).build();
-					 AlertGenerateHandler.handleMessage(DEVICE_DEAD, "For"+" "+ccuName + "," +deviceInfo.getDisplayName() +" has stopped reporting data. Please contact 75F support.");
-					// mDeviceUpdate.put(address,Calendar.getInstance().getTimeInMillis());
-					mDeviceUpdate.remove(address);
-					break;
-				 }
+				 AlertGenerateHandler.handleMessage(DEVICE_DEAD, "For"+" "+ccuName + "," +d.getDisplayName() +" has stopped reporting data. Please contact 75F support.");
+				 break;
 			 }
 		}
 	}

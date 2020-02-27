@@ -20,7 +20,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
     
     @Override
     public void bark() {
-        watchdogMonitor = false;
+        watchdogMonitor = true;
     }
     
     @Override

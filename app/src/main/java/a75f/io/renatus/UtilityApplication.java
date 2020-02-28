@@ -79,7 +79,6 @@ public abstract class UtilityApplication extends Application
         public void onServiceConnected(ComponentName arg0, IBinder arg1)
         {
             try {
-                Log.d("USB Permisssion", "utility Application -" + arg1.isBinderAlive() + "," + arg1.toString() + "," + arg0.getClassName() + "," + arg1.getInterfaceDescriptor());
                 if (arg1.isBinderAlive()) {
                     usbService = ((UsbService.UsbBinder) arg1).getService();
                     LSerial.getInstance().setUSBService(usbService);

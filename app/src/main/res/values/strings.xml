@@ -429,6 +429,7 @@
     <string name="label_pumpchange">Heat Pump Changeover</string>
     <string name="label_airflowtemp">Airflow Temperature Sensor</string>
     <string name="label_enableoccup">Enable Occupancy Sensing</string>
+    <string name="label_enablefanstage1">Enable Fan Stage1 During Occupied</string>
     <string name="label_extsensor">Use External 10k Temp Sensor</string>
     <string name="button_set">SET</string>
     <string name="label_cpucoolstage1">Cooling Stage 1</string>

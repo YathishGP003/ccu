@@ -19,8 +19,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import a75f.io.logic.SystemProperties;
 import a75f.io.renatus.util.ActivityLifecycleHandler;
-import io.fabric.sdk.android.Fabric;
-
 /**
  * Created by ryanmattison isOn 7/24/17.
  */

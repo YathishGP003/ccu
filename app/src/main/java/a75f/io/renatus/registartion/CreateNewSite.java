@@ -457,6 +457,76 @@ public class CreateNewSite extends Fragment {
         mTextTimeZone.setTextColor(getResources().getColor(R.color.hint_color));
 
     }
+    private void retryRegistrationInfo() {
+        AsyncTask<Void, Void, String> updateCCUReg = new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... voids) {
+
+                //TODO upload CCU Registration details to Server for user management here //KUMAR 30/01/2020
+                String response = "";
+                try {
+
+                    HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
+                    HashMap site = CCUHsApi.getInstance().read("site");
+                    if(site.size() > 0) {
+                        String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
+                        JSONObject ccuRegInfo = new JSONObject();
+                        ccuRegInfo.put("siteId", siteGUID);
+                        ccuRegInfo.put("siteName", site.get("dis").toString());
+                        JSONObject locInfo = new JSONObject();
+                        locInfo.put("geoCity", site.get("geoCity").toString());
+                        locInfo.put("geoCountry", site.get("geoCountry").toString());
+                        locInfo.put("geoState", site.get("geoState").toString());
+                        locInfo.put("geoAddr", site.get("geoAddr").toString());
+                        locInfo.put("geoPostalCode", site.get("geoPostalCode").toString());
+                        if(site.get("organization") != null)
+                            ccuRegInfo.put("organization", site.get("organization").toString());
+                        if(ccu.size() > 0) {
+                            String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
+                            ccuRegInfo.put("deviceId", ccuGUID);
+                            ccuRegInfo.put("deviceName", ccu.get("dis").toString());
+                            ccuRegInfo.put("facilityManagerEmail", ccu.get("fmEmail").toString());
+                            if (ccu.get("installerEmail") != null) {
+                                ccuRegInfo.put("installerEmail", ccu.get("installerEmail").toString());
+                            }
+                            ccuRegInfo.put("locationDetails", locInfo);
+
+
+                            response = HttpUtil.executeJSONPost(CCUHsApi.getInstance().getAuthenticationUrl() + "api/v1/device/register", ccuRegInfo.toString());
+                            Log.d("CCURegistration", " Response : " + response);
+                        }
+                    }
+                }catch (JSONException e){
+                    e.printStackTrace();
+                }
+                return response;
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+                super.onPostExecute(result);
+                if( (result != null) && (!result.equals(""))){
+
+                    try {
+                        JSONObject resString = new JSONObject(result);
+                        if(resString.getBoolean("success")){
+
+                            Toast.makeText(getActivity(), "CCU Registered Successfully "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();
+                        }else
+                            Toast.makeText(getActivity(), "CCU Registration is not Successful "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }else {
+                    retryRegistrationInfo();
+                    //Toast.makeText(getActivity(), "CCU Registration is not Successful", Toast.LENGTH_LONG).show();
+                }
+            }
+        };
+
+        updateCCUReg.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
     private void updateCCURegistrationInfo(final String ccuRegInfo) {
         AsyncTask<Void, Void, String> updateCCUReg = new AsyncTask<Void, Void, String>() {
 
@@ -486,7 +556,8 @@ public class CreateNewSite extends Fragment {
                         e.printStackTrace();
                     }
                 }else {
-                    Toast.makeText(getActivity(), "CCU Registration is not Successful", Toast.LENGTH_LONG).show();
+                    retryRegistrationInfo();
+                    //Toast.makeText(getActivity(), "CCU Registration is not Successful", Toast.LENGTH_LONG).show();
                 }
             }
         };

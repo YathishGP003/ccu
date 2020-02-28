@@ -78,11 +78,18 @@ public abstract class UtilityApplication extends Application
         @Override
         public void onServiceConnected(ComponentName arg0, IBinder arg1)
         {
-            usbService = ((UsbService.UsbBinder) arg1).getService();
-            LSerial.getInstance().setUSBService(usbService);
-            
-            //TODO: research what cts and dsr changes are.  For now no handler will be used, because I'm uncertain if the information is relevant.
-            usbService.setHandler(null);
+            try {
+                Log.d("USB Permisssion", "utility Application -" + arg1.isBinderAlive() + "," + arg1.toString() + "," + arg0.getClassName() + "," + arg1.getInterfaceDescriptor());
+                if (arg1.isBinderAlive()) {
+                    usbService = ((UsbService.UsbBinder) arg1).getService();
+                    LSerial.getInstance().setUSBService(usbService);
+
+                    //TODO: research what cts and dsr changes are.  For now no handler will be used, because I'm uncertain if the information is relevant.
+                    usbService.setHandler(null);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
 
 

@@ -653,7 +653,7 @@ public class CreateNewSite extends Fragment {
                             ccuRegInfo.put("locationDetails", locInfo);
 
 
-                            response = HttpUtil.executeJSONPost(CCUHsApi.getInstance().getAuthenticationUrl() + "api/v1/device/register", ccuRegInfo.toString());
+                            response = HttpUtil.executeJSONPost(CCUHsApi.getInstance().getAuthenticationUrl() + "api/v1/device/register", ccuRegInfo.toString(),"");
                             Log.d("CCURegistration", " Response : " + response);
                         }
                     }

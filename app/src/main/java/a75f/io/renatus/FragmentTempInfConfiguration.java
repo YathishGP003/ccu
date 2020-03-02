@@ -19,6 +19,7 @@ import android.widget.Spinner;
 
 import java.lang.reflect.Field;
 
+import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;

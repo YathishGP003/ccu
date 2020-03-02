@@ -26,6 +26,9 @@ public class DeviceSyncAdapter extends EntitySyncAdapter
     @Override
     public boolean onSync() {
         CcuLog.i("CCU_HS_SYNC", "onSync Devices");
+        if (!CCUHsApi.getInstance().isCCURegistered()){
+            return false;
+        }
         HashMap site = CCUHsApi.getInstance().read("site");
         String siteLUID = site.get("id").toString();
         ArrayList<HashMap> devices = CCUHsApi.getInstance().readAll("device");

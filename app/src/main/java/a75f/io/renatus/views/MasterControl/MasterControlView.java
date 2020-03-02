@@ -659,6 +659,9 @@ public class MasterControlView extends LinearLayout {
 
     public void writePoint(String guid, int level, String who, double value, int duration)
     {
+        if (!CCUHsApi.getInstance().isCCURegistered()){
+            return;
+        }
         HNum val = HNum.make(value);
         HNum dur = HNum.make(duration);
         if (dur.unit == null) {
@@ -685,6 +688,9 @@ public class MasterControlView extends LinearLayout {
 
     public synchronized void writeHisValById(String id, Double val)
     {
+        if (!CCUHsApi.getInstance().isCCURegistered()){
+            return;
+        }
         HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         hClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), HNum.make(val))});
     }

@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import a75f.io.api.haystack.sync.DeviceSyncAdapter;
 import a75f.io.api.haystack.sync.EntityParser;
 import a75f.io.api.haystack.sync.EntitySyncHandler;
 import a75f.io.api.haystack.sync.HisSyncHandler;
@@ -468,6 +469,10 @@ public class CCUHsApi
 
     public void pointWrite(HRef id, int level, String who, HVal val, HNum dur)
     {
+        if (!CCUHsApi.getInstance().isCCURegistered()){
+            return;
+        }
+
         hsClient.pointWrite(id, level, who, val, dur);
 
         String guid = getGUID(id.toString());
@@ -1165,7 +1170,7 @@ public class CCUHsApi
         if (ccu.size() == 0) {
             return;
         }
-        String id = ccu.get("id").toString();
+        final String id = ccu.get("id").toString();
 
         HDictBuilder hDictBuilder = new HDictBuilder();
         hDictBuilder.add("id", HRef.copy(id));
@@ -1179,12 +1184,50 @@ public class CCUHsApi
         hDictBuilder.add("gatewayRef", ahuRef);
         hDictBuilder.add("ahuRef", ahuRef);
         hDictBuilder.add("device");
+        if (hDictBuilder.has("unregister")){
+            hDictBuilder.remove("unregister");
+        }
         tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
 
         if (tagsDb.idMap.get(id) != null)
         {
             tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
         }
+       CCUHsApi.getInstance().syncEntityTree();
+    }
+
+
+    public void unRegisterCCU(String ccuName, String installerEmail, String ahuRef, String managerEmail)
+    {
+        Log.d("CCU_HS","updateCCUahuRef "+ahuRef);
+        HashMap ccu = read("device and ccu");
+
+        if (ccu.size() == 0) {
+            return;
+        }
+        final String id = ccu.get("id").toString();
+
+        HDictBuilder hDictBuilder = new HDictBuilder();
+        hDictBuilder.add("id", HRef.copy(id));
+        hDictBuilder.add("ccu");
+        hDictBuilder.add("dis", HStr.make(ccuName));
+        hDictBuilder.add("fmEmail", HStr.make(managerEmail));
+        hDictBuilder.add("installerEmail", HStr.make(installerEmail));
+        hDictBuilder.add("siteRef", getSiteId());
+        hDictBuilder.add("equipRef", ccu.get("equipRef").toString());
+        hDictBuilder.add("createdDate", HDate.make(ccu.get("createdDate").toString()));
+        hDictBuilder.add("gatewayRef", ahuRef);
+        hDictBuilder.add("ahuRef", ahuRef);
+        hDictBuilder.add("device");
+        hDictBuilder.add("unregister");
+        tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
+
+        if (tagsDb.idMap.get(id) != null)
+        {
+            tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+        }
+
+        CCUHsApi.getInstance().syncEntityTree();
     }
 
     public void updateCCUahuRef(String ahuRef) {
@@ -1216,6 +1259,7 @@ public class CCUHsApi
         {
             tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
         }
+
     }
 
     public HRef getSiteId()
@@ -1454,12 +1498,16 @@ public class CCUHsApi
             tagsDb.removeAllHisItems(HRef.copy(m.get("id").toString()));
         }
 
-        tagsDb.dropDbAndUpdate();
+        //tagsDb.dropDbAndUpdate();
     }
     
     public ConcurrentHashMap<String, String> getIDMap() {
         return tagsDb.idMap ;
     }
 
+  public boolean isCCURegistered(){
+      SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(cxt);
 
+      return spDefaultPrefs.getBoolean("registered", false);
+  }
 }

@@ -23,6 +23,11 @@ public class SiteSyncAdapter extends EntitySyncAdapter
     @Override
     public boolean onSync() {
         CcuLog.i("CCU_HS_SYNC", "onSync Site");
+
+        if (!CCUHsApi.getInstance().isCCURegistered()){
+            return false;
+        }
+
         HDict sDict =  CCUHsApi.getInstance().readHDict("site");
         HDictBuilder b = new HDictBuilder().add(sDict);
         String siteLUID = b.remove("id").toString();

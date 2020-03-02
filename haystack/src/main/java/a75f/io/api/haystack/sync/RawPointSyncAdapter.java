@@ -26,6 +26,9 @@ public class RawPointSyncAdapter extends EntitySyncAdapter
     @Override
     public boolean onSync() {
         CcuLog.i("CCU_HS_SYNC", "onSync Physical points");
+        if (!CCUHsApi.getInstance().isCCURegistered()){
+            return false;
+        }
         HashMap site = CCUHsApi.getInstance().read("site");
         String siteLUID = site.get("id").toString();
         

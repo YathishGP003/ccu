@@ -54,6 +54,7 @@ import a75f.io.renatus.VavIERtuProfile;
 import a75f.io.renatus.VavStagedRtuProfile;
 import a75f.io.renatus.VavStagedRtuWithVfdProfile;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.util.ProgressDialogUtils;
 
 public class FreshRegistration extends AppCompatActivity implements VerticalTabAdapter.OnItemClickListener, SwitchFragment {
     //CustomViewPager pager;
@@ -323,12 +324,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 if (currentFragment instanceof CongratsFragment) {
                     prefs.setBoolean("REGISTRATION", true);
                     updateCCURegistrationInfo();
-
-                    AlertManager.getInstance().fetchAllPredefinedAlerts();
-                    Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(i);
-                    finish();
                 }
 
                 /*//int fragmentItem = pager.getCurrentItem();
@@ -1246,6 +1241,10 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
     }
 
     private void updateCCURegistrationInfo() {
+        if (!ProgressDialogUtils.isDialogShowing()){
+            ProgressDialogUtils.showProgressDialog(this,"CCU Registering...");
+        }
+
         AsyncTask<Void, Void, String> updateCCUReg = new AsyncTask<Void, Void, String>() {
 
             @Override
@@ -1279,7 +1278,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                             ccuRegInfo.put("locationDetails", locInfo);
 
 
-                            response = HttpUtil.executeJSONPost(CCUHsApi.getInstance().getAuthenticationUrl() + "api/v1/device/register", ccuRegInfo.toString());
+                            response = HttpUtil.executeJSONPost(CCUHsApi.getInstance().getAuthenticationUrl() + "api/v1/device/register", ccuRegInfo.toString(), " ");
                             Log.d("CCURegistration", " Response : " + response);
                         }
                     }
@@ -1297,16 +1296,23 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                     try {
                         JSONObject resString = new JSONObject(result);
                         if(resString.getBoolean("success")){
-
+                            ProgressDialogUtils.hideProgressDialog();
+                            prefs.setString("token",resString.getString("token"));
                             Toast.makeText(getApplicationContext(), "CCU Registered Successfully "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();
+                            //
+                            AlertManager.getInstance().fetchAllPredefinedAlerts();
+                            Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
+                            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(i);
+                            finish();
                         }else
-                            Toast.makeText(getApplicationContext(), "CCU Registration is not Successful "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();
+                            updateCCURegistrationInfo();
 
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }else {
-                    Toast.makeText(getApplicationContext(), "CCU Registration is not Successful", Toast.LENGTH_LONG).show();
+                    updateCCURegistrationInfo();
                 }
             }
         };

@@ -1,5 +1,8 @@
 package a75f.io.api.haystack.sync;
 
+import android.text.TextUtils;
+import android.util.Log;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -82,6 +85,7 @@ public class HttpUtil
             int responseCode = connection.getResponseCode();
             if (responseCode != 200) {
                 CcuLog.i("CCU_HS","HttpError: responseCode "+responseCode);
+                
             }
             if(responseCode == 401 && retry)
             {
@@ -119,7 +123,7 @@ public class HttpUtil
         }
     }
 
-    public static synchronized String executeJSONPost(String targetURL, String urlParameters)
+    public static synchronized String executeJSONPost(String targetURL, String urlParameters, String token)
     {
         if (clientToken.equalsIgnoreCase(""))
         {
@@ -149,7 +153,7 @@ public class HttpUtil
             connection.setRequestProperty("Content-Length", "" +
                     Integer.toString(urlParameters.getBytes("UTF-8").length));
             connection.setRequestProperty("Content-Language", "en-US");
-            connection.setRequestProperty("Authorization", " Bearer " + clientToken);
+            connection.setRequestProperty("Authorization", " Bearer " + (TextUtils.isEmpty(token)? clientToken : token));
             connection.setUseCaches (false);
             connection.setDoInput(true);
             connection.setDoOutput(true);

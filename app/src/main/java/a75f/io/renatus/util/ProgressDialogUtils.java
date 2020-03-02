@@ -46,4 +46,8 @@ public class ProgressDialogUtils {
             progressDialog = null;
         }
     }
+
+    public static boolean isDialogShowing() {
+        return progressDialog != null && progressDialog.isShowing();
+    }
 }

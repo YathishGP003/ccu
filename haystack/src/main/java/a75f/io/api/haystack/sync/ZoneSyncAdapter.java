@@ -26,6 +26,9 @@ public class ZoneSyncAdapter extends EntitySyncAdapter
     @Override
     public boolean onSync() {
         CcuLog.i("CCU_HS_SYNC", "onSync Zones");
+        if (!CCUHsApi.getInstance().isCCURegistered()){
+            return false;
+        }
         ArrayList<HashMap> floors = CCUHsApi.getInstance().readAll("floor");
         ArrayList<String> zoneLUIDList = new ArrayList();
         ArrayList<HDict> entities = new ArrayList<>();

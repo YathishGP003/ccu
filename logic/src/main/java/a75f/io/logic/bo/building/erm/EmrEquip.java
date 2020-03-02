@@ -93,7 +93,7 @@ public class EmrEquip
                                            .setKind("string")
                                            .build();
         String equipStatusMessageLd = CCUHsApi.getInstance().addPoint(equipStatusMessage);
-        hayStack.writeDefaultValById(equipStatusMessageLd, "Output Loop Signal is 0%");
+        hayStack.writeDefaultValById(equipStatusMessageLd, "Total Energy Consumed 0kWh Current Rate 0kW");
     
         Point equipScheduleType = new Point.Builder()
                                           .setDisplayName(equipDis+"-scheduleType")

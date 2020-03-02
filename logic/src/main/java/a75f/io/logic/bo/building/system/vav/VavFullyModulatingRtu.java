@@ -716,7 +716,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                 .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("his").addMarker("equipHis").addMarker("runtime").setUnit("%")
                                 .setTz(tz)
                                 .build();
-                        CCUHsApi.getInstance().addPoint(coolingSignal);
+                        String cmdCoolingPtId = CCUHsApi.getInstance().addPoint(coolingSignal);
+                        CCUHsApi.getInstance().writeHisValById(cmdCoolingPtId,0.0);
                     }
                     break;
                 case "analog2":
@@ -733,7 +734,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                 .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").addMarker("equipHis").addMarker("runtime").setUnit("%")
                                 .setTz(tz)
                                 .build();
-                        CCUHsApi.getInstance().addPoint(fanSignal);
+                        String cmdFanSignalPtId = CCUHsApi.getInstance().addPoint(fanSignal);
+                        CCUHsApi.getInstance().writeHisValById(cmdFanSignalPtId,0.0);
                     }
                     break;
                 case "analog3":
@@ -750,7 +752,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                 .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("modulating").addMarker("his").addMarker("equipHis").addMarker("runtime").setUnit("%")
                                 .setTz(tz)
                                 .build();
-                        CCUHsApi.getInstance().addPoint(heatSignal);
+                        String cmdHeatingPtId = CCUHsApi.getInstance().addPoint(heatSignal);
+                        CCUHsApi.getInstance().writeHisValById(cmdHeatingPtId,0.0);
                     }
                     break;
                 case "analog4":
@@ -767,7 +770,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                 .addMarker("system").addMarker("cmd").addMarker("co2").addMarker("modulating").addMarker("his").addMarker("equipHis").addMarker("runtime").setUnit("%")
                                 .setTz(tz)
                                 .build();
-                        CCUHsApi.getInstance().addPoint(co2Signal);
+                        String cmdCo2PtId = CCUHsApi.getInstance().addPoint(co2Signal);
+                        CCUHsApi.getInstance().writeHisValById(cmdCo2PtId,0.0);
                     }
                     break;
                 case "relay3":
@@ -784,7 +788,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                 .addMarker("system").addMarker("cmd").addMarker("occupancy").addMarker("his").addMarker("equipHis").addMarker("runtime")
                                 .setTz(tz)
                                 .build();
-                        CCUHsApi.getInstance().addPoint(occupancySignal);
+                        String cmdOccPtId = CCUHsApi.getInstance().addPoint(occupancySignal);
+                        CCUHsApi.getInstance().writeHisValById(cmdOccPtId,0.0);
                     }
                     break;
                 case "relay7":
@@ -805,7 +810,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                     .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his").addMarker("equipHis").addMarker("runtime")
                                     .setTz(tz)
                                     .build();
-                            CCUHsApi.getInstance().addPoint(humidPt);
+                            String cmdHumidPtId = CCUHsApi.getInstance().addPoint(humidPt);
+                            CCUHsApi.getInstance().writeHisValById(cmdHumidPtId,0.0);
                         }
                     }else {
 
@@ -822,7 +828,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                     .addMarker("system").addMarker("cmd").addMarker("dehumidifier").addMarker("his").addMarker("equipHis").addMarker("runtime")
                                     .setTz(tz)
                                     .build();
-                            CCUHsApi.getInstance().addPoint(dehumidPt);
+                            String cmdDehumidPtId = CCUHsApi.getInstance().addPoint(dehumidPt);
+                            CCUHsApi.getInstance().writeHisValById(cmdDehumidPtId,0.0);
                         }
                     }
                     break;

@@ -622,7 +622,8 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                 .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("his").addMarker("equipHis").addMarker("runtime").setUnit("%")
                                 .setTz(tz)
                                 .build();
-                        CCUHsApi.getInstance().addPoint(coolingSignal);
+                        String cmdCoolingPtId = CCUHsApi.getInstance().addPoint(coolingSignal);
+                        CCUHsApi.getInstance().writeHisValById(cmdCoolingPtId,0.0);
                     }
                     break;
                 case "analog2":
@@ -639,7 +640,8 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                 .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").addMarker("equipHis").addMarker("runtime").setUnit("%")
                                 .setTz(tz)
                                 .build();
-                        CCUHsApi.getInstance().addPoint(fanSignal);
+                        String cmdFanPtId = CCUHsApi.getInstance().addPoint(fanSignal);
+                        CCUHsApi.getInstance().writeHisValById(cmdFanPtId,0.0);
                     }
                     break;
                 case "analog3":
@@ -656,7 +658,8 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                 .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("modulating").addMarker("his").addMarker("equipHis").addMarker("runtime").setUnit("%")
                                 .setTz(tz)
                                 .build();
-                        CCUHsApi.getInstance().addPoint(heatSignal);
+                        String cmdHeatingPtId = CCUHsApi.getInstance().addPoint(heatSignal);
+                        CCUHsApi.getInstance().writeHisValById(cmdHeatingPtId,0.0);
                     }
                     break;
                 case "analog4":
@@ -673,7 +676,8 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                 .addMarker("system").addMarker("cmd").addMarker("co2").addMarker("modulating").addMarker("his").addMarker("equipHis").addMarker("runtime").setUnit("%")
                                 .setTz(tz)
                                 .build();
-                        CCUHsApi.getInstance().addPoint(co2Signal);
+                        String co2SignalId = CCUHsApi.getInstance().addPoint(co2Signal);
+                        CCUHsApi.getInstance().writeHisValById(co2SignalId,0.0);
                     }
                     break;
                 case "relay3":
@@ -690,7 +694,8 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                 .addMarker("system").addMarker("cmd").addMarker("occupancy").addMarker("his").addMarker("equipHis").addMarker("runtime")
                                 .setTz(tz)
                                 .build();
-                        CCUHsApi.getInstance().addPoint(occupancySignal);
+                        String cmdOccupancyPtId = CCUHsApi.getInstance().addPoint(occupancySignal);
+                        CCUHsApi.getInstance().writeHisValById(cmdOccupancyPtId,0.0);
                     }
                     break;
                 case "relay7":
@@ -710,7 +715,8 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                     .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his").addMarker("equipHis").addMarker("runtime")
                                     .setTz(tz)
                                     .build();
-                            CCUHsApi.getInstance().addPoint(humidPt);
+                            String cmdHumdityPtId = CCUHsApi.getInstance().addPoint(humidPt);
+                            CCUHsApi.getInstance().writeHisValById(cmdHumdityPtId,0.0);
                         }
                     }else {
 
@@ -727,7 +733,8 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                     .addMarker("system").addMarker("cmd").addMarker("dehumidifier").addMarker("his").addMarker("equipHis").addMarker("runtime")
                                     .setTz(tz)
                                     .build();
-                            CCUHsApi.getInstance().addPoint(dehumidPt);
+                            String cmdDehumidPtId = CCUHsApi.getInstance().addPoint(dehumidPt);
+                            CCUHsApi.getInstance().writeHisValById(cmdDehumidPtId,0.0);
                         }
                     }
                     break;

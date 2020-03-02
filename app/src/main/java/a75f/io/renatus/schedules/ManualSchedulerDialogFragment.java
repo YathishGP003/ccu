@@ -357,7 +357,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
             }.start();
         }
 
-        if (mDays != null) {
+        if (mDays != null && (mDays.size() > 0)) {
             for(Schedule.Days d : mDays) {
                 checkDays(d);
             }

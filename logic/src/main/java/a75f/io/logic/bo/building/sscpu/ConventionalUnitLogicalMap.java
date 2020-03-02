@@ -601,6 +601,19 @@ public class ConventionalUnitLogicalMap {
         String enableOccupancyControlId = CCUHsApi.getInstance().addPoint(enableOccupancyControl);
         CCUHsApi.getInstance().writeDefaultValById(enableOccupancyControlId, config.enableOccupancyControl == true ? 1.0 : 0);
 
+        Point enableFanStage1 = new Point.Builder()
+                .setDisplayName(equipDis + "-enableFanStage1DuringOccupied")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setFloorRef(floor)
+                .setRoomRef(room)
+                .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
+                .addMarker("enable").addMarker("fan").addMarker("stage1").addMarker("sp").addMarker(profile)
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+        String eenableFanStage1Id = CCUHsApi.getInstance().addPoint(enableFanStage1);
+        CCUHsApi.getInstance().writeDefaultValById(eenableFanStage1Id, config.enableFanStage1 == true ? 1.0 : 0);
         if(config.enableOccupancyControl){
             Point occupancyDetection = new Point.Builder()
                     .setDisplayName(equipDis+"-occupancyDetection")
@@ -774,6 +787,7 @@ public class ConventionalUnitLogicalMap {
         setConfigNumVal("temperature and offset",config.temperatureOffset);
         setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
         setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
+        setConfigNumVal("enable and fan and stage1",config.enableFanStage1 == true ? 1.0 : 0);
 
     }
 
@@ -905,6 +919,7 @@ public class ConventionalUnitLogicalMap {
         setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
         setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
         setConfigNumVal("relay6 and type",(double)config.relay6Type);
+        setConfigNumVal("enable and fan and stage1",config.enableFanStage1 == true ? 1.0 : 0);
     }
 
 
@@ -912,6 +927,7 @@ public class ConventionalUnitLogicalMap {
     public ConventionalUnitConfiguration getProfileConfiguration() {
         ConventionalUnitConfiguration config = new ConventionalUnitConfiguration();
         config.enableOccupancyControl = getConfigNumVal("enable and occupancy") > 0 ? true : false ;
+        config.enableFanStage1 = getConfigNumVal("enable and fan and stage1") > 0 ? true : false ;
         config.temperatureOffset = getConfigNumVal("temperature and offset");
         config.enableThermistor1 = getConfigNumVal("enable and th1") >  0 ? true : false;
         config.enableThermistor2 = getConfigNumVal("enable and th2") > 0 ? true : false;

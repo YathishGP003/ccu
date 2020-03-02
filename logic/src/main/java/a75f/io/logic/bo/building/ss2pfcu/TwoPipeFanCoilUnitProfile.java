@@ -676,7 +676,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                         fanstages = "FanStage3";
                         relayStates.put("FanStage3",1);
                     }else if(roomTemp >= (setTempHeating - heatingDeadband)){
-                        if(getCmdSignal("fan and high",addr) == 0)
+                        if(getCmdSignal("fan and high",addr) > 0)
                             setCmdSignal("fan and high",0,addr);
                     }else {
                         if(getCmdSignal("fan and high",addr) > 0)

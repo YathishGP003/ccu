@@ -80,6 +80,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
     ToggleButton testFanHighOb;
     ToggleButton switchOccSensor;
     ToggleButton switchExtTempSensor;
+    ToggleButton switchEnableFanStage1;
     @BindView(R.id.textCoolStage1)
     TextView textCoolStage1;
     Button setButton;
@@ -199,11 +200,12 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
 
         switchOccSensor = view.findViewById(R.id.toggleCpuOccupancy);
 
-
+        switchEnableFanStage1 = view.findViewById(R.id.toggleEnableFanStage1);
         setButton = (Button) view.findViewById(R.id.setBtn);
 
         if (mProfileConfig != null) {
             switchOccSensor.setChecked(mProfileConfig.enableOccupancyControl);
+            switchEnableFanStage1.setChecked(mProfileConfig.enableFanStage1);
             int offsetIndex = (int) mProfileConfig.temperatureOffset + TEMP_OFFSET_LIMIT;
             temperatureOffset.setValue(offsetIndex);
             switchExtTempSensor.setChecked(mProfileConfig.enableThermistor2);
@@ -311,6 +313,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
         cpuConfig.setNodeType(mNodeType);
         cpuConfig.setNodeAddress(mSmartNodeAddress);
         cpuConfig.enableOccupancyControl = switchOccSensor.isChecked();
+        cpuConfig.enableFanStage1 = switchEnableFanStage1.isChecked();
         cpuConfig.setPriority(ZonePriority.NONE);
         cpuConfig.temperatureOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
         cpuConfig.enableThermistor1 = switchThermistor1.isChecked();

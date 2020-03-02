@@ -503,7 +503,8 @@ public class VavStagedRtu extends VavSystemProfile
                                  .addMarker("system").addMarker("cmd").addMarker(relayMap).addMarker(stage).addMarker("his").addMarker("equipHis").addMarker("runtime")
                                  .setTz(tz)
                                  .build();
-        CCUHsApi.getInstance().addPoint(relay1Op);
+        String cmdPointId = CCUHsApi.getInstance().addPoint(relay1Op);
+        CCUHsApi.getInstance().writeHisValById(cmdPointId,0.0);
     }
     private void addHumidityCmdPoint(String name, String relayMap, String equipDis, String siteRef, String equipref, String tz){
         //Name to be updated
@@ -694,7 +695,10 @@ public class VavStagedRtu extends VavSystemProfile
                 //CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + newCmdPoint.getDisplayName() + "," + newCmdPoint.getMarkers().toString()  + "," + oldPoint.getId());
             }
             if(oldPoint != null && oldPoint.getId() != null)CCUHsApi.getInstance().deleteEntity(oldPoint.getId());
-            if(newCmdPoint != null)CCUHsApi.getInstance().addPoint(newCmdPoint);
+            if(newCmdPoint != null){
+                String newCmdPointId = CCUHsApi.getInstance().addPoint(newCmdPoint);
+                CCUHsApi.getInstance().writeHisValById(newCmdPointId, 0.0);
+            }
 
             CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and association and " + config, val);
             CCUHsApi.getInstance().syncPointEntityTree();

@@ -14,8 +14,11 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.api.haystack.Zone;
 import a75f.io.device.alerts.AlertGenerateHandler;
 import a75f.io.device.serial.CcuToCmOverUsbCmResetMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
@@ -32,6 +35,7 @@ import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.CCUApplication;
+import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Sensor;
 import a75f.io.logic.bo.building.SensorType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -986,6 +990,47 @@ public class Pulse
 				 mDeviceUpdate.remove(address);
 				 break;
 			 }
+		}
+	}
+
+
+	public static void sendSeedMessage(boolean isSmartStat, boolean isCcuAsZone, Short addr, String roomRef, String floorRef){
+		NodeType deviceType = NodeType.SMART_NODE;
+		if(isSmartStat)
+			deviceType = NodeType.SMART_STAT;
+		else if(isCcuAsZone)
+			deviceType = NodeType.CONTROL_MOTE;
+		CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SEEDING NEW PROFILE====================="+addr+","+roomRef+","+isSmartStat);
+		Device d = HSUtil.getDevice(addr);
+		Zone zone = HSUtil.getZone(roomRef, floorRef);
+		CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SEEDING NEW PROFILE22====================="+zone.getDisplayName()+","+roomRef+","+isSmartStat);
+		switch (deviceType) {
+			case SMART_NODE:
+				String snprofile = "dab";
+				if(d.getMarkers().contains("sse"))
+					snprofile = "sse";
+				else if(d.getMarkers().contains("lcm"))
+					snprofile = "lcm";
+				else if(d.getMarkers().contains("iftt"))
+					snprofile = "iftt";
+				CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING SN SEEDS====================="+zone.getDisplayName()+","+addr);
+				CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(zone, Short.parseShort(d.getAddr()),d.getEquipRef(),snprofile);
+				MeshUtil.sendStructToCM(seedMessage);
+				LSerial.getInstance().setNodeSeeding(false);
+				break;
+			case SMART_STAT:
+				String profile = "cpu";
+				if(d.getMarkers().contains("hpu"))
+					profile = "hpu";
+				else if(d.getMarkers().contains("pipe2"))
+					profile = "pipe2";
+				else if(d.getMarkers().contains("pipe4"))
+					profile = "pipe4";
+				CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING SS SEEDS====================="+zone.getDisplayName()+","+addr);
+				CcuToCmOverUsbDatabaseSeedSmartStatMessage_t seedSSMessage = LSmartStat.getSeedMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef(),profile);
+				MeshUtil.sendStructToCM( seedSSMessage);
+				LSerial.getInstance().setNodeSeeding(false);
+				break;
 		}
 	}
 }

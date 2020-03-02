@@ -138,8 +138,9 @@ public class FloorPlanFragment extends Fragment
 						@Override
 						public void run()
 						{
-							if(LSerial.getInstance().isConnected()) //If usb connected and pairing done then reseed
-								LSerial.getInstance().setResetSeedMessage(true);
+							//TODO Commented this out for seed messages
+							//if(LSerial.getInstance().isConnected()) //If usb connected and pairing done then reseed
+							//	LSerial.getInstance().setResetSeedMessage(true);
 							try{
 								if (mFloorListAdapter.getSelectedPostion() == -1) {
 									updateOAOModule();
@@ -728,10 +729,11 @@ public class FloorPlanFragment extends Fragment
 			}
 
 			if(addFloorEdit.getText().toString().length() > 0) {
-
+				ArrayList<String> flrMarkers = new ArrayList<>();
+				flrMarkers.add("writable");
 				HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
 				Floor hsFloor = new Floor.Builder()
-						.setDisplayName(addFloorEdit.getText().toString())
+						.setDisplayName(addFloorEdit.getText().toString()).setMarkers(flrMarkers)
 						.setSiteRef(siteMap.get("id").toString())
 						.build();
 				for (Floor floor : siteFloorList) {

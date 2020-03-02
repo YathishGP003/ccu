@@ -26,6 +26,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.device.mesh.LSerial;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.MessageType;
@@ -300,6 +301,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
                         ProgressDialogUtils.hideProgressDialog();
                         FragmentCPUConfiguration.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                        LSerial.getInstance().sendSeedMessage(true,false, mSmartNodeAddress, roomRef,floorRef);
                     }
                 }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 

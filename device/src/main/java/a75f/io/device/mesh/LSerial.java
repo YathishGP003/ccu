@@ -40,6 +40,7 @@ public class LSerial
     private static LSerial    mLSerial;
     private        UsbService mUsbService;
     private static boolean mSendSeedMsgs;
+    private static boolean isNodeSeeding;
 
     /***
      * D
@@ -389,5 +390,18 @@ public class LSerial
     {
         mUsbService.write(struct.getOrderedBuffer());
         return true;
+    }
+
+    public boolean isNodesSeeding(){
+        return isNodeSeeding;
+    }
+    public void setNodeSeeding(boolean isSeeding){
+        isNodeSeeding = isSeeding;
+    }
+    public void sendSeedMessage(boolean isSs, boolean isTi, Short addr, String roomRef, String floorRef ){
+        if(isConnected()) {
+            isNodeSeeding = true;
+            Pulse.sendSeedMessage(isSs, isTi, addr, roomRef, floorRef);
+        }
     }
 }

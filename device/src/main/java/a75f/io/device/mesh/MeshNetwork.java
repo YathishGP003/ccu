@@ -41,7 +41,8 @@ public class MeshNetwork extends DeviceNetwork
             LSerial.getInstance().setResetSeedMessage(true);
             return;
         }
-        
+        if(LSerial.getInstance().isNodesSeeding())
+            return;
         MeshUtil.sendHeartbeat((short)0);
         
         MeshUtil.tSleep(1000);
@@ -52,6 +53,7 @@ public class MeshNetwork extends DeviceNetwork
             {
                 for (Zone zone : HSUtil.getZones(floor.getId()))
                 {
+                    if(LSerial.getInstance().isNodesSeeding())break;
                     CcuLog.d(L.TAG_CCU_DEVICE,"=============Zone: " + zone.getDisplayName() + " =================="+bSeedMessage);
                     for(Device d : HSUtil.getDevices(zone.getId())) { //TODO Will this work? kumar
                         NodeType deviceType = NodeType.SMART_NODE;

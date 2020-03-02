@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.device.mesh.LSerial;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
@@ -234,6 +235,7 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
                         ProgressDialogUtils.hideProgressDialog();
                         FragmentSSEConfiguration.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                        LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, roomRef,floorRef);
                     }
                 }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 

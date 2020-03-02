@@ -27,6 +27,9 @@ public class FloorSyncAdapter extends EntitySyncAdapter
     public boolean onSync() {
     
         CcuLog.i("CCU_HS_SYNC", "onSync Floors");
+        if (!CCUHsApi.getInstance().isCCURegistered()){
+            return false;
+        }
         ArrayList<HashMap> floors = CCUHsApi.getInstance().readAll("floor");
         ArrayList<String> floorLUIDList = new ArrayList();
     

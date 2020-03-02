@@ -26,6 +26,9 @@ public class EquipSyncAdapter extends EntitySyncAdapter
     @Override
     public boolean onSync() {
         CcuLog.i("CCU_HS_SYNC", "onSync Equips");
+        if (!CCUHsApi.getInstance().isCCURegistered()){
+            return false;
+        }
         HashMap site = CCUHsApi.getInstance().read("site");
         String siteLUID = site.get("id").toString();
         

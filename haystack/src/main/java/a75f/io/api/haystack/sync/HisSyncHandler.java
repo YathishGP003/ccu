@@ -44,7 +44,6 @@ public class HisSyncHandler
     }
     
     public synchronized void doSync() {
-    
         CcuLog.d(TAG, "doHisSync ->");
         //sendHisToHaystack();
         sendHisToInflux();
@@ -123,6 +122,9 @@ public class HisSyncHandler
     * All the local history entries marked 'synced' once the data is wrote to influx.
     * */
     private void sendHisToInflux() {
+        if (!CCUHsApi.getInstance().isCCURegistered()){
+            return;
+        }
         ArrayList<HashMap> equips = hayStack.readAll("equip");
         DateTime now = new DateTime();
         

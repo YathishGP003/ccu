@@ -48,6 +48,7 @@ public class EntitySyncHandler
     
     
     public synchronized void sync() {
+
         syncProgress = true;
         Log.i(TAG, "syncPending: " + syncPending);
         if (mSyncTimerTask != null) {
@@ -122,6 +123,9 @@ public class EntitySyncHandler
             }
             if (equipDict.size() > 0)
             {
+                if (!CCUHsApi.getInstance().isCCURegistered()){
+                    return;
+                }
                 HDict nosyncMeta = new HDictBuilder().add("nosync").toDict();
                 String r = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "pointWriteMany",
                                         HZincWriter.gridToString(HGridBuilder.dictsToGrid(nosyncMeta,equipDict.toArray(new HDict[equipDict.size()]))));
@@ -165,6 +169,10 @@ public class EntitySyncHandler
     public void doSyncRemoveIds()
     {
         CcuLog.i(TAG, "doSyncRemoveIds->");
+
+        if (!CCUHsApi.getInstance().isCCURegistered()){
+            return;
+        }
         ArrayList<HDict> entities = new ArrayList<>();
         
         for (String removeId : CCUHsApi.getInstance().tagsDb.removeIdMap.values())
@@ -205,6 +213,9 @@ public class EntitySyncHandler
      */
     public void doSyncUpdateEntities() {
         CcuLog.i(TAG, "doSyncUpdateEntities->");
+        if (!CCUHsApi.getInstance().isCCURegistered()){
+            return ;
+        }
         ArrayList<HDict> entities = new ArrayList<>();
         for (String luid : CCUHsApi.getInstance().tagsDb.updateIdMap.keySet()) {
             if (CCUHsApi.getInstance().getGUID(luid) == null) {

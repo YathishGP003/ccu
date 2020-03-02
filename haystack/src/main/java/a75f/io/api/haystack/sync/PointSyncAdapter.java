@@ -30,6 +30,9 @@ public class PointSyncAdapter extends EntitySyncAdapter
     @Override
     public boolean onSync() {
         CcuLog.i("CCU_HS_SYNC", "onSync Points");
+        if (!CCUHsApi.getInstance().isCCURegistered()){
+            return false;
+        }
         HashMap site = CCUHsApi.getInstance().read("site");
         String siteLUID = site.get("id").toString();
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and siteRef == \"" + siteLUID + "\"");

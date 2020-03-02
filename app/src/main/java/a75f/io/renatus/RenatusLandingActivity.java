@@ -517,7 +517,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             protected String doInBackground(Void... voids) {
 
                 Log.d("CCURegInfo","RenatusLA backgroundtask="+ccuRegInfo);
-                return  HttpUtil.executeJSONPost(CCUHsApi.getInstance().getAuthenticationUrl()+"api/v1/device/register",ccuRegInfo);
+                return  HttpUtil.executeJSONPost(CCUHsApi.getInstance().getAuthenticationUrl()+"api/v1/device/register",ccuRegInfo, "");
             }
 
             @Override
@@ -529,7 +529,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     try {
                         JSONObject resString = new JSONObject(result);
                         if(resString.getBoolean("success")){
-
+                            prefs.setString("token",resString.getString("token"));
                             Toast.makeText(getApplicationContext(), "CCU Registered Successfully "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();
                         }else
                             Toast.makeText(getApplicationContext(), "CCU Registration is not Successful "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();

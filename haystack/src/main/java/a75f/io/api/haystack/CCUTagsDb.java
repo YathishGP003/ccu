@@ -1,6 +1,9 @@
 package a75f.io.api.haystack;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -998,6 +1001,11 @@ public class CCUTagsDb extends HServer {
     }
 
     public void dropDbAndUpdate() {
+        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(appContext);
+        final SharedPreferences.Editor prefEditor = spDefaultPrefs.edit();
+        prefEditor.putBoolean("registered", false);
+        prefEditor.apply();
+
         ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and his");
         List<HisItem> hisItems = new ArrayList<>();
         if (points.size() > 0) {
@@ -1024,6 +1032,15 @@ public class CCUTagsDb extends HServer {
         for (HisItem hisItem : hisItems) {
             hisBox.put(hisItem);
         }
+
+        new Handler(appContext.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                prefEditor.putBoolean("registered", true);
+                prefEditor.commit();
+            }
+        }, 60000);
+
     }
 
     public void removeAllHisItems(HRef id) {

@@ -1,9 +1,12 @@
 package a75f.io.renatus.registartion;
 
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -42,6 +45,7 @@ import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.util.ProgressDialogUtils;
 
 public class CreateNewSite extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -214,6 +218,15 @@ public class CreateNewSite extends Fragment {
         mSiteOrg.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_facilityorg) + "</font></big>"));
         mSiteInstallerEmailId.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_installer_email) + "</font></big>"));
 
+        if (prefs.getBoolean("registered")) {
+            btnUnregisterSite.setText("UnRegister");
+            btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
+            setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
+        } else {
+            btnUnregisterSite.setText("Register");
+            btnUnregisterSite.setTextColor(getResources().getColor(R.color.accent));
+            setCompoundDrawableColor(btnUnregisterSite, R.color.accent);
+        }
 
         mTextInputSitename.setHintEnabled(true);
 
@@ -281,6 +294,7 @@ public class CreateNewSite extends Fragment {
                     String installerOrg = mSiteOrg.getText().toString();
                     String ccuName = mSiteCCU.getText().toString();
 
+                    prefs.setBoolean("registered", true);
                     if (site.size() > 0) {
                         String siteId = site.get("id").toString();
                         updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId,installerOrg);
@@ -423,7 +437,154 @@ public class CreateNewSite extends Fragment {
             }
 
         }
+
+        btnUnregisterSite.setOnClickListener(view -> {
+            if (prefs.getBoolean("registered")){
+                showUnregisterAlertDialog();
+            } else {
+                ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU...");
+                btnUnregisterSite.setText("UnRegister");
+                btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
+                setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
+                prefs.setBoolean("registered", true);
+
+                String ahuRef = ccu.get("ahuRef").toString();
+                String managerEmail = mSiteEmailId.getText().toString();
+                String installerEmail = mSiteInstallerEmailId.getText().toString();
+                String ccuName = mSiteCCU.getText().toString();
+                CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, managerEmail);
+
+                JSONObject ccuRegInfo = new JSONObject();
+                String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
+                String siteName = site.get("dis").toString();
+                String siteAddress = site.get("geoAddr").toString();
+                String siteCity = site.get("geoCity").toString();
+                String siteState = site.get("geoState").toString();
+                String siteCountry = site.get("geoCountry").toString();
+                String siteZip = site.get("geoPostalCode").toString();
+                String siteOrg = site.get("organization") != null ? site.get("organization").toString(): "";
+                String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
+                try {
+                    JSONObject locInfo = new JSONObject();
+                    locInfo.put("geoCity", siteCity);
+                    locInfo.put("geoCountry", siteCountry);
+                    locInfo.put("geoState", siteState);
+                    locInfo.put("geoAddr", siteAddress);
+                    locInfo.put("geoPostalCode", siteZip);
+
+                    ccuRegInfo.put("organization", siteOrg);
+                    ccuRegInfo.put("siteName",siteName);
+                    ccuRegInfo.put("siteId",  siteGUID);
+                    ccuRegInfo.put("deviceId", ccuGUID);
+                    ccuRegInfo.put("deviceName", ccuName);
+                    ccuRegInfo.put("facilityManagerEmail", managerEmail);
+                    ccuRegInfo.put("installerEmail", installerEmail);
+                    ccuRegInfo.put("locationDetails", locInfo);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                new Handler().postDelayed(() -> {
+                    updateCCURegistrationInfo(ccuRegInfo.toString());
+                }, 10000);
+                L.ccu().setCCUName(ccuName);
+            }
+
+        });
+
         return rootView;
+    }
+
+    private void setCompoundDrawableColor(TextView textView, int color) {
+        for (Drawable drawable : textView.getCompoundDrawablesRelative()) {
+            if (drawable != null) {
+                drawable.setTint(getResources().getColor(color));
+            }
+        }
+    }
+
+    private void showUnregisterAlertDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+        builder.setIcon(R.drawable.ic_warning);
+        builder.setTitle("Unregister CCU");
+        builder.setMessage("\n"+"Are you sure you want to unregister ccu?");
+        builder.setCancelable(false);
+        builder.setPositiveButton("YES", (dialog, which) -> {
+            btnUnregisterSite.setText("Register");
+            btnUnregisterSite.setTextColor(getResources().getColor(R.color.accent));
+            setCompoundDrawableColor(btnUnregisterSite, R.color.accent);
+
+            HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
+            String ahuRef = ccu.get("ahuRef").toString();
+            String managerEmail = mSiteEmailId.getText().toString();
+            String installerEmail = mSiteInstallerEmailId.getText().toString();
+            String ccuName = mSiteCCU.getText().toString();
+            CCUHsApi.getInstance().unRegisterCCU(ccuName, installerEmail, ahuRef, managerEmail);
+            L.ccu().setCCUName(ccuName);
+
+            ProgressDialogUtils.showProgressDialog(getActivity(), "UnRegistering CCU...");
+
+            JSONObject ccuRegInfo = new JSONObject();
+            String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
+
+            new Handler().postDelayed(() -> {
+                try {
+                    ccuRegInfo.put("deviceId", ccuGUID);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                unRegisterCCU(ccuRegInfo.toString());
+            }, 10000);
+
+            dialog.dismiss();
+        });
+
+        builder.setNegativeButton("NO", (dialog, which) -> {
+
+            dialog.dismiss();
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    private void unRegisterCCU(String deviceInfo) {
+        AsyncTask<Void, Void, String> ccuUnReg = new AsyncTask<Void, Void, String>() {
+
+            @Override
+            protected String doInBackground(Void... voids) {
+
+               String response = HttpUtil.executeJSONPost(CCUHsApi.getInstance().getAuthenticationUrl() + "api/v1/device/unregister", deviceInfo, prefs.getString("token"));
+                Log.d("CCUUnRegistration", " Response : " + response);
+                return response;
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+                super.onPostExecute(result);
+                ProgressDialogUtils.hideProgressDialog();
+                if( (result != null) && (!result.equals(""))){
+
+                    try {
+                        JSONObject resString = new JSONObject(result);
+                        if(resString.getBoolean("success")){
+                            prefs.setString("token","");
+                            prefs.setBoolean("registered", false);
+                            Toast.makeText(getActivity(), "CCU Unregistered Successfully", Toast.LENGTH_LONG).show();
+                        } else
+                            Toast.makeText(getActivity(), "CCU Unregistration is not Successful", Toast.LENGTH_LONG).show();
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }else {
+                    Toast.makeText(getActivity(), "CCU Unregistration is not Successful", Toast.LENGTH_LONG).show();
+                }
+            }
+        };
+
+        ccuUnReg.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     /**
@@ -492,7 +653,7 @@ public class CreateNewSite extends Fragment {
                             ccuRegInfo.put("locationDetails", locInfo);
 
 
-                            response = HttpUtil.executeJSONPost(CCUHsApi.getInstance().getAuthenticationUrl() + "api/v1/device/register", ccuRegInfo.toString());
+                            response = HttpUtil.executeJSONPost(CCUHsApi.getInstance().getAuthenticationUrl() + "api/v1/device/register", ccuRegInfo.toString(),"");
                             Log.d("CCURegistration", " Response : " + response);
                         }
                     }
@@ -535,19 +696,20 @@ public class CreateNewSite extends Fragment {
             protected String doInBackground(Void... voids) {
 
                 Log.d("CCURegInfo","createNewSite Edit backgroundtask="+ccuRegInfo);
-                return  HttpUtil.executeJSONPost(CCUHsApi.getInstance().getAuthenticationUrl()+"api/v1/device/register",ccuRegInfo);
+                return  HttpUtil.executeJSONPost(CCUHsApi.getInstance().getAuthenticationUrl()+"api/v1/device/register",ccuRegInfo, "");
             }
 
             @Override
             protected void onPostExecute(String result) {
 
                 Log.d("CCURegInfo","createNewSite Edit onPostExecute="+result);
+                ProgressDialogUtils.hideProgressDialog();
                 if((result != null) && (!result.equals(""))){
 
                     try {
                         JSONObject resString = new JSONObject(result);
                         if(resString.getBoolean("success")){
-
+                            prefs.setString("token",resString.getString("token"));
                             Toast.makeText(getActivity(), "CCU Registered Successfully "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();
                         }else
                             Toast.makeText(getActivity(), "CCU Registration is not Successful "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();

@@ -140,7 +140,6 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     @Override
     public void doJob() {
 
-
         CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob-> "+CCUHsApi.getInstance());
     
         watchdogMonitor = false;
@@ -161,7 +160,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     }
     
     public static void processSchedules() {
-        
+
+        if (!CCUHsApi.getInstance().isCCURegistered()){
+            return;
+        }
+
         ArrayList<Schedule> activeVacationSchedules = CCUHsApi.getInstance().getSystemSchedule(true);
     
         activeSystemVacation = getActiveVacation(activeVacationSchedules);

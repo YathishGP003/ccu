@@ -27,6 +27,9 @@ public class ScheduleSyncAdapter extends EntitySyncAdapter
     @Override
     public boolean onSync() {
         CcuLog.i("CCU_HS_SYNC", "onSync Schedules");
+        if (!CCUHsApi.getInstance().isCCURegistered()){
+            return false;
+        }
         ArrayList<HashMap> schedules = CCUHsApi.getInstance().readAll("schedule");
         HashMap site = CCUHsApi.getInstance().read("site");
         String siteLUID = site.get("id").toString();

@@ -331,6 +331,10 @@ public class AlertProcessor
         CcuLog.d("CCU_ALERTS"," Unsynced Alerts "+unsyncedAlerts.size());
         if (unsyncedAlerts.size() > 0)
         {
+            if (!CCUHsApi.getInstance().isCCURegistered()){
+                return;
+            }
+
             List<Alert> syncedAlerts = AlertSyncHandler.sync(mContext, unsyncedAlerts);
             for (Alert a : syncedAlerts) {
                 updateAlert(a);

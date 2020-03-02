@@ -27,6 +27,7 @@ import android.widget.ToggleButton;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
@@ -441,6 +442,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                         ProgressDialogUtils.hideProgressDialog();
                         FragmentVAVConfiguration.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                        LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
                     }
                 }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
                 

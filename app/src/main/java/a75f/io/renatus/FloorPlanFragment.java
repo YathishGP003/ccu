@@ -138,8 +138,9 @@ public class FloorPlanFragment extends Fragment
 						@Override
 						public void run()
 						{
-							if(LSerial.getInstance().isConnected()) //If usb connected and pairing done then reseed
-								LSerial.getInstance().setResetSeedMessage(true);
+							//TODO Commented this out for seed messages
+							//if(LSerial.getInstance().isConnected()) //If usb connected and pairing done then reseed
+							//	LSerial.getInstance().setResetSeedMessage(true);
 							try{
 								if (mFloorListAdapter.getSelectedPostion() == -1) {
 									updateOAOModule();

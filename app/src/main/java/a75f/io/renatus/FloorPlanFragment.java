@@ -728,10 +728,11 @@ public class FloorPlanFragment extends Fragment
 			}
 
 			if(addFloorEdit.getText().toString().length() > 0) {
-
+				ArrayList<String> flrMarkers = new ArrayList<>();
+				flrMarkers.add("writable");
 				HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
 				Floor hsFloor = new Floor.Builder()
-						.setDisplayName(addFloorEdit.getText().toString())
+						.setDisplayName(addFloorEdit.getText().toString()).setMarkers(flrMarkers)
 						.setSiteRef(siteMap.get("id").toString())
 						.build();
 				for (Floor floor : siteFloorList) {

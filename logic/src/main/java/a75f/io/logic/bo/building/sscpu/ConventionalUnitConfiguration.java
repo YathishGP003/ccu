@@ -7,6 +7,7 @@ public class ConventionalUnitConfiguration extends BaseProfileConfiguration {
     public boolean enableOccupancyControl;
     public boolean enableThermistor1;
     public boolean enableThermistor2;
+    public boolean enableFanStage1;
 
     public double temperatureOffset;
     public boolean enableRelay1;

@@ -193,7 +193,9 @@ public class StandaloneScheduler {
                 status = status + " Fan OFF";
         }
         if(equipId != null) {
-            CCUHsApi.getInstance().writeHisValByQuery("point and temp and operating and mode and his and equipRef == \""+equipId+"\"" , (double)state.ordinal());
+            double curState = CCUHsApi.getInstance().readHisValByQuery("point and temp and operating and mode and his and equipRef == \""+equipId+"\"");
+            if(curState != state.ordinal())
+                CCUHsApi.getInstance().writeHisValByQuery("point and temp and operating and mode and his and equipRef == \""+equipId+"\"" , (double)state.ordinal());
             if(getSmartStatStatusString(equipId).equals(status) == false) {
                 if(standaloneStatus.containsKey(equipId))standaloneStatus.remove(equipId);
                 standaloneStatus.put(equipId, status);

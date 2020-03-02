@@ -208,6 +208,17 @@
                     android:checked="false"
                     android:textOff=""
                     android:textOn="" />
+                <ToggleButton
+                    android:id="@+id/toggleEnableFanStage1"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginTop="32dp"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
             </LinearLayout>
 
             <LinearLayout
@@ -290,6 +301,13 @@
                     android:layout_height="28.5dp"
                     android:layout_marginTop="30dp"
                     android:text="@string/label_enableoccup"
+                    android:textAppearance="@style/text_appearance" />
+                <TextView
+                    android:id="@+id/textEnableFanStage1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28.5dp"
+                    android:layout_marginTop="30dp"
+                    android:text="@string/label_enablefanstage1"
                     android:textAppearance="@style/text_appearance" />
 
             </LinearLayout>

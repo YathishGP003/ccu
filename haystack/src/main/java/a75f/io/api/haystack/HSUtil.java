@@ -36,7 +36,16 @@ public class HSUtil
         }
         return zoneList;
     }
-    
+    public static Zone getZone(String roomRef, String floorRef) {
+
+        ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("room and floorRef == \""+floorRef+"\"");
+        for (HashMap m : zones)
+        {
+            if((m.get("id")).toString().equals(roomRef))
+                return new Zone.Builder().setHashMap(m).build();
+        }
+        return null;
+    }
     public static ArrayList<Equip> getEquips(String roomRef) {
         
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and roomRef == \""+roomRef+"\"");

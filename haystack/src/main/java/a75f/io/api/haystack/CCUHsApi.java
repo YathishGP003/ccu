@@ -742,9 +742,9 @@ public class CCUHsApi
 
     public synchronized void writeHisValById(String id, Double val)
     {
-
-        Double prevVal = readHisValById(id);
-        if(!prevVal.equals(val))
+        HisItem item = curRead(id);
+        Double prevVal = item == null ? 0 : item.getVal();
+        if((item == null)|| (!item.initialized) || !prevVal.equals(val))
             hsClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), HNum.make(val))});
        
     }
@@ -761,8 +761,9 @@ public class CCUHsApi
                 {
                     return;
                 }
-                Double prevVal = readHisValById(cachedId);
-                if(!prevVal.equals(val)) {
+                HisItem previtem = curRead(cachedId);
+                Double prevVal = previtem == null ? 0 : previtem.getVal();
+                if((previtem == null) || (!previtem.initialized)|| !prevVal.equals(val)) {
                     cachedId = p.get("id").toString();
                     QueryCache.getInstance().add(query, cachedId);
                     HisItem item = new HisItem(cachedId, new Date(), val);
@@ -776,8 +777,9 @@ public class CCUHsApi
                 CcuLog.d("CCU_HS","write point id is null");
                 return;
             }
-            Double prevVal = readHisValById(id);
-            if(!prevVal.equals(val)) {
+            HisItem previtem = curRead(id);
+            Double prevVal = previtem == null ? 0 : previtem.getVal();
+            if((previtem == null) || (!previtem.initialized) || !prevVal.equals(val)) {
                 HisItem item = new HisItem(id, new Date(), val);
                 hisWrite(item);
             }

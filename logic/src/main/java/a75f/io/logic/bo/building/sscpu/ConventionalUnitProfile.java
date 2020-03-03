@@ -229,7 +229,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                         if(getCmdSignal("cooling and stage2",node) == 0)
                             setCmdSignal("cooling and stage2", 1.0, node);
                         relayStages.put("CoolingStage2",1);
-                        if((isFanStage2Enabled ||  (occupied && enableFanStage1DuringOccupied))&& (fanHighType == SmartStatFanRelayType.FAN_STAGE2)){
+                        if(((isFanStage2Enabled  && ((fanSpeed == AUTO) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED)) ) ||  (occupied && enableFanStage1DuringOccupied))&& (fanHighType == SmartStatFanRelayType.FAN_STAGE2)){
                             relayStages.put("FanStage2",1);
                             if(getCmdSignal("fan and stage2",node) == 0)
                                 setCmdSignal("fan and stage2",1.0,node);
@@ -321,7 +321,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                     if (roomTemp <= (setTempHeating - heatingDeadband)) {
                         if(getCmdSignal("heating and stage2", node) == 0)
                             setCmdSignal("heating and stage2", 1.0, node);
-                        if((isFanStage2Enabled || (occupied && enableFanStage1DuringOccupied)) && (fanHighType == SmartStatFanRelayType.FAN_STAGE2)){
+                        if(((isFanStage2Enabled  && ((fanSpeed == AUTO) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED)  )) || (occupied && enableFanStage1DuringOccupied)) && (fanHighType == SmartStatFanRelayType.FAN_STAGE2)){
                             relayStages.put("FanStage2",1);
                             if(getCmdSignal("fan and stage2", node) == 0)
                                 setCmdSignal("fan and stage2",1.0,node);

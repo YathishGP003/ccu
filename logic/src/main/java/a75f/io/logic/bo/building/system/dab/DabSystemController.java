@@ -407,6 +407,7 @@ public class DabSystemController extends SystemController
         double zonePrioritySpread = TunerUtil.readTunerValByQuery("point and tuner and zone and priority and spread and equipRef == \"" + equipRef + "\"");;
         double zonePriorityMultiplier = TunerUtil.readTunerValByQuery("point and tuner and zone and priority and multiplier and equipRef == \""+equipRef+"\"");
         double equipDynamicPriority = p.val * Math.pow(zonePriorityMultiplier, (zoneLoad/zonePrioritySpread) > 10 ? 10 : (zoneLoad/zonePrioritySpread));
+        equipDynamicPriority = CCUUtils.roundToTwoDecimal(equipDynamicPriority);
         try {
             HashMap zdpPoint = CCUHsApi.getInstance().read("point and zone and dynamic and priority and equipRef == \"" + equipRef + "\"");
             double zdpPointValue = CCUHsApi.getInstance().readHisValById(zdpPoint.get("id").toString());

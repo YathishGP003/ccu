@@ -763,7 +763,7 @@ public class CCUHsApi
                 }
                 HisItem previtem = curRead(cachedId);
                 Double prevVal = previtem == null ? 0 : previtem.getVal();
-                if((previtem == null) || (!previtem.initialized)|| !prevVal.equals(val)) {
+                if((previtem == null) || (!previtem.initialized)|| !prevVal.equals(val) || query.contains("and diag")) {
                     cachedId = p.get("id").toString();
                     QueryCache.getInstance().add(query, cachedId);
                     HisItem item = new HisItem(cachedId, new Date(), val);
@@ -779,7 +779,7 @@ public class CCUHsApi
             }
             HisItem previtem = curRead(id);
             Double prevVal = previtem == null ? 0 : previtem.getVal();
-            if((previtem == null) || (!previtem.initialized) || !prevVal.equals(val)) {
+            if((previtem == null) || (!previtem.initialized) || !prevVal.equals(val) || query.contains("and diag")) {
                 HisItem item = new HisItem(id, new Date(), val);
                 hisWrite(item);
             }

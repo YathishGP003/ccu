@@ -502,7 +502,7 @@ public class Pulse
 			double val = cmRegularUpdateMessage_t.roomTemperature.get();
 			double curTempVal = getCMRoomTempConversion(val,0);
 			hayStack.writeHisValById(cmCurrentTemp.get("id").toString(), curTempVal);
-			CcuLog.d(TAG_CCU_DEVICE, "regularCMUpdate : CM currentTemp " + curTempVal+","+val);
+			CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : CM currentTemp " + curTempVal+","+val);
 		}
 		HashMap cmHumidity = hayStack.read("point and system and cm and humidity");
 		if (cmHumidity != null && cmHumidity.size() > 0) {
@@ -510,7 +510,7 @@ public class Pulse
 			if (val > 0) {
 				hayStack.writeHisValById(cmHumidity.get("id").toString(), val);
 			}
-			CcuLog.d(TAG_CCU_DEVICE, "regularCMUpdate : Humidity " + val );
+			CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Humidity " + val );
 		}
 
 

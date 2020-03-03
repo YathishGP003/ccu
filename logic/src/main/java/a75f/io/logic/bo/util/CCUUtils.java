@@ -8,7 +8,7 @@ import java.text.DecimalFormat;
 
 public class CCUUtils
 {
-    public static double roundTo2Decimal(double number) {
+    public static double roundToOneDecimal(double number) {
         DecimalFormat df = new DecimalFormat("#.#");
         return Double.parseDouble(df.format(number));
     }

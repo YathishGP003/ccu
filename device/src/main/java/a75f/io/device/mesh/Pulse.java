@@ -436,7 +436,7 @@ public class Pulse
 						val = cmRegularUpdateMessage_t.roomTemperature.get();
 						double tempOffset = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and config and ti and temperature and offset and equipRef == \"" + deviceInfo.getEquipRef() + "\"");
 						curTempVal = getCMRoomTempConversion(val,tempOffset);
-						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(phyPoint.get("id").toString(), curTempVal);
 						logicalCurTempPoint = logPoint.get("id").toString();
 						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : currentTemp " + curTempVal+","+tempOffset+","+val);
 						break;
@@ -495,25 +495,25 @@ public class Pulse
 					currentTempInterface.updateTemperature(curTempVal, Short.parseShort(deviceInfo.getAddr()));
 				}
 			}
-		}else if(L.ccu().systemProfile.getSystemEquipRef() != null){
-			HashMap cmCurrentTemp = hayStack.read("point and system and cm and temp and current");
-			if (cmCurrentTemp != null && cmCurrentTemp.size() > 0) {
-
-				double val = cmRegularUpdateMessage_t.roomTemperature.get();
-				double curTempVal = getCMRoomTempConversion(val,0);
-				hayStack.writeHisValById(cmCurrentTemp.get("id").toString(), curTempVal);
-				CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : CM currentTemp " + curTempVal+","+val);
-			}
-			HashMap cmHumidity = hayStack.read("point and system and cm and humidity");
-			if (cmHumidity != null && cmHumidity.size() > 0) {
-				double val = cmRegularUpdateMessage_t.humidity.get();
-				if (val > 0) {
-					hayStack.writeHisValById(cmHumidity.get("id").toString(), val);
-				}
-				CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Humidity " + val );
-			}
-
 		}
+		HashMap cmCurrentTemp = hayStack.read("point and system and cm and temp and current");
+		if (cmCurrentTemp != null && cmCurrentTemp.size() > 0) {
+
+			double val = cmRegularUpdateMessage_t.roomTemperature.get();
+			double curTempVal = getCMRoomTempConversion(val,0);
+			hayStack.writeHisValById(cmCurrentTemp.get("id").toString(), curTempVal);
+			CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : CM currentTemp " + curTempVal+","+val);
+		}
+		HashMap cmHumidity = hayStack.read("point and system and cm and humidity");
+		if (cmHumidity != null && cmHumidity.size() > 0) {
+			double val = cmRegularUpdateMessage_t.humidity.get();
+			if (val > 0) {
+				hayStack.writeHisValById(cmHumidity.get("id").toString(), val);
+			}
+			CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Humidity " + val );
+		}
+
+
 	}
 
 

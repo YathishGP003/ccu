@@ -144,12 +144,12 @@ public class Pulse
 						isTh2Enabled = phyPoint.get("enabled").toString().equals("true");
 						if(isTh2Enabled && isSse) {
 							th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
-							th2TempVal = CCUUtils.roundTo2Decimal(th2TempVal);
+							th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
 						}else {
 
 							double oldEntTempVal = hayStack.readHisValById(logPoint.get("id").toString());
 							double curEntTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
-							curEntTempVal = CCUUtils.roundTo2Decimal(curEntTempVal);
+							curEntTempVal = CCUUtils.roundToOneDecimal(curEntTempVal);
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 							if((oldEntTempVal != curEntTempVal) && !isSse)
 								hayStack.writeHisValById(logPoint.get("id").toString(), curEntTempVal);
@@ -176,7 +176,7 @@ public class Pulse
 
 						double oldDisTempVal = hayStack.readHisValById(logPoint.get("id").toString());
 						double curDisTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
-						curDisTempVal = CCUUtils.roundTo2Decimal(curDisTempVal);
+						curDisTempVal = CCUUtils.roundToOneDecimal(curDisTempVal);
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						if(oldDisTempVal != curDisTempVal)
 							hayStack.writeHisValById(logPoint.get("id").toString(), curDisTempVal);
@@ -445,7 +445,7 @@ public class Pulse
 						isTh2Enabled = phyPoint.get("enabled").toString().equals("true");
 						if (isTh2Enabled) {
 							th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
-							th2TempVal = CCUUtils.roundTo2Decimal(th2TempVal);
+							th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
 						}else {
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 							hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10));
@@ -576,7 +576,7 @@ public class Pulse
 						isTh2Enabled = phyPoint.get("enabled").toString().equals("true");
 						if(isTh2Enabled && !is2pfcu){
 							th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
-							th2TempVal = CCUUtils.roundTo2Decimal(th2TempVal);
+							th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
 							}
 						else if(isTh2Enabled && is2pfcu){
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
@@ -598,7 +598,7 @@ public class Pulse
 
 						double oldTh1TempVal = hayStack.readHisValById(logPoint.get("id").toString());
 						double curTh1TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
-						curTh1TempVal = CCUUtils.roundTo2Decimal(curTh1TempVal);
+						curTh1TempVal = CCUUtils.roundToOneDecimal(curTh1TempVal);
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						if(oldTh1TempVal != curTh1TempVal)
 							hayStack.writeHisValById(logPoint.get("id").toString(), curTh1TempVal);

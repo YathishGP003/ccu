@@ -1,14 +1,3 @@
- - Merge branch 'mahesh_renatus' into 'master'
- - fix post execute
- - RENATUS-947 added
- - Merge branch 'cov_change_only' into 'master'
- - #RENATUS-935, Cov Changes, to be updated only on change of value
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-961, add floor marker as writable
- - #RENATUS-961, add floor marker as writable
- - #RENATUS-953, App crashed after 42 successful attempts
- - #RENATUS-622, EMR status by default is wrong
- - #RENATUS-622, EMR status by default is wrong
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-956, Few System Equip points no his values
- - #RENATUS-942, SmartStat | CPU - Add enable fan stage1 during occupied
+ - #RENATUS-965, slider not visible
+ - #RENATUS-954, Alerts trigger only once

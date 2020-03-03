@@ -21,6 +21,7 @@
             app:srcCompat="@drawable/ic_warning" />
 
         <TextView
+            android:id="@+id/tvMessage"
             style="@style/text_appearance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

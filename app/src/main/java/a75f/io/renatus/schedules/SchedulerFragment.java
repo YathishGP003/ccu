@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.DialogFragment;
@@ -28,6 +29,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -59,6 +61,7 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
 import a75f.io.renatus.util.FontManager;
 import a75f.io.renatus.util.Marker;
+import a75f.io.renatus.util.ProgressDialogUtils;
 
 public class SchedulerFragment extends DialogFragment implements ManualScheduleDialogListener {
 
@@ -400,6 +403,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             @Override
             public boolean onClickSave(String vacationId, String vacationName, DateTime startDate, DateTime endDate)
             {
+                ProgressDialogUtils.showProgressDialog(getActivity(), "Adding vacation...");
                 if (vacationSchedule != null && !TextUtils.isEmpty(vacationSchedule.getRoomRef()) && vacationSchedule.getRoomRef()!= null) {
                     DefaultSchedules.upsertZoneVacation(vacationId, vacationName, startDate, endDate, vacationSchedule.getRoomRef());
                 } else if ((vacationSchedule == null && getArguments() != null && getArguments().containsKey(PARAM_ROOM_REF))){
@@ -409,10 +413,16 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 {
                     DefaultSchedules.upsertVacation(vacationId, vacationName, startDate, endDate);
                 }
+
                 CCUHsApi.getInstance().saveTagsData();
-                loadVacations();
                 ScheduleProcessJob.updateSchedules();
                 CCUHsApi.getInstance().syncEntityTree();
+
+                new Handler().postDelayed(() -> {
+                    loadVacations();
+                    ProgressDialogUtils.hideProgressDialog();
+                }, 3000);
+
                 return false;
             }
 
@@ -433,11 +443,34 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
     ImageButton.OnClickListener mDeleteOnClickListener = v ->  {
             String id = v.getTag().toString();
-            CCUHsApi.getInstance().deleteEntity("@"+id);
-            CCUHsApi.getInstance().syncEntityTree();
-            loadVacations();
-            ScheduleProcessJob.updateSchedules();
+            showDeleteVacationAlert(id);
     };
+
+    private void showDeleteVacationAlert(String vacationId) {
+        Schedule vacationSchedule = CCUHsApi.getInstance().getScheduleById(vacationId);
+        final Dialog alertDialog = new Dialog(getActivity());
+        alertDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        alertDialog.setCancelable(false);
+        alertDialog.setContentView(R.layout.dialog_delete_schedule);
+        TextView messageTv = alertDialog.findViewById(R.id.tvMessage);
+        messageTv.setText("Are you sure you want to delete the vacation: " + vacationSchedule.getDis()+"?");
+        alertDialog.findViewById(R.id.btnCancel).setOnClickListener(view -> alertDialog.dismiss());
+        alertDialog.findViewById(R.id.btnProceed).setOnClickListener(view -> {
+            ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting vacation...");
+
+            CCUHsApi.getInstance().deleteEntity("@"+vacationId);
+            ScheduleProcessJob.updateSchedules();
+            CCUHsApi.getInstance().syncEntityTree();
+            alertDialog.dismiss();
+
+            new Handler().postDelayed(() -> {
+                loadVacations();
+                ProgressDialogUtils.hideProgressDialog();
+            }, 3000);
+        });
+
+        alertDialog.show();
+    }
 
     private void loadVacations() {
         

@@ -354,7 +354,7 @@ public class AlertProcessor
     
     public boolean alertActive(Alert a, String ref) {
         for (Alert b : getActiveAlerts()) {
-            if (b.mTitle.equals(a.mTitle) && (b!= null && b.ref.equals(ref))) {
+            if (b.mTitle.equals(a.mTitle) /*&& (b!= null && b.ref.equals(ref))*/ && ((b.mMessage != null) && b.mMessage.equals(a.mMessage))) {
                 return true;
             }
         }
@@ -484,7 +484,7 @@ public class AlertProcessor
     
     public void addAlert(Alert alert) {
         for (Alert a : getActiveAlerts()) {
-            if (a.mTitle.equals(alert.mTitle) && (a.ref != null && a.ref == alert.ref)) {
+            if (a.mTitle.equals(alert.mTitle) /*&& (a.ref != null && a.ref == alert.ref)*/ && ((a.mMessage != null) && a.mMessage.equals(alert.mMessage))) {
                 return;
             }
         }
@@ -528,7 +528,7 @@ public class AlertProcessor
         ArrayList<AlertDefinition> alertDefinition = getAlertDefinitions();
         for (AlertDefinition ad :alertDefinition) {
             if(ad.alert.ismEnabled()) {
-                if (ad.alert.mTitle.equals(title)) {
+                if (ad.alert.mTitle.equals(title) && (!ad.alert.mMessage.equals(msg))) {
                     ad.alert.setmMessage(msg);
                     ad.alert.setmNotificationMsg(msg);
                     addAlert(AlertBuilder.build(ad, AlertFormatter.getFormattedMessage(ad)));

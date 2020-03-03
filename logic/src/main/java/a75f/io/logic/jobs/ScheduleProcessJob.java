@@ -1207,7 +1207,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 c = OCCUPANCYSENSING;
             }else{
                 Occupancy prevStatus = Occupancy.values()[(int)occuStatus];
-                Log.d("Schedule","Precond:"+occuStatus+","+prevStatus.name()+","+cachedOccupied.isForcedOccupied()+","+cachedOccupied.isPreconditioning()+","+cachedOccupied.isSystemZone());
+                //Log.d("Schedule","Precond:"+occuStatus+","+prevStatus.name()+","+cachedOccupied.isForcedOccupied()+","+cachedOccupied.isPreconditioning()+","+cachedOccupied.isSystemZone());
                 if((prevStatus == OCCUPIED)){
                     //Reset when schedule is changed from occupied to unoccupied
                     cachedOccupied.setForcedOccupied(false);
@@ -1232,7 +1232,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 CCUHsApi.getInstance().writeHisValById(id, (double) c.ordinal());
         }
         if((zoneDataInterface != null) && (cachedOccupied != null)){
-            Log.d("ZoneSchedule","updateZoneOccupancy11==>>"+equip.getDisplayName()+","+cachedOccupied.isForcedOccupied()+","+cachedOccupied.isOccupied()+","+cachedOccupied.isPreconditioning()+","+totEquipsInZone.toString());
+            //Log.d("ZoneSchedule","updateZoneOccupancy11==>>"+equip.getDisplayName()+","+cachedOccupied.isForcedOccupied()+","+cachedOccupied.isOccupied()+","+cachedOccupied.isPreconditioning()+","+totEquipsInZone.toString());
             zoneDataInterface.refreshDesiredTemp(equip.getGroup(), "","");
         }
         

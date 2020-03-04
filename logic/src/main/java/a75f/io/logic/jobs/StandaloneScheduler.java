@@ -80,7 +80,7 @@ public class StandaloneScheduler {
             occ.setHeatingDeadBand(deadbands);
             Double coolingTemp = ((occ.isOccupied() || occ.isPreconditioning() ) ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback()));
             setDesiredTemp(equip, coolingTemp, "cooling",occ.isForcedOccupied());
-            Double heatingTemp = (occ.isOccupied() || occ.isPreconditioning() || occ.isForcedOccupied())? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
+            Double heatingTemp = (occ.isOccupied() || occ.isPreconditioning() )? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
             setDesiredTemp(equip, heatingTemp, "heating",occ.isForcedOccupied());
             setDesiredTemp(equip, avgTemp, "average",occ.isForcedOccupied());
         }

@@ -158,12 +158,12 @@ public abstract class SystemProfile
         for (HashMap m : equips)
         {
             Equip q = new Equip.Builder().setHashMap(m)/*.setAhuRef(systemEquipId)*/.build();
-            if(q.getMarkers().contains("dab") || q.getMarkers().contains("vav"))
+            if(q.getMarkers().contains("dab") || q.getMarkers().contains("vav")|| q.getMarkers().contains("oao"))
                 q.setAhuRef(systemEquipId);
             else q.setGatewayRef(systemEquipId);
             CCUHsApi.getInstance().updateEquip(q, q.getId());
         }
-        
+
         CCUHsApi.getInstance().updateCCUahuRef(systemEquipId);
     }
     

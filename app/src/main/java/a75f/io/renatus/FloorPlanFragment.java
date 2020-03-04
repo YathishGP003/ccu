@@ -998,6 +998,10 @@ public class FloorPlanFragment extends Fragment
             if (L.ccu().oaoProfile != null) {
                 Toast.makeText(getActivity(), "OAO Module already paired", Toast.LENGTH_LONG).show();
             } else {
+				if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT) {
+					Toast.makeText(getActivity(), "Please set system profile to vav or dab to continue!", Toast.LENGTH_LONG).show();
+					return;
+				}
                 showDialogFragment(FragmentBLEInstructionScreen.getInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.OAO, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
             }
             return;
@@ -1033,6 +1037,10 @@ public class FloorPlanFragment extends Fragment
 				if (L.ccu().oaoProfile != null) {
 					Toast.makeText(getActivity(), "OAO Module already paired", Toast.LENGTH_LONG).show();
 				} else {
+					if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT) {
+						Toast.makeText(getActivity(), "Please set system profile to vav or dab to continue!", Toast.LENGTH_LONG).show();
+						return;
+					}
 					showDialogFragment(FragmentBLEInstructionScreen.getInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.OAO, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
 					//DialogOAOProfile oaoProfiling = DialogOAOProfile.newInstance(Short.parseShort(nodeAddr), "SYSTEM", "SYSTEM");
 					//showDialogFragment(oaoProfiling, DialogOAOProfile.ID);

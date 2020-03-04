@@ -67,7 +67,7 @@ public class VAVScheduler {
 
             setDesiredTemp(equip, coolingTemp, "cooling",occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
 
-            Double heatingTemp = (occ.isOccupied() || occ.isPreconditioning() || occ.isForcedOccupied() || (systemOcc == Occupancy.PRECONDITIONING) || (systemOcc == Occupancy.FORCEDOCCUPIED)) ? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
+            Double heatingTemp = (occ.isOccupied() || occ.isPreconditioning() /*|| occ.isForcedOccupied()*/ || (systemOcc == Occupancy.PRECONDITIONING) /*|| (systemOcc == Occupancy.FORCEDOCCUPIED))*/ ? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
             setDesiredTemp(equip, heatingTemp, "heating",occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
             setDesiredTemp(equip, avgTemp, "average",occ.isForcedOccupied() || systemOcc == Occupancy.FORCEDOCCUPIED);
         }

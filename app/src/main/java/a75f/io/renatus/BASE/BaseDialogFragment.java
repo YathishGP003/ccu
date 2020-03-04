@@ -26,16 +26,16 @@ public abstract class BaseDialogFragment extends DialogFragment
 		}
 		ft.addToBackStack(null);
 		// Create and show the dialog.
-		dialogFragment.show(ft, id);
+		dialogFragment.show(getFragmentManager(), id);
 	}
 	
 	protected void removeDialogFragment(String id)
 	{
 		FragmentTransaction ft = getFragmentManager().beginTransaction();
 		Fragment prev = getFragmentManager().findFragmentByTag(id);
-		if (prev != null && prev instanceof DialogFragment)
+		if (prev instanceof DialogFragment)
 		{
-			((DialogFragment) prev).dismiss();
+			ft.remove(prev).commitAllowingStateLoss();
 		}
 	}
 	
@@ -76,7 +76,7 @@ public abstract class BaseDialogFragment extends DialogFragment
         {
             if(fragment instanceof BaseDialogFragment)
             {
-                removeDialogFragment(((BaseDialogFragment)fragment).getIdString());
+					removeDialogFragment(((BaseDialogFragment) fragment).getIdString());
             }
         }
 		

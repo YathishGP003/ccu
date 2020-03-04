@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -147,6 +148,7 @@ public class FloorPlanFragment extends Fragment
 								}else
 								{
 									updateModules(getSelectedZone());
+									new Handler(getActivity().getMainLooper()).postDelayed(() -> setScheduleType(getSelectedZone().getId()), 5000);
 								}
 								//Crash here because of activity null while moving to other fragment and return back here after edit config
 								if((getActivity() != null) && (mPairingReceiver != null))
@@ -161,8 +163,29 @@ public class FloorPlanFragment extends Fragment
 			}
 		}
 	};
-	
-	
+
+	private void setScheduleType(String zoneId) {
+		ArrayList<Equip> zoneEquips  = HSUtil.getEquips(zoneId);
+		if(zoneEquips != null && (zoneEquips.size() > 0)) {
+           int newScheduleType = 0;
+			for (Equip equip: zoneEquips){
+				String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \"" + equip.getId() + "\"");
+				int mScheduleType = (int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
+				if (mScheduleType > newScheduleType){
+					newScheduleType = mScheduleType;
+				}
+			}
+
+			for (Equip equip: zoneEquips) {
+				String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \"" + equip.getId() + "\"");
+
+				CCUHsApi.getInstance().writeDefaultValById(scheduleTypeId, (double) newScheduleType);
+				CCUHsApi.getInstance().writeHisValById(scheduleTypeId, (double)newScheduleType);
+			}
+		}
+	}
+
+
 	public FloorPlanFragment()
 	{
 	}

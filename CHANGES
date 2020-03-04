@@ -1,14 +1,3 @@
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-956, system points update
- - #RENATUS-956, system points update
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-962, Frequency of Diag status is not 1 min
- - #RENATUS-971, CPU , fans tage on
- - Merge branch 'kumar_renatus' into 'master'
- - Merge branch 'mahesh_renatus' into 'master'
- - remove margin
- - fixed RENATUS-960 and update alerts icon
- - #RENATUS-970, CM temp not updating
- - #RENATUS-970, CM temp not updating
- - #RENATUS-941, Forced occupied for multimodules
- - #RENATUS-967, scheduleType is not getting updted for multi modules
+ - #RENATUS-941, forced occupied fix
+ - #RENATUS-941, forced occupied fix

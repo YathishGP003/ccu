@@ -357,6 +357,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         //{Current Mode}, Changes to Energy Saving Range of %.1f-%.1fF at %s
         if(curOccupancyMode == OCCUPIED)
         {
+            if (cachedOccupied.getCurrentlyOccupiedSchedule() == null){
+                return "Setting up...";
+            }
             return String.format("In %s, changes to Energy saving range of %.1f-%.1fF at %02d:%02d", "Occupied mode",
                     cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
                     cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
@@ -378,10 +381,13 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             {
                 statusString = String.format("In Energy saving %s till %s", "Vacation",
                             cachedOccupied.getVacation().getEndDateString());
-        
+
             } else
             {
                 if(curOccupancyMode == PRECONDITIONING) {//Currently handled only for standalone
+                    if (cachedOccupied.getNextOccupiedSchedule() == null){
+                        return "Setting up...";
+                    }
                     statusString = String.format("In %s, changes to Energy saving range of %.1f-%.1fF at %02d:%02d", "Preconditioning",
                             cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
                             cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
@@ -389,6 +395,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                             cachedOccupied.getNextOccupiedSchedule().getEtmm());
 
                 }else {
+                    if (cachedOccupied.getNextOccupiedSchedule() == null){
+                        return "Setting up...";
+                    }
                     statusString = String.format("In Energy saving %s, changes to %.1f-%.1fF at %02d:%02d", "Unoccupied mode",
                             cachedOccupied.getHeatingVal(),
                             cachedOccupied.getCoolingVal(),
@@ -445,6 +454,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
         switch (systemOccupancy) {
             case OCCUPIED:
+                if (currOccupied == null || currOccupied.getCurrentlyOccupiedSchedule() == null){
+                    return "Setting up...";
+                }
                 return String.format("In %s | Changes to Energy saving Unoccupied mode at %02d:%02d", "Occupied mode",
                         currOccupied.getCurrentlyOccupiedSchedule().getEthh(),
                         currOccupied.getCurrentlyOccupiedSchedule().getEtmm());
@@ -453,6 +465,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 return "In Preconditioning";
 
             case UNOCCUPIED:
+                if (nextOccupied == null || nextOccupied.getNextOccupiedSchedule() == null ){
+                    return "Setting up...";
+                }
                 return String.format("In Energy saving %s | Changes to %.1f-%.1fF at %02d:%02d", "Unoccupied mode",
                         nextOccupied.getHeatingVal(),
                         nextOccupied.getCoolingVal(),
@@ -1173,7 +1188,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             for(int i = 0; i < zonedetails.size(); i++){
                 ArrayList occStatus = CCUHsApi.getInstance().readAll("point and occupancy and mode and equipRef == \""+zonedetails.get(i).get("id").toString()+"\"");
                 if((occStatus != null) && occStatus.size() > 0){
-                    totEquipsInZone.add(((HashMap) occ.get(0)).get("id").toString());
+                    if (occ != null && occ.size() > 0 ) {
+                        totEquipsInZone.add(((HashMap) occ.get(0)).get("id").toString());
+                    }
                 }
             }
         }

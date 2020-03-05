@@ -454,7 +454,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
         switch (systemOccupancy) {
             case OCCUPIED:
-                if (currOccupied.getCurrentlyOccupiedSchedule() == null){
+                if (currOccupied == null || currOccupied.getCurrentlyOccupiedSchedule() == null){
                     return "Setting up...";
                 }
                 return String.format("In %s | Changes to Energy saving Unoccupied mode at %02d:%02d", "Occupied mode",
@@ -465,7 +465,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 return "In Preconditioning";
 
             case UNOCCUPIED:
-                if (nextOccupied == null){
+                if (nextOccupied == null || nextOccupied.getNextOccupiedSchedule() == null ){
                     return "Setting up...";
                 }
                 return String.format("In Energy saving %s | Changes to %.1f-%.1fF at %02d:%02d", "Unoccupied mode",

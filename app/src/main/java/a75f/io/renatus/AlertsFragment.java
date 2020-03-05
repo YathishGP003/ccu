@@ -56,11 +56,7 @@ public class AlertsFragment extends Fragment implements AlertSyncHandler.AlertDe
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
 		listView= view.findViewById(R.id.alertList);
-		alertList = new ArrayList<>(AlertManager.getInstance(getActivity()).getAllAlerts());
-		
-		adapter= new AlertAdapter(alertList,getActivity());
-		
-		listView.setAdapter(adapter);
+
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -137,6 +133,21 @@ public class AlertsFragment extends Fragment implements AlertSyncHandler.AlertDe
 		DateFormat sdf = new SimpleDateFormat("dd MMM yyyy HH:mm");
 		Date date = new Date(millis);
 		return sdf.format(date);
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+
+		setAlertList();
+	}
+
+	private void setAlertList() {
+		alertList = new ArrayList<>(AlertManager.getInstance(getActivity()).getAllAlerts());
+
+		adapter = new AlertAdapter(alertList,getActivity());
+
+		listView.setAdapter(adapter);
 	}
 
 	@Override

@@ -111,6 +111,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		// TODO Auto-generated method stub
 		super.onResume();
 		checkForOao();
+		fetchPoints();
+
 		if(getUserVisibleHint()) {
             fetchPoints();
             if (prefs.getBoolean("REGISTRATION")) {
@@ -361,10 +363,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 		});*/
 
-		fetchPoints();
-
-		checkForOao();
-		
 	}
 
 	private void checkForOao() {

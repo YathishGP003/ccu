@@ -1,3 +1,4 @@
  - Merge branch 'mahesh_renatus' into 'master'
- - fix
- - fixed RENATUS-967
+ - fixed RENATUS-976
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-975, wifi disconnect and reconnect - data write is wrong

@@ -50,6 +50,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
             CcuLog.d(L.TAG_CCU_JOB,"No CCU Registered ! <-BuildingProcessJob ");
             return;
         }
+        L.pingCloudServer();
     
         tsData = new HashMap();
         DiagEquip.getInstance().updatePoints();

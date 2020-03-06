@@ -1,6 +1,10 @@
 package a75f.io.logic;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -342,6 +346,21 @@ public class L
         if (deleteProfile != null)
         {
             L.ccu().zoneProfiles.remove(deleteProfile);
+        }
+    }
+
+    public static synchronized void pingCloudServer() {
+        final ConnectivityManager connMgr = (ConnectivityManager) Globals.getInstance().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        final NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
+        Log.d("CCU_CLOUDSTATUS", "Ping cloud server");
+        if (netInfo != null && netInfo.isConnected()) {
+            //  Some sort of connection is open, check if server is reachable
+            SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
+            spDefaultPrefs.edit().putBoolean("75fNetworkAvailable", true).commit();
+        }
+        else {
+            SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
+            spDefaultPrefs.edit().putBoolean("75fNetworkAvailable", false).commit();
         }
     }
 }

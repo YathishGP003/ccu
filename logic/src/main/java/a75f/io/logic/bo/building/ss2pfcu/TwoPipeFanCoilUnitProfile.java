@@ -652,11 +652,16 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                     }
                 }
                 if(isFanMediumEnabled){
-                    if(roomTemp <= (setTempHeating - heatingDeadband)){
-                        if(getCmdSignal("fan and low",addr) > 0)setCmdSignal("fan and low",0,addr);
-                        if(getCmdSignal("fan and high",addr) > 0)setCmdSignal("fan and high",0,addr);
-                        if(getCmdSignal("fan and medium",addr) == 0)setCmdSignal("fan and medium", 1.0 , addr);
-                        fanstages = "FanStage2";
+                    if((roomTemp <= (setTempHeating - heatingDeadband))){
+                        if(getCmdSignal("fan and high",addr) == 0) {
+                            if (getCmdSignal("fan and low", addr) > 0)
+                                setCmdSignal("fan and low", 0, addr);
+                            if (getCmdSignal("fan and high", addr) > 0)
+                                setCmdSignal("fan and high", 0, addr);
+                            if (getCmdSignal("fan and medium", addr) == 0)
+                                setCmdSignal("fan and medium", 1.0, addr);
+                            fanstages = "FanStage2";
+                        }
                     }else if(roomTemp >= setTempHeating){
                         if(getCmdSignal("fan and medium",addr) > 0)
                             setCmdSignal("fan and medium",0,addr);

@@ -31,8 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-
-import a75f.io.api.haystack.sync.DeviceSyncAdapter;
 import a75f.io.api.haystack.sync.EntityParser;
 import a75f.io.api.haystack.sync.EntitySyncHandler;
 import a75f.io.api.haystack.sync.HisSyncHandler;
@@ -1512,4 +1510,11 @@ public class CCUHsApi
 
       return spDefaultPrefs.getBoolean("registered", false);
   }
+    public boolean isNetworkConnected() {
+
+        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(cxt);
+
+        return spDefaultPrefs.getBoolean("75fNetworkAvailable", false);
+    }
+
 }

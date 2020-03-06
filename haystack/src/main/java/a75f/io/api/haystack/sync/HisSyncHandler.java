@@ -35,7 +35,6 @@ public class HisSyncHandler
     private static final String TAG = "CCU_HS_SYNC";
     
     CCUHsApi hayStack;
-    HashMap<String, String> tsData;
     
     public boolean entitySyncRequired = false;
     
@@ -159,7 +158,7 @@ public class HisSyncHandler
                         continue;
                     }
                     tsData.put( pointGUID.replace("@",""), String.valueOf(hisVal.getVal()));
-                    if (now.getMinuteOfDay() == 0)
+                    //if (now.getMinuteOfDay() == 0)
                     {
                         hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
                     }
@@ -172,9 +171,9 @@ public class HisSyncHandler
                             item.setSyncStatus(true);
                         }
                         hayStack.tagsDb.setHisItemSyncStatus(hisItems);
-                        if (now.getMinuteOfDay() == 0) {
+                        //if (now.getMinuteOfDay() == 0) {
                             hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
-                        }
+                        //}
                     }else
                         continue;
                 }
@@ -198,10 +197,12 @@ public class HisSyncHandler
             
             if (tsData.size() > 0)
             {
-                CcuLog.d(TAG," sendHisToInflux tsData111= "+tsData.size()+","+tsData.toString());
-                //String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
-                InfluxDbUtil.writeData(CCUHsApi.getInstance().getInfluxUrl(), CCUHsApi.getInstance().getGUID(equip.get("id").toString()).toString().replace("@","")
-                                                , tsData, System.currentTimeMillis());
+                if(CCUHsApi.getInstance().isNetworkConnected()) {
+                    CcuLog.d(TAG, " sendHisToInflux tsData111= " + tsData.size() + "," + tsData.toString());
+                    //String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
+                    InfluxDbUtil.writeData(CCUHsApi.getInstance().getInfluxUrl(), CCUHsApi.getInstance().getGUID(equip.get("id").toString()).toString().replace("@", "")
+                            , tsData, System.currentTimeMillis());
+                }
             }
         
         }
@@ -285,12 +286,13 @@ public class HisSyncHandler
         
             if (tsData.size() > 0)
             {
-                CcuLog.d(TAG," sendHisToInflux device tsData= "+tsData.size()+","+tsData.toString());
-                //String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
-                InfluxDbUtil.writeData(CCUHsApi.getInstance().getInfluxUrl(), CCUHsApi.getInstance().getGUID(device.get("id").toString()).toString().replace("@","")
-                        , tsData, System.currentTimeMillis());
+                if(CCUHsApi.getInstance().isNetworkConnected()) {
+                    CcuLog.d(TAG, " sendHisToInflux device tsData= " + tsData.size() + "," + tsData.toString());
+                    //String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
+                    InfluxDbUtil.writeData(CCUHsApi.getInstance().getInfluxUrl(), CCUHsApi.getInstance().getGUID(device.get("id").toString()).toString().replace("@", "")
+                            , tsData, System.currentTimeMillis());
+                }
             }
-        
         }
     }
     

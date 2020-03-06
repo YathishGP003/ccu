@@ -42,7 +42,6 @@ public class StandaloneScheduler {
         Log.i(TAG, "Equip: " + equip);
         Log.i(TAG, "Equip Schedule: " + equipSchedule);
         Occupied occ = equipSchedule.getCurrentValues();
-        Occupied curOccu = ScheduleProcessJob.getOccupiedModeCache(equip.getRoomRef());
         //When schedule is deleted
         if (occ == null) {
             ScheduleProcessJob.occupiedHashMap.remove(equip.getRoomRef());
@@ -52,11 +51,7 @@ public class StandaloneScheduler {
             occ.setOccupied(false);
 
         occ.setVacation(vacation);
-        if(curOccu != null) {
-            occ.setPreconditioning(curOccu.isPreconditioning());
-            occ.setForcedOccupied(curOccu.isForcedOccupied());
-            occ.setSystemZone(curOccu.isSystemZone());
-        }
+
 
         double occuStatus = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and mode and equipRef == \""+equip.getId()+"\"");
 

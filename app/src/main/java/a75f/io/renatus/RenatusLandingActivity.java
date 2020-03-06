@@ -61,6 +61,7 @@ import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 import a75f.io.renatus.registartion.CustomViewPager;
 import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.CCUUtils;
+import a75f.io.renatus.util.CloudConnetionStatusThread;
 import a75f.io.renatus.util.Prefs;
 
 public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface {
@@ -73,6 +74,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     ImageView setupButton;
     ImageView menuToggle;
     ImageView floorMenu;
+    static CloudConnetionStatusThread mCloudConnectionStatus = null;
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -368,6 +370,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     @Override
     public void onResume() {
         super.onResume();
+        isCloudConnectionAlive();
         RemoteCommandUpdateHandler.setRemoteCommandInterface(this);
     }
     @Override
@@ -379,6 +382,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mCloudConnectionStatus.stopThread();
         L.saveCCUState();
     }
 
@@ -388,7 +392,13 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             getSupportFragmentManager().popBackStack();
         }
     }
-
+    public static synchronized boolean isCloudConnectionAlive() {
+        if (mCloudConnectionStatus == null) {
+            mCloudConnectionStatus = new CloudConnetionStatusThread();
+            mCloudConnectionStatus.start();
+        }
+        return mCloudConnectionStatus.isCloudAlive();
+    }
     public void showRequestPasswordAlert(String title, String key, int position) {
 
         final int[] passwordAttempt = {0};
@@ -508,44 +518,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         return (prefs.getBoolean(getString(R.string.SET_SETUP_PASSWORD))&& !prefs.getString(getString(R.string.USE_SETUP_PASSWORD_KEY)).isEmpty());
     }
 
-
-    private void updateCCURegistrationInfo(final String ccuRegInfo) {
-        AsyncTask<Void, Void, String> updateCCUReg = new AsyncTask<Void, Void, String>() {
-
-
-            @Override
-            protected String doInBackground(Void... voids) {
-
-                Log.d("CCURegInfo","RenatusLA backgroundtask="+ccuRegInfo);
-                return  HttpUtil.executeJSONPost(CCUHsApi.getInstance().getAuthenticationUrl()+"api/v1/device/register",ccuRegInfo, "");
-            }
-
-            @Override
-            protected void onPostExecute(String result) {
-
-                Log.d("CCURegInfo","RenatusLA Edit onPostExecute="+result);
-                if((result != null) && (!result.equals(""))){
-
-                    try {
-                        JSONObject resString = new JSONObject(result);
-                        if(resString.getBoolean("success")){
-                            prefs.setString("token",resString.getString("token"));
-                            Toast.makeText(getApplicationContext(), "CCU Registered Successfully "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();
-                        }else
-                            Toast.makeText(getApplicationContext(), "CCU Registration is not Successful "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }else {
-                    Toast.makeText(getApplicationContext(), "CCU Registration is not Successful", Toast.LENGTH_LONG).show();
-                }
-            }
-        };
-
-        updateCCUReg.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
     @Override
     public void updateRemoteCommands(String commands,String cmdLevel,String id) {
         CcuLog.d("RemoteCommand","PUBNUB RenatusLandingActivity="+commands+","+cmdLevel);
@@ -604,7 +576,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                                     ssControlsMessage_t.address.set(Short.parseShort(d.getAddr()));
                                     ssControlsMessage_t.controls.reset.set((short) 1);
                                     MeshUtil.sendStructToNodes(ssControlsMessage_t);
-                                }else {
+                                }else if(d.getMarkers().contains("smartnode")){
                                     CcuToCmOverUsbSnControlsMessage_t snControlsMessage_t = new CcuToCmOverUsbSnControlsMessage_t();
                                     snControlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
                                     snControlsMessage_t.smartNodeAddress.set(Short.parseShort(d.getAddr()));

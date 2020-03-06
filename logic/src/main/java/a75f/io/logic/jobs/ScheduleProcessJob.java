@@ -1188,9 +1188,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             for(int i = 0; i < zonedetails.size(); i++){
                 ArrayList occStatus = CCUHsApi.getInstance().readAll("point and occupancy and mode and equipRef == \""+zonedetails.get(i).get("id").toString()+"\"");
                 if((occStatus != null) && occStatus.size() > 0){
-                    if (occ != null && occ.size() > 0 ) {
-                        totEquipsInZone.add(((HashMap) occ.get(0)).get("id").toString());
-                    }
+                    totEquipsInZone.add(((HashMap) occStatus.get(0)).get("id").toString());
                 }
             }
         }

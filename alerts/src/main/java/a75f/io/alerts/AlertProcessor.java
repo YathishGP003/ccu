@@ -352,9 +352,9 @@ public class AlertProcessor
         return false;
     }
     
-    public boolean alertActive(Alert a, String ref) {
+    public boolean alertActive(Alert a, String pointId) {
         for (Alert b : getActiveAlerts()) {
-            if (b.mTitle.equals(a.mTitle) /*&& (b!= null && b.ref.equals(ref))*/ && ((b.mMessage != null) && b.mMessage.equals(a.mMessage))) {
+            if (b.mTitle.equals(a.mTitle) && b.ref.equals(pointId)) {
                 return true;
             }
         }
@@ -484,7 +484,7 @@ public class AlertProcessor
     
     public void addAlert(Alert alert) {
         for (Alert a : getActiveAlerts()) {
-            if (a.mTitle.equals(alert.mTitle) /*&& (a.ref != null && a.ref == alert.ref)*/ && ((a.mMessage != null) && a.mMessage.equals(alert.mMessage))) {
+            if (a.mTitle.equals(alert.mTitle) && (a.ref != null && a.ref.equals(alert.ref)) && ((a.mMessage != null) && a.mMessage.equals(alert.mMessage))) {
                 return;
             }
         }

@@ -1141,43 +1141,43 @@ public class FloorPlanFragment extends Fragment
 				case VAV_PARALLEL_FAN:
 					VavProfileConfiguration config = profile.getProfileConfiguration(Short.parseShort(nodeAddr));
 					showDialogFragment(FragmentVAVConfiguration
-							.newInstance(Short.parseShort(nodeAddr), zone.getDisplayName(), config.getNodeType(), floor.getDisplayName(), profile.getProfileType()), FragmentVAVConfiguration.ID);
+							.newInstance(Short.parseShort(nodeAddr), zone.getId(), config.getNodeType(), floor.getId(), profile.getProfileType()), FragmentVAVConfiguration.ID);
 					break;
 				case PLC:
 					showDialogFragment(FragmentPLCConfiguration
-							                   .newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.SMART_NODE, floor.getDisplayName()), FragmentPLCConfiguration.ID);
+							                   .newInstance(Short.parseShort(nodeAddr),zone.getId(), NodeType.SMART_NODE, floor.getId()), FragmentPLCConfiguration.ID);
 				break;
 				case DAB:
 					showDialogFragment(FragmentDABConfiguration
-											   .newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.SMART_NODE, floor.getDisplayName(), profile.getProfileType()), FragmentDABConfiguration.ID);
+											   .newInstance(Short.parseShort(nodeAddr),zone.getId(), NodeType.SMART_NODE, floor.getId(), profile.getProfileType()), FragmentDABConfiguration.ID);
 					break;
 				case EMR:
 					showDialogFragment(FragmentEMRConfiguration
-							                   .newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.SMART_NODE, floor.getDisplayName()), FragmentEMRConfiguration.ID);
+							                   .newInstance(Short.parseShort(nodeAddr),zone.getId(), NodeType.SMART_NODE, floor.getId()), FragmentEMRConfiguration.ID);
 					break;
 				case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
 					showDialogFragment(FragmentCPUConfiguration
-							.newInstance(Short.parseShort(nodeAddr), zone.getDisplayName(), /*cpuConfig.getNodeType()*/ NodeType.SMART_STAT, floor.getDisplayName(), profile.getProfileType()), FragmentCPUConfiguration.ID);
+							.newInstance(Short.parseShort(nodeAddr), zone.getId(), /*cpuConfig.getNodeType()*/ NodeType.SMART_STAT, floor.getId(), profile.getProfileType()), FragmentCPUConfiguration.ID);
 					break;
 				case SMARTSTAT_HEAT_PUMP_UNIT:
 					showDialogFragment(FragmentHeatPumpConfiguration
-							.newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(),NodeType.SMART_STAT,floor.getDisplayName(),profile.getProfileType()),FragmentHeatPumpConfiguration.ID);
+							.newInstance(Short.parseShort(nodeAddr),zone.getId(),NodeType.SMART_STAT,floor.getId(),profile.getProfileType()),FragmentHeatPumpConfiguration.ID);
 					break;
 				case SMARTSTAT_TWO_PIPE_FCU:
 					showDialogFragment(Fragment2PipeFanCoilUnitConfig
-							.newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(),NodeType.SMART_STAT,floor.getDisplayName(),profile.getProfileType()),Fragment2PipeFanCoilUnitConfig.ID);
+							.newInstance(Short.parseShort(nodeAddr),zone.getId(),NodeType.SMART_STAT,floor.getId(),profile.getProfileType()),Fragment2PipeFanCoilUnitConfig.ID);
 					break;
 				case SMARTSTAT_FOUR_PIPE_FCU:
 					showDialogFragment(Fragment4PipeFanCoilUnitConfig
-							.newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(),NodeType.SMART_STAT,floor.getDisplayName(),profile.getProfileType()),Fragment4PipeFanCoilUnitConfig.ID);
+							.newInstance(Short.parseShort(nodeAddr),zone.getId(),NodeType.SMART_STAT,floor.getId(),profile.getProfileType()),Fragment4PipeFanCoilUnitConfig.ID);
 					break;
 				case TEMP_INFLUENCE:
 					showDialogFragment(FragmentTempInfConfiguration
-							.newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.CONTROL_MOTE, floor.getDisplayName()), FragmentTempInfConfiguration.ID);
+							.newInstance(Short.parseShort(nodeAddr),zone.getId(), NodeType.CONTROL_MOTE, floor.getId()), FragmentTempInfConfiguration.ID);
 					break;
 				case SSE:
 					showDialogFragment(FragmentSSEConfiguration
-							.newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.SMART_NODE, floor.getDisplayName(),profile.getProfileType()), FragmentSSEConfiguration.ID);
+							.newInstance(Short.parseShort(nodeAddr),zone.getId(), NodeType.SMART_NODE, floor.getId(),profile.getProfileType()), FragmentSSEConfiguration.ID);
 					break;
 
 			}

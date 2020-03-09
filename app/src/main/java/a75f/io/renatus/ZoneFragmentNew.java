@@ -193,7 +193,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         mFloorListAdapter = new DataArrayAdapter<Floor>(getActivity(), R.layout.listviewitem,floorList);
         lvFloorList.setAdapter(mFloorListAdapter);
-       // loadGrid(parentRootView);
+        loadGrid(parentRootView);
         if(floorList != null && floorList.size()>0){
             lvFloorList.setContentDescription(floorList.get(0).getDisplayName());
         }
@@ -2564,7 +2564,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     public void onResume() {
         // TODO Auto-generated method stub
         super.onResume();
-        loadGrid(parentRootView);
+       // loadGrid(parentRootView);
 
         if(getUserVisibleHint())
         {

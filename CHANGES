@@ -1,4 +1,4 @@
- - Merge branch 'mahesh_renatus' into 'master'
- - fixed RENATUS-976
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-975, wifi disconnect and reconnect - data write is wrong
+ - twopipe fan high turn off earlier
+ - Merge branch 'mahesh_renatus' into 'master'
+ - resolved RENATUS-954

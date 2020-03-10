@@ -1220,7 +1220,12 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     //Reset when schedule is changed from occupied to unoccupied
                     cachedOccupied.setForcedOccupied(false);
                     cachedOccupied.setPreconditioning(false);
-                    clearTempOverrides(equip.getId());
+                    if(zonedetails.size() > 1) {
+                        for(int i = 0; i < zonedetails.size(); i++){
+                            clearTempOverrides(zonedetails.get(i).get("id").toString());
+                        }
+                    }else
+                        clearTempOverrides(equip.getId());
                 }else {
                     boolean isZoneHasStandaloneEquip = (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse") );
                     if(isZonePreconditioningActive(equip.getId(),cachedOccupied, isZoneHasStandaloneEquip) || cachedOccupied.isPreconditioning()){

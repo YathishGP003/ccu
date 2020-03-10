@@ -1,4 +1,4 @@
  - Merge branch 'kumar_renatus' into 'master'
- - twopipe fan high turn off earlier
+ - #RENATUS-980, CPU -fan Low all times, relay off
  - Merge branch 'mahesh_renatus' into 'master'
- - resolved RENATUS-954
+ - resolved RENATUS-979

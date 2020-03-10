@@ -36,7 +36,7 @@
 
     <com.prolificinteractive.materialcalendarview.MaterialCalendarView xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/calendarView"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="300dp"
         app:mcv_selectionColor="@color/orange"
         app:mcv_selectionMode="range"

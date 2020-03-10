@@ -155,7 +155,7 @@ public class AlertsFragment extends Fragment implements AlertSyncHandler.AlertDe
 		getActivity().runOnUiThread(() -> {
 			alertList.clear();
 			alertList = new ArrayList<>(AlertManager.getInstance(getActivity()).getAllAlerts());
-			adapter= new AlertAdapter(alertList,getActivity());
+			adapter = new AlertAdapter(alertList,getActivity());
 			listView.setAdapter(adapter);
 			adapter.notifyDataSetChanged();
 		});

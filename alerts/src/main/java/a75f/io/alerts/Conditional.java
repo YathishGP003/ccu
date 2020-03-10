@@ -12,12 +12,15 @@ import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDateTimeRange;
 import org.projecthaystack.HTimeZone;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
@@ -241,16 +244,15 @@ public class Conditional
                     if (point.size() == 0) {
                         continue;
                     }
-    
-                    List<HisItem> hisItems = CCUHsApi.getInstance().hisRead(point.get("id").toString(),HDateTimeRange.make(HDateTime.make(System.currentTimeMillis()-110000,HTimeZone.make(point.get("tz").toString())), HDateTime.make(System.currentTimeMillis(),HTimeZone.make(point.get("tz").toString()))));
-
+                    //List<HisItem> hisItems = CCUHsApi.getInstance().hisRead(point.get("id").toString(),HDateTimeRange.make(HDateTime.make(System.currentTimeMillis()-1800000,HTimeZone.make(TimeZone.getDefault().getDisplayName(false,TimeZone.SHORT))), HDateTime.make(System.currentTimeMillis(),HTimeZone.make(TimeZone.getDefault().getDisplayName(false,TimeZone.SHORT)))));
+                   List<HisItem> hisItems = CCUHsApi.getInstance().hisRead(point.get("id").toString(),"today");
                     if (hisItems.size() < 2) {
                         CcuLog.d("CCU_ALERTS"," Not enough his vals to evaluate conditional "+toString());
                         return;
                     }
                     
-                    HisItem reading1 = hisItems.get(0);
-                    HisItem reading2 = hisItems.get(hisItems.size()-1);
+                    HisItem reading1 = hisItems.get(hisItems.size() - 2);
+                    HisItem reading2 = hisItems.get(hisItems.size() - 1);
     
                     if (value.contains("zone")) {
                         val = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value+" and equipRef == \""+q.get("id")+"\""));

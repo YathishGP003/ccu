@@ -142,6 +142,16 @@ public class AlertManager
             this.mContext = mApplicationContext;
         }
     }
-    
+
+    public void clearAlertsWhenAppClose(){
+
+        for (Alert a: getActiveAlerts()){
+            if (!a.isFixed() && a.getSyncStatus()){
+               fixAlert(a);
+            } else if (!a.getSyncStatus()){
+                deleteAlert(a);
+            }
+        }
+    }
 }
 

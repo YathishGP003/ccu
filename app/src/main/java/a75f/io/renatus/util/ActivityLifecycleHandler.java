@@ -5,6 +5,7 @@ import android.app.Application;
 import android.os.Bundle;
 import android.util.Log;
 
+import a75f.io.alerts.AlertManager;
 import a75f.io.logic.diag.DiagEquip;
 
 /**
@@ -49,5 +50,6 @@ public class ActivityLifecycleHandler implements Application.ActivityLifecycleCa
     @Override
     public void onActivityDestroyed(Activity activity) {
         prefs.setBoolean("APP_START", true);
+        AlertManager.getInstance().clearAlertsWhenAppClose();
     }
 }

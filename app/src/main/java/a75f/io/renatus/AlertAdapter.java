@@ -29,7 +29,13 @@ public class AlertAdapter extends ArrayAdapter<Alert> implements View.OnClickLis
         this.mContext=context;
         
     }
-    
+
+    @Override
+    public int getCount() {
+        //display only first 60 alert
+        return 60;
+    }
+
     @Override
     public void onClick(View v) {
         

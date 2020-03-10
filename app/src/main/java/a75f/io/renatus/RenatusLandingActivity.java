@@ -38,6 +38,8 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 
+import a75f.io.alerts.AlertManager;
+import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
@@ -384,6 +386,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         super.onDestroy();
         mCloudConnectionStatus.stopThread();
         L.saveCCUState();
+        AlertManager.getInstance().clearAlertsWhenAppClose();
     }
 
     @Override

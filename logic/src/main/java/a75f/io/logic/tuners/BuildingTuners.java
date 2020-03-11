@@ -718,7 +718,7 @@ public class BuildingTuners
         hayStack.writePoint(stage5HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 35.0, 0);
         hayStack.writeHisValById(stage5HeatingAirflowTempLowerOffsetId, 35.0);
 
-        Point lightingIntensityOccupancyDetect  = new Point.Builder()
+        /*Point lightingIntensityOccupancyDetect  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"lightingIntensityOccupancyDetect")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef).setHisInterpolate("cov")
@@ -744,7 +744,7 @@ public class BuildingTuners
                 .build();
         String minLightingControlOverrideId = hayStack.addPoint(minLightingControlOverride);
         hayStack.writePoint(minLightingControlOverrideId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 20.0, 0);
-        hayStack.writeHisValById(minLightingControlOverrideId, 20.0);
+        hayStack.writeHisValById(minLightingControlOverrideId, 20.0);*/
 
         Point clockUpdateInterval  = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"clockUpdateInterval")
@@ -1721,7 +1721,7 @@ public class BuildingTuners
         }
         hayStack.writeHisValById(abnormalCurTempRiseTriggerId, HSUtil.getPriorityVal(abnormalCurTempRiseTriggerId));
 
-        Point lightingIntensityOccupancyDetect = new Point.Builder()
+       /* Point lightingIntensityOccupancyDetect = new Point.Builder()
                 .setDisplayName(equipdis+"-"+"lightingIntensityOccupancyDetect")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipref)
@@ -1768,6 +1768,7 @@ public class BuildingTuners
             }
         }
         hayStack.writeHisValById(minLightingControlOverrideId, HSUtil.getPriorityVal(minLightingControlOverrideId));
+        */
     }
     
     public void addVavEquipTuners(String equipdis, String equipref, String roomRef, String floorRef) {

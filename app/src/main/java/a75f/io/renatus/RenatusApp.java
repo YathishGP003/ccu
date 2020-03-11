@@ -9,7 +9,6 @@ import android.support.multidex.MultiDex;
 import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
 
-import com.crashlytics.android.Crashlytics;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -17,7 +16,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import a75f.io.logic.SystemProperties;
 import a75f.io.renatus.util.ActivityLifecycleHandler;
 /**
  * Created by ryanmattison isOn 7/24/17.
@@ -121,10 +119,9 @@ public class RenatusApp extends UtilityApplication
 		setIntentToRestartCCU();
 		try {
 			Log.d("CCU_DEBUG", "************Houston, May Day, May Day, May Day, Bailing Out!!!************");
-			//Runtime.getRuntime().exec("su -c reboot"); //su -c 'setprop sys.powerctl reboot,recovery'
-			Runtime.getRuntime().exec("su -c 'setprop sys.powerctl reboot");
-
-		} catch (Exception e) {
+			Runtime.getRuntime().exec("su");
+			Runtime.getRuntime().exec("reboot");
+		}catch (Exception e){
 			e.printStackTrace();
 		}
 	}

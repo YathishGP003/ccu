@@ -395,7 +395,26 @@ public class ConventionalUnitProfile extends ZoneProfile {
                             setCmdSignal("fan and stage2",0,node);
                     }else if(isFanStage2Enabled && ((fanHighType == SmartStatFanRelayType.HUMIDIFIER) || (fanHighType == SmartStatFanRelayType.DE_HUMIDIFIER)))
                         updateHumidityStatus(fanHighType,node,cpuDevice.getHumidity(),targetThreshold,relayStages);
-                }else{
+                }else if((fanSpeed == FAN_HIGH_ALL_TIMES) || (fanSpeed == FAN_LOW_ALL_TIMES)){
+                    curState = DEADBAND;
+                    if(isFanStage1Enabled ) {
+                        relayStages.put("FanStage1", 1);
+                        if(getCmdSignal("fan and stage1", node) == 0)
+                            setCmdSignal("fan and stage1",1.0,node);
+                    }else{
+                        if(getCmdSignal("fan and stage1", node) > 0)
+                            setCmdSignal("fan and stage1",0,node);
+                    }
+                    if(isFanStage2Enabled  && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && (fanSpeed == FAN_HIGH_ALL_TIMES)) {
+                        relayStages.put("FanStage2", 1);
+                        if(getCmdSignal("fan and stage2", node) == 0)
+                            setCmdSignal("fan and stage2",1.0,node);
+                    }else if(fanHighType == SmartStatFanRelayType.FAN_STAGE2){
+                        if(getCmdSignal("fan and stage2", node) > 0)
+                            setCmdSignal("fan and stage2",0,node);
+                    }else if(isFanStage2Enabled && ((fanHighType == SmartStatFanRelayType.HUMIDIFIER) || (fanHighType == SmartStatFanRelayType.DE_HUMIDIFIER)))
+                        updateHumidityStatus(fanHighType,node,cpuDevice.getHumidity(),targetThreshold,relayStages);
+                } else{
                     curState = DEADBAND;
                     if(getCmdSignal("fan and stage1",node) > 0)
                         setCmdSignal("fan and stage1",0,node);

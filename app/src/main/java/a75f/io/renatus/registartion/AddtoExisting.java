@@ -32,6 +32,7 @@ import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RegisterGatherCCUDetails;
 import a75f.io.renatus.RegisterGatherDetails;
+import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 
 public class AddtoExisting extends Fragment {
@@ -60,6 +61,7 @@ public class AddtoExisting extends Fragment {
     Context mContext;
 
     ProgressBar mProgressDialog;
+    Prefs prefs;
     private static final String TAG = AddtoExisting.class.getSimpleName();
 
     public AddtoExisting() {
@@ -87,6 +89,7 @@ public class AddtoExisting extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        prefs = new Prefs(getActivity());
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -322,7 +325,7 @@ public class AddtoExisting extends Fragment {
     }
 
     private void showSiteDialog(HGrid hGrid) {
-
+        prefs.setBoolean("registered", true);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {

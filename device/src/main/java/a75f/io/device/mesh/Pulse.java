@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 
+import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
@@ -989,6 +990,8 @@ public class Pulse
 				 AlertGenerateHandler.handleMessage(DEVICE_DEAD, "For"+" "+ccuName + "," +d.getDisplayName() +" has stopped reporting data. Please contact 75F support.");
 				 mDeviceUpdate.remove(address);
 				 break;
+			 } else {
+				 AlertManager.getInstance().fixDeviceDead(String.valueOf(address));
 			 }
 		}
 	}

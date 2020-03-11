@@ -1,5 +1,6 @@
 package a75f.io.device.mesh;
 
+import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
@@ -168,6 +169,8 @@ public class MeshNetwork extends DeviceNetwork
             LSerial.getInstance().setResetSeedMessage(true);
             Pulse.setCMDeadTimerIncrement(false);
             return;
+        } else {
+            AlertManager.getInstance().fixCMDead();
         }
         
         if (ccu().systemProfile == null) {

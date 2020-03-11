@@ -33,7 +33,7 @@ public class AlertAdapter extends ArrayAdapter<Alert> implements View.OnClickLis
     @Override
     public int getCount() {
         //display only first 60 alert
-        return 60;
+        return alerts.size() > 60 ? 60 : alerts.size();
     }
 
     @Override

@@ -430,6 +430,24 @@ public class AlertProcessor
     
         return alertQuery.build().find();
     }
+
+    public List<Alert> getActiveCMDeadAlerts(){
+        QueryBuilder<Alert> alertQuery = alertBox.query();
+        alertQuery.equal(Alert_.isFixed, false)
+                .equal(Alert_.mTitle,"CM DEAD")
+                .orderDesc(Alert_.startTime);
+
+        return alertQuery.build().find();
+    }
+
+    public List<Alert> getActiveDeviceDeadAlerts(){
+        QueryBuilder<Alert> alertQuery = alertBox.query();
+        alertQuery.equal(Alert_.isFixed, false)
+                .equal(Alert_.mTitle,"DEVICE DEAD")
+                .orderDesc(Alert_.startTime);
+
+        return alertQuery.build().find();
+    }
     
     public List<Alert> getActiveUnSyncedAlerts(){
         QueryBuilder<Alert> alertQuery = alertBox.query();
@@ -512,7 +530,9 @@ public class AlertProcessor
         if (alert._id.equals("") || AlertSyncHandler.delete(mContext, alert._id))
         {
             alertBox.remove(alert.id);
-            AlertSyncHandler.mListener.onDeleteSuccess();
+            if (AlertSyncHandler.mListener != null){
+                AlertSyncHandler.mListener.onDeleteSuccess();
+            }
         }
     }
     
@@ -529,6 +549,19 @@ public class AlertProcessor
         for (AlertDefinition ad :alertDefinition) {
             if(ad.alert.ismEnabled()) {
                 if (ad.alert.mTitle.equals(title) && (!ad.alert.mMessage.equals(msg))) {
+                    ad.alert.setmMessage(msg);
+                    ad.alert.setmNotificationMsg(msg);
+                    addAlert(AlertBuilder.build(ad, AlertFormatter.getFormattedMessage(ad)));
+                }
+            }
+        }
+    }
+
+    public void generateCMDeadAlert(String title, String msg){
+        ArrayList<AlertDefinition> alertDefinition = getAlertDefinitions();
+        for (AlertDefinition ad :alertDefinition) {
+            if(ad.alert.ismEnabled()) {
+                if (ad.alert.mTitle.equals(title) && getActiveCMDeadAlerts().size() == 0) {
                     ad.alert.setmMessage(msg);
                     ad.alert.setmNotificationMsg(msg);
                     addAlert(AlertBuilder.build(ad, AlertFormatter.getFormattedMessage(ad)));

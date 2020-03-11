@@ -288,7 +288,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                         if(getCmdSignal("heating and stage1", node) == 0)
                             setCmdSignal("heating and stage1", 1.0, node);
                         if(isFanStage1Enabled || (occupied && enableFanStage1DuringOccupied)){
-                            if(getCmdSignal("fan and stage1", node) > 0)
+                            if(getCmdSignal("fan and stage1", node) == 0)
                                 setCmdSignal("fan and stage1",1.0,node);
                         }
                         relayStages.put("HeatingStage1",1);

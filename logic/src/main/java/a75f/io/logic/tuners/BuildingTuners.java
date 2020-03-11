@@ -3306,6 +3306,98 @@ public class BuildingTuners
         }
         hayStack.writeHisValById(standaloneAirflowSampleWaitTimeId, HSUtil.getPriorityVal(standaloneAirflowSampleWaitTimeId));
 
+
+        Point zoneCO2Target  = new Point.Builder()
+                .setDisplayName(equipDis+"standaloneCO2Target")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("zone").addMarker("co2").addMarker("target").addMarker("sp")
+                .setMinVal("0").setMaxVal("2000").setIncrementVal("10").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setUnit("ppm")
+                .setTz(tz)
+                .build();
+        String zoneCO2TargetId = hayStack.addPoint(zoneCO2Target);
+
+        HashMap zoneCO2TargetIdPoint = hayStack.read("point and tuner and default and base and standalone and zone and co2 and target and sp");
+        ArrayList<HashMap> zoneCO2TargetIdArr = hayStack.readPoint(zoneCO2TargetIdPoint.get("id").toString());
+        for (HashMap valMap : zoneCO2TargetIdArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(zoneCO2TargetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(zoneCO2TargetId, HSUtil.getPriorityVal(zoneCO2TargetId));
+
+        Point zoneCO2Threshold  = new Point.Builder()
+                .setDisplayName(equipDis+"standaloneCO2Threshold")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("zone").addMarker("co2").addMarker("threshold").addMarker("sp")
+                .setMinVal("0").setMaxVal("2000").setIncrementVal("10").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setUnit("ppm")
+                .setTz(tz)
+                .build();
+        String zoneCO2ThresholdId = hayStack.addPoint(zoneCO2Threshold);
+
+        HashMap zoneCO2ThresholdIdPoint = hayStack.read("point and tuner and default and base and standalone and zone and co2 and threshold and sp");
+        ArrayList<HashMap> zoneCO2ThresholdIdArr = hayStack.readPoint(zoneCO2ThresholdIdPoint.get("id").toString());
+        for (HashMap valMap : zoneCO2ThresholdIdArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(zoneCO2ThresholdId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(zoneCO2ThresholdId, HSUtil.getPriorityVal(zoneCO2ThresholdId));
+
+        Point zoneVOCTarget  = new Point.Builder()
+                .setDisplayName(equipDis+"standaloneVOCTarget")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("zone").addMarker("voc").addMarker("target").addMarker("sp")
+                .setMinVal("0").setMaxVal("1000").setIncrementVal("10").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setUnit("ppb")
+                .setTz(tz)
+                .build();
+        String zoneVOCTargetId = hayStack.addPoint(zoneVOCTarget);
+
+        HashMap zoneVOCTargetIdPoint = hayStack.read("point and tuner and default and base and standalone and zone and voc and target and sp");
+        ArrayList<HashMap> zoneVOCTargetIdArr = hayStack.readPoint(zoneVOCTargetIdPoint.get("id").toString());
+        for (HashMap valMap : zoneVOCTargetIdArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(zoneVOCTargetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(zoneVOCTargetId, HSUtil.getPriorityVal(zoneVOCTargetId));
+
+        Point zoneVOCThreshold  = new Point.Builder()
+                .setDisplayName(equipDis+"StandaloneVOCThreshold")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("zone").addMarker("voc").addMarker("threshold").addMarker("sp")
+                .setMinVal("0").setMaxVal("1000").setIncrementVal("10").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setUnit("ppb")
+                .setTz(tz)
+                .build();
+        String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
+
+        HashMap zoneVOCThresholdIdPoint = hayStack.read("point and tuner and default and base and standalone and zone and voc and target and sp");
+        ArrayList<HashMap> zoneVOCThresholdIdArr = hayStack.readPoint(zoneVOCThresholdIdPoint.get("id").toString());
+        for (HashMap valMap : zoneVOCThresholdIdArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(zoneVOCThresholdId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(zoneVOCThresholdId, HSUtil.getPriorityVal(zoneVOCThresholdId));
     }
     public void addEquipStandaloneTuners(String equipdis, String equipref, String roomRef, String floorRef){
         addEquipZoneTuners(equipdis,equipref, roomRef, floorRef);
@@ -3479,6 +3571,62 @@ public class BuildingTuners
         hayStack.writePoint(standaloneHeatingPreconditioningRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_HEATING_PRECONDITIONING_RATE, 0);
         hayStack.writeHisValById(standaloneHeatingPreconditioningRateId, TunerConstants.STANDALONE_HEATING_PRECONDITIONING_RATE);
 
+
+        Point zoneCO2Target  = new Point.Builder()
+                .setDisplayName(equipDis+"standaloneCO2Target")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("zone").addMarker("co2").addMarker("target").addMarker("sp")
+                .setMinVal("0").setMaxVal("2000").setIncrementVal("10").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setUnit("ppm")
+                .setTz(tz)
+                .build();
+        String zoneCO2TargetId = hayStack.addPoint(zoneCO2Target);
+        hayStack.writePoint(zoneCO2TargetId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_CO2_TARGET, 0);
+        hayStack.writeHisValById(zoneCO2TargetId, TunerConstants.ZONE_CO2_TARGET);
+
+        Point zoneCO2Threshold  = new Point.Builder()
+                .setDisplayName(equipDis+"standaloneCO2Threshold")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("zone").addMarker("co2").addMarker("threshold").addMarker("sp")
+                .setMinVal("0").setMaxVal("2000").setIncrementVal("10").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setUnit("ppm")
+                .setTz(tz)
+                .build();
+        String zoneCO2ThresholdId = hayStack.addPoint(zoneCO2Threshold);
+        hayStack.writePoint(zoneCO2ThresholdId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_CO2_THRESHOLD, 0);
+        hayStack.writeHisValById(zoneCO2ThresholdId, TunerConstants.ZONE_CO2_THRESHOLD);
+
+        Point zoneVOCTarget  = new Point.Builder()
+                .setDisplayName(equipDis+"standaloneVOCTarget")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("zone").addMarker("voc").addMarker("target").addMarker("sp")
+                .setMinVal("0").setMaxVal("1000").setIncrementVal("10").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setUnit("ppb")
+                .setTz(tz)
+                .build();
+        String zoneVOCTargetId = hayStack.addPoint(zoneVOCTarget);
+        hayStack.writePoint(zoneVOCTargetId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_VOC_TARGET, 0);
+        hayStack.writeHisValById(zoneVOCTargetId, TunerConstants.ZONE_VOC_TARGET);
+
+        Point zoneVOCThreshold  = new Point.Builder()
+                .setDisplayName(equipDis+"StandaloneVOCThreshold")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("zone").addMarker("voc").addMarker("threshold").addMarker("sp")
+                .setMinVal("0").setMaxVal("1000").setIncrementVal("10").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setUnit("ppb")
+                .setTz(tz)
+                .build();
+        String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
+        hayStack.writePoint(zoneVOCThresholdId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_VOC_THRESHOLD, 0);
+        hayStack.writeHisValById(zoneVOCThresholdId, TunerConstants.ZONE_VOC_THRESHOLD);
         Point standaloneCoolingAirflowTempLowerOffset = new Point.Builder()
                 .setDisplayName(equipDis+"-standaloneStage2CoolingLowerOffset")
                 .setSiteRef(siteRef)

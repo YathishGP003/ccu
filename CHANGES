@@ -1,4 +1,4 @@
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-980, CPU -fan Low all times, relay off
  - Merge branch 'mahesh_renatus' into 'master'
- - resolved RENATUS-979
+ - reolved RENATUS-982, RENATUS-983
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-978, Multi modules hisData update

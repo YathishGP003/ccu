@@ -109,13 +109,22 @@ public class RegisterGatherCCUDetails extends Activity {
         mCreateNewCCU.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                prefs.setBoolean("registered", true);
                 String ccuName = mCCUNameET.getText().toString();
+                String installerEmail = mInstallerEmailET.getText().toString();
+                String managerEmail = mManagerEmailET.getText().toString();
                 if (ccuName.trim().length() == 0) {
                     Toast.makeText(RegisterGatherCCUDetails.this, "Enter CCU name", Toast.LENGTH_SHORT).show();
                     return;
+                } else if (installerEmail.trim().length() == 0) {
+                    Toast.makeText(RegisterGatherCCUDetails.this, "Enter Installer email", Toast.LENGTH_SHORT).show();
+                    return;
+                } else if (managerEmail.trim().length() == 0) {
+                    Toast.makeText(RegisterGatherCCUDetails.this, "Enter Manager email", Toast.LENGTH_SHORT).show();
+                    return;
                 }
-                String installerEmail = mInstallerEmailET.getText().toString();
-                String managerEmail = mManagerEmailET.getText().toString();
+
+
                 L.ccu().setCCUName(ccuName);
                 String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(), managerEmail);
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));

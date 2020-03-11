@@ -84,6 +84,10 @@ public class AlertManager
         processor.generateAlert(title,msg);
     }
 
+    public void generateCMDeadAlert(String title, String msg){
+        processor.generateCMDeadAlert(title,msg);
+    }
+
     public void fetchAllPredefinedAlerts(){
         processor.fetchAllPredefinedAlerts();
     }
@@ -151,6 +155,20 @@ public class AlertManager
             } else if (!a.getSyncStatus()){
                 deleteAlert(a);
             }
+        }
+    }
+
+    public void fixDeviceDead(String address){
+        for (Alert a: processor.getActiveDeviceDeadAlerts()){
+            if (a.mMessage.contains(address)){
+                fixAlert(a);
+            }
+        }
+    }
+
+    public void fixCMDead(){
+        for (Alert a: processor.getActiveCMDeadAlerts()){
+            fixAlert(a);
         }
     }
 }

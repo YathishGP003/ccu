@@ -48,7 +48,7 @@ public class AlertGenerateHandler {
                     AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(FIRMWARE_OTA_UPDATE_ENDED, msg);
                     break;
                 case CM_DEAD:
-                    AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(CM_DEAD, msg);
+                    AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateCMDeadAlert(CM_DEAD, msg);
                     break;
                 case DEVICE_DEAD:
                     AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(DEVICE_DEAD, msg);

@@ -1,4 +1,10 @@
  - Merge branch 'mahesh_renatus' into 'master'
- - reolved RENATUS-982, RENATUS-983
+ - resolved RENATUS-954, RENATUS-988, RENATUS-989
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-978, Multi modules hisData update
+ - #RENATUS-989, Crash issue
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-986, CPU, in unoccupied fan low is not on
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-963, Reboot Tablet is not occuring
+ - #RENATUS-987, CPU | Fan mode Low and conditon OFF, in unoccupied
+ - #RENATUS-985, CO2, VOC Target and threshold tuners update

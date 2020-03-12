@@ -3309,7 +3309,7 @@ public class BuildingTuners
 
 
         Point zoneCO2Target  = new Point.Builder()
-                .setDisplayName(equipDis+"standaloneCO2Target")
+                .setDisplayName(equipDis+"-standaloneCO2Target")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -3332,7 +3332,7 @@ public class BuildingTuners
         hayStack.writeHisValById(zoneCO2TargetId, HSUtil.getPriorityVal(zoneCO2TargetId));
 
         Point zoneCO2Threshold  = new Point.Builder()
-                .setDisplayName(equipDis+"standaloneCO2Threshold")
+                .setDisplayName(equipDis+"-standaloneCO2Threshold")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -3355,7 +3355,7 @@ public class BuildingTuners
         hayStack.writeHisValById(zoneCO2ThresholdId, HSUtil.getPriorityVal(zoneCO2ThresholdId));
 
         Point zoneVOCTarget  = new Point.Builder()
-                .setDisplayName(equipDis+"standaloneVOCTarget")
+                .setDisplayName(equipDis+"-standaloneVOCTarget")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -3378,7 +3378,7 @@ public class BuildingTuners
         hayStack.writeHisValById(zoneVOCTargetId, HSUtil.getPriorityVal(zoneVOCTargetId));
 
         Point zoneVOCThreshold  = new Point.Builder()
-                .setDisplayName(equipDis+"StandaloneVOCThreshold")
+                .setDisplayName(equipDis+"-StandaloneVOCThreshold")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -3574,7 +3574,7 @@ public class BuildingTuners
 
 
         Point zoneCO2Target  = new Point.Builder()
-                .setDisplayName(equipDis+"standaloneCO2Target")
+                .setDisplayName(equipDis+"-standaloneCO2Target")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -3588,7 +3588,7 @@ public class BuildingTuners
         hayStack.writeHisValById(zoneCO2TargetId, TunerConstants.ZONE_CO2_TARGET);
 
         Point zoneCO2Threshold  = new Point.Builder()
-                .setDisplayName(equipDis+"standaloneCO2Threshold")
+                .setDisplayName(equipDis+"-standaloneCO2Threshold")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -3602,7 +3602,7 @@ public class BuildingTuners
         hayStack.writeHisValById(zoneCO2ThresholdId, TunerConstants.ZONE_CO2_THRESHOLD);
 
         Point zoneVOCTarget  = new Point.Builder()
-                .setDisplayName(equipDis+"standaloneVOCTarget")
+                .setDisplayName(equipDis+"-standaloneVOCTarget")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -3616,7 +3616,7 @@ public class BuildingTuners
         hayStack.writeHisValById(zoneVOCTargetId, TunerConstants.ZONE_VOC_TARGET);
 
         Point zoneVOCThreshold  = new Point.Builder()
-                .setDisplayName(equipDis+"StandaloneVOCThreshold")
+                .setDisplayName(equipDis+"-standaloneVOCThreshold")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")

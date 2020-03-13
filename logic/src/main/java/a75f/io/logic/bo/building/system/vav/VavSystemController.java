@@ -542,7 +542,7 @@ public class VavSystemController extends SystemController
     
     @Override
     public double getAverageSystemHumidity() {
-        return averageSystemHumidity;
+        return CCUUtils.roundToOneDecimal(averageSystemHumidity);
     }
 
     public void updateSystemDesiredTemp(){
@@ -597,7 +597,7 @@ public class VavSystemController extends SystemController
     
     @Override
     public double getAverageSystemTemperature() {
-        return averageSystemTemperature;
+        return CCUUtils.roundToOneDecimal(averageSystemTemperature);
     }
     
     /*public double getDynamicPriority(double zoneLoad, String zoneRef) {

@@ -1,12 +1,15 @@
 package a75f.io.renatus.registartion;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -15,6 +18,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,10 +26,12 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.util.ArrayList;
@@ -36,7 +42,7 @@ import java.util.Set;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
 
-public class WifiFragment extends Fragment /*implements InstallType */ {
+public class WifiFragment extends Fragment /*implements InstallType */  implements WifiListAdapter.ItemClickListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -134,14 +140,20 @@ public class WifiFragment extends Fragment /*implements InstallType */ {
         });
 
         mContext = getContext().getApplicationContext();
+        wifinetworks = new ArrayList<>();
         if (!isFreshRegister) layoutConnectWifi.setVisibility(View.VISIBLE); else layoutConnectWifi.setVisibility(View.GONE);
 
         prefs = new Prefs(mContext);
         INSTALL_TYPE = prefs.getString("INSTALL_TYPE");
         mHandler = new Handler();
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(mContext);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity(),LinearLayoutManager.VERTICAL, false);
         recyclerWifi.setLayoutManager(mLayoutManager);
+        recyclerWifi.setHasFixedSize(true);
         recyclerWifi.setItemAnimator(new DefaultItemAnimator());
+
+        wifiListAdapter = new WifiListAdapter(getActivity(),this);
+        wifiListAdapter.updateData(wifinetworks);
+        recyclerWifi.setAdapter(wifiListAdapter);
 
         Animation animation = new RotateAnimation(0.0f, 360.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
         animation.setDuration(1200);
@@ -200,8 +212,9 @@ public class WifiFragment extends Fragment /*implements InstallType */ {
                             imageRefresh.setImageResource(R.drawable.ic_refresh_disable);
                             recyclerWifi.setVisibility(View.GONE);
                         }
+
+                        showScanResult();
                     }
-                    showScanResult();
                 }
             }
         }, filterWifi);
@@ -272,6 +285,7 @@ public class WifiFragment extends Fragment /*implements InstallType */ {
     }*/
 
     public void showScanResult() {
+
         try {
             if (isFreshRegister) {
                 ((FreshRegistration) getActivity()).setToggleWifi(mainWifiObj.isWifiEnabled());
@@ -288,7 +302,7 @@ public class WifiFragment extends Fragment /*implements InstallType */ {
             }
             Set<String> wifiset = distinctNetworks.keySet();
             Log.i(TAG, "NW:" + distinctNetworks.toString() + " keyset:" + wifiset);
-
+            wifinetworks.clear();
             wifinetworks = new ArrayList<>(wifiset);
             ConnectivityManager connManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
@@ -335,9 +349,9 @@ public class WifiFragment extends Fragment /*implements InstallType */ {
                 };
                 mHandler.postDelayed(mRunable, WAIT_TIME);*/
             }
-            wifiListAdapter = new WifiListAdapter(getContext(), wifinetworks);
+
+            wifiListAdapter.updateData(wifinetworks);
             recyclerWifi.setAdapter(wifiListAdapter);
-            wifiListAdapter.notifyDataSetChanged();
             if (progressbar.isShown()) {
                 progressbar.setVisibility(View.GONE);
             }
@@ -359,5 +373,68 @@ public class WifiFragment extends Fragment /*implements InstallType */ {
     @Override
     public void onDetach() {
         super.onDetach();
+    }
+
+    @Override
+    public void onItemClicked(View view, int position) {
+
+        String ssid = wifinetworks.get(position);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        View alertview = LayoutInflater.from(getActivity()).inflate(R.layout.alert_wifipassword, null);
+        builder.setView(alertview);
+
+        final EditText editText_Password = alertview.findViewById(R.id.editPassword);
+        builder.setPositiveButton("Connect", (dialog, which) -> {
+       if (TextUtils.isEmpty(editText_Password.getText().toString())) {
+            Toast.makeText(getContext(), "Please enter password", Toast.LENGTH_SHORT).show();
+
+            return;
+          }
+
+          connectWifi(ssid, editText_Password.getText().toString());
+
+          dialog.dismiss();
+        });
+
+
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+
+
+        AlertDialog alertDialog = builder.create();
+        TextView tvisConnected = view.findViewById(R.id.textisConnected);
+        if (!tvisConnected.getText().toString().equals("CONNECTED")) {
+            alertDialog.show();
+        }
+    }
+
+    private void connectWifi(String ssid, String password) {
+
+        WifiManager mainWifiObj = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiConfiguration wifiConfig = new WifiConfiguration();
+        wifiConfig.SSID = String.format("\"%s\"", ssid);
+        wifiConfig.preSharedKey = String.format("\"%s\"", password);
+
+        // remember id
+        int netId = mainWifiObj.addNetwork(wifiConfig);
+        mainWifiObj.disconnect();
+        mainWifiObj.enableNetwork(netId, true);
+        mainWifiObj.saveConfiguration();
+        mainWifiObj.reconnect();
+
+        WifiConfiguration conf = new WifiConfiguration();
+        conf.SSID = "\"\"" + ssid + "\"\"";
+        conf.preSharedKey = "\"" + password + "\"";
+        conf.status = WifiConfiguration.Status.ENABLED;
+        conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+        conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
+        conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+        conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+        conf.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+        conf.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+        conf.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+        conf.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+
+        mainWifiObj.addNetwork(conf);
+        mainWifiObj.startScan();
     }
 }

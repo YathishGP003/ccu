@@ -19,6 +19,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import a75f.io.renatus.R;
@@ -34,6 +35,7 @@ public class WifiListAdapter extends RecyclerView.Adapter<WifiListAdapter.WifiVi
     private View.OnClickListener mOnClickListener;
     public String networkSSID;
     public String networkPass;
+    private ItemClickListener onItemClickListener;
 
     public class WifiViewHolder extends RecyclerView.ViewHolder {
         public TextView textWifiNw;
@@ -48,6 +50,12 @@ public class WifiListAdapter extends RecyclerView.Adapter<WifiListAdapter.WifiVi
             imageWifi = (ImageView) itemView.findViewById(R.id.imageWifi);
             imageSecurity = (ImageView) itemView.findViewById(R.id.imageSecurity);
             itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onItemClickListener.onItemClicked(itemView, getAdapterPosition());
+                }
+            });
+           /* itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
@@ -78,19 +86,29 @@ public class WifiListAdapter extends RecyclerView.Adapter<WifiListAdapter.WifiVi
 
                     AlertDialog alertDialog = builder.create();
                     TextView tvisConnected = v.findViewById(R.id.textisConnected);
-                    if(!tvisConnected.getText().toString().equals("CONNECTED")) {
+                    if (!tvisConnected.getText().toString().equals("CONNECTED")) {
                         alertDialog.show();
                     }
                 }
-            });
+            });*/
         }
 
     }
 
 
-    public WifiListAdapter(Context context, List<String> wifiList) {
-        this.wifiList = wifiList;
+
+    public WifiListAdapter(Context context, ItemClickListener clickListener) {
+        this.onItemClickListener = clickListener;
         this.mContext = context;
+    }
+
+    public void updateData(List<String> wifiList) {
+        this.wifiList = wifiList;
+        this.notifyDataSetChanged();
+    }
+
+    interface ItemClickListener{
+        void onItemClicked(View view, int position);
     }
 
     @Override
@@ -113,11 +131,11 @@ public class WifiListAdapter extends RecyclerView.Adapter<WifiListAdapter.WifiVi
         ConnectivityManager connManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         if (networkInfo.isConnected()) {
-            final WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+            final WifiManager wifiManager = (WifiManager) mContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             final WifiInfo connectionInfo = wifiManager.getConnectionInfo();
             Log.i("Wifi", "Current SSID:" + connectionInfo.getSSID() + " Wifi Available:" + ssid_scanned);
             ssid_scanned = String.format("\"%s\"", ssid_scanned);
-            if (connectionInfo != null && !TextUtils.isEmpty(connectionInfo.getSSID())) {
+            if (!TextUtils.isEmpty(connectionInfo.getSSID())) {
                 ssid_connected = connectionInfo.getSSID();
                 if (ssid_connected.equalsIgnoreCase(ssid_scanned)) {
                     holder.textisConnected.setVisibility(View.VISIBLE);
@@ -134,35 +152,5 @@ public class WifiListAdapter extends RecyclerView.Adapter<WifiListAdapter.WifiVi
     @Override
     public int getItemCount() {
         return wifiList.size();
-    }
-
-    public void connectWifi(String SSID, String Password) {
-        WifiManager mainWifiObj = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-        WifiConfiguration wifiConfig = new WifiConfiguration();
-        wifiConfig.SSID = String.format("\"%s\"", SSID);
-        wifiConfig.preSharedKey = String.format("\"%s\"", Password);
-
-        // remember id
-        int netId = mainWifiObj.addNetwork(wifiConfig);
-        mainWifiObj.disconnect();
-        mainWifiObj.enableNetwork(netId, true);
-        mainWifiObj.saveConfiguration();
-        mainWifiObj.reconnect();
-
-        WifiConfiguration conf = new WifiConfiguration();
-        conf.SSID = "\"\"" + SSID + "\"\"";
-        conf.preSharedKey = "\"" + Password + "\"";
-        conf.status = WifiConfiguration.Status.ENABLED;
-        conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-        conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
-        conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-        conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-        conf.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-        conf.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-        conf.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-        conf.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
-
-        mainWifiObj.addNetwork(conf);
-        mainWifiObj.startScan();
     }
 }

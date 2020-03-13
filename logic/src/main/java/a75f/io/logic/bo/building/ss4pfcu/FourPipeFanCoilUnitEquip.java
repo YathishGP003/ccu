@@ -511,7 +511,7 @@ public class FourPipeFanCoilUnitEquip  {
         setScheduleStatus("");
         setSmartStatStatus("OFF"); //Intialize with off
         Schedule schedule = Schedule.getScheduleByEquipId(equipRef);
-        if(schedule != null) {
+        if(schedule != null && schedule.getCurrentValues() != null) {
             defaultDesiredTemp = (schedule.getCurrentValues().getCoolingVal() + schedule.getCurrentValues().getHeatingVal()) / 2.0;
             coolingVal = schedule.getCurrentValues().getCoolingVal();
             heatingVal = schedule.getCurrentValues().getHeatingVal();

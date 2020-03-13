@@ -231,19 +231,21 @@ public class Pulse
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
 					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), getHumidityConversion(val));
 					break;
-				case CO2:
-				case CO:
-				case NO:
-				case VOC:
 				case PRESSURE:
-				case OCCUPANCY:
-				case SOUND:
-				case CO2_EQUIVALENT:
-				case ILLUMINANCE:
 				case UVI:
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
 					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),val);
 					break;
+				case OCCUPANCY:
+				case ILLUMINANCE:
+				case CO2:
+				case CO:
+				case NO:
+				case SOUND:
+				case VOC:
+				case CO2_EQUIVALENT:
+					CCUHsApi.getInstance().writeHisValById(sp.getId(), CCUUtils.roundToOneDecimal(val) );
+					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),CCUUtils.roundToOneDecimal(val));
 				case ENERGY_METER_HIGH:
 					emVal = emVal > 0 ?  (emVal | (r.sensorData.get() << 12)) : r.sensorData.get();
 					break;
@@ -277,17 +279,17 @@ public class Pulse
 	}
 	
 	public static Double getRoomTempConversion(Double temp) {
-		return temp/10.0;
+		return CCUUtils.roundToOneDecimal(temp/10.0);
 	}
 
 	public static Double getCMRoomTempConversion(Double temp, double tempOffset) {
-		return (temp+tempOffset)/10.0;
+		return CCUUtils.roundToOneDecimal((temp+tempOffset)/10.0);
 	}
 	public static Double getAnalogConversion(Double val) {
 		return val/10.0;
 	}
 	public static Double getHumidityConversion(Double h) {
-		return h/10.0;
+		return CCUUtils.roundToOneDecimal(h/10.0);
 	}
 	public static Double getDesredTempConversion(Double val) {
 		return val/2;
@@ -448,10 +450,14 @@ public class Pulse
 							th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
 							th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
 						}else {
+
+							double oldTh2TempVal = hayStack.readHisValById(logPoint.get("id").toString());
+							double curTh2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
+							curTh2TempVal = CCUUtils.roundToOneDecimal(curTh2TempVal);
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-							hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10));
-						}// else
-							//hayStack.writeHisValById(logPoint.get("id").toString(), val * 10);
+							if(oldTh2TempVal != curTh2TempVal)
+								hayStack.writeHisValById(logPoint.get("id").toString(), curTh2TempVal);
+						}
 						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Thermistor2 " + th2TempVal + "," + (val * 10) + "," + logicalCurTempPoint + "," + isTh2Enabled);
 						break;
 					case ANALOG_IN_ONE:
@@ -468,9 +474,13 @@ public class Pulse
 						break;
 					case TH1_IN:
 						val = cmRegularUpdateMessage_t.thermistor1.get();
+						double oldTh1TempVal = hayStack.readHisValById(logPoint.get("id").toString());
+						double curTh1TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
+						curTh1TempVal = CCUUtils.roundToOneDecimal(curTh1TempVal);
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10));
-						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Thermistor1 " + ThermistorUtil.getThermistorValueToTemp(val * 10));
+						if(oldTh1TempVal != curTh1TempVal)
+							hayStack.writeHisValById(logPoint.get("id").toString(), curTh1TempVal);
+						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Thermistor1 " + curTh1TempVal);
 						break;
 					case SENSOR_RH:
 						val = cmRegularUpdateMessage_t.humidity.get();
@@ -507,7 +517,7 @@ public class Pulse
 		}
 		HashMap cmHumidity = hayStack.read("point and system and cm and humidity");
 		if (cmHumidity != null && cmHumidity.size() > 0) {
-			double val = cmRegularUpdateMessage_t.humidity.get();
+			double val = CCUUtils.roundToOneDecimal(cmRegularUpdateMessage_t.humidity.get());
 			if (val > 0) {
 				hayStack.writeHisValById(cmHumidity.get("id").toString(), val);
 			}
@@ -580,8 +590,9 @@ public class Pulse
 							th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
 							}
 						else if(isTh2Enabled && is2pfcu){
+							double th2TempVal1 = ThermistorUtil.getThermistorValueToTemp(val * 10);
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-							hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10));
+							hayStack.writeHisValById(logPoint.get("id").toString(), CCUUtils.roundToOneDecimal(th2TempVal1));
 						}
 						break;
 					case ANALOG_IN_ONE:

@@ -1195,48 +1195,48 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         if (occ != null && occ.size() > 0) {
             String id = ((HashMap) occ.get(0)).get("id").toString();
             double occuStatus = CCUHsApi.getInstance().readHisValById(id);
-            if (cachedOccupied != null && cachedOccupied.isOccupied())
-            {
-                cachedOccupied.setForcedOccupied(false);
-                cachedOccupied.setPreconditioning(false);
-                c = OCCUPIED;
-            } else if (getTemporaryHoldExpiry(equip) > 0){
-                Occupancy prevStatus = Occupancy.values()[(int)occuStatus];
-                if((prevStatus == OCCUPIED)){
-                    //Reset when schedule is changed from occupied to unoccupied
+            if(cachedOccupied != null) {
+                if (cachedOccupied != null && cachedOccupied.isOccupied()) {
                     cachedOccupied.setForcedOccupied(false);
                     cachedOccupied.setPreconditioning(false);
-                    clearTempOverrides(equip.getId());
-                }else {
-                    c = FORCEDOCCUPIED;
-                }
-            }else if((cachedOccupied != null) && cachedOccupied.getVacation() != null) {
-                c = VACATION;
-            }else if((cachedOccupied != null) && cachedOccupied.isOccupancySensed()){
-                c = OCCUPANCYSENSING;
-            }else{
-                Occupancy prevStatus = Occupancy.values()[(int)occuStatus];
-                if((prevStatus == OCCUPIED)){
-                    //Reset when schedule is changed from occupied to unoccupied
-                    cachedOccupied.setForcedOccupied(false);
-                    cachedOccupied.setPreconditioning(false);
-                    if(zonedetails.size() > 1) {
-                        for(int i = 0; i < zonedetails.size(); i++){
-                            clearTempOverrides(zonedetails.get(i).get("id").toString());
-                        }
-                    }else
+                    c = OCCUPIED;
+                } else if (getTemporaryHoldExpiry(equip) > 0) {
+                    Occupancy prevStatus = Occupancy.values()[(int) occuStatus];
+                    if ((prevStatus == OCCUPIED)) {
+                        //Reset when schedule is changed from occupied to unoccupied
+                        cachedOccupied.setForcedOccupied(false);
+                        cachedOccupied.setPreconditioning(false);
                         clearTempOverrides(equip.getId());
-                }else {
-                    boolean isZoneHasStandaloneEquip = (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse") );
-                    if(isZonePreconditioningActive(equip.getId(),cachedOccupied, isZoneHasStandaloneEquip) || cachedOccupied.isPreconditioning()){
-                        c = PRECONDITIONING;
-                    }else if (!isZoneHasStandaloneEquip && getSystemOccupancy() == PRECONDITIONING)
-                        c = PRECONDITIONING;
-                    else if ((prevStatus == PRECONDITIONING) || cachedOccupied.isPreconditioning())
-                        c = PRECONDITIONING;
+                    } else {
+                        c = FORCEDOCCUPIED;
+                    }
+                } else if ((cachedOccupied != null) && cachedOccupied.getVacation() != null) {
+                    c = VACATION;
+                } else if ((cachedOccupied != null) && cachedOccupied.isOccupancySensed()) {
+                    c = OCCUPANCYSENSING;
+                } else {
+                    Occupancy prevStatus = Occupancy.values()[(int) occuStatus];
+                    if ((prevStatus == OCCUPIED)) {
+                        //Reset when schedule is changed from occupied to unoccupied
+                        cachedOccupied.setForcedOccupied(false);
+                        cachedOccupied.setPreconditioning(false);
+                        if (zonedetails.size() > 1) {
+                            for (int i = 0; i < zonedetails.size(); i++) {
+                                clearTempOverrides(zonedetails.get(i).get("id").toString());
+                            }
+                        } else
+                            clearTempOverrides(equip.getId());
+                    } else {
+                        boolean isZoneHasStandaloneEquip = (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse"));
+                        if (isZonePreconditioningActive(equip.getId(), cachedOccupied, isZoneHasStandaloneEquip) || cachedOccupied.isPreconditioning()) {
+                            c = PRECONDITIONING;
+                        } else if (!isZoneHasStandaloneEquip && getSystemOccupancy() == PRECONDITIONING)
+                            c = PRECONDITIONING;
+                        else if ((prevStatus == PRECONDITIONING) || cachedOccupied.isPreconditioning())
+                            c = PRECONDITIONING;
+                    }
                 }
             }
-
             if(totEquipsInZone.size() > 1) {
                 for(String ids: totEquipsInZone) {
                     CCUHsApi.getInstance().writeHisValById(ids, (double) c.ordinal());

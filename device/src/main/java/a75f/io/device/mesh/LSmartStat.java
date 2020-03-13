@@ -183,12 +183,13 @@ public class LSmartStat {
         try {
             Log.d("LSmartStat","sch status="+equipId+","+zone.getId());
             Occupied occuStatus = ScheduleProcessJob.getOccupiedModeCache(zone.getId());
-            if(occuStatus != null)
-            Log.d("LSmartStat","sch status22="+occuStatus.getCoolingVal()+","+occuStatus.getHeatingVal()+","+occuStatus.getHeatingDeadBand()+","+occuStatus.getCoolingDeadBand());
-            settings_t.heatingDeadBand.set((short) (occuStatus.getHeatingDeadBand() * 10)); //Send in multiples of 10
-            settings_t.coolingDeadBand.set((short) (occuStatus.getCoolingDeadBand() * 10));
-            settings_t.changeToOccupiedTime.set((short)(occuStatus.getCurrentOccupiedSlot()));
-            settings_t.changeToUnoccupiedTime.set((short)(occuStatus.getCurrentUnOccupiedSlot()));
+            if(occuStatus != null) {
+                Log.d("LSmartStat", "sch status22=" + occuStatus.getCoolingVal() + "," + occuStatus.getHeatingVal() + "," + occuStatus.getHeatingDeadBand() + "," + occuStatus.getCoolingDeadBand());
+                settings_t.heatingDeadBand.set((short) (occuStatus.getHeatingDeadBand() * 10)); //Send in multiples of 10
+                settings_t.coolingDeadBand.set((short) (occuStatus.getCoolingDeadBand() * 10));
+                settings_t.changeToOccupiedTime.set((short) (occuStatus.getCurrentOccupiedSlot()));
+                settings_t.changeToUnoccupiedTime.set((short) (occuStatus.getCurrentUnOccupiedSlot()));
+            }
 
         }catch (Exception e){
             settings_t.heatingDeadBand.set((short)20);//default deadband is 2.0, sending in multiples

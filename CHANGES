@@ -1,2 +1,7 @@
+ - Merge branch 'mahesh_renatus' into 'master'
+ - resolved RENATUS-992
+ - resolved RENATUS-991
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-985, Standalone devices CO2, VOC threshold and target tuners update
+ - #RENATUS-991, crash issue
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-981, rounding off decimal values

@@ -1,0 +1,4 @@
+ - Merge branch 'mahesh_renatus' into 'master'
+ - resolved RENATUS-994, RENATUS-992
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-993, CPU, Fan low, didnt turn on when temp is 73.9

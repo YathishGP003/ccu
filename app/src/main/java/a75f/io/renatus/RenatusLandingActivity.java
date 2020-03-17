@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
@@ -100,6 +101,16 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         prefs = new Prefs(this);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (prefs != null){
+                    prefs.setBoolean("registered", true);
+                }
+            }
+        }, 120000);
+
         if (!isFinishing()) {
             setContentView(R.layout.activity_renatus_landing);
             mSettingPagerAdapter = new SettingsPagerAdapter(getSupportFragmentManager());
@@ -384,6 +395,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     @Override
     public void onDestroy() {
         super.onDestroy();
+        prefs.setBoolean("registered", false);
         mCloudConnectionStatus.stopThread();
         L.saveCCUState();
         AlertManager.getInstance().clearAlertsWhenAppClose();

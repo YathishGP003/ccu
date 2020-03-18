@@ -561,7 +561,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                         Log.d("CCU_DOWNLOAD", String.format("Received download complete for %d from %d and %d", downloadId, AppInstaller.getHandle().getCCUAppDownloadId(), AppInstaller.getHandle().getDownloadedFileVersion(downloadId)));
                         if (downloadId == AppInstaller.getHandle().getCCUAppDownloadId()) {
                             if (AppInstaller.getHandle().getDownloadedFileVersion(downloadId) > 0)
-                                AppInstaller.getHandle().install(null, false, true, true);
+                                AppInstaller.getHandle().install(null, false, true, false);
                         }else if(downloadId == AppInstaller.getHandle().getHomeAppDownloadId()){
                             int homeAppVersion = AppInstaller.getHandle().getDownloadedFileVersion(downloadId);
                             if(homeAppVersion >= 1) {

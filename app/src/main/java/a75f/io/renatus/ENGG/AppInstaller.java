@@ -243,7 +243,7 @@ public class AppInstaller
                     File file = new File(RenatusApp.getAppContext().getExternalFilesDir(null), CCU_APK_FILE_NAME);
                     final String[] commands = {"pm install -r -d "+file.getAbsolutePath()};
 
-                    Log.d("CCU_DOWNLOAD", "Install AppInstall silent invokeInstallerIntent===>>>"+sFilePath);
+                    Log.d("CCU_DOWNLOAD", "Install AppInstall silent invokeInstallerIntent===>>>"+sFilePath+","+file.getAbsolutePath());
                     RenatusApp.executeAsRoot(commands);
                 }
             }

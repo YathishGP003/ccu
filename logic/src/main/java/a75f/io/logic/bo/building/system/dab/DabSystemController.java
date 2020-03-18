@@ -457,11 +457,12 @@ public class DabSystemController extends SystemController
             }
         }
         averageSystemHumidity = humidityZones == 0 ? 0 : humiditySum/humidityZones;
+        averageSystemHumidity = CCUUtils.roundToOneDecimal(averageSystemHumidity);
     }
     
     @Override
     public double getAverageSystemHumidity() {
-        return CCUUtils.roundToOneDecimal(averageSystemHumidity);
+        return averageSystemHumidity;
     }
 
     public void updateSystemDesiredTemp(){
@@ -510,6 +511,7 @@ public class DabSystemController extends SystemController
             }
         }
         averageSystemTemperature = tempZones == 0 ? 0 : tempSum/tempZones;
+        averageSystemTemperature =CCUUtils.roundToOneDecimal(averageSystemTemperature);
     }
     
     public boolean isZoneDead(Equip q) {
@@ -546,7 +548,7 @@ public class DabSystemController extends SystemController
     
     @Override
     public double getAverageSystemTemperature() {
-        return CCUUtils.roundToOneDecimal(averageSystemTemperature);
+        return averageSystemTemperature;
     }
     
     public double getWACo2LoopOp() {

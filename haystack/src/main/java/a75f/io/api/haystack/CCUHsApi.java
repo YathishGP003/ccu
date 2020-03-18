@@ -608,6 +608,22 @@ public class CCUHsApi
         CcuLog.d("CCU_HS", "Response : "+response);
         return response == null ? null : new HZincReader(response).readGrid();
     }
+
+    public ArrayList<HisItem> hisReadRemote(String id, Object range)
+    {
+        HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        HGrid              resGrid = hClient.hisRead(HRef.copy(id), range);
+        ArrayList<HisItem> hisList = new ArrayList<>();
+        Iterator           it      = resGrid.iterator();
+        while (it.hasNext())
+        {
+            HRow      r    = (HRow) it.next();
+            HDateTime date = (HDateTime) r.get("ts");
+            HNum      val  = (HNum) r.get("val");
+            hisList.add(new HisItem("", new Date(date.millis()), Double.parseDouble(val.toString())));
+        }
+        return hisList;
+    }
     
     
     public double readPointPriorityVal(String id) {

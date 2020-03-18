@@ -152,12 +152,14 @@ public class AlertsFragment extends Fragment implements AlertSyncHandler.AlertDe
 
 	@Override
 	public void onDeleteSuccess() {
-		getActivity().runOnUiThread(() -> {
-			alertList.clear();
-			alertList = new ArrayList<>(AlertManager.getInstance(getActivity()).getAllAlerts());
-			adapter = new AlertAdapter(alertList,getActivity());
-			listView.setAdapter(adapter);
-			adapter.notifyDataSetChanged();
-		});
+		if (getActivity() != null && isAdded()) {
+			getActivity().runOnUiThread(() -> {
+				alertList.clear();
+				alertList = new ArrayList<>(AlertManager.getInstance(getActivity()).getAllAlerts());
+				adapter = new AlertAdapter(alertList, getActivity());
+				listView.setAdapter(adapter);
+				adapter.notifyDataSetChanged();
+			});
+		}
 	}
 }

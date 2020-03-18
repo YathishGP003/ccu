@@ -512,7 +512,8 @@ public class VavStagedRtu extends VavSystemProfile
                 .setDisplayName(equipDis+"-"+name)
                 .setSiteRef(siteRef)
                 .setEquipRef(equipref).setHisInterpolate("cov")
-                .addMarker("system").addMarker("cmd").addMarker(relayMap).addMarker("his").addMarker("equipHis").addMarker("runtime")
+                .addMarker("system").addMarker("cmd").addMarker(relayMap).addMarker("his").addMarker("equipHis")
+                .setEnums("off,on")
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(relay1Op);
@@ -687,11 +688,11 @@ public class VavStagedRtu extends VavSystemProfile
                 //CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + newCmdPoint.getDisplayName() + "," + newCmdPoint.getMarkers().toString() + "," + oldPoint.getId());
             } else if (val == HUMIDIFIER.ordinal()) {
                 newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system")
-                        .addMarker("cmd").addMarker("humidifier").addMarker("his").addMarker("equipHis").addMarker("runtime").setTz(oldPoint.getTz()).build();
+                        .addMarker("cmd").addMarker("humidifier").addMarker("his").addMarker("equipHis").setEnums("off,on").setTz(oldPoint.getTz()).build();
                 //CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + newCmdPoint.getDisplayName() + "," + newCmdPoint.getMarkers().toString()  + "," + oldPoint.getId());
             } else if (val == DEHUMIDIFIER.ordinal()) {
                 newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system")
-                        .addMarker("cmd").addMarker("dehumidifier").addMarker("his").addMarker("equipHis").addMarker("runtime").setTz(oldPoint.getTz()).build();
+                        .addMarker("cmd").addMarker("dehumidifier").addMarker("his").addMarker("equipHis").setEnums("off,on").setTz(oldPoint.getTz()).build();
                 //CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + newCmdPoint.getDisplayName() + "," + newCmdPoint.getMarkers().toString()  + "," + oldPoint.getId());
             }
             if(oldPoint != null && oldPoint.getId() != null)CCUHsApi.getInstance().deleteEntity(oldPoint.getId());

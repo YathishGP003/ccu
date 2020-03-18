@@ -397,7 +397,7 @@ public class DabEquip
                     device.analog1Out.setType(op.getAnalogActuatorType());
                     break;
                 case ANALOG_OUT_TWO:
-                    device.analog1Out.setType(op.getAnalogActuatorType());
+                    device.analog2Out.setType(op.getAnalogActuatorType());
                     break;
             }
         }

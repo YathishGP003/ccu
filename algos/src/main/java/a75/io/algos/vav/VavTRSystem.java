@@ -177,51 +177,113 @@ public class VavTRSystem extends TRSystem
     private double getSatTRTunerVal(String trParam) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and system and tuner and tr and sat and " + trParam);
-    
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("val") != null) {
-                    return Double.parseDouble(valMap.get("val").toString());
+        if((cdb == null) && (cdb.size() == 0))
+            cdb = hayStack.read("point and tuner and default and tr and sat and "+trParam);
+        if(cdb != null && cdb.size() > 0) {
+
+            ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+            if (values != null && values.size() > 0) {
+                for (int l = 1; l <= values.size(); l++) {
+                    HashMap valMap = ((HashMap) values.get(l - 1));
+                    if (valMap.get("val") != null) {
+                        return Double.parseDouble(valMap.get("val").toString());
+                    }
                 }
             }
         }
-        throw new IllegalStateException("Tuner not initialized");
+        switch (trParam){
+            case "spinit":
+            case "spmax":
+                return 65.0;
+            case "spmin":
+                return 55.0;
+            case "spres":
+                return -0.3;
+            case "ignoreRequest":
+                return -0.1;
+            case "sptrim":
+                return 0.2;
+            case "timeInterval":
+            case "timeDelay":
+                return 2.0;
+        }
+        return 0;
+        //throw new IllegalStateException("Tuner not initialized");
     }
     
     private double getSpTRTunerVal(String trParam) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and system and tuner and tr and staticPressure and "+trParam);
-    
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("val") != null) {
-                    return Double.parseDouble(valMap.get("val").toString());
+
+        if(cdb == null)
+            cdb = hayStack.read("point and default and tuner and tr and staticPressure and "+trParam);
+        if(cdb != null && cdb.size() > 0) {
+            ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+            if (values != null && values.size() > 0) {
+                for (int l = 1; l <= values.size(); l++) {
+                    HashMap valMap = ((HashMap) values.get(l - 1));
+                    if (valMap.get("val") != null) {
+                        return Double.parseDouble(valMap.get("val").toString());
+                    }
                 }
             }
         }
-        throw new IllegalStateException("Tuner not initialized");
+        switch (trParam){
+            case "spinit":
+            case "spmin":
+                return 0.2;
+            case "spmax":
+                return 1.0;
+            case "spres":
+                return 0.05;
+            case "sptrim":
+                return -0.02;
+            case "ignoreRequest":
+            case "timeInterval":
+            case "timeDelay":
+                return 2.0;
+            case "spresmax":
+                return 0.1;
+        }
+        return 0;
+        //throw new IllegalStateException("Tuner not initialized");
     }
     
     private double getCO2TRTunerVal(String trParam) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and system and tuner and tr and co2 and "+trParam);
-    
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("val") != null) {
-                    return Double.parseDouble(valMap.get("val").toString());
+        if(cdb == null)
+            cdb = hayStack.read("point and default and tuner and tr and co2 and "+trParam);
+        if(cdb != null && cdb.size() > 0) {
+
+            ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+            if (values != null && values.size() > 0) {
+                for (int l = 1; l <= values.size(); l++) {
+                    HashMap valMap = ((HashMap) values.get(l - 1));
+                    if (valMap.get("val") != null) {
+                        return Double.parseDouble(valMap.get("val").toString());
+                    }
                 }
             }
         }
-        throw new IllegalStateException("Tuner not initialized");
+        switch (trParam){
+            case "spinit":
+            case "spmin":
+                return 800.0;
+            case "spmax":
+                return 1000.0;
+            case "spres":
+                return -10.0;
+            case "sptrim":
+                return 20.0;
+            case "ignoreRequest":
+            case "timeInterval":
+            case "timeDelay":
+                return 2.0;
+            case "spresmax":
+                return -30.0;
+        }
+        return 0;
+        //throw new IllegalStateException("Tuner not initialized");
     }
 }

@@ -12,6 +12,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
+import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -250,7 +251,7 @@ public class OAOProfile
         double H = A * averageHumidity + B;
     
         Log.d(L.TAG_CCU_OAO, "averageTemp "+averageTemp+" averageHumidity "+averageHumidity+" Enthalpy "+H);
-        return H;
+        return CCUUtils.roundToTwoDecimal(H);
     }
     
 }

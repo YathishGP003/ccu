@@ -658,7 +658,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                 if(cmd != null && (cmd.size() > 0)) {
                     HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
                     String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
-                    Point cmdPoint = new Point.Builder().setHashMap(cmd).removeMarker("humidifier").addMarker("dehumidifier").setDisplayName(equipDis + "-dehumidifier").build();
+                    Point cmdPoint = new Point.Builder().setHashMap(cmd).removeMarker("humidifier").removeMarker("runtime").addMarker("dehumidifier").setEnums("off,on").setDisplayName(equipDis + "-dehumidifier").build();
                     CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + cmdPoint.getDisplayName());
                     CCUHsApi.getInstance().deleteEntityTree(cmd.get("id").toString());
                     CCUHsApi.getInstance().addPoint(cmdPoint);
@@ -670,7 +670,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                 if(cmd != null && cmd.size() > 0) {
                     HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
                     String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
-                    Point cmdPoint = new Point.Builder().setHashMap(cmd).removeMarker("dehumidifier").addMarker("humidifier").setDisplayName(equipDis + "-humidifier").build();
+                    Point cmdPoint = new Point.Builder().setHashMap(cmd).removeMarker("dehumidifier").removeMarker("runtime").addMarker("humidifier").setEnums("off,on").setDisplayName(equipDis + "-humidifier").build();
                     CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + cmdPoint.getDisplayName());
                     CCUHsApi.getInstance().deleteEntityTree(cmd.get("id").toString());
                     CCUHsApi.getInstance().addPoint(cmdPoint);
@@ -807,7 +807,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                     .setDisplayName(equipDis + "-" + "humidifier")
                                     .setSiteRef(siteRef)
                                     .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
-                                    .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his").addMarker("equipHis").addMarker("runtime")
+                                    .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his").addMarker("equipHis")
+                                    .setEnums("off,on")
                                     .setTz(tz)
                                     .build();
                             String cmdHumidPtId = CCUHsApi.getInstance().addPoint(humidPt);

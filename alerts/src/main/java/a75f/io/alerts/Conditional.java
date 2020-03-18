@@ -257,6 +257,11 @@ public class Conditional
                     if (value.contains("zone")) {
                         val = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value+" and equipRef == \""+q.get("id")+"\""));
                     }
+
+                    //updating constant temp from last 15 min
+                    if (reading2.getDate().getTime() - System.currentTimeMillis() >= 900000){
+                        reading1 = reading2;
+                    }
                     resVal = reading1.getVal() - reading2.getVal();
                     Expression expression = new Expression(resVal+ " "+condition+" " + val);
                     CcuLog.d("CCU_ALERTS", " expression "+expression.toString());

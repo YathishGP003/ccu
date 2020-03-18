@@ -1830,7 +1830,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
 
-        double fanHighHumdOption = (double)cpuEquipPoints.get("Fan High Humidity");
+        double fanHighHumdOption = Double.valueOf(cpuEquipPoints.get("Fan High Humidity").toString());
         double targetHumidity = 0;
         double targetDeHumidity = 0;
         if(fanHighHumdOption > 1.0)

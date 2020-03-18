@@ -245,7 +245,9 @@ public class Conditional
                         continue;
                     }
                     //List<HisItem> hisItems = CCUHsApi.getInstance().hisRead(point.get("id").toString(),HDateTimeRange.make(HDateTime.make(System.currentTimeMillis()-1800000,HTimeZone.make(TimeZone.getDefault().getDisplayName(false,TimeZone.SHORT))), HDateTime.make(System.currentTimeMillis(),HTimeZone.make(TimeZone.getDefault().getDisplayName(false,TimeZone.SHORT)))));
-                   List<HisItem> hisItems = CCUHsApi.getInstance().hisRead(point.get("id").toString(),"today");
+                    List<HisItem> hisItems = CCUHsApi.getInstance().hisRead(point.get("id").toString(),"today");
+                    ///List<HisItem> hisItems= CCUHsApi.getInstance().hisReadRemote(CCUHsApi.getInstance().getGUID(point.get("id").toString()),HDateTimeRange.make(HDateTime.make(System.currentTimeMillis() - 3600000, HTimeZone.make(point.get("tz").toString())), HDateTime.make(System.currentTimeMillis(),HTimeZone.make(point.get("tz").toString()))));
+
                     if (hisItems.size() < 2) {
                         CcuLog.d("CCU_ALERTS"," Not enough his vals to evaluate conditional "+toString());
                         return;
@@ -257,6 +259,12 @@ public class Conditional
                     if (value.contains("zone")) {
                         val = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value+" and equipRef == \""+q.get("id")+"\""));
                     }
+
+                    // check for last updated current temp value
+                    if (System.currentTimeMillis() - reading2.getDate().getTime() >= 65000){
+                        reading1 = reading2 ;
+                    }
+
                     resVal = reading1.getVal() - reading2.getVal();
                     Expression expression = new Expression(resVal+ " "+condition+" " + val);
                     CcuLog.d("CCU_ALERTS", " expression "+expression.toString());

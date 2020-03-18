@@ -3309,9 +3309,11 @@ public class BuildingTuners
 
 
         Point zoneCO2Target  = new Point.Builder()
-                .setDisplayName(equipDis+"-standaloneCO2Target")
+                .setDisplayName(equipdis+"-"+"standaloneCO2Target")
                 .setSiteRef(siteRef)
-                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("zone").addMarker("co2").addMarker("target").addMarker("sp")
                 .setMinVal("0").setMaxVal("2000").setIncrementVal("10").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
@@ -3332,9 +3334,11 @@ public class BuildingTuners
             hayStack.writeHisValById(zoneCO2TargetId, HSUtil.getPriorityVal(zoneCO2TargetId));
         }
         Point zoneCO2Threshold  = new Point.Builder()
-                .setDisplayName(equipDis+"-standaloneCO2Threshold")
+                .setDisplayName(equipdis+"-"+"standaloneCO2Threshold")
                 .setSiteRef(siteRef)
-                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("zone").addMarker("co2").addMarker("threshold").addMarker("sp")
                 .setMinVal("0").setMaxVal("2000").setIncrementVal("10").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
@@ -3356,9 +3360,11 @@ public class BuildingTuners
         }
 
         Point zoneVOCTarget  = new Point.Builder()
-                .setDisplayName(equipDis+"-standaloneVOCTarget")
+                .setDisplayName(equipdis+"-"+"standaloneVOCTarget")
                 .setSiteRef(siteRef)
-                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("zone").addMarker("voc").addMarker("target").addMarker("sp")
                 .setMinVal("0").setMaxVal("1000").setIncrementVal("10").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
@@ -3380,9 +3386,11 @@ public class BuildingTuners
        }
 
         Point zoneVOCThreshold  = new Point.Builder()
-                .setDisplayName(equipDis+"-StandaloneVOCThreshold")
+                .setDisplayName(equipdis+"-"+"standaloneVOCThreshold")
                 .setSiteRef(siteRef)
-                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("zone").addMarker("voc").addMarker("threshold").addMarker("sp")
                 .setMinVal("0").setMaxVal("1000").setIncrementVal("10").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)

@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
+import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -41,6 +42,7 @@ import java.util.Set;
 
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.util.ProgressDialogUtils;
 
 public class WifiFragment extends Fragment /*implements InstallType */  implements WifiListAdapter.ItemClickListener {
     // TODO: Rename parameter arguments, choose names that match
@@ -73,6 +75,7 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
     Prefs prefs;
     String INSTALL_TYPE = "";
     private boolean isFreshRegister;
+    private BroadcastReceiver mNetworkReceiver;
 
     public WifiFragment() {
         // Required empty public constructor
@@ -103,7 +106,8 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-
+        mNetworkReceiver = new NetworkChangeReceiver();
+        getActivity().registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
     @Override
@@ -178,6 +182,7 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
                     imageRefresh.startAnimation(animation);
                     mainWifiObj.startScan();
                     recyclerWifi.setAdapter(null);
+                    showScanResult();
                 }
             }
         });
@@ -376,21 +381,28 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
     }
 
     @Override
-    public void onItemClicked(View view, int position) {
+    public void onDestroy() {
+        super.onDestroy();
+        if (mNetworkReceiver != null){
+            getActivity().unregisterReceiver(mNetworkReceiver);
+        }
 
+    }
+
+    @Override
+    public void onItemClicked(View view, int position) {
         String ssid = wifinetworks.get(position);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         View alertview = LayoutInflater.from(getActivity()).inflate(R.layout.alert_wifipassword, null);
         builder.setView(alertview);
-
+        TextView tvisConnected = view.findViewById(R.id.textisConnected);
         final EditText editText_Password = alertview.findViewById(R.id.editPassword);
         builder.setPositiveButton("Connect", (dialog, which) -> {
        if (TextUtils.isEmpty(editText_Password.getText().toString())) {
-            Toast.makeText(getContext(), "Please enter password", Toast.LENGTH_SHORT).show();
-
+            Toast.makeText(getActivity(), "Please enter password", Toast.LENGTH_SHORT).show();
             return;
           }
-
+          ProgressDialogUtils.showProgressDialog(getActivity(),"Connecting...");
           connectWifi(ssid, editText_Password.getText().toString());
 
           dialog.dismiss();
@@ -401,7 +413,7 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
 
 
         AlertDialog alertDialog = builder.create();
-        TextView tvisConnected = view.findViewById(R.id.textisConnected);
+
         if (!tvisConnected.getText().toString().equals("CONNECTED")) {
             alertDialog.show();
         }
@@ -436,5 +448,40 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
 
         mainWifiObj.addNetwork(conf);
         mainWifiObj.startScan();
+
+        new Handler().postDelayed(() -> {
+            if(getActivity()!= null && isAdded() && !isOnline(getActivity())){
+                Toast.makeText(getActivity(), "Incorrect password", Toast.LENGTH_SHORT).show();
+                ProgressDialogUtils.hideProgressDialog();
+            }
+        }, 30000);
+    }
+
+    public class NetworkChangeReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if (isOnline(context)) {
+                showScanResult();
+                ProgressDialogUtils.hideProgressDialog();
+            }
+        }
+    }
+
+
+    private boolean isOnline(Context context) {
+
+        try {
+            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo netInfo = cm.getActiveNetworkInfo();
+
+            //should check null because in airplane mode it will be null
+            return (netInfo != null && netInfo.isConnected());
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }
+

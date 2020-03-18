@@ -276,13 +276,19 @@ public class Schedule extends Entity
     {
         Occupied            occupied           = null;
         ArrayList<Days>     daysSorted         = getDaysSorted();
-        ArrayList<Interval> scheduledIntervals = getScheduledIntervals(daysSorted);
+        ArrayList<Interval> scheduledIntervals = getScheduledIntervalsForDays(daysSorted);
+
+        Collections.sort(scheduledIntervals, new Comparator<Interval>() {
+            @Override
+            public int compare(Interval lhs, Interval rhs) {
+                return Long.compare(lhs.getStartMillis(), rhs.getStartMillis());
+            }
+        });
 
         for (int i = 0; i < daysSorted.size(); i++)
         {
             if (scheduledIntervals.get(i).contains(getTime().getMillis()) || scheduledIntervals.get(i).isAfter(getTime().getMillis()))
             {
-
                 boolean currentlyOccupied = scheduledIntervals.get(i).contains(getTime().getMillis());
                 occupied = new Occupied();
                 occupied.setOccupied(currentlyOccupied);

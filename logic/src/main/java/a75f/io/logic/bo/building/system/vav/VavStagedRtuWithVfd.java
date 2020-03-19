@@ -70,8 +70,9 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
         
         addAnalogConfigPoints(equipRef);
         addAnalogCmdPoints(equipRef);
-        ControlMote controlMote = new ControlMote(siteRef);
-        updateAhuRef(equipRef, controlMote.getDeviceRef());
+        updateAhuRef(equipRef);
+        //sysEquip = new SystemEquip(equipRef);
+        new ControlMote(siteRef);
         initTRSystem();
         L.saveCCUState();
         CCUHsApi.getInstance().syncEntityTree();

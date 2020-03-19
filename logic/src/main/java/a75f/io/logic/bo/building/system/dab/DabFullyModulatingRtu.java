@@ -305,9 +305,9 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         addCmdPoints(equipRef);
         addConfigPoints(equipRef);
         addDabSystemTuners(equipRef);
+        updateAhuRef(equipRef);
         //sysEquip = new SystemEquip(equipRef);
-        ControlMote controlMote = new ControlMote(siteRef);
-        updateAhuRef(equipRef,controlMote.getDeviceRef());
+        new ControlMote(siteRef);
         L.saveCCUState();
         CCUHsApi.getInstance().syncEntityTree();
         

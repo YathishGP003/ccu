@@ -93,9 +93,6 @@ public class ControlMote
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         tz = siteMap.get("tz").toString();
     }
-    public String getDeviceRef(){
-        return deviceRef;
-    }
     public void createPoints() {
         addRelayStatePoint("relay1");
         addRelayStatePoint("relay2");

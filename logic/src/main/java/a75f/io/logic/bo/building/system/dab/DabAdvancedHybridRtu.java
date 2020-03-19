@@ -74,8 +74,8 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         
         addAnalogConfigPoints(equipRef);
         addAnalogCmdPoints(equipRef);
-        ControlMote cmDevice = new ControlMote(siteRef);
-        updateAhuRef(equipRef,cmDevice.getDeviceRef());
+        updateAhuRef(equipRef);
+        new ControlMote(siteRef);
         L.saveCCUState();
         CCUHsApi.getInstance().syncEntityTree();
         

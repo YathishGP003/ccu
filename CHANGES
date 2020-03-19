@@ -1,2 +1,12 @@
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-1002, Multiple CCU Registratio to a site app crashes
+ - #RENATUS-1000, Enum tags needs to be updated for humidifier
  - Merge branch 'mahesh_renatus' into 'master'
- - resolved RENATUS-997
+ - fixes
+ - check for null fragment
+ - #RENATUS-998, Decimal points restriction to one decimal
+ - #RENATUS-998, Decimal points restriction to one decimal
+ - constant temp fix
+ - Merge branch 'kumar_renatus' into 'master'
+ - Merge branch 'kumar_renatus' of https://gitlab.com/75f/android/renatus into kumar_renatus
+ - #RENATUS-985, Standalone device CO2 and VOC tuners consumption

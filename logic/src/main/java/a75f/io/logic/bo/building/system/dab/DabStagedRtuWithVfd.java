@@ -66,9 +66,9 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         addDabSystemTuners(equipRef);
         addAnalogConfigPoints(equipRef);
         addAnalogCmdPoints(equipRef);
-        updateAhuRef(equipRef);
         
-        new ControlMote(siteRef);
+        ControlMote controlMote = new ControlMote(siteRef);
+        updateAhuRef(equipRef, controlMote.getDeviceRef());
         L.saveCCUState();
         CCUHsApi.getInstance().syncEntityTree();
     }
@@ -227,7 +227,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
         String siteRef = siteMap.get("id").toString();
         String tz = siteMap.get("tz").toString();
-        Point coolingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "anlog2Signal").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").addMarker("equipHis").setUnit("%").setTz(tz).build();
+        Point coolingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "FanSignal").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").addMarker("equipHis").setUnit("%").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(coolingSignal);
     }
     

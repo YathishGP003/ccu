@@ -121,7 +121,7 @@ public class PointSyncAdapter extends EntitySyncAdapter
     
     private void initWritableRemotePoints(ArrayList<String> luidList) {
         ArrayList<String> writablePoints = new ArrayList<>();
-        if(luidList.size() < 6) {
+        if(luidList.size() < 21) {
             for (String luid : luidList) {
                 if (isWritable(luid)) {
                     //writeValRemote(luid, CCUHsApi.getInstance().getGUID(luid));
@@ -137,13 +137,13 @@ public class PointSyncAdapter extends EntitySyncAdapter
                 if (isWritable(luid)) {
                     writablePoints.add(luid);
                     pointArrList.remove(luid);
-                    if(writablePoints.size() == 5) {
+                    if(writablePoints.size() == 20) {
                         writeValRemoteMany(writablePoints);
                         writablePoints.clear();
                     }
                 }
             }
-            if(writablePoints.size() < 6)
+            if(writablePoints.size() < 21)
                 writeValRemoteMany(writablePoints);
         }
     }

@@ -1246,7 +1246,7 @@ public class CCUHsApi
         CCUHsApi.getInstance().syncEntityTree();
     }
 
-    public void updateCCUahuRef(String ahuRef) {
+    public void updateCCUahuRef(String ahuRef, String cmDeviceRef) {
         
         Log.d("CCU_HS","updateCCUahuRef "+ahuRef);
         HashMap ccu = read("device and ccu");
@@ -1268,6 +1268,7 @@ public class CCUHsApi
         hDictBuilder.add("createdDate", HDate.make(ccu.get("createdDate").toString()));
         hDictBuilder.add("gatewayRef", ahuRef);
         hDictBuilder.add("ahuRef", ahuRef);
+        hDictBuilder.add("deviceRef",cmDeviceRef);
         hDictBuilder.add("device");
         tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
     

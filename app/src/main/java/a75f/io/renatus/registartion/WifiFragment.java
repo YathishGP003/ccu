@@ -38,6 +38,7 @@ import android.widget.ToggleButton;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import a75f.io.renatus.R;
@@ -76,6 +77,7 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
     String INSTALL_TYPE = "";
     private boolean isFreshRegister;
     private BroadcastReceiver mNetworkReceiver;
+    private BroadcastReceiver mWifiReceiver;
 
     public WifiFragment() {
         // Required empty public constructor
@@ -107,6 +109,7 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
         mNetworkReceiver = new NetworkChangeReceiver();
+        mWifiReceiver = new WifiStateReceiver();
         getActivity().registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
@@ -187,49 +190,13 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
             }
         });
 
-        mainWifiObj = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-
-        IntentFilter filterWifi = new IntentFilter();
-        filterWifi.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        filterWifi.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-        filterWifi.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        filterWifi.addAction(WifiManager.ACTION_PICK_WIFI_NETWORK);
-
-        mContext.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context c, Intent intent) {
-                if (getUserVisibleHint()) {
-                    final String action = intent.getAction();
-                    results = mainWifiObj.getScanResults();
-                    Log.i(TAG, "Scan Result Action:" + action + " Result:" + results.toString());
-                    if (action.equals("android.net.wifi.STATE_CHANGE") || action.equals("android.net.wifi.WIFI_STATE_CHANGED")) {
-                        //toggleWifi.setChecked(mainWifiObj.isWifiEnabled());
-                        if (mainWifiObj.isWifiEnabled()) {
-                            mTurnonwifi.setVisibility(View.GONE);
-                            toggleWifi.setChecked(true);
-                            imageRefresh.setEnabled(true);
-                            imageRefresh.setImageResource(R.drawable.ic_refresh);
-                            recyclerWifi.setVisibility(View.VISIBLE);
-                        } else {
-                            toggleWifi.setChecked(false);
-                            mTurnonwifi.setVisibility(View.VISIBLE);
-                            imageRefresh.setEnabled(false);
-                            imageRefresh.setImageResource(R.drawable.ic_refresh_disable);
-                            recyclerWifi.setVisibility(View.GONE);
-                        }
-
-                        showScanResult();
-                    }
-                }
-            }
-        }, filterWifi);
+        mainWifiObj = (WifiManager) mContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         toggleWifi.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (getUserVisibleHint()) {
-
                     mainWifiObj = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
                     if (isChecked) {
                         progressbar.setVisibility(View.VISIBLE);
@@ -288,6 +255,17 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
             }
         }
     }*/
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        IntentFilter filterWifi = new IntentFilter();
+        filterWifi.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        filterWifi.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        filterWifi.addAction(WifiManager.ACTION_PICK_WIFI_NETWORK);
+
+        Objects.requireNonNull(getActivity()).registerReceiver(mWifiReceiver, filterWifi);
+    }
 
     public void showScanResult() {
 
@@ -383,8 +361,12 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mNetworkReceiver != null){
+        if (getActivity() != null && mNetworkReceiver != null) {
             getActivity().unregisterReceiver(mNetworkReceiver);
+        }
+
+        if (getActivity() != null && mWifiReceiver != null) {
+            getActivity().unregisterReceiver(mWifiReceiver);
         }
 
     }
@@ -465,6 +447,36 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
             if (isOnline(context)) {
                 showScanResult();
                 ProgressDialogUtils.hideProgressDialog();
+            }
+        }
+    }
+
+    public class WifiStateReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (getUserVisibleHint()) {
+                final String action = intent.getAction();
+                results = mainWifiObj.getScanResults();
+                Log.i(TAG, "Scan Result Action:" + action + " Result:" + results.toString());
+                if (action.equals("android.net.wifi.STATE_CHANGE") || action.equals("android.net.wifi.WIFI_STATE_CHANGED")) {
+                    //toggleWifi.setChecked(mainWifiObj.isWifiEnabled());
+                    if (mainWifiObj.isWifiEnabled()) {
+                        mTurnonwifi.setVisibility(View.GONE);
+                        toggleWifi.setChecked(true);
+                        imageRefresh.setEnabled(true);
+                        imageRefresh.setImageResource(R.drawable.ic_refresh);
+                        recyclerWifi.setVisibility(View.VISIBLE);
+                    } else {
+                        toggleWifi.setChecked(false);
+                        mTurnonwifi.setVisibility(View.VISIBLE);
+                        imageRefresh.setEnabled(false);
+                        imageRefresh.setImageResource(R.drawable.ic_refresh_disable);
+                        recyclerWifi.setVisibility(View.GONE);
+                    }
+
+                    showScanResult();
+                }
             }
         }
     }

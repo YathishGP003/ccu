@@ -603,18 +603,7 @@ public class AlertProcessor
 
     public void fetchAllPredefinedAlerts(){
         if (predefinedAlerts == null || predefinedAlerts.size() == 0) {
-            taskExecutor.scheduleAtFixedRate(getAllPredefinedAlerts(), 60, 60, TimeUnit.SECONDS );
+            fetchPredefinedAlerts();
         }
-    }
-    private Runnable getAllPredefinedAlerts()
-    {
-        return new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                fetchPredefinedAlerts();
-            }
-        };
     }
 }

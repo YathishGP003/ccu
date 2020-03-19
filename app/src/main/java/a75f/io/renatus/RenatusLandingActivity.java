@@ -102,14 +102,14 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         super.onCreate(savedInstanceState);
         prefs = new Prefs(this);
 
-        new Handler().postDelayed(new Runnable() {
+       /* new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 if (prefs != null){
                     prefs.setBoolean("registered", true);
                 }
             }
-        }, 120000);
+        }, 120000);*/
 
         if (!isFinishing()) {
             setContentView(R.layout.activity_renatus_landing);
@@ -395,7 +395,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     @Override
     public void onDestroy() {
         super.onDestroy();
-        prefs.setBoolean("registered", false);
+      //  prefs.setBoolean("registered", false);
         mCloudConnectionStatus.stopThread();
         L.saveCCUState();
         AlertManager.getInstance().clearAlertsWhenAppClose();

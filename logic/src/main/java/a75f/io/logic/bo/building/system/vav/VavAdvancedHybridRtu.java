@@ -79,9 +79,8 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         
         addAnalogConfigPoints(equipRef);
         addAnalogCmdPoints(equipRef);
-        updateAhuRef(equipRef);
-        //sysEquip = new SystemEquip(equipRef);
-        new ControlMote(siteRef);
+        ControlMote controlMote = new ControlMote(siteRef);
+        updateAhuRef(equipRef, controlMote.getDeviceRef());
         initTRSystem();
         L.saveCCUState();
         CCUHsApi.getInstance().syncEntityTree();

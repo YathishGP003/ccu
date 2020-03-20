@@ -125,8 +125,8 @@ public class VavIERtu extends VavSystemProfile
         addConfigPoints(equipRef);
         addTunerPoints(equipRef);
         addVavSystemTuners(equipRef);
-        ControlMote controlMote = new ControlMote(siteRef);
-        updateAhuRef(equipRef, controlMote.getDeviceRef());
+        updateAhuRef(equipRef);
+        new ControlMote(equipRef);
         initTRSystem();
         L.saveCCUState();
         CCUHsApi.getInstance().syncEntityTree();

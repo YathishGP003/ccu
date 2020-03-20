@@ -222,7 +222,14 @@ public class CCUHsApi
     {
         return tagsDb.addDevice(d);
     }
-
+    public void updateDevice(Device d, String id)
+    {
+        tagsDb.updateDevice(d, id);
+        if (tagsDb.idMap.get(id) != null)
+        {
+            tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+        }
+    }
     public String addFloor(Floor f)
     {
         return tagsDb.addFloor(f);
@@ -1235,7 +1242,6 @@ public class CCUHsApi
         hDictBuilder.add("gatewayRef", ahuRef);
         hDictBuilder.add("ahuRef", ahuRef);
         hDictBuilder.add("device");
-        hDictBuilder.add("unregister");
         tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
 
         if (tagsDb.idMap.get(id) != null)
@@ -1245,8 +1251,18 @@ public class CCUHsApi
 
         CCUHsApi.getInstance().syncEntityTree();
     }
+    public void updateDiagGatewayRef(String systemEquipRef){
+        HashMap diag = read("equip and diag");
 
-    public void updateCCUahuRef(String ahuRef, String cmDeviceRef) {
+        if (diag.size() == 0) {
+            return;
+        }
+        Equip q = new Equip.Builder().setHashMap(diag).build();
+        q.setGatewayRef(systemEquipRef);
+        CCUHsApi.getInstance().updateEquip(q, q.getId());
+    }
+
+    public void updateCCUahuRef(String ahuRef) {
         
         Log.d("CCU_HS","updateCCUahuRef "+ahuRef);
         HashMap ccu = read("device and ccu");
@@ -1268,7 +1284,6 @@ public class CCUHsApi
         hDictBuilder.add("createdDate", HDate.make(ccu.get("createdDate").toString()));
         hDictBuilder.add("gatewayRef", ahuRef);
         hDictBuilder.add("ahuRef", ahuRef);
-        hDictBuilder.add("deviceRef",cmDeviceRef);
         hDictBuilder.add("device");
         tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
     

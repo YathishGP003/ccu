@@ -33,11 +33,14 @@ public class ControlMote
     public String equipRef;
 
     String tz;
-    public ControlMote(String siteRef) {
+    public ControlMote(String systemEquipRef) {
         
         HashMap device = CCUHsApi.getInstance().read("device and cm");
-        if (device != null && device.size() > 0) {
-            CcuLog.d(L.TAG_CCU_DEVICE," CM device exists");
+        if ((device != null) && (device.size() > 0)) {
+            Device d = new Device.Builder().setHashMap(device).build();
+            d.setEquipRef(systemEquipRef);
+            CCUHsApi.getInstance().updateDevice(d,d.getId());
+            CcuLog.d(L.TAG_CCU_DEVICE," CM device exists - update equipRef ="+systemEquipRef);
             return;
         }
         site = new Site.Builder().setHashMap(CCUHsApi.getInstance().read(Tags.SITE)).build();
@@ -48,6 +51,7 @@ public class ControlMote
                            .addMarker("cm")
                            .addMarker("equipHis")
                            .setSiteRef(site.getId())
+                           .setEquipRef(systemEquipRef)
                            .build();
         deviceRef = CCUHsApi.getInstance().addDevice(d);
         createPoints();
@@ -92,9 +96,6 @@ public class ControlMote
         equipRef = d.getEquipRef();
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         tz = siteMap.get("tz").toString();
-    }
-    public String getDeviceRef(){
-        return deviceRef;
     }
     public void createPoints() {
         addRelayStatePoint("relay1");

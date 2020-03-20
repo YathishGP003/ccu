@@ -95,9 +95,9 @@ public class DabStagedRtu extends DabSystemProfile
         addCmdPoints(equipRef);
         addConfigPoints(equipRef);
         addDabSystemTuners(equipRef);
+        updateAhuRef(equipRef);
         
-        ControlMote controlMote = new ControlMote(siteRef);
-        updateAhuRef(equipRef, controlMote.getDeviceRef());
+        new ControlMote(equipRef);
         L.saveCCUState();
         CCUHsApi.getInstance().syncEntityTree();
     }

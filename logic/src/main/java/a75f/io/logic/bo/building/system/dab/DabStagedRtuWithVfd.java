@@ -66,9 +66,9 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         addDabSystemTuners(equipRef);
         addAnalogConfigPoints(equipRef);
         addAnalogCmdPoints(equipRef);
+        updateAhuRef(equipRef);
         
-        ControlMote controlMote = new ControlMote(siteRef);
-        updateAhuRef(equipRef, controlMote.getDeviceRef());
+        new ControlMote(equipRef);
         L.saveCCUState();
         CCUHsApi.getInstance().syncEntityTree();
     }

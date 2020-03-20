@@ -152,7 +152,7 @@ public abstract class SystemProfile
         return equipRef;
     }
     
-    public void updateAhuRef(String systemEquipId, String cmDeviceRef) {
+    public void updateAhuRef(String systemEquipId) {
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
         
         for (HashMap m : equips)
@@ -163,8 +163,8 @@ public abstract class SystemProfile
             else q.setGatewayRef(systemEquipId);
             CCUHsApi.getInstance().updateEquip(q, q.getId());
         }
-        
-        CCUHsApi.getInstance().updateCCUahuRef(systemEquipId, cmDeviceRef);
+        CCUHsApi.getInstance().updateDiagGatewayRef(systemEquipId);
+        CCUHsApi.getInstance().updateCCUahuRef(systemEquipId);
     }
     
     public void addSystemTuners() {
@@ -691,7 +691,7 @@ public abstract class SystemProfile
         hayStack.writeHisValById(humidityCompensationOffsetId, HSUtil.getPriorityVal(humidityCompensationOffsetId));
     }
     
-    public void updateGatewayRef(String systemEquipId, String cmDeviceRef)
+    public void updateGatewayRef(String systemEquipId)
     {
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
         for (HashMap m : equips)
@@ -702,7 +702,8 @@ public abstract class SystemProfile
             else q.setGatewayRef(systemEquipId);
             CCUHsApi.getInstance().updateEquip(q, q.getId());
         }
-        CCUHsApi.getInstance().updateCCUahuRef(systemEquipId,cmDeviceRef);
+        CCUHsApi.getInstance().updateDiagGatewayRef(systemEquipId);
+        CCUHsApi.getInstance().updateCCUahuRef(systemEquipId);
     }
     
     public void addCMPoints(String siteRef, String equipref, String equipDis , String tz) {

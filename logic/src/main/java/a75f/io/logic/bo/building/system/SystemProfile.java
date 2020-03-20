@@ -163,7 +163,7 @@ public abstract class SystemProfile
             else q.setGatewayRef(systemEquipId);
             CCUHsApi.getInstance().updateEquip(q, q.getId());
         }
-        
+        CCUHsApi.getInstance().updateDiagGatewayRef(systemEquipId);
         CCUHsApi.getInstance().updateCCUahuRef(systemEquipId);
     }
     
@@ -702,6 +702,7 @@ public abstract class SystemProfile
             else q.setGatewayRef(systemEquipId);
             CCUHsApi.getInstance().updateEquip(q, q.getId());
         }
+        CCUHsApi.getInstance().updateDiagGatewayRef(systemEquipId);
         CCUHsApi.getInstance().updateCCUahuRef(systemEquipId);
     }
     

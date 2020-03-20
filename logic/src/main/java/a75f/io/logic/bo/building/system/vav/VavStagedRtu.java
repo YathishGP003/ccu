@@ -136,7 +136,7 @@ public class VavStagedRtu extends VavSystemProfile
         addVavSystemTuners(equipRef);
         updateAhuRef(equipRef);
         //sysEquip = new SystemEquip(equipRef);
-        new ControlMote(siteRef);
+        new ControlMote(equipRef);
         initTRSystem();
         L.saveCCUState();
         CCUHsApi.getInstance().syncEntityTree();

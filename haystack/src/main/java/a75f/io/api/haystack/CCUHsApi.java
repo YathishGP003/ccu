@@ -1051,7 +1051,7 @@ public class CCUHsApi
                 ArrayList<Floor> floors = HSUtil.getFloors();
                 ConcurrentHashMap<String, String> removeMap = new ConcurrentHashMap<>();
 
-                // remove ccu and site to force sync
+                // exclude ccu and site for force sync
                 for (ConcurrentHashMap.Entry<String, String> pair : tagsDb.idMap.entrySet()){
                     if (ccuid.equals(pair.getKey()) || siteId.equals(pair.getKey())){
                         continue;
@@ -1060,7 +1060,7 @@ public class CCUHsApi
                     removeMap.put(pair.getKey(),pair.getValue());
                 }
 
-                // remove floors to force sync
+                // exclude floors for force sync
                 for (ConcurrentHashMap.Entry<String,String> map : removeMap.entrySet()){
 
                     for (Floor f: floors){
@@ -1070,13 +1070,13 @@ public class CCUHsApi
                         }
                     }
 
-                    // remove building schedule to force sync
+                    // exclude building schedule for force sync
                     HashMap buildingSchedule = read("schedule and building and not vacation");
                     if (buildingSchedule.get("id").toString().contains(map.getKey())){
                         removeMap.remove(map.getKey());
                     }
 
-                    // remove building tuners to force sync
+                    // exclude building tuners for force sync
                     ArrayList<HashMap> hQList = readAll("equip");
                     for (HashMap h: hQList){
                         Equip equip = new Equip.Builder().setHashMap(h).build();
@@ -1086,7 +1086,7 @@ public class CCUHsApi
                         }
                     }
 
-                    // remove cm device to force sync
+                    // exclude cm devices for force sync
                     ArrayList<HashMap> hDList = readAll("device");
                     for (HashMap h: hDList){
                         Device d = new Device.Builder().setHashMap(h).build();
@@ -1097,7 +1097,7 @@ public class CCUHsApi
                     }
                 }
 
-                // finally clear remaining id's for re sync
+                // finally clear remaining id's for force sync
                 for (ConcurrentHashMap.Entry<String, String> removeKey : removeMap.entrySet()){
                     tagsDb.idMap.remove(removeKey.getKey());
                 }

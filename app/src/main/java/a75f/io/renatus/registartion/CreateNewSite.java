@@ -523,8 +523,8 @@ public class CreateNewSite extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         builder.setIcon(R.drawable.ic_warning);
-        builder.setTitle("Remove CCU");
-        builder.setMessage("\n"+"Are you sure you want to remove ccu?");
+        builder.setTitle("UnRegister CCU");
+        builder.setMessage("\n"+"Are you sure you want to unregister ccu?");
         builder.setCancelable(false);
         builder.setPositiveButton("YES", (dialog, which) -> {
             btnUnregisterSite.setText("Register");

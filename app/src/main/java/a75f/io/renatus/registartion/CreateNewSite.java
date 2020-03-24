@@ -523,7 +523,7 @@ public class CreateNewSite extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         builder.setIcon(R.drawable.ic_warning);
-        builder.setTitle("UnRegister CCU");
+        builder.setTitle("Unregister CCU");
         builder.setMessage("\n"+"Are you sure you want to unregister ccu?");
         builder.setCancelable(false);
         builder.setPositiveButton("YES", (dialog, which) -> {
@@ -540,7 +540,7 @@ public class CreateNewSite extends Fragment {
             CCUHsApi.getInstance().unRegisterCCU(ccuName, installerEmail, ahuRef, managerEmail);
             L.ccu().setCCUName(ccuName);
 
-            ProgressDialogUtils.showProgressDialog(getActivity(), "Removing CCU...");
+            ProgressDialogUtils.showProgressDialog(getActivity(), "UnRegistering CCU...");
 
             String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
             new Handler().postDelayed(() -> {

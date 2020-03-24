@@ -45,7 +45,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         boolean onClickSave(int position, double minTemp, double maxTemp, int startTimeHour, int endTimeHour, int startTimeMinute, int endTimeMinute,
                             ArrayList<DAYS> days);
 
-        boolean onClickCancel(DialogFragment dialog);
+        boolean onClickCancel(String scheduleId);
     }
 
     private ManualScheduleDialogListener mListener;
@@ -333,7 +333,10 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
             dismiss();
         });
 
-        buttonCancel.setOnClickListener(view12 -> dismiss());
+        buttonCancel.setOnClickListener(view12 ->{
+            mListener.onClickCancel(mSchedule.getId());
+            dismiss();
+        });
 
         AlertDialog builder = new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle)
                 .setView(view)

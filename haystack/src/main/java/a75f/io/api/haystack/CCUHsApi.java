@@ -2,6 +2,7 @@ package a75f.io.api.haystack;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -1036,6 +1037,81 @@ public class CCUHsApi
         tagsDb.saveTags();
         tagsDb.init(cxt);
         syncEntityWithPointWrite();
+    }
+
+    //Reset CCU - Force-writes local entities to the backend.
+    public void resetSync() {
+
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground( final Void ... params ) {
+
+                String ccuid = getCcuId().toString();
+                String siteId = getSiteId().toString();
+                ArrayList<Floor> floors = HSUtil.getFloors();
+                ConcurrentHashMap<String, String> removeMap = new ConcurrentHashMap<>();
+
+                // remove ccu and site to force sync
+                for (ConcurrentHashMap.Entry<String, String> pair : tagsDb.idMap.entrySet()){
+                    if (ccuid.equals(pair.getKey()) || siteId.equals(pair.getKey())){
+                        continue;
+                    }
+
+                    removeMap.put(pair.getKey(),pair.getValue());
+                }
+
+                // remove floors to force sync
+                for (ConcurrentHashMap.Entry<String,String> map : removeMap.entrySet()){
+
+                    for (Floor f: floors){
+
+                        if (f.getId().equals(map.getKey())){
+                            removeMap.remove(f.getId());
+                        }
+                    }
+
+                    // remove building schedule to force sync
+                    HashMap buildingSchedule = read("schedule and building and not vacation");
+                    if (buildingSchedule.get("id").toString().contains(map.getKey())){
+                        removeMap.remove(map.getKey());
+                    }
+
+                    // remove building tuners to force sync
+                    ArrayList<HashMap> hQList = readAll("equip");
+                    for (HashMap h: hQList){
+                        Equip equip = new Equip.Builder().setHashMap(h).build();
+
+                        if (equip.getMarkers().contains("tuner") && equip.getId().equals(map.getKey())){
+                            removeMap.remove(map.getKey());
+                        }
+                    }
+
+                    // remove cm device to force sync
+                    ArrayList<HashMap> hDList = readAll("device");
+                    for (HashMap h: hDList){
+                        Device d = new Device.Builder().setHashMap(h).build();
+
+                        if (d.getMarkers().contains("cm") && d.getId().equals(map.getKey())){
+                            removeMap.remove(map.getKey());
+                        }
+                    }
+                }
+
+                // finally clear remaining id's for re sync
+                for (ConcurrentHashMap.Entry<String, String> removeKey : removeMap.entrySet()){
+                    tagsDb.idMap.remove(removeKey.getKey());
+                }
+
+                syncEntityWithPointWrite();
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute( final Void result ) {
+                // continue what you are doing...
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
     
     public void scheduleSync() {

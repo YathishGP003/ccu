@@ -29,10 +29,17 @@ import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
+import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HRef;
+import org.projecthaystack.HRow;
+import org.projecthaystack.io.HZincReader;
+import org.projecthaystack.io.HZincWriter;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.TimeZone;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -222,7 +229,9 @@ public class CreateNewSite extends Fragment {
             btnUnregisterSite.setText("UnRegister");
             btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
             setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
+            btnEditSite.setEnabled(true);
         } else {
+            btnEditSite.setEnabled(false);
             btnUnregisterSite.setText("Register");
             btnUnregisterSite.setTextColor(getResources().getColor(R.color.accent));
             setCompoundDrawableColor(btnUnregisterSite, R.color.accent);
@@ -442,52 +451,59 @@ public class CreateNewSite extends Fragment {
             if (prefs.getBoolean("registered")){
                 showUnregisterAlertDialog();
             } else {
+                btnEditSite.setEnabled(true);
+                CCUHsApi.getInstance().deleteEntity(CCUHsApi.getInstance().getCcuId().toString());
+
                 ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU...");
                 btnUnregisterSite.setText("UnRegister");
                 btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
                 setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
                 prefs.setBoolean("registered", true);
 
-                String ahuRef = ccu.get("ahuRef").toString();
                 String managerEmail = mSiteEmailId.getText().toString();
                 String installerEmail = mSiteInstallerEmailId.getText().toString();
                 String ccuName = mSiteCCU.getText().toString();
-                CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, managerEmail);
-
-                JSONObject ccuRegInfo = new JSONObject();
-                String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
-                String siteName = site.get("dis").toString();
-                String siteAddress = site.get("geoAddr").toString();
-                String siteCity = site.get("geoCity").toString();
-                String siteState = site.get("geoState").toString();
-                String siteCountry = site.get("geoCountry").toString();
-                String siteZip = site.get("geoPostalCode").toString();
-                String siteOrg = site.get("organization") != null ? site.get("organization").toString(): "";
-                String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
-                try {
-                    JSONObject locInfo = new JSONObject();
-                    locInfo.put("geoCity", siteCity);
-                    locInfo.put("geoCountry", siteCountry);
-                    locInfo.put("geoState", siteState);
-                    locInfo.put("geoAddr", siteAddress);
-                    locInfo.put("geoPostalCode", siteZip);
-
-                    ccuRegInfo.put("organization", siteOrg);
-                    ccuRegInfo.put("siteName",siteName);
-                    ccuRegInfo.put("siteId",  siteGUID);
-                    ccuRegInfo.put("deviceId", ccuGUID);
-                    ccuRegInfo.put("deviceName", ccuName);
-                    ccuRegInfo.put("facilityManagerEmail", managerEmail);
-                    ccuRegInfo.put("installerEmail", installerEmail);
-                    ccuRegInfo.put("locationDetails", locInfo);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                HashMap diagEquip = CCUHsApi.getInstance().read("equip and diag");
+                String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, diagEquip.get("id").toString(),managerEmail);
+                L.ccu().setCCUName(ccuName);
+                CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
+                L.saveCCUState();
+                CCUHsApi.getInstance().syncEntityTree();
 
                 new Handler().postDelayed(() -> {
+                    HashMap newCCU = CCUHsApi.getInstance().read("device and ccu");
+                    JSONObject ccuRegInfo = new JSONObject();
+                    String ccuGUID = CCUHsApi.getInstance().getGUID(newCCU.get("id").toString());
+                    String siteName = site.get("dis").toString();
+                    String siteAddress = site.get("geoAddr").toString();
+                    String siteCity = site.get("geoCity").toString();
+                    String siteState = site.get("geoState").toString();
+                    String siteCountry = site.get("geoCountry").toString();
+                    String siteZip = site.get("geoPostalCode").toString();
+                    String siteOrg = site.get("organization") != null ? site.get("organization").toString(): "";
+                    String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
+                    try {
+                        JSONObject locInfo = new JSONObject();
+                        locInfo.put("geoCity", siteCity);
+                        locInfo.put("geoCountry", siteCountry);
+                        locInfo.put("geoState", siteState);
+                        locInfo.put("geoAddr", siteAddress);
+                        locInfo.put("geoPostalCode", siteZip);
+
+                        ccuRegInfo.put("organization", siteOrg);
+                        ccuRegInfo.put("siteName",siteName);
+                        ccuRegInfo.put("siteId",  siteGUID);
+                        ccuRegInfo.put("deviceId", ccuGUID);
+                        ccuRegInfo.put("deviceName", ccuName);
+                        ccuRegInfo.put("facilityManagerEmail", managerEmail);
+                        ccuRegInfo.put("installerEmail", installerEmail);
+                        ccuRegInfo.put("locationDetails", locInfo);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     updateCCURegistrationInfo(ccuRegInfo.toString());
-                }, 10000);
-                L.ccu().setCCUName(ccuName);
+                   CCUHsApi.getInstance().resetSync();
+                }, 25000);
             }
 
         });
@@ -513,6 +529,7 @@ public class CreateNewSite extends Fragment {
         builder.setPositiveButton("YES", (dialog, which) -> {
             btnUnregisterSite.setText("Register");
             btnUnregisterSite.setTextColor(getResources().getColor(R.color.accent));
+            btnEditSite.setEnabled(false);
             setCompoundDrawableColor(btnUnregisterSite, R.color.accent);
 
             HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
@@ -525,16 +542,11 @@ public class CreateNewSite extends Fragment {
 
             ProgressDialogUtils.showProgressDialog(getActivity(), "UnRegistering CCU...");
 
-            JSONObject ccuRegInfo = new JSONObject();
             String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
-
             new Handler().postDelayed(() -> {
-                try {
-                    ccuRegInfo.put("deviceId", ccuGUID);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                unRegisterCCU(ccuRegInfo.toString());
+               // unRegisterCCU(ccuRegInfo.toString());
+                removeCCU(ccuGUID);
+
             }, 10000);
 
             dialog.dismiss();
@@ -580,6 +592,49 @@ public class CreateNewSite extends Fragment {
                     }
                 }else {
                     Toast.makeText(getActivity(), "CCU Unregistration is not Successful", Toast.LENGTH_LONG).show();
+                }
+            }
+        };
+
+        ccuUnReg.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void removeCCU(String ccuId) {
+        //String ccuRemoveParams = "ver:"+"\"3.0\""+"\n"+"ccuId"+"\n"+ccuId;
+        AsyncTask<Void, Void, String> ccuUnReg = new AsyncTask<Void, Void, String>() {
+
+            @Override
+            protected String doInBackground(Void... voids) {
+
+                HDictBuilder b = new HDictBuilder()
+                        .add("ccuId", HRef.copy(ccuId));
+                HDict[] dictArr = {b.toDict()};
+                String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "removeCCU/", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+                return response;
+            }
+
+            @Override
+            protected void onPostExecute(String response) {
+                super.onPostExecute(response);
+                ProgressDialogUtils.hideProgressDialog();
+                if( (response != null) && (!response.equals(""))){
+                        HZincReader zReader = new HZincReader(response);
+                        Iterator it = zReader.readGrid().iterator();
+                        while (it.hasNext())
+                        {
+                            HRow row = (HRow) it.next();
+                            String ccuId = row.get("removeCCUId").toString();
+                            if (ccuId != null && ccuId != "")
+                            {
+                                prefs.setString("token","");
+                                prefs.setBoolean("registered", false);
+                                Toast.makeText(getActivity(), "CCU removed Successfully " +ccuId, Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(getActivity(), "Fails to remove CCU", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                }else {
+                    Toast.makeText(getActivity(), "Fails to remove CCU", Toast.LENGTH_LONG).show();
                 }
             }
         };

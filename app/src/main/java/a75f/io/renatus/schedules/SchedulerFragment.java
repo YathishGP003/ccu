@@ -500,7 +500,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     private void showDialog(int id, int position, Schedule.Days day) {
 
         FragmentTransaction ft = getFragmentManager().beginTransaction();
-
+        schedule = CCUHsApi.getInstance().getScheduleById(schedule.getId());
         switch (id) {
             case ID_DIALOG_SCHEDULE:
                 Fragment scheduleFragment = getFragmentManager().findFragmentByTag("popup");
@@ -612,7 +612,11 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                        .setIcon(android.R.drawable.ic_dialog_alert)
                        .setNegativeButton("Re-Edit", new DialogInterface.OnClickListener() {
                            public void onClick(DialogInterface dialog, int id) {
-                               showDialog(ID_DIALOG_SCHEDULE, position, daysArrayList);
+                               if (removeEntry != null) {
+                                   showDialog(ID_DIALOG_SCHEDULE, position, removeEntry);
+                               } else {
+                                   showDialog(ID_DIALOG_SCHEDULE, position, daysArrayList);
+                               }
                            }
                        })
                        .setPositiveButton("Force-Trim", new DialogInterface.OnClickListener() {
@@ -654,7 +658,11 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                        .setIcon(android.R.drawable.ic_dialog_alert)
                        .setNegativeButton("Re-Edit", new DialogInterface.OnClickListener() {
                            public void onClick(DialogInterface dialog, int id) {
-                               showDialog(ID_DIALOG_SCHEDULE, position, daysArrayList);
+                               if (removeEntry != null) {
+                                   showDialog(ID_DIALOG_SCHEDULE, position, removeEntry);
+                               } else {
+                                   showDialog(ID_DIALOG_SCHEDULE, position, daysArrayList);
+                               }
                            }
                        })
                        .setPositiveButton("Force-Trim", new DialogInterface.OnClickListener() {
@@ -1103,7 +1111,9 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         });
     }
 
-    public boolean onClickCancel(DialogFragment dialog) {
+    public boolean onClickCancel(String mScheduleId) {
+        schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
+        updateUI();
         return true;
     }
 

@@ -287,31 +287,33 @@ public class Schedule extends Entity
 
         for (int i = 0; i < scheduledIntervals.size(); i++)
         {
-            if (scheduledIntervals.get(i).contains(getTime().getMillis()) || scheduledIntervals.get(i).isAfter(getTime().getMillis()))
-            {
+            for (int j = 0; j < daysSorted.size(); j++) {
+
+            if (scheduledIntervals.get(i).contains(getTime().getMillis()) || scheduledIntervals.get(i).isAfter(getTime().getMillis())) {
                 boolean currentlyOccupied = scheduledIntervals.get(i).contains(getTime().getMillis());
-                occupied = new Occupied();
-                occupied.setOccupied(currentlyOccupied);
-                occupied.setValue(daysSorted.get(scheduledIntervals.get(i).getStart().getDayOfWeek() -1).mVal);
-                occupied.setCoolingVal(daysSorted.get(scheduledIntervals.get(i).getStart().getDayOfWeek()-1).mCoolingVal);
-                occupied.setHeatingVal(daysSorted.get(scheduledIntervals.get(i).getStart().getDayOfWeek()-1).mHeatingVal);
+                if (daysSorted.get(j).mDay == (scheduledIntervals.get(i).getStart().getDayOfWeek() - 1)) {
+                    occupied = new Occupied();
+                    occupied.setOccupied(currentlyOccupied);
+                    occupied.setValue(daysSorted.get(j).mVal);
+                    occupied.setCoolingVal(daysSorted.get(j).mCoolingVal);
+                    occupied.setHeatingVal(daysSorted.get(j).mHeatingVal);
 
-                if (currentlyOccupied)
-                {
-                    occupied.setCurrentlyOccupiedSchedule(daysSorted.get(scheduledIntervals.get(i).getStart().getDayOfWeek()-1));
-                } else
-                {
-                    occupied.setNextOccupiedSchedule(daysSorted.get(scheduledIntervals.get(i).getStart().getDayOfWeek()-1));
+                    if (currentlyOccupied) {
+                        occupied.setCurrentlyOccupiedSchedule(daysSorted.get(j));
+                    } else {
+                        occupied.setNextOccupiedSchedule(daysSorted.get(j));
+                    }
+
+                    DateTime startDateTime = new DateTime(MockTime.getInstance().getMockTime())
+                            .withHourOfDay(daysSorted.get(j).getSthh())
+                            .withMinuteOfHour(daysSorted.get(j).getStmm())
+                            .withDayOfWeek(daysSorted.get(j).getDay() + 1)
+                            .withSecondOfMinute(0);
+                    occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
+
+                    return occupied;
                 }
-
-                DateTime startDateTime = new DateTime(MockTime.getInstance().getMockTime())
-                        .withHourOfDay(daysSorted.get(scheduledIntervals.get(i).getStart().getDayOfWeek()-1).getSthh())
-                        .withMinuteOfHour(daysSorted.get(scheduledIntervals.get(i).getStart().getDayOfWeek()-1).getStmm())
-                        .withDayOfWeek(daysSorted.get(scheduledIntervals.get(i).getStart().getDayOfWeek()-1).getDay() + 1)
-                        .withSecondOfMinute(0);
-                occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
-
-                return occupied;
+              }
             }
         }
 

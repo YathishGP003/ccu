@@ -304,8 +304,7 @@ public class Schedule extends Entity
                         .withDayOfWeek(daysSorted.get(i).getDay() + 1)
                         .withSecondOfMinute(0);
                 occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
-
-                Log.d("Mahesh"," occ " +occupied.getCurrentlyOccupiedSchedule());
+                
                 return occupied;
             }
         }

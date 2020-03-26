@@ -285,29 +285,29 @@ public class Schedule extends Entity
             }
         });
 
-        for (int i = 0; i < daysSorted.size(); i++)
+        for (int i = 0; i < scheduledIntervals.size(); i++)
         {
             if (scheduledIntervals.get(i).contains(getTime().getMillis()) || scheduledIntervals.get(i).isAfter(getTime().getMillis()))
             {
                 boolean currentlyOccupied = scheduledIntervals.get(i).contains(getTime().getMillis());
                 occupied = new Occupied();
                 occupied.setOccupied(currentlyOccupied);
-                occupied.setValue(daysSorted.get(i).mVal);
-                occupied.setCoolingVal(daysSorted.get(i).mCoolingVal);
-                occupied.setHeatingVal(daysSorted.get(i).mHeatingVal);
+                occupied.setValue(daysSorted.get(scheduledIntervals.get(i).getStart().getDayOfWeek() -1).mVal);
+                occupied.setCoolingVal(daysSorted.get(scheduledIntervals.get(i).getStart().getDayOfWeek()-1).mCoolingVal);
+                occupied.setHeatingVal(daysSorted.get(scheduledIntervals.get(i).getStart().getDayOfWeek()-1).mHeatingVal);
 
                 if (currentlyOccupied)
                 {
-                    occupied.setCurrentlyOccupiedSchedule(daysSorted.get(i));
+                    occupied.setCurrentlyOccupiedSchedule(daysSorted.get(scheduledIntervals.get(i).getStart().getDayOfWeek()-1));
                 } else
                 {
-                    occupied.setNextOccupiedSchedule(daysSorted.get(i));
+                    occupied.setNextOccupiedSchedule(daysSorted.get(scheduledIntervals.get(i).getStart().getDayOfWeek()-1));
                 }
 
                 DateTime startDateTime = new DateTime(MockTime.getInstance().getMockTime())
-                        .withHourOfDay(daysSorted.get(i).getSthh())
-                        .withMinuteOfHour(daysSorted.get(i).getStmm())
-                        .withDayOfWeek(daysSorted.get(i).getDay() + 1)
+                        .withHourOfDay(daysSorted.get(scheduledIntervals.get(i).getStart().getDayOfWeek()-1).getSthh())
+                        .withMinuteOfHour(daysSorted.get(scheduledIntervals.get(i).getStart().getDayOfWeek()-1).getStmm())
+                        .withDayOfWeek(daysSorted.get(scheduledIntervals.get(i).getStart().getDayOfWeek()-1).getDay() + 1)
                         .withSecondOfMinute(0);
                 occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
 

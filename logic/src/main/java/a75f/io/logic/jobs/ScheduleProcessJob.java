@@ -343,9 +343,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             Schedule currentSchedule = Schedule.getScheduleForZone(zoneId.replace("@", ""), false);
             Log.d(L.TAG_CCU_JOB, "currentSchedule.getDays().size() "+currentSchedule.getDays().size());
             if (currentSchedule.getDays().size() == 0) {
-                return "Empty Schedule";
+                return "No schedule configured";
             }
-            return "Setting up..";
+            return "No schedule configured";
         }
         Log.d("ZoneSchedule","zoneStatusString = "+equip.getDisplayName()+","+isZoneHasStandaloneEquip+",occ="+cachedOccupied.isOccupied()+",precon="+cachedOccupied.isPreconditioning()+",fc="+cachedOccupied.isForcedOccupied());
         if (!isZoneHasStandaloneEquip && (systemOccupancy == PRECONDITIONING) ) {
@@ -358,7 +358,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         if(curOccupancyMode == OCCUPIED)
         {
             if (cachedOccupied.getCurrentlyOccupiedSchedule() == null){
-                return "Setting up...";
+                return "No schedule configured";
             }
             return String.format("In %s, changes to Energy saving range of %.1f-%.1fF at %02d:%02d", "Occupied mode",
                     cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
@@ -386,7 +386,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             {
                 if(curOccupancyMode == PRECONDITIONING) {//Currently handled only for standalone
                     if (cachedOccupied.getNextOccupiedSchedule() == null){
-                        return "Setting up...";
+                        return "No schedule configured";
                     }
                     statusString = String.format("In %s, changes to Energy saving range of %.1f-%.1fF at %02d:%02d", "Preconditioning",
                             cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
@@ -396,7 +396,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
                 }else {
                     if (cachedOccupied.getNextOccupiedSchedule() == null){
-                        return "Setting up...";
+                        return "No schedule configured";
                     }
                     statusString = String.format("In Energy saving %s, changes to %.1f-%.1fF at %02d:%02d", "Unoccupied mode",
                             cachedOccupied.getHeatingVal(),
@@ -432,7 +432,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             return "No Central equipment connected.";
         if(systemOccupancy == null)
         {
-            return "Setting up..";
+            return "No schedule configured";
         }
         
         if (systemVacation == true && systemOccupancy != FORCEDOCCUPIED) {
@@ -455,7 +455,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         switch (systemOccupancy) {
             case OCCUPIED:
                 if (currOccupied == null || currOccupied.getCurrentlyOccupiedSchedule() == null){
-                    return "Setting up...";
+                    return "No schedule configured";
                 }
                 return String.format("In %s | Changes to Energy saving Unoccupied mode at %02d:%02d", "Occupied mode",
                         currOccupied.getCurrentlyOccupiedSchedule().getEthh(),
@@ -466,7 +466,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
             case UNOCCUPIED:
                 if (nextOccupied == null || nextOccupied.getNextOccupiedSchedule() == null ){
-                    return "Setting up...";
+                    return "No schedule configured";
                 }
                 return String.format("In Energy saving %s | Changes to %.1f-%.1fF at %02d:%02d", "Unoccupied mode",
                         nextOccupied.getHeatingVal(),
@@ -491,7 +491,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
         if(cachedOccupied == null)
         {
-            return "Setting up..";
+            return "No schedule configured";
         }
         else if(cachedOccupied.getVacation() != null)
         {

@@ -421,11 +421,11 @@ public class Pulse
 		CCUHsApi hayStack = CCUHsApi.getInstance();
 		String addr = String.valueOf(L.ccu().getSmartNodeAddressBand()).substring(0,2).concat("99");
 		HashMap device = hayStack.read("device and addr == \""+Short.parseShort(addr)+"\"");
+		double curTempVal = 0.0;
 		if (device != null && device.size() > 0) {
 			Device deviceInfo = new Device.Builder().setHashMap(device).build();
 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + deviceInfo.getId() + "\"");
 			String logicalCurTempPoint = "";
-			double curTempVal = 0.0;
 			double th2TempVal = 0.0;
 			boolean isTh2Enabled = false;
 			for (HashMap phyPoint : phyPoints) {
@@ -511,7 +511,7 @@ public class Pulse
 		if (cmCurrentTemp != null && cmCurrentTemp.size() > 0) {
 
 			double val = cmRegularUpdateMessage_t.roomTemperature.get();
-			double curTempVal = getCMRoomTempConversion(val,0);
+			if(curTempVal == 0.0) curTempVal = getCMRoomTempConversion(val,0);
 			hayStack.writeHisValById(cmCurrentTemp.get("id").toString(), curTempVal);
 			CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : CM currentTemp " + curTempVal+","+val);
 		}

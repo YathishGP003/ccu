@@ -12,7 +12,7 @@
       - touch setup.py
       - cat ci-setup/setup.py >> setup.py
       - ls -al
-      - pip install configparser
+      - pip3 install configparser
       - python setup.py
       - chmod +x ./build.sh
     stages:

@@ -276,9 +276,9 @@ public class Schedule extends Entity
     {
         Occupied            occupied           = null;
         ArrayList<Days>     daysSorted         = getDaysSorted();
-        ArrayList<Interval> scheduledIntervals = getScheduledAllIntervals(daysSorted);
+        ArrayList<Interval> scheduledIntervals = getScheduledIntervals(daysSorted);
 
-        Collections.sort(scheduledIntervals, new Comparator<Interval>() {
+      /*  Collections.sort(scheduledIntervals, new Comparator<Interval>() {
             @Override
             public int compare(Interval lhs, Interval rhs) {
                 if (lhs == null || rhs == null){
@@ -286,7 +286,7 @@ public class Schedule extends Entity
                 }
                 return Long.compare(lhs.getStart().getMillis(), rhs.getStart().getMillis());
             }
-        });
+        });*/
 
         for (int i = 0; i < daysSorted.size(); i++)
         {
@@ -304,7 +304,6 @@ public class Schedule extends Entity
                 if (currentlyOccupied)
                 {
                     occupied.setCurrentlyOccupiedSchedule(days);
-
                 } else
                 {
                     occupied.setNextOccupiedSchedule(days);
@@ -317,7 +316,6 @@ public class Schedule extends Entity
                         .withSecondOfMinute(0);
                 occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
 
-                Log.d("Mahesh","occupied slot " +occupied.getCurrentlyOccupiedSchedule());
                 return occupied;
             }
         }

@@ -228,8 +228,11 @@ public class Pulse
 			CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : "+t+" : "+val);
 			switch (t) {
 				case HUMIDITY:
+					double oldHumidityVal = CCUHsApi.getInstance().readHisValById(sp.getId());
+					double curHumidityVal = getHumidityConversion(val);
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
-					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), getHumidityConversion(val));
+					if(oldHumidityVal != curHumidityVal)
+					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), curHumidityVal);
 					break;
 				case PRESSURE:
 				case UVI:
@@ -484,7 +487,8 @@ public class Pulse
 						break;
 					case SENSOR_RH:
 						val = cmRegularUpdateMessage_t.humidity.get();
-						if (val > 0) {
+						double oldHumidityVal = hayStack.readHisValById(logPoint.get("id").toString());
+						if (val > 0 && (oldHumidityVal != val)) {
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 							hayStack.writeHisValById(logPoint.get("id").toString(), val/*getHumidityConversion(val)*/);
 						}
@@ -500,10 +504,13 @@ public class Pulse
 					currentTempInterface.updateTemperature(th2TempVal, Short.parseShort(deviceInfo.getAddr()));
 				}
 			} else if (!logicalCurTempPoint.isEmpty()) {
-				hayStack.writeHisValById(logicalCurTempPoint, curTempVal);
-				if (currentTempInterface != null) {
-					Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
-					currentTempInterface.updateTemperature(curTempVal, Short.parseShort(deviceInfo.getAddr()));
+				double oldCurTemp = hayStack.readHisValById(logicalCurTempPoint);
+				if(oldCurTemp != curTempVal) {
+					hayStack.writeHisValById(logicalCurTempPoint, curTempVal);
+					if (currentTempInterface != null) {
+						Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
+						currentTempInterface.updateTemperature(curTempVal, Short.parseShort(deviceInfo.getAddr()));
+					}
 				}
 			}
 		}
@@ -617,11 +624,13 @@ public class Pulse
 						break;
 					case SENSOR_RH:
 						val = smartStatRegularUpdateMessage_t.update.humidity.get();
-						if(val > 0) {
+						double oldHumidityVal = hayStack.readHisValById(logPoint.get("id").toString());
+						double curHumidityVal = getHumidityConversion(val);
+						if(curHumidityVal != oldHumidityVal) {
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-							hayStack.writeHisValById(logPoint.get("id").toString(), getHumidityConversion(val));
+							hayStack.writeHisValById(logPoint.get("id").toString(), curHumidityVal);
 						}
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartStatUpdate : Humidity "+getHumidityConversion(val)+","+smartStatRegularUpdateMessage_t.update.sensorReadings);
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartStatUpdate : Humidity "+curHumidityVal+","+smartStatRegularUpdateMessage_t.update.sensorReadings);
 						break;
 				}
 			}
@@ -647,10 +656,12 @@ public class Pulse
 				}
 			}
 			else if(!logicalCurTempPoint.isEmpty()){
-				hayStack.writeHisValById(logicalCurTempPoint, curTempVal);
-				if ((currentTempInterface != null) && (oldCurTempVal != curTempVal)) {
-					Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
-					currentTempInterface.updateTemperature(curTempVal, nodeAddr);
+				if(oldCurTempVal != curTempVal) {
+					hayStack.writeHisValById(logicalCurTempPoint, curTempVal);
+					if (currentTempInterface != null) {
+						Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
+						currentTempInterface.updateTemperature(curTempVal, nodeAddr);
+					}
 				}
 			}
 		}

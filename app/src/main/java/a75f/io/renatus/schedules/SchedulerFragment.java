@@ -1103,7 +1103,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             @Override
             public void onClick(View v) {
                 int clickedPosition = (int)v.getTag();
-                Toast.makeText(SchedulerFragment.this.getContext(), "Clicked: " + clickedPosition, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(SchedulerFragment.this.getContext(), "Clicked: " + clickedPosition, Toast.LENGTH_SHORT).show();
                 // force refresh schedule
                 if(mScheduleId != null) schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
                 showDialog(ID_DIALOG_SCHEDULE, clickedPosition, schedule.getDays().get(clickedPosition));

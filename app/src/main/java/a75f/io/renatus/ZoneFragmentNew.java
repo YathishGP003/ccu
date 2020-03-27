@@ -1858,7 +1858,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 targetHumidity = (double)cpuEquipPoints.get("Target Humidity");
                 spinnerValue3.setSelection((int)targetHumidity -1);
             }else {
-                textViewLabel3.setText("Target Dehumidify : ");
+                textViewLabel3.setText("Target Dehumidity : ");
                 targetDeHumidity = (double)cpuEquipPoints.get("Target Dehumidity");
                 spinnerValue3.setSelection((int)targetDeHumidity - 1);
             }
@@ -2032,7 +2032,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 targetHumidity = (double)hpuEquipPoints.get("Target Humidity");
                 spinnerValue3.setSelection((int)targetHumidity -1);
             }else {
-                textViewLabel3.setText("Target Dehumidify : ");
+                textViewLabel3.setText("Target Dehumidity : ");
                 targetDeHumidity = (double)hpuEquipPoints.get("Target Dehumidity");
                 spinnerValue3.setSelection((int)targetDeHumidity - 1);
             }

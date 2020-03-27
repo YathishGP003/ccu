@@ -39,6 +39,10 @@ public class UpdateScheduleHandler
         HDict[] dictArr = {b.toDict()};
         String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
         CcuLog.d(L.TAG_CCU_PUBNUB, "Read Schedule : " + response);
+        if(response == null || response.isEmpty()){
+            CcuLog.d(L.TAG_CCU_PUBNUB, "Failed to read remote schedule : " + response);
+            return;
+        }
         HGrid sGrid = new HZincReader(response).readGrid();
         if (sGrid == null)
         {

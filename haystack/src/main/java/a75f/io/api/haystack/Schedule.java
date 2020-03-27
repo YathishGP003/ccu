@@ -296,23 +296,22 @@ public class Schedule extends Entity
                 boolean currentlyOccupied = scheduledIntervals.get(i).contains(getTime().getMillis());
                 occupied = new Occupied();
                 occupied.setOccupied(currentlyOccupied);
-                Days days = daysSorted.get(i);
-                occupied.setValue(days.mVal);
-                occupied.setCoolingVal(days.mCoolingVal);
-                occupied.setHeatingVal(days.mHeatingVal);
+                occupied.setValue(daysSorted.get(i).mVal);
+                occupied.setCoolingVal(daysSorted.get(i).mCoolingVal);
+                occupied.setHeatingVal(daysSorted.get(i).mHeatingVal);
 
                 if (currentlyOccupied)
                 {
-                    occupied.setCurrentlyOccupiedSchedule(days);
+                    occupied.setCurrentlyOccupiedSchedule(daysSorted.get(i));
                 } else
                 {
-                    occupied.setNextOccupiedSchedule(days);
+                    occupied.setNextOccupiedSchedule(daysSorted.get(i));
                 }
 
                 DateTime startDateTime = new DateTime(MockTime.getInstance().getMockTime())
-                        .withHourOfDay(days.getSthh())
-                        .withMinuteOfHour(days.getStmm())
-                        .withDayOfWeek(days.getDay() + 1)
+                        .withHourOfDay(daysSorted.get(i).getSthh())
+                        .withMinuteOfHour(daysSorted.get(i).getStmm())
+                        .withDayOfWeek(daysSorted.get(i).getDay() + 1)
                         .withSecondOfMinute(0);
                 occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
 
@@ -559,75 +558,7 @@ public class Schedule extends Entity
                 } else {
                     scheduledInterval = new Interval(startDateTime, endDateTime.withDayOfWeek(DAYS.values()[day.getDay()].getNextDay().ordinal() + 1));
                 }
-            }
-            else
-            {
-                scheduledInterval =
-                        new Interval(startDateTime, endDateTime);
-            }
-
-
-            intervals.add(scheduledInterval);
-        }
-
-        return intervals;
-    }
-
-    public ArrayList<Interval> getScheduledAllIntervals(ArrayList<Days> daysSorted)
-    {
-        ArrayList<Interval> intervals = new ArrayList<Interval>();
-
-        for (Days day : daysSorted)
-        {
-
-            long now = MockTime.getInstance().getMockTime();
-
-            DateTime startDateTime = new DateTime(now)
-                    .withHourOfDay(day.getSthh())
-                    .withMinuteOfHour(day.getStmm())
-                    .withDayOfWeek(day.getDay() + 1)
-                    .withSecondOfMinute(0)
-                    .withMillisOfSecond(0);
-            DateTime endDateTime = new DateTime(now)
-                    .withHourOfDay(day.getEthh())
-                    .withMinuteOfHour(day.getEtmm())
-                    .withSecondOfMinute(0).withMillisOfSecond(0).withDayOfWeek(
-                            day.getDay() +
-                                    1);
-            Interval scheduledInterval = null;
-            if (startDateTime.isAfter(endDateTime))
-            {
-                if (day.getDay() == DAYS.SUNDAY.ordinal()) {
-                    if (startDateTime.getWeekOfWeekyear() >= 52){
-                        scheduledInterval = new Interval(startDateTime, endDateTime.plusDays(1));
-
-                    } else if (day.getSthh() >= day.getEthh()){
-                        DateTime endofDayDateTime = new DateTime(now)
-                                .withHourOfDay(23)
-                                .withMinuteOfHour(45)
-                                .withSecondOfMinute(0).withMillisOfSecond(0).withDayOfWeek(
-                                        day.getDay() +
-                                                1);
-                        intervals.add(new Interval(startDateTime, endofDayDateTime));
-
-                        DateTime startofDayDateTime = new DateTime(now)
-                                .withHourOfDay(0)
-                                .withMinuteOfHour(0)
-                                .withSecondOfMinute(0).withMillisOfSecond(0).withDayOfWeek(1);
-
-                        DateTime newEndofDayDateTime = new DateTime(now)
-                                .withHourOfDay(day.getEthh())
-                                .withMinuteOfHour(day.getEtmm())
-                                .withSecondOfMinute(0).withMillisOfSecond(0).withDayOfWeek(1);
-                        intervals.add(new Interval(startofDayDateTime, newEndofDayDateTime));
-                    } else
-                        scheduledInterval = new Interval(startDateTime, endDateTime.withWeekOfWeekyear(startDateTime.getWeekOfWeekyear()+1)
-                                .withDayOfWeek(DAYS.values()[day.getDay()].getNextDay().ordinal() + 1));
-                } else {
-                    scheduledInterval = new Interval(startDateTime, endDateTime.withDayOfWeek(DAYS.values()[day.getDay()].getNextDay().ordinal() + 1));
-                }
-            }
-            else
+            } else
             {
                 scheduledInterval =
                         new Interval(startDateTime, endDateTime);

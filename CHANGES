@@ -1,12 +1,5 @@
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-1012, Temperature offset should be added to cm logical temp as well
- - #RENATUS-1012, Temperature offset should be added to cm logical temp as well
+ - #RENATUS-1013,dehumidifiers not turning off in setback
  - Merge branch 'mahesh_renatus' into 'master'
- - fix
- - Update .gitlab-ci.yml
- - Merge branch 'mahesh_renatus' into 'master'
- - resolved RENATUS-997, RENATUS-1010, RENATUS-1005
- - Merge branch 'mahesh_renatus' into 'master'
- - fixes
- - text fixes
- - resolved RENATUS-898, RENATUS-947
+ - remove log
+ - revert to old

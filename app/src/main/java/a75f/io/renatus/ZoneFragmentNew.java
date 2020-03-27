@@ -75,6 +75,8 @@ import a75f.io.renatus.util.GridItem;
 import a75f.io.renatus.util.NonTempControl;
 import a75f.io.renatus.util.SeekArc;
 
+import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
+
 public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 {
     ExpandableListView            expandableListView;
@@ -2753,29 +2755,29 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
         
         ArrayList<Interval> zoneIntervals = zoneSchedule.getScheduledIntervals();
-        
-        for(Interval z : zoneIntervals) {
-            boolean add = true;
-            for (Interval s: systemIntervals) {
-                if (s.contains(z)) {
-                    add = false;
-                    break;
-                } else if (s.overlaps(z)) {
-                    if (z.getStartMillis() < s.getStartMillis()) {
-                        intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
-                    } else if (z.getEndMillis() > s.getEndMillis()) {
-                        intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));
+
+            for(Interval z : zoneIntervals) {
+                boolean add = true;
+                for (Interval s: systemIntervals) {
+                    if (s.contains(z)) {
+                        add = false;
+                        break;
+                    } else if (s.overlaps(z)) {
+                        add = false;
+                        for (Interval i: disconnectedIntervals(systemIntervals,z)){
+                            if (!intervalSpills.contains(i)){
+                                intervalSpills.add(i);
+                            }
+                        }
+
                     }
-                    add = false;
+                }
+                if (add)
+                {
+                    intervalSpills.add(z);
+                    CcuLog.d(L.TAG_CCU_UI, " Zone Interval not contained "+z);
                 }
             }
-            if (add)
-            {
-                intervalSpills.add(z);
-                CcuLog.d("CCU_UI", " Zone Interval not contained "+z);
-            }
-            
-        }
         
         
         if (intervalSpills.size() > 0) {
@@ -2811,7 +2813,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                        public void onClick(DialogInterface dialog, int id) {
                            HashMap<String, ArrayList<Interval>> spillsMap = new HashMap<>();
                            spillsMap.put(zoneSchedule.getRoomRef(), intervalSpills);
-                           ScheduleUtil.trimZoneSchedules(spillsMap);
+                           ScheduleUtil.trimZoneSchedule(mSchedule, spillsMap);
                            CCUHsApi.getInstance().scheduleSync();
                        }
                    });

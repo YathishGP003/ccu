@@ -674,10 +674,12 @@ public class VavSystemController extends SystemController
             }
             HashMap damper = hayStack.read("point and damper and base and cmd and equipRef == \""+m.get("id").toString()+"\"");
             double damperPos = hayStack.readHisValById(damper.get("id").toString());
-            int normalizedDamperPos = (int) (damperPos + damperPos * targetPercent/100);
+            double normalizedDamperPos =  (damperPos + damperPos * targetPercent/100);
             HashMap normalizedDamper = hayStack.read("point and damper and normalized and cmd and equipRef == \""+m.get("id").toString()+"\"");
             CcuLog.d(L.TAG_CCU_SYSTEM,"normalizeAirflow"+"Equip: "+m.get("dis")+",damperPos :"+damperPos+" targetPercent:"+targetPercent+" normalizedDamper:"+normalizedDamperPos);
-            hayStack.writeHisValById(normalizedDamper.get("id").toString(), (double)normalizedDamperPos);
+            double curNormalisedDamper = hayStack.readHisValById(normalizedDamper.get("id").toString());
+            if(normalizedDamperPos != curNormalisedDamper)
+            hayStack.writeHisValById(normalizedDamper.get("id").toString(), normalizedDamperPos);
         }
         
         

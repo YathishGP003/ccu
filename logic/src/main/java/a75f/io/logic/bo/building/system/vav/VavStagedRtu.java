@@ -314,6 +314,10 @@ public class VavStagedRtu extends VavSystemProfile
                         if (systemMode == SystemMode.OFF || ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED
                                                             || ScheduleProcessJob.getSystemOccupancy() == Occupancy.VACATION) {
                             relayState = 0;
+                            if(stage == HUMIDIFIER)
+                                setCmdSignal("humidifier", relayState);
+                            else if(stage == DEHUMIDIFIER)
+                                setCmdSignal("dehumidifier", relayState);
                         } else
                         {
                             double humidity = VavSystemController.getInstance().getAverageSystemHumidity();

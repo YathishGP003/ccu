@@ -882,7 +882,8 @@ public class DabEquip
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        return CCUHsApi.getInstance().readDefaultValById(id);
+        return CCUHsApi.getInstance().readPointPriorityVal(id);
+        //return CCUHsApi.getInstance().readDefaultValById(id);
     }
     public void setDamperLimit(String coolHeat, String minMax, double val)
     {

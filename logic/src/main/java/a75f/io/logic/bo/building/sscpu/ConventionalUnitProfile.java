@@ -168,10 +168,10 @@ public class ConventionalUnitProfile extends ZoneProfile {
 
             switch (fanHighType){
                 case HUMIDIFIER:
-                    targetThreshold = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and humidity and equipRef == \"" + cpuEquip.getId() + "\"");
+                    targetThreshold = CCUHsApi.getInstance().readPointPriorityVal("point and standalone and target and humidity and equipRef == \"" + cpuEquip.getId() + "\"");
                     break;
                 case DE_HUMIDIFIER:
-                    targetThreshold = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and dehumidifier and equipRef == \"" + cpuEquip.getId() + "\"");
+                    targetThreshold = CCUHsApi.getInstance().readPointPriorityVal("point and standalone and target and dehumidifier and equipRef == \"" + cpuEquip.getId() + "\"");
                     break;
             }
             boolean isFanStage1Enabled = getConfigEnabled("relay3", node) > 0 ? true : false;

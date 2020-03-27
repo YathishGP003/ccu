@@ -522,8 +522,7 @@ public class SingleStageEquip {
                     SmartNode.updatePhysicalPointRef(nodeAddr,Port.RELAY_ONE.name(),r1coolID);
                     break;
                 case HEATING:
-
-                    HashMap coolingPt = CCUHsApi.getInstance().read("point and standalone and cooling and stage1 and  sse and equipRef== \"" + equip.getId() + "\"");
+					HashMap coolingPt = CCUHsApi.getInstance().read("point and standalone and cooling and stage1 and  sse and equipRef== \"" + equip.getId() + "\"");
                     if ((coolingPt != null) && (coolingPt.size() > 0))
                         CCUHsApi.getInstance().deleteEntity(coolingPt.get("id").toString());
                     Point heatingStage = new Point.Builder()

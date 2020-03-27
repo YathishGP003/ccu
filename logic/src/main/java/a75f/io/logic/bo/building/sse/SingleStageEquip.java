@@ -178,8 +178,9 @@ public class SingleStageEquip {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("standalone").addMarker("fan").addMarker("stage1").addMarker("his").addMarker("zone").addMarker("runtime")
+                .addMarker("standalone").addMarker("fan").addMarker("stage1").addMarker("his").addMarker("zone")
                 .addMarker("logical").addMarker("sse").addMarker("equipHis").addMarker("cmd")
+                .setEnums("off,on")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -306,8 +307,9 @@ public class SingleStageEquip {
                         .setSiteRef(siteRef)
                         .setRoomRef(roomRef)
                         .setFloorRef(floorRef).setHisInterpolate("cov")
-                        .addMarker("standalone").addMarker("cooling").addMarker("stage1").addMarker("his").addMarker("zone").addMarker("runtime")
+                        .addMarker("standalone").addMarker("cooling").addMarker("stage1").addMarker("his").addMarker("zone")
                         .addMarker("logical").addMarker("sse").addMarker("equipHis").addMarker("cmd")
+                        .setEnums("off,on")
                         .setGroup(String.valueOf(nodeAddr))
                         .setTz(tz)
                         .build();
@@ -323,8 +325,9 @@ public class SingleStageEquip {
                         .setSiteRef(siteRef)
                         .setRoomRef(roomRef)
                         .setFloorRef(floorRef).setHisInterpolate("cov")
-                        .addMarker("standalone").addMarker("heating").addMarker("stage1").addMarker("his").addMarker("zone").addMarker("runtime")
+                        .addMarker("standalone").addMarker("heating").addMarker("stage1").addMarker("his").addMarker("zone")
                         .addMarker("logical").addMarker("sse").addMarker("equipHis").addMarker("cmd")
+                        .setEnums("off,on")
                         .setGroup(String.valueOf(nodeAddr))
                         .setTz(tz)
                         .build();
@@ -508,8 +511,9 @@ public class SingleStageEquip {
                             .setSiteRef(siteRef)
                             .setRoomRef(equip.getRoomRef())
                             .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                            .addMarker("standalone").addMarker("cooling").addMarker("stage1").addMarker("his").addMarker("zone").addMarker("runtime")
+                            .addMarker("standalone").addMarker("cooling").addMarker("stage1").addMarker("his").addMarker("zone")
                             .addMarker("logical").addMarker("sse").addMarker("equipHis").addMarker("cmd")
+                            .setEnums("off,on")
                             .setGroup(String.valueOf(nodeAddr))
                             .setTz(tz)
                             .build();
@@ -518,8 +522,7 @@ public class SingleStageEquip {
                     SmartNode.updatePhysicalPointRef(nodeAddr,Port.RELAY_ONE.name(),r1coolID);
                     break;
                 case HEATING:
-
-                    HashMap coolingPt = CCUHsApi.getInstance().read("point and standalone and cooling and stage1 and  sse and equipRef== \"" + equip.getId() + "\"");
+					HashMap coolingPt = CCUHsApi.getInstance().read("point and standalone and cooling and stage1 and  sse and equipRef== \"" + equip.getId() + "\"");
                     if ((coolingPt != null) && (coolingPt.size() > 0))
                         CCUHsApi.getInstance().deleteEntity(coolingPt.get("id").toString());
                     Point heatingStage = new Point.Builder()
@@ -528,8 +531,9 @@ public class SingleStageEquip {
                             .setSiteRef(siteRef)
                             .setRoomRef(equip.getRoomRef())
                             .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                            .addMarker("standalone").addMarker("heating").addMarker("stage1").addMarker("his").addMarker("zone").addMarker("runtime")
+                            .addMarker("standalone").addMarker("heating").addMarker("stage1").addMarker("his").addMarker("zone")
                             .addMarker("logical").addMarker("sse").addMarker("equipHis").addMarker("cmd")
+                            .setEnums("off,on")
                             .setGroup(String.valueOf(nodeAddr))
                             .setTz(tz)
                             .build();

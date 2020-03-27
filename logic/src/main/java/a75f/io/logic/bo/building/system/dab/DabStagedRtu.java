@@ -240,6 +240,10 @@ public class DabStagedRtu extends DabSystemProfile
                         if (systemMode == SystemMode.OFF || ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED
                                                              || ScheduleProcessJob.getSystemOccupancy() == Occupancy.VACATION) {
                             relayState = 0;
+                            if(stage == HUMIDIFIER)
+                                setCmdSignal("humidifier", relayState);
+                            else if(stage == DEHUMIDIFIER)
+                                setCmdSignal("dehumidifier", relayState);
                         } else
                         {
                             double humidity = getSystemController().getAverageSystemHumidity();

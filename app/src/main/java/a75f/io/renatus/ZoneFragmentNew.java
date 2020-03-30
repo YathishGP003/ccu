@@ -1840,7 +1840,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             View viewPointRow2 = inflater.inflate(R.layout.zones_item_type2, null);
 
             TextView textViewLabel3 = viewPointRow2.findViewById(R.id.text_point1label);
-            Spinner spinnerValue3 = viewPointRow2.findViewById(R.id.spinnerValue1);
+            Spinner humiditySpinner = viewPointRow2.findViewById(R.id.spinnerValue1);
             TextView textViewLabel4 = viewPointRow2.findViewById(R.id.text_point2label);
             textViewLabel4.setVisibility(View.GONE);
             Spinner spinnerValue4 = viewPointRow2.findViewById(R.id.spinnerValue2);
@@ -1853,19 +1853,55 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
             ArrayAdapter<Integer> humidityTargetAdapter = new ArrayAdapter<Integer>(getActivity(),R.layout.spinner_zone_item,arrayHumdityTargetList);
             humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
-            spinnerValue3.setAdapter(humidityTargetAdapter);
+            humiditySpinner.setAdapter(humidityTargetAdapter);
 
             if(fanHighHumdOption == 2.0) {
                 textViewLabel3.setText("Target Humidity : ");
                 targetHumidity = (double)cpuEquipPoints.get("Target Humidity");
-                spinnerValue3.setSelection((int)targetHumidity -1);
+                humiditySpinner.setSelection((int)targetHumidity -1, false);
             }else {
                 textViewLabel3.setText("Target Dehumidity : ");
                 targetDeHumidity = (double)cpuEquipPoints.get("Target Dehumidity");
-                spinnerValue3.setSelection((int)targetDeHumidity - 1);
+                humiditySpinner.setSelection((int)targetDeHumidity - 1, false);
             }
 
             linearLayoutZonePoints.addView(viewPointRow2);
+
+            final double targetHumidValue = targetHumidity;
+            final double targetDehumidValue = targetDeHumidity;
+            humiditySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                    try {
+                        if(isHPUFromPubNub) {
+                            if(fanHighHumdOption == 2.0) {
+                                if (targetHumidValue != (position+1)) {
+                                    Log.i("PubNub", "humidityValue:" + targetHumidValue + " position:" + position);
+                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position+1);
+                                }
+                            }else if(fanHighHumdOption == 3.0) {
+                                if (targetDehumidValue != (position +1)) {
+                                    Log.i("PubNub", "DehumidityValue:" + targetDehumidValue + " position:" + position);
+                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position+1);
+                                }
+                            }
+                        }else{
+                            if(fanHighHumdOption == 2.0)
+                                StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position+1);
+                            else if(fanHighHumdOption == 3.0)
+                                StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position+1);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+
+                }
+            });
+
         }
 
 
@@ -2014,7 +2050,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             View viewPointRow2 = inflater.inflate(R.layout.zones_item_type2, null);
 
             TextView textViewLabel3 = viewPointRow2.findViewById(R.id.text_point1label);
-            Spinner spinnerValue3 = viewPointRow2.findViewById(R.id.spinnerValue1);
+            Spinner humiditySpinner = viewPointRow2.findViewById(R.id.spinnerValue1);
             TextView textViewLabel4 = viewPointRow2.findViewById(R.id.text_point2label);
             textViewLabel4.setVisibility(View.GONE);
             Spinner spinnerValue4 = viewPointRow2.findViewById(R.id.spinnerValue2);
@@ -2027,19 +2063,53 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
             ArrayAdapter<Integer> humidityTargetAdapter = new ArrayAdapter<Integer>(getActivity(),R.layout.spinner_zone_item,arrayHumdityTargetList);
             humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
-            spinnerValue3.setAdapter(humidityTargetAdapter);
+            humiditySpinner.setAdapter(humidityTargetAdapter);
 
             if(fanHighHumdOption == 2.0) {
                 textViewLabel3.setText("Target Humidity : ");
                 targetHumidity = (double)hpuEquipPoints.get("Target Humidity");
-                spinnerValue3.setSelection((int)targetHumidity -1);
+                humiditySpinner.setSelection((int)targetHumidity -1, false);
             }else {
                 textViewLabel3.setText("Target Dehumidity : ");
                 targetDeHumidity = (double)hpuEquipPoints.get("Target Dehumidity");
-                spinnerValue3.setSelection((int)targetDeHumidity - 1);
+                humiditySpinner.setSelection((int)targetDeHumidity - 1, false);
             }
 
             linearLayoutZonePoints.addView(viewPointRow2);
+            final double targetHumidValue = targetHumidity;
+            final double targetDehumidValue = targetDeHumidity;
+            humiditySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                    try {
+                        if(isHPUFromPubNub) {
+                            if(fanHighHumdOption == 2.0) {
+                                if (targetHumidValue != (position+1)) {
+                                    Log.i("PubNub", "humidityValue:" + targetHumidValue + " position:" + position+1);
+                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position+1);
+                                }
+                            }else if(fanHighHumdOption == 3.0) {
+                                if (targetDehumidValue != (position+1)) {
+                                    Log.i("PubNub", "DehumidityValue:" + targetDehumidValue + " position:" + position+1);
+                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position+1);
+                                }
+                            }
+                        }else{
+                            if(fanHighHumdOption == 2.0)
+                                StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position+1);
+                            else if(fanHighHumdOption == 3.0)
+                                StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position+1);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+
+                }
+            });
         }
 
 

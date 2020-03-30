@@ -643,12 +643,12 @@ public class Schedule extends Entity
         ArrayList<Days> days = new ArrayList<>();
 
         for (Days day : getDaysSorted()){
-            if (day.getSthh() >= day.getEthh()){
+            if (day.getSthh() >= day.getEthh() && (day.getDay() == DAYS.SUNDAY.ordinal())){
                 Days d = new Days();
                 d.setSthh(day.mSthh);
                 d.setStmm(day.mStmm);
                 d.setEthh(23);
-                d.setEtmm(45);
+                d.setEtmm(59);
                 d.setDay(day.mDay);
                 d.setVal(day.mVal);
                 d.setCoolingVal(day.getCoolingVal());

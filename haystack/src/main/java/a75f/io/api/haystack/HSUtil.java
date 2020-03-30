@@ -71,7 +71,7 @@ public class HSUtil
     
     public static String getDis(String id) {
         HashMap item = CCUHsApi.getInstance().readMapById(id);
-        return item.get("dis").toString() ;
+        return item.get("dis") == null ? "" : item.get("dis").toString() ;
     }
     
     public static Device getDevice(short addr) {

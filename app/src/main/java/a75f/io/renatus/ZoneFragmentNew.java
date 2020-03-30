@@ -1332,13 +1332,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             if (updatedEquip.getProfile().startsWith("SMARTSTAT_CONVENTIONAL_PACK_UNIT")) {
                 HashMap cpuEquipPoints = ScheduleProcessJob.getCPUEquipPoints(updatedEquip.getId());
                 Log.i("PointsValue", "CPU Points:" + cpuEquipPoints.toString());
-                loadSSCPUPointsUI(cpuEquipPoints, inflater, linearLayoutZonePoints, equipId, true, updatedEquip.getGroup(),false);
+                loadSSCPUPointsUI(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), true, updatedEquip.getGroup(),false);
                 //isCPUloaded = true;
             }
             if (updatedEquip.getProfile().startsWith("SMARTSTAT_HEAT_PUMP_UNIT")) {
                 HashMap hpuEquipPoints = ScheduleProcessJob.getHPUEquipPoints(updatedEquip.getId());
                 Log.i("PointsValue", "HPU Points:" + hpuEquipPoints.toString());
-                loadSSHPUPointsUI(hpuEquipPoints, inflater, linearLayoutZonePoints, equipId, true, updatedEquip.getGroup(),false);
+                loadSSHPUPointsUI(hpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), true, updatedEquip.getGroup(),false);
                 //isHPUloaded = true;
             }
         }

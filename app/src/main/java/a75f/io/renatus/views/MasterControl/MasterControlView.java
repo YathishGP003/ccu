@@ -703,9 +703,15 @@ public class MasterControlView extends LinearLayout {
     {
         //CcuLog.d("CCU_HS", "Read Query: " + query);
         HashMap<Object, Object> map = new HashMap<>();
+        if (!CCUHsApi.getInstance().isNetworkConnected()){
+            return map;
+        }
         HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict tDict = new HDictBuilder().add("filter", query).toDict();
         HGrid hGrid = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+        if (hGrid == null){
+            return map;
+        }
         hGrid.dump();
         Iterator it   = hGrid.iterator();
         while (it.hasNext())

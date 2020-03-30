@@ -88,11 +88,15 @@ public class RangeBarView extends LinearLayout {
     }
 
     public void setLowerCoolingTemp(double lowerCoolTemp) {
-        rangeBar.setLowerCoolingTemp((float) lowerCoolTemp);
+        if (rangeBar != null){
+            rangeBar.setLowerCoolingTemp((float) lowerCoolTemp);
+        }
     }
 
     public void setLowerHeatingTemp(double lowerHeatTemp) {
-        rangeBar.setLowerHeatingTemp((float) lowerHeatTemp);
+        if (rangeBar != null){
+            rangeBar.setLowerHeatingTemp((float) lowerHeatTemp);
+        }
     }
 
     public float getHeatValue() {

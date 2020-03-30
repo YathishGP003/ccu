@@ -1,5 +1,11 @@
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-1013,dehumidifiers not turning off in setback
+ - #RENATUS-981, decimal points updates every min
  - Merge branch 'mahesh_renatus' into 'master'
- - remove log
- - revert to old
+ - fix
+ - resolved RENATUS-1015, RENATUS-997
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-981, decimal points updates every min
+ - #RENATUS-1016, toast msg
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-1014, SSE tags change from runtime to enum
+ - #LSFACPORTL-1255, SSE tags change from runtime to enum

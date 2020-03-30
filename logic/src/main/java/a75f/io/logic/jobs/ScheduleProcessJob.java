@@ -949,10 +949,10 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                if(fanHighHumdOption > 1) isFanHighEnabled = false;
                 cpuPoints.put("Fan High Humidity",fanHighHumdOption);
                 if(fanHighHumdOption == 2.0) {
-                    targetHumidity = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and humidity and his and equipRef == \"" + equipID + "\"");
+                    targetHumidity = CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and target and humidity and his and equipRef == \"" + equipID + "\"");
                     cpuPoints.put("Target Humidity",targetHumidity);
                 }else {
-                    targetHumidity = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and dehumidifier and his and equipRef == \"" + equipID + "\"");
+                    targetHumidity = CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and target and dehumidifier and his and equipRef == \"" + equipID + "\"");
                     cpuPoints.put("Target Dehumidity",targetHumidity);
                 }
             }else{
@@ -1015,10 +1015,10 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             if(fanHighHumdOption > 1)isFanHighEnabled = false; //Since relay 5 is mapped to humidity or dehumidity
             hpuPoints.put("Fan High Humidity",fanHighHumdOption);
             if(fanHighHumdOption == 2.0) {
-                targetHumidity = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and humidity and his and equipRef == \"" + equipID + "\"");
+                targetHumidity = CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and target and humidity and his and equipRef == \"" + equipID + "\"");
                 hpuPoints.put("Target Humidity",targetHumidity);
             }else {
-                targetHumidity = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and dehumidifier and his and equipRef == \"" + equipID + "\"");
+                targetHumidity = CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and target and dehumidifier and his and equipRef == \"" + equipID + "\"");
                 hpuPoints.put("Target Dehumidity",targetHumidity);
             }
         }else{

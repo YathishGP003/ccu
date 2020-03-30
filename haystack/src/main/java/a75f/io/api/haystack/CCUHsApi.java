@@ -1071,14 +1071,14 @@ public class CCUHsApi
                     }
 
                     // exclude cm devices for force sync
-                    ArrayList<HashMap> hDList = readAll("device");
+                   /* ArrayList<HashMap> hDList = readAll("device");
                     for (HashMap h: hDList){
                         Device d = new Device.Builder().setHashMap(h).build();
 
                         if (d.getMarkers().contains("cm") && d.getId().equals(map.getKey())){
                             removeMap.remove(map.getKey());
                         }
-                    }
+                    }*/
                 }
 
                 // finally clear remaining id's for force sync

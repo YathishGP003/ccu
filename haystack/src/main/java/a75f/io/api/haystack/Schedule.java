@@ -275,18 +275,15 @@ public class Schedule extends Entity
     public Occupied getCurrentValues()
     {
         Occupied            occupied           = null;
-        ArrayList<Days>     daysSorted         = getDaysSorted();
+        ArrayList<Days>     daysSorted         = getSplitDays();
         ArrayList<Interval> scheduledIntervals = getScheduledIntervals(daysSorted);
 
-      /*  Collections.sort(scheduledIntervals, new Comparator<Interval>() {
+        Collections.sort(scheduledIntervals, new Comparator<Interval>() {
             @Override
             public int compare(Interval lhs, Interval rhs) {
-                if (lhs == null || rhs == null){
-                    return 0;
-                }
                 return Long.compare(lhs.getStart().getMillis(), rhs.getStart().getMillis());
             }
-        });*/
+        });
 
         for (int i = 0; i < daysSorted.size(); i++)
         {
@@ -640,6 +637,75 @@ public class Schedule extends Entity
         });
 
         return mDays;
+    }
+
+    public ArrayList<Days> getSplitDays(){
+        ArrayList<Days> days = new ArrayList<>();
+
+        for (Days day : getDaysSorted()){
+            if (day.getSthh() >= day.getEthh()){
+                Days d = new Days();
+                d.setSthh(day.mSthh);
+                d.setStmm(day.mStmm);
+                d.setEthh(23);
+                d.setEtmm(45);
+                d.setDay(day.mDay);
+                d.setVal(day.mVal);
+                d.setCoolingVal(day.getCoolingVal());
+                d.setHeatingVal(day.getHeatingVal());
+                days.add(d);
+
+                Days d2 = new Days();
+                d2.setSthh(00);
+                d2.setStmm(00);
+                d2.setEthh(day.mEthh);
+                d2.setEtmm(day.mEtmm);
+                d.setVal(day.mVal);
+
+                if (day.getDay() == DAYS.SUNDAY.ordinal()){
+                    d2.setDay(0);
+                } else {
+                    d2.setDay(day.mDay + 1);
+                }
+
+                d2.setCoolingVal(day.getCoolingVal());
+                d2.setHeatingVal(day.getHeatingVal());
+                days.add(d2);
+
+                continue;
+            }
+
+            days.add(day);
+        }
+
+        Collections.sort(days, new Comparator<Days>()
+        {
+            @Override
+            public int compare(Days o1, Days o2)
+            {
+                return Integer.valueOf(o1.getStmm()).compareTo(Integer.valueOf(o2.getStmm()));
+            }
+        });
+
+        Collections.sort(days, new Comparator<Days>()
+        {
+            @Override
+            public int compare(Days o1, Days o2)
+            {
+                return Integer.valueOf(o1.getSthh()).compareTo(Integer.valueOf(o2.getSthh()));
+            }
+        });
+
+        Collections.sort(days, new Comparator<Days>()
+        {
+            @Override
+            public int compare(Days o1, Days o2)
+            {
+                return Integer.valueOf(o1.mDay).compareTo(Integer.valueOf(o2.mDay));
+            }
+        });
+
+        return days;
     }
 
     public void populateIntersections()

@@ -723,6 +723,11 @@ public abstract class SystemProfile
     
     public void addDefaultSystemPoints(String siteRef, String equipref, String equipDis, String tz)
     {
+        Point cmCurrentTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmCurrentTemp").setSiteRef(siteRef)
+                .setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cm").addMarker("current")
+                .addMarker("temp").addMarker("his").addMarker("equipHis").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
+        String ctID = CCUHsApi.getInstance().addPoint(cmCurrentTemp);
+        CCUHsApi.getInstance().writeHisValById(ctID, 0.0);
         Point systemStatusMessage = new Point.Builder()
                 .setDisplayName(equipDis + "-StatusMessage")
                 .setEquipRef(equipref)

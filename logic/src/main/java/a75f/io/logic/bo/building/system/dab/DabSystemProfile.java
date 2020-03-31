@@ -66,7 +66,8 @@ public abstract class DabSystemProfile extends SystemProfile
         String siteRef = (String) siteMap.get(Tags.ID);
         String tz = siteMap.get("tz").toString();
         
-        Point targetCumulativeDamper = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "targetCumulativeDamper").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("target").addMarker("cumulative").addMarker("damper").addMarker("sp").addMarker("equipHis").setTz(tz).build();
+        Point targetCumulativeDamper = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "targetCumulativeDamper").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("target").addMarker("cumulative").addMarker("damper").addMarker("sp").addMarker("equipHis")
+                .setUnit("%").setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP).setTz(tz).build();
         String targetCumulativeDamperId = hayStack.addPoint(targetCumulativeDamper);
         HashMap targetCumulativeDamperP = hayStack.read("point and tuner and default and dab and target and cumulative and damper");
         ArrayList<HashMap> targetCumulativeDamperArr = hayStack.readPoint(targetCumulativeDamperP.get("id").toString());
@@ -80,7 +81,8 @@ public abstract class DabSystemProfile extends SystemProfile
         }
         hayStack.writeHisValById(targetCumulativeDamperId, HSUtil.getPriorityVal(targetCumulativeDamperId));
         
-        Point analogFanSpeedMultiplier = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "analogFanSpeedMultiplier").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("analog").addMarker("fan").addMarker("speed").addMarker("multiplier").addMarker("sp").addMarker("equipHis").setTz(tz).build();
+        Point analogFanSpeedMultiplier = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "analogFanSpeedMultiplier").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("analog").addMarker("fan").addMarker("speed").addMarker("multiplier").addMarker("sp").addMarker("equipHis")
+                .setMinVal("0.1").setMaxVal("3.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP).setTz(tz).build();
         String analogFanSpeedMultiplierId = hayStack.addPoint(analogFanSpeedMultiplier);
         HashMap analogFanSpeedMultiplierP = hayStack.read("point and tuner and default and dab and analog and fan and speed and multiplier");
         ArrayList<HashMap> analogFanSpeedMultiplierArr = hayStack.readPoint(analogFanSpeedMultiplierP.get("id").toString());
@@ -94,7 +96,8 @@ public abstract class DabSystemProfile extends SystemProfile
         }
         hayStack.writeHisValById(analogFanSpeedMultiplierId, HSUtil.getPriorityVal(analogFanSpeedMultiplierId));
         
-        Point humidityHysteresis = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "humidityHysteresis").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("humidity").addMarker("hysteresis").addMarker("sp").addMarker("equipHis").setTz(tz).build();
+        Point humidityHysteresis = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "humidityHysteresis").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("humidity").addMarker("hysteresis").addMarker("sp").addMarker("equipHis")
+                .setUnit("%").setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP).setTz(tz).build();
         String humidityHysteresisId = hayStack.addPoint(humidityHysteresis);
         HashMap humidityHysteresisPoint = hayStack.read("point and tuner and default and dab and humidity and hysteresis");
         ArrayList<HashMap> humidityHysteresisArr = hayStack.readPoint(humidityHysteresisPoint.get("id").toString());
@@ -108,7 +111,8 @@ public abstract class DabSystemProfile extends SystemProfile
         }
         hayStack.writeHisValById(humidityHysteresisId, HSUtil.getPriorityVal(humidityHysteresisId));
         
-        Point relayDeactivationHysteresis = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "relayDeactivationHysteresis").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp").addMarker("equipHis").setTz(tz).build();
+        Point relayDeactivationHysteresis = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "relayDeactivationHysteresis").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp").addMarker("equipHis")
+                .setUnit("%").setMinVal("0").setMaxVal("10").setIncrementVal("0.5").setTunerGroup(TunerConstants.DAB_TUNER_GROUP).setTz(tz).build();
         String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
         HashMap relayDeactivationHysteresisPoint = hayStack.read("point and tuner and default and dab and relay and deactivation and hysteresis");
         ArrayList<HashMap> relayDeactivationHysteresisArr = hayStack.readPoint(relayDeactivationHysteresisPoint.get("id").toString());

@@ -74,7 +74,6 @@ public class DefaultSystem extends SystemProfile
                                    .build();
         String equipRef = hayStack.addEquip(systemEquip);
         addSystemTuners();
-        addCMPoints(siteRef, equipRef, siteDis+"-SystemEquip", siteMap.get("tz").toString());
         addDefaultSystemPoints(siteRef, equipRef, siteDis+"-SystemEquip", siteMap.get("tz").toString());
         updateGatewayRef(equipRef);
 

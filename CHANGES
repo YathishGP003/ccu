@@ -1,11 +1,7 @@
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-981, decimal points updates every min
+ - #RENATUS-997, Sunday overnight schedule fix
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-1011, humidifier not turning off
  - Merge branch 'mahesh_renatus' into 'master'
- - fix
- - resolved RENATUS-1015, RENATUS-997
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-981, decimal points updates every min
- - #RENATUS-1016, toast msg
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-1014, SSE tags change from runtime to enum
- - #LSFACPORTL-1255, SSE tags change from runtime to enum
+ - remove cm device
+ - resolved RENATUS-997, RENATUS-1006, RENATUS-1009

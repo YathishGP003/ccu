@@ -3422,15 +3422,26 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("base").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("standalone").addMarker("heating").addMarker("threshold").addMarker("pipe2").addMarker("fcu").addMarker("sp")
                 .setMinVal("80").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
         String sa2PfcHeatingThresholdId = hayStack.addPoint(sa2PfcHeatingThreshold);
-        hayStack.writePoint(sa2PfcHeatingThresholdId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_HEATING_THRESHOLD_2PFCU_DEFAULT, 0);
-        hayStack.writeHisValById(sa2PfcHeatingThresholdId, TunerConstants.STANDALONE_HEATING_THRESHOLD_2PFCU_DEFAULT);
+        HashMap sa2PfcHeatingThresholdIdPoint = hayStack.read("point and tuner and default and base and standalone and heating and threshold and pipe2 and fcu");
+        if (sa2PfcHeatingThresholdIdPoint != null && sa2PfcHeatingThresholdIdPoint.get("id") != null) {
+            ArrayList<HashMap> sa2PfcHeatingThresholdIdPointArr = hayStack.readPoint(sa2PfcHeatingThresholdIdPoint.get("id").toString());
+            for (HashMap valMap : sa2PfcHeatingThresholdIdPointArr) {
+                if (valMap.get("val") != null) {
+                    System.out.println(valMap);
+                    hayStack.pointWrite(HRef.copy(sa2PfcHeatingThresholdId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                }
+            }
+            hayStack.writeHisValById(sa2PfcHeatingThresholdId, HSUtil.getPriorityVal(sa2PfcHeatingThresholdId));
+        }
+        //hayStack.writePoint(sa2PfcHeatingThresholdId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_HEATING_THRESHOLD_2PFCU_DEFAULT, 0);
+        //hayStack.writeHisValById(sa2PfcHeatingThresholdId, TunerConstants.STANDALONE_HEATING_THRESHOLD_2PFCU_DEFAULT);
 
         Point sa2PfcCoolingThreshold = new Point.Builder()
                 .setDisplayName(equipDis+"-2PipeFancoilCoolingThreshold")
@@ -3438,15 +3449,24 @@ public class BuildingTuners
                 .setEquipRef(equipRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("base").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("standalone").addMarker("cooling").addMarker("threshold").addMarker("pipe2").addMarker("fcu").addMarker("sp")
                 .setMinVal("35").setMaxVal("70").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
         String sa2PfcCoolingThresholdId = hayStack.addPoint(sa2PfcCoolingThreshold);
-        hayStack.writePoint(sa2PfcCoolingThresholdId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_COOLING_THRESHOLD_2PFCU_DEFAULT, 0);
-        hayStack.writeHisValById(sa2PfcCoolingThresholdId, TunerConstants.STANDALONE_COOLING_THRESHOLD_2PFCU_DEFAULT);
+        HashMap sa2PfcCoolingThresholdIdPoint = hayStack.read("point and tuner and default and base and standalone and cooling and threshold and pipe2 and fcu");
+        if (sa2PfcCoolingThresholdIdPoint != null && sa2PfcCoolingThresholdIdPoint.get("id") != null) {
+            ArrayList<HashMap> sa2PfcCoolingThresholdIdPointArr = hayStack.readPoint(sa2PfcCoolingThresholdIdPoint.get("id").toString());
+            for (HashMap valMap : sa2PfcCoolingThresholdIdPointArr) {
+                if (valMap.get("val") != null) {
+                    System.out.println(valMap);
+                    hayStack.pointWrite(HRef.copy(sa2PfcCoolingThresholdId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                }
+            }
+            hayStack.writeHisValById(sa2PfcCoolingThresholdId, HSUtil.getPriorityVal(sa2PfcCoolingThresholdId));
+        }
     }
     public void addDefaultStandaloneTuners()
     {
@@ -3639,6 +3659,35 @@ public class BuildingTuners
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
         hayStack.writePoint(zoneVOCThresholdId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_VOC_THRESHOLD, 0);
         hayStack.writeHisValById(zoneVOCThresholdId, TunerConstants.ZONE_VOC_THRESHOLD);
+
+
+        Point sa2PfcHeatingThreshold = new Point.Builder()
+                .setDisplayName(equipDis+"-2PipeFancoilHeatingThreshold")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("default").addMarker("base").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("standalone").addMarker("heating").addMarker("threshold").addMarker("pipe2").addMarker("fcu").addMarker("sp")
+                .setMinVal("80").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String sa2PfcHeatingThresholdId = hayStack.addPoint(sa2PfcHeatingThreshold);
+        hayStack.writePoint(sa2PfcHeatingThresholdId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_HEATING_THRESHOLD_2PFCU_DEFAULT, 0);
+        hayStack.writeHisValById(sa2PfcHeatingThresholdId, TunerConstants.STANDALONE_HEATING_THRESHOLD_2PFCU_DEFAULT);
+
+        Point sa2PfcCoolingThreshold = new Point.Builder()
+                .setDisplayName(equipDis+"-2PipeFancoilCoolingThreshold")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("default").addMarker("base").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("standalone").addMarker("cooling").addMarker("threshold").addMarker("pipe2").addMarker("fcu").addMarker("sp")
+                .setMinVal("35").setMaxVal("70").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String sa2PfcCoolingThresholdId = hayStack.addPoint(sa2PfcCoolingThreshold);
+        hayStack.writePoint(sa2PfcCoolingThresholdId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_COOLING_THRESHOLD_2PFCU_DEFAULT, 0);
+        hayStack.writeHisValById(sa2PfcCoolingThresholdId, TunerConstants.STANDALONE_COOLING_THRESHOLD_2PFCU_DEFAULT);
         Point standaloneCoolingAirflowTempLowerOffset = new Point.Builder()
                 .setDisplayName(equipDis+"-standaloneStage2CoolingLowerOffset")
                 .setSiteRef(siteRef)

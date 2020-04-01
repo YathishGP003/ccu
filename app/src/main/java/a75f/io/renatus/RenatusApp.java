@@ -94,9 +94,11 @@ public class RenatusApp extends UtilityApplication
 							output += new String(buffer, 0, read);
 						}
 						p.waitFor();
+						wait(5000);
 						Log.d("CCU_DOWNLOAD", output.trim() + " (" + p.exitValue() + ")");
 						ApplicationInfo appInfo2 = RenatusApp.getAppContext().getApplicationInfo();
 						Log.d("CCU_DOWNLOAD", "RenatusAPP ExecuteAsRoot END===>"+(appInfo2.flags & ApplicationInfo.FLAG_SYSTEM));
+						closeApp();
 					}
 				} catch (IOException e) {
 					Log.e("CCU_DOWNLOAD", e.getMessage());

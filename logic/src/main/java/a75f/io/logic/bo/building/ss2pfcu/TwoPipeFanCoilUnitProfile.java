@@ -395,7 +395,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                     if (supplyWaterTempTh2 > heatingThreshold) {
                         if (waterVal > 0)
                             setCmdSignal("pipe2 and fcu and water and valve", 0, addr);
-                    } else {
+                    } else if(supplyWaterTempTh2 > coolingThreshold){
                         if( occupied || (!occupied && ((roomTemp > setTempCooling) || ( (roomTemp > 0) && (roomTemp < setTempHeating)))) ){
                             // run periodic water valve check 2 mins on and 5 mins OFF
                             fcuPeriodicWaterValveCheck(addr, false);
@@ -411,7 +411,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                     if (supplyWaterTempTh2 < coolingThreshold) {
                         if (waterVal > 0)
                             setCmdSignal("pipe2 and fcu and water and valve", 0, addr);
-                    } else {
+                    } else if(supplyWaterTempTh2 < heatingThreshold){
                         if( occupied || (!occupied && ((roomTemp > setTempCooling) || ( (roomTemp > 0) && (roomTemp < setTempHeating)))) ){
                             // run periodic water valve check 2 mins on and 5 mins OFF
                             fcuPeriodicWaterValveCheck(addr, false);
@@ -509,7 +509,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                         setCmdSignal("fan and medium",0,addr);
                         setCmdSignal("fan and low",0,addr);
                         fanstages = "FanStage3";
-                    }else if((roomTemp >= (setTempHeating+heatingDeadband)) && (roomTemp <= (setTempCooling + coolingDeadband))){
+                    }else if((roomTemp >= (setTempHeating - heatingDeadband)) && (roomTemp <= (setTempCooling + coolingDeadband))){
                         setCmdSignal("fan and high",0,addr);
                     }else {
                         if(getCmdSignal("fan and high",addr) > 0)

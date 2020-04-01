@@ -1,7 +1,2 @@
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-997, Sunday overnight schedule fix
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-1011, humidifier not turning off
- - Merge branch 'mahesh_renatus' into 'master'
- - remove cm device
- - resolved RENATUS-997, RENATUS-1006, RENATUS-1009
+ - #RENATUS-1012,Tuners: add group tag for system tuners

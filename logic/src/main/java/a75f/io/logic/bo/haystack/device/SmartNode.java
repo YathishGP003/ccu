@@ -223,6 +223,7 @@ public class SmartNode
     public RawPoint addSensor(Port p) {
         Equip q = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \""+smartNodeAddress+"\"")).build();
         String sensorUnit = "";
+        boolean isOccupancySensor = false;
         switch (p){
             case SENSOR_NO:
             case SENSOR_CO2_EQUIVALENT:
@@ -241,22 +242,44 @@ public class SmartNode
             case SENSOR_VOC:
                 sensorUnit = "ppb";
                 break;
+            case SENSOR_OCCUPANCY:
+                isOccupancySensor = true;
+                break;
             default:
                 break;
         }
-    
-        Point equipSensor = new Point.Builder()
-                                 .setDisplayName(q.getDisplayName()+"-"+p.getPortSensor())
-                                 .setEquipRef(q.getId())
-                                 .setSiteRef(siteRef)
-                                 .setRoomRef(roomRef)
-                                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                                 .addMarker("zone").addMarker("sensor").addMarker(p.getPortSensor()).addMarker("his").addMarker("cur").addMarker("current").addMarker("logical").addMarker("equipHis")
-                                 .setUnit(sensorUnit)
-                                 .setGroup(String.valueOf(smartNodeAddress))
-                                 .setTz(tz)
-                                 .build();
-        String pointRef = CCUHsApi.getInstance().addPoint(equipSensor);
+
+
+        Point equipSensor;
+        String pointRef;
+        if(isOccupancySensor) {
+
+            equipSensor = new Point.Builder()
+                    .setDisplayName(q.getDisplayName() + "-" + p.getPortSensor()+"Sensor")
+                    .setEquipRef(q.getId())
+                    .setSiteRef(siteRef)
+                    .setRoomRef(roomRef)
+                    .setFloorRef(floorRef).setHisInterpolate("cov")
+                    .addMarker("zone").addMarker("sensor").addMarker(p.getPortSensor()).addMarker("his").addMarker("cur").addMarker("current").addMarker("logical").addMarker("equipHis")
+                    .setEnums("off,on")
+                    .setGroup(String.valueOf(smartNodeAddress))
+                    .setTz(tz)
+                    .build();
+             pointRef = CCUHsApi.getInstance().addPoint(equipSensor);
+        }else {
+            equipSensor = new Point.Builder()
+                    .setDisplayName(q.getDisplayName() + "-" + p.getPortSensor())
+                    .setEquipRef(q.getId())
+                    .setSiteRef(siteRef)
+                    .setRoomRef(roomRef)
+                    .setFloorRef(floorRef).setHisInterpolate("cov")
+                    .addMarker("zone").addMarker("sensor").addMarker(p.getPortSensor()).addMarker("his").addMarker("cur").addMarker("current").addMarker("logical").addMarker("equipHis")
+                    .setUnit(sensorUnit)
+                    .setGroup(String.valueOf(smartNodeAddress))
+                    .setTz(tz)
+                    .build();
+            pointRef = CCUHsApi.getInstance().addPoint(equipSensor);
+        }
         RawPoint deviceSensor = new RawPoint.Builder()
                                   .setDisplayName(p.toString()+"-"+smartNodeAddress)
                                   .setDeviceRef(deviceRef)

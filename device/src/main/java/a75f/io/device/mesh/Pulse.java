@@ -249,6 +249,7 @@ public class Pulse
 				case CO2_EQUIVALENT:
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), CCUUtils.roundToOneDecimal(val) );
 					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),CCUUtils.roundToOneDecimal(val));
+					break;
 				case ENERGY_METER_HIGH:
 					emVal = emVal > 0 ?  (emVal | (r.sensorData.get() << 12)) : r.sensorData.get();
 					break;

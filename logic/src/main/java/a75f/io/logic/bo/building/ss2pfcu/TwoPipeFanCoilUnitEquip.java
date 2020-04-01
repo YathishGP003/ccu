@@ -243,6 +243,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
                 .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("occupancy").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
+                .setEnums("off,on")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();

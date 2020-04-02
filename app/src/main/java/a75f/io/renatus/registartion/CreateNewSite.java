@@ -313,10 +313,10 @@ public class CreateNewSite extends Fragment {
 
                     if (ccu.size() > 0) {
                         String ahuRef = ccu.get("ahuRef").toString();
-                        CCUHsApi.getInstance().updateCCU(ccuName, ahuRef);
+                        CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, managerEmail);
                         L.ccu().setCCUName(ccuName);
                     } else {
-                        String localId = CCUHsApi.getInstance().createCCU(ccuName, DiagEquip.getInstance().create());
+                        String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(),managerEmail);
                         L.ccu().setCCUName(ccuName);
                         CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                     }
@@ -367,10 +367,10 @@ public class CreateNewSite extends Fragment {
 
                     if (ccu.size() > 0) {
                         String ahuRef = ccu.get("ahuRef").toString();
-                        CCUHsApi.getInstance().updateCCU(ccuName, ahuRef);
+                        CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, managerEmail);
                         L.ccu().setCCUName(ccuName);
                     } else {
-                        String localId = CCUHsApi.getInstance().createCCU(ccuName, DiagEquip.getInstance().create());
+                        String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(), managerEmail);
                         L.ccu().setCCUName(ccuName);
                         CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                     }
@@ -417,7 +417,7 @@ public class CreateNewSite extends Fragment {
             String siteState = site.get("geoState").toString();
             String siteCountry = site.get("geoCountry").toString();
             String siteZipCode = site.get("geoPostalCode").toString();
-            String ccuFmEmail = site.get("fmEmail").toString();
+            String ccuFmEmail = site.get("fmEmail") != null ?  site.get("fmEmail").toString() : "";
             String ccuInstallerEmail = site.get("installerEmail") != null ? site.get("installerEmail").toString() : "";
             String siteTz = site.get("tz").toString();
             String siteOrg = site.get("organization") != null ? site.get("organization").toString(): "";
@@ -442,7 +442,11 @@ public class CreateNewSite extends Fragment {
             if (ccu.size() > 0) {
                 //if CCU Exists
                 String ccuName = ccu.get("dis").toString();
+                ccuFmEmail = ccu.get("fmEmail").toString();
+                ccuInstallerEmail = ccu.get("installerEmail") != null ? ccu.get("installerEmail").toString() : "";
                 mSiteCCU.setText(ccuName);
+                mSiteEmailId.setText(ccuFmEmail);
+                mSiteInstallerEmailId.setText(ccuInstallerEmail);
             }
 
         }
@@ -461,7 +465,7 @@ public class CreateNewSite extends Fragment {
                 String installerEmail = mSiteInstallerEmailId.getText().toString();
                 String ccuName = mSiteCCU.getText().toString();
                 HashMap diagEquip = CCUHsApi.getInstance().read("equip and diag");
-                String localId = CCUHsApi.getInstance().createCCU(ccuName, diagEquip.get("id").toString());
+                String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail,diagEquip.get("id").toString(),managerEmail);
                 L.ccu().setCCUName(ccuName);
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                 L.saveCCUState();
@@ -699,9 +703,9 @@ public class CreateNewSite extends Fragment {
                             String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
                             ccuRegInfo.put("deviceId", ccuGUID);
                             ccuRegInfo.put("deviceName", ccu.get("dis").toString());
-                            ccuRegInfo.put("facilityManagerEmail", site.get("fmEmail").toString());
-                            if (site.get("installerEmail") != null) {
-                                ccuRegInfo.put("installerEmail", site.get("installerEmail").toString());
+                            ccuRegInfo.put("facilityManagerEmail", ccu.get("fmEmail").toString());
+                            if (ccu.get("installerEmail") != null) {
+                                ccuRegInfo.put("installerEmail", ccu.get("installerEmail").toString());
                             }
                             ccuRegInfo.put("locationDetails", locInfo);
 

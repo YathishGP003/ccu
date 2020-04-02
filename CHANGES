@@ -1,2 +1,7 @@
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-1012,Tuners: add group tag for system tuners
+ - #RENATUS-1019, upgrade ccu app fix
+ - #RENATUS-1019, upgrade ccu app fix
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-1019, upgrade ccu app fix
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-1020, Occupancy sensor should also have enum tag for bar graph

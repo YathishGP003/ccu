@@ -78,6 +78,14 @@ public class RegisterGatherCCUDetails extends Activity {
         mCCUNameET = findViewById(R.id.ccu_name_et);
         mCreateNewCCU = findViewById(R.id.create_new);
 
+        HashMap site = CCUHsApi.getInstance().read("site");
+        String ccuFmEmail = site.get("fmEmail").toString();
+        String ccuInstallerEmail = site.get("installerEmail") != null ? site.get("installerEmail").toString() : "";
+        mInstallerEmailET.setText(ccuInstallerEmail);
+        mManagerEmailET.setText(ccuFmEmail);
+        mManagerEmailET.setEnabled(false);
+        mInstallerEmailET.setEnabled(false);
+
         for (int addr = 1000; addr <= 10000; addr+=100)
         {
             addressBand.add(String.valueOf(addr));
@@ -111,22 +119,14 @@ public class RegisterGatherCCUDetails extends Activity {
             public void onClick(View v) {
                 prefs.setBoolean("registered", true);
                 String ccuName = mCCUNameET.getText().toString();
-                String installerEmail = mInstallerEmailET.getText().toString();
-                String managerEmail = mManagerEmailET.getText().toString();
                 if (ccuName.trim().length() == 0) {
                     Toast.makeText(RegisterGatherCCUDetails.this, "Enter CCU name", Toast.LENGTH_SHORT).show();
-                    return;
-                } else if (installerEmail.trim().length() == 0) {
-                    Toast.makeText(RegisterGatherCCUDetails.this, "Enter Installer email", Toast.LENGTH_SHORT).show();
-                    return;
-                } else if (managerEmail.trim().length() == 0) {
-                    Toast.makeText(RegisterGatherCCUDetails.this, "Enter Manager email", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
 
                 L.ccu().setCCUName(ccuName);
-                String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(), managerEmail);
+                String localId = CCUHsApi.getInstance().createCCU(ccuName, DiagEquip.getInstance().create());
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
 
                 HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);

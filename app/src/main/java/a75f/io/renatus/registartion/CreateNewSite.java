@@ -306,17 +306,17 @@ public class CreateNewSite extends Fragment {
                     prefs.setBoolean("registered", true);
                     if (site.size() > 0) {
                         String siteId = site.get("id").toString();
-                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId,installerOrg);
+                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId,installerOrg, installerEmail, managerEmail);
                     } else {
-                        saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, installerOrg);
+                        saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, installerOrg, installerEmail,managerEmail);
                     }
 
                     if (ccu.size() > 0) {
                         String ahuRef = ccu.get("ahuRef").toString();
-                        CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, managerEmail);
+                        CCUHsApi.getInstance().updateCCU(ccuName, ahuRef);
                         L.ccu().setCCUName(ccuName);
                     } else {
-                        String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(),managerEmail);
+                        String localId = CCUHsApi.getInstance().createCCU(ccuName, DiagEquip.getInstance().create());
                         L.ccu().setCCUName(ccuName);
                         CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                     }
@@ -360,17 +360,17 @@ public class CreateNewSite extends Fragment {
 
                     if (site.size() > 0) {
                         String siteId = site.get("id").toString();
-                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId, installerOrg);
+                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId, installerOrg, installerEmail, managerEmail);
                     } else {
-                        saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry,installerOrg);
+                        saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry,installerOrg, installerEmail,managerEmail);
                     }
 
                     if (ccu.size() > 0) {
                         String ahuRef = ccu.get("ahuRef").toString();
-                        CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, managerEmail);
+                        CCUHsApi.getInstance().updateCCU(ccuName, ahuRef);
                         L.ccu().setCCUName(ccuName);
                     } else {
-                        String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(), managerEmail);
+                        String localId = CCUHsApi.getInstance().createCCU(ccuName, DiagEquip.getInstance().create());
                         L.ccu().setCCUName(ccuName);
                         CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                     }
@@ -417,6 +417,8 @@ public class CreateNewSite extends Fragment {
             String siteState = site.get("geoState").toString();
             String siteCountry = site.get("geoCountry").toString();
             String siteZipCode = site.get("geoPostalCode").toString();
+            String ccuFmEmail = site.get("fmEmail").toString();
+            String ccuInstallerEmail = site.get("installerEmail") != null ? site.get("installerEmail").toString() : "";
             String siteTz = site.get("tz").toString();
             String siteOrg = site.get("organization") != null ? site.get("organization").toString(): "";
 
@@ -427,6 +429,8 @@ public class CreateNewSite extends Fragment {
             mSiteCountry.setText(siteCountry);
             mSiteZip.setText(siteZipCode);
             mSiteOrg.setText(siteOrg);
+            mSiteEmailId.setText(ccuFmEmail);
+            mSiteInstallerEmailId.setText(ccuInstallerEmail);
 
             String[] tzIds = TimeZone.getAvailableIDs();
             for (String timeZone : tzIds) {
@@ -438,11 +442,7 @@ public class CreateNewSite extends Fragment {
             if (ccu.size() > 0) {
                 //if CCU Exists
                 String ccuName = ccu.get("dis").toString();
-                String ccuFmEmail = ccu.get("fmEmail").toString();
-                String ccuInstallerEmail = ccu.get("installerEmail") != null ? ccu.get("installerEmail").toString() : "";
                 mSiteCCU.setText(ccuName);
-                mSiteEmailId.setText(ccuFmEmail);
-                mSiteInstallerEmailId.setText(ccuInstallerEmail);
             }
 
         }
@@ -455,16 +455,13 @@ public class CreateNewSite extends Fragment {
                 CCUHsApi.getInstance().deleteEntity(CCUHsApi.getInstance().getCcuId().toString());
 
                 ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU...");
-                btnUnregisterSite.setText("UnRegister");
-                btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
-                setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
                 prefs.setBoolean("registered", true);
 
                 String managerEmail = mSiteEmailId.getText().toString();
                 String installerEmail = mSiteInstallerEmailId.getText().toString();
                 String ccuName = mSiteCCU.getText().toString();
                 HashMap diagEquip = CCUHsApi.getInstance().read("equip and diag");
-                String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, diagEquip.get("id").toString(),managerEmail);
+                String localId = CCUHsApi.getInstance().createCCU(ccuName, diagEquip.get("id").toString());
                 L.ccu().setCCUName(ccuName);
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                 L.saveCCUState();
@@ -527,10 +524,6 @@ public class CreateNewSite extends Fragment {
         builder.setMessage("\n"+"Are you sure you want to unregister ccu?");
         builder.setCancelable(false);
         builder.setPositiveButton("YES", (dialog, which) -> {
-            btnUnregisterSite.setText("Register");
-            btnUnregisterSite.setTextColor(getResources().getColor(R.color.accent));
-            btnEditSite.setEnabled(false);
-            setCompoundDrawableColor(btnUnregisterSite, R.color.accent);
 
             HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
             String ahuRef = ccu.get("ahuRef").toString();
@@ -626,6 +619,11 @@ public class CreateNewSite extends Fragment {
                             String ccuId = row.get("removeCCUId").toString();
                             if (ccuId != null && ccuId != "")
                             {
+                                btnUnregisterSite.setText("Register");
+                                btnUnregisterSite.setTextColor(getResources().getColor(R.color.accent));
+                                btnEditSite.setEnabled(false);
+                                setCompoundDrawableColor(btnUnregisterSite, R.color.accent);
+
                                 prefs.setString("token","");
                                 prefs.setBoolean("registered", false);
                                 Toast.makeText(getActivity(), "CCU removed Successfully " +ccuId, Toast.LENGTH_LONG).show();
@@ -701,9 +699,9 @@ public class CreateNewSite extends Fragment {
                             String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
                             ccuRegInfo.put("deviceId", ccuGUID);
                             ccuRegInfo.put("deviceName", ccu.get("dis").toString());
-                            ccuRegInfo.put("facilityManagerEmail", ccu.get("fmEmail").toString());
-                            if (ccu.get("installerEmail") != null) {
-                                ccuRegInfo.put("installerEmail", ccu.get("installerEmail").toString());
+                            ccuRegInfo.put("facilityManagerEmail", site.get("fmEmail").toString());
+                            if (site.get("installerEmail") != null) {
+                                ccuRegInfo.put("installerEmail", site.get("installerEmail").toString());
                             }
                             ccuRegInfo.put("locationDetails", locInfo);
 
@@ -764,6 +762,10 @@ public class CreateNewSite extends Fragment {
                     try {
                         JSONObject resString = new JSONObject(result);
                         if(resString.getBoolean("success")){
+                            btnUnregisterSite.setText("UnRegister");
+                            btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
+                            setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
+
                             prefs.setString("token",resString.getString("token"));
                             Toast.makeText(getActivity(), "CCU Registered Successfully "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();
                         }else
@@ -929,7 +931,7 @@ public class CreateNewSite extends Fragment {
     }
     /* This site never existed we are creating a new orphaned site. */
 
-    public String saveSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState, String siteCountry, String org) {
+    public String saveSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState, String siteCountry, String org, String installer, String fcManager) {
         HashMap site = CCUHsApi.getInstance().read("site");
 
         String tzID = mTimeZoneSelector.getSelectedItem().toString();
@@ -946,6 +948,8 @@ public class CreateNewSite extends Fragment {
                 .setGeoZip(siteZip)
                 .setGeoCountry(siteCountry)
                 .setOrgnization(org)
+                .setInstaller(installer)
+                .setFcManager(fcManager)
                 .setGeoAddress(geoAddress)
                 .setArea(10000).build();
 
@@ -963,7 +967,7 @@ public class CreateNewSite extends Fragment {
         return localSiteId;
     }
 
-    public void updateSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState, String siteCountry, String siteId, String org) {
+    public void updateSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState, String siteCountry, String siteId, String org, String installer, String fcManager) {
 
         String tzID = mTimeZoneSelector.getSelectedItem().toString();
         AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
@@ -980,6 +984,8 @@ public class CreateNewSite extends Fragment {
                 .setGeoCountry(siteCountry)
                 .setGeoAddress(geoAddress)
                 .setOrgnization(org)
+                .setInstaller(installer)
+                .setFcManager(fcManager)
                 .setArea(10000).build();
 
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();

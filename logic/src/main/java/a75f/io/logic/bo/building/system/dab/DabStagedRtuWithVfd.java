@@ -90,7 +90,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
                         int val = (int) getConfigAssociation("relay" + i);
                         if (val <= Stage.COOLING_5.ordinal())
                         {
-                            if(getCmdSignal("cooling and stage" +Stage.values()[val]+1) > 0)
+                            if(getCmdSignal("cooling and stage" +(Stage.values()[val].ordinal()+1)) > 0)
                                 signal = getConfigVal("analog2 and cooling and stage" + (val + 1));
                         }
                     }

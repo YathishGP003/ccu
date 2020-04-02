@@ -455,10 +455,6 @@ public class CreateNewSite extends Fragment {
                 CCUHsApi.getInstance().deleteEntity(CCUHsApi.getInstance().getCcuId().toString());
 
                 ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU...");
-                btnUnregisterSite.setText("UnRegister");
-                btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
-                setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
-                prefs.setBoolean("registered", true);
 
                 String managerEmail = mSiteEmailId.getText().toString();
                 String installerEmail = mSiteInstallerEmailId.getText().toString();
@@ -527,10 +523,6 @@ public class CreateNewSite extends Fragment {
         builder.setMessage("\n"+"Are you sure you want to unregister ccu?");
         builder.setCancelable(false);
         builder.setPositiveButton("YES", (dialog, which) -> {
-            btnUnregisterSite.setText("Register");
-            btnUnregisterSite.setTextColor(getResources().getColor(R.color.accent));
-            btnEditSite.setEnabled(false);
-            setCompoundDrawableColor(btnUnregisterSite, R.color.accent);
 
             HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
             String ahuRef = ccu.get("ahuRef").toString();
@@ -626,6 +618,11 @@ public class CreateNewSite extends Fragment {
                             String ccuId = row.get("removeCCUId").toString();
                             if (ccuId != null && ccuId != "")
                             {
+                                btnUnregisterSite.setText("Register");
+                                btnUnregisterSite.setTextColor(getResources().getColor(R.color.accent));
+                                btnEditSite.setEnabled(false);
+                                setCompoundDrawableColor(btnUnregisterSite, R.color.accent);
+
                                 prefs.setString("token","");
                                 prefs.setBoolean("registered", false);
                                 Toast.makeText(getActivity(), "CCU removed Successfully " +ccuId, Toast.LENGTH_LONG).show();
@@ -764,6 +761,12 @@ public class CreateNewSite extends Fragment {
                     try {
                         JSONObject resString = new JSONObject(result);
                         if(resString.getBoolean("success")){
+
+                            btnUnregisterSite.setText("UnRegister");
+                            btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
+                            setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
+                            prefs.setBoolean("registered", true);
+
                             prefs.setString("token",resString.getString("token"));
                             Toast.makeText(getActivity(), "CCU Registered Successfully "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();
                         }else

@@ -1271,12 +1271,11 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                             String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
                             ccuRegInfo.put("deviceId", ccuGUID);
                             ccuRegInfo.put("deviceName", ccu.get("dis").toString());
-                            ccuRegInfo.put("facilityManagerEmail", ccu.get("fmEmail").toString());
-                            if (ccu.get("installerEmail") != null) {
-                                ccuRegInfo.put("installerEmail", ccu.get("installerEmail").toString());
+                            ccuRegInfo.put("facilityManagerEmail", site.get("fmEmail").toString());
+                            if (site.get("installerEmail") != null) {
+                                ccuRegInfo.put("installerEmail", site.get("installerEmail").toString());
                             }
                             ccuRegInfo.put("locationDetails", locInfo);
-
 
                             response = HttpUtil.executeJSONPost(CCUHsApi.getInstance().getAuthenticationUrl() + "api/v1/device/register", ccuRegInfo.toString(), " ");
                             Log.d("CCURegistration", " Response : " + response);

@@ -20,6 +20,8 @@ public class Site extends Entity
     private String tz;
     private double area;
     public String  organization;
+    public String  installerEmail;
+    public String  fcManagerEmail;
     private String id;
     public String getId()
     {
@@ -59,6 +61,14 @@ public class Site extends Entity
     }
     public String getGeoCountry() {return geoCountry;}
     public String getOrganization() {return organization;}
+    public String getInstallerEmail() {
+        return installerEmail;
+    }
+
+    public String getFcManagerEmail() {
+        return fcManagerEmail;
+    }
+
     public String toString() {
         return displayName;
     }
@@ -79,6 +89,8 @@ public class Site extends Entity
         private String geoCountry;
         private double area;
         public String  organization;
+        public String  fcManagerEmail;
+        public String  installerEmail;
 
 
         public Builder setGeoZip(String siteZip) {
@@ -136,6 +148,16 @@ public class Site extends Entity
             return this;
         }
 
+        public Builder setInstaller(String installer){
+            this.installerEmail = installer;
+            return this;
+        }
+
+        public Builder setFcManager(String fcManager){
+            this.fcManagerEmail = fcManager;
+            return this;
+        }
+
         public Site build()
         {
             Site s = new Site();
@@ -150,6 +172,8 @@ public class Site extends Entity
             s.id = this.id;
             s.geoCountry = this.geoCountry;
             s.organization = this.organization;
+            s.fcManagerEmail = this.fcManagerEmail;
+            s.installerEmail = this.installerEmail;
             return s;
         }
 
@@ -198,6 +222,14 @@ public class Site extends Entity
                 else if(pair.getKey().equals("organization"))
                 {
                     this.organization = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("fmEmail"))
+                {
+                    this.fcManagerEmail = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("installerEmail"))
+                {
+                    this.installerEmail = pair.getValue().toString();
                 }
 
                 //it.remove();

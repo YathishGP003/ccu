@@ -18,12 +18,14 @@ public class Site
     public String            geoZip;
     public String            tz;
     public String            organization;
+    public String            installerEmail;
+    public String            fcManagerEmail;
     public double            area;
     
     public Site() {
     
     }
-    public Site(String name,String city, String state, String country,String zip, String tz, double area, String org) {
+    public Site(String name,String city, String state, String country,String zip, String tz, double area, String org, String fcManager, String installer) {
         this.displayName = name;
         this.geoCity = city;
         this.geoState = state;
@@ -32,6 +34,8 @@ public class Site
         this.tz = tz;
         this.area = area;
         this.organization = org;
+        this.fcManagerEmail = fcManager;
+        this.installerEmail = installer;
     }
     
     public Site (a75f.io.api.haystack.Site s) {
@@ -44,5 +48,7 @@ public class Site
         this.tz = s.getTz();
         this.area = s.getArea();
         this.organization = s.getOrganization();
+        this.installerEmail = s.getInstallerEmail();
+        this.fcManagerEmail = s.getFcManagerEmail();
     }
 }

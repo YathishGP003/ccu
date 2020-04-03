@@ -667,6 +667,7 @@
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
                             android:layout_alignParentLeft="true"
+                            android:textSize="@dimen/text_small_xlarge"
                             android:textAppearance="@style/text_appearance"
                             android:text="@string/label_economizer"/>
 
@@ -697,6 +698,7 @@
                             android:layout_marginBottom="1dp"
                             android:layout_toLeftOf="@+id/analog2Recirculate"
                             android:text="@string/label_recirculate"
+                            android:textSize="@dimen/text_small_xlarge"
                             android:textAppearance="@style/text_appearance" />
 
                         <Spinner
@@ -730,6 +732,7 @@
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
                             android:layout_alignParentLeft="true"
+                            android:textSize="@dimen/text_small_xlarge"
                             android:textAppearance="@style/text_appearance"
                             android:text="@string/label_coolstage1"/>
 
@@ -758,6 +761,7 @@
                             android:layout_centerVertical="true"
                             android:layout_toLeftOf="@+id/analog2CoolStage2"
                             android:layout_marginRight="86dp"
+                            android:textSize="@dimen/text_small_xlarge"
                             android:textAppearance="@style/text_appearance"
                             android:text="@string/label_coolstage2"/>
 
@@ -793,6 +797,7 @@
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
                             android:layout_alignParentLeft="true"
+                            android:textSize="@dimen/text_small_xlarge"
                             android:textAppearance="@style/text_appearance"
                             android:text="@string/label_coolstage3"/>
 
@@ -821,6 +826,7 @@
                             android:layout_centerVertical="true"
                             android:layout_toLeftOf="@+id/analog2CoolStage4"
                             android:layout_marginRight="86dp"
+                            android:textSize="@dimen/text_small_xlarge"
                             android:textAppearance="@style/text_appearance"
                             android:text="@string/label_coolstage4"/>
 
@@ -855,6 +861,7 @@
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
                             android:layout_alignParentLeft="true"
+                            android:textSize="@dimen/text_small_xlarge"
                             android:textAppearance="@style/text_appearance"
                             android:text="@string/label_coolstage5"/>
 
@@ -896,6 +903,7 @@
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
                             android:layout_alignParentLeft="true"
+                            android:textSize="@dimen/text_small_xlarge"
                             android:textAppearance="@style/text_appearance"
                             android:text="@string/label_heatstage1"/>
 
@@ -924,6 +932,7 @@
                             android:layout_marginLeft="20dp"
                             android:layout_marginRight="82dp"
                             android:layout_marginBottom="1dp"
+                            android:textSize="@dimen/text_small_xlarge"
                             android:layout_toLeftOf="@+id/analog2HeatStage2"
                             android:text="@string/label_heatstage2"
                             android:textAppearance="@style/text_appearance" />
@@ -959,6 +968,7 @@
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
                             android:layout_alignParentLeft="true"
+                            android:textSize="@dimen/text_small_xlarge"
                             android:textAppearance="@style/text_appearance"
                             android:text="@string/label_heatstage3"/>
 
@@ -987,6 +997,7 @@
                             android:layout_centerVertical="true"
                             android:layout_toLeftOf="@+id/analog2HeatStage4"
                             android:layout_marginRight="86dp"
+                            android:textSize="@dimen/text_small_xlarge"
                             android:textAppearance="@style/text_appearance"
                             android:text="@string/label_heatstage4"/>
 
@@ -1022,6 +1033,7 @@
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
                             android:layout_alignParentLeft="true"
+                            android:textSize="@dimen/text_small_xlarge"
                             android:textAppearance="@style/text_appearance"
                             android:text="@string/label_heatstage5"/>
 

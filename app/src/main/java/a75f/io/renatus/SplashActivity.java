@@ -72,6 +72,10 @@ public class SplashActivity extends Activity {
                                 finish();
                             } else if(prefs.getBoolean("REGISTRATION"))
                             {
+                                if (!prefs.getBoolean("isCCURegistered")){
+                                    CCUHsApi.getInstance().registerDevice();
+                                }
+
                                 /*Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
                                 i.putExtra("viewpager_position", 18);
                                 startActivity(i);

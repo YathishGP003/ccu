@@ -3,9 +3,15 @@ package a75f.io.api.haystack;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.projecthaystack.HDate;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
@@ -1608,6 +1614,108 @@ public class CCUHsApi
         SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(cxt);
 
         return spDefaultPrefs.getBoolean("75fNetworkAvailable", false);
+    }
+
+    public void registerDevice(){
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                registerDeviceInfo();
+            }
+        }, 60000);
+    }
+
+    private void registerDeviceInfo() {
+
+        if (!isNetworkConnected()){
+            registerDevice();
+            return;
+        }
+
+        AsyncTask<Void, Void, String> updateCCUReg = new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... voids) {
+
+                //TODO upload CCU Registration details to Server for user management here //KUMAR 30/01/2020
+                String response = "";
+                try {
+                    HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
+                    HashMap site = CCUHsApi.getInstance().read("site");
+                    if (ccu.size() > 0) {
+                        String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
+                        if (ccuGUID == null || TextUtils.isEmpty(ccuGUID)) {
+                            registerDevice();
+                        }
+                    }
+                    if(site.size() > 0) {
+                        String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
+                        JSONObject ccuRegInfo = new JSONObject();
+                        ccuRegInfo.put("siteId", siteGUID);
+                        ccuRegInfo.put("siteName", site.get("dis").toString());
+                        JSONObject locInfo = new JSONObject();
+                        locInfo.put("geoCity", site.get("geoCity").toString());
+                        locInfo.put("geoCountry", site.get("geoCountry").toString());
+                        locInfo.put("geoState", site.get("geoState").toString());
+                        locInfo.put("geoAddr", site.get("geoAddr").toString());
+                        locInfo.put("geoPostalCode", site.get("geoPostalCode").toString());
+                        if(site.get("organization") != null)
+                            ccuRegInfo.put("organization", site.get("organization").toString());
+                        if(ccu.size() > 0) {
+                            String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
+                            ccuRegInfo.put("deviceId", ccuGUID);
+                            ccuRegInfo.put("deviceName", ccu.get("dis").toString());
+                            ccuRegInfo.put("facilityManagerEmail", site.get("fmEmail").toString());
+                            if (site.get("installerEmail") != null) {
+                                ccuRegInfo.put("installerEmail", site.get("installerEmail").toString());
+                            }
+                            ccuRegInfo.put("locationDetails", locInfo);
+
+
+                            response = HttpUtil.executeJSONPost(CCUHsApi.getInstance().getAuthenticationUrl() + "api/v1/device/register", ccuRegInfo.toString(),"");
+                            Log.d("CCURegistration", " Response : " + response);
+                        }
+                    }
+                }catch (JSONException e){
+                    e.printStackTrace();
+                }
+                return response;
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+                super.onPostExecute(result);
+                SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(cxt);
+                SharedPreferences.Editor editor = spDefaultPrefs.edit();
+
+                if( (result != null) && (!result.equals(""))){
+
+                    try {
+                        JSONObject resString = new JSONObject(result);
+                        if(resString.getBoolean("success")){
+                            editor.putString("token", resString.getString("token"));
+                            editor.putBoolean("isCCURegistered",true);
+                            editor.commit();
+
+                            Log.d("CCURegistration", " Success! ");
+                            Toast.makeText(cxt, "CCU Registered Successfully "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();
+
+                        } else {
+                            editor.putBoolean("isCCURegistered",false);
+                            editor.commit();
+                            registerDevice();
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    editor.putBoolean("isCCURegistered",false);
+                    editor.commit();
+                    registerDevice();
+                }
+            }
+        };
+        updateCCUReg.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
 }

@@ -1,7 +1,9 @@
 package a75f.io.renatus.registartion;
 
+import android.app.AlertDialog;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -1241,7 +1243,33 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
     }
 
     private void updateCCURegistrationInfo() {
-        if (!ProgressDialogUtils.isDialogShowing()){
+        prefs.setBoolean("isCCURegistered",false);
+        
+        if (CCUHsApi.getInstance().isNetworkConnected()){
+            CCUHsApi.getInstance().registerDevice();
+
+            AlertManager.getInstance().fetchAllPredefinedAlerts();
+            Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+            finish();
+
+        } else {
+            new AlertDialog.Builder(FreshRegistration.this)
+                    .setCancelable(false)
+                    .setMessage("No network connection, Registration is not complete and Facilisight cannot be accessed unless you connect to network.")
+                    .setPositiveButton("Proceed", (dialog, id) -> {
+
+                        CCUHsApi.getInstance().registerDevice();
+                        AlertManager.getInstance().fetchAllPredefinedAlerts();
+                        Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
+                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(i);
+                        finish();
+                    })
+                    .show();
+        }
+        /*if (!ProgressDialogUtils.isDialogShowing()){
             ProgressDialogUtils.showProgressDialog(this,"CCU Registering...");
         }
 
@@ -1316,7 +1344,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             }
         };
 
-        updateCCUReg.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        updateCCUReg.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);*/
     }
 
 }

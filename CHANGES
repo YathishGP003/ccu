@@ -1,5 +1,2 @@
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-1026, Dab stage Rtu with vfd, fan speed always 0
- - Merge branch 'mahesh_renatus' into 'master'
- - resolved RENATUS-1018
- - resolved RENATUS-1024
+ - #RENATUS-1018, update fm email and installer email to site

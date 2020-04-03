@@ -62,16 +62,17 @@
                             android:layout_alignParentLeft="true"
                             android:layout_centerVertical="true"
                             android:layout_toStartOf="@+id/analog1InSensor"
+                            android:textSize="@dimen/text_small_xlarge"
                             android:text="@string/label_analogin1"
                             android:textAppearance="@style/title_normal" />
 
                         <Spinner
                             android:id="@+id/analog1InSensor"
-                            android:layout_width="160dp"
+                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            android:layout_width="260dp"
                             android:layout_height="?android:attr/listPreferredItemHeight"
                             android:layout_alignParentRight="true"
                             android:layout_centerVertical="true"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
                     </RelativeLayout>
@@ -89,16 +90,17 @@
                             android:layout_alignParentLeft="true"
                             android:layout_centerVertical="true"
                             android:layout_toStartOf="@+id/th1InSensor"
+                            android:textSize="@dimen/text_small_xlarge"
                             android:text="@string/label_thin1"
                             android:textAppearance="@style/title_normal" />
 
                         <Spinner
                             android:id="@+id/th1InSensor"
-                            android:layout_width="160dp"
+                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            android:layout_width="260dp"
                             android:layout_height="?android:attr/listPreferredItemHeight"
                             android:layout_alignParentRight="true"
                             android:layout_centerVertical="true"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
                     </RelativeLayout>
@@ -113,6 +115,7 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentLeft="true"
                             android:layout_toStartOf="@+id/analog2DynamicSp"
+                            android:textSize="@dimen/text_small_xlarge"
                             android:text="@string/label_useanalogin2"
                             android:textAppearance="@style/title_normal" />
 
@@ -140,16 +143,17 @@
                             android:layout_alignParentLeft="true"
                             android:layout_centerVertical="true"
                             android:layout_toStartOf="@+id/analog2InSensor"
+                            android:textSize="@dimen/text_small_xlarge"
                             android:text="@string/label_analogin2"
                             android:textAppearance="@style/title_normal" />
 
                         <Spinner
                             android:id="@+id/analog2InSensor"
-                            android:layout_width="160dp"
+                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            android:layout_width="260dp"
                             android:layout_height="?android:attr/listPreferredItemHeight"
                             android:layout_alignParentRight="true"
                             android:layout_centerVertical="true"
-                            style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
                     </RelativeLayout>
@@ -165,6 +169,7 @@
                             android:layout_alignParentLeft="true"
                             android:layout_centerVertical="true"
                             android:layout_toStartOf="@+id/analogout1AtMin"
+                            android:textSize="@dimen/text_small_xlarge"
                             android:text="@string/label_analogout1min"
                             android:textAppearance="@style/title_normal" />
 
@@ -190,6 +195,7 @@
                             android:layout_alignParentLeft="true"
                             android:layout_centerVertical="true"
                             android:layout_toStartOf="@+id/analogout1AtMax"
+                            android:textSize="@dimen/text_small_xlarge"
                             android:text="@string/label_analogout1max"
                             android:textAppearance="@style/title_normal" />
 
@@ -216,6 +222,7 @@
                             android:layout_alignParentLeft="true"
                             android:layout_marginBottom="12dp"
                             android:layout_centerVertical="true"
+                            android:textSize="@dimen/text_small_xlarge"
                             android:text="@string/label_zeroerrormp"
                             android:textAppearance="@style/title_normal" />
 
@@ -247,6 +254,7 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentLeft="true"
                             android:layout_centerVertical="true"
+                            android:textSize="@dimen/text_small_xlarge"
                             android:text="@string/label_targetvalue"
                             android:textAppearance="@style/title_normal" />
 
@@ -271,6 +279,7 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentLeft="true"
                             android:layout_centerVertical="true"
+                            android:textSize="@dimen/text_small_xlarge"
                             android:text="@string/label_expectedError"
                             android:textAppearance="@style/title_normal" />
 
@@ -297,6 +306,7 @@
                         android:layout_toStartOf="@+id/sensorOffset"
                         android:layout_alignParentLeft="true"
                         android:layout_centerVertical="true"
+                        android:textSize="@dimen/text_small_xlarge"
                         android:text="@string/label_setpointsensor"
                         android:textAppearance="@style/title_normal" />
 

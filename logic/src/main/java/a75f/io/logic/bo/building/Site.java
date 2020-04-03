@@ -16,6 +16,7 @@ public class Site
     public String            geoCountry;
     public String            geoPostalCode;
     public String            geoZip;
+    public String            geoFence;
     public String            tz;
     public String            organization;
     public String            installerEmail;
@@ -25,7 +26,7 @@ public class Site
     public Site() {
     
     }
-    public Site(String name,String city, String state, String country,String zip, String tz, double area, String org, String fcManager, String installer) {
+    public Site(String name,String city, String state, String country,String zip, String tz, double area, String org, String fcManager, String installer,String geoFence) {
         this.displayName = name;
         this.geoCity = city;
         this.geoState = state;
@@ -36,6 +37,7 @@ public class Site
         this.organization = org;
         this.fcManagerEmail = fcManager;
         this.installerEmail = installer;
+        this.geoFence = geoFence;
     }
     
     public Site (a75f.io.api.haystack.Site s) {
@@ -50,5 +52,6 @@ public class Site
         this.organization = s.getOrganization();
         this.installerEmail = s.getInstallerEmail();
         this.fcManagerEmail = s.getFcManagerEmail();
+        this.geoFence = s.getGeoFence();
     }
 }

@@ -306,7 +306,8 @@ public class CreateNewSite extends Fragment {
                     prefs.setBoolean("registered", true);
                     if (site.size() > 0) {
                         String siteId = site.get("id").toString();
-                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId,installerOrg, installerEmail, managerEmail);
+                        String geoFence = site.get("geoFence") != null ? site.get("geoFence").toString() : "2.0";
+                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId,installerOrg, installerEmail, managerEmail,geoFence);
                     } else {
                         saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, installerOrg, installerEmail,managerEmail);
                     }
@@ -360,7 +361,8 @@ public class CreateNewSite extends Fragment {
 
                     if (site.size() > 0) {
                         String siteId = site.get("id").toString();
-                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId, installerOrg, installerEmail, managerEmail);
+                        String geoFence = site.get("geoFence") != null ? site.get("geoFence").toString() : "2.0";
+                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId, installerOrg, installerEmail, managerEmail,geoFence);
                     } else {
                         saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry,installerOrg, installerEmail,managerEmail);
                     }
@@ -955,6 +957,7 @@ public class CreateNewSite extends Fragment {
                 .setInstaller(installer)
                 .setFcManager(fcManager)
                 .setGeoAddress(geoAddress)
+                .setGeoFence("2.0")
                 .setArea(10000).build();
 
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
@@ -971,7 +974,7 @@ public class CreateNewSite extends Fragment {
         return localSiteId;
     }
 
-    public void updateSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState, String siteCountry, String siteId, String org, String installer, String fcManager) {
+    public void updateSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState, String siteCountry, String siteId, String org, String installer, String fcManager,String geoFence) {
 
         String tzID = mTimeZoneSelector.getSelectedItem().toString();
         AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
@@ -987,6 +990,7 @@ public class CreateNewSite extends Fragment {
                 .setGeoZip(siteZip)
                 .setGeoCountry(siteCountry)
                 .setGeoAddress(geoAddress)
+                .setGeoFence(geoFence)
                 .setOrgnization(org)
                 .setInstaller(installer)
                 .setFcManager(fcManager)

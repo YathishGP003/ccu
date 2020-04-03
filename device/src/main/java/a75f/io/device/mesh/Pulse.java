@@ -192,8 +192,8 @@ public class Pulse
 			}
 
 			//Write Current temp point based on th2 enabled or not
-            double oldCurTempVal = hayStack.readHisValById(logicalCurTempPoint);
 			if(isTh2Enabled && !logicalCurTempPoint.isEmpty() && isSse) {
+				double oldCurTempVal = hayStack.readHisValById(logicalCurTempPoint);
 				hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
 				if ((currentTempInterface != null) && (oldCurTempVal != th2TempVal)) {
 					Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
@@ -201,6 +201,7 @@ public class Pulse
 				}
 			}
 			else if(!logicalCurTempPoint.isEmpty()){
+				double oldCurTempVal = hayStack.readHisValById(logicalCurTempPoint);
 				hayStack.writeHisValById(logicalCurTempPoint, curTempVal);
 				if ((currentTempInterface != null) && (oldCurTempVal != curTempVal)) {
 					Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);

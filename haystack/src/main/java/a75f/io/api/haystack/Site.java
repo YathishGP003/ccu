@@ -17,6 +17,7 @@ public class Site extends Entity
     private String geoAddr;
     private String geoCountry;
     private String geoPostalCode;
+    private String geoFence;
     private String tz;
     private double area;
     public String  organization;
@@ -46,6 +47,10 @@ public class Site extends Entity
     public String getGeoAddress()
     {
         return geoAddr;
+    }
+    public String getGeoFence()
+    {
+        return geoFence;
     }
     public String getGeoPostalCode()
     {
@@ -84,6 +89,7 @@ public class Site extends Entity
         private String geoState;
         private String geoAddr;
         private String geoPostalCode;
+        private String geoFence;
         private String tz;
         private String id;
         private String geoCountry;
@@ -128,6 +134,11 @@ public class Site extends Entity
             this.geoAddr = geoAddr;
             return this;
         }
+        public Builder setGeoFence(String geoFence)
+        {
+            this.geoFence = geoFence;
+            return this;
+        }
         public Builder setTz(String tz)
         {
             this.tz = tz;
@@ -169,6 +180,7 @@ public class Site extends Entity
             s.area = this.area;
             s.tz = this.tz;
             s.geoPostalCode = this.geoPostalCode;
+            s.geoFence = this.geoFence;
             s.id = this.id;
             s.geoCountry = this.geoCountry;
             s.organization = this.organization;
@@ -202,6 +214,10 @@ public class Site extends Entity
                 else if(pair.getKey().equals("geoState"))
                 {
                     this.geoState = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("geoFence"))
+                {
+                    this.geoFence = pair.getValue().toString();
                 }
                 else if(pair.getKey().equals("geoCountry"))
                 {

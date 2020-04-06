@@ -410,6 +410,9 @@ public class FloorPlanFragment extends Fragment
 				try
 				{
 					HGrid zonePoint = hClient.call("read", HGridBuilder.dictToGrid(zDict));
+					if (zonePoint == null){
+						return null;
+					}
 					Iterator zit = zonePoint.iterator();
 					siteRoomList.clear();
 					while (zit.hasNext())

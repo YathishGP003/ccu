@@ -64,8 +64,9 @@ public class CloudConnetionStatusThread extends Thread {
     private synchronized void pingCloudServer() {
         final ConnectivityManager connMgr = (ConnectivityManager) Globals.getInstance().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
-        Log.d("CCU_CLOUDSTATUS", "Ping cloud server app");
-        if (netInfo != null && netInfo.isConnected()) {
+
+        NetworkInfo networkInfo = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        if (netInfo != null && netInfo.isConnected() || (networkInfo != null && networkInfo.isConnected())) {
             //  Some sort of connection is open, check if server is reachable
             mWifiAlive = true;
             SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());

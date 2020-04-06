@@ -920,7 +920,7 @@ public class BuildingTuners
         hayStack.writeHisValById(heatingDbMultiplierId, TunerConstants.VAV_HEATING_DB_MULTIPLIER);
         
         Point propGain = new Point.Builder()
-                                 .setDisplayName(equipDis+"-VAV-"+"proportionalKFactor ")
+                                 .setDisplayName(equipDis+"-VAV-"+"proportionalKFactor")
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipRef).setHisInterpolate("cov")
                                  .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -933,7 +933,7 @@ public class BuildingTuners
         hayStack.writeHisValById(pgainId, TunerConstants.VAV_PROPORTIONAL_GAIN);
         
         Point integralGain = new Point.Builder()
-                                     .setDisplayName(equipDis+"-VAV-"+"integralKFactor ")
+                                     .setDisplayName(equipDis+"-VAV-"+"integralKFactor")
                                      .setSiteRef(siteRef)
                                      .setEquipRef(equipRef).setHisInterpolate("cov")
                                      .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -946,7 +946,7 @@ public class BuildingTuners
         hayStack.writeHisValById(igainId, TunerConstants.VAV_INTEGRAL_GAIN);
         
         Point propSpread = new Point.Builder()
-                                   .setDisplayName(equipDis+"-VAV-"+"temperatureProportionalRange ")
+                                   .setDisplayName(equipDis+"-VAV-"+"temperatureProportionalRange")
                                    .setSiteRef(siteRef)
                                    .setEquipRef(equipRef).setHisInterpolate("cov")
                                    .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -959,7 +959,7 @@ public class BuildingTuners
         hayStack.writeHisValById(pSpreadId, TunerConstants.VAV_PROPORTIONAL_SPREAD);
         
         Point integralTimeout = new Point.Builder()
-                                        .setDisplayName(equipDis+"-VAV-"+"temperatureIntegralTime ")
+                                        .setDisplayName(equipDis+"-VAV-"+"temperatureIntegralTime")
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipRef).setHisInterpolate("cov")
                                         .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")

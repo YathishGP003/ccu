@@ -1664,7 +1664,7 @@ public class CCUHsApi
                             String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
                             ccuRegInfo.put("deviceId", ccuGUID);
                             ccuRegInfo.put("deviceName", ccu.get("dis").toString());
-                            ccuRegInfo.put("facilityManagerEmail", site.get("fmEmail").toString());
+                            ccuRegInfo.put("facilityManagerEmail", site.get("fmEmail") != null ? site.get("fmEmail").toString(): ccu.get("fmEmail").toString());
                             if (site.get("installerEmail") != null) {
                                 ccuRegInfo.put("installerEmail", site.get("installerEmail").toString());
                             }

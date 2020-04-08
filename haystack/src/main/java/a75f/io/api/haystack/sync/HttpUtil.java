@@ -111,7 +111,9 @@ public class HttpUtil
             return responseCode == 200 ? response.toString() : null;
             
         } catch (Exception e) {
-            
+            if(connection != null) {
+                connection.disconnect();
+            }
             e.printStackTrace();
             return null;
             

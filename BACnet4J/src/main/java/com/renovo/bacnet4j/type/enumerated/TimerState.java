@@ -1,0 +1,75 @@
+
+package com.renovo.bacnet4j.type.enumerated;
+
+import com.renovo.bacnet4j.exception.BACnetErrorException;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import com.renovo.bacnet4j.type.primitive.Enumerated;
+import com.renovo.bacnet4j.util.sero.ByteQueue;
+import java.util.Collections;
+
+public class TimerState extends Enumerated {
+    public static final TimerState idle = new TimerState(0);
+    public static final TimerState running = new TimerState(1);
+    public static final TimerState expired = new TimerState(2);
+
+    private static final Map<Integer, Enumerated> idMap = new HashMap<>();
+    private static final Map<String, Enumerated> nameMap = new HashMap<>();
+    private static final Map<Integer, String> prettyMap = new HashMap<>();
+
+    /*static {
+        Enumerated.init(MethodHandles.lookup().lookupClass(), idMap, nameMap, prettyMap);
+    }*/
+
+    public static TimerState forId(final int id) {
+        TimerState e = (TimerState) idMap.get(id);
+        if (e == null)
+            e = new TimerState(id);
+        return e;
+    }
+
+    public static String nameForId(final int id) {
+        return prettyMap.get(id);
+    }
+
+    public static TimerState forName(final String name) {
+        return (TimerState) Enumerated.forName(nameMap, name);
+    }
+
+    public static int size() {
+        return idMap.size();
+    }
+
+    private TimerState(final int value) {
+        super(value);
+    }
+
+    public TimerState(final ByteQueue queue) throws BACnetErrorException {
+        super(queue);
+    }
+
+    /**
+     * Returns a unmodifiable map.
+     *
+     * @return unmodifiable map
+     */
+    public static Map<Integer, String> getPrettyMap() {
+        return Collections.unmodifiableMap(prettyMap);
+    }
+    
+     /**
+     * Returns a unmodifiable nameMap.
+     *
+     * @return unmodifiable map
+     */
+    public static Map<String, Enumerated> getNameMap() {
+        return Collections.unmodifiableMap(nameMap);
+    }
+    
+    @Override
+    public String toString() {
+        return super.toString(prettyMap);
+    }
+}

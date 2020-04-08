@@ -287,12 +287,171 @@
                 android:textOn=""
                 android:layout_below="@+id/textSingleTemp" />
 
+            <TextView
+                android:id="@+id/textBacnetEnable"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textTempforAll"
+                android:layout_marginLeft="76dp"
+                android:text="@string/enable_bacnet"
+                android:textColor="@color/black"
+                android:alpha="0.87"
+                android:layout_marginTop="36dp"
+                android:textSize="25dp"/>
 
+            <ToggleButton
+                android:id="@+id/toggleBACnet"
+                android:layout_width="47dp"
+                android:layout_height="28dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/toggle_selector"
+                android:checked="false"
+                android:layout_marginTop="36dp"
+                android:textOff=""
+                android:textOn=""
+                android:layout_below="@+id/textTempforAll" />
+
+            <RelativeLayout
+                android:id="@+id/rl_Bacnet"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textBacnetEnable"
+                android:layout_marginLeft="96dp"
+                android:layout_marginTop="20dp"
+                >
+                <RadioGroup
+                    android:id="@+id/radioGroup_config"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <RadioButton
+                        android:id="@+id/rbAuto"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/rb_auto"/>
+
+                    <RadioButton
+                        android:id="@+id/rbManual"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/rb_manual"
+                        android:layout_marginLeft="36dp"/>
+                </RadioGroup>
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/textInputIP"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/radioGroup_config"
+                    app:errorTextAppearance="@style/error_appearance">
+
+                    <EditText
+                        android:id="@+id/editIPaddr"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minWidth="200dp"
+                        android:fontFamily="@font/lato_regular"
+                        android:gravity="left|center_vertical"
+                        android:hint="@string/hint_deviceIP"
+                        android:inputType="numberDecimal|textWebEditText"
+                        android:digits="0123456789."
+                        android:singleLine="true"
+                        android:maxLength="16"
+                        android:textColor="@color/input_textcolor"
+                        android:textSize="19.5dp" />
+                </android.support.design.widget.TextInputLayout>
+
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/textInputSubnet"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@+id/textInputIP"
+                    android:layout_marginLeft="56dp"
+                    android:layout_below="@+id/radioGroup_config"
+                    app:errorTextAppearance="@style/error_appearance">
+
+                    <EditText
+                        android:id="@+id/editSubnet"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minWidth="200dp"
+                        android:fontFamily="@font/lato_regular"
+                        android:gravity="left|center_vertical"
+                        android:hint="@string/hint_deviceSubnet"
+                        android:inputType="numberDecimal"
+                        android:singleLine="true"
+                        android:maxLength="16"
+                        android:textColor="@color/input_textcolor"
+                        android:textSize="19.5dp" />
+                </android.support.design.widget.TextInputLayout>
+
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/textInputGateway"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textInputIP"
+                    android:layout_marginTop="20dp"
+                    app:errorTextAppearance="@style/error_appearance">
+
+                    <EditText
+                        android:id="@+id/editGateway"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minWidth="200dp"
+                        android:fontFamily="@font/lato_regular"
+                        android:gravity="left|center_vertical"
+                        android:hint="@string/hint_deviceGateWay"
+                        android:inputType="numberDecimal"
+                        android:singleLine="true"
+                        android:maxLength="16"
+                        android:textColor="@color/input_textcolor"
+                        android:textSize="19.5dp"
+                        android:focusable="true"/>
+                </android.support.design.widget.TextInputLayout>
+
+                <Button
+                    android:id="@+id/buttonInitialise"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textInputIP"
+                    android:layout_alignRight="@+id/textInputSubnet"
+                    android:layout_alignBottom="@+id/textInputGateway"
+                    android:background="@null"
+                    android:layout_marginTop="20dp"
+                    android:padding="5dp"
+                    android:fontFamily="@font/lato_bold"
+                    android:text="@string/button_initialise"
+                    android:textColor="@color/orange_75f"
+                    android:focusableInTouchMode="true"
+                    android:textSize="26dp" />
+
+                <Button
+                    android:id="@+id/buttonSendIAM"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textInputIP"
+                    android:layout_toRightOf="@+id/buttonInitialise"
+                    android:layout_alignBottom="@+id/textInputGateway"
+                    android:visibility="gone"
+                    android:background="@null"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginLeft="36dp"
+                    android:padding="5dp"
+                    android:fontFamily="@font/lato_bold"
+                    android:text="@string/button_sendIAM"
+                    android:textColor="@color/orange_75f"
+                    android:focusableInTouchMode="true"
+                    android:textSize="26dp" />
+
+            </RelativeLayout>
             <Button
                 android:id="@+id/buttonNext"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/toggleTempAll"
+                android:layout_below="@+id/rl_Bacnet"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="36dp"
                 android:layout_marginBottom="24dp"

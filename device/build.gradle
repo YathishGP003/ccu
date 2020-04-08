@@ -43,5 +43,6 @@ dependencies {
     implementation project(':haystack')
     implementation project(':logic')
     implementation project(':alerts')
+    implementation project(':BACnet4J')
 }
 

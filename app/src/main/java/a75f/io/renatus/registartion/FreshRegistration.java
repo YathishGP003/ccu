@@ -5,11 +5,13 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -41,6 +43,7 @@ import a75f.io.alerts.AlertManager;
 import a75f.io.alerts.AlertProcessor;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.logic.Globals;
 import a75f.io.renatus.DABFullyAHUProfile;
 import a75f.io.renatus.DABHybridAhuProfile;
 import a75f.io.renatus.DABStagedProfile;
@@ -1245,7 +1248,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
     private void updateCCURegistrationInfo() {
         prefs.setBoolean("isCCURegistered",false);
         
-        if (CCUHsApi.getInstance().isNetworkConnected()){
+        if (pingCloudServer()){
             CCUHsApi.getInstance().registerDevice();
 
             AlertManager.getInstance().fetchAllPredefinedAlerts();
@@ -1347,4 +1350,20 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         updateCCUReg.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);*/
     }
 
+    private synchronized boolean pingCloudServer() {
+        ConnectivityManager connMgr = (ConnectivityManager) Globals.getInstance().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
+        NetworkInfo networkInfo = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        if (netInfo != null && netInfo.isConnected() || (networkInfo != null && networkInfo.isConnected())) {
+            //  Some sort of connection is open, check if server is reachable
+            SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
+            spDefaultPrefs.edit().putBoolean("75fNetworkAvailable", true).commit();
+            return true;
+        }
+        else {
+            SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
+            spDefaultPrefs.edit().putBoolean("75fNetworkAvailable", false).commit();
+            return false;
+        }
+    }
 }

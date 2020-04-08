@@ -69,6 +69,7 @@ public class CCUApplication
     private String           mTitle        = "";
     private ArrayList<Floor> mfloors       = new ArrayList<Floor>();
     private short           mSmartNodeAddressBand;
+    private boolean          useBACnet;
     private String mCCUName;
     
 
@@ -225,4 +226,13 @@ public class CCUApplication
         }
         return "";
     }
+
+    public boolean isUseBACnet() {
+        return useBACnet;
+    }
+
+    public void setUseBACnet(boolean useBACnet) {
+        this.useBACnet = useBACnet;
+    }
+
 }

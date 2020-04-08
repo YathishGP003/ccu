@@ -1,0 +1,66 @@
+apply plugin: 'java'
+apply plugin: 'jacoco'
+apply plugin: 'maven-publish'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+group = 'com.infiniteautomation'
+version = '5.0.0-SNAPSHOT'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    implementation 'ai.serotonin.oss:sero-scheduler:[1.1.0,2)'
+    implementation 'ai.serotonin.oss:sero-warp:1.0.0'
+    implementation 'org.apache.commons:commons-lang3:3.5'
+    implementation 'org.scream3r:jssc:2.8.0'
+    implementation 'org.slf4j:slf4j-api:[1.7.0,1.8)'
+    implementation 'org.threeten:threetenbp:1.4.0'
+    
+    //testCompile 'junit:junit:4.12'
+    //testCompile 'org.mockito:mockito-core:[2.7.22,3)'
+    //testCompile 'org.slf4j:slf4j-simple:[1.7.0,1.8)'
+}
+
+task sourceJar(group: 'build', type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allJava
+}
+
+task jacoco(group: 'verification', dependsOn: jacocoTestReport) {
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+        	artifactId 'bacnet4j'
+            from components.java
+            
+            artifact sourceJar {
+                classifier "sources"
+            }
+            
+        }
+    }
+}
+
+test {
+    testLogging {
+        // Make sure output from standard out or error is shown in Gradle output.
+        showStandardStreams = true
+ 
+        // Or we use events method:
+        // events 'standard_out', 'standard_error'
+ 
+        // Or set property events:
+        // events = ['standard_out', 'standard_error']
+ 
+        // Instead of string values we can
+        // use enum values:
+        // events org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_OUT,
+        //        org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR,
+    }
+}

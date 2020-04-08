@@ -13,6 +13,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
+import a75f.io.device.bacnet.BACnetUtils;
 import a75f.io.logic.L;
 
 
@@ -99,6 +100,8 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 			Zone sZone = selectedRoom.get(nCount);
 			for (Device d : HSUtil.getDevices(sZone.getId())) {
 				L.removeHSDeviceEntities(Short.parseShort(d.getAddr()));
+				//Todo Notifies to BACnet Data Layer
+				BACnetUtils.removeModule(Short.parseShort(d.getAddr()));
 			}
 			CCUHsApi.getInstance().deleteEntityTree(sZone.getId());
 			CCUHsApi.getInstance().saveTagsData();

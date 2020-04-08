@@ -1,6 +1,7 @@
 package a75f.io.renatus;
 
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,6 +16,7 @@ import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
+import a75f.io.device.bacnet.BACnetUtils;
 import a75f.io.logic.L;
 
 public class FloorListActionMenuListener implements MultiChoiceModeListener
@@ -97,6 +99,7 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 			{
 				for (Device d : HSUtil.getDevices(sZone.getId())) {
 					L.removeHSDeviceEntities(Short.parseShort(d.getAddr()));
+					BACnetUtils.removeModule(Short.parseShort(d.getAddr()));
 				}
                 ArrayList<HashMap> schedules = CCUHsApi.getInstance().readAll("schedule and roomRef == "+ sZone.getId() );
                 for (HashMap schedule : schedules)

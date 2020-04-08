@@ -1,0 +1,5 @@
+ - Merge branch 'kumar_renatus' into 'master'
+ - #149, [Azure Board] DAB /VAV profile, operating mode should show only cooling or heating
+ - #159, [Azure Board] - system profile conditioning tag change
+ - bacnet module commit
+ - bacnet module commit

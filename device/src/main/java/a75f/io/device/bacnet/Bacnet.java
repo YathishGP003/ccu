@@ -35,7 +35,7 @@ public class Bacnet extends BACNetwork
                     if(bacnetDevice != null) {
                         String objectName = floor.getDisplayName() + "_" + zone.getDisplayName();
                         new ZonePoints(bacnetDevice, zone, objectName);
-                        if (LSerial.getInstance().isScheduleChanged() || LSerial.getInstance().isReseedMessage())
+                        if ( LSerial.getInstance().isReseedMessage())
                             new BACnetScheduler(bacnetDevice, zone);//Why new?? every time do we create new??
                     }
                 }

@@ -449,7 +449,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             
             AlertDialog dlg = builder.create();
             dlg.show();
-            setUserIntentBackground("rtu and mode", SystemMode.OFF.ordinal());
+            setUserIntentBackground("conditioning and mode", SystemMode.OFF.ordinal());
         }
     }
     

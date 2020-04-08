@@ -195,6 +195,8 @@ public class HttpUtil
 
         } catch (Exception e) {
 
+            if(connection != null)
+                connection.disconnect();
             e.printStackTrace();
             return null;
 

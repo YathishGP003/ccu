@@ -1151,7 +1151,7 @@ public class CCUHsApi
             if (wa != null) {
                 wa.dump();
             } else {
-                return false;
+               // return false;
             }
 
             ArrayList<HashMap> valList = new ArrayList<>();

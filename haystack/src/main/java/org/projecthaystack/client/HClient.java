@@ -635,6 +635,7 @@ public class HClient extends HProj
         c.setRequestProperty("Connection", "Close");
         c.setRequestProperty("Content-Type", mimeType == null ? "text/plain; charset=utf-8": mimeType);
         c.setRequestProperty("Authorization", "Bearer " + HttpUtil.clientToken);
+        c.setConnectTimeout(30000);
         c.connect();
 
         // post expression
@@ -645,6 +646,7 @@ public class HClient extends HProj
         // check for successful request
         if(c.getResponseCode() == 401)
         {
+          c.disconnect();
           HttpUtil.clientToken = HttpUtil.parseToken(HttpUtil.authorizeToken(HttpUtil.CLIENT_ID,
                   "",
                   HttpUtil.CLIENT_SECRET,
@@ -652,8 +654,10 @@ public class HClient extends HProj
           CcuLog.d("CCU_HS","Client Token: " + HttpUtil.clientToken);
           postString(uriStr, req, mimeType);
         }
-        else if (c.getResponseCode() != 200)
+        else if (c.getResponseCode() != 200) {
+          c.disconnect();
           throw new CallHttpException(c.getResponseCode(), c.getResponseMessage());
+        }
 
         // read response into string
         StringBuffer s = new StringBuffer(1024);

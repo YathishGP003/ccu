@@ -113,7 +113,7 @@ public class VavReheatProfile extends VavProfile
             //If supply air temperature from air handler is greater than room temperature, Cooling shall be
             //locked out.
             SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
-            SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("rtu and mode")];
+            SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
             if (roomTemp > setTempCooling)
             {
                 //Zone is in Cooling
@@ -186,13 +186,13 @@ public class VavReheatProfile extends VavProfile
             else
             {
                 //Zone is in deadband
-                if (state != DEADBAND) {
-                    state = DEADBAND;
+                /*if (state != DEADBAND) {
+                    state = DEADBAND;*/
                     //valveController.reset();
                     valve.currentPosition = 0;
                     heatingLoop.setDisabled();
                     coolingLoop.setDisabled();
-                }
+                //}
             }
             
             if (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.OFF|| valveController.getControlVariable() == 0)

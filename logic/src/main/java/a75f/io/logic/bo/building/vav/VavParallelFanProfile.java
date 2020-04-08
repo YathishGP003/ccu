@@ -139,19 +139,19 @@ public class VavParallelFanProfile extends VavProfile
             else
             {
                 //Zone is in deadband
-                if (state != DEADBAND)
-                {
-                    state = DEADBAND;
+                /*if (state != DEADBAND)
+                {*/
+                    //state = DEADBAND;
                     valveController.reset();
                     valve.currentPosition = 0;
                     heatingLoop.setDisabled();
                     coolingLoop.setDisabled();
-                }
+                //}
             
                 loopOp = 0;
             }
     
-            SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("rtu and mode")];
+            SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
             if (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.OFF|| valveController.getControlVariable() == 0)
             {
                 valve.currentPosition = 0;

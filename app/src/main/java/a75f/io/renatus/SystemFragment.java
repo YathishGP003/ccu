@@ -214,9 +214,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						@Override
 						public void run()
 						{
-							if (numberPicker.getValue() != TunerUtil.readSystemUserIntentVal("rtu and mode"))
+							if (numberPicker.getValue() != TunerUtil.readSystemUserIntentVal("conditioning and mode"))
 							{
-								setUserIntentBackground("rtu and mode", SystemMode.getEnum(modesAvailable.get(numberPicker.getValue())).ordinal());
+								setUserIntentBackground("conditioning and mode", SystemMode.getEnum(modesAvailable.get(numberPicker.getValue())).ordinal());
 							}
 						}
 					}, 100);
@@ -422,7 +422,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						targetMinInsideHumidity.setSelection(humidityAdapter
 								.getPosition(0.0), false);
 					}else{
-						systemModePicker.setValue((int) TunerUtil.readSystemUserIntentVal("rtu and mode"));
+						systemModePicker.setValue((int) TunerUtil.readSystemUserIntentVal("conditioning and mode"));
 
 						equipmentStatus.setText(status.equals("") ? Html.fromHtml("<font color='#e24725'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='#e24725'>ON</font>").replace("OFF","<font color='#e24725'>OFF</font>")));
 						occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());

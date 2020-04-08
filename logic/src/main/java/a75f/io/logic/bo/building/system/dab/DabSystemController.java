@@ -88,7 +88,7 @@ public class DabSystemController extends SystemController
         double prioritySum = 0;
         DabSystemProfile profile = (DabSystemProfile) L.ccu().systemProfile;
         ciDesired = (int)profile.getUserIntentVal("desired and ci");
-        SystemMode systemMode = SystemMode.values()[(int)profile.getUserIntentVal("rtu and mode")];
+        SystemMode systemMode = SystemMode.values()[(int)profile.getUserIntentVal("conditioning and mode")];
         CcuLog.d(L.TAG_CCU_SYSTEM, "runDabSystemControlAlgo -> ciDesired: " + ciDesired + " systemMode: " + systemMode);
     
         weightedAverageCoolingLoadPostML = weightedAverageHeatingLoadPostML = weightedAverageLoadSum = 0;
@@ -205,7 +205,7 @@ public class DabSystemController extends SystemController
                     piController.reset();
                 }
             } else {
-                systemState = OFF;
+                //systemState = OFF;
             }
             
         } else if ((systemState != COOLING) && buildingLimitMinBreached("dab")) {
@@ -219,7 +219,7 @@ public class DabSystemController extends SystemController
                     piController.reset();
                 }
             } else {
-                systemState = OFF;
+                //systemState = OFF;
             }
         } else
         {
@@ -247,7 +247,7 @@ public class DabSystemController extends SystemController
             }
             else
             {
-                systemState = OFF;
+                //systemState = OFF;
             }
         }
     
@@ -321,7 +321,7 @@ public class DabSystemController extends SystemController
     
     public SystemController.State getConditioningForecast(Occupied occupiedSchedule) {
         DabSystemProfile profile = (DabSystemProfile) L.ccu().systemProfile;
-        SystemMode systemMode = SystemMode.values()[(int)profile.getUserIntentVal("rtu and mode")];
+        SystemMode systemMode = SystemMode.values()[(int)profile.getUserIntentVal("conditioning and mode")];
         
         if ((systemMode == COOLONLY || systemMode == AUTO) && (getAverageSystemTemperature() > occupiedSchedule.getCoolingVal()))
         {

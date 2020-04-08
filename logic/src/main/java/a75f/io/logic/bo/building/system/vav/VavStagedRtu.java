@@ -215,7 +215,7 @@ public class VavStagedRtu extends VavSystemProfile
         double relayDeactHysteresis = TunerUtil.readTunerValByQuery("relay and deactivation and hysteresis", getSystemEquipRef());
         CcuLog.d(L.TAG_CCU_SYSTEM, "systemCoolingLoopOp: "+systemCoolingLoopOp + " systemHeatingLoopOp: " + systemHeatingLoopOp+" systemFanLoopOp: "+systemFanLoopOp);
         CcuLog.d(L.TAG_CCU_SYSTEM, "coolingStages: "+coolingStages + " heatingStages: "+heatingStages+" fanStages: "+fanStages);
-        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("rtu and mode")];
+        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
         for (int i = 1; i <=7 ;i++)
         {
             double relayState = 0;

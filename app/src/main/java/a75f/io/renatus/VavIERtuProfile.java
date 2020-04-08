@@ -408,7 +408,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     }
     
     public void updateSystemMode() {
-        SystemMode systemMode = SystemMode.values()[(int)systemProfile.getUserIntentVal("rtu and mode")];
+        SystemMode systemMode = SystemMode.values()[(int)systemProfile.getUserIntentVal("conditioning and mode")];
         if (systemMode == SystemMode.OFF) {
             return;
         }
@@ -417,20 +417,20 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
             || (systemMode == SystemMode.HEATONLY && !systemProfile.isHeatingAvailable()))
         {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle);//, AlertDialog.THEME_HOLO_DARK);
-            String str = "Operational Mode changed from '" + systemMode.name() + "' to '" + SystemMode.OFF.name() + "' based on changed equipment selection.";
-            str = str + "\nPlease select appropriate operational mode from System Settings.";
+            String str = "Conditioning Mode changed from '" + systemMode.name() + "' to '" + SystemMode.OFF.name() + "' based on changed equipment selection.";
+            str = str + "\nPlease select appropriate conditioning mode from System Settings.";
             builder.setCancelable(false)
                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                        public void onClick(DialogInterface dialog, int id) {
                            dialog.cancel();
                        }
                    })
-                   .setTitle("Operational Mode Changed")
+                   .setTitle("System Conditioning Mode Changed")
                    .setMessage(str);
             
             AlertDialog dlg = builder.create();
             dlg.show();
-            setUserIntentBackground("rtu and mode", SystemMode.OFF.ordinal());
+            setUserIntentBackground("conditioning and mode", SystemMode.OFF.ordinal());
         }
     }
 }

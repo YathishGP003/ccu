@@ -139,14 +139,7 @@ public class CazProfile extends ZoneProfile
             {
                 damperOpController.updateControlVariable(setTempHeating, roomTemp);
             }*/
-        } else {
-            if (state != DEADBAND) {
-                state = DEADBAND;
-                //damperOpController.reset();
-            }
-
-        }
-        //damperOpController.dump();
+        } 
 
         String zoneId = HSUtil.getZoneIdFromEquipId(cazEquip.getId());
         //Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);

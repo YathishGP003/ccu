@@ -241,7 +241,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         }
         ControlMote.setAnalogOut("analog4", signal);
     
-        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("rtu and mode")];
+        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
         if ((getConfigVal("relay3 and output and enabled") > 0) && (systemMode != SystemMode.OFF))
         {
             double staticPressuremOp = getStaticPressure() - SystemConstants.SP_CONFIG_MIN;

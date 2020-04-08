@@ -384,6 +384,7 @@ public class AddtoExisting extends Fragment {
                 super.onPostExecute(success);
                 if (!success) {
                     Toast.makeText(mContext, "The site failed to sync.", Toast.LENGTH_LONG).show();
+                    ProgressDialogUtils.hideProgressDialog();
                     return;
                 }
 

@@ -13,6 +13,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.RoomDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
 
+import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 
 /**
@@ -29,7 +30,7 @@ public abstract class ZoneProfile extends Schedulable
     protected boolean mIsCircuitTest = false;
     
     @JsonIgnore
-    public ZoneState    state    = DEADBAND;
+    public ZoneState    state    = COOLING;
     
     public ZoneProfile()
     {

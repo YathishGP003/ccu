@@ -124,7 +124,7 @@ public class SingleStageProfile extends ZoneProfile
             boolean occupied = (occuStatus == null ? false : occuStatus.isOccupied());
             String stageStatus = "";
             Log.d("SSE", "sse profile11 =" + roomTemp + "," + sseStage.name()+","+avgSetTemp);
-            if ((roomTemp >= avgSetTemp) && (sseStage == SSEStage.COOLING)) {
+            if ((roomTemp > 0) && (sseStage == SSEStage.COOLING)) {
                 //Zone is in Cooling
                 state = COOLING;
                 if (roomTemp >= setTempCooling) {
@@ -150,7 +150,7 @@ public class SingleStageProfile extends ZoneProfile
                     } else
                         setCmdSignal("fan and stage1", 0, (short) sseEquip.nodeAddr);
                 }
-            } else if ((roomTemp <= avgSetTemp) && (sseStage == SSEStage.HEATING)) {
+            } else if ((roomTemp > 0) && (sseStage == SSEStage.HEATING)) {
                 //Zone is in heating
                 state = HEATING;
                 if (roomTemp <= setTempHeating) {
@@ -183,7 +183,7 @@ public class SingleStageProfile extends ZoneProfile
                 } else
                     setCmdSignal("fan and stage1", 0, (short) sseEquip.nodeAddr);
                 reset((short) sseEquip.nodeAddr);
-                state = DEADBAND;
+                state = TEMPDEAD;
 
 
             }

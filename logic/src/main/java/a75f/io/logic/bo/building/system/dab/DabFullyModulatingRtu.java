@@ -186,7 +186,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         }
         ControlMote.setAnalogOut("analog2", signal);
     
-        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("rtu and mode")];
+        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
         if (getConfigVal("relay3 and output and enabled") > 0 && systemMode != SystemMode.OFF)
         {
             signal = ((ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION) || systemFanLoopOp > 0) ? 1 : 0;

@@ -780,7 +780,33 @@ public class Pulse
 			}
 		}
 	}
+	public static void updateSetTempFromBacnet(short nodeAddr, double temp, String coolheat){
+		//CCUHsApi hayStack = CCUHsApi.getInstance();
 
+		HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+nodeAddr+"\"");
+		Equip q = new Equip.Builder().setHashMap(equipMap).build();
+
+		HashMap coolingDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and cooling and sp and equipRef == \""+q.getId()+"\"");
+		if (coolingDtPoint == null || coolingDtPoint.size() == 0) {
+			throw new IllegalArgumentException();
+		}
+		Point p = new Point.Builder().setHashMap(coolingDtPoint).build();
+		if(coolheat.contains("heating")) {
+
+			HashMap heatinDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and heating and sp and equipRef == \""+q.getId()+"\"");
+			if (heatinDtPoint == null || heatinDtPoint.size() == 0) {
+				throw new IllegalArgumentException();
+			}
+			p = new Point.Builder().setHashMap(heatinDtPoint).build();
+		}
+		try{
+			CCUHsApi.getInstance().writeHisValById(p.getId(), temp);
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		ScheduleProcessJob.handleDesiredTempUpdate(p, true, temp);
+
+	}
 	public static void updateSetTempFromSmartStat(CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t setTempUpdate){
 		short nodeAddr = (short)setTempUpdate.smartNodeAddress.get();
 		double temp = setTempUpdate.setTemperature.get();
@@ -914,7 +940,7 @@ public class Pulse
 				sp = node.addSensor(p);
 				CcuLog.d(L.TAG_CCU_DEVICE, " Sensor Added , type "+t+" port "+p);
 			}
-			CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : "+t+" : "+val);
+			CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartStatUpdate : "+t+" : "+val);
 			switch (t) {
 				case HUMIDITY:
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
@@ -986,6 +1012,15 @@ public class Pulse
 		CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), val);
 	}
 
+	public static double getDesiredTemp(short node, String tag)
+	{
+		HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and "+tag+" and sp and group == \""+node+"\"");
+		if (point == null || point.size() == 0) {
+			Log.d(L.TAG_CCU_DEVICE, " Desired Temp point does not exist for equip , sending 0");
+			return 0;
+		}
+		return CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());
+	}
 	public static void setCurrentTempInterface(ZoneDataInterface in) { currentTempInterface = in; }
 
 	public static void sendCMResetMessage(){

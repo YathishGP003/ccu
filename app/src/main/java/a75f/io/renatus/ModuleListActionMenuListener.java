@@ -11,6 +11,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.device.bacnet.BACnetUtils;
 import a75f.io.logic.L;
 
 class ModuleListActionMenuListener implements MultiChoiceModeListener
@@ -95,6 +96,7 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 		for(Short selectedModule : seletedModules)
 		{
 			L.removeHSDeviceEntities(selectedModule);
+			BACnetUtils.removeModule(selectedModule);
 		}
 		
 		new AsyncTask<String, Void, Void>() {

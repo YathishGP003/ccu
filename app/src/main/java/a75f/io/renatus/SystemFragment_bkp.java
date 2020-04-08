@@ -145,7 +145,7 @@ public class SystemFragment_bkp extends Fragment implements AdapterView.OnItemSe
 			@Override
 			public void onClick(View view)
 			{
-				setUserIntentBackground("rtu and mode", SystemMode.OFF.ordinal());
+				setUserIntentBackground("conditioning and mode", SystemMode.OFF.ordinal());
 			}
 		});
 		systemAuto.setOnClickListener(new View.OnClickListener()
@@ -153,7 +153,7 @@ public class SystemFragment_bkp extends Fragment implements AdapterView.OnItemSe
 			@Override
 			public void onClick(View view)
 			{
-				setUserIntentBackground("rtu and mode", SystemMode.AUTO.ordinal());
+				setUserIntentBackground("conditioning and mode", SystemMode.AUTO.ordinal());
 			}
 		});
 		systemCool.setOnClickListener(new View.OnClickListener()
@@ -161,7 +161,7 @@ public class SystemFragment_bkp extends Fragment implements AdapterView.OnItemSe
 			@Override
 			public void onClick(View view)
 			{
-				setUserIntentBackground("rtu and mode", SystemMode.COOLONLY.ordinal());
+				setUserIntentBackground("conditioning and mode", SystemMode.COOLONLY.ordinal());
 			}
 		});
 		systemHeat.setOnClickListener(new View.OnClickListener()
@@ -169,7 +169,7 @@ public class SystemFragment_bkp extends Fragment implements AdapterView.OnItemSe
 			@Override
 			public void onClick(View view)
 			{
-				setUserIntentBackground("rtu and mode", SystemMode.HEATONLY.ordinal());
+				setUserIntentBackground("conditioning and mode", SystemMode.HEATONLY.ordinal());
 			}
 		});
 		
@@ -183,7 +183,7 @@ public class SystemFragment_bkp extends Fragment implements AdapterView.OnItemSe
 		handler.post(new Runnable() {
 	                    @Override
 	                    public void run() {
-		                    SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("rtu and mode")];
+		                    SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
 		                    Log.d("CCU_UI"," Set system Mode "+systemMode);
 		                    switch (systemMode) {
 			                    case OFF:

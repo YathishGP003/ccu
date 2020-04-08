@@ -164,7 +164,7 @@ public abstract class VavSystemProfile extends SystemProfile
         String desiredCIId = CCUHsApi.getInstance().addPoint(desiredCI);
         CCUHsApi.getInstance().writePoint(desiredCIId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.SYSTEM_DEFAULT_CI, 0);
         CCUHsApi.getInstance().writeHisValById(desiredCIId, TunerConstants.SYSTEM_DEFAULT_CI);
-        Point systemState = new Point.Builder().setDisplayName(equipDis + "-" + "systemMode").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("rtu").addMarker("mode").addMarker("sp").addMarker("his").addMarker("equipHis").setEnums("off,auto,coolonly,heatonly").setTz(tz).build();
+        Point systemState = new Point.Builder().setDisplayName(equipDis + "-" + "conditioningMode").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("conditioning").addMarker("mode").addMarker("sp").addMarker("his").addMarker("equipHis").setEnums("off,auto,coolonly,heatonly").setTz(tz).build();
         String systemStateId = CCUHsApi.getInstance().addPoint(systemState);
         CCUHsApi.getInstance().writePoint(systemStateId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", (double) SystemState.OFF.ordinal(), 0);
         CCUHsApi.getInstance().writeHisValById(systemStateId, (double) SystemState.OFF.ordinal());

@@ -101,7 +101,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
     
     public synchronized void updateSystemPoints()
     {
-        updateOutsideWeatherParams();
+        //updateOutsideWeatherParams();
         super.updateSystemPoints();
         double signal = 0;
         if (getConfigEnabled("analog2") > 0)

@@ -114,7 +114,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
     
     public synchronized void updateSystemPoints() {
         super.updateSystemPoints();
-        updateOutsideWeatherParams();
+        //updateOutsideWeatherParams();
         
         int signal;
         double analogMin = 0, analogMax = 0;

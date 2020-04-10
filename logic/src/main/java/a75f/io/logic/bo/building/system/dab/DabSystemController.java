@@ -207,6 +207,10 @@ public class DabSystemController extends SystemController
                 }
             } else {
                 //systemState = OFF;
+
+                coolingSignal = 0;
+                heatingSignal = 0;
+                piController.reset();
             }
             
         } else if ((systemState != COOLING) && buildingLimitMinBreached("dab")) {
@@ -221,6 +225,10 @@ public class DabSystemController extends SystemController
                 }
             } else {
                 //systemState = OFF;
+
+                coolingSignal = 0;
+                heatingSignal = 0;
+                piController.reset();
             }
         } else
         {
@@ -248,7 +256,9 @@ public class DabSystemController extends SystemController
             }
             else
             {
-                //systemState = OFF;
+                coolingSignal = 0;
+                heatingSignal = 0;
+                piController.reset();
             }
         }
     

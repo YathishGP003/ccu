@@ -228,6 +228,10 @@ public class VavSystemController extends SystemController
                 }
             } else {
                 //systemState = OFF;
+
+                coolingSignal = 0;
+                heatingSignal = 0;
+                piController.reset();
             }
         } else if ( (systemState != COOLING) && buildingLimitMinBreached("vav")) {
             CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency HEATING Active");
@@ -241,6 +245,9 @@ public class VavSystemController extends SystemController
                 }
             } else {
                 //systemState = OFF;
+                coolingSignal = 0;
+                heatingSignal = 0;
+                piController.reset();
             }
         } else
         {
@@ -268,6 +275,10 @@ public class VavSystemController extends SystemController
             else
             {
                 //systemState = OFF;
+
+                coolingSignal = 0;
+                heatingSignal = 0;
+                piController.reset();
             }
         }
         

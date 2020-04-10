@@ -1622,7 +1622,7 @@ public class CCUHsApi
             public void run() {
                 registerDeviceInfo();
             }
-        }, 60000);
+        }, 30000);
     }
 
     private void registerDeviceInfo() {

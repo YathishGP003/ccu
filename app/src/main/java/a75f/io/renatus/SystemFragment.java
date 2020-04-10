@@ -263,6 +263,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		tbCompHumidity = view.findViewById(R.id.tbCompHumidity);
 		tbDemandResponse = view.findViewById(R.id.tbDemandResponse);
 
+		tbCompHumidity.setEnabled(false);
+		tbDemandResponse.setEnabled(false);
+
 		if (L.ccu().systemProfile instanceof DefaultSystem) {
 			systemModePicker.setEnabled(false);
 			sbComfortValue.setEnabled(false);

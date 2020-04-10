@@ -209,6 +209,7 @@
                 android:layout_marginTop="36dp"
                 android:textOff=""
                 android:textOn=""
+                android:enabled="false"
                 android:layout_below="@+id/imageTemp" />
 
             <TextView
@@ -232,6 +233,7 @@
                 android:background="@drawable/toggle_selector"
                 android:checked="true"
                 android:layout_marginTop="36dp"
+                android:enabled="false"
                 android:textOff=""
                 android:textOn=""
                 android:layout_below="@+id/textUseCelsius" />
@@ -257,6 +259,7 @@
                 android:layout_centerVertical="true"
                 android:background="@drawable/toggle_selector"
                 android:checked="false"
+                android:enabled="false"
                 android:layout_marginTop="36dp"
                 android:textOff=""
                 android:textOn=""
@@ -282,6 +285,7 @@
                 android:layout_centerVertical="true"
                 android:background="@drawable/toggle_selector"
                 android:checked="false"
+                android:enabled="false"
                 android:layout_marginTop="36dp"
                 android:textOff=""
                 android:textOn=""

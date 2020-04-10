@@ -1,11 +1,16 @@
 package a75f.io.renatus.registartion;
 
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -62,6 +67,8 @@ import a75f.io.renatus.views.MasterControl.MasterControlView;
 import a75f.io.renatus.views.TempLimit.TempLimitView;
 
 import static a75f.io.logic.L.ccu;
+import static a75f.io.renatus.FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED;
+import static a75f.io.renatus.SettingsFragment.ACTION_SETTING_SCREEN;
 import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
 public class InstallerOptions extends Fragment {
@@ -432,6 +439,8 @@ public class InstallerOptions extends Fragment {
             }
         });
 
+        getActivity().registerReceiver(mPairingReceiver, new IntentFilter(ACTION_SETTING_SCREEN));
+
         return rootView;
     }
 
@@ -590,4 +599,32 @@ public class InstallerOptions extends Fragment {
         });
         thread.start();
     }
+
+    @Override
+    public void onDestroyView() {
+        if (getActivity() != null){
+            getActivity().unregisterReceiver(mPairingReceiver);
+        }
+        super.onDestroyView();
+    }
+
+    private final BroadcastReceiver mPairingReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent == null || intent.getAction() == null){
+                return;
+            }
+
+            if (intent.getAction().equals(ACTION_SETTING_SCREEN)) {
+                if (mAddressBandSpinner != null) {
+                    ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
+                    if (equips != null && equips.size() > 0) {
+                        mAddressBandSpinner.setEnabled(false);
+                    } else {
+                        mAddressBandSpinner.setEnabled(true);
+                    }
+                }
+            }
+        }
+    };
 }

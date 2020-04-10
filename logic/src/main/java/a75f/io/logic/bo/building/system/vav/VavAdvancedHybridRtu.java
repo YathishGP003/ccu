@@ -123,7 +123,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
     
     public synchronized void updateSystemPoints() {
         super.updateSystemPoints();
-        updateOutsideWeatherParams();
+        //updateOutsideWeatherParams();
         
         int signal;
         double analogMin = 0, analogMax = 0;

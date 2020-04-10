@@ -76,7 +76,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
     public synchronized void updateSystemPoints()
     {
         super.updateSystemPoints();
-        updateOutsideWeatherParams();
+        //updateOutsideWeatherParams();
         
         double signal = 0;
         if (getConfigEnabled("analog2") > 0)

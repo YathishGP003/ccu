@@ -248,7 +248,6 @@ public class DabSystemController extends SystemController
             }
             else
             {
-                //systemState = OFF;
             }
         }
     

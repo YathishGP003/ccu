@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import a75f.io.logic.Globals;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.WeatherDataDownloadService;
@@ -514,7 +515,7 @@ public class CCUUtils {
 						//String address = locadd.replaceAll(" ", "%20");
                         String address = locadd.replaceAll(" ", "+");
 						//https://maps.google.com/maps/api/geocode/json?address=54016, United States&sensor=false&key=AIzaSyD3mUArjl1fvA7EBy6M8x8FJSKpKS3RmOg
-						HttpPost httppost = new HttpPost( "https://maps.google.com/maps/api/geocode/json?address=" + address + "&key=AIzaSyD3mUArjl1fvA7EBy6M8x8FJSKpKS3RmOg");
+						HttpPost httppost = new HttpPost( "https://maps.google.com/maps/api/geocode/json?address=" + address + "&key="+getEnvGoogleMapKeys());
 
 						org.apache.http.HttpResponse response;
 						StringBuilder stringBuilder = new StringBuilder();
@@ -638,5 +639,20 @@ public class CCUUtils {
         }
         return value;
     }
+	public static String getEnvGoogleMapKeys() {
+			SharedPreferences sprefs = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
+			switch (sprefs.getString("SERVER_ENV", "")) {
+				case "QA":
+					return "AIzaSyCo7HhoO6m40JWyosWl3RqMjTZd5GI0znU";
+				case "DEV":
+					return  "AIzaSyA867irnfUuznLLsTVFwLs_c-0DNqiVEEY";
 
+				case "STAGING":
+					return "AIzaSyA-b5lbhs7XOO8Fy1bdNky7CoNJR4B3kyY";
+				case "PROD":
+				default:
+					return  "AIzaSyDEI5fuYQmggzyoDc6cBLciIx3ygY-lmOE";
+
+			}
+	}
 }

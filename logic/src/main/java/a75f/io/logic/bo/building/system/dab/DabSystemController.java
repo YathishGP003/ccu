@@ -256,9 +256,6 @@ public class DabSystemController extends SystemController
             }
             else
             {
-                coolingSignal = 0;
-                heatingSignal = 0;
-                piController.reset();
             }
         }
     

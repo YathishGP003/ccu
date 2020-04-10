@@ -278,7 +278,6 @@ public class CreateNewSite extends Fragment {
         mNext.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                ProgressDialogUtils.showProgressDialog(getActivity(),"Adding New Site...");
                 int[] mandotaryIds = new int[]
                         {
                                 R.id.editSitename,
@@ -306,6 +305,7 @@ public class CreateNewSite extends Fragment {
                     String ccuName = mSiteCCU.getText().toString();
 
                     prefs.setBoolean("registered", true);
+                    ProgressDialogUtils.showProgressDialog(getActivity(),"Adding New Site...");
                     if (site.size() > 0) {
                         String siteId = site.get("id").toString();
                         String geoFence = site.get("geoFence") != null ? site.get("geoFence").toString() : "2.0";

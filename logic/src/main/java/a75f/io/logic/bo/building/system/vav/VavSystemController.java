@@ -180,11 +180,13 @@ public class VavSystemController extends SystemController
             }
         }
         
-        if (prioritySum == 0) {
+        if (prioritySum == 0 || zoneCount == 0) {
             CcuLog.d(L.TAG_CCU_SYSTEM, "No valid temperature, Skip VavSystemControlAlgo");
             systemState = OFF;
             reset();
             return;
+        }else if(systemState == OFF){
+            systemState = COOLING;
         }
         
         weightedAverageCoolingOnlyLoad = weightedAverageCoolingOnlyLoadSum / prioritySum;

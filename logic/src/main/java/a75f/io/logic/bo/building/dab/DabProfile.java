@@ -156,10 +156,10 @@ public class DabProfile extends ZoneProfile
             }
             damperOpController.updateControlVariable(setTempHeating, roomTemp);
         } else {
-            //if (state != DEADBAND) {
-              //  state = DEADBAND;
+            if (state != DEADBAND) {
+                state = DEADBAND;
                 damperOpController.reset();
-            //}
+            }
            
         }
         damperOpController.dump();

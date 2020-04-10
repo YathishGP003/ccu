@@ -174,7 +174,8 @@ public class DabSystemController extends SystemController
             systemState = OFF;
             reset();
             return;
-        }
+        }else if(systemState == OFF)
+            systemState = COOLING;
         
         weightedAverageLoad = weightedAverageLoadSum / prioritySum;
         co2LoopOpWA = co2LoopWASum/prioritySum;

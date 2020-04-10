@@ -27,20 +27,17 @@ public class StatusPagerAdapter extends FragmentStatePagerAdapter
 		switch (position)
 		{
 			case 0:
-				fragment = DashboardFragment.newInstance();
-				break;
-			case 1:
 				//fragment = ZoneFragmentTemp.newInstance();
 				fragment = ZoneFragmentNew.newInstance();
 				break;
-			case 2:
+			case 1:
 				//fragment = SystemFragment_bkp.newInstance();
 				fragment = SystemFragment.newInstance();
 				break;
-			case 3:
+			case 2:
 				fragment = SchedulerFragment.newInstance();
 				break;
-			case 4:
+			case 3:
 				fragment = AlertsFragment.newInstance();
 				break;
 		}
@@ -51,7 +48,7 @@ public class StatusPagerAdapter extends FragmentStatePagerAdapter
 	@Override
 	public int getCount()
 	{
-		return 5;
+		return 4;
 	}
 	
 	
@@ -67,15 +64,15 @@ public class StatusPagerAdapter extends FragmentStatePagerAdapter
 	{
 		switch (position)
 		{
+			/*case 0:
+				return "Dashboard";*/
 			case 0:
-				return "Dashboard";
-			case 1:
 				return "Zones";
-			case 2:
+			case 1:
 				return "System";
-			case 3:
+			case 2:
 				return "Building";
-			case 4:
+			case 3:
 				return "Alerts";
 		}
 		return null;

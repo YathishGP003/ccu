@@ -348,7 +348,7 @@
     <string name="title_systemprofile">SELECT SYSTEM PROFILE</string>
     <string name="string_gateway">Default System acts as a Gateway \nwithout connecting to physical equipment</string>
     <string name="gateway_ex">Example use cases are when we only use Zone/Terminal profiles that \n
-        operate in standalone mode without any central plan equipment \n
+        operate in standalone mode without any central plant equipment \n
         e.g. zones configured to be Hot water Mixing Pacakge, \n
         Generic PI Controller, Standalone Conventional Package Unit etc.</string>
 

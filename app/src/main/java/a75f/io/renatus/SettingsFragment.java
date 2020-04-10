@@ -1,6 +1,7 @@
 package a75f.io.renatus;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -32,6 +33,8 @@ public class SettingsFragment extends Fragment {
     FrameLayout flContent;
 
     public static SlidingPaneLayout slidingPane;
+    public static final String ACTION_SETTING_SCREEN =
+            "a75f.io.renatus.SettingsFragment";
     //
     Fragment fragment = null;
     Class fragmentClass;
@@ -184,7 +187,8 @@ public class SettingsFragment extends Fragment {
                     }
                     case 5: {
                         if (isTransactionSafe && !(fragment instanceof TempOverrideFragment)) {
-                            fragmentClass = TempOverrideFragment.class;
+                            //TODO:
+                           /* fragmentClass = TempOverrideFragment.class;
                             try {
                                 fragment = (Fragment) fragmentClass.newInstance();
                             } catch (Exception e) {
@@ -194,7 +198,7 @@ public class SettingsFragment extends Fragment {
                             FragmentTransaction transaction = fragmentManager.beginTransaction();
                             transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
                             transaction.replace(R.id.flContent, fragment);
-                            transaction.commit();
+                            transaction.commit();*/
                         } else {
                             isTransactionPending = true;
                         }
@@ -246,5 +250,13 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            getActivity().sendBroadcast(new Intent(ACTION_SETTING_SCREEN));
+        }
     }
 }

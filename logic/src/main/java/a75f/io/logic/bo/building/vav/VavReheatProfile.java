@@ -186,13 +186,13 @@ public class VavReheatProfile extends VavProfile
             else
             {
                 //Zone is in deadband
-                /*if (state != DEADBAND) {
-                    state = DEADBAND;*/
+                if (state != DEADBAND) {
+                    state = DEADBAND;
                     //valveController.reset();
                     valve.currentPosition = 0;
                     heatingLoop.setDisabled();
                     coolingLoop.setDisabled();
-                //}
+                }
             }
             
             if (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.OFF|| valveController.getControlVariable() == 0)

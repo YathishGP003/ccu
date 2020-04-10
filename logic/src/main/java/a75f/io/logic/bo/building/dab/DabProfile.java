@@ -101,7 +101,7 @@ public class DabProfile extends ZoneProfile
     {
         if (isZoneDead()) {
             CcuLog.d(L.TAG_CCU_ZONE,"Zone Temp Dead: "+dabEquip.nodeAddr+" roomTemp : "+dabEquip.getCurrentTemp());
-            state = TEMPDEAD;
+            //state = TEMPDEAD;
             String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+dabEquip.nodeAddr+"\"");
             if (!curStatus.equals("Zone Temp Dead"))
             {
@@ -156,10 +156,10 @@ public class DabProfile extends ZoneProfile
             }
             damperOpController.updateControlVariable(setTempHeating, roomTemp);
         } else {
-            //if (state != DEADBAND) {
-              //  state = DEADBAND;
+            if (state != DEADBAND) {
+                state = DEADBAND;
                 damperOpController.reset();
-            //}
+            }
            
         }
         damperOpController.dump();

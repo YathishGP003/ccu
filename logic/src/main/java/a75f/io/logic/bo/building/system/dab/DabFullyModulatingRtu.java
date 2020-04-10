@@ -272,7 +272,8 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
             status.insert(0, "Free Cooling Used |");
         }
-        
+        if(status.toString().isEmpty())
+            status.append("System OFF");
         return status.toString();
     }
     

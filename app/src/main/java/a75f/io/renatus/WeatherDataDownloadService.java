@@ -158,7 +158,7 @@ public class WeatherDataDownloadService extends IntentService {
                                 Log.d("CCU_WEATHER", String.valueOf(finalLat) + "/" + String.valueOf(finalLng) + current.toString(4));
                             mCurrentTemp = current.getDouble("temperature");
                             micon = current.getString("icon");
-                            mCurrentHumidity = current.getDouble("humidity");
+                            mCurrentHumidity = CCUUtils.roundTo2Decimal(current.getDouble("humidity"));
                             mSummary = current.getString("summary");
                             mPrecipIntensity = current.getDouble("precipIntensity");
                             mPrecipIntensity *= 100; // Normally in the range .000x, display 100 times to make more readable.
@@ -200,7 +200,7 @@ public class WeatherDataDownloadService extends IntentService {
                 @Override
                 protected JSONObject doInBackground(Void... params) {
                     HttpClient httpclient = new DefaultHttpClient();
-                    HttpGet httpget = new HttpGet(sUrlForecastIO + String.valueOf(finalLat) + "," + String.valueOf(finalLng));
+                    HttpGet httpget = new HttpGet(sUrlForecastIO + String.valueOf(finalLat) + "," + String.valueOf(finalLng)+"?exclude=minutely,hourly,alerts,flags");
                     ResponseHandler<String> responseHandler = new BasicResponseHandler();
                     String responseBody;
                     try {
@@ -221,7 +221,7 @@ public class WeatherDataDownloadService extends IntentService {
             };
             downloader.execute();
             
-            new SolcastDataFetchTask().execute();
+            //new SolcastDataFetchTask().execute();
         }
     }
     

@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -277,6 +278,7 @@ public class CreateNewSite extends Fragment {
         mNext.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
+                ProgressDialogUtils.showProgressDialog(getActivity(),"Adding New Site...");
                 int[] mandotaryIds = new int[]
                         {
                                 R.id.editSitename,
@@ -321,7 +323,13 @@ public class CreateNewSite extends Fragment {
                         L.ccu().setCCUName(ccuName);
                         CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                     }
-                    goTonext();
+                    new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            ProgressDialogUtils.hideProgressDialog();
+                            goTonext();
+                        }
+                    }, 20000);
                 }
             }
         });

@@ -11,6 +11,8 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
@@ -1247,31 +1249,39 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
     private void updateCCURegistrationInfo() {
         prefs.setBoolean("isCCURegistered",false);
-        
-        if (pingCloudServer()){
-            CCUHsApi.getInstance().registerDevice();
+        ProgressDialogUtils.showProgressDialog(this,"CCU Registering...");
 
-            AlertManager.getInstance().fetchAllPredefinedAlerts();
-            Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(i);
-            finish();
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                ProgressDialogUtils.hideProgressDialog();
+                if (pingCloudServer()){
+                    CCUHsApi.getInstance().registerDevice();
 
-        } else {
-            new AlertDialog.Builder(FreshRegistration.this)
-                    .setCancelable(false)
-                    .setMessage("No network connection, Registration is not complete and Facilisight cannot be accessed unless you connect to network.")
-                    .setPositiveButton("Proceed", (dialog, id) -> {
+                    AlertManager.getInstance().fetchAllPredefinedAlerts();
+                    Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(i);
+                    finish();
 
-                        CCUHsApi.getInstance().registerDevice();
-                        AlertManager.getInstance().fetchAllPredefinedAlerts();
-                        Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
-                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(i);
-                        finish();
-                    })
-                    .show();
-        }
+                } else {
+                    new AlertDialog.Builder(FreshRegistration.this)
+                            .setCancelable(false)
+                            .setMessage("No network connection, Registration is not complete and Facilisight cannot be accessed unless you connect to network.")
+                            .setPositiveButton("Proceed", (dialog, id) -> {
+
+                                CCUHsApi.getInstance().registerDevice();
+                                AlertManager.getInstance().fetchAllPredefinedAlerts();
+                                Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
+                                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(i);
+                                finish();
+                            })
+                            .show();
+                }
+            }
+        }, 30000);
+
         /*if (!ProgressDialogUtils.isDialogShowing()){
             ProgressDialogUtils.showProgressDialog(this,"CCU Registering...");
         }

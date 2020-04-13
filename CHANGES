@@ -1,11 +1,2 @@
- - Merge branch 'kumar_renatus' into 'master'
- - UI changes for demo fix
- - Merge branch 'kumar_renatus' into 'master'
- - BugFix, for dab staged
- - BugFix, for dab staged
- - BugFix, for dab staged
- - remove duplicate requests to fetch weather data
- - Merge branch 'kumar_renatus' of https://gitlab.com/75f/android/renatus into kumar_renatus
  - Merge branch 'mahesh_demoFix' into 'master'
- - fixes
- - Weather geocode keys update
+ - fix

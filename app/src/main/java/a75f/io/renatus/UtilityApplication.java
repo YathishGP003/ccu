@@ -725,7 +725,8 @@ public abstract class UtilityApplication extends Application
             localDevice.writePropertyInternal(PropertyIdentifier.firmwareRevision, new CharacterString("4.13"));
             HashMap site = CCUHsApi.getInstance().read("site");
             String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
-            localDevice.writePropertyInternal(PropertyIdentifier.serialNumber, new CharacterString(siteGUID));
+            String ccuGUID = CCUHsApi.getInstance().getGUID(CCUHsApi.getInstance().getCcuId().toString());
+            localDevice.writePropertyInternal(PropertyIdentifier.serialNumber, new CharacterString(ccuGUID));
             localDevice.writePropertyInternal(PropertyIdentifier.applicationSoftwareVersion, new CharacterString(Integer.toString(BuildConfig.VERSION_CODE)));
             //localDevice.writePropertyInternal(PropertyIdentifier.maxSegmentsAccepted, new UnsignedInteger(15));
             localDevice.writePropertyInternal(PropertyIdentifier.segmentationSupported, Segmentation.noSegmentation);
@@ -767,8 +768,8 @@ public abstract class UtilityApplication extends Application
             localDevice.writePropertyInternal(PropertyIdentifier.firmwareRevision, new CharacterString("4.13"));
             HashMap site = CCUHsApi.getInstance().read("site");
             String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
-            //tvSerialNumber.setText(siteGUID == null? site.get("id").toString() :siteGUID);
-            localDevice.writePropertyInternal(PropertyIdentifier.serialNumber, new CharacterString(siteGUID));
+            String ccuGUID = CCUHsApi.getInstance().getGUID(CCUHsApi.getInstance().getCcuId().toString());
+            localDevice.writePropertyInternal(PropertyIdentifier.serialNumber, new CharacterString(ccuGUID));
             localDevice.writePropertyInternal(PropertyIdentifier.applicationSoftwareVersion, new CharacterString(Integer.toString(BuildConfig.VERSION_CODE)));
             //localDevice.writePropertyInternal(PropertyIdentifier.maxSegmentsAccepted, new UnsignedInteger(15));
             localDevice.writePropertyInternal(PropertyIdentifier.segmentationSupported, Segmentation.noSegmentation);
@@ -815,7 +816,7 @@ public abstract class UtilityApplication extends Application
                     }
 
                     }
-                }, 60000);
+                }, 1000);//Todo For Demo purpose reducing the intializing time
             }
     }
 
@@ -849,9 +850,11 @@ public abstract class UtilityApplication extends Application
 
             HashMap site = CCUHsApi.getInstance().read("site");
             String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
+
             Log.i("Bacnet", "Device Number:" + localDevice.getInstanceNumber() + " Device Name:" + ccuName + " Serial:" + site.get("id").toString() + " GUID:" + siteGUID);
             //tvSerialNumber.setText(siteGUID == null? site.get("id").toString() :siteGUID);
-            localDevice.writePropertyInternal(PropertyIdentifier.serialNumber, new CharacterString(site.get("id").toString()));
+            String ccuGUID = CCUHsApi.getInstance().getGUID(CCUHsApi.getInstance().getCcuId().toString());
+            localDevice.writePropertyInternal(PropertyIdentifier.serialNumber, new CharacterString(ccuGUID));
             localDevice.writePropertyInternal(PropertyIdentifier.applicationSoftwareVersion, new UnsignedInteger(BuildConfig.VERSION_CODE));
             localDevice.writePropertyInternal(PropertyIdentifier.segmentationSupported, new UnsignedInteger(15));
             localDevice.getServicesSupported();

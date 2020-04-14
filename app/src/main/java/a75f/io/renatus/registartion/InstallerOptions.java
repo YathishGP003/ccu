@@ -29,6 +29,7 @@ import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.renovo.bacnet4j.LocalDevice;
@@ -118,6 +119,7 @@ public class InstallerOptions extends Fragment {
     TextInputLayout textInputIP;
     RadioGroup radioGroup_config;
     Button buttonSendIAM;
+    TextView textBacnetEnable;
     private static final String TAG = InstallerOptions.class.getSimpleName();
 
     MasterControlView.OnClickListener onSaveChangeListener = (lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, lowerBuildingTemp, upperBuildingTemp, setBack, zoneDiff, hdb, cdb) -> {
@@ -200,8 +202,16 @@ public class InstallerOptions extends Fragment {
         textInputIP = rootView.findViewById(R.id.textInputIP);
         radioGroup_config = rootView.findViewById(R.id.radioGroup_config);
         buttonSendIAM = rootView.findViewById(R.id.buttonSendIAM);
+        textBacnetEnable = rootView.findViewById(R.id.textBacnetEnable);
         rl_BACnet.setVisibility(View.GONE);
-
+        String ccuGUID = CCUHsApi.getInstance().getGUID(CCUHsApi.getInstance().getCcuId().toString());
+        if(prefs.getBoolean("registered") && ccuGUID!=null){
+            textBacnetEnable.setVisibility(View.VISIBLE);
+            toggleBACnet.setVisibility(View.VISIBLE);
+        }else {
+            textBacnetEnable.setVisibility(View.GONE);
+            toggleBACnet.setVisibility(View.GONE);
+        }
         ArrayList<String> addressBand = new ArrayList<>();
         //addressBand.add("Select SmartNode Address Band");
         for (int addr = 1000; addr <= 9900; addr += 100) {

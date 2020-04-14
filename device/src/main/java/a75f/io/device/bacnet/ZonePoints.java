@@ -31,6 +31,8 @@ import com.renovo.bacnet4j.type.primitive.CharacterString;
 import com.renovo.bacnet4j.type.primitive.Real;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -57,7 +59,7 @@ public class ZonePoints {
     }
     public ZonePoints(LocalDevice localDevice,Zone zone,String objectName)
     {
-        Log.i("Bacnet","LocalDevice:"+localDevice.getInstanceNumber());
+        Log.i("ad","LocalDevice:"+localDevice.getInstanceNumber());
         Device zoneDevice =  HSUtil.getDevices(zone.getId()).get(0);
         //We will handle only single module per zone
         if(zoneDevice!=null) {
@@ -68,10 +70,12 @@ public class ZonePoints {
             if (!zoneEquip.getMarkers().contains("pid") && !zoneEquip.getMarkers().contains("emr")) {
                 updateCurrentTemp(localDevice, zoneAddress, zoneName, zoneDescription, zoneDevice);
                 updateDesiredTemp(localDevice, zoneAddress, zoneName, zoneDescription, zoneDevice);
-                updateSensorData(localDevice,zoneAddress,zoneName,zoneDescription,zoneDevice);
                 if (zoneEquip.getMarkers().contains("vav") || zoneEquip.getMarkers().contains("dab")) {
                     updateDamperPosition(localDevice, zoneAddress, zoneName, zoneDescription, zoneDevice);
                 }
+            }
+            if(zoneDevice.getMarkers().contains("smartstat")) {
+                updateSensorData(localDevice,zoneAddress,zoneName,zoneDescription,zoneDevice);
             }
         }
     }
@@ -94,7 +98,7 @@ public class ZonePoints {
 
                 //currentTemperature.supportWritable();
                 //currentTemperature.makePresentValueReadOnly();
-                currentTemperature.supportCovReporting(0.5f);
+                currentTemperature.supportCovReporting(BACnetUtils.currentTempCOV);
 
                 //currentTemperature.setOverridden(true);
 
@@ -105,10 +109,10 @@ public class ZonePoints {
                         new LinkedListLogBuffer<LogRecord>(), true, DateTime.UNSPECIFIED, DateTime.UNSPECIFIED,
                         new DeviceObjectPropertyReference(localDevice.getInstanceNumber(), currentTemperature.getId(), PropertyIdentifier.presentValue),
                         BACnetUtils.logInterval, false, BACnetUtils.bufferSize);
-                trendObject.withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(0.5f)));
+                trendObject.withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS);
+                trendObject.withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(BACnetUtils.currentTempCOV)));
                 trendObject.writePropertyInternal(PropertyIdentifier.eventState,EventState.normal);
                 trendObject.makePropertyReadOnly(PropertyIdentifier.logDeviceObjectProperty);
-
                 Log.i("Bacnet","Creating notifClass for Current Temp:"+instanceID);
 
             }else{
@@ -130,9 +134,9 @@ public class ZonePoints {
                 if(baCnetObject.readProperty(PropertyIdentifier.outOfService).equals(Boolean.FALSE)) {
                     baCnetObject.writePropertyInternal(PropertyIdentifier.presentValue, new Real((float) currentTemp));
                 }
-                TrendLogObject trendLogObject = (TrendLogObject)localDevice.getObjectByID(instanceID);
-                trendLogObject.withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS);
-                trendLogObject.withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(0.5f)));
+                //TrendLogObject trendLogObject = (TrendLogObject)localDevice.getObjectByID(instanceID);
+                //trendLogObject.withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS);
+                //trendLogObject.withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(0.5f)));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -144,8 +148,11 @@ public class ZonePoints {
             int addressNumber = Integer.parseInt(zoneAddress+"00");
             int instanceCoolID = addressNumber + BACnetUtils.desiredTempCooling;
             int instanceHeatID = addressNumber + BACnetUtils.desiredTempHeating;
-            double hdb = StandaloneTunerUtil.getStandaloneHeatingDeadband(zoneDevice.getEquipRef());
-            double cdb = StandaloneTunerUtil.getStandaloneCoolingDeadband(zoneDevice.getEquipRef());
+            //double hdb = StandaloneTunerUtil.getStandaloneHeatingDeadband(zoneDevice.getEquipRef());
+            //double cdb = StandaloneTunerUtil.getStandaloneCoolingDeadband(zoneDevice.getEquipRef());
+            double hdb = getDeadband(zoneDevice,"heating");
+            double cdb = getDeadband(zoneDevice,"cooling");
+            Log.i("BacnetDB","Heating Deadband:"+hdb+" Cooling Deadband:"+cdb+" EquipRef:"+zoneDevice.getEquipRef());
             if (!localDevice.checkObjectByID(instanceCoolID)) {
                 Log.i("Bacnet","Creating Cooling Desired Temp:"+instanceCoolID);
                 //Todo re-verfify deadbands for heating and cooling DT
@@ -163,8 +170,9 @@ public class ZonePoints {
                 desiredTemperature.supportCovReporting(0.5f);
                 TrendLogObject trendObject = new TrendLogObject(localDevice, desiredTemperature.getInstanceId() , zoneName + "_coolingDesiredTemp_trend", new LinkedListLogBuffer<LogRecord>(), true, DateTime.UNSPECIFIED, DateTime.UNSPECIFIED,
                         new DeviceObjectPropertyReference(localDevice.getInstanceNumber(), desiredTemperature.getId(), PropertyIdentifier.presentValue), BACnetUtils.logInterval, false, BACnetUtils.bufferSize)
-                        .withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS)
-                        .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(0.5f)));
+                        .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(0.5f)))
+                        .withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS);
+
                 trendObject.writePropertyInternal(PropertyIdentifier.eventState,EventState.normal);
                 trendObject.makePropertyReadOnly(PropertyIdentifier.logDeviceObjectProperty);
 
@@ -190,8 +198,9 @@ public class ZonePoints {
                 desiredTemperature.supportCovReporting(0.5f);
                 TrendLogObject trendObject = new TrendLogObject(localDevice, desiredTemperature.getInstanceId(), zoneName + "_heatingDesiredTemp_trend", new LinkedListLogBuffer<LogRecord>(), true, DateTime.UNSPECIFIED, DateTime.UNSPECIFIED,
                         new DeviceObjectPropertyReference(localDevice.getInstanceNumber(), desiredTemperature.getId(), PropertyIdentifier.presentValue), BACnetUtils.logInterval, false, BACnetUtils.bufferSize)
-                        .withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS)
-                        .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(0.5f)));
+                        .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(0.5f)))
+                        .withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS);
+
                 trendObject.writePropertyInternal(PropertyIdentifier.eventState,EventState.normal);
                 trendObject.makePropertyReadOnly(PropertyIdentifier.logDeviceObjectProperty);
 
@@ -212,9 +221,11 @@ public class ZonePoints {
                 if (localDevice.checkObjectByID(instanceCoolID)) {
                     BACnetObject baCnetObject = localDevice.getObjectByID(instanceCoolID);
                     double desiredCoolingTemp = getDesiredTemp(equip, dtemp);
+                    double cdb = getDeadband(equip,"cooling");
                     Log.i("Bacnet", "Updating Desired Temp:" + instanceCoolID + " Value:" + desiredCoolingTemp);
                     if(baCnetObject.readProperty(PropertyIdentifier.outOfService).equals(Boolean.FALSE)) {
                         baCnetObject.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.presentValue, new Real((float) desiredCoolingTemp)));
+                        baCnetObject.writePropertyInternal(PropertyIdentifier.deadband,new Real((float)cdb));
                     }
                     //baCnetObject.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.deadband, new Real((int) 2)));
                 }
@@ -224,9 +235,11 @@ public class ZonePoints {
                 if (localDevice.checkObjectByID(instanceHeatID)) {
                     BACnetObject baCnetObject = localDevice.getObjectByID(instanceHeatID);
                     double desiredHeatingTemp = getDesiredTemp(equip, "heating");
+                    double hdb = getDeadband(equip,"heating");
                     Log.i("Bacnet", "Updating Desired Temp:" + instanceHeatID + " Value:" + desiredHeatingTemp);
                     if(baCnetObject.readProperty(PropertyIdentifier.outOfService).equals(Boolean.FALSE)) {
                         baCnetObject.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.presentValue, new Real((float) desiredHeatingTemp)));
+                        baCnetObject.writePropertyInternal(PropertyIdentifier.deadband,new Real((float)hdb));
                     }
                     //baCnetObject.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.deadband, new Real((int) 2)));
                 }
@@ -251,10 +264,12 @@ public class ZonePoints {
 
                 TrendLogObject trendObject = new TrendLogObject(localDevice, damperPosition.getInstanceId(), zoneName + "_damperPos_trend", new LinkedListLogBuffer<LogRecord>(), true, DateTime.UNSPECIFIED, DateTime.UNSPECIFIED,
                         new DeviceObjectPropertyReference(localDevice.getInstanceNumber(), damperPosition.getId(), PropertyIdentifier.presentValue), 0, false, BACnetUtils.bufferSize)
-                        .withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS)
-                        .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(5f)));
-                localDevice.incrementDatabaseRevision(); //Todo Increase Database Revision
+                        .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)))
+                        .withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS);
+
+                trendObject.writePropertyInternal(PropertyIdentifier.eventState,EventState.normal);
                 trendObject.makePropertyReadOnly(PropertyIdentifier.logDeviceObjectProperty);
+
                 readAccessSpecifications.add(new ReadAccessSpecification(damperPosition.getId(),
                         new SequenceOf<>( new PropertyReference(PropertyIdentifier.presentValue))));
                 //readAccessSpecifications.add(new ReadAccessSpecification(trendObject.getId(),
@@ -262,7 +277,7 @@ public class ZonePoints {
 
                 listOfObjectPropertyReferences.add(new DeviceObjectPropertyReference(damperPosition.getId(), PropertyIdentifier.presentValue, null, null));
                 //listOfObjectPropertyReferences.add(new DeviceObjectPropertyReference(trendObject.getId(), PropertyIdentifier.presentValue, null, null));
-
+                //localDevice.incrementDatabaseRevision(); //Todo Increase Database Revision
             }
             else{
                 setDamperPosition(localDevice,zoneAddress,zoneDevice);
@@ -317,8 +332,11 @@ public class ZonePoints {
                                     new LinkedListLogBuffer<LogRecord>(), true, DateTime.UNSPECIFIED, DateTime.UNSPECIFIED,
                                     new DeviceObjectPropertyReference(localDevice.getInstanceNumber(), sensorTypeName.getId(),
                                             PropertyIdentifier.presentValue), BACnetUtils.logInterval, false, BACnetUtils.bufferSize)
+                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)))
                                     .withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS)
-                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)));
+                                    .writePropertyInternal(PropertyIdentifier.eventState,EventState.normal);
+
+
                             break;
                         case CO2:
                             sensorVal = CCUHsApi.getInstance().readHisValByQuery("point and sensor and current and his and "+ SensorType.values()[i].getSensorPort().getPortSensor()+" and equipRef == \"" + zoneDevice.getEquipRef() + "\"");
@@ -331,8 +349,9 @@ public class ZonePoints {
                                     new LinkedListLogBuffer<LogRecord>(), true, DateTime.UNSPECIFIED, DateTime.UNSPECIFIED,
                                     new DeviceObjectPropertyReference(localDevice.getInstanceNumber(), sensorTypeName.getId(),
                                             PropertyIdentifier.presentValue), BACnetUtils.logInterval, false, BACnetUtils.bufferSize)
+                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)))
                                     .withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS)
-                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)));
+                                    .writePropertyInternal(PropertyIdentifier.eventState,EventState.normal);
                             break;
                         case CO:
                             sensorVal = CCUHsApi.getInstance().readHisValByQuery("point and sensor and current and his and "+ SensorType.values()[i].getSensorPort().getPortSensor()+" and equipRef == \"" + zoneDevice.getEquipRef() + "\"");
@@ -345,8 +364,9 @@ public class ZonePoints {
                                     new LinkedListLogBuffer<LogRecord>(), true, DateTime.UNSPECIFIED, DateTime.UNSPECIFIED,
                                     new DeviceObjectPropertyReference(localDevice.getInstanceNumber(), sensorTypeName.getId(),
                                             PropertyIdentifier.presentValue), BACnetUtils.logInterval, false, BACnetUtils.bufferSize)
+                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)))
                                     .withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS)
-                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)));
+                                    .writePropertyInternal(PropertyIdentifier.eventState,EventState.normal);
                             break;
                         case NO:
                             sensorVal = CCUHsApi.getInstance().readHisValByQuery("point and sensor and current and his and "+ SensorType.values()[i].getSensorPort().getPortSensor()+" and equipRef == \"" + zoneDevice.getEquipRef() + "\"");
@@ -359,8 +379,9 @@ public class ZonePoints {
                                     new LinkedListLogBuffer<LogRecord>(), true, DateTime.UNSPECIFIED, DateTime.UNSPECIFIED,
                                     new DeviceObjectPropertyReference(localDevice.getInstanceNumber(), sensorTypeName.getId(),
                                             PropertyIdentifier.presentValue), BACnetUtils.logInterval, false, BACnetUtils.bufferSize)
+                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)))
                                     .withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS)
-                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)));
+                                    .writePropertyInternal(PropertyIdentifier.eventState,EventState.normal);
                             break;
                         case VOC:
                             sensorVal = CCUHsApi.getInstance().readHisValByQuery("point and sensor and current and his and "+ SensorType.values()[i].getSensorPort().getPortSensor()+" and equipRef == \"" + zoneDevice.getEquipRef() + "\"");
@@ -373,8 +394,9 @@ public class ZonePoints {
                                     new LinkedListLogBuffer<LogRecord>(), true, DateTime.UNSPECIFIED, DateTime.UNSPECIFIED,
                                     new DeviceObjectPropertyReference(localDevice.getInstanceNumber(), sensorTypeName.getId(),
                                             PropertyIdentifier.presentValue), BACnetUtils.logInterval, false, BACnetUtils.bufferSize)
+                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)))
                                     .withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS)
-                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)));
+                                    .writePropertyInternal(PropertyIdentifier.eventState,EventState.normal);
                             break;
                         case PRESSURE:
                             sensorVal = CCUHsApi.getInstance().readHisValByQuery("point and sensor and current and his and "+ SensorType.values()[i].getSensorPort().getPortSensor()+" and equipRef == \"" + zoneDevice.getEquipRef() + "\"");
@@ -387,8 +409,9 @@ public class ZonePoints {
                                     new LinkedListLogBuffer<LogRecord>(), true, DateTime.UNSPECIFIED, DateTime.UNSPECIFIED,
                                     new DeviceObjectPropertyReference(localDevice.getInstanceNumber(), sensorTypeName.getId(),
                                             PropertyIdentifier.presentValue), BACnetUtils.logInterval, false, BACnetUtils.bufferSize)
+                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)))
                                     .withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS)
-                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)));
+                                    .writePropertyInternal(PropertyIdentifier.eventState,EventState.normal);
                             break;
                         case OCCUPANCY:
                             sensorVal = CCUHsApi.getInstance().readHisValByQuery("point and sensor and current and his and "+ SensorType.values()[i].getSensorPort().getPortSensor()+" and equipRef == \"" + zoneDevice.getEquipRef() + "\"");
@@ -401,8 +424,9 @@ public class ZonePoints {
                                     new LinkedListLogBuffer<LogRecord>(), true, DateTime.UNSPECIFIED, DateTime.UNSPECIFIED,
                                     new DeviceObjectPropertyReference(localDevice.getInstanceNumber(), sensorTypeName.getId(),
                                             PropertyIdentifier.presentValue), BACnetUtils.logInterval, false, BACnetUtils.bufferSize)
+                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)))
                                     .withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS)
-                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)));
+                                    .writePropertyInternal(PropertyIdentifier.eventState,EventState.normal);
                             break;
                         case SOUND:
                             sensorVal = CCUHsApi.getInstance().readHisValByQuery("point and sensor and current and his and "+ SensorType.values()[i].getSensorPort().getPortSensor()+" and equipRef == \"" + zoneDevice.getEquipRef() + "\"");
@@ -415,8 +439,9 @@ public class ZonePoints {
                                     new LinkedListLogBuffer<LogRecord>(), true, DateTime.UNSPECIFIED, DateTime.UNSPECIFIED,
                                     new DeviceObjectPropertyReference(localDevice.getInstanceNumber(), sensorTypeName.getId(),
                                             PropertyIdentifier.presentValue), BACnetUtils.logInterval, false, BACnetUtils.bufferSize)
+                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)))
                                     .withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS)
-                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)));
+                                    .writePropertyInternal(PropertyIdentifier.eventState,EventState.normal);
                             break;
                         case CO2_EQUIVALENT:
                             sensorVal = CCUHsApi.getInstance().readHisValByQuery("point and sensor and current and his and "+ SensorType.values()[i].getSensorPort().getPortSensor()+" and equipRef == \"" + zoneDevice.getEquipRef() + "\"");
@@ -429,8 +454,9 @@ public class ZonePoints {
                                     new LinkedListLogBuffer<LogRecord>(), true, DateTime.UNSPECIFIED, DateTime.UNSPECIFIED,
                                     new DeviceObjectPropertyReference(localDevice.getInstanceNumber(), sensorTypeName.getId(),
                                             PropertyIdentifier.presentValue), BACnetUtils.logInterval, false, BACnetUtils.bufferSize)
+                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)))
                                     .withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS)
-                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)));
+                                    .writePropertyInternal(PropertyIdentifier.eventState,EventState.normal);
                             break;
                         case ILLUMINANCE:
                             sensorVal = CCUHsApi.getInstance().readHisValByQuery("point and sensor and current and his and "+ SensorType.values()[i].getSensorPort().getPortSensor()+" and equipRef == \"" + zoneDevice.getEquipRef() + "\"");
@@ -443,8 +469,9 @@ public class ZonePoints {
                                     new LinkedListLogBuffer<LogRecord>(), true, DateTime.UNSPECIFIED, DateTime.UNSPECIFIED,
                                     new DeviceObjectPropertyReference(localDevice.getInstanceNumber(), sensorTypeName.getId(),
                                             PropertyIdentifier.presentValue), BACnetUtils.logInterval, false, BACnetUtils.bufferSize)
+                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)))
                                     .withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS)
-                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)));
+                                    .writePropertyInternal(PropertyIdentifier.eventState,EventState.normal);
                             break;
                         case UVI:
                             sensorVal = CCUHsApi.getInstance().readHisValByQuery("point and sensor and current and his and "+ SensorType.values()[i].getSensorPort().getPortSensor()+" and equipRef == \"" + zoneDevice.getEquipRef() + "\"");
@@ -457,8 +484,9 @@ public class ZonePoints {
                                     new LinkedListLogBuffer<LogRecord>(), true, DateTime.UNSPECIFIED, DateTime.UNSPECIFIED,
                                     new DeviceObjectPropertyReference(localDevice.getInstanceNumber(), sensorTypeName.getId(),
                                             PropertyIdentifier.presentValue), BACnetUtils.logInterval, false, BACnetUtils.bufferSize)
+                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)))
                                     .withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS)
-                                    .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)));
+                                    .writePropertyInternal(PropertyIdentifier.eventState,EventState.normal);
                             break;
                     }
                 } else {
@@ -547,6 +575,24 @@ public class ZonePoints {
             e.printStackTrace();
             return 0;
         }
+    }
+
+    public double getDeadband(Device equip, String tags){
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap cdb = CCUHsApi.getInstance().read("point and tuner and deadband and base and "+tags+" and equipRef == \""+equip.getEquipRef()+"\"");
+        if((cdb != null) && (cdb.get("id") != null) ) {
+
+            ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+            if (values != null && values.size() > 0) {
+                for (int l = 1; l <= values.size(); l++) {
+                    HashMap valMap = ((HashMap) values.get(l - 1));
+                    if (valMap.get("val") != null) {
+                        return Double.parseDouble(valMap.get("val").toString());
+                    }
+                }
+            }
+        }
+        return 0;
     }
     public double getZoneDeadband(String tags,Device equip){
         try {

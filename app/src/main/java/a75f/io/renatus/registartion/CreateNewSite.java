@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -229,13 +230,19 @@ public class CreateNewSite extends Fragment {
         if (prefs.getBoolean("registered")) {
             btnUnregisterSite.setText("UnRegister");
             btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
-            setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            {
+                setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
+            }
             btnEditSite.setEnabled(true);
         } else {
             btnEditSite.setEnabled(false);
             btnUnregisterSite.setText("Register");
             btnUnregisterSite.setTextColor(getResources().getColor(R.color.accent));
-            setCompoundDrawableColor(btnUnregisterSite, R.color.accent);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            {
+                setCompoundDrawableColor(btnUnregisterSite, R.color.accent);
+            }
         }
 
         mTextInputSitename.setHintEnabled(true);
@@ -524,8 +531,12 @@ public class CreateNewSite extends Fragment {
 
     private void setCompoundDrawableColor(TextView textView, int color) {
         for (Drawable drawable : textView.getCompoundDrawablesRelative()) {
-            if (drawable != null) {
-                drawable.setTint(getResources().getColor(color));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            {
+                if (drawable != null)
+                {
+                    drawable.setTint(getResources().getColor(color));
+                }
             }
         }
     }

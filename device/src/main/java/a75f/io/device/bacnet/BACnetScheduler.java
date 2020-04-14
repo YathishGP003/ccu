@@ -260,13 +260,13 @@ public class BACnetScheduler {
                 final SequenceOf<DeviceObjectPropertyReference> listOfObjectPropertyReferences = new SequenceOf<>();
                 int zoneAddress = Integer.parseInt(zoneDevice.getAddr());
                 int instanceID = zoneAddress + BACnetUtils.desiredTemp;
-                if (localDevice.checkObjectByID(instanceID)) {
+                /*if (localDevice.checkObjectByID(instanceID)) {
                     //BinaryValueObject occupiedStatus = new BinaryValueObject(localDevice,1001,"Occupancy", BinaryPV.active,false);
                     AnalogValueObject setTempObject = (AnalogValueObject)localDevice.getObjectByID(instanceID);
                     //listOfObjectPropertyReferences.add(new DeviceObjectPropertyReference(occupiedStatus.getId(), PropertyIdentifier.presentValue, null, null));
                     listOfObjectPropertyReferences.add(new DeviceObjectPropertyReference(setTempObject.getId(), PropertyIdentifier.presentValue, null, null));
 
-                }
+                }*/
                 //BinaryValueObject occupiedStatus = new BinaryValueObject(localDevice,1001,"Occupancy", BinaryPV.active,false);
 
                 listOfObjectPropertyReferences.add(new DeviceObjectPropertyReference(occupancyObject.getId(), PropertyIdentifier.presentValue, null, null));

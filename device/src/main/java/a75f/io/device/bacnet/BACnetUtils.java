@@ -86,12 +86,13 @@ public class BACnetUtils{
     //Trend Object
     public static int bufferSize = 200;
     public static int logInterval = 60; //Ideally 300 Seconds or 60 Seconds for demo
-    public static int covResubscriptionInterval = 300; //Ideally 300 Seconds or 60 Seconds for demo
+    public static int covResubscriptionInterval = 900; //Ideally 300 Seconds or 60 Seconds for demo
     public static int buildingLimitMin = 55;
     public static int buildingLimitMax = 90;
 
     //Increment Values
     public static float incrementValue = 0.5f;
+    public static float currentTempCOV = 0.1f;
 
     //Password for Device Initialise
     public static String PASSWORD = "admin@75f";

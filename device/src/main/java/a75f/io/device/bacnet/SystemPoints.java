@@ -258,10 +258,10 @@ public class SystemPoints{
             if(!localDevice.checkObjectByID(addressNumber + relayNumber)) {
                 relay1 = new MultistateValueObject(localDevice, addressNumber + relayNumber, ccuName + "_relay" + relayNumber, relayModes.getCount(), relayModes, 1, false);
                 relay1.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("75F System Relay " + relayNumber + " " + relayOp)));
-                relay1.supportCommandable(new UnsignedInteger(1));
+                //relay1.supportCommandable(new UnsignedInteger(1));
                 //relay1.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.presentValue, new UnsignedInteger((int) getRelay(relayNumber) + 1)));
                 relay1.writePropertyInternal(PropertyIdentifier.presentValue, new UnsignedInteger((int) getRelay(relayNumber)));
-                relay1.setOverridden(true);
+                //relay1.setOverridden(true);
                 relay1.supportCovReporting();
             }else {
                 relay1 = (MultistateValueObject)localDevice.getObjectByID(addressNumber + relayNumber);
@@ -368,8 +368,8 @@ public class SystemPoints{
                 analogOut1.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("75F System Analog Out 1 - Cooling")));
                 analogOut1.writePropertyInternal(PropertyIdentifier.lowLimit, new Real((int)getAnalogMin(1)));
                 analogOut1.writePropertyInternal(PropertyIdentifier.highLimit, new Real((int)getAnalogMax(1)));
-                analogOut1.supportCommandable(1);
-                analogOut1.setOverridden(true);
+                //analogOut1.supportCommandable(1);
+                //analogOut1.setOverridden(true);
             }else {
                 analogOut1 = (AnalogValueObject)localDevice.getObjectByID(addressNumber + BACnetUtils.analogOut1);
                 analogOut1.writePropertyInternal(PropertyIdentifier.presentValue, new Real((float)getAnalogOut("analog1")));
@@ -389,8 +389,8 @@ public class SystemPoints{
                 analogOut2.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("75F System Analog Out 2 - Fan Speed")));
                 analogOut2.writePropertyInternal(PropertyIdentifier.lowLimit, new Real((int) getAnalogMin(2)));
                 analogOut2.writePropertyInternal(PropertyIdentifier.highLimit, new Real((int) getAnalogMax(2)));
-                analogOut2.supportCommandable(1);
-                analogOut2.setOverridden(true);
+                //analogOut2.supportCommandable(1);
+                //analogOut2.setOverridden(true);
             }else{
                 analogOut2 = (AnalogValueObject)localDevice.getObjectByID(addressNumber + BACnetUtils.analogOut2);
                 analogOut2.writePropertyInternal(PropertyIdentifier.presentValue, new Real((float)getAnalogOut("analog2")));
@@ -409,8 +409,8 @@ public class SystemPoints{
                 analogOut3.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("75F System Analog Out 3 - Heating")));
                 analogOut3.writePropertyInternal(PropertyIdentifier.lowLimit, new Real((int) getAnalogMin(3)));
                 analogOut3.writePropertyInternal(PropertyIdentifier.highLimit, new Real((int) getAnalogMax(3)));
-                analogOut3.supportCommandable(1);
-                analogOut3.setOverridden(true);
+                //analogOut3.supportCommandable(1);
+                //analogOut3.setOverridden(true);
             }else{
                 analogOut3 = (AnalogValueObject)localDevice.getObjectByID(addressNumber + BACnetUtils.analogOut3);
                 analogOut3.writePropertyInternal(PropertyIdentifier.presentValue, new Real((float)getAnalogOut("analog3")));
@@ -429,8 +429,8 @@ public class SystemPoints{
                 analogOut4.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("75F System Analog Out 4 - Outside Air")));
                 analogOut4.writePropertyInternal(PropertyIdentifier.lowLimit, new Real((int) getAnalogMin(4)));
                 analogOut4.writePropertyInternal(PropertyIdentifier.highLimit, new Real((int) getAnalogMax(4)));
-                analogOut4.supportCommandable(1);
-                analogOut4.setOverridden(true);
+                //analogOut4.supportCommandable(1);
+                //analogOut4.setOverridden(true);
             }else {
                 analogOut4 = (AnalogValueObject)localDevice.getObjectByID(addressNumber + BACnetUtils.analogOut4);
                 analogOut4.writePropertyInternal(PropertyIdentifier.presentValue, new Real((float)getAnalogOut("analog4")));

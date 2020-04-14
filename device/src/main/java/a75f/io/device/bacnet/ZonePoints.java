@@ -332,8 +332,8 @@ public class ZonePoints {
                                     new LinkedListLogBuffer<LogRecord>(), true, DateTime.UNSPECIFIED, DateTime.UNSPECIFIED,
                                     new DeviceObjectPropertyReference(localDevice.getInstanceNumber(), sensorTypeName.getId(),
                                             PropertyIdentifier.presentValue), BACnetUtils.logInterval, false, BACnetUtils.bufferSize)
-                                    .withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS)
                                     .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov( new Real(1f)))
+                                    .withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS)
                                     .writePropertyInternal(PropertyIdentifier.eventState,EventState.normal);
 
 

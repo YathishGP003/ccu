@@ -270,9 +270,10 @@ public class BACnetScheduler {
                 //BinaryValueObject occupiedStatus = new BinaryValueObject(localDevice,1001,"Occupancy", BinaryPV.active,false);
 
                 listOfObjectPropertyReferences.add(new DeviceObjectPropertyReference(occupancyObject.getId(), PropertyIdentifier.presentValue, null, null));
+                Log.i("Bacnet","BV is added to Building Schedule:"+occupancyObject.getId());
                 final DateRange effectivePeriod = new DateRange(Date.UNSPECIFIED, Date.UNSPECIFIED);
                 if(!localDevice.checkObjectByID(BACnetUtils.systemSchedule)) {
-                    Log.i("Bacnet","Creating Building Schedule:"+BACnetUtils.systemSchedule);
+                    Log.i("Bacnet","Creating Building Schedule:"+BACnetUtils.systemSchedule+" LOPS:"+listOfObjectPropertyReferences);
                     buildingSchedule = new ScheduleObject(localDevice, BACnetUtils.systemSchedule, "Building Schedule Object", effectivePeriod, weeklySchedule, exceptionSchedule, BinaryPV.inactive, listOfObjectPropertyReferences, 9, false);
                     buildingSchedule.writePropertyInternal(PropertyIdentifier.description, new CharacterString("Building Schedule - 75F" ));
                     createTestSchedules(localDevice,effectivePeriod,calendarObject);
@@ -281,6 +282,7 @@ public class BACnetScheduler {
                     ScheduleObject oldBuildingSchedule = (ScheduleObject) localDevice.getObjectByID(BACnetUtils.systemSchedule);
                     //oldBuildingSchedule.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.effectivePeriod, effectivePeriod));
                     oldBuildingSchedule.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.weeklySchedule, weeklySchedule));
+                    oldBuildingSchedule.updatePresentValue();
                     //oldBuildingSchedule.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.exceptionSchedule, exceptionSchedule));
                 }
             } catch (BACnetServiceException e) {

@@ -1,6 +1,2 @@
  - Merge branch 'sureshkumar_bacnet' into 'master'
- - Merge branch 'master' of https://gitlab.com/75f/android/renatus into sureshkumar_bacnet
- - BACnet Enable UI option.
- - Merge branch 'dev_sam' into 'master'
- - Fix to get Renatus work on pre-M tablets
- - BACnet-Demo Fix
+ - BACnet Schedule Fix

@@ -35,51 +35,34 @@ public class SplashActivity extends Activity {
                         @Override
                         public void run() {
                             HashMap site = CCUHsApi.getInstance().read("site");
-                            HashMap ccu = CCUHsApi.getInstance().read("ccu");
-                            
+
                             if (site.size() == 0) {
                                 System.out.println("No Site Synced navigate to Register");
                                 Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
                                 startActivity(i);
                                 finish();
-                            }/*else if (ccu.size() == 0) {
-                                System.out.println("No CCU Synced navigate to Create");
-                                //Intent i = new Intent(SplashActivity.this, RegisterGatherCCUDetails.class);
-                                Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
-                                i.putExtra("viewpager_position", 4);
-                                startActivity(i);
-                                finish();
-                            }*/else if(site.size() > 0 && !prefs.getBoolean("CCU_SETUP"))
-                            {
+                            } else if(site.size() > 0 && !prefs.getBoolean("CCU_SETUP")) {
                                 System.out.println("CCU Setup is not completed");
                                 Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
                                 i.putExtra("viewpager_position", 4);
                                 startActivity(i);
                                 finish();
-                            }else if(prefs.getBoolean("CCU_SETUP") && !prefs.getBoolean("PROFILE_SETUP"))
-                            {
+                            } else if(prefs.getBoolean("CCU_SETUP") && !prefs.getBoolean("PROFILE_SETUP")) {
                                 System.out.println("No Profile Synced navigate to Create Profile");
                                 Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
                                 i.putExtra("viewpager_position", 9);
                                 startActivity(i);
                                 finish();
-                            }else if(prefs.getBoolean("PROFILE_SETUP") && !prefs.getBoolean("REGISTRATION"))
-                            {
+                            } else if(prefs.getBoolean("PROFILE_SETUP") && !prefs.getBoolean("REGISTRATION")) {
                                 System.out.println("No Floor is Created");
                                 Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
                                 i.putExtra("viewpager_position", 18);
                                 startActivity(i);
                                 finish();
-                            } else if(prefs.getBoolean("REGISTRATION"))
-                            {
+                            } else if(prefs.getBoolean("REGISTRATION")) {
                                 if (!prefs.getBoolean("isCCURegistered")){
                                     CCUHsApi.getInstance().registerDevice();
                                 }
-
-                                /*Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
-                                i.putExtra("viewpager_position", 18);
-                                startActivity(i);
-                                finish();*/
                                 Intent i = new Intent(SplashActivity.this, RenatusLandingActivity.class);
                                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(i);
@@ -97,34 +80,34 @@ public class SplashActivity extends Activity {
     
         if (prefs.getString("SERVER_ENV").equals(""))
         {
-            String[] envList = {"PROD", "QA", "DEV","STAGING"};
+            String[] envList = {"PROD", "QA", "DEV","STAGING","LOCAL"};
             PackageManager pm = getApplicationContext().getPackageManager();
             PackageInfo pi; //RENATUS_CCU_dev_1.437.2
             try {
                 pi = pm.getPackageInfo("a75f.io.renatus", 0);
                 String str = pi.versionName;
                 Log.d("SplashActivity","package info = "+pi.versionName+","+str.contains("_dev"));
-                if(str.contains("_prod")) {
+                if (str.contains("_prod")) {
                     prefs.setString("SERVER_ENV", envList[0]);
-                }else if(str.contains("_qa")) {
+                } else if(str.contains("_qa")) {
                     prefs.setString("SERVER_ENV", envList[1]);
-                }else if(str.contains("_dev")) {
+                } else if(str.contains("_dev")) {
                     prefs.setString("SERVER_ENV", envList[2]);
-                }else if(str.contains("_staging")) {
+                } else if(str.contains("_staging")) {
                     prefs.setString("SERVER_ENV", envList[3]);
+                } else if(str.contains("_local")) {
+                    prefs.setString("SERVER_ENV", envList[4]);
                 }
 
                 registrationThread.start();
             }catch (PackageManager.NameNotFoundException e){
 
                 //default dev registration
-                prefs.setString("SERVER_ENV", envList[2]);
+                prefs.setString("SERVER_ENV", envList[4]);
                 registrationThread.start();
             }
         } else {
             registrationThread.start();
         }
-
-        //DefaultSchedules.generateDefaultSchedule()
     }
 }

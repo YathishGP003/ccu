@@ -19,6 +19,8 @@ android {
             }
         }
 
+        buildConfigField "String", 'LOCAL_HAYSTACK_API_BASE', '\"https://192.168.4.37:8080/\"'
+        buildConfigField "String", 'LOCAL_CARETAKER_API_BASE', '\"https://192.168.4.37:3100/\"'
     }
 
     buildTypes {

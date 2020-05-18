@@ -64,9 +64,6 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 
 public class FreshRegistration extends AppCompatActivity implements VerticalTabAdapter.OnItemClickListener, SwitchFragment {
-    //CustomViewPager pager;
-    //ViewPager pager;
-    RegistrationAdapter pageAdapter;
     VerticalTabAdapter verticalTabAdapter;
     ListView listView_icons;
     ImageView imageView_logo;
@@ -80,9 +77,8 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
     ToggleButton toggleWifi;
     Button buttonNext;
     Prefs prefs;
-    //Wifi On-Off
     WifiManager mainWifiObj;
-    int NO_OF_SCREENS = 21;
+
     int[] menu_icons = new int[]{
             R.drawable.ic_goarrow_svg,
             R.drawable.ic_wifi_svg,
@@ -94,33 +90,10 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
     FrameLayout container;
 
-    //Installer Wizard Fragments
-    InstallTypeFragment installTypeFragment;
-    WifiFragment wifiFragment;
-    CreateNewSite createNewSite;
-    InstallerOptions installerOptions;
-    Security securityFragment;
-    AddtoExisting addtoExisting;
-    PreConfigCCU preConfigCCU;
-    ReplaceCCU replaceCCU;
-    DefaultSystemProfile defaultSystemProfile;
-    VavStagedRtuProfile vavStagedRTU;
-    VavAnalogRtuProfile vavAnalogRTU;
-    VavStagedRtuWithVfdProfile vavStagedRtuWithVfdProfile;
-    VavHybridRtuProfile vavAdvancedHybridRtu;
-    DABStagedProfile dabStagedProfile;
-    DABFullyAHUProfile dabFullyAHUProfile;
-    DABStagedRtuWithVfdProfile dabStagedRtuWithVfdProfile;
-    DABHybridAhuProfile dabHybridAhuProfile;
-    FloorPlanFragment floorPlanFragment;
-    SystemFragment systemFragment;
-    CongratsFragment congratsFragment;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_freshregistration);
-        //pager = findViewById(R.id.pager);
         container = findViewById(R.id.container);
         listView_icons = findViewById(R.id.listView_icons);
         imageView_logo = findViewById(R.id.imageLogo);
@@ -137,11 +110,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
         showIcons(false);
         verticalTabAdapter = new VerticalTabAdapter(this, menu_icons, listView_icons, this, 0);
-        //pageAdapter = new RegistrationAdapter(this,getSupportFragmentManager(), NO_OF_SCREENS);
-        //pager.setAdapter(pageAdapter);
         listView_icons.setAdapter(verticalTabAdapter);
-        //pager.setCurrentItem(pager.getCurrentItem());
-        //pager.setOffscreenPageLimit(2);
         rl_Header.setVisibility(View.GONE);
 
         int position = 0;
@@ -161,7 +130,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
 
                 // TODO Auto-generated method stub
-                //selectItem(1);
                 if (currentFragment instanceof WifiFragment) {
                     selectItem(1);
                 }
@@ -219,10 +187,8 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                     selectItem(5);
                 }
                 if (currentFragment instanceof FloorPlanFragment) {
-
-                    //selectItem(9);
-
                     String profileType = prefs.getString("PROFILE");
+
                     if (profileType.equals("DEFAULT")) {
                         spinnerSystemProile.setSelection(0);
                         selectItem(9);
@@ -263,8 +229,8 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                         spinnerSystemProile.setSelection(8);
                         selectItem(18);
                     }
-
                 }
+
                 if (currentFragment instanceof SystemFragment) {
                     selectItem(19);
                 }
@@ -332,23 +298,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                     prefs.setBoolean("REGISTRATION", true);
                     updateCCURegistrationInfo();
                 }
-
-                /*//int fragmentItem = pager.getCurrentItem();
-                // TODO Auto-generated method stub
-                //selectItem(1);
-                if(fragmentItem == 18) {
-                    selectItem(19);
-                }
-                if(fragmentItem == 19) {
-                    selectItem(20);
-                }
-                if(fragmentItem == 20) {
-                    prefs.setBoolean("REGISTRATION",true);
-                    Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(i);
-                    finish();
-                }*/
             }
         });
 
@@ -427,8 +376,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
         });
 
-        //showIcons(true);
-        //pager.setCurrentItem(position);
         selectItem(position);
     }
 
@@ -446,11 +393,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         }
     }
 
-    public void setRl_Header(String title, int position) {
-
-
-    }
-
     public void setToggleWifi(boolean status) {
         toggleWifi.setChecked(status);
         if (status) {
@@ -461,15 +403,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             imageRefresh.setImageResource(R.drawable.ic_refresh_disable);
         }
     }
-
-
-    /*public void GoTo(int from, int to) {
-        if(from == 2)
-        {
-            pageAdapter.GoTo(from, to);
-        }
-        selectItem(from);
-    }*/
 
     public void Switch(int position) {
         selectItem(position);
@@ -485,9 +418,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         } else {
             showIcons(true);
         }
-        //pageAdapter = new RegistrationAdapter(this,getSupportFragmentManager(), NO_OF_SCREENS);
-        //pager.setAdapter(pageAdapter);
-        //pager.setCurrentItem(position, true);
 
         Log.i("Tab", "Position:" + position);
 
@@ -1281,83 +1211,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 }
             }
         }, 30000);
-
-        /*if (!ProgressDialogUtils.isDialogShowing()){
-            ProgressDialogUtils.showProgressDialog(this,"CCU Registering...");
-        }
-
-        AsyncTask<Void, Void, String> updateCCUReg = new AsyncTask<Void, Void, String>() {
-
-            @Override
-            protected String doInBackground(Void... voids) {
-
-                String response = "";
-                try {
-                    HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
-                    HashMap site = CCUHsApi.getInstance().read("site");
-                    if(site.size() > 0) {
-                        String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
-                        JSONObject ccuRegInfo = new JSONObject();
-                        ccuRegInfo.put("siteId", siteGUID);
-                        ccuRegInfo.put("siteName", site.get("dis").toString());
-                        JSONObject locInfo = new JSONObject();
-                        locInfo.put("geoCity", site.get("geoCity").toString());
-                        locInfo.put("geoCountry", site.get("geoCountry").toString());
-                        locInfo.put("geoState", site.get("geoState").toString());
-                        locInfo.put("geoAddr", site.get("geoAddr").toString());
-                        locInfo.put("geoPostalCode", site.get("geoPostalCode").toString());
-                        if(site.get("organization") != null)
-                            ccuRegInfo.put("organization", site.get("organization").toString());
-                        if(ccu.size() > 0) {
-                            String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
-                            ccuRegInfo.put("deviceId", ccuGUID);
-                            ccuRegInfo.put("deviceName", ccu.get("dis").toString());
-                            ccuRegInfo.put("facilityManagerEmail", ccu.get("fmEmail").toString());
-                            if (ccu.get("installerEmail") != null) {
-                                ccuRegInfo.put("installerEmail", ccu.get("installerEmail").toString());
-                            }
-                            ccuRegInfo.put("locationDetails", locInfo);
-
-                            response = HttpUtil.executeJSONPost(CCUHsApi.getInstance().getAuthenticationUrl() + "api/v1/device/register", ccuRegInfo.toString(), " ");
-                            Log.d("CCURegistration", " Response : " + response);
-                        }
-                    }
-                }catch (JSONException e){
-                    e.printStackTrace();
-                }
-                return response;
-            }
-
-            @Override
-            protected void onPostExecute(String result) {
-                super.onPostExecute(result);
-                if( (result != null) && (!result.equals(""))){
-
-                    try {
-                        JSONObject resString = new JSONObject(result);
-                        if(resString.getBoolean("success")){
-                            ProgressDialogUtils.hideProgressDialog();
-                            prefs.setString("token",resString.getString("token"));
-                            Toast.makeText(getApplicationContext(), "CCU Registered Successfully "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();
-                            //
-                            AlertManager.getInstance().fetchAllPredefinedAlerts();
-                            Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
-                            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(i);
-                            finish();
-                        }else
-                            updateCCURegistrationInfo();
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }else {
-                    updateCCURegistrationInfo();
-                }
-            }
-        };
-
-        updateCCUReg.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);*/
     }
 
     private synchronized boolean pingCloudServer() {

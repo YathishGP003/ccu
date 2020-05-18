@@ -199,7 +199,7 @@ def getCurrentFlavor() {
     }
     else {
         println "NO MATCH FOUND"
-        return "";
+        return "local";
     }
 }
 

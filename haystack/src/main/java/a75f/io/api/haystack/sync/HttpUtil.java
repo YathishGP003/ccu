@@ -11,55 +11,59 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import a75f.io.logger.CcuLog;
 import info.guardianproject.netcipher.NetCipher;
-
-/**
- * Created by samjithsadasivan on 10/17/18.
- */
+import org.apache.commons.lang3.StringUtils;
 
 public class HttpUtil
 {
 
-    private static final String TAG = HttpUtil.class.getSimpleName();
-    
-    //public static final String HAYSTACK_URL = "https://renatusv2.azurewebsites.net/";
-
     public static final String CLIENT_ID = "d7682439-ac41-408b-bf72-b89a98490bdf";
     public static final String TENANT_ID = "941d8a61-4be2-4622-8ace-ed8ee5696d99";
     public static final String CLIENT_SECRET = "8tHwP3ykcKabD+J8tDrhex7HmVtrzF3zfXt56cF6h7c=";
-    public static final String SCOPE = "234afeb7-497b-45a3-aa76-db2a549f17d4%2F.default";
-
+    public static final String HTTP_SCHEME = "http";
+    public static final String HTTPS_SCHEME = "https";
 
     public static String clientToken = "";
     public static boolean retry = true;
-    //JsonParser parser = new JsonParser();
-    //JsonElement jsonTree = parser.parse(tokenJson);
-    //JsonObject asJsonObject = jsonTree.getAsJsonObject();
-    //String token = asJsonObject.get("access_token").getAsString();
-    public static synchronized String executePost(String targetURL, String urlParameters)
+
+    public static String executePost(String targetURL, String urlParameters) {
+        return executePost(targetURL, urlParameters, null); // TODO Matt Rudd - I hate this hack, but the executePost needs a complete rewrite
+    }
+
+    public static synchronized String executePost(String targetURL, String urlParameters, String bearerToken)
     {
-        if (clientToken.equalsIgnoreCase(""))
-        {
-            String jsonToken = authorizeToken(CLIENT_ID, "", CLIENT_SECRET, TENANT_ID);
-            if (jsonToken == null)
+        String token = bearerToken;
+        if (StringUtils.isBlank(token)) {
+            if (clientToken.equalsIgnoreCase(""))
             {
-                return null;
+                String jsonToken = authorizeToken(CLIENT_ID, "", CLIENT_SECRET, TENANT_ID);
+                if (jsonToken == null)
+                {
+                    return null;
+                }
+                clientToken = parseToken(jsonToken);
             }
-            clientToken = parseToken(jsonToken);
-            CcuLog.i("CCU_HS","Client Token: " + clientToken);
+            token = clientToken;
         }
+        CcuLog.i("CCU_HS","Client Token: " + token);
+
         URL url;
-        HttpsURLConnection connection = null;
+        HttpURLConnection connection = null;
         try {
-            //Create connection
             url = new URL(targetURL);
-            //connection = (HttpsURLConnection)url.openConnection();
-            connection = NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
+
+            if (StringUtils.equals(url.getProtocol(), HTTP_SCHEME)) {
+                connection = (HttpURLConnection)url.openConnection();
+            } else {
+                connection = NetCipher.getHttpsURLConnection(url);
+            }
+
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type",
                     "text/zinc");
@@ -71,7 +75,7 @@ public class HttpUtil
             connection.setRequestProperty("Content-Length", "" +
                                                             Integer.toString(urlParameters.getBytes("UTF-8").length));
             connection.setRequestProperty("Content-Language", "en-US");
-            connection.setRequestProperty("Authorization", " Bearer " + clientToken);
+            connection.setRequestProperty("Authorization", " Bearer " + token);
             connection.setUseCaches (false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -90,10 +94,10 @@ public class HttpUtil
             if(responseCode == 401 && retry)
             {
                 retry = false;
-                clientToken = parseToken(authorizeToken(CLIENT_ID, "", CLIENT_SECRET, TENANT_ID));
-                CcuLog.i("CCU_HS","Client Token: " + clientToken);
+                token = parseToken(authorizeToken(CLIENT_ID, "", CLIENT_SECRET, TENANT_ID));
+                CcuLog.i("CCU_HS","Client Token: " + token);
                 connection.disconnect();
-                return executePost(targetURL, urlParameters);
+                return executePost(targetURL, urlParameters, token);
             }
             retry = true;
             //Get Response

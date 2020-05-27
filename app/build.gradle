@@ -7,10 +7,6 @@ repositories {
     maven { url 'https://maven.fabric.io/public' }
 }
 
-import java.util.regex.Matcher
-import java.util.regex.Pattern
-
-
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
    lintOptions {
@@ -27,14 +23,15 @@ android {
             storeFile file("debug.keystore")
             storePassword 'android'
         }
-        release {
 
+        release {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
             storeFile file("debug.keystore")
             storePassword 'android'
         }
     }
+
     defaultConfig {
         applicationId "a75f.io.renatus"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -44,47 +41,47 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
+        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        multiDexKeepProguard file('multidex-config.pro')
         javaCompileOptions {
             annotationProcessorOptions {
                 includeCompileClasspath true
             }
         }
-               missingDimensionStrategy 'dev', 'prod','qa','staging'
+
         signingConfig signingConfigs.debug
-
-
     }
 
-     flavorDimensions "mode"
-    productFlavors {
-                dev {
-                    signingConfig signingConfigs.release
-                }
-                prod {
-                    signingConfig signingConfigs.release
-                }
-                qa {
-                    signingConfig signingConfigs.release
-                }
-                staging {
-                    signingConfig signingConfigs.release
-                }
-    }
-
+    flavorDimensions "mode"
 
     buildTypes {
-        release {
+        local {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
+        }
+        dev {
+            minifyEnabled false
+            signingConfig signingConfigs.debug
+        }
+        prod {
+            minifyEnabled false
+            signingConfig signingConfigs.release
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
-            multiDexKeepProguard file('multidex-config.pro')
         }
-
-        debug {
+        qa {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            multiDexKeepProguard file('multidex-config.pro')
+            signingConfig signingConfigs.debug
+        }
+        staging {
+            minifyEnabled false
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    android.variantFilter { variant ->
+        if(variant.buildType.name.endsWith('release') || variant.buildType.name.endsWith('debug')) {
+            variant.setIgnore(true);
         }
     }
 
@@ -103,15 +100,15 @@ android {
         exclude 'simplelogger.properties'
     }
 
-
-
     dexOptions {
     }
+
     sourceSets { main { assets.srcDirs = ['src/main/assets', 'src/androidTest/assets'] } }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
     useLibrary 'org.apache.http.legacy'
 }
 
@@ -160,46 +157,17 @@ def getVersionCodeTimestamp() {
     return code
 }
 
-def getVersionNameIncremented() {
-    return applicationName + "_" + getCurrentFlavor() + "_" + VERSION_CODE_MAJOR + "." + VERSION_CODE_MINOR + "." + VERSION_CODE_PATCH
+def getVersionNameIncremented(String variantName) {
+    return applicationName + "_" + variantName + "_" + VERSION_CODE_MAJOR + "." + VERSION_CODE_MINOR + "." + VERSION_CODE_PATCH
 }
 
 android.applicationVariants.all { variant ->
     variant.outputs.all {
-        if (variant.buildType.name == "release") {
-            outputFileName = getVersionNameIncremented() + ".apk"
-        } else if (variant.buildType.name == "debug") {
-            outputFileName = "app-debug.apk"
+        if (variant.buildType.name == "prod") {
+            outputFileName = getVersionNameIncremented(variant.buildType.name) + ".apk"
+        } else {
+            outputFileName = "app-" + variant.buildType.name + "-debug.apk"
         }
-    }
-}
-
-def getCurrentFlavor() {
-    Gradle gradle = getGradle()
-    String tskReqStr = gradle.getStartParameter().getTaskRequests().toString()
-
-    println tskReqStr
-    Pattern pattern;
-
-    if (tskReqStr.contains("assemble"))
-        pattern = Pattern.compile("assemble(\\w+)(Release|Debug)")
-    else
-        pattern = Pattern.compile("generate(\\w+)(Release|Debug)")
-
-    Matcher matcher = pattern.matcher(tskReqStr)
-    if (matcher.find()){
-        //return matcher.group(1).toLowerCase()
-        String flavor = matcher.group(1)
-        // This makes first character to lowercase.
-        char[] c = flavor.toCharArray()
-        c[0] = Character.toLowerCase(c[0])
-        flavor = new String(c)
-        println "getCurrentFlavor:" + flavor
-        return flavor
-    }
-    else {
-        println "NO MATCH FOUND"
-        return "local";
     }
 }
 

@@ -4,29 +4,16 @@ apply plugin: 'io.objectbox'
 android {
     compileSdkVersion 28
 
-
-
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         javaCompileOptions {
             annotationProcessorOptions {
                 includeCompileClasspath true
             }
-        }
-
-        buildConfigField "String", 'LOCAL_HAYSTACK_API_BASE', '\"https://192.168.4.37:8080/\"'
-        buildConfigField "String", 'LOCAL_CARETAKER_API_BASE', '\"https://192.168.4.37:3100/\"'
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 
@@ -34,6 +21,42 @@ android {
         unitTests.returnDefaultValues = true
     }
 
+    buildTypes {
+        local {
+            minifyEnabled false
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://192.168.4.37:8080/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://192.168.4.37:3100/\"'
+        }
+        dev {
+            minifyEnabled false
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://haystack-75f-service-dev.azurewebsites.net/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-dev.azurewebsites.net/\"'
+        }
+        prod {
+            minifyEnabled false
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://haystack-75f-service.azurewebsites.net/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service.azurewebsites.net/\"'
+        }
+        qa {
+            minifyEnabled false
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://haystack-75f-service-qa.azurewebsites.net//\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-qa.azurewebsites.net/\"'
+        }
+        staging {
+            minifyEnabled false
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://haystack-75f-service-staging.azurewebsites.net/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-staging.azurewebsites.net/\"'
+        }
+    }
+    sourceSets {
+        main {
+            java {
+                srcDirs = ['build/generated/source/buildConfig', 'src/main/java']
+            }
+        }
+    }
 }
 
 dependencies {
@@ -43,6 +66,7 @@ dependencies {
     api 'com.fasterxml.jackson.core:jackson-annotations:2.8.6'
     api 'com.fasterxml.jackson.core:jackson-databind:2.8.6'
     implementation 'info.guardianproject.netcipher:netcipher:1.2'
+    implementation 'org.apache.commons:commons-lang3:3.6'
     implementation 'org.influxdb:influxdb-java:2.5'
 
     api 'joda-time:joda-time:2.9.9'

@@ -80,7 +80,7 @@ public class SplashActivity extends Activity {
     
         if (prefs.getString("SERVER_ENV").equals(""))
         {
-            String[] envList = {"PROD", "QA", "DEV","STAGING","LOCAL"};
+            String[] envList = {"PROD", "QA", "DEV","STAGING"};
             PackageManager pm = getApplicationContext().getPackageManager();
             PackageInfo pi; //RENATUS_CCU_dev_1.437.2
             try {
@@ -95,15 +95,13 @@ public class SplashActivity extends Activity {
                     prefs.setString("SERVER_ENV", envList[2]);
                 } else if(str.contains("_staging")) {
                     prefs.setString("SERVER_ENV", envList[3]);
-                } else if(str.contains("_local")) {
-                    prefs.setString("SERVER_ENV", envList[4]);
                 }
 
                 registrationThread.start();
             }catch (PackageManager.NameNotFoundException e){
 
                 //default dev registration
-                prefs.setString("SERVER_ENV", envList[4]);
+                prefs.setString("SERVER_ENV", envList[2]);
                 registrationThread.start();
             }
         } else {

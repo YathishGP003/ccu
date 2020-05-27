@@ -196,7 +196,7 @@ final public class AuthClientContext
    */
   public HttpURLConnection openHttpConnection(String uri, String method) throws IOException
   {
-    return HClient.openHttpsConnection(new URL(uri), method, this.connectTimeout, this.readTimeout);
+    return HClient.openHttpConnection(new URL(uri), method, this.connectTimeout, this.readTimeout);
   }
 
   public void addCookiesToHeaders(HttpURLConnection c)

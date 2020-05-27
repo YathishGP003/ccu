@@ -1,50 +1,43 @@
 package a75f.io.api.haystack.sync;
 
-import android.util.Log;
-
 import org.joda.time.DateTime;
-import org.projecthaystack.HBool;
-import org.projecthaystack.HDateTime;
-import org.projecthaystack.HDict;
-import org.projecthaystack.HDictBuilder;
-import org.projecthaystack.HGrid;
-import org.projecthaystack.HGridBuilder;
-import org.projecthaystack.HHisItem;
-import org.projecthaystack.HNum;
-import org.projecthaystack.HRef;
-import org.projecthaystack.HStr;
-import org.projecthaystack.HVal;
-import org.projecthaystack.io.HZincWriter;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.logger.CcuLog;
+import org.projecthaystack.HDateTime;
+import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
+import org.projecthaystack.HRef;
+import org.projecthaystack.HTimeZone;
 
-/**
- * Created by samjithsadasivan on 10/18/18.
- */
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class HisSyncHandler
 {
     private static final String TAG = "CCU_HS_SYNC";
     
-    CCUHsApi hayStack;
+    CCUHsApi ccuHsApi;
     
     public boolean entitySyncRequired = false;
     
     public HisSyncHandler(CCUHsApi api) {
-        hayStack = api;
+        ccuHsApi = api;
     }
     
-    public synchronized void doSync() {
+    public synchronized void sync() {
         CcuLog.d(TAG, "doHisSync ->");
-        sendHisToInflux();
+
+        DateTime now = new DateTime();
+        boolean timeForQuarterHourSync = now.getMinuteOfDay() % 15 == 0 ? true : false;
+
+        if (CCUHsApi.getInstance().isCCURegistered() && CCUHsApi.getInstance().isNetworkConnected() && timeForQuarterHourSync) {
+            syncHistorizedEquipPoints(timeForQuarterHourSync);
+            syncHistorizedDevicePoints(timeForQuarterHourSync);
+        }
 
         if (entitySyncRequired) {
             CcuLog.d(TAG,"doHisSync : entitySyncRequired");
@@ -53,145 +46,112 @@ public class HisSyncHandler
         }
         CcuLog.d(TAG,"<- doHisSync");
     }
-    
-    /**
-    * Single measurement is created for an equip with current time as time stamp.
-    * Most recent unsynced value is sent for each point.
-    * All the local history entries marked 'synced' once the data is wrote to influx.
-    * */
-    private void sendHisToInflux() {
-        if (!CCUHsApi.getInstance().isCCURegistered()){
-            return;
-        }
-        ArrayList<HashMap> equips = hayStack.readAll("equip");
-        DateTime now = new DateTime();
-        
-        for (HashMap equip : equips) {
-            CcuLog.d(TAG," sendHisToInflux Equip "+equip.get("dis"));
-            ArrayList<HashMap> points = hayStack.readAll("point and his and equipRef == \""+equip.get("id")+"\"");
-            if (CCUHsApi.getInstance().getGUID(equip.get("id").toString()) == null) {
-                entitySyncRequired = true;
-                continue;
-            }
-    
-            HashMap tsData = new HashMap<>();
-        
-            for (Map m : points)
-            {
-                String pointID = m.get("id").toString();
-                String pointGUID = CCUHsApi.getInstance().getGUID(pointID);
-                if (pointGUID == null) {
-                    CcuLog.d(TAG,"Skip hisSync; point does not have GUID "+pointID);
-                    if(pointID != null) {
-                        HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
-                        CcuLog.d(TAG, "" + point);
-                    }
-                    entitySyncRequired = true;
-                    continue;
-        
-                }
-                if ((now.getMinuteOfDay() % 15) == 0) {
-                    HisItem hisVal = hayStack.tagsDb.getLastHisItem(HRef.copy(pointID));
-                    if (hisVal == null || !hisVal.initialized) {
-                        CcuLog.d(TAG, "His val not found : "+m.get("dis"));
-                        continue;
-                    }
-                    tsData.put( pointGUID.replace("@",""), String.valueOf(hisVal.getVal()));
-                    hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
-                }else {
-                    ArrayList<HisItem> hisItems = (ArrayList<HisItem>) hayStack.tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
-                    if (hisItems.size() > 0) {
-                        HisItem sItem = hisItems.get(hisItems.size() - 1); //Writing just the recent val?
-                        tsData.put(pointGUID.replace("@", ""), String.valueOf(sItem.getVal()));
-                        for (HisItem item : hisItems) {
-                            item.setSyncStatus(true);
-                        }
-                        hayStack.tagsDb.setHisItemSyncStatus(hisItems);
-                        hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
-                    }else
-                        continue;
-                }
-            
-            }
-            
-            if (tsData.size() > 0)
-            {
-                if(CCUHsApi.getInstance().isNetworkConnected()) {
-                    CcuLog.d(TAG, " sendHisToInflux tsData111= " + tsData.size() + "," + tsData.toString());
-//                    InfluxDbUtil.writeData(CCUHsApi.getInstance().getInfluxUrl(), CCUHsApi.getInstance().getGUID(equip.get("id").toString()).toString().replace("@", "")
-//                            , tsData, System.currentTimeMillis());
-                }
-            }
-        
-        }
 
-        boolean syncAllHisItemsNow = ((now.getMinuteOfDay() % 15) == 0);
-        sendDeviceHisData(syncAllHisItemsNow);
+    private void syncHistorizedEquipPoints(boolean timeForQuarterHourSync) {
+        List<HashMap> allEquips = ccuHsApi.readAll("equip");
+        List<HashMap> equipsToSync = getEntitiesWithGuidForSyncing(allEquips);
 
+        for (HashMap equipToSync : equipsToSync) {
+            String equipPointId = equipToSync.get("id").toString();
+            List<HashMap> allPointsForEquip = ccuHsApi.readAll("point and his and equipRef == \""+ equipPointId +"\"");
+            List<HashMap> pointsToSyncForEquip = getEntitiesWithGuidForSyncing(allPointsForEquip);
+            if (!pointsToSyncForEquip.isEmpty()) {
+                syncPoints(equipPointId, pointsToSyncForEquip, timeForQuarterHourSync);
+            }
+        }
     }
-    
-    private void sendDeviceHisData(boolean syncAllHisItemsNow) {
-        ArrayList<HashMap> devices = hayStack.readAll("device");
-        for (HashMap device : devices) {
-            if (device.get("ccu") != null) {
-                continue;
-            }
-            CcuLog.d(TAG," sendHisToInflux device "+device.get("dis"));
-            ArrayList<HashMap> points = hayStack.readAll("point and his and deviceRef == \""+device.get("id")+"\"");
-            if (CCUHsApi.getInstance().getGUID(device.get("id").toString()) == null) {
-                entitySyncRequired = true;
-                continue;
-            }
-        
-            HashMap tsData = new HashMap<>();
-        
-            for (Map m : points)
-            {
-                String pointID = m.get("id").toString();
-                String pointGUID = CCUHsApi.getInstance().getGUID(pointID);
-                if (pointGUID == null) {
-                    CcuLog.d(TAG,"Skip hisSync; point does not have GUID "+pointID);
-                    if(pointID != null) { //Crash because Floor is deleted and corresponding points also deleted
-                        HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
-                        CcuLog.d(TAG, "" + point);
-                    }
-                    entitySyncRequired = true;
-                    continue;
-                
-                }
-                if(syncAllHisItemsNow){
-                    HisItem hisVal = hayStack.tagsDb.getLastHisItem(HRef.copy(pointID));
-                    if (hisVal == null || !hisVal.initialized) {
-                        CcuLog.d(TAG, "His val not found : "+m.get("dis"));
-                        continue;
-                    }
-                    tsData.put( pointGUID.replace("@",""), String.valueOf(hisVal.getVal()));
 
-                    hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
-                }else {
-                    ArrayList<HisItem> hisItems = (ArrayList<HisItem>) hayStack.tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
-                    if (hisItems.size() > 0) {
-                        HisItem sItem = hisItems.get(hisItems.size() - 1);//TODO - Writing just the recent his val?
-                        tsData.put(pointGUID.replace("@", ""), String.valueOf(sItem.getVal()));
+    private void syncHistorizedDevicePoints(boolean timeForQuarterHourSync) {
+    List<HashMap> allEquips = ccuHsApi.readAll("device");
+    List<HashMap> devicesToSync = getEntitiesWithGuidForSyncing(allEquips);
 
-                        for (HisItem item : hisItems) {
-                            item.setSyncStatus(true);
-                        }
-                        hayStack.tagsDb.setHisItemSyncStatus(hisItems);
-                        hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
-                    }else
-                        continue;
+    for (HashMap deviceToSync : devicesToSync) {
+        String equipPointId = deviceToSync.get("id").toString();
+        List<HashMap> allPointsForDevice = ccuHsApi.readAll("point and his and deviceRef == \""+ equipPointId +"\"");
+        List<HashMap> pointsToSyncForDevice = getEntitiesWithGuidForSyncing(allPointsForDevice);
+        if (!pointsToSyncForDevice.isEmpty()) {
+            syncPoints(equipPointId, pointsToSyncForDevice, timeForQuarterHourSync);
+        }
+    }
+}
+
+
+    private void syncPoints(String deviceOrEquipId, List<HashMap> pointList, boolean timeForQuarterHourSync) {
+
+        HDict[] hDicts = new HDict[pointList.size()];
+
+        List<HisItem> unsyncedHisItems = new ArrayList<>();
+        HisItem[] hisItemsToSync = null;
+
+        for (HashMap pointToSync : pointList) {
+            String pointID = pointToSync.get("id").toString();
+
+            unsyncedHisItems = ccuHsApi.tagsDb.getUnsyncedHisItemsOrderDesc(pointID);
+
+
+            if (unsyncedHisItems.isEmpty() && timeForQuarterHourSync) {
+                HisItem hisItemToSync = ccuHsApi.tagsDb.getLastHisItem(HRef.copy(pointID));
+                hisItemsToSync = new HisItem[]{hisItemToSync};
+            } else {
+                hisItemsToSync = new HisItem[unsyncedHisItems.size()];
+                int hisItemBuilderIterator = 0;
+                for (HisItem hisItemToSync : hisItemsToSync) {
+                    hisItemsToSync[hisItemBuilderIterator] = hisItemToSync;
                 }
             }
-        
-            if (tsData.size() > 0)
-            {
-                if(CCUHsApi.getInstance().isNetworkConnected()) {
-                    CcuLog.d(TAG, " sendHisToInflux device tsData= " + tsData.size() + "," + tsData.toString());
-//                    InfluxDbUtil.writeData(CCUHsApi.getInstance().getInfluxUrl(), CCUHsApi.getInstance().getGUID(device.get("id").toString()).toString().replace("@", "")
-//                            , tsData, System.currentTimeMillis());
+
+            int hdictBuilderIterator = 0;
+            for (HisItem hisItem : hisItemsToSync) {
+                if (hisItem != null && hisItem.initialized) {
+                    String pointGuid = CCUHsApi.getInstance().getGUID(pointID);
+                    String pointTimezone = pointToSync.get("tz").toString();
+                    Double pointValue = hisItem.getVal();
+                    long pointTimestamp = hisItem.getDateInMillis();
+
+                    HDict hDict = buildHDict(pointGuid, pointTimezone, pointValue, pointTimestamp);
+                    hDicts[hdictBuilderIterator] = hDict;
+                    hdictBuilderIterator++;
                 }
+            }
+            ccuHsApi.tagsDb.removeExpiredHisItems(HRef.copy(pointID));
+        }
+
+        if (!pointList.isEmpty()) {
+            HDict hisWriteMetadata = new HDictBuilder()
+                    .add("id", deviceOrEquipId)
+                    .toDict();
+
+            String response = CCUHsApi.getInstance().hisWriteManyToHaystackService(hisWriteMetadata, hDicts);
+            if (response != null) {
+                ccuHsApi.tagsDb.updateHisItemSynced(unsyncedHisItems);
             }
         }
+    }
+
+    private HDict buildHDict(String pointGuid, String pointTimezone, Double pointValue, long pointTimestamp) {
+
+        HTimeZone hTimeZone = HTimeZone.make(pointTimezone);
+        HDateTime hDateTime = HDateTime.make(pointTimestamp, hTimeZone);
+
+        HDict hDict = new HDictBuilder()
+                .add("id", pointGuid)
+                .add("val", pointValue)
+                .add("ts", hDateTime)
+                .toDict();
+
+        return hDict;
+    }
+
+    private List<HashMap> getEntitiesWithGuidForSyncing(List<HashMap> entityList) {
+        List<HashMap> entitiesWithGuid = new ArrayList<>();
+
+        for (HashMap entity : entityList) {
+            if (CCUHsApi.getInstance().getGUID(entity.get("id").toString()) != null) {
+                entitiesWithGuid.add(entity);
+                entitySyncRequired = true;
+            }
+        }
+
+        return entitiesWithGuid;
     }
 }

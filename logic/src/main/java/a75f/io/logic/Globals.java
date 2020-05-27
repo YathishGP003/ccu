@@ -68,11 +68,6 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.pubnub.PubNubHandler;
 import a75f.io.logic.watchdog.Watchdog;
 
-/**
- * Created by rmatt isOn 7/19/2017.
- */
-
-
 /*
     This is used to keep track of global static associated with application context.
  */
@@ -91,23 +86,18 @@ public class Globals {
     }
 
     private static final int      NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES = 10;
-    private static final int      TASK_SEPERATION                           = 15;
-    private static final TimeUnit TASK_SERERATION_TIMEUNIT                  = TimeUnit.SECONDS;
+    private static final int TASK_SEPARATION = 15;
+    private static final TimeUnit TASK_SEPARATION_TIMEUNIT = TimeUnit.SECONDS;
 
     private static Globals globals;
-    //HeartBeatJob mHeartBeatJob;
     BuildingProcessJob mProcessJob = new BuildingProcessJob();
     ScheduleProcessJob mScheduleProcessJob = new ScheduleProcessJob();
     
     AlertProcessJob mAlertProcessJob;
 
-    PrintProcessJob mPrintProcessJob = new PrintProcessJob();
-    PrintProcessJobTwo mPrintProcessJobTwo = new PrintProcessJobTwo();
-
     private ScheduledExecutorService taskExecutor;
     private Context mApplicationContext;
     private CCUApplication mCCUApplication;
-    private LZoneProfile mLZoneProfile;
     private boolean isSimulation = false;
     private boolean testHarness = true;
 
@@ -139,15 +129,6 @@ public class Globals {
         }
         return getInstance().mCCUApplication;
     }
-
-
-    public LZoneProfile getLZoneProfile() {
-        if (getInstance().mLZoneProfile == null) {
-            getInstance().mLZoneProfile = new LZoneProfile();
-        }
-        return getInstance().mLZoneProfile;
-    }
-
 
     public boolean isSimulation() {
         return getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
@@ -210,13 +191,13 @@ public class Globals {
         }
         
         mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
-                TASK_SEPERATION , TASK_SERERATION_TIMEUNIT);
+                TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
     
         mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
-                TASK_SEPERATION +15, TASK_SERERATION_TIMEUNIT);
+                TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);
     
         mAlertProcessJob = new AlertProcessJob(mApplicationContext);
-        getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPERATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SERERATION_TIMEUNIT );
+        getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
     
         Watchdog.getInstance().addMonitor(mProcessJob);
         Watchdog.getInstance().addMonitor(mScheduleProcessJob);

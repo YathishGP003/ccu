@@ -17,10 +17,24 @@ android {
             }
         }
     }
+
     buildTypes {
-        release {
+        local {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        dev {
+            minifyEnabled false
+        }
+        prod {
+            minifyEnabled false
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+        }
+        qa {
+            minifyEnabled false
+        }
+        staging {
+            minifyEnabled false
         }
     }
 }

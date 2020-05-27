@@ -24,18 +24,10 @@ public class CcuLog
 	public static final int INFO = android.util.Log.INFO;
 	public static final int WARN = android.util.Log.WARN;
 	public static final int ERROR = android.util.Log.ERROR;
-	public static final int ASSERT = android.util.Log.ASSERT;
-	
+
 	// Stores the beginning of the LogNode topology.
 	private static LogNode mLogNode;
-	
-	/**
-	 * Returns the next LogNode in the linked list.
-	 */
-	public static LogNode getLogNode() {
-		return mLogNode;
-	}
-	
+
 	/**
 	 * Sets the LogNode data will be sent to.
 	 */
@@ -198,37 +190,5 @@ public class CcuLog
 	public static void e(String tag, String msg) {
 		e(tag, msg, null);
 	}
-	
-	/**
-	 * Prints a message at ASSERT priority.
-	 *
-	 * @param tag Tag for for the log data. Can be used to organize log statements.
-	 * @param msg The actual message to be logged.
-	 * @param tr If an exception was thrown, this can be sent along for the logging facilities
-	 *           to extract and print useful information.
-	 */
-	public static void wtf(String tag, String msg, Throwable tr) {
-		println(ASSERT, tag, msg, tr);
-	}
-	
-	/**
-	 * Prints a message at ASSERT priority.
-	 *
-	 * @param tag Tag for for the log data. Can be used to organize log statements.
-	 * @param msg The actual message to be logged.
-	 */
-	public static void wtf(String tag, String msg) {
-		wtf(tag, msg, null);
-	}
-	
-	/**
-	 * Prints a message at ASSERT priority.
-	 *
-	 * @param tag Tag for for the log data. Can be used to organize log statements.
-	 * @param tr If an exception was thrown, this can be sent along for the logging facilities
-	 *           to extract and print useful information.
-	 */
-	public static void wtf(String tag, Throwable tr) {
-		wtf(tag, null, tr);
-	}
+
 }

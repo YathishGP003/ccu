@@ -27,7 +27,6 @@ public class HttpUtil
     public static final String TENANT_ID = "941d8a61-4be2-4622-8ace-ed8ee5696d99";
     public static final String CLIENT_SECRET = "8tHwP3ykcKabD+J8tDrhex7HmVtrzF3zfXt56cF6h7c=";
     public static final String HTTP_SCHEME = "http";
-    public static final String HTTPS_SCHEME = "https";
 
     public static String clientToken = "";
     public static boolean retry = true;
@@ -69,7 +68,11 @@ public class HttpUtil
                     "text/zinc");
     
             CcuLog.i("CCU_HS",url.toString());
-            CcuLog.i("CCU_HS",urlParameters);
+            final int chunkSize = 2048;
+            for (int i = 0; i < urlParameters.length(); i += chunkSize) {
+                Log.d("CCU_HS", urlParameters.substring(i, Math.min(urlParameters.length(), i + chunkSize)));
+            }
+
             //System.out.println(targetURL);
             //System.out.println(urlParameters);
             connection.setRequestProperty("Content-Length", "" +
@@ -142,12 +145,18 @@ public class HttpUtil
             CcuLog.i("CCU_HS","Client Token: " + clientToken);
         }
         URL url;
-        HttpsURLConnection connection = null;
+        HttpURLConnection connection = null;
         try {
             //Create connection
             url = new URL(targetURL);
+
+            if (StringUtils.equals(url.getProtocol(), HTTP_SCHEME)) {
+                connection = (HttpURLConnection)url.openConnection();
+            } else {
+                connection = NetCipher.getHttpsURLConnection(url);
+            }
+
             //connection = (HttpsURLConnection)url.openConnection();
-            connection = NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type",
                     "application/json");

@@ -45,6 +45,12 @@ android {
         }
     }
 
+    android.variantFilter { variant ->
+        if(variant.buildType.name.endsWith('release') || variant.buildType.name.endsWith('debug')) {
+            variant.setIgnore(true);
+        }
+    }
+
 }
 
 dependencies {
@@ -58,6 +64,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-core:2.8.6'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.8.6'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.8.6'
+    implementation 'org.apache.commons:commons-lang3:3.6'
 
     implementation project(':haystack')
     implementation 'info.guardianproject.netcipher:netcipher:1.2'

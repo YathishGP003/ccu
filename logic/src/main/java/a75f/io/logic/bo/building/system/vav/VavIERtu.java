@@ -115,7 +115,6 @@ public class VavIERtu extends VavSystemProfile
                                    .setDisplayName(siteDis+"-SystemEquip")
                                    .setProfile(ProfileType.SYSTEM_VAV_IE_RTU.name())
                                    .addMarker("equip").addMarker("system").addMarker("vav")
-                                   .addMarker("equipHis")
                                    .setTz(siteMap.get("tz").toString())
                                    .build();
         String equipRef = hayStack.addEquip(systemEquip);
@@ -298,7 +297,7 @@ public class VavIERtu extends VavSystemProfile
                 .setDisplayName(equipDis+"-"+"DATClgSetpoint")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipref)
-                .addMarker("system").addMarker("cmd").addMarker("dat").addMarker("setpoint").addMarker("temp").addMarker("his").addMarker("equipHis")
+                .addMarker("system").addMarker("cmd").addMarker("dat").addMarker("setpoint").addMarker("temp").addMarker("his")
                 .setUnit("\u00B0F").setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(DATClgSetpoint);
@@ -306,7 +305,7 @@ public class VavIERtu extends VavSystemProfile
                                       .setDisplayName(equipDis+"-"+"coolingDat")
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
-                                      .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("discharge").addMarker("air").addMarker("temp").addMarker("his").addMarker("equipHis").addMarker("runtime")
+                                      .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("discharge").addMarker("air").addMarker("temp").addMarker("his").addMarker("runtime")
                                       .setUnit("\u00B0F").setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(coolingSignal);
@@ -315,7 +314,7 @@ public class VavIERtu extends VavSystemProfile
                                       .setDisplayName(equipDis+"-"+"heatingDat")
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
-                                      .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("discharge").addMarker("air").addMarker("temp").addMarker("his").addMarker("equipHis").addMarker("runtime")
+                                      .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("discharge").addMarker("air").addMarker("temp").addMarker("his").addMarker("runtime")
                                       .setUnit("\u00B0F").setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(heatingSignal);
@@ -324,7 +323,7 @@ public class VavIERtu extends VavSystemProfile
                                       .setDisplayName(equipDis+"-"+"DATClgSetpoint")
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
-                                      .addMarker("system").addMarker("cmd").addMarker("dat").addMarker("setpoint").addMarker("temp").addMarker("his").addMarker("equipHis")
+                                      .addMarker("system").addMarker("cmd").addMarker("dat").addMarker("setpoint").addMarker("temp").addMarker("his")
                                       .setUnit("\u00B0F").setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(DATClgSetpoint);
@@ -333,7 +332,7 @@ public class VavIERtu extends VavSystemProfile
                                   .setDisplayName(equipDis+"-"+"ductStaticPressure")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
-                                  .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his").addMarker("equipHis").addMarker("runtime")
+                                  .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his").addMarker("runtime")
                                   .setUnit("inch wc").setTz(tz)
                                   .build();
         CCUHsApi.getInstance().addPoint(fanSignal);*/
@@ -531,7 +530,7 @@ public class VavIERtu extends VavSystemProfile
                                 .setDisplayName(equipDis+"-"+"coolingDat")
                                 .setSiteRef(siteRef)
                                 .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
-                                .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("discharge").addMarker("air").addMarker("temp").addMarker("his").addMarker("equipHis")
+                                .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("discharge").addMarker("air").addMarker("temp").addMarker("his")
                                 .setUnit("\u00B0F").setTz(tz)
                                 .build();
                         CCUHsApi.getInstance().addPoint(coolingSignal);
@@ -548,7 +547,7 @@ public class VavIERtu extends VavSystemProfile
                                 .setDisplayName(equipDis+"-"+"ductStaticPressure")
                                 .setSiteRef(siteRef)
                                 .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
-                                .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").addMarker("equipHis")
+                                .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his")
                                 .setUnit("inch wc").setTz(tz)
                                 .build();
                         CCUHsApi.getInstance().addPoint(fanSignal);
@@ -565,7 +564,7 @@ public class VavIERtu extends VavSystemProfile
                                 .setDisplayName(equipDis+"-"+"heatingDat")
                                 .setSiteRef(siteRef)
                                 .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
-                                .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("modulating").addMarker("discharge").addMarker("air").addMarker("temp").addMarker("his").addMarker("equipHis")
+                                .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("modulating").addMarker("discharge").addMarker("air").addMarker("temp").addMarker("his")
                                 .setUnit("\u00B0F").setTz(tz)
                                 .build();
                         CCUHsApi.getInstance().addPoint(heatingSignal);
@@ -582,7 +581,7 @@ public class VavIERtu extends VavSystemProfile
                                 .setDisplayName(equipDis+"-"+"humidifier")
                                 .setSiteRef(siteRef)
                                 .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
-                                .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his").addMarker("equipHis")
+                                .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his")
                                 .setEnums("off,on")
                                 .setUnit("%").setTz(tz)
                                 .build();

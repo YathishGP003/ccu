@@ -51,7 +51,7 @@ public class DiagEquip
         Equip b = new Equip.Builder()
                           .setSiteRef(siteRef)
                           .setDisplayName(siteDis+"-DiagEquip")
-                          .addMarker("equip").addMarker("diag").addMarker("equipHis")
+                          .addMarker("equip").addMarker("diag")
                           .setTz(tz).build();
         String equipRef = CCUHsApi.getInstance().addEquip(b);
         addPoints(equipRef, "DiagEquip");
@@ -68,7 +68,7 @@ public class DiagEquip
                                            .setDisplayName(equipDis+"-batteryLevel")
                                            .setEquipRef(equipRef)
                                            .setSiteRef(siteRef).setHisInterpolate("linear")
-                                           .addMarker("diag").addMarker("battery").addMarker("level").addMarker("his").addMarker("equipHis")
+                                           .addMarker("diag").addMarker("battery").addMarker("level").addMarker("his")
                                            .setUnit("%")
                                            .setTz(tz)
                                            .build();
@@ -78,7 +78,7 @@ public class DiagEquip
                                      .setDisplayName(equipDis+"-chargingStatus")
                                      .setEquipRef(equipRef)
                                      .setSiteRef(siteRef).setHisInterpolate("linear")
-                                     .addMarker("diag").addMarker("charging").addMarker("status").addMarker("his").addMarker("equipHis")
+                                     .addMarker("diag").addMarker("charging").addMarker("status").addMarker("his")
                                      .setTz(tz)
                                      .build();
         hsApi.addPoint(chargingStatus);
@@ -87,7 +87,7 @@ public class DiagEquip
                 .setDisplayName(equipDis+"-powerConnected")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef).setHisInterpolate("linear")
-                .addMarker("diag").addMarker("power").addMarker("connected").addMarker("his").addMarker("equipHis")
+                .addMarker("diag").addMarker("power").addMarker("connected").addMarker("his")
                 .setTz(tz)
                 .build();
         hsApi.addPoint(powerConnected);
@@ -96,7 +96,7 @@ public class DiagEquip
                                        .setDisplayName(equipDis+"-wifiRssi")
                                        .setEquipRef(equipRef)
                                        .setSiteRef(siteRef).setHisInterpolate("linear")
-                                       .addMarker("diag").addMarker("wifi").addMarker("rssi").addMarker("his").addMarker("equipHis")
+                                       .addMarker("diag").addMarker("wifi").addMarker("rssi").addMarker("his")
                                        .setUnit("dB")
                                        .setTz(tz)
                                        .build();
@@ -106,7 +106,7 @@ public class DiagEquip
                                  .setDisplayName(equipDis+"-wifiLinkSpeed")
                                  .setEquipRef(equipRef)
                                  .setSiteRef(siteRef).setHisInterpolate("linear")
-                                 .addMarker("diag").addMarker("wifi").addMarker("link").addMarker("speed").addMarker("his").addMarker("equipHis")
+                                 .addMarker("diag").addMarker("wifi").addMarker("link").addMarker("speed").addMarker("his")
                                  .setUnit("mbps")
                                  .setTz(tz)
                                  .build();
@@ -116,7 +116,7 @@ public class DiagEquip
                                       .setDisplayName(equipDis+"-wifiSignalStrength")
                                       .setEquipRef(equipRef)
                                       .setSiteRef(siteRef).setHisInterpolate("linear")
-                                      .addMarker("diag").addMarker("wifi").addMarker("signal").addMarker("strength").addMarker("his").addMarker("equipHis")
+                                      .addMarker("diag").addMarker("wifi").addMarker("signal").addMarker("strength").addMarker("his")
                                       .setUnit("dBm")
                                       .setTz(tz)
                                       .build();
@@ -126,7 +126,7 @@ public class DiagEquip
                                            .setDisplayName(equipDis+"-availableMemory")
                                            .setEquipRef(equipRef)
                                            .setSiteRef(siteRef).setHisInterpolate("linear")
-                                           .addMarker("diag").addMarker("available").addMarker("memory").addMarker("his").addMarker("equipHis")
+                                           .addMarker("diag").addMarker("available").addMarker("memory").addMarker("his")
                                            .setUnit("MB")
                                            .setTz(tz)
                                            .build();
@@ -136,7 +136,7 @@ public class DiagEquip
                                         .setDisplayName(equipDis+"-totalMemory")
                                         .setEquipRef(equipRef)
                                         .setSiteRef(siteRef).setHisInterpolate("linear")
-                                        .addMarker("diag").addMarker("total").addMarker("memory").addMarker("his").addMarker("equipHis")
+                                        .addMarker("diag").addMarker("total").addMarker("memory").addMarker("his")
                                         .setUnit("MB")
                                         .setTz(tz)
                                         .build();
@@ -146,7 +146,7 @@ public class DiagEquip
                                     .setDisplayName(equipDis+"-isLowMemory")
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef).setHisInterpolate("linear")
-                                    .addMarker("diag").addMarker("low").addMarker("memory").addMarker("his").addMarker("equipHis")
+                                    .addMarker("diag").addMarker("low").addMarker("memory").addMarker("his")
                                     .setTz(tz)
                                     .build();
         hsApi.addPoint(isLowMemory);
@@ -155,7 +155,7 @@ public class DiagEquip
                                     .setDisplayName(equipDis+"-serialConnection")
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef).setHisInterpolate("linear")
-                                    .addMarker("diag").addMarker("serial").addMarker("connection").addMarker("his").addMarker("equipHis")
+                                    .addMarker("diag").addMarker("serial").addMarker("connection").addMarker("his")
                                     .setTz(tz)
                                     .build();
         hsApi.addPoint(serialConnection);
@@ -164,7 +164,7 @@ public class DiagEquip
                                          .setDisplayName(equipDis+"-firmwareUpdate")
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef).setHisInterpolate("linear")
-                                         .addMarker("diag").addMarker("firmware").addMarker("update").addMarker("his").addMarker("equipHis")
+                                         .addMarker("diag").addMarker("firmware").addMarker("update").addMarker("his")
                                          .setTz(tz)
                                          .build();
         hsApi.addPoint(firmwareUpdate);
@@ -173,7 +173,7 @@ public class DiagEquip
                 .setDisplayName(equipDis+"-appRestart")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef).setHisInterpolate("linear")
-                .addMarker("diag").addMarker("app").addMarker("restart").addMarker("his").addMarker("equipHis")
+                .addMarker("diag").addMarker("app").addMarker("restart").addMarker("his")
                 .setUnit("")
                 .setTz(tz)
                 .build();
@@ -182,7 +182,7 @@ public class DiagEquip
                 .setDisplayName(equipDis+"-appVersion")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef).setHisInterpolate("cov")
-                .addMarker("diag").addMarker("app").addMarker("version").addMarker("his").addMarker("equipHis").addMarker("writable")
+                .addMarker("diag").addMarker("app").addMarker("version").addMarker("his").addMarker("writable")
                 .setUnit("")
                 .setKind("string")
                 .setTz(tz)

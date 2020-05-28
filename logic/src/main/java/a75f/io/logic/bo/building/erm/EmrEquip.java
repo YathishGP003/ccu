@@ -48,7 +48,7 @@ public class EmrEquip
                                      .setFloorRef(floorRef)
                                      .setProfile(profileType.name())
                                      .addMarker("equip").addMarker("emr").addMarker("zone")
-                                     .addMarker("equipHis").setGatewayRef(ahuRef).setTz(tz).setGroup(String.valueOf(nodeAddr)).build();
+                                     .setGatewayRef(ahuRef).setTz(tz).setGroup(String.valueOf(nodeAddr)).build();
         equipRef = hayStack.addEquip(b);
     
         Point emrReading  = new Point.Builder()
@@ -58,7 +58,7 @@ public class EmrEquip
                                           .setRoomRef(roomRef)
                                           .setFloorRef(floorRef).setHisInterpolate("cov")
                                           .addMarker("sp").addMarker("emr").addMarker("sensor").addMarker("zone").addMarker("his")
-                                          .addMarker("cur").addMarker("logical").addMarker("equipHis")
+                                          .addMarker("cur").addMarker("logical")
                                           .setGroup(String.valueOf(nodeAddr))
                                           .setUnit("KWh")
                                           .setTz(tz)
@@ -73,7 +73,7 @@ public class EmrEquip
                                     .setRoomRef(roomRef)
                                     .setFloorRef(floorRef).setHisInterpolate("cov")
                                     .addMarker("sp").addMarker("emr").addMarker("zone").addMarker("his")
-                                    .addMarker("current").addMarker("rate").addMarker("logical").addMarker("equipHis").addMarker("sp")
+                                    .addMarker("current").addMarker("rate").addMarker("logical").addMarker("sp")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setUnit("KW")
                                     .setTz(tz)
@@ -87,7 +87,7 @@ public class EmrEquip
                                            .setSiteRef(siteRef)
                                            .setRoomRef(roomRef)
                                            .setFloorRef(floorRef).setHisInterpolate("cov")
-                                           .addMarker("status").addMarker("message").addMarker("emr").addMarker("writable").addMarker("logical").addMarker("zone").addMarker("his").addMarker("equipHis")
+                                           .addMarker("status").addMarker("message").addMarker("emr").addMarker("writable").addMarker("logical").addMarker("zone")
                                            .setGroup(String.valueOf(nodeAddr))
                                            .setTz(tz)
                                            .setKind("string")
@@ -101,7 +101,7 @@ public class EmrEquip
                                           .setSiteRef(siteRef)
                                           .setRoomRef(roomRef)
                                           .setFloorRef(floorRef).setHisInterpolate("cov")
-                                          .addMarker("zone").addMarker("emr").addMarker("scheduleType").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                          .addMarker("zone").addMarker("emr").addMarker("scheduleType").addMarker("writable").addMarker("his")
                                           .setGroup(String.valueOf(nodeAddr))
                                           .setEnums("building,zone,named")
                                           .setTz(tz)

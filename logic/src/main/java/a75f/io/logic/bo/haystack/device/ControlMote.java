@@ -49,7 +49,7 @@ public class ControlMote
                            .setDisplayName("CM-device")
                            .addMarker("network")
                            .addMarker("cm")
-                           .addMarker("equipHis")
+                           .addMarker("his")
                            .setSiteRef(site.getId())
                            .setEquipRef(systemEquipRef)
                            .build();
@@ -66,7 +66,7 @@ public class ControlMote
         }
         Device d = new Device.Builder()
                 .setDisplayName("TI-"+address)
-                .addMarker("network").addMarker("node").addMarker("ti").addMarker("equipHis")
+                .addMarker("network").addMarker("node").addMarker("ti").addMarker("his")
                 .setAddr(address)
                 .setSiteRef(site)
                 .setFloorRef(floor)
@@ -137,7 +137,7 @@ public class ControlMote
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("sensor").addMarker("his").addMarker("equipHis")
+                .addMarker("sensor").addMarker("his")
                 .setPort(Port.SENSOR_RT.toString())
                 .setUnit("\u00B0F")
                 .setTz(tz)
@@ -151,7 +151,7 @@ public class ControlMote
                 .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("sensor").addMarker("his").addMarker("equipHis")
+                .addMarker("sensor").addMarker("his")
                 .setUnit("mV")
                 .setTz(tz)
                 .build();
@@ -165,7 +165,7 @@ public class ControlMote
                 .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("sensor").addMarker("his").addMarker("equipHis")
+                .addMarker("sensor").addMarker("his")
                 .setUnit("mV")
                 .setTz(tz)
                 .build();
@@ -178,7 +178,7 @@ public class ControlMote
                 .setPort(Port.TH1_IN.toString())
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("sensor").addMarker("his").addMarker("equipHis")
+                .addMarker("sensor").addMarker("his")
                 .setUnit("Ohm")
                 .setTz(tz)
                 .build();
@@ -191,7 +191,7 @@ public class ControlMote
                 .setPort(Port.TH2_IN.toString())
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("sensor").addMarker("his").addMarker("equipHis")
+                .addMarker("sensor").addMarker("his")
                 .setUnit("Ohm")
                 .setTz(tz)
                 .build();
@@ -213,7 +213,7 @@ public class ControlMote
                           .setDisplayName(site.getDisplayName()+"-CM-"+analog+"Out")
                           .setDeviceRef(deviceRef)
                           .setSiteRef(site.getId())
-                          .addMarker(analog).addMarker("his").addMarker("system").addMarker("out").addMarker("equipHis")
+                          .addMarker(analog).addMarker("his").addMarker("system").addMarker("out")
                           .setTz(site.getTz())
                           .build();
         CCUHsApi.getInstance().addPoint(p);
@@ -234,7 +234,7 @@ public class ControlMote
                              .setDisplayName(site.getDisplayName()+"-"+relay+"State")
                              .setDeviceRef(deviceRef)
                              .setSiteRef(site.getId())
-                             .addMarker(relay).addMarker("his").addMarker("system").addMarker("state").addMarker("equipHis")
+                             .addMarker(relay).addMarker("his").addMarker("system").addMarker("state")
                              .setTz(site.getTz())
                              .build();
         CCUHsApi.getInstance().addPoint(p);
@@ -257,7 +257,7 @@ public class ControlMote
                 .setFloorRef(floorRef)
                 .setPointRef(pointRef)
                 .setEnabled(true)
-                .addMarker("sensor").addMarker("his").addMarker("equipHis")
+                .addMarker("sensor").addMarker("his")
                 .setPort(p.toString())
                 .setTz(tz)
                 .build();

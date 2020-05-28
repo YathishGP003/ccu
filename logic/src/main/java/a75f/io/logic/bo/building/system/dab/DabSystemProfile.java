@@ -34,17 +34,17 @@ public abstract class DabSystemProfile extends SystemProfile
     
     private void addSystemLoopOpPoint(String loop, String siteRef, String equipref, String equipDis, String tz)
     {
-        Point relay1Op = new Point.Builder().setDisplayName(equipDis + "-" + loop + "LoopOutput").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker(loop).addMarker("loop").addMarker("output").addMarker("his").addMarker("equipHis").addMarker("sp").setUnit("%").setTz(tz).build();
+        Point relay1Op = new Point.Builder().setDisplayName(equipDis + "-" + loop + "LoopOutput").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker(loop).addMarker("loop").addMarker("output").addMarker("his").addMarker("sp").setUnit("%").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(relay1Op);
     }
     
     private void addDabSystemPoints(String siteRef, String equipref, String equipDis, String tz)
     {
-        Point weightedAverageLoadMA = new Point.Builder().setDisplayName(equipDis + "-" + "weightedAverageLoadMA ").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("weighted").addMarker("average").addMarker("moving").addMarker("load").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        Point weightedAverageLoadMA = new Point.Builder().setDisplayName(equipDis + "-" + "weightedAverageLoadMA ").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("weighted").addMarker("average").addMarker("moving").addMarker("load").addMarker("his").addMarker("sp").setTz(tz).build();
         CCUHsApi.getInstance().writeHisValById(CCUHsApi.getInstance().addPoint(weightedAverageLoadMA), 0.0);
-        Point weightedAverageCoolingLoadPostML = new Point.Builder().setDisplayName(equipDis + "-" + "weightedAverageCoolingLoadPostML").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("weighted").addMarker("average").addMarker("cooling").addMarker("load").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        Point weightedAverageCoolingLoadPostML = new Point.Builder().setDisplayName(equipDis + "-" + "weightedAverageCoolingLoadPostML").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("weighted").addMarker("average").addMarker("cooling").addMarker("load").addMarker("his").addMarker("sp").setTz(tz).build();
         CCUHsApi.getInstance().writeHisValById(CCUHsApi.getInstance().addPoint(weightedAverageCoolingLoadPostML), 0.0);
-        Point weightedAverageHeatingLoadPostML = new Point.Builder().setDisplayName(equipDis + "-" + "weightedAverageHeatingLoadPostML").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("weighted").addMarker("average").addMarker("heating").addMarker("load").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        Point weightedAverageHeatingLoadPostML = new Point.Builder().setDisplayName(equipDis + "-" + "weightedAverageHeatingLoadPostML").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("weighted").addMarker("average").addMarker("heating").addMarker("load").addMarker("his").addMarker("sp").setTz(tz).build();
         CCUHsApi.getInstance().writeHisValById(CCUHsApi.getInstance().addPoint(weightedAverageHeatingLoadPostML), 0.0);
     }
     
@@ -66,7 +66,7 @@ public abstract class DabSystemProfile extends SystemProfile
         String siteRef = (String) siteMap.get(Tags.ID);
         String tz = siteMap.get("tz").toString();
         
-        Point targetCumulativeDamper = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "targetCumulativeDamper").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("target").addMarker("cumulative").addMarker("damper").addMarker("sp").addMarker("equipHis")
+        Point targetCumulativeDamper = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "targetCumulativeDamper").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("target").addMarker("cumulative").addMarker("damper").addMarker("sp")
                 .setUnit("%").setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP).setTz(tz).build();
         String targetCumulativeDamperId = hayStack.addPoint(targetCumulativeDamper);
         HashMap targetCumulativeDamperP = hayStack.read("point and tuner and default and dab and target and cumulative and damper");
@@ -81,7 +81,7 @@ public abstract class DabSystemProfile extends SystemProfile
         }
         hayStack.writeHisValById(targetCumulativeDamperId, HSUtil.getPriorityVal(targetCumulativeDamperId));
         
-        Point analogFanSpeedMultiplier = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "analogFanSpeedMultiplier").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("analog").addMarker("fan").addMarker("speed").addMarker("multiplier").addMarker("sp").addMarker("equipHis")
+        Point analogFanSpeedMultiplier = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "analogFanSpeedMultiplier").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("analog").addMarker("fan").addMarker("speed").addMarker("multiplier").addMarker("sp")
                 .setMinVal("0.1").setMaxVal("3.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP).setTz(tz).build();
         String analogFanSpeedMultiplierId = hayStack.addPoint(analogFanSpeedMultiplier);
         HashMap analogFanSpeedMultiplierP = hayStack.read("point and tuner and default and dab and analog and fan and speed and multiplier");
@@ -96,7 +96,7 @@ public abstract class DabSystemProfile extends SystemProfile
         }
         hayStack.writeHisValById(analogFanSpeedMultiplierId, HSUtil.getPriorityVal(analogFanSpeedMultiplierId));
         
-        Point humidityHysteresis = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "humidityHysteresis").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("humidity").addMarker("hysteresis").addMarker("sp").addMarker("equipHis")
+        Point humidityHysteresis = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "humidityHysteresis").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("humidity").addMarker("hysteresis").addMarker("sp")
                 .setUnit("%").setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP).setTz(tz).build();
         String humidityHysteresisId = hayStack.addPoint(humidityHysteresis);
         HashMap humidityHysteresisPoint = hayStack.read("point and tuner and default and dab and humidity and hysteresis");
@@ -111,7 +111,7 @@ public abstract class DabSystemProfile extends SystemProfile
         }
         hayStack.writeHisValById(humidityHysteresisId, HSUtil.getPriorityVal(humidityHysteresisId));
         
-        Point relayDeactivationHysteresis = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "relayDeactivationHysteresis").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp").addMarker("equipHis")
+        Point relayDeactivationHysteresis = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "relayDeactivationHysteresis").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp")
                 .setUnit("%").setMinVal("0").setMaxVal("10").setIncrementVal("0.5").setTunerGroup(TunerConstants.DAB_TUNER_GROUP).setTz(tz).build();
         String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
         HashMap relayDeactivationHysteresisPoint = hayStack.read("point and tuner and default and dab and relay and deactivation and hysteresis");
@@ -130,7 +130,7 @@ public abstract class DabSystemProfile extends SystemProfile
                 .setDisplayName(HSUtil.getDis(equipref)+"-DAB-"+"rebalanceHoldTime")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipref).setHisInterpolate("cov")
-                .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
                 .addMarker("rebalance").addMarker("hold").addMarker("time").addMarker("sp").addMarker("system")
                 .setMinVal("1").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                 .setUnit("m")
@@ -156,28 +156,28 @@ public abstract class DabSystemProfile extends SystemProfile
         String siteRef = siteMap.get("id").toString();
         String tz = siteMap.get("tz").toString();
         
-        Point desiredCI = new Point.Builder().setDisplayName(equipDis + "-" + "desiredCI").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("ci").addMarker("desired").addMarker("sp").addMarker("his").addMarker("equipHis").setTz(tz).build();
+        Point desiredCI = new Point.Builder().setDisplayName(equipDis + "-" + "desiredCI").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("ci").addMarker("desired").addMarker("sp").addMarker("his").setTz(tz).build();
         String desiredCIId = CCUHsApi.getInstance().addPoint(desiredCI);
         CCUHsApi.getInstance().writePoint(desiredCIId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.SYSTEM_DEFAULT_CI, 0);
         CCUHsApi.getInstance().writeHisValById(desiredCIId, TunerConstants.SYSTEM_DEFAULT_CI);
-        Point systemState = new Point.Builder().setDisplayName(equipDis + "-" + "conditioningMode").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("conditioning").addMarker("mode").addMarker("sp").addMarker("his").addMarker("equipHis").setEnums("off,auto,coolonly,heatonly").setTz(tz).build();
+        Point systemState = new Point.Builder().setDisplayName(equipDis + "-" + "conditioningMode").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("conditioning").addMarker("mode").addMarker("sp").addMarker("his").setEnums("off,auto,coolonly,heatonly").setTz(tz).build();
         String systemStateId = CCUHsApi.getInstance().addPoint(systemState);
         CCUHsApi.getInstance().writePoint(systemStateId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", (double) SystemState.OFF.ordinal(), 0);
         CCUHsApi.getInstance().writeHisValById(systemStateId, (double) SystemState.OFF.ordinal());
-        Point targetMaxInsideHumidty = new Point.Builder().setDisplayName(equipDis + "-" + "targetMaxInsideHumidty").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("max").addMarker("his").addMarker("equipHis").setUnit("%").setTz(tz).addMarker("inside").addMarker("humidity").addMarker("sp").build();
+        Point targetMaxInsideHumidty = new Point.Builder().setDisplayName(equipDis + "-" + "targetMaxInsideHumidty").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("max").addMarker("his").setUnit("%").setTz(tz).addMarker("inside").addMarker("humidity").addMarker("sp").build();
         String targetMaxInsideHumidtyId = CCUHsApi.getInstance().addPoint(targetMaxInsideHumidty);
         CCUHsApi.getInstance().writePoint(targetMaxInsideHumidtyId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.TARGET_MAX_INSIDE_HUMIDITY, 0);
         CCUHsApi.getInstance().writeHisValById(targetMaxInsideHumidtyId, TunerConstants.TARGET_MAX_INSIDE_HUMIDITY);
-        Point targetMinInsideHumidty = new Point.Builder().setDisplayName(equipDis + "-" + "targetMinInsideHumidty").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("min").addMarker("inside").addMarker("humidity").setUnit("%").addMarker("sp").addMarker("his").addMarker("equipHis").setTz(tz).build();
+        Point targetMinInsideHumidty = new Point.Builder().setDisplayName(equipDis + "-" + "targetMinInsideHumidty").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("min").addMarker("inside").addMarker("humidity").setUnit("%").addMarker("sp").addMarker("his").setTz(tz).build();
         String targetMinInsideHumidtyId = CCUHsApi.getInstance().addPoint(targetMinInsideHumidty);
         CCUHsApi.getInstance().writePoint(targetMinInsideHumidtyId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.TARGET_MIN_INSIDE_HUMIDITY, 0);
         CCUHsApi.getInstance().writeHisValById(targetMinInsideHumidtyId, TunerConstants.TARGET_MIN_INSIDE_HUMIDITY);
-        Point compensateHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "compensateHumidity").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("compensate").addMarker("humidity").setUnit("%").setEnums("false,true").setTz(tz).build();
+        Point compensateHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "compensateHumidity").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("compensate").addMarker("humidity").setUnit("%").setEnums("false,true").setTz(tz).build();
         String compensateHumidityId = CCUHsApi.getInstance().addPoint(compensateHumidity);
         CCUHsApi.getInstance().writePoint(compensateHumidityId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
         CCUHsApi.getInstance().writeHisValById(compensateHumidityId, 0.0);
         
-        Point demandResponseMode = new Point.Builder().setDisplayName(equipDis + "-" + "demandResponseMode").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("demand").addMarker("response").setEnums("false,true").setTz(tz).build();
+        Point demandResponseMode = new Point.Builder().setDisplayName(equipDis + "-" + "demandResponseMode").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("demand").addMarker("response").setEnums("false,true").setTz(tz).build();
         String demandResponseModeId = CCUHsApi.getInstance().addPoint(demandResponseMode);
         CCUHsApi.getInstance().writePoint(demandResponseModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
         CCUHsApi.getInstance().writeHisValById(demandResponseModeId, 0.0);

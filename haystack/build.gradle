@@ -24,8 +24,8 @@ android {
     buildTypes {
         local {
             minifyEnabled false
-            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://192.168.4.37:8080/\"'
-            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://192.168.4.37:3100/\"'
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"http://10.0.5.41:8080/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"http://10.0.5.41:3100/\"'
         }
         dev {
             minifyEnabled false
@@ -50,10 +50,17 @@ android {
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-staging.azurewebsites.net/\"'
         }
     }
+
+    android.variantFilter { variant ->
+        if(variant.buildType.name.endsWith('release') || variant.buildType.name.endsWith('debug')) {
+            variant.setIgnore(true);
+        }
+    }
+
     sourceSets {
         main {
             java {
-                srcDirs = ['build/generated/source/buildConfig', 'src/main/java']
+                srcDirs = ['build/generated/source', 'src/main/java']
             }
         }
     }

@@ -50,6 +50,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import a75f.io.logger.CcuLog;
+import a75f.io.api.haystack.MyObjectBox;
+import a75f.io.api.haystack.HisItem_;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.DebugFlags;
@@ -810,6 +812,7 @@ public class CCUTagsDb extends HServer {
             hisItem.setRec(rec.get("id").toString());
             hisItem.setVal(Double.parseDouble(item.val.toString()));
             hisItem.setSyncStatus(false);
+            CcuLog.d(TAG,"Adding historized item for point " + rec.get("id").toString() + " and value "  + item.val.toString());
             hisBox.put(hisItem);
             HisItemCache.getInstance().add(rec.get("id").toString(), hisItem);
         }

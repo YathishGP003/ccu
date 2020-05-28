@@ -667,7 +667,7 @@ public class CCUHsApi
                     cachedId = p.get("id").toString();
                     QueryCache.getInstance().add(query, cachedId);
                     HisItem item = new HisItem(cachedId, new Date(), val);
-                    hisWrite(item);
+                      hisWrite(item);
                 }
             }
         } else {

@@ -46,6 +46,13 @@ android {
             minifyEnabled false
         }
     }
+
+    android.variantFilter { variant ->
+        if(variant.buildType.name.endsWith('release') || variant.buildType.name.endsWith('debug')) {
+            variant.setIgnore(true);
+        }
+    }
+
 }
 
 dependencies {

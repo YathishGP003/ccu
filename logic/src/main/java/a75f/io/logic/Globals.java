@@ -25,6 +25,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.alerts.AlertProcessJob;
+import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
@@ -275,30 +276,13 @@ public class Globals {
 
         PNConfiguration pnConfiguration = new PNConfiguration();
         SharedPreferences sprefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        switch (sprefs.getString("SERVER_ENV", "")) {
-            case "QA":
 
-                pnConfiguration.setSubscribeKey("sub-c-295bc836-36eb-11ea-bbf4-c6d8f98a95a1");
-                pnConfiguration.setPublishKey("pub-c-a07f9ce7-fb79-4ceb-a8e8-823a28941811");
-                break;
-            case "DEV":
-                pnConfiguration.setSubscribeKey("sub-c-da285df6-36ea-11ea-bbf4-c6d8f98a95a1");
-                pnConfiguration.setPublishKey("pub-c-a90edd5d-7cb5-4e23-9961-cc4183b7a8ce");
-                break;
+        final String pubnubSubscribeKey = BuildConfig.PUBNUB_SUBSCRIBE_KEY;
+        final String pubnubPublishKey = BuildConfig.PUBNUB_SUBSCRIBE_KEY;
 
-            case "STAGING":
-                pnConfiguration.setSubscribeKey("sub-c-540e11a6-36eb-11ea-a657-76e5f2bf83fc");
-                pnConfiguration.setPublishKey("pub-c-8043b6fe-2948-4ad2-9a0b-fed1e4237a5f");
-                break;
-            case "PROD":
-            default:
-                pnConfiguration.setSubscribeKey("sub-c-97b4645a-36eb-11ea-81d4-f6d34a0dd71d");
-                pnConfiguration.setPublishKey("pub-c-bc945448-0b14-4d08-a8d7-5727bdbc2c62");
-                break;
+        pnConfiguration.setSubscribeKey(pubnubSubscribeKey);
+        pnConfiguration.setPublishKey(pubnubPublishKey);
 
-        }
-        //pnConfiguration.setSubscribeKey("sub-c-9497c79c-c96f-11e9-ac59-7e2323a85324");
-        //pnConfiguration.setPublishKey("pub-c-77c360ff-23fa-49e0-a971-7c1b522b594e");
         pnConfiguration.setSecure(false);
 
         pubnub = new PubNub(pnConfiguration);

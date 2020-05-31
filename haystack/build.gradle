@@ -24,8 +24,8 @@ android {
     buildTypes {
         local {
             minifyEnabled false
-            buildConfigField "String", 'HAYSTACK_API_BASE', '\"http://10.0.5.41:8080/\"'
-            buildConfigField "String", 'CARETAKER_API_BASE', '\"http://10.0.5.41:3100/\"'
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"http://192.168.4.37:8080/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"http://192.168.4.37:3100/\"'
             buildConfigField "String", 'PUBNUB_SUBSCRIBE_KEY', '\"sub-c-06a5fb60-a084-11ea-8e2f-c62edd1c297d/\"'
             buildConfigField "String", 'PUBNUB_PUBLISH_KEY', '\"pub-c-f7996da8-88b1-48dc-aa1e-2b6ab6611ab1/\"'
         }

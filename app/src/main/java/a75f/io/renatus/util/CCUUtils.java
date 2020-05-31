@@ -639,20 +639,8 @@ public class CCUUtils {
         }
         return value;
     }
+
 	public static String getEnvGoogleMapKeys() {
-			SharedPreferences sprefs = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
-			switch (sprefs.getString("SERVER_ENV", "")) {
-				case "QA":
-					return "AIzaSyCo7HhoO6m40JWyosWl3RqMjTZd5GI0znU";
-				case "DEV":
-					return  "AIzaSyA867irnfUuznLLsTVFwLs_c-0DNqiVEEY";
-
-				case "STAGING":
-					return "AIzaSyA-b5lbhs7XOO8Fy1bdNky7CoNJR4B3kyY";
-				case "PROD":
-				default:
-					return  "AIzaSyDEI5fuYQmggzyoDc6cBLciIx3ygY-lmOE";
-
-			}
+			return BuildConfig.GOOGLE_MAPS_KEY;
 	}
 }

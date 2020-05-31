@@ -9,6 +9,7 @@ repositories {
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
+
    lintOptions {
         checkReleaseBuilds true
         // Or, if you prefer, you can continue to check for errors in release builds,
@@ -37,7 +38,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion 19 
         versionCode getVersionCodeTimestamp()
-        versionName getVersionNameIncremented()
+        versionName applicationName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
@@ -55,27 +56,39 @@ android {
     flavorDimensions "mode"
 
     buildTypes {
+        def versionSuffix = VERSION_CODE_MAJOR + "." + VERSION_CODE_MINOR + "." + VERSION_CODE_PATCH
+
         local {
             minifyEnabled false
             signingConfig signingConfigs.debug
+            buildConfigField "String", 'GOOGLE_MAPS_KEY', '\"AIzaSyA867irnfUuznLLsTVFwLs_c-0DNqiVEEY\"'
+            versionNameSuffix "_" + 'local' + "_" + versionSuffix
         }
         dev {
             minifyEnabled false
             signingConfig signingConfigs.debug
+            buildConfigField "String", 'GOOGLE_MAPS_KEY', '\"AIzaSyA867irnfUuznLLsTVFwLs_c-0DNqiVEEY\"'
+            versionNameSuffix "_" + 'dev' + "_" + versionSuffix
         }
         prod {
             minifyEnabled false
             signingConfig signingConfigs.release
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+            buildConfigField "String", 'GOOGLE_MAPS_KEY', '\"AIzaSyDEI5fuYQmggzyoDc6cBLciIx3ygY-lmOE\"'
+            versionNameSuffix "_" + 'prod' + "_" + versionSuffix
         }
         qa {
             minifyEnabled false
             signingConfig signingConfigs.debug
+            buildConfigField "String", 'GOOGLE_MAPS_KEY', '\"AIzaSyCo7HhoO6m40JWyosWl3RqMjTZd5GI0znU\"'
+            versionNameSuffix "_" + 'qa' + "_" + versionSuffix
         }
         staging {
             minifyEnabled false
             signingConfig signingConfigs.debug
+            buildConfigField "String", 'GOOGLE_MAPS_KEY', '\"AIzaSyA-b5lbhs7XOO8Fy1bdNky7CoNJR4B3kyY\"'
+            versionNameSuffix "_" + 'staging' + "_" + versionSuffix
         }
     }
 
@@ -103,7 +116,15 @@ android {
     dexOptions {
     }
 
-    sourceSets { main { assets.srcDirs = ['src/main/assets', 'src/androidTest/assets'] } }
+    sourceSets {
+        main {
+            assets.srcDirs = ['src/main/assets','src/androidTest/assets']
+            java {
+                srcDirs = ['build/generated/source', 'src/main/java']
+            }
+        }
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -157,14 +178,10 @@ def getVersionCodeTimestamp() {
     return code
 }
 
-def getVersionNameIncremented(String variantName) {
-    return applicationName + "_" + variantName + "_" + VERSION_CODE_MAJOR + "." + VERSION_CODE_MINOR + "." + VERSION_CODE_PATCH
-}
-
 android.applicationVariants.all { variant ->
     variant.outputs.all {
         if (variant.buildType.name == "prod") {
-            outputFileName = getVersionNameIncremented(variant.buildType.name) + ".apk"
+            outputFileName = versionName + ".apk"
         } else {
             outputFileName = "app-" + variant.buildType.name + "-debug.apk"
         }

@@ -30,6 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import a75f.io.alerts.BuildConfig;
 import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.Alert_;
 import a75f.io.api.haystack.CCUHsApi;
@@ -153,7 +154,7 @@ public class AlertProcessor
                 StrictMode.setThreadPolicy(policy);
             }
             String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
-            String alertDef = HttpUtil.sendRequest(mContext, "readPredefined", new JSONObject().put("siteRef", siteGUID.replace("@","")).toString());
+            String alertDef = HttpUtil.sendRequest("readPredefined", new JSONObject().put("siteRef", siteGUID.replace("@","")).toString());
             //CcuLog.d("CCU_ALERTS", " alertDef " + alertDef);
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

@@ -275,10 +275,9 @@ public class Globals {
         CcuLog.d(L.TAG_CCU,"registerSiteToPubNub "+siteId.replace("@",""));
 
         PNConfiguration pnConfiguration = new PNConfiguration();
-        SharedPreferences sprefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         final String pubnubSubscribeKey = BuildConfig.PUBNUB_SUBSCRIBE_KEY;
-        final String pubnubPublishKey = BuildConfig.PUBNUB_SUBSCRIBE_KEY;
+        final String pubnubPublishKey = BuildConfig.PUBNUB_PUBLISH_KEY;
 
         pnConfiguration.setSubscribeKey(pubnubSubscribeKey);
         pnConfiguration.setPublishKey(pubnubPublishKey);
@@ -286,9 +285,6 @@ public class Globals {
         pnConfiguration.setSecure(false);
 
         pubnub = new PubNub(pnConfiguration);
-
-        //HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-        //final String channelName = (String) siteMap.get(Tags.ID);
 
         // create message payload using Gson
         final JsonObject messageJsonObject = new JsonObject();

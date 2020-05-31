@@ -812,7 +812,7 @@ public class CCUTagsDb extends HServer {
             hisItem.setRec(rec.get("id").toString());
             hisItem.setVal(Double.parseDouble(item.val.toString()));
             hisItem.setSyncStatus(false);
-            CcuLog.d(TAG,"Adding historized item for point " + rec.get("id").toString() + " and value "  + item.val.toString());
+            CcuLog.d(TAG,"Adding historized item for point ID " + rec.get("id").toString() + "; description " + rec.get("dis").toString() + "; value "  + item.val.toString());
             hisBox.put(hisItem);
             HisItemCache.getInstance().add(rec.get("id").toString(), hisItem);
         }
@@ -828,14 +828,25 @@ public class CCUTagsDb extends HServer {
     }
 
     public List<HisItem> getUnsyncedHisItemsOrderDesc(String pointId) {
-        HDict entity = readById(HRef.copy(pointId));
+        List<HisItem> validHisItems = new ArrayList<>();
 
         QueryBuilder<HisItem> hisQuery = hisBox.query();
-        hisQuery.equal(HisItem_.rec, entity.get("id").toString())
+        hisQuery.equal(HisItem_.rec, pointId)
                 .equal(HisItem_.syncStatus, false)
                 .orderDesc(HisItem_.date);
 
-        return hisQuery.build().find();
+        CcuLog.d("CCU_HS", "Finding unsynced items for point ID " + pointId);
+
+        List<HisItem> hisItems = hisQuery.build().find();
+
+        // TODO Matt Rudd - This shouldn't be necessary, but I was seeing null items in the collection; need to investigate
+        for (HisItem hisItem : hisItems) {
+            if  (hisItem != null) {
+                validHisItems.add(hisItem);
+            }
+        }
+
+        return validHisItems;
     }
     
     public HisItem getLastHisItem(HRef id) {
@@ -845,6 +856,7 @@ public class CCUTagsDb extends HServer {
             retVal = hisBox.query().equal(HisItem_.rec, id.toString())
                            .orderDesc(HisItem_.date).build().findFirst();
             if (retVal == null) {
+                // TODO - Matt Rudd This looks competely wrong; if it's null in the DB we assume it's a double and just create it and put it in the cache?  WTF.
                 retVal = new HisItem(id.toString(), new Date(), 0.0, Boolean.FALSE);
             }
             HisItemCache.getInstance().add(id.toString(), retVal);

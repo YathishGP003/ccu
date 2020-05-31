@@ -21,7 +21,7 @@ ECHO Stop the app
 
 
 ECHO Compile the APK
-call ..\gradlew assembleDebug
+call ..\gradlew assembleLocal
 
 ECHO  mount system
 %ADB% push %apk_host%/%apk_name% %apk_target_dir%

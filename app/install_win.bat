@@ -21,7 +21,7 @@ ECHO Stop the app
 
 
 ECHO Compile the APK
-call ..\gradlew assembleDebug -q
+call ..\gradlew assembleLocal -q
 
 ECHO  mount system
 %ADB% remount

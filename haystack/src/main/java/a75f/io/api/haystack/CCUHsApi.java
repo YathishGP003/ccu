@@ -2,7 +2,6 @@ package a75f.io.api.haystack;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -11,6 +10,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projecthaystack.HDate;
@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import a75f.io.api.haystack.BuildConfig;
+
 import a75f.io.api.haystack.sync.EntityParser;
 import a75f.io.api.haystack.sync.EntitySyncHandler;
 import a75f.io.api.haystack.sync.HisSyncHandler;
@@ -62,7 +62,7 @@ public class CCUHsApi
     
     public boolean unitTestingEnabled = true;
     
-    Context cxt;
+    Context context;
     
     String hayStackUrl = "";
     String careTakerUrl ="";
@@ -85,10 +85,10 @@ public class CCUHsApi
         {
             throw new IllegalStateException("Api instance already created , use getInstance()");
         }
-        cxt = c;
+        context = c;
         hsClient = new AndroidHSClient();
         tagsDb = (CCUTagsDb) hsClient.db();
-        tagsDb.init(cxt);
+        tagsDb.init(context);
         instance = this;
         entitySyncHandler = new EntitySyncHandler();
         hisSyncHandler = new HisSyncHandler(this);
@@ -110,7 +110,7 @@ public class CCUHsApi
 
     public String hisWriteManyToHaystackService(HDict hisWriteMetadata, HDict[] hisWritePoints) {
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cxt);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         String apiToken = sharedPreferences.getString("token","");
 
         HGrid hisWriteRequest = HGridBuilder.dictsToGrid(hisWriteMetadata, hisWritePoints);
@@ -885,7 +885,7 @@ public class CCUHsApi
     public void forceSync() {
         tagsDb.idMap.clear();
         tagsDb.saveTags();
-        tagsDb.init(cxt);
+        tagsDb.init(context);
         syncEntityWithPointWrite();
     }
 
@@ -1426,17 +1426,130 @@ public class CCUHsApi
         }
     }
     
-  public boolean isCCURegistered(){
-      SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(cxt);
+    public boolean isCCURegistered(){
+      SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 
       return spDefaultPrefs.getBoolean("registered", false);
-  }
+    }
+
     public boolean isNetworkConnected() {
 
-        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(cxt);
+        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 
         return spDefaultPrefs.getBoolean("75fNetworkAvailable", false);
     }
+
+    public void registerCcu(String facilityManagerEmail, String installerEmail) {
+        registerCcuAsyncTask(facilityManagerEmail, installerEmail, false);
+    }
+
+    public void updateCcu(String facilityManagerEmail, String installerEmail) {
+        registerCcuAsyncTask(facilityManagerEmail, installerEmail, true);
+    }
+
+    private void registerCcuAsyncTask(final String facilityManagerEmail, final String installerEmail, final boolean update) {
+        AsyncTask<Void, Void, String> updateCCUReg = new AsyncTask<Void, Void, String>() {
+
+            @Override
+            protected String doInBackground(Void... voids) {
+                HashMap site = CCUHsApi.getInstance().read("site");
+
+                String ccuRegistrationResponse = null;
+
+                Log.d("CCURegInfo","createNewSite Edit backgroundtask");
+                String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
+
+                if (StringUtils.isNotBlank(siteGUID) && CCUHsApi.getInstance().isNetworkConnected()) {
+                    HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
+
+
+                    String dis = ccu.get("dis").toString();
+                    String ahuRef = ccu.get("ahuRef").toString();
+                    String gatewayRef = ccu.get("gatewayRef").toString();
+                    String equipRef = ccu.get("equipRef").toString();
+
+                    JSONObject ccuRegistrationRequest = getCcuJson(siteGUID, dis, ahuRef, gatewayRef, equipRef, facilityManagerEmail, installerEmail);
+
+                    // TODO - Matt Rudd Need to have mechanism for setting API token in HttpUtils
+                    if (ccuRegistrationRequest != null) {
+                        if (update) {
+                            // TODO Matt Rudd - Need to have method to execute a JSON put
+                        } else {
+                            ccuRegistrationResponse = HttpUtil.executeJSONPost(
+                                    CCUHsApi.getInstance().getAuthenticationUrl()+"sites",
+                                    ccuRegistrationRequest.toString(), ""
+                            );
+                        }
+                    } else {
+                        ccuRegistrationResponse = null;
+                    }
+                }
+                return ccuRegistrationResponse;
+
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+
+                Log.d("CCURegInfo","createNewSite Edit onPostExecute=" + result);
+                if(StringUtils.isNoneEmpty(result)){
+                    try {
+                        JSONObject ccuRegistrationResponse = new JSONObject(result);
+                        HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
+                        String ccuLuid = ccu.get("id").toString();
+                        String ccuGuid = ccuRegistrationResponse.getString("id");
+
+                        if(StringUtils.isNotBlank(ccuGuid) && StringUtils.isBlank(CCUHsApi.getInstance().getGUID(ccuLuid))){
+                            CCUHsApi.getInstance().putUIDMap(ccuLuid, ccuGuid);
+                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString("token", ccuRegistrationResponse.getString("token"));
+                            editor.putBoolean("isCCURegistered",true);
+                            editor.commit();
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+
+        updateCCUReg.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private JSONObject getCcuJson(String siteGuid, String ccuDescription, String ahuRef, String gatewayRef, String equipRef, final String facilityManagerEmail, final String installerEmail) {
+        JSONObject ccuJsonRequest = null;
+
+        try {
+            ccuJsonRequest = new JSONObject();
+
+            ccuJsonRequest.put("dis", ccuDescription);
+            ccuJsonRequest.put("siteRef", siteGuid);
+
+            if (StringUtils.isNotBlank(ahuRef)) {
+                ccuJsonRequest.put("ahuRef", ahuRef);
+            }
+
+            if (StringUtils.isNotBlank(gatewayRef)) {
+                ccuJsonRequest.put("gatewayRef", gatewayRef);
+            }
+
+            if (StringUtils.isNotBlank(equipRef)) {
+                ccuJsonRequest.put("equipRef", equipRef);
+            }
+
+            ccuJsonRequest.put("fmEmail", facilityManagerEmail);
+            ccuJsonRequest.put("installerEmail", installerEmail);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            ccuJsonRequest = null;
+        }
+
+        return ccuJsonRequest;
+    }
+
 
     public void registerDevice(){
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
@@ -1505,7 +1618,7 @@ public class CCUHsApi
             @Override
             protected void onPostExecute(String result) {
                 super.onPostExecute(result);
-                SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(cxt);
+                SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
                 SharedPreferences.Editor editor = spDefaultPrefs.edit();
 
                 if( (result != null) && (!result.equals(""))){
@@ -1518,7 +1631,7 @@ public class CCUHsApi
                             editor.commit();
 
                             Log.d("CCURegistration", " Success! ");
-                            Toast.makeText(cxt, "CCU Registered Successfully "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "CCU Registered Successfully "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();
 
                         } else {
                             editor.putBoolean("isCCURegistered",false);

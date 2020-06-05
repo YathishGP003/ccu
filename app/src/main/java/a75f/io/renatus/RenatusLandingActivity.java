@@ -102,15 +102,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         super.onCreate(savedInstanceState);
         prefs = new Prefs(this);
 
-       /* new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (prefs != null){
-                    prefs.setBoolean("registered", true);
-                }
-            }
-        }, 120000);*/
-
         if (!isFinishing()) {
             setContentView(R.layout.activity_renatus_landing);
             mSettingPagerAdapter = new SettingsPagerAdapter(getSupportFragmentManager());
@@ -179,33 +170,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     SettingsFragment.slidingPane.openPane();
                 }
             });
-            /*setupButton = findViewById(R.id.logo_daikin);
-            setupButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-*//*				if (settingView == true && mTabLayout.getSelectedTabPosition() == 0)
-                {
-					DefaultFragment.getInstance().show(getSupportFragmentManager(), "setup");
-				}*//*
-                    //				else if (settingView == true && mTabLayout.getSelectedTabPosition() == 1)
-                    //				{
-                    //					Intent i = new Intent(RenatusLandingActivity.this, MainActivity.class);
-                    //					startActivity(i);
-                    //				}
-                    //				else if (settingView == false && mTabLayout.getSelectedTabPosition() == 1)
-                    //				{
-                    //					Intent i = new Intent(RenatusLandingActivity.this, MainActivity.class);
-                    //					startActivity(i);
-                    //				}
-                }
-            });
-            setupButton.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    startActivity(new Intent(view.getContext(), RenatusEngineeringActivity.class));
-                    return true;
-                }
-            });*/
             findViewById(R.id.logo_75f).setOnLongClickListener(view -> {
                 startActivity(new Intent(view.getContext(), RenatusEngineeringActivity.class));
                 return true;
@@ -217,54 +181,19 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             String siteCountry = site.get("geoCountry").toString();
             String siteZipCode = site.get("geoPostalCode").toString();
             CCUUtils.getLocationInfo(siteCountry + " " + siteZipCode);
-            /*try {
-                JSONObject ccuRegInfo = new JSONObject();
-                JSONObject locInfo = new JSONObject();
-                locInfo.put("geoCity", site.get("geoCity").toString());
-                locInfo.put("geoCountry", siteCountry);
-                locInfo.put("geoState", site.get("geoState").toString());
-                locInfo.put("geoAddr", site.get("geoAddr").toString());
-                locInfo.put("geoPostalCode", siteZipCode);
-                if(site.get("organization") != null)
-				    locInfo.put("organization", site.get("organization").toString());
-                if(site.size() > 0) {
-                    ccuRegInfo.put("siteName", site.get("dis").toString());
-                    String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
-                    ccuRegInfo.put("siteId", siteGUID);
-                    if (ccu.size() > 0) {
-                        String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
-                        ccuRegInfo.put("deviceId", ccuGUID);
-                        ccuRegInfo.put("deviceName", ccu.get("dis").toString());
-                        ccuRegInfo.put("facilityManagerEmail", ccu.get("fmEmail").toString());
-                        ccuRegInfo.put("installerEmail", ccu.get("fmEmail").toString());
-                        ccuRegInfo.put("locationDetails", locInfo);
-                        CcuLog.d("CCURegInfo", "createNewSite json Edit =" + ccuRegInfo.toString());
 
-                        updateCCURegistrationInfo(ccuRegInfo.toString());
-                    }
-                }
-            }catch (JSONException e){
-                e.printStackTrace();
-            }*/
             floorMenu.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
                     Fragment currentFragment = mStatusPagerAdapter.getItem(mViewPager.getCurrentItem());
-                    //if(currentFragment !=null && currentFragment instanceof ZoneFragmentTemp)
+
                     if (currentFragment != null && currentFragment instanceof ZoneFragmentNew) {
-                        //if(zoneFragmentTemp instanceof ZoneFragmentTemp)
-                        //Bitmap map = BlurEffect.takeScreenShot(RenatusLandingActivity.this);
-                        //Bitmap fast = BlurEffect.fastblur(map, 10);
-                        //final Drawable draw=new BitmapDrawable(getResources(),fast);
 
-
-                        //ZoneFragmentTemp zoneFragmentTemp = (ZoneFragmentTemp)mStatusPagerAdapter.getItem(mViewPager.getCurrentItem());
                         ZoneFragmentNew zoneFragmentTemp = (ZoneFragmentNew) mStatusPagerAdapter.getItem(mViewPager.getCurrentItem());
 
                         DrawerLayout mDrawerLayout = findViewById(R.id.drawer_layout);
                         LinearLayout drawer_screen = findViewById(R.id.drawer_screen);
-                        //zoneFragmentTemp.openFloor();
                         try {
                             //zoneFragmentTemp.mDrawerLayout.openDrawer(zoneFragmentTemp.drawer_screen);
                             mDrawerLayout.openDrawer(drawer_screen);

@@ -1,5 +1,9 @@
 package a75f.io.api.haystack.sync;
 
+import a75f.io.api.haystack.BuildConfig;
+import a75f.io.api.haystack.Site;
+import a75f.io.constants.HttpConstants;
+import a75f.io.constants.SiteFieldConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,27 +25,15 @@ public class SiteSyncAdapter extends EntitySyncAdapter {
 
     private static final String LOG_PREFIX = "CCU_HS_SITESYNC";
 
-    private static final String ID_FIELD = "id";
-    private static final String TIMEZONE_FIELD = "tz";
-    private static final String DESCRIPTION_FIELD = "dis";
-    private static final String ORGANIZATION_FIELD = "organization";
-    private static final String GEOADDRESS_FIELD = "geoAddr";
-    private static final String GEOCITY_FIELD = "geoCity";
-    private static final String GEOSTATE_FIELD = "geoState";
-    private static final String GEOCOUNTRY_FIELD = "geoCountry";
-    private static final String GEOPOSTALCODE_FIELD = "geoPostalCode";
-    private static final String GEOCOORDINATES_FIELD = "geoCoord";
-    private static final String AREA_FIELD = "area";
-
     @Override
-    public boolean onSync() {
+    public synchronized boolean onSync() {
         CcuLog.i(LOG_PREFIX, "onSync Site");
 
         boolean synced = false;
 
         HDict sDict =  CCUHsApi.getInstance().readHDict("site");
         HDictBuilder b = new HDictBuilder().add(sDict);
-        String siteLuid = b.get("id").toString();
+        String siteLuid = b.get(SiteFieldConstants.ID).toString();
         String siteGuid = CCUHsApi.getInstance().getGUID(siteLuid);
 
         if (StringUtils.isBlank(siteGuid)) {
@@ -58,14 +50,19 @@ public class SiteSyncAdapter extends EntitySyncAdapter {
         boolean synced = false;
 
         HDictBuilder b = new HDictBuilder().add(siteDict);
-        String siteLuid = b.get("id").toString();
+        String siteLuid = b.get(SiteFieldConstants.ID).toString();
         JSONObject siteCreationRequestJson = getSiteJsonRequest(siteDict);
         String siteGuid = null;
 
         if (siteCreationRequestJson != null) {
             try {
-                // TODO Matt Rudd - Need to add the api-key header and make the HTTP util support it
-                String response = HttpUtil.executePost(CCUHsApi.getInstance().getAuthenticationUrl() + "sites", siteCreationRequestJson.toString());
+                String response = HttpUtil.executeJson(
+                        CCUHsApi.getInstance().getAuthenticationUrl() + "sites",
+                        siteCreationRequestJson.toString(),
+                        BuildConfig.CARETAKER_API_KEY,
+                        true, // TODO Matt Rudd - Hate to do this, but the HttpUtils are a mess
+                        HttpConstants.HTTP_METHOD_POST
+                );
 
                 if (response != null) {
                     JSONObject siteCreationResponseJson = new JSONObject(response);
@@ -95,8 +92,13 @@ public class SiteSyncAdapter extends EntitySyncAdapter {
 
         if (siteCreationRequestJson != null) {
             try {
-                // TODO Matt Rudd - Need to add the api-key header and make the HTTP util support it; this needs to be a PUT
-                String response = HttpUtil.executePost(CCUHsApi.getInstance().getAuthenticationUrl() + "sites", siteCreationRequestJson.toString());
+                String response = HttpUtil.executeJson(
+                        CCUHsApi.getInstance().getAuthenticationUrl() + "sites/" + existingSiteGuid,
+                        siteCreationRequestJson.toString(),
+                        BuildConfig.CARETAKER_API_KEY,
+                        true, // TODO Matt Rudd - Hate to do this, but the HttpUtils are a mess
+                        HttpConstants.HTTP_METHOD_PUT
+                );
 
                 if (response != null) {
                     JSONObject siteCreationResponseJson = new JSONObject(response);
@@ -119,17 +121,18 @@ public class SiteSyncAdapter extends EntitySyncAdapter {
         JSONObject siteCreationRequestJson = new JSONObject();
 
         try {
-            siteCreationRequestJson.put(ID_FIELD, siteDict.get(ID_FIELD));
-            siteCreationRequestJson.put(TIMEZONE_FIELD, siteDict.get(TIMEZONE_FIELD));
-            siteCreationRequestJson.put(DESCRIPTION_FIELD, siteDict.dis());
-            siteCreationRequestJson.put(ORGANIZATION_FIELD, siteDict.get(ORGANIZATION_FIELD));
-            siteCreationRequestJson.put(GEOADDRESS_FIELD, siteDict.get(GEOADDRESS_FIELD));
-            siteCreationRequestJson.put(GEOCITY_FIELD, siteDict.get(GEOCITY_FIELD));
-            siteCreationRequestJson.put(GEOSTATE_FIELD, siteDict.get(GEOSTATE_FIELD));
-            siteCreationRequestJson.put(GEOCOUNTRY_FIELD, siteDict.get(GEOCOUNTRY_FIELD));
-            siteCreationRequestJson.put(GEOPOSTALCODE_FIELD, siteDict.get(GEOPOSTALCODE_FIELD));
-            siteCreationRequestJson.put(GEOCOORDINATES_FIELD, siteDict.get(GEOCOORDINATES_FIELD));
-            siteCreationRequestJson.put(AREA_FIELD, siteDict.get(AREA_FIELD));
+            siteCreationRequestJson.put(SiteFieldConstants.TIMEZONE, siteDict.get(SiteFieldConstants.TIMEZONE));
+            siteCreationRequestJson.put(SiteFieldConstants.DESCRIPTION, siteDict.dis());
+            siteCreationRequestJson.put(SiteFieldConstants.ORGANIZATION, siteDict.get(SiteFieldConstants.ORGANIZATION));
+            siteCreationRequestJson.put(SiteFieldConstants.GEOADDRESS, siteDict.get(SiteFieldConstants.GEOADDRESS));
+            siteCreationRequestJson.put(SiteFieldConstants.FACILITY_MANAGER_EMAIL, siteDict.get(SiteFieldConstants.FACILITY_MANAGER_EMAIL));
+            siteCreationRequestJson.put(SiteFieldConstants.INSTALLER_EMAIL, siteDict.get(SiteFieldConstants.INSTALLER_EMAIL));
+            siteCreationRequestJson.put(SiteFieldConstants.GEOCITY, siteDict.get(SiteFieldConstants.GEOCITY));
+            siteCreationRequestJson.put(SiteFieldConstants.GEOSTATE, siteDict.get(SiteFieldConstants.GEOSTATE));
+            siteCreationRequestJson.put(SiteFieldConstants.GEOCOUNTRY, siteDict.get(SiteFieldConstants.GEOCOUNTRY));
+            siteCreationRequestJson.put(SiteFieldConstants.GEOPOSTALCODE, siteDict.get(SiteFieldConstants.GEOPOSTALCODE));
+            siteCreationRequestJson.put(SiteFieldConstants.GEOCOORDINATES, siteDict.get(SiteFieldConstants.GEOCOORDINATES, false));
+            siteCreationRequestJson.put(SiteFieldConstants.AREA, siteDict.get(SiteFieldConstants.AREA));
         } catch (JSONException e) {
             e.printStackTrace();
             CcuLog.d(LOG_PREFIX, "Unable to sync site due to JSON exception. This is likely unrecoverable.");

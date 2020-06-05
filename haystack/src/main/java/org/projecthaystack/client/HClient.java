@@ -8,6 +8,9 @@
 //
 package org.projecthaystack.client;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.constants.CcuFieldConstants;
+import a75f.io.constants.HttpConstants;
 import android.util.Log;
 
 import org.apache.commons.lang3.StringUtils;
@@ -220,64 +223,6 @@ public class HClient extends HProj
 // Evals
 //////////////////////////////////////////////////////////////////////////
 
-  /**
-   * Call "eval" operation to evaluate a vendor specific
-   * expression on the server:
-   *   - SkySpark: any Axon expression
-   *
-   * Raise CallErrException if the server raises an exception.
-   */
-  public HGrid eval(String expr)
-  {
-    HGridBuilder b = new HGridBuilder();
-    b.addCol("expr");
-    b.addRow(new HVal[] { HStr.make(expr) });
-    HGrid req = b.toGrid();
-    return call("eval", req);
-  }
-
-  /**
-   * Convenience for "evalAll(HGrid, true)".
-   */
-  public HGrid[] evalAll(String[] exprs)
-  {
-    return evalAll(exprs, true);
-  }
-
-  /**
-   * Convenience for "evalAll(HGrid, checked)".
-   */
-  public HGrid[] evalAll(String[] exprs, boolean checked)
-  {
-    HGridBuilder b = new HGridBuilder();
-    b.addCol("expr");
-    for (int i=0; i<exprs.length; ++i)
-      b.addRow(new HVal[] { HStr.make(exprs[i]) });
-    return evalAll(b.toGrid(), checked);
-  }
-
-  /**
-   * Call "evalAll" operation to evaluate a batch of vendor specific
-   * expressions on the server. See "eval" method for list of vendor
-   * expression formats.  The request grid must specify an "expr" column.
-   * A separate grid is returned for each row in the request.  If checked
-   * is false, then this call does *not* automatically check for error
-   * grids.  Client code must individual check each grid for partial
-   * failures using "Grid.isErr".  If checked is true and one of the
-   * requests failed, then raise CallErrException for first failure.
-   */
-  public HGrid[] evalAll(HGrid req, boolean checked)
-  {
-    String reqStr = HZincWriter.gridToString(req);
-    String resStr = postString(uri + "evalAll", reqStr);
-    HGrid[] res = new HZincReader(resStr).readGrids();
-    if (checked)
-    {
-      for (int i=0; i<res.length; ++i)
-        if (res[i].isErr()) throw new CallErrException(res[i]);
-    }
-    return res;
-  }
 
 //////////////////////////////////////////////////////////////////////////
 // Watches
@@ -588,8 +533,8 @@ public class HClient extends HProj
    */
   public HGrid call(String op, HGrid req)
   {
-    CcuLog.d("CCU_HS", "HClient Op: " + op);
-    CcuLog.d("CCU_HS", "HClient Req: ");
+    CcuLog.d("CCU_HCLIENT", "HClient Op: " + op);
+    CcuLog.d("CCU_HCLIENT", "HClient Req: ");
     req.dump();
     HGrid res = postGrid(op, req);
     if (res != null && res.isErr()) { CcuLog.e("CCU_HS", "Network Error: " +res);}
@@ -603,76 +548,54 @@ public class HClient extends HProj
     return (resStr == null? null : new HZincReader(resStr).readGrid());
   }
 
-
-
-
   private String postString(String uriStr, String req)
   {
     return postString(uriStr, req, null);
   }
 
-  private String postString(String uriStr, String req, String mimeType)
-  {
-    try
-    {
-      if(HttpUtil.clientToken.equalsIgnoreCase(""))
-      {
-        HttpUtil.clientToken = HttpUtil.parseToken(HttpUtil.authorizeToken(HttpUtil.CLIENT_ID,
-                "",
-                HttpUtil.CLIENT_SECRET,
-                HttpUtil.TENANT_ID));
-        Log.i("CCU_HS","Client Token: " + HttpUtil.clientToken);
-      }
-      // setup the POST request
-      URL url = new URL(uriStr);
-      HttpURLConnection c = openHttpConnection(url, "POST");
-      try
-      {
-        c.setDoOutput(true);
-        c.setDoInput(true);
-        c.setRequestProperty("Connection", "Close");
-        c.setRequestProperty("Content-Type", mimeType == null ? "text/plain; charset=utf-8": mimeType);
-        c.setRequestProperty("Authorization", "Bearer " + HttpUtil.clientToken);
-        c.setConnectTimeout(30000);
-        c.connect();
+  private String postString(String uriStr, String req, String mimeType) {
+    String bearerToken = CCUHsApi.getInstance().getJwt();
 
-        // post expression
-        Writer cout = new OutputStreamWriter(c.getOutputStream(), "UTF-8");
-        cout.write(req);
-        cout.close();
+    if (StringUtils.isNotBlank(bearerToken)) {
+      try {
+        Log.i("CCU_HCLIENT","Client Token: " + bearerToken);
+        URL url = new URL(uriStr);
+        HttpURLConnection c = openHttpConnection(url, "POST");
+        try {
+          c.setDoOutput(true);
+          c.setDoInput(true);
+          c.setRequestProperty("Connection", "Close");
+          c.setRequestProperty("Content-Type", mimeType == null ? "text/plain; charset=utf-8": mimeType);
+          c.setRequestProperty("Authorization", "Bearer " + bearerToken);
+          c.setConnectTimeout(30000);
+          c.connect();
 
-        // check for successful request
-        if(c.getResponseCode() == 401)
-        {
-          c.disconnect();
-          HttpUtil.clientToken = HttpUtil.parseToken(HttpUtil.authorizeToken(HttpUtil.CLIENT_ID,
-                  "",
-                  HttpUtil.CLIENT_SECRET,
-                  HttpUtil.TENANT_ID));
-          CcuLog.d("CCU_HS","Client Token: " + HttpUtil.clientToken);
-          postString(uriStr, req, mimeType);
+          // post expression
+          Writer cout = new OutputStreamWriter(c.getOutputStream(), "UTF-8");
+          cout.write(req);
+          cout.close();
+
+          Log.d("CCU_HCLIENT", "Request response code: " + c.getResponseCode());
+
+          // read response into string
+          StringBuffer s = new StringBuffer(1024);
+          Reader r = new BufferedReader(new InputStreamReader(c.getInputStream(), "UTF-8"));
+          int n;
+          while ((n = r.read()) > 0) s.append((char)n);
+          return s.toString();
+        } finally {
+          try {
+            c.disconnect();
+          } catch(Exception e) {
+            CcuLog.e("CCU_HCLIENT", "Could not disconnect");
+          }
         }
-        else if (c.getResponseCode() != 200) {
-          c.disconnect();
-          throw new CallHttpException(c.getResponseCode(), c.getResponseMessage());
-        }
-
-        // read response into string
-        StringBuffer s = new StringBuffer(1024);
-        Reader r = new BufferedReader(new InputStreamReader(c.getInputStream(), "UTF-8"));
-        int n;
-        while ((n = r.read()) > 0) s.append((char)n);
-        return s.toString();
-      }
-      finally
-      {
-        try { c.disconnect(); } catch(Exception e) {}
+      } catch (Exception e) {
+        e.printStackTrace();
+        return null;
       }
     }
-    catch (Exception e) {
-      e.printStackTrace();
-      return null;
-    }
+    return null;
   }
 
 ////////////////////////////////////////////////////////////////
@@ -690,7 +613,7 @@ public class HClient extends HProj
   {
     HttpURLConnection connection;
 
-    if (StringUtils.equals(url.getProtocol(), HttpUtil.HTTP_SCHEME)) {
+    if (StringUtils.equals(url.getProtocol(), HttpConstants.HTTP_PROTOCOL)) {
       connection = (HttpURLConnection)url.openConnection();
     } else {
       connection = NetCipher.getHttpsURLConnection(url);

@@ -1,5 +1,6 @@
 package a75f.io.api.haystack.sync;
 
+import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
@@ -27,26 +28,23 @@ public class FloorSyncAdapter extends EntitySyncAdapter
     public boolean onSync() {
     
         CcuLog.i("CCU_HS_SYNC", "onSync Floors");
-        if (!CCUHsApi.getInstance().isCCURegistered()){
+
+        String siteRef = CCUHsApi.getInstance().getSiteGuid();
+
+        if (!CCUHsApi.getInstance().isCCURegistered() || StringUtils.isBlank(siteRef)){
             return false;
         }
+
         ArrayList<HashMap> floors = CCUHsApi.getInstance().readAll("floor");
         ArrayList<String> floorLUIDList = new ArrayList();
-    
-        HashMap site = CCUHsApi.getInstance().read("site");
-    
+
         ArrayList<HDict> entities = new ArrayList<>();
         for (Map m: floors)
         {
-            //CcuLog.i("CCU", m.toString());
             String luid = m.remove("id").toString();
             if (CCUHsApi.getInstance().getGUID(luid) == null) {
                 floorLUIDList.add(luid);
-                String guid = CCUHsApi.getInstance().getGUID(site.get("id").toString());
-                if(guid == null) {
-                   return false;
-                }
-                m.put("siteRef", HRef.copy(guid));
+                m.put("siteRef", HRef.copy(siteRef));
                 entities.add(HSUtil.mapToHDict(m));
             }
         }

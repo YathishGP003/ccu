@@ -423,8 +423,7 @@ public class CreateNewSite extends Fragment {
                         String ccuGuid = CCUHsApi.getInstance().getGUID(ccuId);
 
                         if (StringUtils.isBlank(ccuGuid)) {
-                            CCUHsApi.getInstance().registerCcuAsyncTask(site, facilityManagerEmail, installerEmail);
-                            registerCcuAsyncTask(site, facilityManagerEmail, installerEmail);
+                            CCUHsApi.getInstance().registerCcu();
                             ProgressDialogUtils.hideProgressDialog();
                             ccuRegistrationHandler.postDelayed(this, 30000);
                         } else {
@@ -439,7 +438,6 @@ public class CreateNewSite extends Fragment {
                 };
                 ccuRegistrationHandler.postDelayed(ccuRegistrationRunnable, 1000);
             }
-
         });
 
         return rootView;
@@ -571,106 +569,6 @@ public class CreateNewSite extends Fragment {
         mTextTimeZone.setText(getString(R.string.input_timezone));
         mTextTimeZone.setTextColor(getResources().getColor(R.color.hint_color));
 
-    }
-
-    private void registerCcuAsyncTask(final HashMap site, final String facilityManagerEmail, final String installerEmail) {
-        AsyncTask<Void, Void, String> updateCCUReg = new AsyncTask<Void, Void, String>() {
-
-
-            @Override
-            protected String doInBackground(Void... voids) {
-                String ccuRegistrationResponse = null;
-
-                Log.d("CCURegInfo","createNewSite Edit backgroundtask");
-                String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
-
-                if (StringUtils.isNotBlank(siteGUID) && CCUHsApi.getInstance().isNetworkConnected()) {
-                    HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
-
-
-                    String dis = ccu.get("dis").toString();
-                    String ahuRef = ccu.get("ahuRef").toString();
-                    String gatewayRef = ccu.get("gatewayRef").toString();
-                    String equipRef = ccu.get("equipRef").toString();
-
-                    JSONObject ccuRegistrationRequest = getCcuJson(siteGUID, dis, ahuRef, gatewayRef, equipRef, facilityManagerEmail, installerEmail);
-
-                    // TODO - Matt Rudd Need to have mechanism for setting API token in HttpUtils
-                    if (ccuRegistrationRequest != null) {
-                        ccuRegistrationResponse = HttpUtil.executeJSONPost(
-                                CCUHsApi.getInstance().getAuthenticationUrl()+"sites",
-                                ccuRegistrationRequest.toString(), ""
-                        );
-                    } else {
-                        ccuRegistrationResponse = null;
-                    }
-                }
-                return ccuRegistrationResponse;
-
-            }
-
-            @Override
-            protected void onPostExecute(String result) {
-
-                Log.d("CCURegInfo","createNewSite Edit onPostExecute=" + result);
-                ProgressDialogUtils.hideProgressDialog();
-                if(StringUtils.isNoneEmpty(result)){
-                    try {
-                        JSONObject ccuRegistrationResponse = new JSONObject(result);
-                        HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
-                        String ccuLuid = ccu.get("id").toString();
-                        String ccuGuid = ccuRegistrationResponse.getString("id");
-
-                        if(StringUtils.isNotBlank(ccuGuid)){
-                            btnUnregisterSite.setText("UnRegister");
-                            btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
-                            setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
-                            CCUHsApi.getInstance().putUIDMap(ccuLuid, ccuGuid);
-                            prefs.setString("token",ccuRegistrationResponse.getString("token"));
-                            Toast.makeText(getActivity(), "CCU Registered Successfully "+ccuRegistrationResponse.getString("deviceId"), Toast.LENGTH_LONG).show();
-                        }else
-                            Toast.makeText(getActivity(), "CCU Registration is not Successful "+ccuRegistrationResponse.getString("deviceId"), Toast.LENGTH_LONG).show();
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        };
-
-        updateCCUReg.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-    private JSONObject getCcuJson(String siteGuid, String ccuDescription, String ahuRef, String gatewayRef, String equipRef, final String facilityManagerEmail, final String installerEmail) {
-        JSONObject ccuJsonRequest = null;
-
-        try {
-            ccuJsonRequest = new JSONObject();
-
-            ccuJsonRequest.put("dis", ccuDescription);
-            ccuJsonRequest.put("siteRef", siteGuid);
-
-            if (StringUtils.isNotBlank(ahuRef)) {
-                ccuJsonRequest.put("ahuRef", ahuRef);
-            }
-
-            if (StringUtils.isNotBlank(gatewayRef)) {
-                ccuJsonRequest.put("gatewayRef", gatewayRef);
-            }
-
-            if (StringUtils.isNotBlank(equipRef)) {
-                ccuJsonRequest.put("equipRef", equipRef);
-            }
-
-            ccuJsonRequest.put("fmEmail", facilityManagerEmail);
-            ccuJsonRequest.put("installerEmail", installerEmail);
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-            ccuJsonRequest = null;
-        }
-
-        return ccuJsonRequest;
     }
 
     private class EditTextWatcher implements TextWatcher {
@@ -828,7 +726,6 @@ public class CreateNewSite extends Fragment {
         Site s75f = new Site.Builder()
                 .setDisplayName(siteName)
                 .addMarker("site")
-                .addMarker("orphan")
                 .setGeoCity(siteCity)
                 .setGeoState(siteState)
                 .setTz(tzID.substring(tzID.lastIndexOf("/") + 1))
@@ -864,7 +761,6 @@ public class CreateNewSite extends Fragment {
         Site s75f = new Site.Builder()
                 .setDisplayName(siteName)
                 .addMarker("site")
-                .addMarker("orphan")
                 .setGeoCity(siteCity)
                 .setGeoState(siteState)
                 .setTz(tzID.substring(tzID.lastIndexOf("/") + 1))

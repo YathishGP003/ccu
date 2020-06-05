@@ -40,6 +40,7 @@ import com.renovo.bacnet4j.type.enumerated.PropertyIdentifier;
 import com.renovo.bacnet4j.type.enumerated.Segmentation;
 import com.renovo.bacnet4j.type.primitive.ObjectIdentifier;
 
+import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HRef;
 
@@ -204,8 +205,14 @@ public class InstallerOptions extends Fragment {
         buttonSendIAM = rootView.findViewById(R.id.buttonSendIAM);
         textBacnetEnable = rootView.findViewById(R.id.textBacnetEnable);
         rl_BACnet.setVisibility(View.GONE);
-        String ccuGUID = CCUHsApi.getInstance().getGUID(CCUHsApi.getInstance().getCcuId().toString());
-        if(prefs.getBoolean("registered") && ccuGUID!=null){
+
+        HRef ccuId = CCUHsApi.getInstance().getCcuId();
+        String ccuGuid = null;
+
+        if (ccuId != null) {
+            ccuGuid = CCUHsApi.getInstance().getGUID(CCUHsApi.getInstance().getCcuId().toString());
+        }
+        if(prefs.getBoolean("registered") && ccuGuid != null){
             textBacnetEnable.setVisibility(View.VISIBLE);
             toggleBACnet.setVisibility(View.VISIBLE);
         }else {

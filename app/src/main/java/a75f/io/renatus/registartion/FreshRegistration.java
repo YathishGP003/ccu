@@ -68,7 +68,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
     ListView listView_icons;
     ImageView imageView_logo;
 
-    //Header Components
     RelativeLayout rl_Header;
     TextView textView_title;
     ImageView imageView_Goback;
@@ -525,8 +524,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             container.setLayoutParams(paramsPager);
         }
         if (position == 4) {
-
-
             fragment = new InstallerOptions();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
@@ -1186,7 +1183,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             public void run() {
                 ProgressDialogUtils.hideProgressDialog();
                 if (pingCloudServer()){
-                    CCUHsApi.getInstance().registerDevice();
+                    CCUHsApi.getInstance().registerCcu();
 
                     AlertManager.getInstance().fetchAllPredefinedAlerts();
                     Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
@@ -1200,7 +1197,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                             .setMessage("No network connection, Registration is not complete and Facilisight cannot be accessed unless you connect to network.")
                             .setPositiveButton("Proceed", (dialog, id) -> {
 
-                                CCUHsApi.getInstance().registerDevice();
+                                CCUHsApi.getInstance().registerCcu();
                                 AlertManager.getInstance().fetchAllPredefinedAlerts();
                                 Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
                                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -1210,7 +1207,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                             .show();
                 }
             }
-        }, 30000);
+        }, 10000);
     }
 
     private synchronized boolean pingCloudServer() {

@@ -1,5 +1,6 @@
 package a75f.io.api.haystack.sync;
 
+import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
@@ -27,20 +28,22 @@ public class ScheduleSyncAdapter extends EntitySyncAdapter
     @Override
     public boolean onSync() {
         CcuLog.i("CCU_HS_SYNC", "onSync Schedules");
-        if (!CCUHsApi.getInstance().isCCURegistered()){
+        String siteRef = CCUHsApi.getInstance().getSiteGuid();
+
+        if (!CCUHsApi.getInstance().isCCURegistered() || StringUtils.isBlank(siteRef)){
             return false;
         }
+
         ArrayList<HashMap> schedules = CCUHsApi.getInstance().readAll("schedule");
-        HashMap site = CCUHsApi.getInstance().read("site");
-        String siteLUID = site.get("id").toString();
         ArrayList<String> scheduleLUIDList = new ArrayList<String>();
         ArrayList<HDict> entities = new ArrayList<>();
+
         for (Map m: schedules)
         {
             String luid = m.remove("id").toString();
             if (CCUHsApi.getInstance().getGUID(luid) == null) {
                 scheduleLUIDList.add(luid);
-                m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteLUID)));
+                m.put("siteRef", HRef.copy(siteRef));
                 if (m.get("roomRef") != null && !m.get("roomRef").toString().equals("SYSTEM"))
                 {
                     String guid = CCUHsApi.getInstance().getGUID(m.get("roomRef").toString());

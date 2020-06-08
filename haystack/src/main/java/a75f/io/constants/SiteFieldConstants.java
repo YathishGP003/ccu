@@ -15,4 +15,5 @@ public class SiteFieldConstants {
     public static final String GEOPOSTALCODE = "geoPostalCode";
     public static final String GEOCOORDINATES = "geoCoord";
     public static final String AREA = "area";
+    public static final String WEATHERREF = "weatherRef";
 }

@@ -4,6 +4,7 @@ import a75f.io.api.haystack.BuildConfig;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.DeviceFieldConstants;
 import a75f.io.constants.HttpConstants;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.projecthaystack.HDict;

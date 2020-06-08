@@ -1177,13 +1177,15 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
     private void updateCCURegistrationInfo() {
         prefs.setBoolean("isCCURegistered",false);
         ProgressDialogUtils.showProgressDialog(this,"CCU Registering...");
+        String installerEmail = prefs.getString("installerEmail");
 
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
                 ProgressDialogUtils.hideProgressDialog();
                 if (pingCloudServer()){
-                    CCUHsApi.getInstance().registerCcu();
+
+                    CCUHsApi.getInstance().registerCcu(installerEmail);
 
                     AlertManager.getInstance().fetchAllPredefinedAlerts();
                     Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
@@ -1197,7 +1199,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                             .setMessage("No network connection, Registration is not complete and Facilisight cannot be accessed unless you connect to network.")
                             .setPositiveButton("Proceed", (dialog, id) -> {
 
-                                CCUHsApi.getInstance().registerCcu();
+                                CCUHsApi.getInstance().registerCcu(installerEmail);
                                 AlertManager.getInstance().fetchAllPredefinedAlerts();
                                 Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
                                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -1207,7 +1209,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                             .show();
                 }
             }
-        }, 10000);
+        }, 1000);
     }
 
     private synchronized boolean pingCloudServer() {

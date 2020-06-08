@@ -423,7 +423,8 @@ public class CreateNewSite extends Fragment {
                         String ccuGuid = CCUHsApi.getInstance().getGUID(ccuId);
 
                         if (StringUtils.isBlank(ccuGuid)) {
-                            CCUHsApi.getInstance().registerCcu();
+                            prefs.setString("installerEmail", installerEmail);
+                            CCUHsApi.getInstance().registerCcu(installerEmail);
                             ProgressDialogUtils.hideProgressDialog();
                             ccuRegistrationHandler.postDelayed(this, 30000);
                         } else {

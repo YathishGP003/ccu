@@ -121,18 +121,19 @@ public class SiteSyncAdapter extends EntitySyncAdapter {
         JSONObject siteCreationRequestJson = new JSONObject();
 
         try {
-            siteCreationRequestJson.put(SiteFieldConstants.TIMEZONE, siteDict.get(SiteFieldConstants.TIMEZONE));
+            siteCreationRequestJson.put(SiteFieldConstants.AREA, siteDict.get(SiteFieldConstants.AREA));
             siteCreationRequestJson.put(SiteFieldConstants.DESCRIPTION, siteDict.dis());
-            siteCreationRequestJson.put(SiteFieldConstants.ORGANIZATION, siteDict.get(SiteFieldConstants.ORGANIZATION));
-            siteCreationRequestJson.put(SiteFieldConstants.GEOADDRESS, siteDict.get(SiteFieldConstants.GEOADDRESS));
             siteCreationRequestJson.put(SiteFieldConstants.FACILITY_MANAGER_EMAIL, siteDict.get(SiteFieldConstants.FACILITY_MANAGER_EMAIL));
-            siteCreationRequestJson.put(SiteFieldConstants.INSTALLER_EMAIL, siteDict.get(SiteFieldConstants.INSTALLER_EMAIL));
+            siteCreationRequestJson.put(SiteFieldConstants.GEOADDRESS, siteDict.get(SiteFieldConstants.GEOADDRESS));
             siteCreationRequestJson.put(SiteFieldConstants.GEOCITY, siteDict.get(SiteFieldConstants.GEOCITY));
-            siteCreationRequestJson.put(SiteFieldConstants.GEOSTATE, siteDict.get(SiteFieldConstants.GEOSTATE));
+            siteCreationRequestJson.put(SiteFieldConstants.GEOCOORDINATES, siteDict.get(SiteFieldConstants.GEOCOORDINATES, false));
             siteCreationRequestJson.put(SiteFieldConstants.GEOCOUNTRY, siteDict.get(SiteFieldConstants.GEOCOUNTRY));
             siteCreationRequestJson.put(SiteFieldConstants.GEOPOSTALCODE, siteDict.get(SiteFieldConstants.GEOPOSTALCODE));
-            siteCreationRequestJson.put(SiteFieldConstants.GEOCOORDINATES, siteDict.get(SiteFieldConstants.GEOCOORDINATES, false));
-            siteCreationRequestJson.put(SiteFieldConstants.AREA, siteDict.get(SiteFieldConstants.AREA));
+            siteCreationRequestJson.put(SiteFieldConstants.GEOSTATE, siteDict.get(SiteFieldConstants.GEOSTATE));
+            siteCreationRequestJson.put(SiteFieldConstants.INSTALLER_EMAIL, siteDict.get(SiteFieldConstants.INSTALLER_EMAIL));
+            siteCreationRequestJson.put(SiteFieldConstants.ORGANIZATION, siteDict.get(SiteFieldConstants.ORGANIZATION));
+            siteCreationRequestJson.put(SiteFieldConstants.TIMEZONE, siteDict.get(SiteFieldConstants.TIMEZONE));
+            siteCreationRequestJson.put(SiteFieldConstants.WEATHERREF, siteDict.get(SiteFieldConstants.WEATHERREF));
         } catch (JSONException e) {
             e.printStackTrace();
             CcuLog.d(LOG_PREFIX, "Unable to sync site due to JSON exception. This is likely unrecoverable.");

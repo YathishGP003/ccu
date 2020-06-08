@@ -172,7 +172,6 @@ public class HttpUtil
                 return null;
 
             } finally {
-
                 if(connection != null) {
                     connection.disconnect();
                 }

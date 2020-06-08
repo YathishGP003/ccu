@@ -1458,11 +1458,11 @@ public class CCUHsApi
         return spDefaultPrefs.getBoolean("75fNetworkAvailable", false);
     }
 
-    public void registerCcu() {
-        registerCcuAsyncTask();
+    public void registerCcu(String installerEmail) {
+        registerCcuAsyncTask(installerEmail);
     }
 
-    private void registerCcuAsyncTask() {
+    private void registerCcuAsyncTask(final String installerEmail) {
         AsyncTask<Void, Void, String> updateCCUReg = new AsyncTask<Void, Void, String>() {
 
             @Override
@@ -1478,13 +1478,16 @@ public class CCUHsApi
                     HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
 
                     String facilityManagerEmail = site.get("fmEmail").toString();
-                    String installerEmail = site.get("installerEmail").toString();
+                    String installEmail = installerEmail;
+                    if (StringUtils.isBlank(installEmail)) {
+                        installEmail = site.get("installerEmail").toString();
+                    }
                     String dis = ccu.get("dis").toString();
                     String ahuRef = ccu.get("ahuRef").toString();
                     String gatewayRef = ccu.get("gatewayRef").toString();
                     String equipRef = ccu.get("equipRef").toString();
 
-                    JSONObject ccuRegistrationRequest = getCcuRegisterJson(siteGUID, dis, ahuRef, gatewayRef, equipRef, facilityManagerEmail, installerEmail);
+                    JSONObject ccuRegistrationRequest = getCcuRegisterJson(siteGUID, dis, ahuRef, gatewayRef, equipRef, facilityManagerEmail, installEmail);
 
                     if (ccuRegistrationRequest != null) {
                         ccuRegistrationResponse = HttpUtil.executeJson(
@@ -1573,5 +1576,6 @@ public class CCUHsApi
 
         return ccuJsonRequest;
     }
+
 
 }

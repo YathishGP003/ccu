@@ -50,7 +50,6 @@ public class ActivityLifecycleHandler implements Application.ActivityLifecycleCa
     @Override
     public void onActivityDestroyed(Activity activity) {
         prefs.setBoolean("APP_START", true);
-      //  prefs.setBoolean("registered", false);
         AlertManager.getInstance().clearAlertsWhenAppClose();
     }
 }

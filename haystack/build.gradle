@@ -24,11 +24,12 @@ android {
     buildTypes {
         local {
             minifyEnabled false
-            buildConfigField "String", 'HAYSTACK_API_BASE', '\"http://10.0.5.41:8080/\"'
-            buildConfigField "String", 'CARETAKER_API_BASE', '\"http://10.0.5.41:3100/api/v1/\"'
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"http://192.168.4.37:8080/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"http://192.168.4.37:3100/api/v1/\"'
             buildConfigField "String", 'PUBNUB_SUBSCRIBE_KEY', '\"sub-c-06a5fb60-a084-11ea-8e2f-c62edd1c297d\"'
             buildConfigField "String", 'PUBNUB_PUBLISH_KEY', '\"pub-c-f7996da8-88b1-48dc-aa1e-2b6ab6611ab1\"'
             buildConfigField "String", 'CARETAKER_API_KEY', '\"ccu-34e80add-6b66-41f3-b8ff-6e7027d6b564\"'
+            buildConfigField "String", 'HAYSTACK_API_KEY', '\"CARETAKER_KEY\"'
         }
         dev {
             minifyEnabled false
@@ -37,6 +38,7 @@ android {
             buildConfigField "String", 'PUBNUB_SUBSCRIBE_KEY', '\"sub-c-da285df6-36ea-11ea-bbf4-c6d8f98a95a1\"'
             buildConfigField "String", 'PUBNUB_PUBLISH_KEY', '\"pub-c-a90edd5d-7cb5-4e23-9961-cc4183b7a8ce\"'
             buildConfigField "String", 'CARETAKER_API_KEY', '\"ccu-ae578c76-067e-4c19-8ec2-a9394b9b2e86\"'
+            buildConfigField "String", 'HAYSTACK_API_KEY', '\"ccu-907ad94f-a08c-40fe-ab48-dc5e09a9a694\"'
         }
         prod {
             minifyEnabled false
@@ -47,6 +49,7 @@ android {
             buildConfigField "String", 'PUBNUB_SUBSCRIBE_KEY', '\"sub-c-97b4645a-36eb-11ea-81d4-f6d34a0dd71d\"'
             buildConfigField "String", 'PUBNUB_PUBLISH_KEY', '\"pub-c-bc945448-0b14-4d08-a8d7-5727bdbc2c62\"'
             buildConfigField "String", 'CARETAKER_API_KEY', '\"ccu-a47d57fd-cd62-4700-8eed-f598b9c24791\"'
+            buildConfigField "String", 'HAYSTACK_API_KEY', '\"ccu-c292d879-d70a-474b-907e-3da24bc61a4d\"'
         }
         qa {
             minifyEnabled false
@@ -55,6 +58,7 @@ android {
             buildConfigField "String", 'PUBNUB_SUBSCRIBE_KEY', '\"sub-c-295bc836-36eb-11ea-bbf4-c6d8f98a95a1\"'
             buildConfigField "String", 'PUBNUB_PUBLISH_KEY', '\"pub-c-a07f9ce7-fb79-4ceb-a8e8-823a28941811\"'
             buildConfigField "String", 'CARETAKER_API_KEY', '\"ccu-f0c1e96b-0869-47d5-9190-4191ab7d7bf1\"'
+            buildConfigField "String", 'HAYSTACK_API_KEY', '\"ccu-4a8955cd-6d2b-413c-aab6-c1f4f1992280\"'
         }
         staging {
             minifyEnabled false
@@ -63,6 +67,7 @@ android {
             buildConfigField "String", 'PUBNUB_SUBSCRIBE_KEY', '\"sub-c-540e11a6-36eb-11ea-a657-76e5f2bf83fc\"'
             buildConfigField "String", 'PUBNUB_PUBLISH_KEY', '\"pub-c-8043b6fe-2948-4ad2-9a0b-fed1e4237a5f\"'
             buildConfigField "String", 'CARETAKER_API_KEY', '\"ccu-746e8311-38fe-4381-b557-e88278aa8516\"'
+            buildConfigField "String", 'HAYSTACK_API_KEY', '\"ccu-391fc224-e3bc-4ef9-98ea-398797b8183a\"'
         }
     }
 

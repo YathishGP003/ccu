@@ -8,6 +8,7 @@
 //
 package org.projecthaystack.client;
 
+import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
@@ -555,8 +556,9 @@ public class HClient extends HProj
 
   private String postString(String uriStr, String req, String mimeType) {
     String bearerToken = CCUHsApi.getInstance().getJwt();
+    String apiKey = BuildConfig.HAYSTACK_API_KEY;
 
-    if (StringUtils.isNotBlank(bearerToken)) {
+    if (StringUtils.isNotBlank(bearerToken) || StringUtils.isNotBlank(apiKey)) {
       try {
         Log.i("CCU_HCLIENT","Client Token: " + bearerToken);
         URL url = new URL(uriStr);
@@ -566,7 +568,11 @@ public class HClient extends HProj
           c.setDoInput(true);
           c.setRequestProperty("Connection", "Close");
           c.setRequestProperty("Content-Type", mimeType == null ? "text/plain; charset=utf-8": mimeType);
-          c.setRequestProperty("Authorization", "Bearer " + bearerToken);
+          if (StringUtils.isNotBlank(bearerToken)) {
+            c.setRequestProperty("Authorization", "Bearer " + bearerToken);
+          } else {
+            c.setRequestProperty("api-key", apiKey);
+          }
           c.setConnectTimeout(30000);
           c.connect();
 

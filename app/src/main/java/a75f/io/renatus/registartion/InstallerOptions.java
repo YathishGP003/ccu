@@ -212,7 +212,7 @@ public class InstallerOptions extends Fragment {
         if (ccuId != null) {
             ccuGuid = CCUHsApi.getInstance().getGUID(CCUHsApi.getInstance().getCcuId().toString());
         }
-        if(prefs.getBoolean("registered") && ccuGuid != null){
+        if(CCUHsApi.getInstance().isCCURegistered() && ccuGuid != null){
             textBacnetEnable.setVisibility(View.VISIBLE);
             toggleBACnet.setVisibility(View.VISIBLE);
         }else {

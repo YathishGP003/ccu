@@ -312,13 +312,13 @@ public class AddtoExisting extends Fragment {
             }
 
             @Override
-            protected void onPostExecute (String responseSiteId){
-                super.onPostExecute(responseSiteId);
+            protected void onPostExecute (String siteId){
+                super.onPostExecute(siteId);
                 ProgressDialogUtils.hideProgressDialog();
 
-                if (StringUtils.isNotBlank(responseSiteId)) {
+                if (StringUtils.isNotBlank(siteId)) {
                     Toast.makeText(getActivity(), "Site found", Toast.LENGTH_LONG).show();
-                    showSiteDialog(responseSiteId);
+                    showSiteDialog(siteId);
                 } else {
                     Toast.makeText(getActivity(), "Site not found", Toast.LENGTH_LONG).show();
                 }

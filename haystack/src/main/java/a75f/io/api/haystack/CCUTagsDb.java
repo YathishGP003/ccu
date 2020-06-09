@@ -812,7 +812,7 @@ public class CCUTagsDb extends HServer {
             hisItem.setRec(rec.get("id").toString());
             hisItem.setVal(Double.parseDouble(item.val.toString()));
             hisItem.setSyncStatus(false);
-            CcuLog.d(TAG,"Adding historized item for point ID " + rec.get("id").toString() + "; description " + rec.get("dis").toString() + "; value "  + item.val.toString());
+            CcuLog.d(TAG,"Write historized value to local DB for point ID " + rec.get("id").toString() + "; description " + rec.get("dis").toString() + "; value "  + item.val.toString());
             hisBox.put(hisItem);
             HisItemCache.getInstance().add(rec.get("id").toString(), hisItem);
         }

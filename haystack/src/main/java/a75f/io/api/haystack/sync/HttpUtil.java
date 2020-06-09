@@ -121,14 +121,12 @@ public class HttpUtil
                     connection = NetCipher.getHttpsURLConnection(url);
                 }
 
-                connection.setRequestMethod(httpMethod);
                 connection.setRequestProperty("Content-Type",
                         "application/json");
 
                 CcuLog.i("CCU_HS",url.toString());
                 CcuLog.i("CCU_HS",urlParameters);
-                connection.setRequestProperty("Content-Length", "" +
-                        Integer.toString(urlParameters.getBytes("UTF-8").length));
+
                 connection.setRequestProperty("Content-Language", "en-US");
 
                 if (tokenIsApiKey) {
@@ -138,14 +136,22 @@ public class HttpUtil
                 }
 
                 connection.setUseCaches (false);
-                connection.setDoInput(true);
-                connection.setDoOutput(true);
+                connection.setRequestMethod(httpMethod);
 
-                //Send request
-                DataOutputStream wr = new DataOutputStream (connection.getOutputStream());
-                wr.write (urlParameters.getBytes("UTF-8"));
-                wr.flush ();
-                wr.close ();
+                if (StringUtils.equals(httpMethod, HttpConstants.HTTP_METHOD_GET)) {
+                    connection.setDoOutput(false);
+                }
+                else {
+                    connection.setDoOutput(true);
+                    connection.setRequestProperty(
+                            "Content-Length", "" + Integer.toString(urlParameters.getBytes("UTF-8").length)
+                    );
+                    //Send request
+                    DataOutputStream wr = new DataOutputStream (connection.getOutputStream());
+                    wr.write (urlParameters.getBytes("UTF-8"));
+                    wr.flush ();
+                    wr.close ();
+                }
 
                 int responseCode = connection.getResponseCode();
                 CcuLog.i("CCU_HS","HttpResponse: responseCode "+responseCode);

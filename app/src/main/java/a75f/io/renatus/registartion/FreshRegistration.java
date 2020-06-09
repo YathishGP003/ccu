@@ -1175,7 +1175,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
     }
 
     private void updateCCURegistrationInfo() {
-        prefs.setBoolean("isCCURegistered",false);
         ProgressDialogUtils.showProgressDialog(this,"CCU Registering...");
         String installerEmail = prefs.getString("installerEmail");
 

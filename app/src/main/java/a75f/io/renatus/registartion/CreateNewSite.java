@@ -182,7 +182,7 @@ public class CreateNewSite extends Fragment {
         mSiteOrg.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_facilityorg) + "</font></big>"));
         mSiteInstallerEmailId.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_installer_email) + "</font></big>"));
 
-        if (prefs.getBoolean("registered")) {
+        if (CCUHsApi.getInstance().isCCURegistered()) {
             btnUnregisterSite.setText("UnRegister");
             btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
@@ -266,7 +266,6 @@ public class CreateNewSite extends Fragment {
                     String installerOrg = mSiteOrg.getText().toString();
                     String ccuName = mSiteCCU.getText().toString();
 
-                    prefs.setBoolean("registered", true);
                     ProgressDialogUtils.showProgressDialog(getActivity(),"Adding New Site...");
                     if (site.size() > 0) {
                         String siteId = site.get("id").toString();
@@ -395,15 +394,13 @@ public class CreateNewSite extends Fragment {
         }
 
         btnUnregisterSite.setOnClickListener(view -> {
-            if (prefs.getBoolean("registered")){
+            if (CCUHsApi.getInstance().isCCURegistered()){
                 showUnregisterAlertDialog();
             } else {
                 btnEditSite.setEnabled(true);
                 CCUHsApi.getInstance().deleteEntity(CCUHsApi.getInstance().getCcuId().toString());
 
                 ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU...");
-                prefs.setBoolean("registered", true);
-
                 String facilityManagerEmail = mSiteEmailId.getText().toString();
                 String installerEmail = mSiteInstallerEmailId.getText().toString();
                 String ccuName = mSiteCCU.getText().toString();
@@ -524,11 +521,11 @@ public class CreateNewSite extends Fragment {
                                 btnEditSite.setEnabled(false);
                                 setCompoundDrawableColor(btnUnregisterSite, R.color.accent);
 
-                                prefs.setString("token","");
-                                prefs.setBoolean("registered", false);
-                                Toast.makeText(getActivity(), "CCU removed Successfully " +ccuId, Toast.LENGTH_LONG).show();
+                                CCUHsApi.getInstance().setJwt("");
+                                CCUHsApi.getInstance().setCcuUnregistered();
+                                Toast.makeText(getActivity(), "CCU unregistered successfully " +ccuId, Toast.LENGTH_LONG).show();
                             } else {
-                                Toast.makeText(getActivity(), "Fails to remove CCU", Toast.LENGTH_LONG).show();
+                                Toast.makeText(getActivity(), "Failed to unregistered the CCU", Toast.LENGTH_LONG).show();
                             }
                         }
                 } else {

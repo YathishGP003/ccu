@@ -1,6 +1,5 @@
 package a75f.io.renatus;
 
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -27,7 +26,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.tuners.TunerUtil;
-import a75f.io.renatus.registartion.FreshRegistration;
+import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;

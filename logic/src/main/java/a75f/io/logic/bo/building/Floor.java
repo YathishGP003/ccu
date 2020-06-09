@@ -31,11 +31,9 @@ public class Floor
     
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
-        ArrayList<String> markers = new ArrayList<>();
-        markers.add("writable");
         a75f.io.api.haystack.Floor hsFloor = new a75f.io.api.haystack.Floor.Builder()
                                                     .setDisplayName(floor)
-                                                    .setSiteRef(siteRef).setMarkers(markers)
+                                                    .setSiteRef(siteRef)
                                                     .build();
         mFloorRef = CCUHsApi.getInstance().addFloor(hsFloor);
         mFloorName = floor;

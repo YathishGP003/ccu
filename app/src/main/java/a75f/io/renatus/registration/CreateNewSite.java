@@ -1,4 +1,4 @@
-package a75f.io.renatus.registartion;
+package a75f.io.renatus.registration;
 
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -29,8 +29,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGridBuilder;
@@ -183,7 +181,7 @@ public class CreateNewSite extends Fragment {
         mSiteInstallerEmailId.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_installer_email) + "</font></big>"));
 
         if (CCUHsApi.getInstance().isCCURegistered()) {
-            btnUnregisterSite.setText("UnRegister");
+            btnUnregisterSite.setText("Unregister");
             btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             {
@@ -289,7 +287,7 @@ public class CreateNewSite extends Fragment {
                             ProgressDialogUtils.hideProgressDialog();
                             goTonext();
                         }
-                    }, 20000);
+                    }, 1000);
                 }
             }
         });

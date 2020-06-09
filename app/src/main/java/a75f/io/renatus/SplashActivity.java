@@ -1,6 +1,5 @@
 package a75f.io.renatus;
 
-import a75f.io.renatus.BuildConfig;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -12,9 +11,8 @@ import android.util.Log;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.renatus.registartion.FreshRegistration;
+import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.Prefs;
-import org.apache.commons.lang3.StringUtils;
 
 public class SplashActivity extends Activity {
     public static final String TAG = SplashActivity.class.getSimpleName();

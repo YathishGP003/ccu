@@ -258,24 +258,24 @@
     <string name="title_ccu">CCU</string>
     <string name="ccufullform">Central Control Unit</string>
     <string name="ccuversion">Ver 2.0</string>
-    <string name="wifipassword">Enter Wifi Password</string>
+    <string name="wifipassword">Enter WiFi Password</string>
     <string name="msg_turnonwifi">Turn ON WiFi to see available networks</string>
 
     <!--Fragment Titles-->
     <string name="installtype">Select Type Of Install</string>
-    <string name="connectwifi">Connect to Wifi</string>
+    <string name="connectwifi">Connect to WiFi</string>
 
     <string name="installcreatenew">Create New Site</string>
-    <string name="desccreatenew">Use this option to create a new sit. This will be the First CCU</string>
+    <string name="desccreatenew">Use this option to create a new site. This will be used for a site\'s first CCU.</string>
 
     <string name="installaddccu">Add CCU to Existing Site</string>
-    <string name="descaddccu">Use this option to add to existing building. You will need to have Site Admin Credentials</string>
+    <string name="descaddccu">Use this option to add a CCU to an existing building. This requires access to the site\'s ID.</string>
 
     <string name="installpreconfig">Pre-Configured CCU</string>
-    <string name="descpreconfigccu">Use this option if you have a 6 digit pre-configuration code provided by the 75F support team</string>
+    <string name="descpreconfigccu">Use this option if you have a 6 digit pre-configuration code provided by the 75F support team.</string>
 
     <string name="installreplaceccu">Replace Existing CCU</string>
-    <string name="descreplaceccu">Use this option if the CCU is damaged and needs to be replaced</string>
+    <string name="descreplaceccu">Use this option if the CCU is damaged and needs to be replaced.</string>
 
     <string name="installwithoutcloud">Setup Without Cloud</string>
     <string name="descwithoutcloud">Operate as an Independent CCU \nNOTE : Remote Access and Apps will not be available until the CCU is registered \nYou may create a new site or connect to an existing site at a later time</string>
@@ -285,7 +285,7 @@
     <string name="mandatory">\u002A</string>
     <string name="notmandatory"> </string>
     <string name="input_sitename">Site Name</string>
-    <string name="hint_sitename">A user friendly name. eg Renatus Tower</string>
+    <string name="hint_sitename">A user friendly name (e.g., Renatus Tower)</string>
     <string name="input_timezone">Time Zone</string>
     <string name="input_streetadd">Street Address</string>
     <string name="input_streetadd2">Street Address 2</string>
@@ -294,9 +294,9 @@
     <string name="input_country">Country</string>
     <string name="input_zip">Zip</string>
     <string name="input_ccuname">CCU Name</string>
-    <string name="input_facilityemail">Facility Manager Email ID</string>
+    <string name="input_facilityemail">Facility Manager Email</string>
     <string name="input_facilityorg">Organization</string>
-    <string name="input_installer_email">Installer Email ID</string>
+    <string name="input_installer_email">Installer Email</string>
     <string name="button_next">Next </string>
 
     <!--Installer Option-->

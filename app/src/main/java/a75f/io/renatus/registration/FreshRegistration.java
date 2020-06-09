@@ -1,15 +1,13 @@
-package a75f.io.renatus.registartion;
+package a75f.io.renatus.registration;
 
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -36,15 +34,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.HashMap;
-
 import a75f.io.alerts.AlertManager;
-import a75f.io.alerts.AlertProcessor;
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logic.Globals;
 import a75f.io.renatus.DABFullyAHUProfile;
 import a75f.io.renatus.DABHybridAhuProfile;

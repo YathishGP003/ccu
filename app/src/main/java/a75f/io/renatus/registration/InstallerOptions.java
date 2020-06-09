@@ -1,4 +1,4 @@
-package a75f.io.renatus.registartion;
+package a75f.io.renatus.registration;
 
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -8,9 +8,6 @@ import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -27,7 +24,6 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -40,7 +36,6 @@ import com.renovo.bacnet4j.type.enumerated.PropertyIdentifier;
 import com.renovo.bacnet4j.type.enumerated.Segmentation;
 import com.renovo.bacnet4j.type.primitive.ObjectIdentifier;
 
-import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HRef;
 
@@ -52,8 +47,6 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Tags;
-import a75f.io.device.bacnet.BACnetUpdateJob;
-import a75f.io.device.bacnet.BACnetUtils;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
@@ -63,13 +56,11 @@ import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
-import a75f.io.renatus.tuners.ExpandableTunerListAdapter;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
 import a75f.io.renatus.views.TempLimit.TempLimitView;
 
 import static a75f.io.logic.L.ccu;
-import static a75f.io.renatus.FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED;
 import static a75f.io.renatus.SettingsFragment.ACTION_SETTING_SCREEN;
 import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 

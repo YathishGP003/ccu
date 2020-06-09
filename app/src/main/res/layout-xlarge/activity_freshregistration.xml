@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_logoscreen"
-    tools:context=".registartion.FreshRegistration">
+    tools:context=".registration.FreshRegistration">
 
 
     <ListView
@@ -21,7 +21,7 @@
         android:scrollbars="none">
     </ListView>
 
-   <!-- <a75f.io.renatus.registartion.CustomViewPager
+   <!-- <a75f.io.renatus.registration.CustomViewPager
         android:id="@+id/pager"
         android:layout_width="0dp"
         android:layout_height="match_parent"

@@ -1,15 +1,13 @@
-package a75f.io.renatus.registartion;
+package a75f.io.renatus.registration;
 
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
-import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -47,7 +45,6 @@ import a75f.io.renatus.util.ProgressDialogUtils;
 
 public class WifiFragment extends Fragment /*implements InstallType */  implements WifiListAdapter.ItemClickListener {
     // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final int WAIT_TIME = 2000;
@@ -229,8 +226,6 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
             }
         });
 
-
-        //toggleWifi.setChecked(mainWifiObj.isWifiEnabled());
         if (isFreshRegister) {
             ((FreshRegistration) getActivity()).setToggleWifi(mainWifiObj.isWifiEnabled());
         }
@@ -241,20 +236,6 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
         }
         return rootView;
     }
-
-   /* @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser) {
-            mainWifiObj = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-            //toggleWifi.setChecked(mainWifiObj.isWifiEnabled());
-            ((FreshRegistration)getActivity()).setToggleWifi(mainWifiObj.isWifiEnabled());
-            if(mainWifiObj.isWifiEnabled())
-            {
-                mainWifiObj.startScan();
-            }
-        }
-    }*/
 
     @Override
     public void onStart() {
@@ -304,33 +285,6 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
                         }
                     }
                 }
-
-                /*mRunable = new Runnable() {
-                    @Override
-                    public void run() {
-                        ConnectivityManager connManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-                        NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-                        if (networkInfo.isConnected()) {
-                            //Toast.makeText(getActivity(), "Wifi Connected", Toast.LENGTH_SHORT).show();
-                            //((FreshRegistration)getActivity()).selectItem(3);
-                            //((FreshRegistration)getActivity().getApplicationContext()).selectItem(goToNext);
-                            Log.i(TAG, "goto:" + goToNext);
-                            if (INSTALL_TYPE.equals("CREATENEW")) {
-                                switchFragment.Switch(3);
-                            }
-                            if (INSTALL_TYPE.equals("ADDCCU")) {
-                                switchFragment.Switch(6);
-                            }
-                            if (INSTALL_TYPE.equals("PRECONFIGCCU")) {
-                                switchFragment.Switch(7);
-                            }
-                            if (INSTALL_TYPE.equals("REPLACECCU")) {
-                                switchFragment.Switch(8);
-                            }
-                        }
-                    }
-                };
-                mHandler.postDelayed(mRunable, WAIT_TIME);*/
             }
 
             wifiListAdapter.updateData(wifinetworks);

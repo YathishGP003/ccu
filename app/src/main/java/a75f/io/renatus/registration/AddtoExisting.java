@@ -1,11 +1,10 @@
-package a75f.io.renatus.registartion;
+package a75f.io.renatus.registration;
 
 import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.constants.HttpConstants;
 import a75f.io.constants.SiteFieldConstants;
 import a75f.io.logger.CcuLog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -30,17 +29,13 @@ import android.widget.Toast;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.projecthaystack.HGrid;
-import org.projecthaystack.ParseException;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
-import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RegisterGatherCCUDetails;
-import a75f.io.renatus.RegisterGatherDetails;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 

@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Objects;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -124,8 +125,8 @@ public class HttpUtil
                 connection.setRequestProperty("Content-Type",
                         "application/json");
 
-                CcuLog.i("CCU_HS",url.toString());
-                CcuLog.i("CCU_HS",urlParameters);
+                CcuLog.i("CCU_HS", Objects.toString(url.toString(),""));
+                CcuLog.i("CCU_HS", Objects.toString(urlParameters, ""));
 
                 connection.setRequestProperty("Content-Language", "en-US");
 

@@ -2,6 +2,9 @@ apply plugin: 'com.android.library'
 apply plugin: 'io.objectbox'
 
 android {
+    def Properties properties = new Properties()
+    properties.load(project.rootProject.file("local.properties").newDataInputStream())
+
     compileSdkVersion 28
 
     defaultConfig {
@@ -24,12 +27,12 @@ android {
     buildTypes {
         local {
             minifyEnabled false
-            buildConfigField "String", 'HAYSTACK_API_BASE', '\"http://192.168.4.37:8080/\"'
-            buildConfigField "String", 'CARETAKER_API_BASE', '\"http://192.168.4.37:3100/api/v1/\"'
-            buildConfigField "String", 'PUBNUB_SUBSCRIBE_KEY', '\"sub-c-456f8384-aa9d-11ea-baa3-a65cc700836a\"'
-            buildConfigField "String", 'PUBNUB_PUBLISH_KEY', '\"pub-c-51dfeed9-4d01-4909-9b4f-9b44e664336d\"'
-            buildConfigField "String", 'CARETAKER_API_KEY', '\"ccu-34e80add-6b66-41f3-b8ff-6e7027d6b564\"'
-            buildConfigField "String", 'HAYSTACK_API_KEY', '\"CARETAKER_KEY\"'
+            buildConfigField "String", 'HAYSTACK_API_BASE', properties.getProperty("haystack.api.base", "")
+            buildConfigField "String", 'CARETAKER_API_BASE', properties.getProperty("caretaker.api.base", "")
+            buildConfigField "String", 'PUBNUB_SUBSCRIBE_KEY', properties.getProperty("pubnub.subscribe.key", "")
+            buildConfigField "String", 'PUBNUB_PUBLISH_KEY', properties.getProperty("pubnub.publish.key", "")
+            buildConfigField "String", 'CARETAKER_API_KEY', properties.getProperty("caretaker.api.key", "")
+            buildConfigField "String", 'HAYSTACK_API_KEY', properties.getProperty("haystack.api.key", "")
         }
         dev {
             minifyEnabled false

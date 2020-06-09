@@ -1,9 +1,9 @@
 apply plugin: 'com.android.library'
 
 android {
+    def Properties properties = new Properties()
+    properties.load(project.rootProject.file("local.properties").newDataInputStream())
     compileSdkVersion 28
-
-
 
     defaultConfig {
         minSdkVersion 19
@@ -28,7 +28,7 @@ android {
     buildTypes {
         local {
             minifyEnabled false
-            buildConfigField "String", 'ALERTS_API_BASE', '\"http://192.168.4.37:5000/\"'
+            buildConfigField "String", 'ALERTS_API_BASE', properties.getProperty("alerts.api.base", "")
         }
         dev {
             minifyEnabled false

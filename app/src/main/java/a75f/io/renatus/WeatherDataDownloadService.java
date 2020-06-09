@@ -1,5 +1,8 @@
 package a75f.io.renatus;
 
+import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.constants.HttpConstants;
+import a75f.io.logger.CcuLog;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,6 +14,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import io.fabric.sdk.android.services.network.HttpMethod;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
@@ -37,14 +41,8 @@ public class WeatherDataDownloadService extends IntentService {
 
 	static int CALLING_TIME_INTERVAL = 15*60000;
 	static String sUrlForecastIO = "https://api.darksky.net/forecast/64f63e0e60f15d3523a8702373e2e3eb/";
-	static String sUrlOpenWeather = "http://api.openweathermap.org/data/2.5/weather?lat=44.0&lon=-93.96&units=imperial";
-	private static final String SOLCAST_API_URL = "https://api.solcast.com.au/radiation/estimated_actuals?latitude=%f&longitude=%f&api_key=pEtltUsfJmkjVUFTwr9PuLmfh10KLkHO&format=json";
-	
+
     static boolean bStopService = false;
-	
-	static void stop() {
-		bStopService = true;
-	}
 	
 	static double mCurrentTemp = -100;
     static String micon = "";
@@ -64,10 +62,6 @@ public class WeatherDataDownloadService extends IntentService {
     public static double windGust = 0;
     public static double windBearing = 0;
     
-    public static int dhi;
-    public static int dni;
-    
-    
 	public WeatherDataDownloadService() {
 		super("WeatherService");
 		// TODO Auto-generated constructor stub
@@ -79,19 +73,15 @@ public class WeatherDataDownloadService extends IntentService {
 		while (!bStopService) {
 	    	synchronized (this) {
 	    		try {
-	    			//if (CCUApp.DEBUG) Log.d("CCU_WEATHER", "getting weather");
 	    			getWeatherData();
 	    			wait(CALLING_TIME_INTERVAL);
 	    		} catch (Exception e) {
 	    			try {
-	    				//if (CCUApp.DEBUG) Log.e("CCU_WEATHER", e.getMessage());
 						wait(CALLING_TIME_INTERVAL);
 					} catch (InterruptedException e1) {
-						//if (CCUApp.DEBUG)
-						    Log.e("CCU_WEATHER", e1.getMessage());
+                        Log.e("CCU_WEATHER", e1.getMessage());
 					}
-	    			//if (CCUApp.DEBUG)
-	    			    Log.e("CCU_WEATHER", e.getMessage());
+                        Log.e("CCU  _WEATHER", e.getMessage());
 	    		}
 	    	}
 	    }
@@ -199,86 +189,29 @@ public class WeatherDataDownloadService extends IntentService {
 
                 @Override
                 protected JSONObject doInBackground(Void... params) {
-                    HttpClient httpclient = new DefaultHttpClient();
-                    HttpGet httpget = new HttpGet(sUrlForecastIO + String.valueOf(finalLat) + "," + String.valueOf(finalLng)+"?exclude=minutely,hourly,alerts,flags");
-                    ResponseHandler<String> responseHandler = new BasicResponseHandler();
-                    String responseBody;
-                    try {
-                        responseBody = httpclient.execute(httpget, responseHandler);
-                        JSONObject response = new JSONObject(responseBody);
-                        return response;
-                    } catch (ClientProtocolException e) {
-                        if (BuildConfig.DEBUG) Log.e("CCU_WEATHER", "Exception: " + e.getMessage());
-                    } catch (IOException e) {
-                        if (BuildConfig.DEBUG) Log.e("CCU_WEATHER", "Exception: " + e.getMessage());
-                    } catch (JSONException e) {
-                        if (BuildConfig.DEBUG) Log.e("CCU_WEATHER", "Exception: " + e.getMessage());
-                    } finally {
-                        httpclient.getConnectionManager().closeExpiredConnections();
+                    JSONObject jsonResponse = null;
+                    String requestUrl = sUrlForecastIO + String.valueOf(finalLat) + "," + String.valueOf(finalLng)+"?exclude=minutely,hourly,alerts,flags";
+                    String response = HttpUtil.executeJson(
+                            requestUrl,
+                            null,
+                            "64f63e0e60f15d3523a8702373e2e3eb",
+                            true,
+                            HttpConstants.HTTP_METHOD_GET
+                    );
+
+                    if (response != null) {
+                        try {
+                            jsonResponse = new JSONObject(response);
+                        } catch (JSONException e) {
+                            CcuLog.e("CCU_WEATHER", "Unable to parse JSON to retrieve weather data");
+                        }
                     }
-                    return null;
+
+                    return jsonResponse;
                 }
             };
             downloader.execute();
-            
-            //new SolcastDataFetchTask().execute();
         }
-    }
-    
-    private static class SolcastDataFetchTask extends AsyncTask<String, Void, JSONObject> {
-        @Override
-        protected JSONObject doInBackground(String... params) {
-            try {
-                String responseBody = httpsGET(String.format(SOLCAST_API_URL, lat,lng));
-    
-                JSONArray forecastArray = new JSONObject(responseBody).getJSONArray("estimated_actuals");
-                JSONObject latestForecast = forecastArray.getJSONObject(0);
-                dhi = latestForecast.getInt("dhi");
-                dni = latestForecast.getInt("dni");
-    
-                Log.d("CCU_WEATHER","dhi: "+dhi+" dni: "+dni);
-            } catch (JSONException e) {
-                if (BuildConfig.DEBUG) Log.e("CCU_WEATHER", "Exception: " + e.getMessage());
-            }
-            return null;
-        }
-        
-        @Override
-        protected void onPostExecute(JSONObject response) {
-        
-        }
-        
-        @Override
-        protected void onPreExecute() {
-        }
-        
-    }
-    
-    private static String httpsGET(String url){
-        
-        StringBuilder result = new StringBuilder();
-        
-        HttpsURLConnection urlConnection = null;
-        
-        try {
-            URL restUrl = new URL(url);
-            urlConnection = (HttpsURLConnection) restUrl.openConnection();
-            urlConnection.setInstanceFollowRedirects(false);
-            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-            
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                result.append(line);
-            }
-            
-        }catch( Exception e) {
-            e.printStackTrace();
-        }
-        finally {
-            urlConnection.disconnect();
-        }
-        return result.toString();
     }
     
     
@@ -288,10 +221,6 @@ public class WeatherDataDownloadService extends IntentService {
 
     public static String getIcon() {
         return micon;
-    }
-
-    public static String getDailySummary() {
-        return dailysummary;
     }
 
     public static double getTemperature() {
@@ -306,10 +235,6 @@ public class WeatherDataDownloadService extends IntentService {
         return mintemp;
     }
 
-    public static String getTimeZone() {
-        return timeZone;
-    }
-
     public static double getHumidity() {
         return mCurrentHumidity;
     }
@@ -317,106 +242,6 @@ public class WeatherDataDownloadService extends IntentService {
     public static double getPrecipitation() {
         return mPrecipIntensity;
     }
-
-    public static double getOutsideAirEnthalpy() {
-        return mOutsideAirEnthalpy;
-    }
-
-    public static String getSunriseTime() {
-        if (mSunriseTime != null && !mSunriseTime.equalsIgnoreCase(""))
-            return mSunriseTime;
-        else
-            return "06:30";
-    }
-
-    public static String getSunsetTime() {
-        if (mSunsetTime != null && !mSunsetTime.equalsIgnoreCase(""))
-            return mSunsetTime;
-        else
-            return "18:30";
-    }
     
-    boolean canGetLocation = false;
-    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10;
-    private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1;
     Location location;
-
-    public Location getLocation() {
-        try {
-            LocationManager locationManager = (LocationManager) RenatusApp.getAppContext()
-                    .getSystemService(LOCATION_SERVICE);
-
-            // getting GPS status
-            boolean isGPSEnabled = locationManager
-                    .isProviderEnabled(LocationManager.GPS_PROVIDER);
-
-            // getting network status
-            boolean isNetworkEnabled = locationManager
-                    .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-
-            if (!isGPSEnabled && !isNetworkEnabled) {
-                // no network provider is enabled
-            } else {
-                this.canGetLocation = true;
-                if (isNetworkEnabled) {
-                    locationManager.requestLocationUpdates(
-                            LocationManager.NETWORK_PROVIDER,
-                            MIN_TIME_BW_UPDATES,
-                            MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListener);
-                    Log.d("location", "Network Enabled");
-                    if (locationManager != null) {
-                        location = locationManager
-                                .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                        if (location != null) {
-                            lat = location.getLatitude();
-                            lng = location.getLongitude();
-                        }
-                    }
-                }
-                // if GPS Enabled get lat/long using GPS Services
-                if (isGPSEnabled) {
-                    if (location == null) {
-                        locationManager.requestLocationUpdates(
-                                LocationManager.GPS_PROVIDER,
-                                MIN_TIME_BW_UPDATES,
-                                MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListener);
-                        Log.d("location", "GPS Enabled");
-                        if (locationManager != null) {
-                            location = getLastKnownLocation();
-                            Log.d("location", location+" ");
-                            if (location != null) {
-                                lat = location.getLatitude();
-                                lng = location.getLongitude();
-                            }
-                        }
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-            Log.e("location",e.getMessage());
-            e.printStackTrace();
-        }
-
-        return location;
-    }
-
-
-    private Location getLastKnownLocation() {
-        LocationManager mLocationManager = (LocationManager)getApplicationContext().getSystemService(LOCATION_SERVICE);
-        List<String> providers = mLocationManager.getProviders(true);
-        Location bestLocation = null;
-        for (String provider : providers) {
-            Location l = mLocationManager.getLastKnownLocation(provider);
-            if (l == null) {
-                continue;
-            }
-            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
-                // Found best last known location: %s", l);
-                bestLocation = l;
-            }
-        }
-        return bestLocation;
-    }
-
 }

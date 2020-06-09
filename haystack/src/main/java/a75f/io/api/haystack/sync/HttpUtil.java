@@ -149,8 +149,8 @@ public class HttpUtil
                     //Send request
                     DataOutputStream wr = new DataOutputStream (connection.getOutputStream());
                     wr.write (urlParameters.getBytes("UTF-8"));
-                    wr.flush ();
-                    wr.close ();
+                    wr.flush();
+                    wr.close();
                 }
 
                 int responseCode = connection.getResponseCode();
@@ -185,5 +185,4 @@ public class HttpUtil
         }
         return null;
     }
-
 }

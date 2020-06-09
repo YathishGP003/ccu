@@ -51,7 +51,7 @@ import io.objectbox.query.QueryBuilder;
 public class AlertProcessor
 {
     
-    ArrayList<AlertDefinition> predefinedAlerts;
+    ArrayList<AlertDefinition> predefinedAlerts = new ArrayList<>();
     
     ArrayList<AlertDefinition> customAlerts = new ArrayList<>();
     AlertParser parser;

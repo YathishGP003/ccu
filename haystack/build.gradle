@@ -97,7 +97,6 @@ dependencies {
     api 'com.fasterxml.jackson.core:jackson-databind:2.8.6'
     implementation 'info.guardianproject.netcipher:netcipher:1.2'
     implementation 'org.apache.commons:commons-lang3:3.6'
-    implementation 'org.influxdb:influxdb-java:2.5'
 
     api 'joda-time:joda-time:2.9.9'
     implementation 'com.getkeepsafe.relinker:relinker:1.3.1'

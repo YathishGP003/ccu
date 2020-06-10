@@ -48,6 +48,7 @@ import a75f.io.api.haystack.sync.EntitySyncHandler;
 import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
+import a75f.io.api.haystack.BuildConfig;
 
 public class CCUHsApi
 {
@@ -404,22 +405,20 @@ public class CCUHsApi
 
     public void pointWrite(HRef id, int level, String who, HVal val, HNum dur)
     {
-        if (!CCUHsApi.getInstance().isCCURegistered()){
-            return;
-        }
-
         hsClient.pointWrite(id, level, who, val, dur);
 
-        String guid = getGUID(id.toString());
-        if (guid != null)
-        {
-            if (dur.unit == null) {
-                dur = HNum.make(dur.val ,"ms");
+        if (!CCUHsApi.getInstance().isCCURegistered()) {
+            String guid = getGUID(id.toString());
+            if (guid != null)
+            {
+                if (dur.unit == null) {
+                    dur = HNum.make(dur.val ,"ms");
+                }
+                HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
+                HDict[] dictArr  = {b.toDict()};
+                String  response = HttpUtil.executePost(getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+                CcuLog.d("CCU_HS", "Response: \n" + response);
             }
-            HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
-            HDict[] dictArr  = {b.toDict()};
-            String  response = HttpUtil.executePost(getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
-            CcuLog.d("CCU_HS", "Response: \n" + response);
         }
     }
 

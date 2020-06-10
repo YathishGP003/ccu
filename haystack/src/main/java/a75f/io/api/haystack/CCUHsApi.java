@@ -1377,23 +1377,26 @@ public class CCUHsApi
             HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
             HGrid site = hClient.call(HStdOps.read.name(), hGrid);
             if (site != null) {
-                HDict tDict = new HDictBuilder().add("filter", "weatherPoint and air and temp and weatherRef == " + site.row(0).get("weatherRef", false)).toDict();
-                HGrid weatherPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+                HVal weatherRef = site.row(0).get("weatherRef", false);
+                if (weatherRef != null) {
+                    HDict tDict = new HDictBuilder().add("filter", "weatherPoint and air and temp and weatherRef == " + weatherRef).toDict();
+                    HGrid weatherPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
 
-                if (weatherPoint != null && weatherPoint.numRows() > 0) {
-                    weatherPoint.dump();
-                    tempWeatherRef = weatherPoint.row(0).getRef("id");
+                    if (weatherPoint != null && weatherPoint.numRows() > 0) {
+                        weatherPoint.dump();
+                        tempWeatherRef = weatherPoint.row(0).getRef("id");
 
-                    HGrid hisGrid = hClient.hisRead(tempWeatherRef, "current");
+                        HGrid hisGrid = hClient.hisRead(tempWeatherRef, "current");
 
-                    if (hisGrid != null && hisGrid.numRows() > 0) {
-                        hisGrid.dump();
-                        HRow r = hisGrid.row(hisGrid.numRows() - 1);
-                        HDateTime date = (HDateTime) r.get("ts");
-                        double tempVal = Double.parseDouble(r.get("val").toString());
-                        Log.d("CCU_OAO",date+" External Temp: "+tempVal);
-                        return tempVal;
+                        if (hisGrid != null && hisGrid.numRows() > 0) {
+                            hisGrid.dump();
+                            HRow r = hisGrid.row(hisGrid.numRows() - 1);
+                            HDateTime date = (HDateTime) r.get("ts");
+                            double tempVal = Double.parseDouble(r.get("val").toString());
+                            Log.d("CCU_OAO",date+" External Temp: "+tempVal);
+                            return tempVal;
 
+                        }
                     }
                 }
             }
@@ -1409,21 +1412,24 @@ public class CCUHsApi
             HDict navIdDict = new HDictBuilder().add(HayStackConstants.ID, HRef.copy(getGUID(getSiteId().toString()))).toDict();
             HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
             HGrid site = hClient.call(HStdOps.read.name(), hGrid);
-            HDict tDict = new HDictBuilder().add("filter", "weatherPoint and humidity and weatherRef == " + site.row(0).get("weatherRef", false)).toDict();
-            HGrid weatherPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
-            weatherPoint.dump();
-            if (weatherPoint != null && weatherPoint.numRows() > 0)
-            {
-                humidityWeatherRef = weatherPoint.row(0).getRef("id");
-                HGrid hisGrid = hClient.hisRead(humidityWeatherRef, "current");
-                hisGrid.dump();
-                if (hisGrid != null && hisGrid.numRows() > 0) {
-                    HRow r = hisGrid.row(hisGrid.numRows() - 1);
-                    HDateTime date = (HDateTime) r.get("ts");
-                    double humidityVal = Double.parseDouble(r.get("val").toString());
-                    Log.d("CCU_OAO",date+" External Humidity: "+humidityVal);
-                    return 100 * humidityVal;
+            HVal weatherRef = site.row(0).get("weatherRef", false);
+            if (weatherRef != null) {
+                HDict tDict = new HDictBuilder().add("filter", "weatherPoint and humidity and weatherRef == " + weatherRef).toDict();
+                HGrid weatherPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+                if (weatherPoint != null && weatherPoint.numRows() > 0)
+                {
+                    weatherPoint.dump();
+                    humidityWeatherRef = weatherPoint.row(0).getRef("id");
+                    HGrid hisGrid = hClient.hisRead(humidityWeatherRef, "current");
+                    hisGrid.dump();
+                    if (hisGrid != null && hisGrid.numRows() > 0) {
+                        HRow r = hisGrid.row(hisGrid.numRows() - 1);
+                        HDateTime date = (HDateTime) r.get("ts");
+                        double humidityVal = Double.parseDouble(r.get("val").toString());
+                        Log.d("CCU_OAO",date+" External Humidity: "+humidityVal);
+                        return 100 * humidityVal;
 
+                    }
                 }
             }
         }

@@ -325,7 +325,7 @@
                 android:layout_marginTop="20dp"
                 >
                 <RadioGroup
-                    android:id="@+id/radioGroup_config"
+                    android:id="@+id/radioGroupConfig"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -347,7 +347,7 @@
                     android:id="@+id/textInputIP"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/radioGroup_config"
+                    android:layout_below="@+id/radioGroupConfig"
                     app:errorTextAppearance="@style/error_appearance">
 
                     <EditText
@@ -373,7 +373,7 @@
                     android:layout_height="wrap_content"
                     android:layout_toRightOf="@+id/textInputIP"
                     android:layout_marginLeft="56dp"
-                    android:layout_below="@+id/radioGroup_config"
+                    android:layout_below="@+id/radioGroupConfig"
                     app:errorTextAppearance="@style/error_appearance">
 
                     <EditText
@@ -455,7 +455,7 @@
                 android:id="@+id/buttonNext"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/rl_Bacnet"
+                android:layout_below="@+id/relativeLayoutBACnet"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="36dp"
                 android:layout_marginBottom="24dp"

@@ -24,10 +24,10 @@ public class HttpUtil
 
     public static final String HTTP_SCHEME = "http";
 
-    public static String sendRequest(String endpoint, String postData, String bearerToken) {
+    public static String sendRequest(String endpoint, String postData, String apiKey) {
         URL url;
         HttpURLConnection connection = null;
-        if (StringUtils.isNotBlank(bearerToken)) {
+        if (StringUtils.isNotBlank(apiKey)) {
             try {
                 //Create connection
                 url = new URL(BuildConfig.ALERTS_API_BASE +  endpoint);
@@ -41,7 +41,7 @@ public class HttpUtil
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Content-Type",
                         "application/json");
-                connection.setRequestProperty("Authorization", " Bearer " + bearerToken);
+                connection.setRequestProperty("api-key", apiKey);
 
                 connection.setUseCaches (false);
                 connection.setDoInput(true);

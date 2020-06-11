@@ -16,17 +16,17 @@
             android:id="@+id/ccuName"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
-            android:text="CCU"
+            android:text="@string/txt_ccu"
             android:textAppearance="@style/title_orange" />
 
         <TextView
             android:id="@+id/profileTitle"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
-            android:layout_marginLeft="14dp"
-            android:layout_toRightOf="@+id/ccuName"
+            android:layout_marginStart="14dp"
+            android:layout_toEndOf="@+id/ccuName"
             android:gravity="center_vertical"
-            android:text="System Profile"
+            android:text="@string/txt_system_profile"
             android:textAppearance="@style/title_grey" />
 
     </RelativeLayout>
@@ -46,8 +46,9 @@
                 android:id="@+id/oaoArc"
                 android:layout_width="200dp"
                 android:layout_height="280dp"
-                android:visibility="gone"
-                android:layout_marginBottom="20dp" />
+                android:layout_marginBottom="20dp"
+                android:visibility="gone" />
+
             <NumberPicker
                 android:id="@+id/systemModePicker"
                 android:layout_width="wrap_content"
@@ -58,14 +59,6 @@
                 android:layout_marginBottom="30dp">
 
             </NumberPicker>
-            <!--a75f.io.renatus.views.NumberPicker.SystemNumberPicker
-                android:id="@+id/systemModePicker"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/oaoArc"
-                android:layout_centerInParent="true"
-                android:layout_marginTop="30dp"
-                android:layout_marginBottom="30dp"/ -->
 
         </RelativeLayout>
 
@@ -85,14 +78,14 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="30dp"
-                    android:text="Occupancy Status:"
+                    android:text="@string/txt_occupancy_status"
                     android:textAppearance="@style/label_black" />
 
                 <TextView
                     android:id="@+id/occupancyStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dp"
+                    android:layout_marginStart="20dp"
                     android:text=""
                     android:textSize="20sp" />
 
@@ -107,14 +100,14 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="30dp"
-                    android:text="Equipment Status:"
+                    android:text="@string/txt_equipment_status"
                     android:textAppearance="@style/label_black" />
 
                 <TextView
                     android:id="@+id/equipmentStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dp"
+                    android:layout_marginStart="20dp"
                     android:text=""
                     android:textSize="20sp" />
 
@@ -131,8 +124,8 @@
                     android:layout_height="30dp"
                     android:layout_gravity="bottom"
                     android:layout_weight="1"
-                    android:text="ECONOMY"
                     android:alpha="0.87"
+                    android:text="@string/txt_economy"
                     android:textAppearance="@style/label_black"
                     android:textSize="19.5sp" />
 
@@ -141,11 +134,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
-                    android:layout_marginRight="8dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_weight="1"
-                    android:gravity="right"
-                    android:text="COMFORT"
                     android:alpha="0.87"
+                    android:gravity="end"
+                    android:text="@string/txt_comfort"
                     android:textColor="#202020"
                     android:textSize="19.5sp" />
 
@@ -160,7 +153,7 @@
 
                 <SeekBar
                     android:id="@+id/systemComfortValue"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:max="3" />
@@ -170,12 +163,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
+                android:baselineAligned="false"
                 android:orientation="horizontal">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="left"
+                    android:layout_gravity="start"
                     android:layout_weight="1"
                     android:orientation="horizontal">
 
@@ -183,7 +177,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="30dp"
                         android:layout_gravity="center_vertical"
-                        android:text="Min Inside Humidity"
+                        android:text="@string/txt_min_humidity"
                         android:textAppearance="@style/label_black" />
 
                     <Spinner
@@ -192,7 +186,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="42dp"
+                        android:layout_marginStart="42dp"
                         android:entries="@array/hvac_stage_selector"
                         tools:listitem="@layout/spinner_dropdown_item" />
 
@@ -202,7 +196,7 @@
                         android:layout_gravity="center_vertical"
                         android:gravity="bottom"
                         android:paddingBottom="5dp"
-                        android:text="%"
+                        android:text="@string/txt_symbol_percent"
                         android:textAppearance="@style/title_grey"
                         android:textSize="16sp" />
                 </LinearLayout>
@@ -211,14 +205,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="right"
+                    android:gravity="end"
                     android:orientation="horizontal">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="30dp"
                         android:layout_gravity="center_vertical"
-                        android:text="Max Inside Humidity"
+                        android:text="@string/txt_max_humidity"
                         android:textAppearance="@style/label_black" />
 
                     <Spinner
@@ -227,7 +221,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="42dp"
+                        android:layout_marginStart="42dp"
                         android:entries="@array/hvac_stage_selector"
                         tools:listitem="@layout/spinner_dropdown_item" />
 
@@ -237,7 +231,7 @@
                         android:layout_gravity="center_vertical"
                         android:gravity="bottom"
                         android:paddingBottom="5dp"
-                        android:text="%"
+                        android:text="@string/txt_symbol_percent"
                         android:textAppearance="@style/title_grey"
                         android:textSize="16sp" />
 
@@ -249,36 +243,26 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="30dp"
-                    android:layout_gravity="left"
-                    android:text="Compensate for Humidity"
+                    android:layout_gravity="start"
+                    android:text="@string/txt_compensate_humidity"
                     android:textAppearance="@style/label_black" />
 
                 <Space
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1" />
 
-                <!-- <android.support.v7.widget.SwitchCompat
-                     android:id="@+id/cbCompHumidity"
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:layout_gravity="right"
-                     android:padding="4dp"
-                     android:thumb="@drawable/switch_thumb_selector"
-                     SwitchCompat:track="@drawable/switch_track_selector"
-                     android:textColor="#202020"
-                     android:textSize="24sp"/>-->
                 <ToggleButton
                     android:id="@+id/tbCompHumidity"
                     android:layout_width="46.12dp"
                     android:layout_height="27.42dp"
-                    android:layout_centerVertical="true"
-                    android:layout_gravity="right"
+                    android:layout_gravity="end"
                     android:background="@drawable/toggle_selector"
                     android:checked="false"
                     android:textOff=""
@@ -289,64 +273,33 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="30dp"
-                    android:layout_gravity="left"
-                    android:text="Demand Response Mode"
+                    android:layout_gravity="start"
+                    android:text="@string/txt_demand_response_mode"
                     android:textAppearance="@style/label_black" />
 
                 <Space
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1" />
-
-                <!--
-                                <android.support.v7.widget.SwitchCompat
-                                    android:id="@+id/cbDemandResponse"
-                                    android:layout_width="46.12dp"
-                                    android:layout_height="27.42dp"
-                                    android:padding="4dp"
-                                    android:layout_gravity="right"
-                                    android:thumb="@drawable/switch_thumb_selector"
-                                    SwitchCompat:track="@drawable/switch_track_selector"
-                                    android:textColor="#202020"
-                                    android:textSize="24sp"/>
-                -->
 
                 <ToggleButton
                     android:id="@+id/tbDemandResponse"
                     android:layout_width="46.12dp"
                     android:layout_height="27.42dp"
-                    android:layout_centerVertical="true"
-                    android:layout_gravity="right"
+                    android:layout_gravity="end"
                     android:background="@drawable/toggle_selector"
                     android:checked="false"
                     android:textOff=""
                     android:textOn="" />
+
             </LinearLayout>
 
-
-            <!-- <android.support.v7.widget.SwitchCompat
-                android:id="@+id/cbCompHumidity"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
-                android:text="Compensate for Humidity                                                          "
-                android:textSize="26sp"
-                android:textColor="#202020" />
-
-            <android.support.v7.widget.SwitchCompat
-                android:id="@+id/cbDemandResponse"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
-                android:text="Demand Response Mode                                                            "
-                android:textSize="26sp"
-                android:textColor="#202020"/>
--->
         </LinearLayout>
     </LinearLayout>
 

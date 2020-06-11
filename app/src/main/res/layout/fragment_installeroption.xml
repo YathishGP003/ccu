@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -16,24 +17,25 @@
             android:id="@+id/imageGoback"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:padding="2.5dp"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="64dp"
+            android:layout_marginStart="64dp"
+            android:padding="2.5dp"
             android:rotation="180"
-            app:srcCompat="@drawable/icon_arrowright" />
+            app:srcCompat="@drawable/icon_arrowright"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/textInstaller"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="310dp"
-            android:gravity="left|center_vertical"
+            android:layout_marginStart="310dp"
             android:fontFamily="@font/lato_bold"
+            android:gravity="start|center_vertical"
             android:text="@string/title_installeroption"
             android:textAllCaps="true"
             android:textColor="@color/orange_75f"
-            android:textSize="33.5dp"
+            android:textSize="33.5sp"
             android:textStyle="bold" />
     </RelativeLayout>
 
@@ -43,55 +45,54 @@
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="24dp"
+        android:scrollbarStyle="insideOverlay"
+        android:scrollbars="none"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layoutCreateNewSite"
-        android:scrollbars="none"
-        android:scrollbarStyle="insideOverlay">
+        app:layout_constraintTop_toBottomOf="@+id/layoutCreateNewSite">
 
         <RelativeLayout
             android:id="@+id/rlFields"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginRight="78dp"
+            android:layout_marginEnd="78dp"
             android:scrollbars="vertical">
 
             <TextView
                 android:id="@+id/textCCU"
-                android:textAllCaps="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/timeZoneSelector"
                 android:layout_marginTop="20dp"
-                android:textColor="@color/orange_75f"
                 android:fontFamily="@font/lato_bold"
-                android:textStyle="bold"
                 android:text="@string/title_ccu"
-                android:textSize="34dp" />
+                android:textAllCaps="true"
+                android:textColor="@color/orange_75f"
+                android:textSize="34sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/textPairingAddress"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textCCU"
-                android:layout_marginLeft="76dp"
+                android:layout_marginStart="76dp"
+                android:layout_marginTop="42dp"
+                android:alpha="0.87"
                 android:text="@string/pairingadd"
                 android:textColor="@color/black"
-                android:alpha="0.87"
-                android:layout_marginTop="42dp"
-                android:textSize="25dp"/>
+                android:textSize="25sp" />
 
             <TextView
                 android:id="@+id/textPairingDesc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textPairingAddress"
-                android:layout_marginLeft="76dp"
+                android:layout_marginStart="76dp"
+                android:alpha="0.60"
                 android:text="@string/pairingadddesc"
                 android:textColor="@color/black"
-                android:alpha="0.60"
-                android:textSize="19.5dp"/>
+                android:textSize="19.5sp" />
 
             <Spinner
                 android:id="@+id/spinnerAddress"
@@ -99,21 +100,22 @@
                 android:layout_width="100dp"
                 android:layout_height="42dp"
                 android:layout_below="@+id/textCCU"
-                android:layout_alignParentRight="true"
-                android:spinnerMode="dropdown"
-                android:layout_marginTop="42dp"/>
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="42dp"
+                android:spinnerMode="dropdown" />
 
             <TextView
                 android:id="@+id/textUseOutside"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textPairingDesc"
-                android:layout_marginLeft="76dp"
+                android:layout_marginStart="76dp"
+                android:layout_marginTop="36dp"
+                android:alpha="0.87"
                 android:text="@string/outsideairtemp"
                 android:textColor="@color/black"
-                android:alpha="0.87"
-                android:layout_marginTop="36dp"
-                android:textSize="25dp"/>
+                android:textSize="25sp"
+                android:visibility="gone" />
 
 
             <TextView
@@ -121,231 +123,260 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textUseOutside"
-                android:layout_marginLeft="76dp"
+                android:layout_marginStart="76dp"
+                android:alpha="0.60"
                 android:text="@string/outsideairtempdesc"
                 android:textColor="@color/black"
-                android:alpha="0.60"
-                android:textSize="19.5dp"/>
+                android:textSize="19.5sp"
+                android:visibility="gone" />
 
 
             <ToggleButton
                 android:id="@+id/toggleOustideAir"
                 android:layout_width="47dp"
                 android:layout_height="28dp"
-                android:layout_alignParentRight="true"
+                android:layout_below="@+id/textPairingDesc"
+                android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
+                android:layout_marginTop="36dp"
                 android:background="@drawable/toggle_selector"
                 android:checked="false"
-                android:layout_marginTop="36dp"
                 android:textOff=""
                 android:textOn=""
-                android:layout_below="@+id/textPairingDesc" />
+                android:visibility="gone" />
 
 
             <TextView
                 android:id="@+id/textBuilding"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAllCaps="true"
                 android:layout_below="@+id/textUseOutsideDesc"
                 android:layout_marginTop="36dp"
-                android:textColor="@color/orange_75f"
                 android:fontFamily="@font/lato_bold"
                 android:text="@string/title_building"
-                android:textStyle="bold"
-                android:textSize="34dp" />
+                android:textAllCaps="true"
+                android:textColor="@color/orange_75f"
+                android:textSize="34sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/textTempLimit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textBuilding"
-                android:layout_marginLeft="76dp"
+                android:layout_marginStart="76dp"
+                android:layout_marginTop="42dp"
+                android:alpha="0.87"
                 android:text="@string/templimit"
                 android:textColor="@color/black"
-                android:alpha="0.87"
-                android:layout_marginTop="42dp"
-                android:textSize="25dp"/>
+                android:textSize="25sp" />
 
             <TextView
                 android:id="@+id/textTempLimitDesc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textTempLimit"
-                android:layout_marginLeft="76dp"
+                android:layout_marginStart="76dp"
+                android:alpha="0.60"
                 android:text="@string/templimitdesc"
                 android:textColor="@color/black"
-                android:alpha="0.60"
-                android:textSize="19.5dp"/>
+                android:textSize="19.5sp" />
 
             <a75f.io.renatus.views.TempLimit.TempLimitView
                 android:id="@+id/imageTemp"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
                 android:layout_below="@+id/textTempLimitDesc"
-                android:layout_marginTop="36dp"
-                android:layout_marginLeft="76dp" />
+                android:layout_marginStart="76dp"
+                android:layout_marginTop="36dp" />
 
             <TextView
                 android:id="@+id/textUseCelsius"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/imageTemp"
-                android:layout_marginLeft="76dp"
+                android:layout_marginStart="76dp"
+                android:layout_marginTop="36dp"
+                android:alpha="0.87"
                 android:text="@string/usecelsius"
                 android:textColor="@color/black"
-                android:alpha="0.87"
-                android:layout_marginTop="36dp"
-                android:textSize="25dp"/>
+                android:textSize="25sp"
+                android:visibility="gone" />
 
             <ToggleButton
                 android:id="@+id/toggleCelsius"
                 android:layout_width="47dp"
                 android:layout_height="28dp"
-                android:layout_alignParentRight="true"
+                android:layout_below="@+id/imageTemp"
+                android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
+                android:layout_marginTop="36dp"
                 android:background="@drawable/toggle_selector"
                 android:checked="false"
                 android:enabled="false"
-                android:layout_marginTop="36dp"
                 android:textOff=""
                 android:textOn=""
-                android:layout_below="@+id/imageTemp" />
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/textUseMT"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textUseCelsius"
-                android:layout_marginLeft="76dp"
+                android:layout_marginStart="76dp"
+                android:layout_marginTop="36dp"
+                android:alpha="0.87"
                 android:text="@string/usemiltime"
                 android:textColor="@color/black"
-                android:alpha="0.87"
-                android:layout_marginTop="36dp"
-                android:textSize="25dp"/>
+                android:textSize="25sp"
+                android:visibility="gone" />
 
             <ToggleButton
                 android:id="@+id/toggleMT"
                 android:layout_width="47dp"
                 android:layout_height="28dp"
-                android:layout_alignParentRight="true"
+                android:layout_below="@+id/textUseCelsius"
+                android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
+                android:layout_marginTop="36dp"
                 android:background="@drawable/toggle_selector"
                 android:checked="true"
-                android:layout_marginTop="36dp"
+                android:enabled="false"
                 android:textOff=""
                 android:textOn=""
-                android:enabled="false"
-                android:layout_below="@+id/textUseCelsius" />
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/textSingleTemp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textUseMT"
-                android:layout_marginLeft="76dp"
+                android:layout_marginStart="76dp"
+                android:layout_marginTop="36dp"
+                android:alpha="0.87"
                 android:text="@string/usesingletemp"
                 android:textColor="@color/black"
-                android:alpha="0.87"
-                android:layout_marginTop="36dp"
-                android:textSize="25dp"/>
+                android:textSize="25sp"
+                android:visibility="gone" />
 
 
             <ToggleButton
                 android:id="@+id/toggleSingleTemp"
                 android:layout_width="47dp"
                 android:layout_height="28dp"
-                android:layout_alignParentRight="true"
+                android:layout_below="@+id/textUseMT"
+                android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
+                android:layout_marginTop="36dp"
                 android:background="@drawable/toggle_selector"
                 android:checked="false"
                 android:enabled="false"
-                android:layout_marginTop="36dp"
                 android:textOff=""
                 android:textOn=""
-                android:layout_below="@+id/textUseMT" />
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/textTempforAll"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textSingleTemp"
-                android:layout_marginLeft="76dp"
+                android:layout_marginStart="76dp"
+                android:layout_marginTop="36dp"
+                android:alpha="0.87"
                 android:text="@string/usetempforall"
                 android:textColor="@color/black"
-                android:alpha="0.87"
-                android:layout_marginTop="36dp"
-                android:textSize="25dp"/>
+                android:textSize="25sp"
+                android:visibility="gone" />
 
             <ToggleButton
                 android:id="@+id/toggleTempAll"
                 android:layout_width="47dp"
                 android:layout_height="28dp"
-                android:layout_alignParentRight="true"
+                android:layout_below="@+id/textSingleTemp"
+                android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
+                android:layout_marginTop="36dp"
                 android:background="@drawable/toggle_selector"
                 android:checked="false"
                 android:enabled="false"
-                android:layout_marginTop="36dp"
                 android:textOff=""
                 android:textOn=""
-                android:layout_below="@+id/textSingleTemp" />
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/textBacnetEnable"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textTempforAll"
-                android:layout_marginLeft="76dp"
+                android:layout_marginStart="76dp"
+                android:layout_marginTop="36dp"
+                android:alpha="0.87"
                 android:text="@string/enable_bacnet"
                 android:textColor="@color/black"
-                android:alpha="0.87"
-                android:layout_marginTop="36dp"
-                android:textSize="25dp"/>
+                android:textSize="25sp" />
 
             <ToggleButton
                 android:id="@+id/toggleBACnet"
                 android:layout_width="47dp"
                 android:layout_height="28dp"
-                android:layout_alignParentRight="true"
+                android:layout_below="@+id/textTempforAll"
+                android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
+                android:layout_marginTop="36dp"
                 android:background="@drawable/toggle_selector"
                 android:checked="false"
-                android:layout_marginTop="36dp"
                 android:textOff=""
-                android:textOn=""
-                android:layout_below="@+id/textTempforAll" />
+                android:textOn="" />
 
             <RelativeLayout
                 android:id="@+id/rl_Bacnet"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textBacnetEnable"
-                android:layout_marginLeft="96dp"
-                android:layout_marginTop="20dp"
-                >
+                android:layout_marginStart="96dp"
+                android:layout_marginTop="20dp">
+
+                <RadioGroup
+                    android:id="@+id/radioGroup_config"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/rbAuto"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/rb_auto" />
+
+                    <RadioButton
+                        android:id="@+id/rbManual"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="36dp"
+                        android:text="@string/rb_manual" />
+                </RadioGroup>
 
                 <android.support.design.widget.TextInputLayout
                     android:id="@+id/textInputIP"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_below="@+id/radioGroup_config"
                     app:errorTextAppearance="@style/error_appearance">
 
                     <EditText
                         android:id="@+id/editIPaddr"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:minWidth="200dp"
-                        android:fontFamily="@font/lato_regular"
-                        android:gravity="left|center_vertical"
-                        android:hint="@string/hint_deviceIP"
-                        android:text="192.168.192.192"
                         android:digits="0123456789."
-                        android:inputType="numberDecimal"
-                        android:singleLine="true"
+                        android:fontFamily="@font/lato_regular"
+                        android:gravity="start|center_vertical"
+                        android:hint="@string/hint_deviceIP"
+                        android:inputType="numberDecimal|textWebEditText"
                         android:maxLength="16"
+                        android:minWidth="200dp"
+                        android:singleLine="true"
                         android:textColor="@color/input_textcolor"
-                        android:textSize="19.5dp" />
+                        android:textSize="19.5sp" />
                 </android.support.design.widget.TextInputLayout>
 
 
@@ -353,24 +384,24 @@
                     android:id="@+id/textInputSubnet"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toRightOf="@+id/textInputIP"
-                    android:layout_marginLeft="36dp"
+                    android:layout_below="@+id/radioGroup_config"
+                    android:layout_marginStart="56dp"
+                    android:layout_toEndOf="@+id/textInputIP"
                     app:errorTextAppearance="@style/error_appearance">
 
                     <EditText
                         android:id="@+id/editSubnet"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:minWidth="200dp"
                         android:fontFamily="@font/lato_regular"
-                        android:gravity="left|center_vertical"
+                        android:gravity="start|center_vertical"
                         android:hint="@string/hint_deviceSubnet"
-                        android:text="192.168.1.1"
                         android:inputType="numberDecimal"
-                        android:singleLine="true"
                         android:maxLength="16"
+                        android:minWidth="200dp"
+                        android:singleLine="true"
                         android:textColor="@color/input_textcolor"
-                        android:textSize="19.5dp" />
+                        android:textSize="19.5sp" />
                 </android.support.design.widget.TextInputLayout>
 
 
@@ -386,17 +417,16 @@
                         android:id="@+id/editGateway"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:minWidth="200dp"
+                        android:focusable="true"
                         android:fontFamily="@font/lato_regular"
-                        android:gravity="left|center_vertical"
+                        android:gravity="start|center_vertical"
                         android:hint="@string/hint_deviceGateWay"
-                        android:text="192.168.1.1"
                         android:inputType="numberDecimal"
-                        android:singleLine="true"
                         android:maxLength="16"
+                        android:minWidth="200dp"
+                        android:singleLine="true"
                         android:textColor="@color/input_textcolor"
-                        android:textSize="19.5dp"
-                        android:focusable="true"/>
+                        android:textSize="19.5sp" />
                 </android.support.design.widget.TextInputLayout>
 
                 <Button
@@ -404,32 +434,52 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/textInputIP"
-                    android:layout_alignRight="@+id/textInputSubnet"
+                    android:layout_alignEnd="@+id/textInputSubnet"
                     android:layout_alignBottom="@+id/textInputGateway"
-                    android:background="@null"
                     android:layout_marginTop="20dp"
-                    android:padding="5dp"
+                    android:background="@null"
+                    android:focusableInTouchMode="true"
                     android:fontFamily="@font/lato_bold"
+                    android:padding="5dp"
                     android:text="@string/button_initialise"
                     android:textColor="@color/orange_75f"
-                    android:textSize="26dp" />
+                    android:textSize="26sp" />
+
+                <Button
+                    android:id="@+id/buttonSendIAM"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textInputIP"
+                    android:layout_alignBottom="@+id/textInputGateway"
+                    android:layout_marginStart="36dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_toEndOf="@+id/buttonInitialise"
+                    android:background="@null"
+                    android:focusableInTouchMode="true"
+                    android:fontFamily="@font/lato_bold"
+                    android:padding="5dp"
+                    android:text="@string/button_sendIAM"
+                    android:textColor="@color/orange_75f"
+                    android:textSize="26sp"
+                    android:visibility="gone" />
 
             </RelativeLayout>
+
             <Button
                 android:id="@+id/buttonNext"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/rl_Bacnet"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:layout_marginTop="36dp"
                 android:layout_marginBottom="24dp"
                 android:background="@null"
-                android:drawableRight="@drawable/icon_arrowright"
+                android:drawableEnd="@drawable/icon_arrowright"
                 android:drawablePadding="5dp"
                 android:fontFamily="@font/lato_bold"
                 android:text="@string/button_next"
                 android:textColor="@color/orange_75f"
-                android:textSize="24dp" />
+                android:textSize="24sp" />
         </RelativeLayout>
     </ScrollView>
 </android.support.constraint.ConstraintLayout>

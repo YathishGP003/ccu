@@ -61,7 +61,7 @@ public class SplashActivity extends Activity {
                                 startActivity(i);
                                 finish();
                             } else if(prefs.getBoolean("REGISTRATION")) {
-                                if (CCUHsApi.getInstance().isCCURegistered()){
+                                if (!CCUHsApi.getInstance().isCCURegistered()){
                                     String installerEmail = prefs.getString("installerEmail");
                                     CCUHsApi.getInstance().registerCcu(installerEmail);
                                     Log.i("SplashActivity","CCU is not yet registered");

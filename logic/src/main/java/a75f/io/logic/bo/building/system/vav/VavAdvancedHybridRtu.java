@@ -10,7 +10,6 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.haystack.device.ControlMote;
-import a75f.io.logic.tuners.VavTRTuners;
 
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_1;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_2;
@@ -237,11 +236,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
     
         if (getConfigEnabled("analog2") > 0)
         {
-            if (VavSystemController.getInstance().getSystemState() == COOLING) {
-                double staticPressureMinValue = VavTRTuners.getStaticPressureTRTunerVal("spmin");
-                status.append(systemFanLoopOp > staticPressureMinValue * 100 ? " Fan ON " : "");
-            }else
-                status.append(systemFanLoopOp > 0 ? " Fan ON " : "");
+            status.append(systemFanLoopOp > 0 ? " Fan ON " : "");
         }
         if (getConfigEnabled("analog1") > 0)
         {

@@ -17,9 +17,7 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZonePriority;
-import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
-import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.util.CCUUtils;
@@ -351,38 +349,6 @@ public class VavSystemController extends SystemController
     
     }
     
-    public boolean isAllZonesHeating() {
-        for (ZoneProfile p: L.ccu().zoneProfiles)
-        {
-            if (p.getState() != ZoneState.HEATING) {
-                CcuLog.d(L.TAG_CCU_SYSTEM," Equip "+p.getProfileType()+" is not in Heating");
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    public boolean isAnyZoneCooling() {
-        for (ZoneProfile p: L.ccu().zoneProfiles)
-        {
-            System.out.println(" Zone State " +p.state);
-            if (p.getState() == ZoneState.COOLING) {
-                CcuLog.d(L.TAG_CCU_SYSTEM," Equip "+p.getProfileType()+" is in Cooling");
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    public boolean isVavEquip(Equip q) {
-        if (q.getProfile() == ProfileType.VAV_REHEAT.name() ||
-            q.getProfile() == ProfileType.VAV_SERIES_FAN.name() ||
-            q.getProfile() == ProfileType.VAV_PARALLEL_FAN.name()) {
-            return true;
-        }
-        return false;
-    }
-    
     public double getEquipCurrentTemp(String equipRef) {
         return CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \""+equipRef+"\"");
     }
@@ -410,11 +376,6 @@ public class VavSystemController extends SystemController
             }
         }
         return 72;
-    }
-    
-    public double getEquipTempTarget(String zoneRef) //Humidity compensated
-    {
-        return getEquipDesiredTemp(zoneRef);//TODO - TEMP
     }
     
     public boolean isZoneDead(Equip q) {
@@ -486,53 +447,6 @@ public class VavSystemController extends SystemController
     public double getSystemCO2WA() {
         return co2WA;
     }
-    
-    /*public double getZoneCurrentTemp(String zoneRef) {
-        double tempSum = 0;
-        int tempCount = 0;
-        for (ZoneProfile p : L.ccu().zoneProfiles)
-        {
-            if (isVavEquip(p.getEquip()) && p.getEquip().getZoneRef().equals(zoneRef) && p.getCurrentTemp() > 0) {
-                tempSum += p.getCurrentTemp();
-                tempCount++;
-            }
-        }
-        return tempCount > 0 ? tempSum/tempCount : 0;
-    }
-    
-    public ZonePriority getZonePriority(String zoneRef) {
-        ZonePriority priority = NONE;
-        for (ZoneProfile p : L.ccu().zoneProfiles)
-        {
-            if (isVavEquip(p.getEquip()) && p.getEquip().getZoneRef().equals(zoneRef) && p.getPriority().ordinal() > priority.ordinal()) {
-                priority = p.getPriority();
-            }
-        }
-        return priority;
-    }
-    
-    public double getZoneDesiredTemp(String zoneRef)
-    {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and air and temp and desired and zoneRef == \""+zoneRef+"\"");
-    
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("val") != null) {
-                    return Double.parseDouble(valMap.get("val").toString());
-                }
-            }
-        }
-        return 72;
-    }
-    
-    public double getZoneTempTarget(String zoneRef) //Humidity compensated
-    {
-        return getZoneDesiredTemp(zoneRef);//TODO - TEMP
-    }*/
     
     public void updateSystemHumidity() {
         //Average across zones or from proxy zone.
@@ -615,39 +529,6 @@ public class VavSystemController extends SystemController
     public double getAverageSystemTemperature() {
         return averageSystemTemperature;
     }
-    
-    /*public double getDynamicPriority(double zoneLoad, String zoneRef) {
-        
-        ZonePriority p = getZonePriority(zoneRef);
-        if (getZoneCurrentTemp(zoneRef) == 0) {
-            return p.val;
-        }
-    
-        double zonePrioritySpread = 2;
-        double zonePriorityMultiplier = 1.3;
-    
-        for (ZoneProfile z : L.ccu().zoneProfiles)
-        {
-            Equip q = z.getEquip();
-            if (q.getZoneRef().equals(zoneRef)) {
-                zonePrioritySpread = TunerUtil.readTunerValByQuery("point and tuner and vav and zone and priority and spread and equipRef == \""+q.getId()+"\"");
-                break;
-            }
-        }
-    
-        for (ZoneProfile z : L.ccu().zoneProfiles)
-        {
-            Equip q = z.getEquip();
-            if (q.getZoneRef().equals(zoneRef)) {
-                zonePriorityMultiplier = TunerUtil.readTunerValByQuery("point and tuner and vav and zone and priority and multiplier and equipRef == \""+q.getId()+"\"");
-                break;
-            }
-        }
-        
-        //zoneDynamicPriority = zoneBasePriority*((zonePriorityMultiplier )^(rounddownTo10(zoneCoolingLoad/zonePrioritySpread))
-        
-        return p.val * Math.pow(zonePriorityMultiplier, (zoneLoad/zonePrioritySpread) > 10 ? 10 : (zoneLoad/zonePrioritySpread));
-    }*/
     
     @Override
     public State getSystemState() {

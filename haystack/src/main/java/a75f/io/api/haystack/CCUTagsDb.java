@@ -1,9 +1,6 @@
 package a75f.io.api.haystack;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -45,7 +42,6 @@ import java.lang.reflect.Type;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +50,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import a75f.io.logger.CcuLog;
+import a75f.io.api.haystack.MyObjectBox;
+import a75f.io.api.haystack.HisItem_;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.DebugFlags;
@@ -75,8 +73,6 @@ public class CCUTagsDb extends HServer {
 
     public ConcurrentHashMap<String, HDict> tagsMap;
     public ConcurrentHashMap<String, WriteArray>      writeArrays;
-
-    public boolean unitTestMode = false;
 
     private Context appContext = null;
 
@@ -157,9 +153,6 @@ public class CCUTagsDb extends HServer {
                     .setPrettyPrinting()
                     .disableHtmlEscaping()
                     .create();
-            Type listType = new TypeToken<ConcurrentHashMap<String, MapImpl<String, HVal>>>() {
-            }.getType();
-
 
             tagsMap = new ConcurrentHashMap<String, HDict>();
             loadGrid(tagsString);
@@ -203,9 +196,6 @@ public class CCUTagsDb extends HServer {
                 .setPrettyPrinting()
                 .disableHtmlEscaping()
                 .create();
-        Type listType = new TypeToken<Map<String, MapImpl<String, HVal>>>() {
-        }.getType();
-
 
         tagsString = HZincWriter.gridToString(getGridTagsMap());
         appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_TAGS_MAP, tagsString).apply();
@@ -230,17 +220,6 @@ public class CCUTagsDb extends HServer {
         HDict[] hDicts = tagsMap.values().toArray(new HDict[tagsMap.size()]);
         HGrid hGrid = HGridBuilder.dictsToGrid(hDicts);
         return hGrid;
-    }
-
-
-
-    //TODO- TEMP for Unit testing
-    public Map getDbMap() {
-        return tagsMap;
-    }
-
-    public void setTagsDbMap() {
-        tagsMap = new ConcurrentHashMap<>();
     }
 
     public void init() {
@@ -277,35 +256,6 @@ public class CCUTagsDb extends HServer {
         }
     }
 
-
-    public void saveString() {
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapterFactory(hsTypeAdapter)
-                .setPrettyPrinting()
-                .disableHtmlEscaping()
-                .create();
-        Type listType = new TypeToken<Map<String, MapImpl<String, HVal>>>() {
-        }.getType();
-        tagsString = HZincWriter.gridToString(getGridTagsMap());;
-
-        Type waType = new TypeToken<Map<String, WriteArray>>() {
-        }.getType();
-        waString = gson.toJson(writeArrays, waType);
-        idMapString = gson.toJson(idMap);
-        removeIdMapString = gson.toJson(removeIdMap);
-        removeIdMapString = gson.toJson(updateIdMap);
-    }
-
-
-    public void addHGrid(HGrid hGrid) {
-        for (int i = 0; i < hGrid.numRows(); i++) {
-            HRef ref = hGrid.row(i).getRef("id");
-            CcuLog.d("CCU_HS","Ref: " + ref.val);
-
-            tagsMap.put(ref.val, new HDictBuilder().add(hGrid.row(i)).toDict());
-        }
-    }
-
     public HDict addSite(String dis, String geoCity, String geoState, String timeZone, int area, String org, String fcManager,String installer) {
         HDict site = new HDictBuilder()
                 .add("id", HRef.make(dis))
@@ -323,11 +273,6 @@ public class CCUTagsDb extends HServer {
         tagsMap.put(dis, site);
         return site;
     }
-
-    public HDict getSite(String ref) {
-        return (HDict) tagsMap.get(ref);
-    }
-
 
     public String addSite(Site s) {
         HDictBuilder site = new HDictBuilder()
@@ -473,33 +418,6 @@ public class CCUTagsDb extends HServer {
         return id.toCode();
     }
 
-    public void updatePoint(Point p, String i) {
-        HDictBuilder b = new HDictBuilder()
-                .add("id", HRef.copy(i))
-                .add("dis", p.getDisplayName())
-                .add("point", HMarker.VAL)
-                .add("siteRef", p.getSiteRef())
-                .add("equipRef", p.getEquipRef())
-                .add("roomRef", p.getRoomRef())
-                .add("floorRef", p.getFloorRef())
-                .add("group", p.getGroup())
-                .add("kind", p.getKind() == null ? "Number" : p.getKind())
-                .add("tz", p.getTz());
-        if (p.getUnit() != null) b.add("unit", p.getUnit());
-        if (p.getEnums() != null) b.add("enum", p.getEnums());
-        if (p.getMinVal() != null) b.add("minVal",Double.parseDouble(p.getMinVal()));
-        if (p.getMaxVal() != null) b.add("maxVal",Double.parseDouble(p.getMaxVal()));
-        if (p.getIncrementVal() != null) b.add("incrementVal",Double.parseDouble(p.getIncrementVal()));
-        if (p.getTunerGroup() != null) b.add("tunerGroup",p.getTunerGroup());
-        if (p.getHisInterpolate() != null) b.add("hisInterpolate",p.getHisInterpolate());
-        
-        for (String m : p.getMarkers()) {
-            b.add(m);
-        }
-        HRef id = (HRef) b.get("id");
-        tagsMap.put(id.toVal(), b.toDict());
-    }
-
     public String addPoint(RawPoint p) {
         HDictBuilder b = new HDictBuilder()
                 .add("id", HRef.make(UUID.randomUUID().toString()))
@@ -565,26 +483,6 @@ public class CCUTagsDb extends HServer {
         HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
         return id.toCode();
-    }
-    
-    public void updatePoint(SettingPoint p, String i) {
-        HDictBuilder b = new HDictBuilder()
-                                 .add("id", HRef.copy(i))
-                                 .add("dis", p.getDisplayName())
-                                 .add("point", HMarker.VAL)
-                                 .add("setting", HMarker.VAL)
-                                 .add("deviceRef", p.getDeviceRef())
-                                 .add("siteRef", p.getSiteRef())
-                                 .add("val", p.getVal())
-                                 .add("kind", p.getKind() == null ? "Number" : p.getKind());
-        
-        if (p.getUnit() != null) b.add("unit", p.getUnit());
-        
-        for (String m : p.getMarkers()) {
-            b.add(m);
-        }
-        HRef id = (HRef) b.get("id");
-        tagsMap.put(id.toVal(), b.toDict());
     }
     
     public String addDevice(Device d) {
@@ -687,12 +585,6 @@ public class CCUTagsDb extends HServer {
         }
         HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
-    }
-
-    public void updateZone(Zone z) {
-        HDict b = z.getHDict();
-        HRef id = (HRef) b.get("id");
-        tagsMap.put(id.toVal(), b);
     }
 
 
@@ -920,6 +812,7 @@ public class CCUTagsDb extends HServer {
             hisItem.setRec(rec.get("id").toString());
             hisItem.setVal(Double.parseDouble(item.val.toString()));
             hisItem.setSyncStatus(false);
+            CcuLog.d(TAG,"Adding historized item for point ID " + rec.get("id").toString() + "; description " + rec.get("dis").toString() + "; value "  + item.val.toString());
             hisBox.put(hisItem);
             HisItemCache.getInstance().add(rec.get("id").toString(), hisItem);
         }
@@ -934,17 +827,26 @@ public class CCUTagsDb extends HServer {
         return HGrid.EMPTY;
     }
 
-    public List<HisItem> getUnSyncedHisItems(HRef id) {
-        HDict entity = readById(id);
+    public List<HisItem> getUnsyncedHisItemsOrderDesc(String pointId) {
+        List<HisItem> validHisItems = new ArrayList<>();
 
         QueryBuilder<HisItem> hisQuery = hisBox.query();
-        hisQuery.equal(HisItem_.rec, entity.get("id").toString())
+        hisQuery.equal(HisItem_.rec, pointId)
                 .equal(HisItem_.syncStatus, false)
-                //.greater(HisItem_.date,range.start.millis())
-                //.less(HisItem_.date,range.end.millis())
-                .order(HisItem_.date);
+                .orderDesc(HisItem_.date);
 
-        return hisQuery.build().find();
+        CcuLog.d("CCU_HS", "Finding unsynced items for point ID " + pointId);
+
+        List<HisItem> hisItems = hisQuery.build().find();
+
+        // TODO Matt Rudd - This shouldn't be necessary, but I was seeing null items in the collection; need to investigate
+        for (HisItem hisItem : hisItems) {
+            if  (hisItem != null) {
+                validHisItems.add(hisItem);
+            }
+        }
+
+        return validHisItems;
     }
     
     public HisItem getLastHisItem(HRef id) {
@@ -954,6 +856,7 @@ public class CCUTagsDb extends HServer {
             retVal = hisBox.query().equal(HisItem_.rec, id.toString())
                            .orderDesc(HisItem_.date).build().findFirst();
             if (retVal == null) {
+                // TODO - Matt Rudd This looks competely wrong; if it's null in the DB we assume it's a double and just create it and put it in the cache?  WTF.
                 retVal = new HisItem(id.toString(), new Date(), 0.0, Boolean.FALSE);
             }
             HisItemCache.getInstance().add(id.toString(), retVal);
@@ -961,23 +864,13 @@ public class CCUTagsDb extends HServer {
         return retVal;
     }
 
-    public void setHisItemSyncStatus(ArrayList<HisItem> hisItems) {
+    public void updateHisItemSynced(List<HisItem> hisItems) {
         for (HisItem item : hisItems) {
+            item.setSyncStatus(true);
             hisBox.put(item);
         }
     }
 
-    public List<HisItem> getAllHisItems(HRef id) {
-
-        HDict entity = readById(id);
-
-        QueryBuilder<HisItem> hisQuery = hisBox.query();
-        hisQuery.equal(HisItem_.rec, entity.get("id").toString())
-                .order(HisItem_.date);
-
-        return hisQuery.build().find();
-    }
-    
     public List<HisItem> getHisItems(HRef id, int offset, int limit) {
         
         HDict entity = readById(id);
@@ -989,12 +882,12 @@ public class CCUTagsDb extends HServer {
     }
     
     //Delete all the hisItem entries older than 24 hrs.
-    public void removeHisItems(HRef id) {
+    public void removeExpiredHisItems(HRef id) {
         HDict entity = readById(id);
     
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, entity.get("id").toString())
-                .less(HisItem_.date, System.currentTimeMillis() - 12*60*60*1000)
+                .less(HisItem_.date, System.currentTimeMillis() - 24*60*60*1000)
                 .order(HisItem_.date);
         
         //Leave one hisItem to make sure his data is not empty if there was no more recent entries
@@ -1004,49 +897,6 @@ public class CCUTagsDb extends HServer {
             hisItems.remove(hisItems.size() - 1);
             hisBox.remove(hisItems);
         }
-    }
-
-    public void dropDbAndUpdate() {
-        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(appContext);
-        final SharedPreferences.Editor prefEditor = spDefaultPrefs.edit();
-        prefEditor.putBoolean("registered", false);
-        prefEditor.apply();
-
-        ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and his");
-        List<HisItem> hisItems = new ArrayList<>();
-        if (points.size() > 0) {
-            for (Map m : points) {
-                HDict entity = readById(HRef.copy(m.get("id").toString()));
-                QueryBuilder<HisItem> hisQuery = hisBox.query();
-
-                hisQuery.equal(HisItem_.rec, entity.get("id").toString())
-                        .order(HisItem_.date);
-
-                hisItems = hisQuery.build().find();
-            }
-        }
-
-        if (boxStore != null && !boxStore.isClosed()) {
-            boxStore.close();
-        }
-
-        // drop db
-        boxStore.deleteAllFiles();
-
-        init(appContext);
-
-        for (HisItem hisItem : hisItems) {
-            hisBox.put(hisItem);
-        }
-
-        new Handler(appContext.getMainLooper()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                prefEditor.putBoolean("registered", true);
-                prefEditor.commit();
-            }
-        }, 60000);
-
     }
 
     public void removeAllHisItems(HRef id) {

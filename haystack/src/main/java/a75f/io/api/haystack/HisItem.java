@@ -7,10 +7,6 @@ import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
 import io.objectbox.annotation.Transient;
 
-/**
- * Created by samjithsadasivan on 9/24/18.
- */
-
 @Entity
 public class HisItem
 {
@@ -76,6 +72,9 @@ public class HisItem
     public Date getDate()
     {
         return new Date(date);
+    }
+    public long getDateInMillis() {
+        return date;
     }
     public void setDate(Date date)
     {

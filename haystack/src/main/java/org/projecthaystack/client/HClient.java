@@ -10,6 +10,7 @@ package org.projecthaystack.client;
 
 import android.util.Log;
 
+import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
@@ -33,12 +34,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 
-import javax.net.ssl.HttpsURLConnection;
-
-import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
 import info.guardianproject.netcipher.NetCipher;
@@ -626,8 +625,7 @@ public class HClient extends HProj
       }
       // setup the POST request
       URL url = new URL(uriStr);
-      HttpsURLConnection c = openHttpsConnection(url, "POST");
-      //c = auth.prepare(c);
+      HttpURLConnection c = openHttpConnection(url, "POST");
       try
       {
         c.setDoOutput(true);
@@ -681,22 +679,28 @@ public class HClient extends HProj
 // Utils
 ////////////////////////////////////////////////////////////////
 
-  private HttpsURLConnection openHttpsConnection(URL url, String method)
+  private HttpURLConnection openHttpConnection(URL url, String method)
     throws IOException
   {
-    return openHttpsConnection(url, method, this.connectTimeout, this.readTimeout);
+    return openHttpConnection(url, method, this.connectTimeout, this.readTimeout);
   }
 
-  public static HttpsURLConnection openHttpsConnection(URL url, String method, int connectTimeout, int readTimeout)
+  public static HttpURLConnection openHttpConnection(URL url, String method, int connectTimeout, int readTimeout)
     throws IOException
   {
-    HttpsURLConnection c = CCUHsApi.getInstance().unitTestingEnabled ? (HttpsURLConnection)url.openConnection() :
-                                                      NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
-    c.setRequestMethod(method);
-    c.setInstanceFollowRedirects(false);
-    c.setConnectTimeout(connectTimeout);
-    c.setReadTimeout(readTimeout);
-    return c;
+    HttpURLConnection connection;
+
+    if (StringUtils.equals(url.getProtocol(), HttpUtil.HTTP_SCHEME)) {
+      connection = (HttpURLConnection)url.openConnection();
+    } else {
+      connection = NetCipher.getHttpsURLConnection(url);
+    }
+
+    connection.setRequestMethod(method);
+    connection.setInstanceFollowRedirects(false);
+    connection.setConnectTimeout(connectTimeout);
+    connection.setReadTimeout(readTimeout);
+    return connection;
   }
 
 ////////////////////////////////////////////////////////////////

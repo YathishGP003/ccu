@@ -69,7 +69,6 @@ public class DefaultSystem extends SystemProfile
                                    .setDisplayName(siteDis+"-SystemEquip")
                                    .setProfile(ProfileType.SYSTEM_DEFAULT.name())
                                    .addMarker("equip").addMarker("system").addMarker("default")
-                                   .addMarker("equipHis")
                                    .setTz(siteMap.get("tz").toString())
                                    .build();
         String equipRef = hayStack.addEquip(systemEquip);

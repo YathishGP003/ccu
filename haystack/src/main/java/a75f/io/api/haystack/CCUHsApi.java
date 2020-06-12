@@ -2,6 +2,7 @@ package a75f.io.api.haystack;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -38,20 +39,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.sync.EntityParser;
 import a75f.io.api.haystack.sync.EntitySyncHandler;
 import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
-import a75f.io.api.haystack.sync.InfluxDbUtil;
 import a75f.io.logger.CcuLog;
 
-/**
- * Created by samjithsadasivan on 9/3/18.
- */
 public class CCUHsApi
 {
 
-    public static  boolean  DEBUG_CCUHS = true;
     public static boolean CACHED_HIS_QUERY = false ;
     private static CCUHsApi instance;
 
@@ -68,7 +65,6 @@ public class CCUHsApi
     Context cxt;
     
     String hayStackUrl = "";
-    String influxUrl = "";
     String careTakerUrl ="";
     
     HRef tempWeatherRef = null;
@@ -98,21 +94,6 @@ public class CCUHsApi
         hisSyncHandler = new HisSyncHandler(this);
     }
 
-    //TODO - Temp for Unit test
-    public CCUHsApi()
-    {
-        if (instance != null)
-        {
-            throw new IllegalStateException("Api instance already created , use getInstance()");
-        }
-        hsClient = new AndroidHSClient();
-        tagsDb = (CCUTagsDb) hsClient.db();
-        tagsDb.init();
-        instance = this;
-        entitySyncHandler = new EntitySyncHandler();
-        hisSyncHandler = new HisSyncHandler(this);
-    }
-
     public HClient getHSClient()
     {
         return hsClient;
@@ -121,78 +102,33 @@ public class CCUHsApi
     public String getHSUrl() {
         if (hayStackUrl.equals(""))
         {
-            SharedPreferences sprefs = PreferenceManager.getDefaultSharedPreferences(cxt);
-            switch (sprefs.getString("SERVER_ENV", "")) {
-                case "QA":
-                    hayStackUrl = "https://haystack-75f-service-qa.azurewebsites.net/";
-                    break;
-                case "DEV":
-                    hayStackUrl = "https://haystack-75f-service-dev.azurewebsites.net/";
-                    break;
-
-                case "STAGING":
-                    hayStackUrl = "https://haystack-75f-service-staging.azurewebsites.net/";
-                    break;
-                case "PROD":
-                default:
-                    hayStackUrl = "https://haystack-75f-service.azurewebsites.net/";
-                    break;
-                 
-            }
+            hayStackUrl = BuildConfig.HAYSTACK_API_BASE;
         }
-        
+        Log.d("Haystack URL: ","url="+hayStackUrl);
         return hayStackUrl;
     }
+
+    public String hisWriteManyToHaystackService(HDict hisWriteMetadata, HDict[] hisWritePoints) {
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cxt);
+        String apiToken = sharedPreferences.getString("token","");
+
+        HGrid hisWriteRequest = HGridBuilder.dictsToGrid(hisWriteMetadata, hisWritePoints);
+
+        return HttpUtil.executePost(
+                CCUHsApi.getInstance().getHSUrl() + "hisWriteMany/",
+                HZincWriter.gridToString(hisWriteRequest),
+                apiToken
+        );
+    }
+
     public String getAuthenticationUrl() {
         if (careTakerUrl.equals(""))
         {
-            SharedPreferences sprefs = PreferenceManager.getDefaultSharedPreferences(cxt);
-            switch (sprefs.getString("SERVER_ENV", "")) {
-                case "QA":
-                    careTakerUrl = "https://caretaker-75f-service-qa.azurewebsites.net/";
-                    break;
-                case "DEV":
-                    careTakerUrl = "https://caretaker-75f-service-dev.azurewebsites.net/";
-                    break;
-
-                case "STAGING":
-                    careTakerUrl = "https://caretaker-75f-service-staging.azurewebsites.net/";
-                    break;
-                case "PROD":
-                default:
-                    careTakerUrl = "https://caretaker-75f-service.azurewebsites.net/";
-                    break;
-
-            }
+            careTakerUrl = BuildConfig.CARETAKER_API_BASE;
         }
-        Log.d("PRODUCT FLAVOUR","careTakerUrl url="+careTakerUrl);
+        Log.d("Authentication URL: ","url="+careTakerUrl);
         return careTakerUrl;
-    }
-    public String getInfluxUrl() {
-        if (influxUrl.equals(""))
-        {
-            SharedPreferences sprefs = PreferenceManager.getDefaultSharedPreferences(cxt);
-            
-            switch (sprefs.getString("SERVER_ENV", "")) {
-                case "QA":
-                    influxUrl = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("influx-75f-objectstore-qa.northcentralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
-                    break;
-                case "DEV":
-                    //influxUrl = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("influx.northcentralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("ccu").setPassword("7575").buildUrl();
-                    influxUrl = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("influx-75f-objectstore-dev.northcentralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
-                    break;
-                case "STAGING":
-                    influxUrl = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("influx-75f-objectstore-staging.northcentralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
-                    break;
-                case "PROD":
-                default:
-                    influxUrl = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("influx-75f-objectstore-prod.northcentralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
-                    break;
-            }
-        }
-    
-        return influxUrl;
-        
     }
     
     public synchronized void saveTagsData()
@@ -265,15 +201,6 @@ public class CCUHsApi
         }
     }
 
-    public void updatePoint(Point p, String id)
-    {
-        tagsDb.updatePoint(p, id);
-        if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
-        }
-    }
-
     public void updatePoint(RawPoint r, String id)
     {
         tagsDb.updatePoint(r, id);
@@ -317,7 +244,7 @@ public class CCUHsApi
                 while (it.hasNext())
                 {
                     HashMap<Object, Object> map = new HashMap<>();
-                    HRow                    r   = (HRow) it.next();
+                    HRow r   = (HRow) it.next();
                     HRow.RowIterator        ri  = (HRow.RowIterator) r.iterator();
                     while (ri.hasNext())
                     {
@@ -399,20 +326,6 @@ public class CCUHsApi
         {
             HDict dict = hsClient.read(query);
             return dict;
-        }
-        catch (UnknownRecException e)
-        {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public HGrid readHGrid(String query)
-    {
-        try
-        {
-            HGrid grid = hsClient.readAll(query);
-            return grid;
         }
         catch (UnknownRecException e)
         {
@@ -602,10 +515,6 @@ public class CCUHsApi
         return rowList;
     }
     
-    public HGrid readPointGrid(String id) {
-        return hsClient.pointWriteArray(HRef.copy(id));
-    }
-    
     public HGrid readPointArrRemote(String id) {
         HDictBuilder b = new HDictBuilder().add("id", HRef.copy(id));
         HDict[] dictArr  = {b.toDict()};
@@ -614,15 +523,6 @@ public class CCUHsApi
       
         return response == null ? null : new HZincReader(response).readGrid();
     }
-    
-    public HGrid readByIdRemote(String id) {
-        HDictBuilder b = new HDictBuilder().add("id", HRef.copy(id));
-        HDict[] dictArr  = {b.toDict()};
-        String response = HttpUtil.executePost(getHSUrl() + "read", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
-        CcuLog.d("CCU_HS", "Response : "+response);
-        return response == null ? null : new HZincReader(response).readGrid();
-    }
-    
     
     public double readPointPriorityVal(String id) {
         
@@ -661,18 +561,6 @@ public class CCUHsApi
         }
         
         return id;
-    }
-    
-    
-    public void hisWrite(ArrayList<HisItem> hisList)
-    {
-        HHisItem[] array = new HHisItem[hisList.size()];
-        for (int itr = 0; itr < array.length; itr++)
-        {
-            HisItem item = hisList.get(itr);
-            array[itr] = HHisItem.make(HDateTime.make(item.date), HNum.make(item.getVal()));
-        }
-        hsClient.hisWrite(HRef.copy(hisList.get(0).getRec()), array);
     }
 
     public void hisWrite(HisItem item)
@@ -779,7 +667,7 @@ public class CCUHsApi
                     cachedId = p.get("id").toString();
                     QueryCache.getInstance().add(query, cachedId);
                     HisItem item = new HisItem(cachedId, new Date(), val);
-                    hisWrite(item);
+                      hisWrite(item);
                 }
             }
         } else {
@@ -796,34 +684,6 @@ public class CCUHsApi
                 hisWrite(item);
             }
         }
-    }
-
-    public ArrayList<HashMap> nav(String id)
-    {
-
-        ArrayList<HashMap> rowList = new ArrayList<>();
-        try
-        {
-            HGrid    grid = hsClient.nav(HStr.make(id.replace("@", "")));
-            Iterator it   = grid.iterator();
-            while (it.hasNext())
-            {
-                HashMap<Object, Object> map = new HashMap<>();
-                HRow                    r   = (HRow) it.next();
-                HRow.RowIterator        ri  = (HRow.RowIterator) r.iterator();
-                while (ri.hasNext())
-                {
-                    HDict.MapEntry m = (HDict.MapEntry) ri.next();
-                    map.put(m.getKey(), m.getValue());
-                }
-                rowList.add(map);
-            }
-        }
-        catch (UnknownRecException e)
-        {
-            e.printStackTrace();
-        }
-        return rowList;
     }
 
     public void deleteEntity(String id)
@@ -1075,16 +935,6 @@ public class CCUHsApi
                             removeMap.remove(map.getKey());
                         }
                     }
-
-                    // exclude cm devices for force sync
-                   /* ArrayList<HashMap> hDList = readAll("device");
-                    for (HashMap h: hDList){
-                        Device d = new Device.Builder().setHashMap(h).build();
-
-                        if (d.getMarkers().contains("cm") && d.getId().equals(map.getKey())){
-                            removeMap.remove(map.getKey());
-                        }
-                    }*/
                 }
 
                 // finally clear remaining id's for force sync
@@ -1110,7 +960,7 @@ public class CCUHsApi
 
     public void syncHisData()
     {
-        hisSyncHandler.doSync();
+        hisSyncHandler.sync();
     }
 
     public boolean syncExistingSite(String siteId)
@@ -1123,8 +973,6 @@ public class CCUHsApi
             return false;
         }
 
-        //HGrid remoteSiteDetails = getRemoteSiteDetails(siteId);
-        
         EntityParser p = new EntityParser(remoteSite);
         Site s = p.getSite();
         tagsDb.idMap.put("@"+tagsDb.addSite(s), s.getId());
@@ -1136,10 +984,6 @@ public class CCUHsApi
         HGrid syncData = hClient.call("sync", hGrid);
         
         p = new EntityParser(syncData);
-        
-        //tagsDb.addHGrid(remoteSite);
-        //tagsDb.addHGrid(remoteSiteDetails);
-    
         p.importSchedules();
         p.importBuildingTuner();
     
@@ -1150,8 +994,6 @@ public class CCUHsApi
             HGrid wa = hClient.call("pointWrite",HGridBuilder.dictToGrid(pid));
             if (wa != null) {
                 wa.dump();
-            } else {
-               // return false;
             }
 
             ArrayList<HashMap> valList = new ArrayList<>();
@@ -1215,11 +1057,6 @@ public class CCUHsApi
         CcuLog.d("CCU_HS", "" + tagsDb);
     }
 
-    public void addExistingSite(HGrid site)
-    {
-        tagsDb.addHGrid(site);
-    }
-
     public HGrid getCCUs()
     {
         HDict hDict = new HDictBuilder().add("filter", "ccu").toDict();
@@ -1227,9 +1064,9 @@ public class CCUHsApi
         return ccus;
     }
 
-    public void addOrUpdateConfigProperty(String thisCCU, HRef id)
+    public void addOrUpdateConfigProperty(String ccu, HRef id)
     {
-        tagsDb.updateConfig("currentCCU", id);
+        tagsDb.updateConfig(ccu, id);
     }
 
     public String createCCU(String ccuName, String installerEmail, String equipRef, String managerEmail)
@@ -1374,12 +1211,6 @@ public class CCUHsApi
         return site.row(0).getRef("id");
     }
 
-    public Schedule getSiteSchedule()
-    {
-        Schedule schedule = new Schedule.Builder().setHDict(tagsDb.read("schedule")).build();
-        return schedule;
-    }
-
     public ArrayList<Schedule> getSystemSchedule(boolean vacation)
     {
         ArrayList<Schedule> schedules = new ArrayList<>();
@@ -1473,11 +1304,6 @@ public class CCUHsApi
         //Log.d("CCU_HS", " getScheduleById " +hDict.toZinc() );
         return new Schedule.Builder().setHDict(hDict).build();
     }
-
-    public void loadTagsData(Context c)
-    {
-        tagsDb.init(c);
-    }
     
     public double getPredictedPreconRate(String ahuRef) {
         HClient hClient   = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
@@ -1519,12 +1345,14 @@ public class CCUHsApi
             HDict navIdDict = new HDictBuilder().add(HayStackConstants.ID, HRef.copy(getGUID(getSiteId().toString()))).toDict();
             HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
             HGrid site = hClient.call(HStdOps.read.name(), hGrid);
-            HDict tDict = new HDictBuilder().add("filter", "weatherPoint and air and temp and weatherRef == " + site.row(0).get("weatherRef")).toDict();
-            HGrid weatherPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
-            weatherPoint.dump();
-            if (weatherPoint != null && weatherPoint.numRows() > 0)
-            {
-                tempWeatherRef = weatherPoint.row(0).getRef("id");
+            if (site != null) {
+                HDict tDict = new HDictBuilder().add("filter", "weatherPoint and air and temp and weatherRef == " + site.row(0).get("weatherRef")).toDict();
+                HGrid weatherPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+                weatherPoint.dump();
+                if (weatherPoint != null && weatherPoint.numRows() > 0)
+                {
+                    tempWeatherRef = weatherPoint.row(0).getRef("id");
+                }
             }
         }
         HGrid hisGrid = hClient.hisRead(tempWeatherRef, "current");
@@ -1596,14 +1424,8 @@ public class CCUHsApi
         {
             tagsDb.removeAllHisItems(HRef.copy(m.get("id").toString()));
         }
-
-        //tagsDb.dropDbAndUpdate();
     }
     
-    public ConcurrentHashMap<String, String> getIDMap() {
-        return tagsDb.idMap ;
-    }
-
   public boolean isCCURegistered(){
       SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(cxt);
 

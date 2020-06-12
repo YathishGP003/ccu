@@ -27,23 +27,6 @@ import a75f.io.logger.CcuLog;
 
 public class EntityPullHandler
 {
-    public void doPullSite(String site) {
-        HGridFormat format = HGridFormat.find("text/plain", true);
-        doPullSiteTree(format.makeReader(new ByteArrayInputStream(site.getBytes(StandardCharsets.UTF_8))).readGrid());
-    }
-    
-    public void doPullSiteTree(HGrid grid) {
-        EntityParser parser = new EntityParser(grid);
-        CCUHsApi hsApi = CCUHsApi.getInstance();
-        if (parser.getSite() != null) {
-            Site site = parser.getSite();
-            String siteLuid = hsApi.addSite(site);
-            hsApi.putUIDMap(siteLuid, site.getId());
-            
-            doPullFloorTree(siteLuid, grid);
-        }
-        
-    }
     
     public void doPullSite(HGrid grid) {
         EntityParser parser = new EntityParser(grid);

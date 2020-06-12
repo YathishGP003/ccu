@@ -57,18 +57,6 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 
 public class CreateNewSite extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    HGrid mCCUS;
-    ImageView imageGoback;
-
     TextInputLayout mTextInputSitename;
     EditText mSiteName;
 
@@ -108,48 +96,18 @@ public class CreateNewSite extends Fragment {
     TextView btnUnregisterSite;
     Context mContext;
     LinearLayout btnSetting;
-    String addressBandSelected = "1000";
     Prefs prefs;
-    HGrid mSite;
     private boolean isFreshRegister;
     private static final String TAG = CreateNewSite.class.getSimpleName();
-
-    public CreateNewSite() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment StartCCUFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static CreateNewSite newInstance(String param1, String param2) {
-        CreateNewSite fragment = new CreateNewSite();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        // Inflate the layout for this fragment
 
         View rootView = inflater.inflate(R.layout.fragment_createnewsite, container, false);
 
@@ -165,8 +123,6 @@ public class CreateNewSite extends Fragment {
 
         HashMap site = CCUHsApi.getInstance().read("site");
         HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
-
-        //imageGoback = rootView.findViewById(R.id.imageGoback);
 
         mTextInputSitename = rootView.findViewById(R.id.textInputSitename);
         mSiteName = rootView.findViewById(R.id.editSitename);
@@ -562,7 +518,6 @@ public class CreateNewSite extends Fragment {
 
             String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
             new Handler().postDelayed(() -> {
-               // unRegisterCCU(ccuRegInfo.toString());
                 removeCCU(ccuGUID);
 
             }, 10000);
@@ -579,46 +534,7 @@ public class CreateNewSite extends Fragment {
         alert.show();
     }
 
-    private void unRegisterCCU(String deviceInfo) {
-        AsyncTask<Void, Void, String> ccuUnReg = new AsyncTask<Void, Void, String>() {
-
-            @Override
-            protected String doInBackground(Void... voids) {
-
-               String response = HttpUtil.executeJSONPost(CCUHsApi.getInstance().getAuthenticationUrl() + "api/v1/device/unregister", deviceInfo, prefs.getString("token"));
-                Log.d("CCUUnRegistration", " Response : " + response);
-                return response;
-            }
-
-            @Override
-            protected void onPostExecute(String result) {
-                super.onPostExecute(result);
-                ProgressDialogUtils.hideProgressDialog();
-                if( (result != null) && (!result.equals(""))){
-
-                    try {
-                        JSONObject resString = new JSONObject(result);
-                        if(resString.getBoolean("success")){
-                            prefs.setString("token","");
-                            prefs.setBoolean("registered", false);
-                            Toast.makeText(getActivity(), "CCU Unregistered Successfully", Toast.LENGTH_LONG).show();
-                        } else
-                            Toast.makeText(getActivity(), "CCU Unregistration is not Successful", Toast.LENGTH_LONG).show();
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }else {
-                    Toast.makeText(getActivity(), "CCU Unregistration is not Successful", Toast.LENGTH_LONG).show();
-                }
-            }
-        };
-
-        ccuUnReg.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
     private void removeCCU(String ccuId) {
-        //String ccuRemoveParams = "ver:"+"\"3.0\""+"\n"+"ccuId"+"\n"+ccuId;
         AsyncTask<Void, Void, String> ccuUnReg = new AsyncTask<Void, Void, String>() {
 
             @Override
@@ -766,6 +682,7 @@ public class CreateNewSite extends Fragment {
 
         updateCCUReg.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
+
     private void updateCCURegistrationInfo(final String ccuRegInfo) {
         AsyncTask<Void, Void, String> updateCCUReg = new AsyncTask<Void, Void, String>() {
 
@@ -808,6 +725,7 @@ public class CreateNewSite extends Fragment {
 
         updateCCUReg.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
+
     private class EditTextWatcher implements TextWatcher {
 
         private View view;
@@ -823,7 +741,6 @@ public class CreateNewSite extends Fragment {
         }
 
         public void afterTextChanged(Editable editable) {
-            String text = editable.toString();
             switch (view.getId()) {
                 case R.id.editSitename:
                     if (mSiteName.getText().length() > 0) {
@@ -957,8 +874,6 @@ public class CreateNewSite extends Fragment {
     /* This site never existed we are creating a new orphaned site. */
 
     public String saveSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState, String siteCountry, String org, String installer, String fcManager) {
-        HashMap site = CCUHsApi.getInstance().read("site");
-
         String tzID = mTimeZoneSelector.getSelectedItem().toString();
         AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         am.setTimeZone(tzID);
@@ -969,7 +884,7 @@ public class CreateNewSite extends Fragment {
                 .addMarker("orphan")
                 .setGeoCity(siteCity)
                 .setGeoState(siteState)
-                .setTz(tzID.substring(tzID.lastIndexOf("/") + 1))//Haystack requires tz area string.
+                .setTz(tzID.substring(tzID.lastIndexOf("/") + 1))
                 .setGeoZip(siteZip)
                 .setGeoCountry(siteCountry)
                 .setOrgnization(org)
@@ -1005,7 +920,7 @@ public class CreateNewSite extends Fragment {
                 .addMarker("orphan")
                 .setGeoCity(siteCity)
                 .setGeoState(siteState)
-                .setTz(tzID.substring(tzID.lastIndexOf("/") + 1))//Haystack requires tz area string.
+                .setTz(tzID.substring(tzID.lastIndexOf("/") + 1))
                 .setGeoZip(siteZip)
                 .setGeoCountry(siteCountry)
                 .setGeoAddress(geoAddress)

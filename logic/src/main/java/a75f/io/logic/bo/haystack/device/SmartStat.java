@@ -39,7 +39,7 @@ public class SmartStat {
     public SmartStat(int address, String site, String floor, String room, String equipRef,String profile) {
         Device d = new Device.Builder()
                 .setDisplayName("SS-"+address)
-                .addMarker("network").addMarker("equipHis").addMarker("node").addMarker(profile)
+                .addMarker("network").addMarker("his").addMarker("node").addMarker(profile)
                 .addMarker("smartstat")
                 .setEquipRef(equipRef)
                 .setAddr(address)
@@ -82,7 +82,7 @@ public class SmartStat {
                 .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("sensor").addMarker("his").addMarker("equipHis")
+                .addMarker("sensor").addMarker("his")
                 .addMarker("mV")
                 .setTz(tz)
                 .build();
@@ -96,7 +96,7 @@ public class SmartStat {
                 .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("sensor").addMarker("his").addMarker("equipHis")
+                .addMarker("sensor").addMarker("his")
                 .setUnit("mV")
                 .setTz(tz)
                 .build();
@@ -109,7 +109,7 @@ public class SmartStat {
                 .setPort(Port.TH1_IN.toString())
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("sensor").addMarker("his").addMarker("equipHis")
+                .addMarker("sensor").addMarker("his")
                 .setUnit("Ohm")
                 .setTz(tz)
                 .build();
@@ -122,7 +122,7 @@ public class SmartStat {
                 .setPort(Port.TH2_IN.toString())
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("sensor").addMarker("his").addMarker("equipHis")
+                .addMarker("sensor").addMarker("his")
                 .setUnit("Ohm")
                 .setTz(tz)
                 .build();
@@ -136,7 +136,7 @@ public class SmartStat {
                 .setFloorRef(floorRef)
                 .setPort(Port.RELAY_ONE.toString())
                 .setType(OutputRelayActuatorType.NormallyOpen.displayName)
-                .addMarker("cmd").addMarker("his").addMarker("equipHis")
+                .addMarker("cmd").addMarker("his")
                 .setTz(tz)
                 .build();
 
@@ -148,7 +148,7 @@ public class SmartStat {
                 .setFloorRef(floorRef)
                 .setPort(Port.RELAY_TWO.toString())
                 .setType(OutputRelayActuatorType.NormallyOpen.displayName)
-                .addMarker("cmd").addMarker("his").addMarker("equipHis")
+                .addMarker("cmd").addMarker("his")
                 .setTz(tz)
                 .build();
 
@@ -160,7 +160,7 @@ public class SmartStat {
                 .setFloorRef(floorRef)
                 .setPort(Port.RELAY_THREE.toString())
                 .setType(OutputRelayActuatorType.NormallyOpen.displayName)
-                .addMarker("cmd").addMarker("his").addMarker("equipHis")
+                .addMarker("cmd").addMarker("his")
                 .setTz(tz)
                 .build();
 
@@ -172,7 +172,7 @@ public class SmartStat {
                 .setFloorRef(floorRef)
                 .setPort(Port.RELAY_FOUR.toString())
                 .setType(OutputRelayActuatorType.NormallyOpen.displayName)
-                .addMarker("cmd").addMarker("his").addMarker("equipHis")
+                .addMarker("cmd").addMarker("his")
                 .setTz(tz)
                 .build();
 
@@ -184,7 +184,7 @@ public class SmartStat {
                 .setFloorRef(floorRef)
                 .setPort(Port.RELAY_FIVE.toString())
                 .setType(OutputRelayActuatorType.NormallyOpen.displayName)
-                .addMarker("cmd").addMarker("his").addMarker("equipHis")
+                .addMarker("cmd").addMarker("his")
                 .setTz(tz)
                 .build();
 
@@ -196,7 +196,7 @@ public class SmartStat {
                 .setFloorRef(floorRef)
                 .setPort(Port.RELAY_SIX.toString())
                 .setType(OutputRelayActuatorType.NormallyOpen.displayName)
-                .addMarker("cmd").addMarker("his").addMarker("equipHis")
+                .addMarker("cmd").addMarker("his")
                 .setTz(tz)
                 .build();
 
@@ -206,7 +206,7 @@ public class SmartStat {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("sensor").addMarker("his").addMarker("equipHis")
+                .addMarker("sensor").addMarker("his")
                 .setPort(Port.SENSOR_RT.toString())
                 .setUnit("\u00B0F")
                 .setTz(tz)
@@ -219,7 +219,7 @@ public class SmartStat {
                               .setSiteRef(siteRef)
                               .setRoomRef(roomRef)
                               .setFloorRef(floorRef)
-                              .addMarker("sensor").addMarker("his").addMarker("equipHis")
+                              .addMarker("sensor").addMarker("his")
                               .setPort(Port.DESIRED_TEMP.toString())
                               .setUnit("\u00B0F")
                               .setTz(tz)
@@ -234,7 +234,7 @@ public class SmartStat {
                                     .setFloorRef(floorRef)
                                     .setPointRef(pointRef)
                                     .setEnabled(true)
-                                    .addMarker("sensor").addMarker("his").addMarker("equipHis")
+                                    .addMarker("sensor").addMarker("his")
                                     .setPort(p.toString())
                                     .setTz(tz)
                                     .build();
@@ -251,7 +251,7 @@ public class SmartStat {
                                  .setSiteRef(siteRef)
                                  .setRoomRef(roomRef)
                                  .setFloorRef(floorRef).setHisInterpolate("cov")
-                                 .addMarker("zone").addMarker("sensor").addMarker(p.getPortSensor()).addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
+                                 .addMarker("zone").addMarker("sensor").addMarker(p.getPortSensor()).addMarker("his").addMarker("cur").addMarker("logical")
                                  .setGroup(String.valueOf(smartNodeAddress))
                                  .setTz(tz)
                                  .build();

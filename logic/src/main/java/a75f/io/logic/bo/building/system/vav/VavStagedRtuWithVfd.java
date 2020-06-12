@@ -57,7 +57,6 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
                                    .setDisplayName(siteDis+"-SystemEquip")
                                    .setProfile(ProfileType.SYSTEM_VAV_STAGED_VFD_RTU.name())
                                    .addMarker("equip").addMarker("system").addMarker("vav")
-                                   .addMarker("equipHis")
                                    .setTz(siteMap.get("tz").toString())
                                    .build();
         String equipRef = hayStack.addEquip(systemEquip);
@@ -251,7 +250,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
         String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
         String siteRef = siteMap.get("id").toString();
         String tz = siteMap.get("tz").toString();
-        Point analog2Signal = new Point.Builder().setDisplayName(equipDis + "-" + "FanSignal").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").addMarker("equipHis").setUnit("%").setTz(tz).build();
+        Point analog2Signal = new Point.Builder().setDisplayName(equipDis + "-" + "FanSignal").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").setUnit("%").setTz(tz).build();
         String cmdPointAnalogId = CCUHsApi.getInstance().addPoint(analog2Signal);
         CCUHsApi.getInstance().writeHisValById(cmdPointAnalogId, 0.0);
     }

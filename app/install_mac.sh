@@ -24,7 +24,7 @@ $ADB shell am force-stop $app_package
 rm -rf $apk_host
 
 # Compile the APK: you can adapt this for production build, flavors, etc.
-../gradlew assembleDebug #|| exit -1 # exit on failure
+../gradlew assembleLocal #|| exit -1 # exit on failure
 
 
 $ADB remount # mount system

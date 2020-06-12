@@ -25,6 +25,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.alerts.AlertProcessJob;
+import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
@@ -68,11 +69,6 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.pubnub.PubNubHandler;
 import a75f.io.logic.watchdog.Watchdog;
 
-/**
- * Created by rmatt isOn 7/19/2017.
- */
-
-
 /*
     This is used to keep track of global static associated with application context.
  */
@@ -91,23 +87,18 @@ public class Globals {
     }
 
     private static final int      NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES = 10;
-    private static final int      TASK_SEPERATION                           = 15;
-    private static final TimeUnit TASK_SERERATION_TIMEUNIT                  = TimeUnit.SECONDS;
+    private static final int TASK_SEPARATION = 15;
+    private static final TimeUnit TASK_SEPARATION_TIMEUNIT = TimeUnit.SECONDS;
 
     private static Globals globals;
-    //HeartBeatJob mHeartBeatJob;
     BuildingProcessJob mProcessJob = new BuildingProcessJob();
     ScheduleProcessJob mScheduleProcessJob = new ScheduleProcessJob();
     
     AlertProcessJob mAlertProcessJob;
 
-    PrintProcessJob mPrintProcessJob = new PrintProcessJob();
-    PrintProcessJobTwo mPrintProcessJobTwo = new PrintProcessJobTwo();
-
     private ScheduledExecutorService taskExecutor;
     private Context mApplicationContext;
     private CCUApplication mCCUApplication;
-    private LZoneProfile mLZoneProfile;
     private boolean isSimulation = false;
     private boolean testHarness = true;
 
@@ -139,15 +130,6 @@ public class Globals {
         }
         return getInstance().mCCUApplication;
     }
-
-
-    public LZoneProfile getLZoneProfile() {
-        if (getInstance().mLZoneProfile == null) {
-            getInstance().mLZoneProfile = new LZoneProfile();
-        }
-        return getInstance().mLZoneProfile;
-    }
-
 
     public boolean isSimulation() {
         return getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
@@ -210,13 +192,13 @@ public class Globals {
         }
         
         mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
-                TASK_SEPERATION , TASK_SERERATION_TIMEUNIT);
+                TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
     
         mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
-                TASK_SEPERATION +15, TASK_SERERATION_TIMEUNIT);
+                TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);
     
         mAlertProcessJob = new AlertProcessJob(mApplicationContext);
-        getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPERATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SERERATION_TIMEUNIT );
+        getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
     
         Watchdog.getInstance().addMonitor(mProcessJob);
         Watchdog.getInstance().addMonitor(mScheduleProcessJob);
@@ -293,37 +275,16 @@ public class Globals {
         CcuLog.d(L.TAG_CCU,"registerSiteToPubNub "+siteId.replace("@",""));
 
         PNConfiguration pnConfiguration = new PNConfiguration();
-        SharedPreferences sprefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        switch (sprefs.getString("SERVER_ENV", "")) {
-            case "QA":
 
-                pnConfiguration.setSubscribeKey("sub-c-295bc836-36eb-11ea-bbf4-c6d8f98a95a1");
-                pnConfiguration.setPublishKey("pub-c-a07f9ce7-fb79-4ceb-a8e8-823a28941811");
-                break;
-            case "DEV":
-                pnConfiguration.setSubscribeKey("sub-c-da285df6-36ea-11ea-bbf4-c6d8f98a95a1");
-                pnConfiguration.setPublishKey("pub-c-a90edd5d-7cb5-4e23-9961-cc4183b7a8ce");
-                break;
+        final String pubnubSubscribeKey = BuildConfig.PUBNUB_SUBSCRIBE_KEY;
+        final String pubnubPublishKey = BuildConfig.PUBNUB_PUBLISH_KEY;
 
-            case "STAGING":
-                pnConfiguration.setSubscribeKey("sub-c-540e11a6-36eb-11ea-a657-76e5f2bf83fc");
-                pnConfiguration.setPublishKey("pub-c-8043b6fe-2948-4ad2-9a0b-fed1e4237a5f");
-                break;
-            case "PROD":
-            default:
-                pnConfiguration.setSubscribeKey("sub-c-97b4645a-36eb-11ea-81d4-f6d34a0dd71d");
-                pnConfiguration.setPublishKey("pub-c-bc945448-0b14-4d08-a8d7-5727bdbc2c62");
-                break;
+        pnConfiguration.setSubscribeKey(pubnubSubscribeKey);
+        pnConfiguration.setPublishKey(pubnubPublishKey);
 
-        }
-        //pnConfiguration.setSubscribeKey("sub-c-9497c79c-c96f-11e9-ac59-7e2323a85324");
-        //pnConfiguration.setPublishKey("pub-c-77c360ff-23fa-49e0-a971-7c1b522b594e");
         pnConfiguration.setSecure(false);
 
         pubnub = new PubNub(pnConfiguration);
-
-        //HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-        //final String channelName = (String) siteMap.get(Tags.ID);
 
         // create message payload using Gson
         final JsonObject messageJsonObject = new JsonObject();

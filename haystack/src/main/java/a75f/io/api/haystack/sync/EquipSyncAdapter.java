@@ -31,6 +31,12 @@ public class EquipSyncAdapter extends EntitySyncAdapter
         }
         HashMap site = CCUHsApi.getInstance().read("site");
         String siteLUID = site.get("id").toString();
+
+        String siteGuid = CCUHsApi.getInstance().getGUID(siteLUID);
+
+        if (siteGuid == null) {
+            return false;
+        }
         
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and siteRef == \"" + siteLUID + "\"");
         ArrayList<String> equipLUIDList = new ArrayList();

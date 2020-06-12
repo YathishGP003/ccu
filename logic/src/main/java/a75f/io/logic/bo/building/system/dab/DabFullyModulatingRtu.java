@@ -297,7 +297,6 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                    .setDisplayName(siteDis+"-SystemEquip")
                                    .setProfile(ProfileType.SYSTEM_DAB_ANALOG_RTU.name())
                                    .addMarker("equip").addMarker("system").addMarker("dab")
-                                   .addMarker("equipHis")
                                    .setTz(siteMap.get("tz").toString())
                                    .build();
         String equipRef = hayStack.addEquip(systemEquip);
@@ -332,7 +331,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                       .setDisplayName(equipDis+"-"+"coolingSignal")
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
-                                      .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("logical").addMarker("his").addMarker("equipHis").addMarker("runtime")
+                                      .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("logical").addMarker("his").addMarker("runtime")
                                       .setUnit("%").setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(coolingSignal);
@@ -341,7 +340,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                       .setDisplayName(equipDis+"-"+"heatingSignal")
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
-                                      .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("modulating").addMarker("logical").addMarker("his").addMarker("equipHis").addMarker("runtime")
+                                      .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("modulating").addMarker("logical").addMarker("his").addMarker("runtime")
                                       .setUnit("%").setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(heatingSignal);
@@ -350,7 +349,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                   .setDisplayName(equipDis+"-"+"fanSignal")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
-                                  .setUnit("%").addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("logical").addMarker("his").addMarker("equipHis").addMarker("runtime")
+                                  .setUnit("%").addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("logical").addMarker("his").addMarker("runtime")
                                   .setTz(tz)
                                   .build();
         CCUHsApi.getInstance().addPoint(fanSignal);
@@ -359,7 +358,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                         .setDisplayName(equipDis+"-"+"occupancySignal")
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipref)
-                                        .addMarker("system").addMarker("cmd").addMarker("occupancy").addMarker("his").addMarker("equipHis").addMarker("runtime")
+                                        .addMarker("system").addMarker("cmd").addMarker("occupancy").addMarker("his").addMarker("runtime")
                                         .setTz(tz)
                                         .build();
         CCUHsApi.getInstance().addPoint(occupancySignal);
@@ -367,7 +366,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                          .setDisplayName(equipDis+"-humidifier")
                                          .setSiteRef(siteRef)
                                          .setEquipRef(equipref)
-                                         .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his").addMarker("equipHis").addMarker("runtime")
+                                         .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his").addMarker("runtime")
                                          .setTz(tz)
                                          .build();
         CCUHsApi.getInstance().addPoint(humidifierSignal);*/
@@ -376,7 +375,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                            .setDisplayName(equipDis+"-"+"dehumidifierSignal")
                                            .setSiteRef(siteRef)
                                            .setEquipRef(equipref)
-                                           .addMarker("system").addMarker("cmd").addMarker("dehumidifier").addMarker("his").addMarker("equipHis")
+                                           .addMarker("system").addMarker("cmd").addMarker("dehumidifier").addMarker("his")
                                            .setUnit("%").setTz(tz)
                                            .build();
         CCUHsApi.getInstance().addPoint(dehumidifierSignal);*/
@@ -620,7 +619,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                 .setDisplayName(equipDis + "-" + "coolingSignal")
                                 .setSiteRef(siteRef)
                                 .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
-                                .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("his").addMarker("equipHis").setUnit("%")
+                                .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("his").setUnit("%")
                                 .setTz(tz)
                                 .build();
                         String cmdCoolingPtId = CCUHsApi.getInstance().addPoint(coolingSignal);
@@ -638,7 +637,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                 .setDisplayName(equipDis + "-" + "fanSignal")
                                 .setSiteRef(siteRef)
                                 .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
-                                .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").addMarker("equipHis").setUnit("%")
+                                .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").setUnit("%")
                                 .setTz(tz)
                                 .build();
                         String cmdFanPtId = CCUHsApi.getInstance().addPoint(fanSignal);
@@ -656,7 +655,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                 .setDisplayName(equipDis + "-" + "heatingSignal")
                                 .setSiteRef(siteRef)
                                 .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
-                                .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("modulating").addMarker("his").addMarker("equipHis").setUnit("%")
+                                .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("modulating").addMarker("his").setUnit("%")
                                 .setTz(tz)
                                 .build();
                         String cmdHeatingPtId = CCUHsApi.getInstance().addPoint(heatSignal);
@@ -674,7 +673,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                 .setDisplayName(equipDis + "-" + "co2Signal")
                                 .setSiteRef(siteRef)
                                 .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
-                                .addMarker("system").addMarker("cmd").addMarker("co2").addMarker("modulating").addMarker("his").addMarker("equipHis").setUnit("%")
+                                .addMarker("system").addMarker("cmd").addMarker("co2").addMarker("modulating").addMarker("his").setUnit("%")
                                 .setTz(tz)
                                 .build();
                         String co2SignalId = CCUHsApi.getInstance().addPoint(co2Signal);
@@ -692,7 +691,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                 .setDisplayName(equipDis+"-"+"occupancySignal")
                                 .setSiteRef(siteRef)
                                 .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
-                                .addMarker("system").addMarker("cmd").addMarker("occupancy").addMarker("his").addMarker("equipHis").addMarker("runtime")
+                                .addMarker("system").addMarker("cmd").addMarker("occupancy").addMarker("his").addMarker("runtime")
                                 .setTz(tz)
                                 .build();
                         String cmdOccupancyPtId = CCUHsApi.getInstance().addPoint(occupancySignal);
@@ -713,7 +712,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                     .setDisplayName(equipDis + "-" + "humidifier")
                                     .setSiteRef(siteRef)
                                     .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
-                                    .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his").addMarker("equipHis")
+                                    .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his")
                                     .setEnums("off,on")
                                     .setTz(tz)
                                     .build();
@@ -732,7 +731,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                     .setDisplayName(equipDis + "-" + "dehumidifier")
                                     .setSiteRef(siteRef)
                                     .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
-                                    .addMarker("system").addMarker("cmd").addMarker("dehumidifier").addMarker("his").addMarker("equipHis")
+                                    .addMarker("system").addMarker("cmd").addMarker("dehumidifier").addMarker("his")
                                     .setEnums("off,on")
                                     .setTz(tz)
                                     .build();

@@ -124,7 +124,6 @@ public class VavStagedRtu extends VavSystemProfile
                                    .setDisplayName(siteDis+"-SystemEquip")
                                    .setProfile(ProfileType.SYSTEM_VAV_STAGED_RTU.name())
                                    .addMarker("equip").addMarker("system").addMarker("vav")
-                                   .addMarker("equipHis")
                                    .setTz(siteMap.get("tz").toString())
                                    .build();
         String equipRef = hayStack.addEquip(systemEquip);
@@ -504,7 +503,7 @@ public class VavStagedRtu extends VavSystemProfile
                                  .setDisplayName(equipDis+"-"+name)
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipref).setHisInterpolate("cov")
-                                 .addMarker("system").addMarker("cmd").addMarker(relayMap).addMarker(stage).addMarker("his").addMarker("equipHis").addMarker("runtime")
+                                 .addMarker("system").addMarker("cmd").addMarker(relayMap).addMarker(stage).addMarker("his").addMarker("runtime")
                                  .setTz(tz)
                                  .build();
         String cmdPointId = CCUHsApi.getInstance().addPoint(relay1Op);
@@ -516,7 +515,7 @@ public class VavStagedRtu extends VavSystemProfile
                 .setDisplayName(equipDis+"-"+name)
                 .setSiteRef(siteRef)
                 .setEquipRef(equipref).setHisInterpolate("cov")
-                .addMarker("system").addMarker("cmd").addMarker(relayMap).addMarker("his").addMarker("equipHis")
+                .addMarker("system").addMarker("cmd").addMarker(relayMap).addMarker("his")
                 .setEnums("off,on")
                 .setTz(tz)
                 .build();
@@ -680,23 +679,23 @@ public class VavStagedRtu extends VavSystemProfile
 
             if (val <= Stage.COOLING_5.ordinal() && val >= COOLING_1.ordinal()) {
                 newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system")
-                        .addMarker("cmd").addMarker("cooling").addMarker("stage" + newStageNum).addMarker("his").addMarker("equipHis").addMarker("runtime").setTz(oldPoint.getTz()).build();
+                        .addMarker("cmd").addMarker("cooling").addMarker("stage" + newStageNum).addMarker("his").addMarker("runtime").setTz(oldPoint.getTz()).build();
                 //CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + newCmdPoint.getDisplayName() + "," + newCmdPoint.getMarkers().toString()  + "," + oldPoint.getId());
             } else if (val >= Stage.HEATING_1.ordinal() && val <= HEATING_5.ordinal()) {
                 newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system")
-                        .addMarker("cmd").addMarker("heating").addMarker("stage" + newStageNum).addMarker("his").addMarker("equipHis").addMarker("runtime").setTz(oldPoint.getTz()).build();
+                        .addMarker("cmd").addMarker("heating").addMarker("stage" + newStageNum).addMarker("his").addMarker("runtime").setTz(oldPoint.getTz()).build();
                 //CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + newCmdPoint.getDisplayName() + "," + newCmdPoint.getMarkers().toString() + "," + oldPoint.getId());
             } else if (val >= Stage.FAN_1.ordinal() && val <= Stage.FAN_5.ordinal()) {
                 newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system")
-                        .addMarker("cmd").addMarker("fan").addMarker("stage" + newStageNum).addMarker("his").addMarker("equipHis").addMarker("runtime").setTz(oldPoint.getTz()).build();
+                        .addMarker("cmd").addMarker("fan").addMarker("stage" + newStageNum).addMarker("his").addMarker("runtime").setTz(oldPoint.getTz()).build();
                 //CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + newCmdPoint.getDisplayName() + "," + newCmdPoint.getMarkers().toString() + "," + oldPoint.getId());
             } else if (val == HUMIDIFIER.ordinal()) {
                 newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system")
-                        .addMarker("cmd").addMarker("humidifier").addMarker("his").addMarker("equipHis").setEnums("off,on").setTz(oldPoint.getTz()).build();
+                        .addMarker("cmd").addMarker("humidifier").addMarker("his").setEnums("off,on").setTz(oldPoint.getTz()).build();
                 //CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + newCmdPoint.getDisplayName() + "," + newCmdPoint.getMarkers().toString()  + "," + oldPoint.getId());
             } else if (val == DEHUMIDIFIER.ordinal()) {
                 newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system")
-                        .addMarker("cmd").addMarker("dehumidifier").addMarker("his").addMarker("equipHis").setEnums("off,on").setTz(oldPoint.getTz()).build();
+                        .addMarker("cmd").addMarker("dehumidifier").addMarker("his").setEnums("off,on").setTz(oldPoint.getTz()).build();
                 //CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + newCmdPoint.getDisplayName() + "," + newCmdPoint.getMarkers().toString()  + "," + oldPoint.getId());
             }
             if(oldPoint != null && oldPoint.getId() != null)CCUHsApi.getInstance().deleteEntity(oldPoint.getId());

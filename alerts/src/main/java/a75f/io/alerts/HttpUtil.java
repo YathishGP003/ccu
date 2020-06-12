@@ -8,38 +8,34 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import a75f.io.alerts.BuildConfig;
 import a75f.io.logger.CcuLog;
 import info.guardianproject.netcipher.NetCipher;
+import org.apache.commons.lang3.StringUtils;
 
 public class HttpUtil
 {
-    public static String getAlertUrl(Context cxt) {
-        SharedPreferences sprefs = PreferenceManager.getDefaultSharedPreferences(cxt);
-        switch (sprefs.getString("SERVER_ENV", "")) {
-            case "QA":
-                return "https://alerts-75f-service-qa.azurewebsites.net/";
-            case "DEV":
-                return  "https://alerts-75f-service-dev.azurewebsites.net/";
-            case "STAGING":
-                return  "https://alerts-75f-service-staging.azurewebsites.net/";
-            case "PROD":
-            default:
-                return  "https://alerts-75f-service.azurewebsites.net/";
-        
-        }
-    }
-    public static String sendRequest(Context cxt, String endpoint, String postData) {
+
+    public static final String HTTP_SCHEME = "http";
+
+    public static String sendRequest(String endpoint, String postData) {
         URL url;
-        HttpsURLConnection connection = null;
+        HttpURLConnection connection = null;
         try {
             //Create connection
-            url = new URL(getAlertUrl(cxt)+endpoint);
-            //connection = (HttpsURLConnection)url.openConnection();
-            connection = NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
+            url = new URL(BuildConfig.ALERTS_API_BASE +  endpoint);
+
+            if (StringUtils.equals(url.getProtocol(), HTTP_SCHEME)) {
+                connection = (HttpURLConnection)url.openConnection();
+            } else {
+                connection = NetCipher.getHttpsURLConnection(url);
+            }
+
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type",
                     "application/json");

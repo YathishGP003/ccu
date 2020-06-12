@@ -418,23 +418,22 @@
                         android:textSize="30sp" />
                 </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
 
-        <Button
-            android:id="@+id/setBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginEnd="24dp"
-            android:layout_marginBottom="110dp"
-            android:background="@null"
-            android:button="@null"
-            android:fontFamily="@font/lato_regular"
-            android:text="@string/button_set"
-            android:textAllCaps="true"
-            android:textColor="@color/orange_75f"
-            android:textSize="19.5sp" />
+            <Button
+                android:id="@+id/setBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginEnd="24dp"
+                android:layout_marginBottom="30dp"
+                android:background="@null"
+                android:button="@null"
+                android:fontFamily="@font/lato_regular"
+                android:text="@string/button_set"
+                android:textAllCaps="true"
+                android:textColor="@color/orange_75f"
+                android:textSize="19.5sp" />
+        </LinearLayout>
 
     </RelativeLayout>
 </ScrollView>

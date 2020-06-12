@@ -1,6 +1,5 @@
 package a75f.io.logic.bo.building.system.vav;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75.io.algos.vav.VavTRSystem;
@@ -40,7 +39,6 @@ import static a75f.io.logic.bo.building.hvac.Stage.HEATING_5;
 import static a75f.io.logic.bo.building.hvac.Stage.HUMIDIFIER;
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
-import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 
 /**
  * Created by samjithsadasivan on 8/14/18.
@@ -167,6 +165,7 @@ public class VavStagedRtu extends VavSystemProfile
     
     protected synchronized void updateSystemPoints() {
         updateOutsideWeatherParams();
+        double fanMinOutput = 0.0;
         stageStatus = new int[17];
         if (VavSystemController.getInstance().getSystemState() == COOLING)
         {
@@ -194,6 +193,7 @@ public class VavStagedRtu extends VavSystemProfile
     
             CcuLog.d(L.TAG_CCU_SYSTEM,"spSpMax :"+spSpMax+" spSpMin: "+spSpMin+" SP: "+getStaticPressure());
             systemFanLoopOp = (int) (getStaticPressure()  * 100 / spSpMax) ;
+            fanMinOutput = spSpMin * 100;
         } else if (VavSystemController.getInstance().getSystemState() == HEATING){
             systemFanLoopOp = (int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier);
         } else {
@@ -270,11 +270,9 @@ public class VavStagedRtu extends VavSystemProfile
                             setCmdSignal("heating and stage"+(stage.ordinal() - COOLING_5.ordinal()), relayState);
                         break;
                     case FAN_1:
-                        if ((systemMode != SystemMode.OFF && ((ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
-                                            && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)
-                                            || VavSystemController.getInstance().getSystemState() != OFF))
-                                || systemFanLoopOp > 0) {
-                            relayState = 1;
+                        if ((systemMode != SystemMode.OFF && (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
+                                && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)) || (systemFanLoopOp > fanMinOutput)) {
+                                relayState = 1;
                         } else {
                             relayState = 0;
                         }
@@ -287,7 +285,7 @@ public class VavStagedRtu extends VavSystemProfile
                         }
                         else
                         {
-                            relayState = systemFanLoopOp > 0 ? 1 : 0;
+                            relayState = systemFanLoopOp > fanMinOutput ? 1 : 0;
                         }
                         if(relayState != getCmdSignal("fan and stage2"))
                             setCmdSignal("fan and stage2", relayState);

@@ -1,5 +1,7 @@
 package a75f.io.logic.pubnub;
 
+import a75f.io.api.haystack.CCUHsApi;
+import android.os.Build;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -18,6 +20,7 @@ import a75f.io.alerts.HttpUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.alerts.BuildConfig;
 
 public class AlertDefinitionHandler
 {
@@ -32,7 +35,7 @@ public class AlertDefinitionHandler
             JSONObject postData = new JSONObject();
             postData.put("_id", alertGUID);
     
-            String alertDef = HttpUtil.sendRequest("readDef", postData.toString());
+            String alertDef = HttpUtil.sendRequest("readDef", postData.toString(), BuildConfig.ALERTS_API_KEY);
             CcuLog.d(L.TAG_CCU_PUBNUB," alertDef "+alertDef);
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

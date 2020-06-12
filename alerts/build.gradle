@@ -29,24 +29,29 @@ android {
         local {
             minifyEnabled false
             buildConfigField "String", 'ALERTS_API_BASE', properties.getProperty("alerts.api.base", "")
+            buildConfigField "String", 'ALERTS_API_KEY', properties.getProperty("alerts.api.key", "")
         }
         dev {
             minifyEnabled false
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts-75f-service-dev.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_KEY', '\"ccu-45fca166-29d8-4d94-a758-eb187fcbd819\"'
         }
         prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts-75f-service.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_KEY', '\"ccu-43a7691a-554d-4a71-844f-1a08b7afc12e\"'
         }
         qa {
             minifyEnabled false
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts-75f-service-qa.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_KEY', '\"6ce0475b-1937-4345-b9b4-d1d6b871f96a\"'
         }
         staging {
             minifyEnabled false
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts-75f-service-staging.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_KEY', '\"ccu-445de537-c8a3-4d8a-bac4-528fa193562a\"'
         }
     }
 

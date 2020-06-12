@@ -106,7 +106,6 @@ public class RegisterGatherSiteDetails extends Activity {
         finish();
     }
 
-    /* This site never existed we are creating a new orphaned site. */
     public String saveSite(String siteName, String siteCity, String siteZip) {
         HashMap site = CCUHsApi.getInstance().read("site");
     
@@ -118,7 +117,6 @@ public class RegisterGatherSiteDetails extends Activity {
         Site s75f = new Site.Builder()
                 .setDisplayName(siteName)
                 .addMarker("site")
-                .addMarker("orphan")
                 .setGeoCity(siteCity)
                 .setGeoState("MN")
                 .setTz(tzID.substring(tzID.lastIndexOf("/") + 1))//Haystack requires tz area string.

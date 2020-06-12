@@ -1,4 +1,4 @@
-package a75f.io.renatus.registartion;
+package a75f.io.renatus.registration;
 
 import android.content.Context;
 import android.os.Bundle;

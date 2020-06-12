@@ -1,5 +1,6 @@
 package a75f.io.api.haystack.sync;
 
+import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
@@ -26,12 +27,13 @@ public class RawPointSyncAdapter extends EntitySyncAdapter
     @Override
     public boolean onSync() {
         CcuLog.i("CCU_HS_SYNC", "onSync Physical points");
-        if (!CCUHsApi.getInstance().isCCURegistered()){
+
+        String siteRef = CCUHsApi.getInstance().getSiteGuid();
+
+        if (!CCUHsApi.getInstance().isCCURegistered() || StringUtils.isBlank(siteRef)){
             return false;
         }
-        HashMap site = CCUHsApi.getInstance().read("site");
-        String siteLUID = site.get("id").toString();
-        
+
         for (Map device : CCUHsApi.getInstance().readAll("device"))
         {
             String deviceLUID = device.get("id").toString();
@@ -49,7 +51,7 @@ public class RawPointSyncAdapter extends EntitySyncAdapter
                     && CCUHsApi.getInstance().getGUID(deviceLUID) != null)
                 {
                     pointLUIDList.add(luid);
-                    m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteLUID)));
+                    m.put("siteRef", HRef.copy(siteRef));
                     m.put("deviceRef", HRef.copy(CCUHsApi.getInstance().getGUID(deviceLUID)));
                 
                     if (m.get("pointRef") != null)

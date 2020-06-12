@@ -135,13 +135,16 @@ public class HisSyncHandler
                 HVal pointValue = isBooleanPoint ? HBool.make(hisItem.getVal() > 0) : HNum.make(hisItem.getVal());
                 long pointTimestamp = hisItem.getDateInMillis();
 
-                HDict hDict = buildHDict(pointGuid, pointTimezone, pointValue, pointTimestamp);
-                hDictList.add(hDict);
-                hisItemsToSyncForDeviceOrEquip.add(hisItem);
-                CcuLog.d(TAG,"Adding historized point value for GUID " + pointGuid + "; point ID " + pointID + "; description of " + pointDescription + "; value of " + pointValue + " for syncing.");
+                if (!StringUtils.equals("NaN", pointValue.toString())) {
+                    HDict hDict = buildHDict(pointGuid, pointTimezone, pointValue, pointTimestamp);
+                    hDictList.add(hDict);
+                    hisItemsToSyncForDeviceOrEquip.add(hisItem);
+                    CcuLog.d(TAG,"Adding historized point value for GUID " + pointGuid + "; point ID " + pointID + "; description of " + pointDescription + "; value of " + pointValue + " for syncing.");
+                } else {
+                    CcuLog.d(TAG,"Historized point value for GUID " + pointGuid + "; point ID " + pointID + "; description of " + pointDescription + " is null. Skipping.");
+                }
             }
 
-            CcuLog.d(TAG,"Items to sync for point GUID " + pointGuid + " is " + unsyncedHisItems.size() + ". Current size of entity historized items to sync is " + hDictList.size());
             ccuHsApi.tagsDb.removeExpiredHisItems(HRef.copy(pointID));
         }
 

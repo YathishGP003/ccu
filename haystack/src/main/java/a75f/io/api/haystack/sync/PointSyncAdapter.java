@@ -1,5 +1,6 @@
 package a75f.io.api.haystack.sync;
 
+import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
@@ -30,9 +31,13 @@ public class PointSyncAdapter extends EntitySyncAdapter
     @Override
     public boolean onSync() {
         CcuLog.i("CCU_HS_SYNC", "onSync Points");
-        if (!CCUHsApi.getInstance().isCCURegistered()){
+
+        String siteRef = CCUHsApi.getInstance().getSiteGuid();
+
+        if (!CCUHsApi.getInstance().isCCURegistered() || StringUtils.isBlank(siteRef)){
             return false;
         }
+
         HashMap site = CCUHsApi.getInstance().read("site");
         String siteLUID = site.get("id").toString();
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and siteRef == \"" + siteLUID + "\"");
@@ -55,7 +60,7 @@ public class PointSyncAdapter extends EntitySyncAdapter
                 if (CCUHsApi.getInstance().getGUID(luid) == null)
                 {
                     pointLUIDList.add(luid);
-                    m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteLUID)));
+                    m.put("siteRef", HRef.copy(siteRef));
                     String gEquipLUID = CCUHsApi.getInstance().getGUID(equipLUID);
                     //Crash here ...due to sync...While no equips no need to sync equip pointers
                     if(gEquipLUID != null) {

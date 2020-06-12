@@ -47,7 +47,7 @@ public class EntitySyncHandler
     TimerTask mSyncTimerTask = null;
     
     
-    public synchronized void sync() {
+    public void sync() {
 
         syncProgress = true;
         Log.i(TAG, "syncPending: " + syncPending);

@@ -68,10 +68,6 @@ import butterknife.OnEditorAction;
 import butterknife.OnFocusChange;
 import butterknife.OnItemClick;
 
-/**
- * Created by samjithsadasivan isOn 8/7/17.
- */
-
 public class FloorPlanFragment extends Fragment
 {
 	public static final String ACTION_BLE_PAIRING_COMPLETED =

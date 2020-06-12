@@ -1,5 +1,6 @@
 package a75f.io.api.haystack.sync;
 
+import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
@@ -26,13 +27,15 @@ public class ZoneSyncAdapter extends EntitySyncAdapter
     @Override
     public boolean onSync() {
         CcuLog.i("CCU_HS_SYNC", "onSync Zones");
-        if (!CCUHsApi.getInstance().isCCURegistered()){
+        String siteRef = CCUHsApi.getInstance().getSiteGuid();
+
+        if (!CCUHsApi.getInstance().isCCURegistered() || StringUtils.isBlank(siteRef)){
             return false;
         }
         ArrayList<HashMap> floors = CCUHsApi.getInstance().readAll("floor");
         ArrayList<String> zoneLUIDList = new ArrayList();
         ArrayList<HDict> entities = new ArrayList<>();
-        HashMap site = CCUHsApi.getInstance().read("site");
+
         for (Map f: floors)
         {
             ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("room and floorRef == \""+f.get("id")+"\"");
@@ -44,7 +47,7 @@ public class ZoneSyncAdapter extends EntitySyncAdapter
                 {
                     zoneLUIDList.add(luid);
 
-                    m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(site.get("id").toString())));
+                    m.put("siteRef", HRef.copy(siteRef));
                     m.put("floorRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("floorRef").toString())));
                     if(m.get("scheduleRef") != null ) {
                         String guid = CCUHsApi.getInstance().getGUID(m.get("scheduleRef").toString());

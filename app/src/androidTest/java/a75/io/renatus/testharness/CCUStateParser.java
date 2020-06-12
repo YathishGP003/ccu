@@ -1,5 +1,6 @@
 package a75.io.renatus.testharness;
 
+import a75f.io.logger.CcuLog;
 import android.content.Context;
 
 import org.projecthaystack.HDict;
@@ -67,7 +68,6 @@ public class CCUStateParser
         Site s75f = new Site.Builder()
                             .setDisplayName(app.defaultSite.displayName)
                             .addMarker("site")
-                            .addMarker("orphan")
                             .setGeoCity(app.defaultSite.geoCity)
                             .setGeoState(app.defaultSite.geoState)
                             .setTz(app.defaultSite.tz)
@@ -114,7 +114,7 @@ public class CCUStateParser
     }
     
     public void pullHayStackDb(String siteId) {
-        
+        CcuLog.d("CCU_STATE_PARSER","Retrieving haystack database");
         HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), "ryan", "ryan");
         HDict siteDict = new HDictBuilder().add("id", HRef.make(siteId)).toDict();
         HGrid siteGrid = hClient.call("read", HGridBuilder.dictToGrid(siteDict));

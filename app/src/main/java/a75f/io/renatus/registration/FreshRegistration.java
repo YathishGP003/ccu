@@ -1,15 +1,13 @@
-package a75f.io.renatus.registartion;
+package a75f.io.renatus.registration;
 
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -36,15 +34,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.HashMap;
-
 import a75f.io.alerts.AlertManager;
-import a75f.io.alerts.AlertProcessor;
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logic.Globals;
 import a75f.io.renatus.DABFullyAHUProfile;
 import a75f.io.renatus.DABHybridAhuProfile;
@@ -68,7 +59,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
     ListView listView_icons;
     ImageView imageView_logo;
 
-    //Header Components
     RelativeLayout rl_Header;
     TextView textView_title;
     ImageView imageView_Goback;
@@ -525,8 +515,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             container.setLayoutParams(paramsPager);
         }
         if (position == 4) {
-
-
             fragment = new InstallerOptions();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
@@ -1178,15 +1166,16 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
     }
 
     private void updateCCURegistrationInfo() {
-        prefs.setBoolean("isCCURegistered",false);
         ProgressDialogUtils.showProgressDialog(this,"CCU Registering...");
+        String installerEmail = prefs.getString("installerEmail");
 
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
                 ProgressDialogUtils.hideProgressDialog();
                 if (pingCloudServer()){
-                    CCUHsApi.getInstance().registerDevice();
+
+                    CCUHsApi.getInstance().registerCcu(installerEmail);
 
                     AlertManager.getInstance().fetchAllPredefinedAlerts();
                     Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
@@ -1200,7 +1189,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                             .setMessage("No network connection, Registration is not complete and Facilisight cannot be accessed unless you connect to network.")
                             .setPositiveButton("Proceed", (dialog, id) -> {
 
-                                CCUHsApi.getInstance().registerDevice();
+                                CCUHsApi.getInstance().registerCcu(installerEmail);
                                 AlertManager.getInstance().fetchAllPredefinedAlerts();
                                 Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
                                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -1210,7 +1199,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                             .show();
                 }
             }
-        }, 30000);
+        }, 1000);
     }
 
     private synchronized boolean pingCloudServer() {

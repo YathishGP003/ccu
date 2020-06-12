@@ -39,7 +39,7 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.tuners.BuildingTuners;
-import a75f.io.renatus.registartion.FreshRegistration;
+import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.Prefs;
 
 import static a75f.io.logic.L.ccu;
@@ -117,7 +117,6 @@ public class RegisterGatherCCUDetails extends Activity {
         mCreateNewCCU.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                prefs.setBoolean("registered", true);
                 String ccuName = mCCUNameET.getText().toString();
                 String installerEmail = mInstallerEmailET.getText().toString();
                 String managerEmail = mManagerEmailET.getText().toString();
@@ -136,6 +135,8 @@ public class RegisterGatherCCUDetails extends Activity {
                 L.ccu().setCCUName(ccuName);
                 String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(), managerEmail);
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
+                CCUHsApi.getInstance().registerCcu(installerEmail);
+                prefs.setString("installerEmail", installerEmail);
 
                 HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
                 SettingPoint snBand = new SettingPoint.Builder()

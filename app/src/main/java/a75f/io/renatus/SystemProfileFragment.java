@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.logic.L;
-import a75f.io.renatus.registartion.FreshRegistration;
+import a75f.io.renatus.registration.FreshRegistration;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 

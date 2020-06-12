@@ -1,5 +1,11 @@
 package a75f.io.renatus;
 
+import a75f.io.api.haystack.BuildConfig;
+import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.constants.CcuFieldConstants;
+import a75f.io.constants.HttpConstants;
+import a75f.io.constants.SiteFieldConstants;
+import a75f.io.logger.CcuLog;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -14,6 +20,10 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.gson.JsonObject;
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.projecthaystack.HGrid;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -48,9 +58,7 @@ public class RegisterGatherDetails extends Activity {
                 loadExistingSite(siteIdEditText.getText().toString());
             }
         });
-        //TODO: let's start with the no site button,
-        //The site doesn't have a preconfig token and it doesn't have a
-        //site id.
+
         noSiteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -65,93 +73,107 @@ public class RegisterGatherDetails extends Activity {
     }
 
     private void showProgressDialog() {
-
             mProgressDialog.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressDialog() {
-
             mProgressDialog.setVisibility(View.INVISIBLE);
-
     }
 
 
     public void loadExistingSite(String siteId) {
         
-
         //TODO: harden for null string.
-        AsyncTask<String, Void, HGrid> getHSClientTask = new AsyncTask<String, Void, HGrid>() {
+        AsyncTask<String, Void, String> loadSiteAsyncTask = new AsyncTask<String, Void, String>() {
 
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-
                 RegisterGatherDetails.this.showProgressDialog();
 
             }
 
             @Override
-            protected HGrid doInBackground(String... strings) {
-                HGrid hGrid = CCUHsApi.getInstance().getRemoteSite(strings[0]);
+            protected String doInBackground(String... strings) {
+                String siteId = strings[0];
+                String siteIdResponse = null;
 
-                if (hGrid == null || hGrid.isEmpty()) {
-                    return null;
+                if (StringUtils.isNotBlank(siteId)) {
+                    String httpResponse = HttpUtil.executeJson(
+                            CCUHsApi.getInstance().getAuthenticationUrl() + "sites/" + siteId,
+                            null, BuildConfig.CARETAKER_API_KEY,
+                            true, HttpConstants.HTTP_METHOD_GET
+                    );
+                    if (StringUtils.isNotBlank(httpResponse)) {
+                        siteIdResponse = getSiteIdFromJson(httpResponse);
+                    }
                 } else {
-                    return hGrid;
+                    Toast.makeText(RegisterGatherDetails.this, "Unable to load site provided. Please try again or provide a different site ID.", Toast.LENGTH_LONG).show();
                 }
+
+                return siteIdResponse;
             }
 
             @Override
-            protected void onPostExecute(HGrid hGrid) {
-                super.onPostExecute(hGrid);
+            protected void onPostExecute(String siteId) {
+                super.onPostExecute(siteId);
                 RegisterGatherDetails.this.hideProgressDialog();
-                if (hGrid == null || hGrid.isEmpty()) {
-                    Toast.makeText(RegisterGatherDetails.this, "No Site returned!", Toast.LENGTH_LONG).show();
-                } else if (!hGrid.row(0).has("site")) {
-                    Toast.makeText(RegisterGatherDetails.this, "Not a valid site returned!", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(RegisterGatherDetails.this, "Site returned!", Toast.LENGTH_LONG).show();
-                    showSiteDialog(hGrid);
 
+                if (StringUtils.isNotBlank(siteId)) {
+                    Toast.makeText(RegisterGatherDetails.this, "Site returned", Toast.LENGTH_LONG).show();
+                    showSiteDialog(siteId);
+                } else {
+                    Toast.makeText(RegisterGatherDetails.this, "Site not found", Toast.LENGTH_LONG).show();
                 }
             }
         };
 
-
-        getHSClientTask.execute(siteId);
+        loadSiteAsyncTask.execute(siteId);
     }
 
-    private void showSiteDialog(HGrid hGrid) {
+    private String getSiteIdFromJson(String loadSiteResponse) {
+        String siteId = null;
+
+        try {
+            JSONObject loadSiteJsonResponse = new JSONObject(loadSiteResponse);
+            if (loadSiteJsonResponse != null) {
+                siteId = loadSiteJsonResponse.getString(SiteFieldConstants.ID);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            siteId = null;
+        }
+
+        return siteId;
+    }
+
+    private void showSiteDialog(String siteId) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(RegisterGatherDetails.this);
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-
-
-                saveExistingSite(hGrid);
-                Toast.makeText(RegisterGatherDetails.this, "Using this site!", Toast.LENGTH_LONG).show();
-                // CCUHsApi.getInstance().addExistingSite(hGrid);
-                // navigateToCCUScreen();
+                saveExistingSite(siteId);
+                Toast.makeText(RegisterGatherDetails.this, "Thank you for confirming using this site", Toast.LENGTH_LONG).show();
 
             }
         });
+
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                Toast.makeText(RegisterGatherDetails.this, "Canceled using this site!", Toast.LENGTH_LONG).show();
+                Toast.makeText(RegisterGatherDetails.this, "Canceled use of existing site", Toast.LENGTH_LONG).show();
             }
         });
 
         builder.setTitle("Site");
-        builder.setMessage(hGrid.row(0).toZinc());
+        builder.setMessage("Registering for site ID " + siteId);
 
         AlertDialog dialog = builder.create();
         dialog.show();
     }
 
-    private void saveExistingSite(HGrid hGrid) {
+    private void saveExistingSite(String siteId) {
 
-        String siteIdVal = hGrid.row(0).getRef("id").val;
-        System.out.println("Site ID val: " + siteIdVal);
+        CcuLog.d("ADD_CCU_EXISTING","Existing site ID used to register for existing site is: " + siteId);
 
         AsyncTask<String, Void, Boolean> syncSiteTask = new AsyncTask<String, Void, Boolean>() {
     
@@ -161,9 +183,6 @@ public class RegisterGatherDetails extends Activity {
             protected void onPreExecute() {
                 super.onPreExecute();
                 RegisterGatherDetails.this.showProgressDialog();
-                //progressDlg.setMessage("Fetching Site data");
-                //progressDlg.show();
-    
                 mUseExistingSiteButton.setEnabled(false);
                 noSiteButton.setEnabled(false);
                 
@@ -172,10 +191,12 @@ public class RegisterGatherDetails extends Activity {
             @Override
             protected Boolean doInBackground(String... strings) {
                 String siteId = strings[0];
-                boolean retVal = CCUHsApi.getInstance().syncExistingSite(siteId);
-                Globals.getInstance().setSiteAlreadyCreated(true);
-                //BuildingTuners.getInstance();
-                L.ccu().systemProfile = new DefaultSystem();
+                boolean retVal = false;
+                if (StringUtils.isNotBlank(siteId)) {
+                    retVal = CCUHsApi.getInstance().syncExistingSite(siteId);
+                    Globals.getInstance().setSiteAlreadyCreated(true);
+                    L.ccu().systemProfile = new DefaultSystem();
+                }
                 return retVal;
             }
 
@@ -183,22 +204,19 @@ public class RegisterGatherDetails extends Activity {
             protected void onPostExecute(Boolean success) {
                 super.onPostExecute(success);
                 RegisterGatherDetails.this.hideProgressDialog();
-                
-                //progressDlg.dismiss();
 
-                if (!success) {
-                    Toast.makeText(RegisterGatherDetails.this, "The site failed to sync.", Toast.LENGTH_LONG).show();
+                if (success) {
+                    Toast.makeText(RegisterGatherDetails.this, "Synchronizing the site with the 75F Cloud was successful.", Toast.LENGTH_LONG).show();
+                    navigateToCCUScreen();
+                } else {
+                    Toast.makeText(RegisterGatherDetails.this, "Synchronizing the site with the 75F Cloud was not successful. Please try choosing a different site for registering this CCU.", Toast.LENGTH_LONG).show();
                     mUseExistingSiteButton.setEnabled(true);
                     noSiteButton.setEnabled(true);
-                    return;
                 }
-
-                Toast.makeText(RegisterGatherDetails.this, "Sync successful.", Toast.LENGTH_LONG).show();
-                navigateToCCUScreen();
             }
         };
 
-        syncSiteTask.execute(siteIdVal);
+        syncSiteTask.execute(siteId);
     }
 
     private void navigateToCCUScreen() {

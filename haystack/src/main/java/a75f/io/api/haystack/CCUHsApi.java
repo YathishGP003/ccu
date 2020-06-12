@@ -1,8 +1,9 @@
 package a75f.io.api.haystack;
 
+import a75f.io.constants.CcuFieldConstants;
+import a75f.io.constants.HttpConstants;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -11,6 +12,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projecthaystack.HDate;
@@ -37,14 +39,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import a75f.io.api.haystack.BuildConfig;
+
 import a75f.io.api.haystack.sync.EntityParser;
 import a75f.io.api.haystack.sync.EntitySyncHandler;
 import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
+import a75f.io.api.haystack.BuildConfig;
 
 public class CCUHsApi
 {
@@ -60,9 +64,7 @@ public class CCUHsApi
 
     public boolean testHarnessEnabled = false;
     
-    public boolean unitTestingEnabled = true;
-    
-    Context cxt;
+    Context context;
     
     String hayStackUrl = "";
     String careTakerUrl ="";
@@ -85,10 +87,10 @@ public class CCUHsApi
         {
             throw new IllegalStateException("Api instance already created , use getInstance()");
         }
-        cxt = c;
+        context = c;
         hsClient = new AndroidHSClient();
         tagsDb = (CCUTagsDb) hsClient.db();
-        tagsDb.init(cxt);
+        tagsDb.init(context);
         instance = this;
         entitySyncHandler = new EntitySyncHandler();
         hisSyncHandler = new HisSyncHandler(this);
@@ -110,16 +112,25 @@ public class CCUHsApi
 
     public String hisWriteManyToHaystackService(HDict hisWriteMetadata, HDict[] hisWritePoints) {
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cxt);
-        String apiToken = sharedPreferences.getString("token","");
-
         HGrid hisWriteRequest = HGridBuilder.dictsToGrid(hisWriteMetadata, hisWritePoints);
 
         return HttpUtil.executePost(
                 CCUHsApi.getInstance().getHSUrl() + "hisWriteMany/",
                 HZincWriter.gridToString(hisWriteRequest),
-                apiToken
+                CCUHsApi.getInstance().getJwt()
         );
+    }
+
+    public String getJwt() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getString("token","");
+    }
+
+    public void setJwt(String jwtToken) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("token", jwtToken);
+        editor.commit();
     }
 
     public String getAuthenticationUrl() {
@@ -394,22 +405,20 @@ public class CCUHsApi
 
     public void pointWrite(HRef id, int level, String who, HVal val, HNum dur)
     {
-        if (!CCUHsApi.getInstance().isCCURegistered()){
-            return;
-        }
-
         hsClient.pointWrite(id, level, who, val, dur);
 
-        String guid = getGUID(id.toString());
-        if (guid != null)
-        {
-            if (dur.unit == null) {
-                dur = HNum.make(dur.val ,"ms");
+        if (CCUHsApi.getInstance().isCCURegistered()) {
+            String guid = getGUID(id.toString());
+            if (guid != null)
+            {
+                if (dur.unit == null) {
+                    dur = HNum.make(dur.val ,"ms");
+                }
+                HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
+                HDict[] dictArr  = {b.toDict()};
+                String  response = HttpUtil.executePost(getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+                CcuLog.d("CCU_HS", "Response: \n" + response);
             }
-            HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
-            HDict[] dictArr  = {b.toDict()};
-            String  response = HttpUtil.executePost(getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
-            CcuLog.d("CCU_HS", "Response: \n" + response);
         }
     }
 
@@ -885,7 +894,7 @@ public class CCUHsApi
     public void forceSync() {
         tagsDb.idMap.clear();
         tagsDb.saveTags();
-        tagsDb.init(cxt);
+        tagsDb.init(context);
         syncEntityWithPointWrite();
     }
 
@@ -963,10 +972,14 @@ public class CCUHsApi
         hisSyncHandler.sync();
     }
 
-    public boolean syncExistingSite(String siteId)
-    {
-        HGrid remoteSite = getRemoteSite(siteId);
+    public synchronized boolean syncExistingSite(String siteId) {
+        siteId = StringUtils.stripStart(siteId,"@");
 
+        if (StringUtils.isBlank(siteId)) {
+            return false;
+        }
+
+        HGrid remoteSite = getRemoteSite(siteId);
 
         if (remoteSite == null || remoteSite.isEmpty() || remoteSite.isErr())
         {
@@ -976,7 +989,7 @@ public class CCUHsApi
         EntityParser p = new EntityParser(remoteSite);
         Site s = p.getSite();
         tagsDb.idMap.put("@"+tagsDb.addSite(s), s.getId());
-        Log.d("CCU_HS","Added Site "+s.getId());
+        Log.d("CCU_HS_EXISTINGSITESYNC","Added Site "+s.getId());
     
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict navIdDict = new HDictBuilder().add("navId", HRef.make(siteId)).toDict();
@@ -988,32 +1001,45 @@ public class CCUHsApi
         p.importBuildingTuner();
     
         ArrayList<HashMap> writablePoints = CCUHsApi.getInstance().readAll("point and writable");
-        for (HashMap m : writablePoints) {
-            System.out.println(m);
-            HDict pid = new HDictBuilder().add("id",HRef.copy(getGUID(m.get("id").toString()))).toDict();
+        for (HashMap writablePoint : writablePoints) {
+            String writablePointLuid = writablePoint.get("id").toString();
+            String writablePointGuid = CCUHsApi.getInstance().getGUID(writablePointLuid);
+            CcuLog.d("CCU_HS_EXISTINGSITESYNC", "Processing point with GUID " + writablePointGuid + " and description " + writablePoint.get("dis").toString());
+            System.out.println(writablePoint);
+            HDict pid = new HDictBuilder().add("id",HRef.copy(writablePointGuid)).toDict();
             HGrid wa = hClient.call("pointWrite",HGridBuilder.dictToGrid(pid));
+            ArrayList<HashMap> valList = new ArrayList<>();
             if (wa != null) {
                 wa.dump();
+                Iterator it = wa.iterator();
+                while (it.hasNext()) {
+                    HashMap<Object, Object> map = new HashMap<>();
+                    HRow r = (HRow) it.next();
+                    CcuLog.d("CCU_HS_EXISTINGSITESYNC", "Processing Zinc row with " + r.toString());
+                    HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
+                    while (ri.hasNext()) {
+                        HDict.MapEntry e = (HDict.MapEntry) ri.next();
+                        map.put(e.getKey(), e.getValue());
+                    }
+                    valList.add(map);
+                }
             }
 
-            ArrayList<HashMap> valList = new ArrayList<>();
-            Iterator it = wa.iterator();
-            while (it.hasNext()) {
-                HashMap<Object, Object> map = new HashMap<>();
-                HRow r = (HRow) it.next();
-                HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
-                while (ri.hasNext()) {
-                    HDict.MapEntry e = (HDict.MapEntry) ri.next();
-                    map.put(e.getKey(), e.getValue());
-                }
-                valList.add(map);
-            }
-            
-            for(HashMap v : valList)
-            {
-                CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(m.get("id").toString()),
-                        Integer.parseInt(v.get("level").toString()), v.get("who").toString(),
-                        m.get("kind").toString().equals("string") ? HStr.make(v.get("val").toString()) : HNum.make(Double.parseDouble(v.get("val").toString())),HNum.make(0));
+            for(HashMap v : valList) {
+                int level = Integer.parseInt(v.get("level").toString());
+                String who = v.get("who").toString();
+                String kind = writablePoint.get("kind").toString();
+
+                CcuLog.d("CCU_HS_EXISTINGSITESYNC", "Syncing remote point to local with LUID "
+                        + writablePointLuid + "; GUID " + writablePointGuid + "; level " + level);
+
+                CCUHsApi.getInstance().getHSClient().pointWrite(
+                        HRef.copy(writablePointLuid),
+                        level,
+                        who,
+                        StringUtils.equals(kind,"string") ? HStr.make(v.get("val").toString()) : HNum.make(Double.parseDouble(v.get("val").toString())),
+                        HNum.make(0)
+                );
             }
         
         }
@@ -1206,9 +1232,13 @@ public class CCUHsApi
     }
 
     public HRef getCcuId() {
+        HRef siteRef = null;
         HDict hDict = new HDictBuilder().add("filter", "ccu").toDict();
         HGrid site  = getHSClient().call("read", HGridBuilder.dictToGrid(hDict));
-        return site.row(0).getRef("id");
+        if (site != null && site.numRows() > 0) {
+            siteRef = site.row(0).getRef("id");
+        }
+        return siteRef;
     }
 
     public ArrayList<Schedule> getSystemSchedule(boolean vacation)
@@ -1346,30 +1376,33 @@ public class CCUHsApi
             HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
             HGrid site = hClient.call(HStdOps.read.name(), hGrid);
             if (site != null) {
-                HDict tDict = new HDictBuilder().add("filter", "weatherPoint and air and temp and weatherRef == " + site.row(0).get("weatherRef")).toDict();
-                HGrid weatherPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
-                weatherPoint.dump();
-                if (weatherPoint != null && weatherPoint.numRows() > 0)
-                {
-                    tempWeatherRef = weatherPoint.row(0).getRef("id");
+                HVal weatherRef = site.row(0).get("weatherRef", false);
+                if (weatherRef != null) {
+                    HDict tDict = new HDictBuilder().add("filter", "weatherPoint and air and temp and weatherRef == " + weatherRef).toDict();
+                    HGrid weatherPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+
+                    if (weatherPoint != null && weatherPoint.numRows() > 0) {
+                        weatherPoint.dump();
+                        tempWeatherRef = weatherPoint.row(0).getRef("id");
+
+                        HGrid hisGrid = hClient.hisRead(tempWeatherRef, "current");
+
+                        if (hisGrid != null && hisGrid.numRows() > 0) {
+                            hisGrid.dump();
+                            HRow r = hisGrid.row(hisGrid.numRows() - 1);
+                            HDateTime date = (HDateTime) r.get("ts");
+                            double tempVal = Double.parseDouble(r.get("val").toString());
+                            Log.d("CCU_OAO",date+" External Temp: "+tempVal);
+                            return tempVal;
+
+                        }
+                    }
                 }
             }
-        }
-        HGrid hisGrid = hClient.hisRead(tempWeatherRef, "current");
-        hisGrid.dump();
-        if (hisGrid != null && hisGrid.numRows() > 0)
-        {
-            HRow r = hisGrid.row(hisGrid.numRows() - 1);
-            HDateTime date = (HDateTime) r.get("ts");
-            double tempVal = Double.parseDouble(r.get("val").toString());
-            Log.d("CCU_OAO",date+" External Temp: "+tempVal);
-            return tempVal;
-        
         }
         return 0;
     }
     
-    //In percentage
     public double getExternalHumidity() {
         
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
@@ -1378,24 +1411,26 @@ public class CCUHsApi
             HDict navIdDict = new HDictBuilder().add(HayStackConstants.ID, HRef.copy(getGUID(getSiteId().toString()))).toDict();
             HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
             HGrid site = hClient.call(HStdOps.read.name(), hGrid);
-            HDict tDict = new HDictBuilder().add("filter", "weatherPoint and humidity and weatherRef == " + site.row(0).get("weatherRef")).toDict();
-            HGrid weatherPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
-            weatherPoint.dump();
-            if (weatherPoint != null && weatherPoint.numRows() > 0)
-            {
-                humidityWeatherRef = weatherPoint.row(0).getRef("id");
+            HVal weatherRef = site.row(0).get("weatherRef", false);
+            if (weatherRef != null) {
+                HDict tDict = new HDictBuilder().add("filter", "weatherPoint and humidity and weatherRef == " + weatherRef).toDict();
+                HGrid weatherPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+                if (weatherPoint != null && weatherPoint.numRows() > 0)
+                {
+                    weatherPoint.dump();
+                    humidityWeatherRef = weatherPoint.row(0).getRef("id");
+                    HGrid hisGrid = hClient.hisRead(humidityWeatherRef, "current");
+                    hisGrid.dump();
+                    if (hisGrid != null && hisGrid.numRows() > 0) {
+                        HRow r = hisGrid.row(hisGrid.numRows() - 1);
+                        HDateTime date = (HDateTime) r.get("ts");
+                        double humidityVal = Double.parseDouble(r.get("val").toString());
+                        Log.d("CCU_OAO",date+" External Humidity: "+humidityVal);
+                        return 100 * humidityVal;
+
+                    }
+                }
             }
-        }
-        HGrid hisGrid = hClient.hisRead(humidityWeatherRef, "current");
-        hisGrid.dump();
-        if (hisGrid != null && hisGrid.numRows() > 0)
-        {
-            HRow r = hisGrid.row(hisGrid.numRows() - 1);
-            HDateTime date = (HDateTime) r.get("ts");
-            double humidityVal = Double.parseDouble(r.get("val").toString());
-            Log.d("CCU_OAO",date+" External Humidity: "+humidityVal);
-            return 100 * humidityVal;
-        
         }
         return 0;
     }
@@ -1426,117 +1461,173 @@ public class CCUHsApi
         }
     }
     
-  public boolean isCCURegistered(){
-      SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(cxt);
+    public boolean isCCURegistered() {
+      SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+      return spDefaultPrefs.getBoolean("isCcuRegistered", false);
+    }
 
-      return spDefaultPrefs.getBoolean("registered", false);
-  }
+    public void setCcuRegistered() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("isCcuRegistered",true);
+        editor.commit();
+    }
+
+    public void setCcuUnregistered() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove("isCcuRegistered");
+        editor.commit();
+    }
+
+    public String getSiteGuid() {
+        String siteRef = null;
+
+        HashMap site = CCUHsApi.getInstance().read("site");
+        String siteLuid = site.get("id").toString();
+
+        if (StringUtils.isNotBlank(siteLuid)) {
+            siteRef = CCUHsApi.getInstance().getGUID(siteLuid);
+        }
+
+        return siteRef;
+    }
+
     public boolean isNetworkConnected() {
 
-        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(cxt);
+        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 
         return spDefaultPrefs.getBoolean("75fNetworkAvailable", false);
     }
 
-    public void registerDevice(){
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                registerDeviceInfo();
-            }
-        }, 30000);
+    public void registerCcu(String installerEmail) {
+        registerCcuAsyncTask(installerEmail);
     }
 
-    private void registerDeviceInfo() {
+    // TODO Matt Rudd - Too much in this method; need to refactor
+    private void registerCcuAsyncTask(final String installerEmail) {
+        AsyncTask<Void, Void, Boolean> updateCCUReg = new AsyncTask<Void, Void, Boolean>() {
 
-        if (!isNetworkConnected()){
-            registerDevice();
-            return;
-        }
-
-        AsyncTask<Void, Void, String> updateCCUReg = new AsyncTask<Void, Void, String>() {
             @Override
-            protected String doInBackground(Void... voids) {
+            protected synchronized Boolean doInBackground(Void... voids) {
+                HashMap site = CCUHsApi.getInstance().read("site");
 
-                //TODO upload CCU Registration details to Server for user management here //KUMAR 30/01/2020
-                String response = "";
-                try {
+                boolean ccuSuccessfulRegistration = false;
+
+                Log.d("CCURegInfo","createNewSite Edit backgroundtask");
+                String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
+
+                if (StringUtils.isNotBlank(siteGUID) && CCUHsApi.getInstance().isNetworkConnected()) {
+                    Log.d("CCURegInfo","The CCU is not registered, but the site is created with ID " + siteGUID);
                     HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
-                    HashMap site = CCUHsApi.getInstance().read("site");
-                    if (ccu.size() > 0) {
-                        String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
-                        if (ccuGUID == null || TextUtils.isEmpty(ccuGUID)) {
-                            registerDevice();
+
+                    String ccuLuid = Objects.toString(ccu.get(CcuFieldConstants.ID),"");
+                    String ccuGuid = CCUHsApi.getInstance().getGUID(ccuLuid);
+
+                    if (StringUtils.isBlank(ccuGuid)) {
+                        Log.d("CCURegInfo","The CCU has a GUID and should be considered registered: " + ccuGuid);
+                        String facilityManagerEmail = site.get("fmEmail").toString();
+                        String installEmail = installerEmail;
+                        if (StringUtils.isBlank(installEmail)) {
+                            installEmail = site.get("installerEmail").toString();
+                        }
+                        String dis = ccu.get("dis").toString();
+                        String ahuRef = ccu.get("ahuRef").toString();
+                        String gatewayRef = ccu.get("gatewayRef").toString();
+                        String equipRef = ccu.get("equipRef").toString();
+
+                        JSONObject ccuRegistrationRequest = getCcuRegisterJson(siteGUID, dis, ahuRef, gatewayRef, equipRef, facilityManagerEmail, installEmail);
+
+                        if (ccuRegistrationRequest != null) {
+                            Log.d("CCURegInfo","Sending CCU registration request: " + ccuRegistrationRequest.toString());
+                            String ccuRegistrationResponse = HttpUtil.executeJson(
+                                    CCUHsApi.getInstance().getAuthenticationUrl()+"devices",
+                                    ccuRegistrationRequest.toString(),
+                                    BuildConfig.CARETAKER_API_KEY,
+                                    true,
+                                    HttpConstants.HTTP_METHOD_POST
+                            );
+                            Log.d("CCURegInfo","Registration response: " + ccuRegistrationResponse);
+
+                            if (ccuRegistrationResponse != null) {
+                                try {
+                                    JSONObject ccuRegistrationResponseJson = new JSONObject(ccuRegistrationResponse);
+                                    ccuGuid = ccuRegistrationResponseJson.getString("id");
+                                    String token = ccuRegistrationResponseJson.getString("token");
+                                    CCUHsApi.getInstance().putUIDMap(ccuLuid, ccuGuid);
+                                    CCUHsApi.getInstance().setJwt(token);
+                                    CCUHsApi.getInstance().setCcuRegistered();
+                                    ccuSuccessfulRegistration = true;
+                                    Log.d("CCURegInfo","CCU was successfully registered with ID " + ccuGuid + "; token " + token);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    } else {
+                        Log.d("CCURegInfo","The CCU has a GUID: " + ccuGuid + " and the token is " + CCUHsApi.getInstance().getJwt());
+                        // TODO Matt Rudd - Need mechanism to handle the token being null here but the GUID existing; may happen in edge cases
+                        CCUHsApi.getInstance().setCcuRegistered();
+
+                        if (StringUtils.isBlank(CCUHsApi.getInstance().getJwt())) {
+                            Log.e("CCURegInfo", "There was a fatal error registering the CCU. The GUID is set, but the token is unavailable.");
                         }
                     }
-                    if(site.size() > 0) {
-                        String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
-                        JSONObject ccuRegInfo = new JSONObject();
-                        ccuRegInfo.put("siteId", siteGUID);
-                        ccuRegInfo.put("siteName", site.get("dis").toString());
-                        JSONObject locInfo = new JSONObject();
-                        locInfo.put("geoCity", site.get("geoCity").toString());
-                        locInfo.put("geoCountry", site.get("geoCountry").toString());
-                        locInfo.put("geoState", site.get("geoState").toString());
-                        locInfo.put("geoAddr", site.get("geoAddr").toString());
-                        locInfo.put("geoPostalCode", site.get("geoPostalCode").toString());
-                        if(site.get("organization") != null)
-                            ccuRegInfo.put("organization", site.get("organization").toString());
-                        if(ccu.size() > 0) {
-                            String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
-                            ccuRegInfo.put("deviceId", ccuGUID);
-                            ccuRegInfo.put("deviceName", ccu.get("dis").toString());
-                            ccuRegInfo.put("facilityManagerEmail", site.get("fmEmail") != null ? site.get("fmEmail").toString(): ccu.get("fmEmail").toString());
-                            ccuRegInfo.put("installerEmail", site.get("installerEmail")!= null ? site.get("installerEmail").toString(): ccu.get("installerEmail").toString());
-
-                            ccuRegInfo.put("locationDetails", locInfo);
-
-
-                            response = HttpUtil.executeJSONPost(CCUHsApi.getInstance().getAuthenticationUrl() + "api/v1/device/register", ccuRegInfo.toString(),"");
-                            Log.d("CCURegistration", " Response : " + response);
-                        }
-                    }
-                }catch (JSONException e){
-                    e.printStackTrace();
                 }
-                return response;
+                return ccuSuccessfulRegistration;
+
             }
 
             @Override
-            protected void onPostExecute(String result) {
-                super.onPostExecute(result);
-                SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(cxt);
-                SharedPreferences.Editor editor = spDefaultPrefs.edit();
-
-                if( (result != null) && (!result.equals(""))){
-
-                    try {
-                        JSONObject resString = new JSONObject(result);
-                        if(resString.getBoolean("success")){
-                            editor.putString("token", resString.getString("token"));
-                            editor.putBoolean("isCCURegistered",true);
-                            editor.commit();
-
-                            Log.d("CCURegistration", " Success! ");
-                            Toast.makeText(cxt, "CCU Registered Successfully "+resString.getString("deviceId"), Toast.LENGTH_LONG).show();
-
-                        } else {
-                            editor.putBoolean("isCCURegistered",false);
-                            editor.commit();
-                            registerDevice();
-                        }
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    editor.putBoolean("isCCURegistered",false);
-                    editor.commit();
-                    registerDevice();
+            protected void onPostExecute(Boolean successfulRegistration) {
+                Log.d("CCURegInfo", "createNewSite Edit onPostExecute=" + successfulRegistration);
+                if (successfulRegistration) {
+                    Toast.makeText(context, "Your CCU was registered successfully", Toast.LENGTH_LONG).show();
                 }
             }
         };
+
         updateCCUReg.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
+
+    public JSONObject getCcuRegisterJson(
+            String siteRef,
+            String ccuDescription,
+            String ahuRef,
+            String gatewayRef,
+            String equipRef,
+            String facilityManagerEmail,
+            String installerEmail) {
+        JSONObject ccuJsonRequest = null;
+
+        try {
+            ccuJsonRequest = new JSONObject();
+
+            ccuJsonRequest.put(CcuFieldConstants.DESCRIPTION, ccuDescription);
+            ccuJsonRequest.put(CcuFieldConstants.SITEREF, siteRef);
+
+            if (StringUtils.isNotBlank(ahuRef)) {
+                ccuJsonRequest.put(CcuFieldConstants.AHUREF, ahuRef);
+            }
+
+            if (StringUtils.isNotBlank(gatewayRef)) {
+                ccuJsonRequest.put(CcuFieldConstants.GATEWAYREF, gatewayRef);
+            }
+
+            if (StringUtils.isNotBlank(equipRef)) {
+                ccuJsonRequest.put(CcuFieldConstants.EQUIPREF, equipRef);
+            }
+
+            ccuJsonRequest.put(CcuFieldConstants.FACILITY_MANAGER_EMAIL, facilityManagerEmail);
+            ccuJsonRequest.put(CcuFieldConstants.INSTALLER_EMAIL, installerEmail);
+
+        } catch (JSONException jsonException) {
+            ccuJsonRequest = null;
+            Log.e("CCURegInfo","Unable to construct a valid CCU registration request", jsonException);
+        }
+
+        return ccuJsonRequest;
+    }
+
 
 }

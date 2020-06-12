@@ -63,7 +63,7 @@
             </intent-filter>
         </activity>
         <activity
-                android:name=".registartion.FreshRegistration"
+                android:name=".registration.FreshRegistration"
                 android:screenOrientation="sensorLandscape"
                 android:theme="@style/RenatusAppTheme.NoActionBar"></activity>
 

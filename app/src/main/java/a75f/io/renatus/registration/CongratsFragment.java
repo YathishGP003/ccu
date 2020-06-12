@@ -1,23 +1,14 @@
-package a75f.io.renatus.registartion;
+package a75f.io.renatus.registration;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
-import android.text.Editable;
 import android.text.Html;
-import android.text.TextUtils;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.util.HashMap;
@@ -168,7 +159,6 @@ public class CongratsFragment extends Fragment {
         mCCUName.setText(ccu.get("dis").toString());
         String ccuGUID = CCUHsApi.getInstance().getGUID(CCUHsApi.getInstance().getCcuId().toString());
         mSerialNo.setText(ccuGUID == null ? CCUHsApi.getInstance().getCcuId().toString() :ccuGUID);
-        //mSerialNo.setText(site.get("id").toString());
         mCMFirwareVer.setText("NA");
         mBuildingLimits.setText(buldingLimit);
         mHeatingLimits.setText(heatingLimit);
@@ -177,14 +167,7 @@ public class CongratsFragment extends Fragment {
         mCurrentTemp.setText(currentTemp);
         mCurrentHumidity.setText(currentHumidity);
         labelHvac.setText(L.ccu().systemProfile.getProfileName()+":");
-       /* mHVACEquip.setText(Html.fromHtml("<small><font color='#000000'>Cooling Stage 1 | "+"</font></small>"+"<font color='#E24301'> "+coolingStage1+"</font>"+
-                                                "<small><font color='#000000'>   Cooling Stage 2 | "+"</font></small>"+"<font color='#E24301'> "+coolingStage2+"</font><br>"+
-                                                "<small><font color='#000000'>Heating Stage 1 | "+"</font></small>"+"<font color='#E24301'> "+heatingStage1+"</font>"+
-                                                "<small><font color='#000000'>   Heating Stage 2 | "+"</font></small>"+"<font color='#E24301'> "+heatingStage2+"</font><br>"+
-                                                "<small><font color='#000000'>Humidifier | "+"</font></small>"+"<font color='#E24301'> "+humidifierStatus+"</font><br>"+
-                                                "<small><font color='#000000'>OAO | "+"</font></small>"+"<font color='#E24301'> "+oaoStatus+"</font><br>"+
-                                                "<small><font color='#000000'>Analog | "+"</font></small>"+"<font color='#E24301'> "+analogStatus+"</font>"
-        ));*/
+
         String status = L.ccu().systemProfile.getStatusMessage();
         if (L.ccu().systemProfile instanceof DefaultSystem) {
             mHVACEquip.setText(status.equals("") ? "System is in gateway mode" : Html.fromHtml(status.replace("ON", "<font color='#e24725'>ON</font>")));

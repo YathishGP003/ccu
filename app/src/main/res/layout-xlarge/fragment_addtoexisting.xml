@@ -118,7 +118,8 @@
                 android:textAllCaps="true"
                 android:textColor="@color/orange_75f"
                 android:textSize="33.5dp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone"/>
 
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/textInputEmail"
@@ -126,7 +127,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textViewList"
                 android:layout_marginTop="84dp"
-                app:errorTextAppearance="@style/error_appearance">
+                app:errorTextAppearance="@style/error_appearance"
+                android:visibility="gone">
 
                 <EditText
                     android:id="@+id/editFacilityEmail"
@@ -147,7 +149,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textInputEmail"
                 android:layout_marginTop="-9dp"
-                app:errorTextAppearance="@style/error_appearance">
+                app:errorTextAppearance="@style/error_appearance"
+                android:visibility="gone">
 
                 <EditText
                     android:id="@+id/editFacilityPass"
@@ -175,7 +178,8 @@
                 android:fontFamily="@font/lato_bold"
                 android:text="@string/button_next"
                 android:textColor="@color/orange_75f"
-                android:textSize="24dp" />
+                android:textSize="24dp"
+                android:visibility="gone"/>
 
         </RelativeLayout>
     </ScrollView>

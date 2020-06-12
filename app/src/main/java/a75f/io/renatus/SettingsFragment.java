@@ -16,10 +16,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import a75f.io.renatus.registartion.CreateNewSite;
-import a75f.io.renatus.registartion.InstallerOptions;
-import a75f.io.renatus.registartion.Security;
-import a75f.io.renatus.registartion.WifiFragment;
+import a75f.io.renatus.registration.CreateNewSite;
+import a75f.io.renatus.registration.InstallerOptions;
+import a75f.io.renatus.registration.Security;
+import a75f.io.renatus.registration.WifiFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 

@@ -12,7 +12,7 @@ import android.widget.Button;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
-import a75f.io.renatus.registartion.FreshRegistration;
+import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.Prefs;
 import butterknife.BindView;
 import butterknife.ButterKnife;

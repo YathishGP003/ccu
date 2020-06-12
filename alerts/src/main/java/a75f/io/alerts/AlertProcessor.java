@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,8 +53,8 @@ public class AlertProcessor
 {
     
     ArrayList<AlertDefinition> predefinedAlerts;
-    
     ArrayList<AlertDefinition> customAlerts = new ArrayList<>();
+
     AlertParser parser;
     
     Context mContext;
@@ -136,8 +137,8 @@ public class AlertProcessor
     }
     
     public ArrayList<AlertDefinition> getPredefinedAlerts() {
-        String alerts = mContext.getSharedPreferences(PREFS_ALERT_DEFS, Context.MODE_PRIVATE).getString(PREFS_ALERTS_PREDEFINED, null);
-        return alerts != null ? parser.parseAlertsString(alerts) : null;
+        String alerts = mContext.getSharedPreferences(PREFS_ALERT_DEFS, Context.MODE_PRIVATE).getString(PREFS_ALERTS_PREDEFINED, "");
+        return StringUtils.isNotBlank(alerts) ? parser.parseAlertsString(alerts) : new ArrayList<AlertDefinition>();
     }
     
     public void fetchPredefinedAlerts() {
@@ -154,7 +155,7 @@ public class AlertProcessor
                 StrictMode.setThreadPolicy(policy);
             }
             String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
-            String alertDef = HttpUtil.sendRequest("readPredefined", new JSONObject().put("siteRef", siteGUID.replace("@","")).toString());
+            String alertDef = HttpUtil.sendRequest("readPredefined", new JSONObject().put("siteRef", siteGUID.replace("@","")).toString(), BuildConfig.ALERTS_API_KEY);
             //CcuLog.d("CCU_ALERTS", " alertDef " + alertDef);
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

@@ -153,20 +153,20 @@ public class BACnetUtils{
         int instanceCoolID = addressNumber + BACnetUtils.desiredTempCooling;
         int instanceHeatID = addressNumber + BACnetUtils.desiredTempHeating;
         double temperatureValue = Double.parseDouble(pv.getValue().toString());
-        if (object.getInstanceId() == instanceHeatID) {//Check for cooling desired instance id
+        if (object.getInstanceId() == instanceHeatID) {//Check for heating desired instance id
             double heatingUpperLimit = TunerUtil.readBuildingTunerValByQuery("user and limit and max and heating");
             double heatingLowerLimit = TunerUtil.readBuildingTunerValByQuery("user and limit and min and heating");
             //beyond limits readjust
-            temperatureValue = (temperatureValue < heatingUpperLimit ? heatingUpperLimit : (temperatureValue > heatingLowerLimit ? heatingLowerLimit : temperatureValue));
+            temperatureValue = (temperatureValue < heatingUpperLimit ? heatingUpperLimit : (Math.min(temperatureValue, heatingLowerLimit)));
             if(temperatureValue >= heatingUpperLimit && temperatureValue <= heatingLowerLimit)
                 Pulse.updateSetTempFromBacnet(Short.valueOf(address), temperatureValue , "heating");
         }
-        if (object.getInstanceId() == instanceCoolID) {//check for heating desired instance id
+        if (object.getInstanceId() == instanceCoolID) {//check for cooling desired instance id
             double coolingUpperLimit = TunerUtil.readBuildingTunerValByQuery("user and limit and max and cooling");
             double coolingLowerLimit = TunerUtil.readBuildingTunerValByQuery("user and limit and min and cooling");
-            temperatureValue = (temperatureValue < coolingLowerLimit ? coolingLowerLimit : (temperatureValue > coolingUpperLimit ? coolingUpperLimit : temperatureValue));
+            temperatureValue = (temperatureValue < coolingLowerLimit ? coolingLowerLimit : (Math.min(temperatureValue, coolingUpperLimit)));
             if(temperatureValue >= coolingLowerLimit && temperatureValue <= coolingUpperLimit)
-                Pulse.updateSetTempFromBacnet(Short.valueOf(address), temperatureValue, "cooling");
+                Pulse.updateSetTempFromBacnet(Short.parseShort(address), temperatureValue, "cooling");
         }
     }
     public static String convertDateTime(DateTime dateTime){

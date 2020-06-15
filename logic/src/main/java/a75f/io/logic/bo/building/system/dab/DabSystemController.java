@@ -20,7 +20,6 @@ import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.dab.DabProfile;
-import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.util.CCUUtils;
@@ -323,17 +322,6 @@ public class DabSystemController extends SystemController
         return heatingSignal;
     }
     
-    public boolean isAllZonesHeating() {
-        for (ZoneProfile p: L.ccu().zoneProfiles)
-        {
-            if (p.getState() != ZoneState.HEATING) {
-                CcuLog.d(L.TAG_CCU_SYSTEM," Equip "+p.getProfileType()+" is not in Heating");
-                return false;
-            }
-        }
-        return true;
-    }
-    
     public SystemController.State getConditioningForecast(Occupied occupiedSchedule) {
         DabSystemProfile profile = (DabSystemProfile) L.ccu().systemProfile;
         SystemMode systemMode = SystemMode.values()[(int)profile.getUserIntentVal("conditioning and mode")];
@@ -353,25 +341,6 @@ public class DabSystemController extends SystemController
         
     }
     
-    public boolean isAnyZoneCooling() {
-        for (ZoneProfile p: L.ccu().zoneProfiles)
-        {
-            System.out.println(" Zone State " +p.state);
-            if (p.getState() == ZoneState.COOLING) {
-                CcuLog.d(L.TAG_CCU_SYSTEM," Equip "+p.getProfileType()+" is in Cooling");
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    public boolean isDabEquip(Equip q) {
-        if (q.getProfile() == ProfileType.DAB.name()) {
-            return true;
-        }
-        return false;
-    }
-    
     public double getEquipCurrentTemp(String equipRef) {
         return CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \""+equipRef+"\"");
     }
@@ -383,28 +352,7 @@ public class DabSystemController extends SystemController
         double priorityVal = CCUHsApi.getInstance().readDefaultVal("point and zone and config and priority and equipRef == \""+equipRef+"\"");
         return ZonePriority.values()[(int) priorityVal];
     }
-    
-    public double getEquipDesiredTemp(String equipRef) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and air and temp and desired and equipRef == \""+equipRef+"\"");
-        
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("val") != null) {
-                    return Double.parseDouble(valMap.get("val").toString());
-                }
-            }
-        }
-        return 72;
-    }
-    
-    public double getEquipTempTarget(String zoneRef) //Humidity compensated
-    {
-        return getEquipDesiredTemp(zoneRef);//TODO - TEMP
-    }
+
 
 
     public double getCMDynamicPriority(double zoneLoad){

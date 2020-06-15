@@ -1,6 +1,5 @@
 package a75f.io.logic.bo.building.system.dab;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -36,7 +35,6 @@ import static a75f.io.logic.bo.building.hvac.Stage.HEATING_5;
 import static a75f.io.logic.bo.building.hvac.Stage.HUMIDIFIER;
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
-import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 
 /**
  * Created by samjithsadasivan on 11/5/18.
@@ -196,11 +194,9 @@ public class DabStagedRtu extends DabSystemProfile
                             setCmdSignal("heating and stage"+ (stage.ordinal() - COOLING_5.ordinal()), relayState);
                         break;
                     case FAN_1:
-                        if ((systemMode != SystemMode.OFF && ((ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
-                                                                               && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)
-                                                                               || getSystemController().getSystemState() != OFF))
-                            ||  systemFanLoopOp > 0) {
-                            relayState = 1;
+                        if ((systemMode != SystemMode.OFF && (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
+                                && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)) || (systemFanLoopOp > 0)) {
+                                relayState = 1;
                         } else {
                             relayState = 0;
                         }

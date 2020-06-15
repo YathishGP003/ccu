@@ -53,6 +53,7 @@ public class HisSyncHandler
 
                 DateTime now = new DateTime();
                 boolean timeForQuarterHourSync = now.getMinuteOfDay() % 15 == 0 ? true : false;
+                CcuLog.d(TAG, "Time for quarter hour sync: " + timeForQuarterHourSync);
 
                 if (CCUHsApi.getInstance().isCCURegistered() && CCUHsApi.getInstance().isNetworkConnected()) {
                     CcuLog.d(TAG,"Processing sync for equips and devices");
@@ -117,7 +118,7 @@ public class HisSyncHandler
 
             String pointID = pointToSync.get("id").toString();
             String pointDescription = pointToSync.get("dis").toString();
-            String pointGuid = CCUHsApi.getInstance().getGUID(pointID);
+            String pointGuid = CCUHsApi.getInstance().getGUID (pointID);
             boolean isBooleanPoint = ((HStr) pointToSync.get("kind")).val.equals("Bool");
 
             unsyncedHisItems = ccuHsApi.tagsDb.getUnsyncedHisItemsOrderDesc(pointID);
@@ -126,7 +127,9 @@ public class HisSyncHandler
                 CcuLog.d(TAG,"There are no unsynced historized items for point GUID " + pointGuid);
 
                 HisItem latestHisItemToSync = ccuHsApi.tagsDb.getLastHisItem(HRef.copy(pointID));
-                unsyncedHisItems.add(latestHisItemToSync);
+                if (latestHisItemToSync != null) {
+                    unsyncedHisItems.add(latestHisItemToSync);
+                }
             }
 
             for (HisItem hisItem : unsyncedHisItems) {

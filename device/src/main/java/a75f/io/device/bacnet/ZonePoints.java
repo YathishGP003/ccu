@@ -64,6 +64,7 @@ public class ZonePoints {
             }
             if (zoneEquip.getMarkers().contains("vav")) {
                 updateSupplyAirTemperature(localDevice, zoneAddress, zoneName, zoneDescription, zoneDevice);
+                updateReheatCoil(localDevice, zoneAddress, zoneName, zoneDescription, zoneDevice);
             }
             if(zoneDevice.getMarkers().contains("smartstat")) {
                 updateSensorData(localDevice,zoneAddress,zoneName, zoneDescription,zoneDevice);
@@ -523,8 +524,54 @@ public class ZonePoints {
             e.printStackTrace();
         }
     }
+    
+    public void updateReheatCoil(LocalDevice localDevice, int zoneAddress, String zoneName, String zoneDescription, Device zoneDevice) {
+        try {
+            AnalogValueObject reheatCoilAV;
+            int addressNumber = Integer.parseInt(zoneAddress + "00");
+            int instanceID = addressNumber + BACnetUtils.reheatCoil;
+            if (!localDevice.checkObjectByID(instanceID)) {
+                Log.i("Bacnet", "Creating Reheat Coil:" + instanceID);
+                reheatCoilAV = new AnalogValueObject(localDevice, instanceID, zoneName + "_reheatCoil", (float) getReheatCoil(zoneDevice), EngineeringUnits.volts, false);
+                reheatCoilAV.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("Reheat Coil of " + zoneDescription)));
+                reheatCoilAV.supportCommandable(1);
+                TrendLogObject trendObject = new TrendLogObject(localDevice, reheatCoilAV.getInstanceId(), zoneName + "_reheatCoil_trend", new LinkedListLogBuffer<LogRecord>(), true, DateTime.UNSPECIFIED, DateTime.UNSPECIFIED,
+                        new DeviceObjectPropertyReference(localDevice.getInstanceNumber(), reheatCoilAV.getId(), PropertyIdentifier.presentValue), 0, false, BACnetUtils.bufferSize)
+                        .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov(new Real(1f)))
+                        .withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS);
 
-   public double getMaxBuildingLimits(){
+                trendObject.writePropertyInternal(PropertyIdentifier.eventState, EventState.normal);
+                trendObject.makePropertyReadOnly(PropertyIdentifier.logDeviceObjectProperty);
+                readAccessSpecifications.add(new ReadAccessSpecification(reheatCoilAV.getId(),
+                        new SequenceOf<>(new PropertyReference(PropertyIdentifier.presentValue))));
+                listOfObjectPropertyReferences.add(new DeviceObjectPropertyReference(reheatCoilAV.getId(), PropertyIdentifier.presentValue, null, null));
+            } else {
+                setReheatCoil(localDevice, zoneAddress, zoneDevice);
+            }
+        } catch (BACnetServiceException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setReheatCoil(LocalDevice localDevice, int zoneAddress, Device equip) {
+        try {
+            int addressNumber = Integer.parseInt(zoneAddress + "00");
+            int instanceID = addressNumber + BACnetUtils.reheatCoil;
+            if (localDevice.checkObjectByID(instanceID)) {
+                BACnetObject baCnetObject = localDevice.getObjectByID(instanceID);
+                double reheatCoil = getReheatCoil(equip);
+                Log.i("Bacnet", "Updating Reheat Coil:" + instanceID + " Value:" + reheatCoil);
+                baCnetObject.setOverridden(false);
+                if (baCnetObject.readProperty(PropertyIdentifier.outOfService).equals(Boolean.FALSE)) {
+                    baCnetObject.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.presentValue, new Real((int) reheatCoil)));
+                }
+                baCnetObject.setOverridden(true);
+            }
+        } catch (BACnetServiceException e) {
+            e.printStackTrace();
+        }
+    }
+    public double getMaxBuildingLimits(){
         return TunerUtil.readBuildingTunerValByQuery("building and limit and max");
    }
     public double getMinBuildingLimits(){
@@ -586,6 +633,16 @@ public class ZonePoints {
     public double getSupplyAirTemp(Device equip){
         try {
             return CCUHsApi.getInstance().readHisValByQuery("zone and point and entering and air and temp and sensor and equipRef == \"" + equip.getEquipRef() + "\"");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    public double getReheatCoil(Device equip) {
+        try {
+            double reheatCoilValue = CCUHsApi.getInstance().readHisValByQuery("point and zone and reheat and cmd and equipRef == \"" + equip.getEquipRef() + "\"");
+            return reheatCoilValue;
         } catch (Exception e) {
             e.printStackTrace();
             return 0;

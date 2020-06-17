@@ -663,4 +663,8 @@
     <string name="txt_place_holder">place holder</string>
     <string name="txt_cancel">Cancel</string>
     <string name="txt_pair">Pair</string>
+    <string name="txt_smartnode">Smartnode</string>
+    <string name="txt_smartstat">SmartStat</string>
+    <string name="txt_itm_hia">ITM-HIA</string>
+    <string name="txt_itm_lpi">ITM-LPI</string>
 </resources>

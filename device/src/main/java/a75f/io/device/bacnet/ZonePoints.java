@@ -38,6 +38,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logic.bo.building.SensorType;
+import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.tuners.TunerUtil;
 
 public class ZonePoints {
@@ -532,7 +533,8 @@ public class ZonePoints {
             int instanceID = addressNumber + BACnetUtils.reheatCoil;
             if (!localDevice.checkObjectByID(instanceID)) {
                 Log.i("Bacnet", "Creating Reheat Coil:" + instanceID);
-                reheatCoilAV = new AnalogValueObject(localDevice, instanceID, zoneName + "_reheatCoil", (float) getReheatCoil(zoneDevice), EngineeringUnits.volts, false);
+                ReheatType reheatType = getReheatCoilType(zoneDevice.getEquipRef());
+                reheatCoilAV = new AnalogValueObject(localDevice, instanceID, zoneName + "_reheatCoil_"+reheatType.displayName, (float) getReheatCoil(zoneDevice), EngineeringUnits.percent, false);
                 reheatCoilAV.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("Reheat Coil of " + zoneDescription)));
                 reheatCoilAV.supportCommandable(1);
                 TrendLogObject trendObject = new TrendLogObject(localDevice, reheatCoilAV.getInstanceId(), zoneName + "_reheatCoil_trend", new LinkedListLogBuffer<LogRecord>(), true, DateTime.UNSPECIFIED, DateTime.UNSPECIFIED,
@@ -641,12 +643,15 @@ public class ZonePoints {
 
     public double getReheatCoil(Device equip) {
         try {
-            double reheatCoilValue = CCUHsApi.getInstance().readHisValByQuery("point and zone and reheat and cmd and equipRef == \"" + equip.getEquipRef() + "\"");
-            return reheatCoilValue;
+            return CCUHsApi.getInstance().readHisValByQuery("point and zone and reheat and cmd and equipRef == \"" + equip.getEquipRef() + "\"");
         } catch (Exception e) {
             e.printStackTrace();
             return 0;
         }
+    }
+    private static ReheatType getReheatCoilType(String equipRef){
+        double reheatTypeValue = CCUHsApi.getInstance().readDefaultVal("point and zone and reheat and type and config and equipRef == \"" + equipRef + "\"");
+        return ReheatType.values()[(int)reheatTypeValue];
     }
     private static float getMaxUserTempLimits(String tag){
         return (float) TunerUtil.readBuildingTunerValByQuery("user and limit and max and "+tag);

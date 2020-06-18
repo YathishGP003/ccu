@@ -316,6 +316,19 @@
                 android:textOn=""
                 android:layout_below="@+id/textTempforAll" />
 
+            <TextView
+                android:id="@+id/textNetworkError"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/errorNetwork"
+                android:textColor="@color/orange_75f"
+                android:textSize="26dp"
+                android:layout_marginTop="5sp"
+                android:layout_marginLeft="96sp"
+                android:layout_below="@+id/textBacnetEnable"
+                android:visibility="gone"
+                />
+
             <RelativeLayout
                 android:id="@+id/relativeLayoutBACnet"
                 android:layout_width="match_parent"
@@ -325,10 +338,29 @@
                 android:layout_marginTop="20dp"
                 >
 
+                <RadioGroup
+                    android:id="@+id/radioGroupConfig"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <RadioButton
+                        android:id="@+id/rbAuto"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/rb_auto"/>
+
+                    <RadioButton
+                        android:id="@+id/rbManual"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/rb_manual"
+                        android:layout_marginLeft="36dp"/>
+                </RadioGroup>
                 <android.support.design.widget.TextInputLayout
                     android:id="@+id/textInputIP"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_below="@+id/radioGroupConfig"
                     app:errorTextAppearance="@style/error_appearance">
 
                     <EditText
@@ -355,6 +387,7 @@
                     android:layout_height="wrap_content"
                     android:layout_toRightOf="@+id/textInputIP"
                     android:layout_marginLeft="36dp"
+                    android:layout_below="@+id/radioGroupConfig"
                     app:errorTextAppearance="@style/error_appearance">
 
                     <EditText

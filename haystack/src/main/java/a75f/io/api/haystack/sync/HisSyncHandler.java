@@ -20,7 +20,6 @@ import org.projecthaystack.HVal;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +53,7 @@ public class HisSyncHandler
 
                 DateTime now = new DateTime();
                 boolean timeForQuarterHourSync = now.getMinuteOfDay() % 15 == 0 ? true : false;
+                CcuLog.d(TAG, "Time for quarter hour sync: " + timeForQuarterHourSync);
 
                 if (CCUHsApi.getInstance().isCCURegistered() && CCUHsApi.getInstance().isNetworkConnected()) {
                     CcuLog.d(TAG,"Processing sync for equips and devices");
@@ -111,8 +111,6 @@ public class HisSyncHandler
 
         List<HisItem> hisItemsToSyncForDeviceOrEquip = new ArrayList<>();
         List<HDict> hDictList = new ArrayList<>();
-        Date quarterHourSyncDateTimeForDeviceOrEquip = new Date(System.currentTimeMillis());
-
 
         for (HashMap pointToSync : pointList) {
 
@@ -120,42 +118,33 @@ public class HisSyncHandler
 
             String pointID = pointToSync.get("id").toString();
             String pointDescription = pointToSync.get("dis").toString();
-            String pointGuid = CCUHsApi.getInstance().getGUID(pointID);
+            String pointGuid = CCUHsApi.getInstance().getGUID (pointID);
             boolean isBooleanPoint = ((HStr) pointToSync.get("kind")).val.equals("Bool");
 
             unsyncedHisItems = ccuHsApi.tagsDb.getUnsyncedHisItemsOrderDesc(pointID);
 
-            if (!unsyncedHisItems.isEmpty()) {
-                for (HisItem hisItem : unsyncedHisItems) {
+            if (unsyncedHisItems.isEmpty() && timeForQuarterHourSync) {
+                CcuLog.d(TAG,"There are no unsynced historized items for point GUID " + pointGuid);
 
-                    String pointTimezone = pointToSync.get("tz").toString();
-                    HVal pointValue = isBooleanPoint ? HBool.make(hisItem.getVal() > 0) : HNum.make(hisItem.getVal());
-                    long pointTimestamp = hisItem.getDateInMillis();
-
-                    if (!StringUtils.equals("NaN", pointValue.toString())) {
-                        HDict hDict = buildHDict(pointGuid, pointTimezone, pointValue, pointTimestamp);
-                        hDictList.add(hDict);
-                        hisItemsToSyncForDeviceOrEquip.add(hisItem);
-                        CcuLog.d(TAG,"Adding historized point value for GUID " + pointGuid + "; point ID " + pointID + "; description of " + pointDescription + "; value of " + pointValue + " for syncing.");
-                    } else {
-                        CcuLog.e(TAG,"Historized point value for GUID " + pointGuid + "; point ID " + pointID + "; description of " + pointDescription + " is null. Skipping.");
-                    }
+                HisItem latestHisItemToSync = ccuHsApi.tagsDb.getLastHisItem(HRef.copy(pointID));
+                if (latestHisItemToSync != null) {
+                    unsyncedHisItems.add(latestHisItemToSync);
                 }
-            } else if (unsyncedHisItems.isEmpty() && timeForQuarterHourSync) {
+            }
 
-                HisItem latestHisItemToReSync = ccuHsApi.tagsDb.getLastHisItem(HRef.copy(pointID));
+            for (HisItem hisItem : unsyncedHisItems) {
 
-                if (latestHisItemToReSync != null) {
-                    // TODO Matt Rudd - Feels a bit wrong to duplicate this code from the for loop for unsynced items, but I don't want to mutate objects or have a method just to set variables
-                    latestHisItemToReSync.setDate(quarterHourSyncDateTimeForDeviceOrEquip);
+                String pointTimezone = pointToSync.get("tz").toString();
+                HVal pointValue = isBooleanPoint ? HBool.make(hisItem.getVal() > 0) : HNum.make(hisItem.getVal());
+                long pointTimestamp = hisItem.getDateInMillis();
 
-                    String pointTimezone = pointToSync.get("tz").toString();
-                    HVal pointValue = isBooleanPoint ? HBool.make(latestHisItemToReSync.getVal() > 0) : HNum.make(latestHisItemToReSync.getVal());
-                    long pointTimestamp = latestHisItemToReSync.getDateInMillis();
-
+                if (!StringUtils.equals("NaN", pointValue.toString())) {
                     HDict hDict = buildHDict(pointGuid, pointTimezone, pointValue, pointTimestamp);
                     hDictList.add(hDict);
-                    CcuLog.d(TAG,"There are no unsynced historized items for point GUID " + pointGuid +  "; resyncing with time of " + quarterHourSyncDateTimeForDeviceOrEquip + "; value of " + pointValue);
+                    hisItemsToSyncForDeviceOrEquip.add(hisItem);
+                    CcuLog.d(TAG,"Adding historized point value for GUID " + pointGuid + "; point ID " + pointID + "; description of " + pointDescription + "; value of " + pointValue + " for syncing.");
+                } else {
+                    CcuLog.d(TAG,"Historized point value for GUID " + pointGuid + "; point ID " + pointID + "; description of " + pointDescription + " is null. Skipping.");
                 }
             }
 
@@ -167,14 +156,13 @@ public class HisSyncHandler
 
             HDict[] hDicts = hDictListToArray(hDictList);
 
-            // TODO Matt Rudd - this list could be substantial; the requests to hisWriteMany will need to be chunked for large lists
             HDict hisWriteMetadata = new HDictBuilder()
                     .add("id", HRef.make(StringUtils.stripStart(deviceOrEquipGuid,"@")))
                     .add(syncType)
                     .toDict();
 
             String response = CCUHsApi.getInstance().hisWriteManyToHaystackService(hisWriteMetadata, hDicts);
-            if (response != null && !hisItemsToSyncForDeviceOrEquip.isEmpty()) {
+            if (response != null) {
                 ccuHsApi.tagsDb.updateHisItemSynced(hisItemsToSyncForDeviceOrEquip);
             }
         }

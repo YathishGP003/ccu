@@ -162,7 +162,9 @@ public class AddtoExisting extends Fragment {
                         };
                 if(!validateEditText(mandotaryIds))
                 {
-                    loadExistingSite(mSiteId.getText().toString().trim());
+                    String siteId = StringUtils.trim(mSiteId.getText().toString());
+                    siteId = StringUtils.prependIfMissing(siteId, "@");
+                    loadExistingSite(siteId);
                 }
             }
         });

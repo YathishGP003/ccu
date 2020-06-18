@@ -186,13 +186,13 @@ public class InstallerOptions extends Fragment {
 
         //BACnet Setup UI Components
         toggleBACnet = rootView.findViewById(R.id.toggleBACnet);
-        rl_BACnet = rootView.findViewById(R.id.rl_Bacnet);
+        rl_BACnet = rootView.findViewById(R.id.relativeLayoutBACnet);
         editIPAddr = rootView.findViewById(R.id.editIPaddr);
         editSubnet = rootView.findViewById(R.id.editSubnet);
         editGateway = rootView.findViewById(R.id.editGateway);
         buttonInitialise = rootView.findViewById(R.id.buttonInitialise);
         textInputIP = rootView.findViewById(R.id.textInputIP);
-        radioGroup_config = rootView.findViewById(R.id.radioGroup_config);
+        radioGroup_config = rootView.findViewById(R.id.radioGroupConfig);
         buttonSendIAM = rootView.findViewById(R.id.buttonSendIAM);
         textBacnetEnable = rootView.findViewById(R.id.textBacnetEnable);
         rl_BACnet.setVisibility(View.GONE);

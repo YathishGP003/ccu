@@ -336,31 +336,10 @@
                 android:layout_marginStart="96dp"
                 android:layout_marginTop="20dp">
 
-                <RadioGroup
-                    android:id="@+id/radioGroupConfig"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/rbAuto"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/rb_auto" />
-
-                    <RadioButton
-                        android:id="@+id/rbManual"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="36dp"
-                        android:text="@string/rb_manual" />
-                </RadioGroup>
-
                 <android.support.design.widget.TextInputLayout
                     android:id="@+id/textInputIP"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/radioGroupConfig"
                     app:errorTextAppearance="@style/error_appearance">
 
                     <EditText
@@ -371,10 +350,11 @@
                         android:fontFamily="@font/lato_regular"
                         android:gravity="start|center_vertical"
                         android:hint="@string/hint_deviceIP"
-                        android:inputType="numberDecimal|textWebEditText"
+                        android:inputType="numberDecimal"
                         android:maxLength="16"
                         android:minWidth="200dp"
                         android:singleLine="true"
+                        android:text="192.168.192.192"
                         android:textColor="@color/input_textcolor"
                         android:textSize="19.5sp" />
                 </android.support.design.widget.TextInputLayout>
@@ -384,8 +364,7 @@
                     android:id="@+id/textInputSubnet"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/radioGroupConfig"
-                    android:layout_marginStart="56dp"
+                    android:layout_marginStart="36dp"
                     android:layout_toEndOf="@+id/textInputIP"
                     app:errorTextAppearance="@style/error_appearance">
 
@@ -400,6 +379,7 @@
                         android:maxLength="16"
                         android:minWidth="200dp"
                         android:singleLine="true"
+                        android:text="192.168.1.1"
                         android:textColor="@color/input_textcolor"
                         android:textSize="19.5sp" />
                 </android.support.design.widget.TextInputLayout>
@@ -425,6 +405,7 @@
                         android:maxLength="16"
                         android:minWidth="200dp"
                         android:singleLine="true"
+                        android:text="192.168.1.1"
                         android:textColor="@color/input_textcolor"
                         android:textSize="19.5sp" />
                 </android.support.design.widget.TextInputLayout>
@@ -438,30 +419,11 @@
                     android:layout_alignBottom="@+id/textInputGateway"
                     android:layout_marginTop="20dp"
                     android:background="@null"
-                    android:focusableInTouchMode="true"
                     android:fontFamily="@font/lato_bold"
                     android:padding="5dp"
                     android:text="@string/button_initialise"
                     android:textColor="@color/orange_75f"
                     android:textSize="26sp" />
-
-                <Button
-                    android:id="@+id/buttonSendIAM"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/textInputIP"
-                    android:layout_alignBottom="@+id/textInputGateway"
-                    android:layout_marginStart="36dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_toEndOf="@+id/buttonInitialise"
-                    android:background="@null"
-                    android:focusableInTouchMode="true"
-                    android:fontFamily="@font/lato_bold"
-                    android:padding="5dp"
-                    android:text="@string/button_sendIAM"
-                    android:textColor="@color/orange_75f"
-                    android:textSize="26sp"
-                    android:visibility="gone" />
 
             </RelativeLayout>
 

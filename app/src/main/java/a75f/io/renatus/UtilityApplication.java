@@ -653,8 +653,10 @@ public abstract class UtilityApplication extends Application
     public class NetworkChangeReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(isBACnetEnabled()){
-                if(localDevice.isInitialized()) {
+            if(isBACnetEnabled() && checkNetworkConnected()){
+                if(localDevice == null)
+                    InitialiseBACnet();
+                if(localDevice!= null && localDevice.isInitialized()) {
                     localDevice.sendLocalBroadcast(new IAmRequest(new ObjectIdentifier(ObjectType.device, localDevice.getInstanceNumber()),
                             localDevice.get(PropertyIdentifier.maxApduLengthAccepted),
                             Segmentation.noSegmentation, localDevice.get(PropertyIdentifier.vendorIdentifier)));

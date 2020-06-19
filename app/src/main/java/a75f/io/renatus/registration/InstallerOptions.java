@@ -415,20 +415,6 @@ public class InstallerOptions extends Fragment {
 
         getActivity().registerReceiver(mPairingReceiver, new IntentFilter(ACTION_SETTING_SCREEN));
 
-
-        if(utilityApplication.isBACnetEnabled()){
-            toggleBACnet.setChecked(true);
-            relativeLayoutBACnet.setVisibility(View.VISIBLE);
-            if(!utilityApplication.isAutoMode()){ // Check for BACnet Enabled in Auto or Manual
-                networkConfig = prefs.getString("BACnetConfig");
-                radioGroupConfig.check(R.id.rbManual);
-                String[] ethConfig = networkConfig.split(":");
-                editIPAddr.setText(ethConfig[1]);
-                editGateway.setText(ethConfig[2]);
-                editSubnet.setText(ethConfig[3]);
-            }
-            lockBACnetConfig();
-        }
         getBACnetConfig();
         return rootView;
     }

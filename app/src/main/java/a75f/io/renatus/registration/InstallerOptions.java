@@ -43,6 +43,8 @@ import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -467,8 +469,7 @@ public class InstallerOptions extends Fragment {
 
     public LocalDevice manualConfigBACnetDevice(){
         LocalDevice localDevice = null;
-        String[] manualIp = (editIPAddr.getText().toString()).split("\\.");
-        if(validateIPAddress(manualIp)){
+        if(validateIPAddress(editIPAddr.getText().toString())){
             utilityApplication.setNetwork(editIPAddr.getText().toString(),editGateway.getText().toString(), editSubnet.getText().toString(),isEthernet);
             if(isEthernet) {
                 networkConfig = utilityApplication.getIPConfig();
@@ -635,18 +636,22 @@ public class InstallerOptions extends Fragment {
         }
     }
 
-    public boolean validateIPAddress(String[] manualIPAddress) {
-        if (manualIPAddress.length == 4) {
-            if (!(manualIPAddress[0].isEmpty() & manualIPAddress[1].isEmpty() & manualIPAddress[2].isEmpty() & manualIPAddress[3].isEmpty())) {
-                return Integer.parseInt(manualIPAddress[0]) <= 255 &
-                        Integer.parseInt(manualIPAddress[1]) <= 255 &
-                        Integer.parseInt(manualIPAddress[2]) <= 255 &
-                        Integer.parseInt(manualIPAddress[3]) <= 255;
-            } else {
-                return false;
-            }
-        } else {
+    public boolean validateIPAddress(String manualIPAddress) {
+        String IPADDRESS_PATTERN =
+                "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+                        "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+                        "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+                        "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
+        Pattern pattern = Pattern.compile(IPADDRESS_PATTERN);
+        Matcher matcher = pattern.matcher(manualIPAddress);
+        if (!matcher.matches()) {
             return false;
+        } else {
+            String[] manualIp = (manualIPAddress).split("\\.");
+                return Integer.parseInt(manualIp[0]) < 255 & Integer.parseInt(manualIp[0]) > 0 &
+                        Integer.parseInt(manualIp[1]) < 255 & Integer.parseInt(manualIp[1]) > 0 &
+                        Integer.parseInt(manualIp[2]) < 255 & Integer.parseInt(manualIp[2]) > 0 &
+                        Integer.parseInt(manualIp[3]) < 255 & Integer.parseInt(manualIp[3]) > 0;
         }
     }
 

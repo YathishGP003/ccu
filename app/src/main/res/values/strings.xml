@@ -641,4 +641,5 @@
     <string name="rb_auto">Auto Config</string>
     <string name="rb_manual">Manual Config</string>
     <string name="button_sendIAM">Send IAM</string>
+    <string name="errorNetwork">Check WiFi or Ethernet Connectivity</string>
 </resources>

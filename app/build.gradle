@@ -180,10 +180,10 @@ def getVersionCodeTimestamp() {
 
 android.applicationVariants.all { variant ->
     variant.outputs.all {
-        if (variant.buildType.name == "prod") {
-            outputFileName = versionName + ".apk"
-        } else {
+        if (variant.buildType.name == "local") {
             outputFileName = "app-" + variant.buildType.name + "-debug.apk"
+        } else {
+            outputFileName = versionName + ".apk"
         }
     }
 }

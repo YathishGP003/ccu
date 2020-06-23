@@ -35,7 +35,6 @@ import a75f.io.device.serial.SnRebootIndicationMessage_t;
 import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Sensor;
 import a75f.io.logic.bo.building.SensorType;
@@ -781,30 +780,47 @@ public class Pulse
 		}
 	}
 	public static void updateSetTempFromBacnet(short nodeAddr, double temp, String coolheat){
-		//CCUHsApi hayStack = CCUHsApi.getInstance();
 
 		HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+nodeAddr+"\"");
-		Equip q = new Equip.Builder().setHashMap(equipMap).build();
-
-		HashMap coolingDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and cooling and sp and equipRef == \""+q.getId()+"\"");
+		Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+		double heatDB = TunerUtil.getZoneHeatingDeadband(equip.getRoomRef());
+		double coolDB = TunerUtil.getZoneCoolingDeadband(equip.getRoomRef());
+		double updatedHeatingDt = 0;
+		double updatedCoolingDt = 0;
+		HashMap coolingDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and cooling and sp and equipRef == \"" + equip.getId() + "\"");
 		if (coolingDtPoint == null || coolingDtPoint.size() == 0) {
 			throw new IllegalArgumentException();
 		}
-		Point p = new Point.Builder().setHashMap(coolingDtPoint).build();
-		if(coolheat.contains("heating")) {
+		double coolingDesiredTemp = CCUHsApi.getInstance().readPointPriorityVal(coolingDtPoint.get("id").toString());
+		Point coolingPt = new Point.Builder().setHashMap(coolingDtPoint).build();
 
-			HashMap heatinDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and heating and sp and equipRef == \""+q.getId()+"\"");
-			if (heatinDtPoint == null || heatinDtPoint.size() == 0) {
-				throw new IllegalArgumentException();
-			}
-			p = new Point.Builder().setHashMap(heatinDtPoint).build();
+		HashMap heatinDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and heating and sp and equipRef == \""+equip.getId()+"\"");
+		if (heatinDtPoint == null || heatinDtPoint.size() == 0) {
+			throw new IllegalArgumentException();
 		}
+		double heatingDesiredTemp = CCUHsApi.getInstance().readPointPriorityVal(heatinDtPoint.get("id").toString());
+		Point heatingPt = new Point.Builder().setHashMap(heatinDtPoint).build();
 		try{
-			CCUHsApi.getInstance().writeHisValById(p.getId(), temp);
+			if(coolheat.equals("heating") && (heatingDesiredTemp != temp)) {
+				if((temp + heatDB + coolDB) > coolingDesiredTemp) {
+					updatedCoolingDt = temp + heatDB + coolDB;
+					CCUHsApi.getInstance().writeHisValById(coolingPt.getId(), updatedCoolingDt);
+				}
+				updatedHeatingDt = temp;
+				CCUHsApi.getInstance().writeHisValById(heatingPt.getId(), temp);
+			}else if(coolheat.equals("cooling") && (coolingDesiredTemp != temp)) {
+				if((temp - (heatDB + coolDB)) < heatingDesiredTemp) {
+					updatedHeatingDt = temp - (heatDB + coolDB);
+					CCUHsApi.getInstance().writeHisValById(heatingPt.getId(), updatedHeatingDt);
+				}
+				updatedCoolingDt = temp;
+				CCUHsApi.getInstance().writeHisValById(coolingPt.getId(), updatedCoolingDt);
+			}
 		}catch (Exception e){
 			e.printStackTrace();
 		}
-		ScheduleProcessJob.handleDesiredTempUpdate(p, true, temp);
+		if(updatedCoolingDt != 0 || updatedHeatingDt != 0)
+			ScheduleProcessJob.handleManualDesiredTempUpdate(coolingPt,heatingPt,null,updatedCoolingDt,updatedHeatingDt, 0);
 
 	}
 	public static void updateSetTempFromSmartStat(CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t setTempUpdate){

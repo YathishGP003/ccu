@@ -13,6 +13,7 @@ import java.util.List;
 import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
+import a75f.io.alerts.BuildConfig;
 
 public class AlertSyncHandler
 {
@@ -40,7 +41,7 @@ public class AlertSyncHandler
             clone.setDeviceRef(deviceId);
             if (a.getGuid().equals(""))
             {
-                String response = HttpUtil.sendRequest("createAlert", new Gson().toJson(clone));
+                String response = HttpUtil.sendRequest("createAlert", new Gson().toJson(clone), BuildConfig.ALERTS_API_KEY);
                 CcuLog.d("CCU_ALERTS", " response " + response);
                 if (response != null)
                 {
@@ -61,7 +62,7 @@ public class AlertSyncHandler
                     }
                 }
             }else {
-                String response = HttpUtil.sendRequest("updateAlert", new Gson().toJson(clone));
+                String response = HttpUtil.sendRequest("updateAlert", new Gson().toJson(clone), BuildConfig.ALERTS_API_KEY);
                 CcuLog.d("CCU_ALERTS", " response " + response);
                 if (response != null)
                 {
@@ -77,7 +78,7 @@ public class AlertSyncHandler
     public static boolean delete(Context c, String id) {
         try
         {
-            String response = HttpUtil.sendRequest("removeAlert", new JSONObject().put("_id", id).toString());
+            String response = HttpUtil.sendRequest("removeAlert", new JSONObject().put("_id", id).toString(), BuildConfig.ALERTS_API_KEY);
             CcuLog.d("CCU_ALERTS", " response " + response);
             return response != null;
         }catch (JSONException e) {

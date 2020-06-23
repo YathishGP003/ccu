@@ -49,6 +49,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logic.DefaultSchedules;
@@ -66,6 +67,9 @@ public class BACnetScheduler {
     public AnalogValueObject occupancyCoolingTemp = null;
     public AnalogValueObject occupancyHeatingTemp = null;
 
+    private static final String defaultStartTime = "00:00:00";
+    private static final String defaultEndTime = "23:59:59";
+
     public BACnetScheduler(LocalDevice localDevice, Zone zone) {
 
         zoneDevice = HSUtil.getDevices(zone.getId()).get(0);
@@ -73,29 +77,28 @@ public class BACnetScheduler {
         schedule = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
         systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
 
-        //Todo Schedule Objects
         try {
             if (!localDevice.checkObjectByID(BACnetUtils.scheduleOccupancy)) {
                 occupancyObject = new BinaryValueObject(localDevice, BACnetUtils.scheduleOccupancy, "Building Schedule Occupancy", BinaryPV.inactive, false);
                 occupancyObject.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("Occupancy Status")));
-                occupancyObject.supportStateText("Unoccupied","Occupied");
+                occupancyObject.supportStateText("Unoccupied", "Occupied");
                 occupancyObject.supportCommandable(BinaryPV.inactive);
                 occupancyObject.supportCovReporting();
-            }else {
+            } else {
                 occupancyObject = (BinaryValueObject) localDevice.getObjectByID(BACnetUtils.scheduleOccupancy);
             }
             if (!localDevice.checkObjectByID(BACnetUtils.occupanyCoolingDT)) {
                 occupancyCoolingTemp = new AnalogValueObject(localDevice, BACnetUtils.occupanyCoolingDT, "Building Schedule Occupied Cooling", (float) BACnetUtils.defaultTemp, EngineeringUnits.degreesFahrenheit, false);
                 occupancyCoolingTemp.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("Occupancy Cooling Temperature")));
                 occupancyCoolingTemp.supportCommandable(72f);
-            }else {
+            } else {
                 occupancyCoolingTemp = (AnalogValueObject) localDevice.getObjectByID(BACnetUtils.occupanyCoolingDT);
             }
             if (!localDevice.checkObjectByID(BACnetUtils.occupanyHeatingDT)) {
                 occupancyHeatingTemp = new AnalogValueObject(localDevice, BACnetUtils.occupanyHeatingDT, "Building Schedule Occupied Heating", (float) BACnetUtils.defaultTemp, EngineeringUnits.degreesFahrenheit, false);
                 occupancyHeatingTemp.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("Occupancy Heating Temperature")));
                 occupancyHeatingTemp.supportCommandable(72f);
-            }else {
+            } else {
                 occupancyHeatingTemp = (AnalogValueObject) localDevice.getObjectByID(BACnetUtils.occupanyHeatingDT);
             }
 
@@ -402,86 +405,90 @@ public class BACnetScheduler {
 
 
     public static void updateVacations(BACnetObject calendarObject) {
-            vacationsList = CCUHsApi.getInstance().getSystemSchedule( true);
-            SequenceOf<CalendarEntry> calendarEntries = calendarObject.get(PropertyIdentifier.dateList);
-            SequenceOf<CalendarEntry> calendar75Entries = new SequenceOf<>();
-            ArrayList<Vacations> vacations75f = new ArrayList<>();
-            ArrayList<Vacations> vacationsBacnet = new ArrayList<>();
-            ArrayList<Vacations> vacationsCommon = new ArrayList<>();
-            ArrayList<Vacations> vacationsNew = new ArrayList<>();
-            if(calendarEntries.getCount() > 0){
-                if(compareVacations(calendarEntries, vacationsList))
-                {
-                    for(int i = 0; i< vacationsList.size(); i++){
-                        Vacations vacItem = new Vacations(null,convertDateTimetoDate(vacationsList.get(i).getStartDate()),convertDateTimetoDate(vacationsList.get(i).getEndDate()));
-                        Vacations vacItemCommon = new Vacations(vacationsList.get(i).getId(),convertDateTimetoDate(vacationsList.get(i).getStartDate()),convertDateTimetoDate(vacationsList.get(i).getEndDate()));
-                        vacations75f.add(vacItem);
-                        vacationsCommon.add(vacItemCommon);
-                    }
-                    for(int i = 0;i<calendarEntries.size();i++){
-                        Vacations vacItem = null;
-                        if(calendarEntries.get(i).isDate()) {
-                            vacItem = new Vacations(null, convertCalendarEntrytoDate(calendarEntries.get(i)),convertCalendarEntrytoDate(calendarEntries.get(i)));
-                        }else {
-                            vacItem = new Vacations(null, convertBacnetDate(calendarEntries.get(i).getDateRange().getStartDate()), convertBacnetDate(calendarEntries.get(i).getDateRange().getEndDate()));
-                        }
-                        vacationsBacnet.add(vacItem);
-                    }
-                    Collections.sort(vacations75f, new Comparator<Vacations>() {
-                        @Override
-                        public int compare(Vacations lhs, Vacations rhs) {
-                            return (lhs.getStartDate()).compareTo(rhs.getStartDate());
-                        }
-                    });
-                    Collections.sort(vacationsBacnet, new Comparator<Vacations>() {
-                        @Override
-                        public int compare(Vacations lhs, Vacations rhs) {
-                            return (lhs.getStartDate()).compareTo(rhs.getStartDate());
-                        }
-                    });
-                    ArrayList<Vacations> results = new ArrayList<>();
-                    for (Vacations vacation2 : vacationsCommon) {
-                        if(!vacationsBacnet.contains(vacation2)){
-                            results.add(vacation2);
-                        }
-                    }
-                    for(Vacations vacationChanged : results){
-                        for(Schedule scheduleItem : vacationsList){
-                            if(scheduleItem.getId().equals(vacationChanged.getVacationID()))
-                            {
-                                vacationsList.remove(scheduleItem);
-                                CCUHsApi.getInstance().deleteEntity("@"+scheduleItem.getId());
-                                ScheduleProcessJob.updateSchedules();
-                            }
-                        }
-                    }
-                    vacationsCommon.clear();
-                    vacationsList = CCUHsApi.getInstance().getSystemSchedule( true);
-                    for(int i = 0; i< vacationsList.size(); i++){
-                        Vacations vacItemCommon = new Vacations(vacationsList.get(i).getId(),convertDateTimetoDate(vacationsList.get(i).getStartDate()),convertDateTimetoDate(vacationsList.get(i).getEndDate()));
-                        vacationsNew.add(vacItemCommon);
-                    }
-                    for (Vacations vacation2 : vacationsBacnet) {
-                        if(!vacationsNew.contains(vacation2)){
-                            DefaultSchedules.upsertVacation(null, "BACnetVacation", new DateTime(vacation2.startDate), new DateTime(vacation2.endDate));
-                        }
-                    }
-                    CCUHsApi.getInstance().syncEntityTree();
-                    ScheduleProcessJob.updateSchedules();
-                    vacationsList = CCUHsApi.getInstance().getSystemSchedule( true);
+        vacationsList = CCUHsApi.getInstance().getSystemSchedule(true);
+        SequenceOf<CalendarEntry> calendarEntries = calendarObject.get(PropertyIdentifier.dateList);
+        ArrayList<Vacations> vacations75f = new ArrayList<>();
+        ArrayList<Vacations> vacationsBacnet = new ArrayList<>();
+        ArrayList<Vacations> vacationsCommon = new ArrayList<>();
+        ArrayList<Vacations> vacationsNew = new ArrayList<>();
+        if (calendarEntries.getCount() > 0) {
+            if (compareVacations(calendarEntries, vacationsList)) {
+                for (int i = 0; i < vacationsList.size(); i++) {
+                    Vacations vacItem = new Vacations(null, convertDateTimetoStartDate(vacationsList.get(i).getStartDate()), convertDateTimetoEndDate(vacationsList.get(i).getEndDate()));
+                    Vacations vacItemCommon = new Vacations(vacationsList.get(i).getId(), convertDateTimetoStartDate(vacationsList.get(i).getStartDate()), convertDateTimetoEndDate(vacationsList.get(i).getEndDate()));
+                    vacations75f.add(vacItem);
+                    vacationsCommon.add(vacItemCommon);
                 }
+                for (int i = 0; i < calendarEntries.size(); i++) {
+                    Vacations vacItem = null;
+                    if (calendarEntries.get(i).isDate()) {
+                        vacItem = new Vacations(null, convertCalendarEntrytoStartDate(calendarEntries.get(i)), convertCalendarEntrytoEndDate(calendarEntries.get(i)));
+                    } else {
+                        vacItem = new Vacations(null, convertBacnetStartDate(calendarEntries.get(i).getDateRange().getStartDate()), convertBacnetEndDate(calendarEntries.get(i).getDateRange().getEndDate()));
+                    }
+                    vacationsBacnet.add(vacItem);
+                }
+                Collections.sort(vacations75f, new Comparator<Vacations>() {
+                    @Override
+                    public int compare(Vacations lhs, Vacations rhs) {
+                        return (lhs.getStartDate()).compareTo(rhs.getStartDate());
+                    }
+                });
+                Collections.sort(vacationsBacnet, new Comparator<Vacations>() {
+                    @Override
+                    public int compare(Vacations lhs, Vacations rhs) {
+                        return (lhs.getStartDate()).compareTo(rhs.getStartDate());
+                    }
+                });
+
+                validateBACnetVacations(vacationsBacnet,vacationsCommon,vacationsNew);
             }
+        }
     }
 
-    public static void addNewVacations(BACnetObject scheduleObject, PropertyValue pv) {
+    public static void validateBACnetVacations(ArrayList<Vacations> vacationsBacnet, ArrayList<Vacations> vacationsCommon,
+                                               ArrayList<Vacations> vacationsNew)
+    {
+        ArrayList<Vacations> results = new ArrayList<>();
+        for (Vacations vacation2 : vacationsCommon) {
+            if (!vacationsBacnet.contains(vacation2)) {
+                results.add(vacation2);
+            }
+        }
+        for (Vacations vacationChanged : results) {
+            for (Schedule scheduleItem : vacationsList) {
+                if (scheduleItem.getId().equals(vacationChanged.getVacationID())) {
+                    vacationsList.remove(scheduleItem);
+                    CCUHsApi.getInstance().deleteEntity("@" + scheduleItem.getId());
+                    ScheduleProcessJob.updateSchedules();
+                }
+            }
+        }
+        vacationsCommon.clear();
+        vacationsList = CCUHsApi.getInstance().getSystemSchedule(true);
+        for (int i = 0; i < vacationsList.size(); i++) {
+            Vacations vacItemCommon = new Vacations(vacationsList.get(i).getId(), convertDateTimetoStartDate(vacationsList.get(i).getStartDate()), convertDateTimetoEndDate(vacationsList.get(i).getEndDate()));
+            vacationsNew.add(vacItemCommon);
+        }
+        for (Vacations vacation2 : vacationsBacnet) {
+            if (!vacationsNew.contains(vacation2)) {
+                DefaultSchedules.upsertVacation(null, "BACnetVacation", new DateTime(vacation2.startDate), new DateTime(vacation2.endDate));
+            }
+        }
+        CCUHsApi.getInstance().syncEntityTree();
+        ScheduleProcessJob.updateSchedules();
+        vacationsList = CCUHsApi.getInstance().getSystemSchedule(true);
+    }
+
+    public static void addNewVacations(PropertyValue pv) {
         vacationsList = CCUHsApi.getInstance().getSystemSchedule(true);
         SequenceOf<SpecialEvent> exceptionSchedules = pv.getValue();
         SequenceOf<CalendarEntry> calendarEntries = new SequenceOf<>();
-        if(exceptionSchedules.getCount() > 0){
-            for (SpecialEvent specialEvent: exceptionSchedules){
+        if (exceptionSchedules.getCount() > 0) {
+            for (SpecialEvent specialEvent : exceptionSchedules) {
                 calendarEntries.add(specialEvent.getCalendarEntry());
             }
-            for(Schedule vac75f: vacationsList) {
+            for (Schedule vac75f : vacationsList) {
                 CalendarEntry calEntry = null;
                 if (vac75f.getStartDate() == vac75f.getEndDate()) {
                     Date vacDate = new Date(vac75f.getStartDate().getYear(), Month.valueOf(vac75f.getStartDate().getMonthOfYear()), vac75f.getStartDate().getDayOfMonth(), DayOfWeek.UNSPECIFIED);
@@ -493,11 +500,12 @@ public class BACnetScheduler {
                     calEntry = new CalendarEntry(vacDateRange);
                 }
                 if (!calendarEntries.contains(calEntry)) {
-                    for(CalendarEntry newVacation : calendarEntries) {
-                        if(newVacation.isDate()) {
-                            DefaultSchedules.upsertVacation(null, "BACnetVacation-E", new DateTime(convertBacnetDate(newVacation.getDate())), new DateTime(convertBacnetDate(newVacation.getDate())));
-                        }if(newVacation.isDateRange()) {
-                            DefaultSchedules.upsertVacation(null, "BACnetVacation-E", new DateTime(convertBacnetDate(newVacation.getDateRange().getStartDate())), new DateTime(convertBacnetDate(newVacation.getDateRange().getEndDate())));
+                    for (CalendarEntry newVacation : calendarEntries) {
+                        if (newVacation.isDate()) {
+                            DefaultSchedules.upsertVacation(null, "BACnetVacation-E", new DateTime(convertBacnetStartDate(newVacation.getDate())), new DateTime(convertBacnetEndDate(newVacation.getDate())));
+                        }
+                        if (newVacation.isDateRange()) {
+                            DefaultSchedules.upsertVacation(null, "BACnetVacation-E", new DateTime(convertBacnetStartDate(newVacation.getDateRange().getStartDate())), new DateTime(convertBacnetEndDate(newVacation.getDateRange().getEndDate())));
                         }
                     }
                 }
@@ -507,64 +515,97 @@ public class BACnetScheduler {
         }
     }
 
-    public static boolean compareVacations(SequenceOf<CalendarEntry> calendarEntries, ArrayList<Schedule> vacationSchedule){
+    public static boolean compareVacations(SequenceOf<CalendarEntry> calendarEntries, ArrayList<Schedule> vacationSchedule) {
         boolean changeDone = false;
         for (int i = 0; i < vacationSchedule.size(); i++) {
             DateTime vacStartDate = vacationSchedule.get(i).getStartDate();
             DateTime vacEndDate = vacationSchedule.get(i).getEndDate();
-            long daysDiff = (vacEndDate.getMillis()-vacStartDate.getMillis())/(1000*60*60*24);
-
-            if(daysDiff == 0){ //Single Calendar Entry
+            long daysDiff = (vacEndDate.getMillis() - vacStartDate.getMillis()) / (1000 * 60 * 60 * 24);
+            if (daysDiff == 0) { //Single Calendar Entry
                 CalendarEntry newCalendarEntry = new CalendarEntry(new Date(vacStartDate.getYear(), Month.valueOf(vacStartDate.getMonthOfYear()), vacStartDate.getDayOfMonth(), DayOfWeek.UNSPECIFIED));
-                if(!calendarEntries.contains(newCalendarEntry)) {
+                if (!calendarEntries.contains(newCalendarEntry)) {
                     changeDone = true;
                 }
-            }
-            else { //Multiple Date Calendar Entry
+            } else { //Multiple Date Calendar Entry
                 Date startDate = new Date(vacStartDate.getYear(), Month.valueOf(vacStartDate.getMonthOfYear()), vacStartDate.getDayOfMonth(), DayOfWeek.UNSPECIFIED);
                 Date endDate = new Date(vacEndDate.getYear(), Month.valueOf(vacEndDate.getMonthOfYear()), vacEndDate.getDayOfMonth(), DayOfWeek.UNSPECIFIED);
-                CalendarEntry newCalendarEntry = new CalendarEntry(new DateRange(startDate,endDate));
-                if(!calendarEntries.contains(newCalendarEntry)){
+                CalendarEntry newCalendarEntry = new CalendarEntry(new DateRange(startDate, endDate));
+                if (!calendarEntries.contains(newCalendarEntry)) {
                     changeDone = true;
                 }
             }
         }
-        if(calendarEntries.getCount() != vacationSchedule.size()){
+        if (calendarEntries.getCount() != vacationSchedule.size()) {
             changeDone = true;
         }
         return changeDone;
     }
 
-    public static java.util.Date convertDateTimetoDate(DateTime dateTime)
-    {
+    @SuppressLint("SimpleDateFormat")
+    public static java.util.Date convertDateTimetoStartDate(DateTime dateTime) {
         java.util.Date convertedDate = null;
-        String strDate = dateTime.getDayOfMonth()+"/"+dateTime.getMonthOfYear()+"/"+(dateTime.getYear());
+        String strDate = dateTime.getDayOfMonth() + "/" + dateTime.getMonthOfYear() + "/" + (dateTime.getYear() + " " + defaultStartTime);
         try {
-            convertedDate = new SimpleDateFormat("dd/MM/yyyy").parse(strDate);
+            convertedDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(strDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return convertedDate;
+    }
+    @SuppressLint("SimpleDateFormat")
+    public static java.util.Date convertDateTimetoEndDate(DateTime dateTime) {
+        java.util.Date convertedDate = null;
+        String strDate = dateTime.getDayOfMonth() + "/" + dateTime.getMonthOfYear() + "/" + (dateTime.getYear() + " " + defaultEndTime);
+        try {
+            convertedDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(strDate);
         } catch (ParseException e) {
             e.printStackTrace();
         }
         return convertedDate;
     }
 
-    public static java.util.Date convertCalendarEntrytoDate(CalendarEntry calendarEntry)
-    {
+    @SuppressLint("SimpleDateFormat")
+    public static java.util.Date convertCalendarEntrytoStartDate(CalendarEntry calendarEntry) {
         java.util.Date convertedDate = null;
-        String strDate = calendarEntry.getDate().getDay()+"/"+Month.getIDof(calendarEntry.getDate().getMonth())+"/"+(1900+calendarEntry.getDate().getYear());
+        String strDate = calendarEntry.getDate().getDay() + "/" + Month.getIDof(calendarEntry.getDate().getMonth()) + "/" + (1900 + calendarEntry.getDate().getYear() + " " + defaultStartTime);
         try {
-            convertedDate = new SimpleDateFormat("dd/MM/yyyy").parse(strDate);
+            convertedDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(strDate);
         } catch (ParseException e) {
             e.printStackTrace();
         }
         return convertedDate;
     }
 
-    public static java.util.Date convertBacnetDate(Date bacnetDate)
-    {
+    @SuppressLint("SimpleDateFormat")
+    public static java.util.Date convertCalendarEntrytoEndDate(CalendarEntry calendarEntry) {
         java.util.Date convertedDate = null;
-        String strDate=bacnetDate.getDay()+"/"+Month.getIDof(bacnetDate.getMonth())+"/"+(1900+bacnetDate.getYear());
+        String strDate = calendarEntry.getDate().getDay() + "/" + Month.getIDof(calendarEntry.getDate().getMonth()) + "/" + (1900 + calendarEntry.getDate().getYear() + " " + defaultEndTime);
         try {
-            convertedDate = new SimpleDateFormat("dd/MM/yyyy").parse(strDate);
+            convertedDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(strDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return convertedDate;
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    public static java.util.Date convertBacnetStartDate(Date bacnetDate) {
+        java.util.Date convertedDate = null;
+        String strDate = bacnetDate.getDay() + "/" + Month.getIDof(bacnetDate.getMonth()) + "/" + (1900 + bacnetDate.getYear() + " " + defaultStartTime);
+        try {
+            convertedDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(strDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return convertedDate;
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    public static java.util.Date convertBacnetEndDate(Date bacnetDate) {
+        java.util.Date convertedDate = null;
+        String strDate = bacnetDate.getDay() + "/" + Month.getIDof(bacnetDate.getMonth()) + "/" + (1900 + bacnetDate.getYear() + " " + defaultEndTime);
+        try {
+            convertedDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(strDate);
         } catch (ParseException e) {
             e.printStackTrace();
         }

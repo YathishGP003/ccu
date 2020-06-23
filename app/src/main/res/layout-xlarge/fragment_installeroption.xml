@@ -401,8 +401,7 @@
                     android:layout_marginStart="56dp"
                     android:layout_toEndOf="@+id/textInputIP"
                     app:errorTextAppearance="@style/error_appearance">
-
-                    <EditText
+		    <EditText
                         android:id="@+id/editSubnet"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

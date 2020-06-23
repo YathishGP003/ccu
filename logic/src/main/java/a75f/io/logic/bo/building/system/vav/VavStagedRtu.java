@@ -192,8 +192,8 @@ public class VavStagedRtu extends VavSystemProfile
             double spSpMin = VavTRTuners.getStaticPressureTRTunerVal("spmin");
     
             CcuLog.d(L.TAG_CCU_SYSTEM,"spSpMax :"+spSpMax+" spSpMin: "+spSpMin+" SP: "+getStaticPressure());
-            systemFanLoopOp = (int) (getStaticPressure()  * 100 / spSpMax) ;
-            fanMinOutput = spSpMin * 100;
+            systemFanLoopOp = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax -spSpMin)) ;
+            
         } else if (VavSystemController.getInstance().getSystemState() == HEATING){
             systemFanLoopOp = (int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier);
         } else {
@@ -271,7 +271,7 @@ public class VavStagedRtu extends VavSystemProfile
                         break;
                     case FAN_1:
                         if ((systemMode != SystemMode.OFF && (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
-                                && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)) || (systemFanLoopOp > fanMinOutput)) {
+                                && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)) || (systemFanLoopOp > 0)) {
                                 relayState = 1;
                         } else {
                             relayState = 0;

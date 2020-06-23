@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#103F51B5"
     android:orientation="vertical">
-
 
     <LinearLayout
         android:id="@+id/lil_account"
@@ -13,23 +13,25 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="16dp"
+        tools:ignore="UseCompoundDrawables">
 
         <ImageView
             android:id="@+id/icon_account"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
             android:tint="@color/black"
-            app:srcCompat="@drawable/ic_account" />
+            app:srcCompat="@drawable/ic_account"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/text_Account"
             style="@style/text_appearance"
             android:layout_width="wrap_content"
-            android:padding="8dp"
             android:layout_height="wrap_content"
-            android:text="Account" />
+            android:padding="8dp"
+            android:text="@string/txt_account" />
 
     </LinearLayout>
 
@@ -39,15 +41,17 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="16dp"
+        tools:ignore="UseCompoundDrawables">
 
         <ImageView
             android:id="@+id/icon_security"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
             android:tint="@color/black"
-            app:srcCompat="@drawable/ic_security" />
+            app:srcCompat="@drawable/ic_security"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/text_security"
@@ -55,7 +59,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:text="Security" />
+            android:text="@string/txt_security" />
 
     </LinearLayout>
 
@@ -65,23 +69,25 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="16dp"
+        tools:ignore="UseCompoundDrawables">
 
         <ImageView
             android:id="@+id/icon_wifi"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
             android:tint="@color/black"
-            app:srcCompat="@drawable/ic_wifi_svg" />
+            app:srcCompat="@drawable/ic_wifi_svg"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/text_wifi"
             style="@style/text_appearance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="WiFiSettings"
             android:padding="8dp"
+            android:text="@string/txt_wifisettings"
             android:textColor="@android:color/black" />
 
     </LinearLayout>
@@ -92,15 +98,17 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="16dp"
+        tools:ignore="UseCompoundDrawables">
 
         <ImageView
             android:id="@+id/icon_installer"
             android:layout_width="28dp"
             android:layout_height="24dp"
-            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
             android:tint="@color/black"
-            app:srcCompat="@drawable/ic_installer_operation" />
+            app:srcCompat="@drawable/ic_installer_operation"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/text_installer"
@@ -108,7 +116,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:text="Installer Operations" />
+            android:text="@string/txt_installer_operations" />
 
     </LinearLayout>
 
@@ -118,15 +126,17 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="16dp"
+        tools:ignore="UseCompoundDrawables">
 
         <ImageView
             android:id="@+id/icon_system_profile"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
             android:tint="@color/black"
-            app:srcCompat="@drawable/ic_system_profile" />
+            app:srcCompat="@drawable/ic_system_profile"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/text_system_profile"
@@ -134,7 +144,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:text="System Profile" />
+            android:text="@string/txt_system_profile" />
 
     </LinearLayout>
 
@@ -144,15 +154,18 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:visibility="gone"
+        tools:ignore="UseCompoundDrawables">
 
         <ImageView
             android:id="@+id/icon_temporary_override"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
             android:tint="@color/black"
-            app:srcCompat="@drawable/ic_temp_override" />
+            app:srcCompat="@drawable/ic_temp_override"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/text_temporary_override"
@@ -160,7 +173,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:text="Temporary Override" />
+            android:text="@string/txt_temporary_override" />
 
     </LinearLayout>
 
@@ -170,14 +183,16 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="16dp"
+        tools:ignore="UseCompoundDrawables">
 
         <ImageView
             android:id="@+id/icon_about"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginRight="16dp"
-            app:srcCompat="@drawable/ic_about" />
+            android:layout_marginEnd="16dp"
+            app:srcCompat="@drawable/ic_about"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/text_about"
@@ -185,7 +200,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:text="About" />
+            android:text="@string/txt_about" />
 
     </LinearLayout>
 

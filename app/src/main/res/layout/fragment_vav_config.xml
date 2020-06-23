@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/damperscrollView"
     android:layout_width="match_parent"
-    android:overScrollMode="never"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:overScrollMode="never">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            android:orientation="vertical">
 
             <RelativeLayout
                 android:id="@+id/layoutHeader"
@@ -32,7 +32,7 @@
                     android:text="@string/title_vavnofan"
                     android:textAllCaps="true"
                     android:textColor="@color/orange_75f"
-                    android:textSize="33.5dp"
+                    android:textSize="33.5sp"
                     android:textStyle="bold" />
 
             </RelativeLayout>
@@ -40,12 +40,12 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
                 android:layout_marginLeft="36dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginRight="36dp"
                 android:orientation="horizontal"
-                android:layout_marginTop="20dp"
-                android:layout_gravity="center_horizontal"
-                android:paddingTop="20dp" >
+                android:paddingTop="20dp">
 
                 <TextView
                     android:id="@+id/textDamperType"
@@ -57,184 +57,189 @@
 
                 <Spinner
                     android:id="@+id/damperType"
-                    android:layout_width="160dp"
-                    android:layout_height="40dp"
-                    android:layout_marginLeft="80dp"
-                    android:layout_toRightOf="@+id/textDamperType"
-                    android:layout_gravity="center_vertical"
                     style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="160dp"
+                    android:layout_height="42dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="80dp"
+                    android:layout_toEndOf="@+id/textDamperType"
                     android:entries="@array/hvac_stage_selector"
-                    tools:listitem="@layout/spinner_dropdown_item"/>
+                    tools:listitem="@layout/spinner_dropdown_item" />
 
                 <TextView
                     android:id="@+id/textDamperSize"
                     android:layout_width="wrap_content"
                     android:layout_height="40dp"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="82dp"
-                    android:layout_toRightOf="@+id/damperType"
+                    android:layout_marginStart="82dp"
+                    android:layout_toEndOf="@+id/damperType"
                     android:text="@string/label_damper1size"
                     android:textAppearance="@style/title_normal" />
 
 
                 <Spinner
                     android:id="@+id/damperSize"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:minWidth="76dp"
-                    android:layout_marginLeft="46dp"
-                    android:layout_toRightOf="@+id/textDamperSize"
-                    android:layout_gravity="center_vertical"
                     style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="42dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="46dp"
+                    android:layout_toEndOf="@+id/textDamperSize"
                     android:entries="@array/hvac_stage_selector"
-                    tools:listitem="@layout/spinner_dropdown_item"/>
+                    android:minWidth="76dp"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+
                 <TextView
                     android:id="@+id/textdamperShape"
                     android:layout_width="wrap_content"
                     android:layout_height="40dp"
-                    android:layout_marginLeft="136dp"
-                    android:layout_toRightOf="@+id/damperSize"
                     android:layout_gravity="center_vertical"
+                    android:layout_marginStart="136dp"
+                    android:layout_toEndOf="@+id/damperSize"
                     android:text="@string/label_damper1shape"
-                    android:textAppearance="@style/title_normal"/>
+                    android:textAppearance="@style/title_normal" />
 
                 <Spinner
                     android:id="@+id/damperShape"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:minWidth="76dp"
-                    android:layout_marginLeft="46dp"
-                    android:layout_toRightOf="@+id/textdamperShape"
-                    android:layout_gravity="center_vertical"
                     style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="42dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="30dp"
+                    android:layout_toEndOf="@+id/textdamperShape"
                     android:entries="@array/hvac_stage_selector"
-                    tools:listitem="@layout/spinner_dropdown_item"/>
+                    tools:listitem="@layout/spinner_dropdown_item" />
 
                 <TextView
                     android:id="@+id/textEnableOccupancy"
                     android:layout_width="wrap_content"
-                    android:layout_height="30dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_alignLeft="@id/textDamperType"
-                    android:layout_marginTop="34dp"
+                    android:layout_height="wrap_content"
                     android:layout_below="@+id/textDamperType"
+                    android:layout_alignStart="@id/textDamperType"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="32dp"
                     android:text="@string/label_enableoccupance"
                     android:textAppearance="@style/title_normal"
-                    />
+                    android:visibility="gone" />
 
                 <ToggleButton
                     android:id="@+id/enableOccupancyControl"
                     android:layout_width="46.12dp"
                     android:layout_height="27.42dp"
+                    android:layout_below="@+id/textDamperType"
                     android:layout_gravity="center_vertical"
+                    android:layout_marginStart="65dp"
+                    android:layout_marginTop="35dp"
+                    android:layout_toEndOf="@+id/textEnableOccupancy"
                     android:background="@drawable/toggle_selector"
                     android:checked="false"
                     android:textOff=""
                     android:textOn=""
-                    android:layout_marginLeft="65dp"
-                    android:layout_marginTop="34dp"
-                    android:layout_toRightOf="@+id/textEnableOccupancy"
-                    android:layout_below="@+id/textDamperType"/>
+                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/textReheatType"
                     android:layout_width="wrap_content"
-                    android:layout_height="30dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textDamperType"
+                    android:layout_alignStart="@+id/textDamperType"
                     android:layout_gravity="center"
-                    android:text="@string/label_reheattype"
-                    android:textAppearance="@style/title_normal"
-                    android:layout_marginRight="172dp"
-                    android:layout_alignLeft="@+id/textDamperSize"
                     android:layout_marginTop="34dp"
-                    android:layout_below="@+id/textDamperType"/>
+                    android:layout_marginEnd="172dp"
+                    android:text="@string/label_reheattype"
+                    android:textAppearance="@style/title_normal" />
 
                 <Spinner
                     android:id="@+id/vavReheatType"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:minWidth="76dp"
-                    android:layout_gravity="center_vertical"
                     style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:entries="@array/hvac_stage_selector"
-                    tools:listitem="@layout/spinner_dropdown_item"
+                    android:layout_width="wrap_content"
+                    android:layout_height="42dp"
+                    android:layout_below="@+id/textDamperType"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="80dp"
                     android:layout_marginTop="34dp"
-                    android:layout_alignRight="@+id/damperShape"
-                    android:layout_below="@+id/textDamperType"/>
+                    android:layout_toEndOf="@+id/textDamperType"
+                    android:entries="@array/hvac_stage_selector"
+                    android:minWidth="76dp"
+                    tools:listitem="@layout/spinner_dropdown_item" />
 
                 <TextView
                     android:id="@+id/textEnableIAQ"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_below="@+id/vavReheatType"
+                    android:layout_alignStart="@+id/textEnableOccupancy"
                     android:layout_gravity="center_vertical"
+                    android:layout_marginTop="32dp"
                     android:text="@string/label_enableIAQ"
                     android:textAppearance="@style/title_normal"
-                    android:layout_marginTop="34dp"
-                    android:layout_alignLeft="@+id/textEnableOccupancy"
-                    android:layout_below="@+id/vavReheatType"/>
+                    android:visibility="gone" />
 
                 <ToggleButton
                     android:id="@+id/enableIAQControl"
                     android:layout_width="46.12dp"
                     android:layout_height="27.42dp"
+                    android:layout_below="@+id/vavReheatType"
+                    android:layout_alignStart="@id/enableOccupancyControl"
                     android:layout_gravity="center_vertical"
+                    android:layout_marginTop="35dp"
+                    android:layout_toEndOf="@+id/textEnableIAQ"
                     android:background="@drawable/toggle_selector"
                     android:checked="false"
                     android:textOff=""
                     android:textOn=""
-                    android:layout_alignLeft="@id/enableOccupancyControl"
-                    android:layout_marginTop="34dp"
-                    android:layout_toRightOf="@+id/textEnableIAQ"
-                    android:layout_below="@+id/vavReheatType"/>
+                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/textZonePriority"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_below="@+id/textDamperSize"
+                    android:layout_alignStart="@+id/textDamperSize"
                     android:layout_gravity="center"
-                    android:text="@string/label_zonepriority"
-                    android:textAppearance="@style/title_normal"
                     android:layout_marginTop="34dp"
-                    android:layout_alignLeft="@+id/textReheatType"
-                    android:layout_toLeftOf="@+id/zonePriority"
-                    android:layout_below="@+id/vavReheatType"/>
+                    android:text="@string/label_zonepriority"
+                    android:textAppearance="@style/title_normal" />
 
                 <Spinner
                     android:id="@+id/zonePriority"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:minWidth="76dp"
-                    android:layout_gravity="center_vertical"
                     style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:entries="@array/hvac_stage_selector"
-                    tools:listitem="@layout/spinner_dropdown_item"
+                    android:layout_width="wrap_content"
+                    android:layout_height="42dp"
+                    android:layout_below="@+id/textDamperSize"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="46dp"
                     android:layout_marginTop="34dp"
-                    android:layout_below="@+id/vavReheatType"
-                    android:layout_alignRight="@+id/vavReheatType"
-                    />
+                    android:layout_toEndOf="@+id/textZonePriority"
+                    android:entries="@array/hvac_stage_selector"
+                    android:minWidth="76dp"
+                    tools:listitem="@layout/spinner_dropdown_item" />
 
                 <TextView
                     android:id="@+id/textEnableCO2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_below="@+id/zonePriority"
+                    android:layout_alignStart="@+id/textEnableIAQ"
                     android:layout_gravity="center_vertical"
+                    android:layout_marginTop="32dp"
                     android:text="@string/label_enableCO2"
                     android:textAppearance="@style/title_normal"
-                    android:layout_alignLeft="@+id/textEnableIAQ"
-                    android:layout_marginTop="34dp"
-                    android:layout_below="@+id/zonePriority"/>
+                    android:visibility="gone" />
 
                 <ToggleButton
                     android:id="@+id/enableCO2Control"
                     android:layout_width="46.12dp"
                     android:layout_height="27.42dp"
+                    android:layout_below="@+id/zonePriority"
+                    android:layout_alignStart="@+id/enableIAQControl"
                     android:layout_gravity="center_vertical"
+                    android:layout_marginTop="35dp"
                     android:background="@drawable/toggle_selector"
                     android:checked="false"
                     android:textOff=""
                     android:textOn=""
-                    android:layout_alignLeft="@+id/enableIAQControl"
-                    android:layout_marginTop="34dp"
-                    android:layout_below="@+id/zonePriority"/>
+                    android:visibility="gone" />
 
             </RelativeLayout>
 
@@ -243,37 +248,38 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginLeft="10dp"
+                android:layout_marginTop="42dp"
                 android:layout_marginRight="10dp"
-                android:orientation="horizontal"
-                android:paddingTop="20dp" >
+                android:orientation="horizontal">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:orientation="vertical" >
+                    android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/textTempOffset"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="@string/label_tempoffset"
                         android:gravity="center_vertical|center_horizontal"
-                        android:textAppearance="@style/label_values"
-                        />
+                        android:text="@string/label_tempoffset"
+                        android:textAppearance="@style/label_values" />
 
                     <NumberPicker
                         android:id="@+id/temperatureOffset"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center" />
+                        android:layout_gravity="center"
+                        android:textColor="#202020"
+                        android:textSize="30sp" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginLeft="42dp"
-                    android:orientation="vertical" >
+                    android:layout_marginStart="42dp"
+                    android:orientation="vertical">
 
 
                     <TextView
@@ -281,52 +287,54 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="@string/label_maxdampercoolpos"
                         android:gravity="center_vertical|center_horizontal"
-                        android:textAppearance="@style/label_values"
-                        />
+                        android:text="@string/label_maxdampercoolpos"
+                        android:textAppearance="@style/label_values" />
 
                     <NumberPicker
                         android:id="@+id/maxDamperPos"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center" />
+                        android:layout_gravity="center"
+                        android:textSize="30sp" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginLeft="42dp"
-                    android:orientation="vertical" >
+                    android:layout_marginStart="42dp"
+                    android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/textMinCool"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="@string/label_mindampercoolpos"
                         android:gravity="center_vertical|center_horizontal"
+                        android:text="@string/label_mindampercoolpos"
                         android:textAppearance="@style/label_values" />
 
                     <NumberPicker
                         android:id="@+id/minDamperPos"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center" />
+                        android:layout_gravity="center"
+                        android:textSize="30sp" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginLeft="42dp"
-                    android:orientation="vertical" >
+                    android:layout_marginStart="42dp"
+                    android:orientation="vertical">
+
                     <TextView
                         android:id="@+id/textMaxHeat"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="@string/label_maxdamperheatpos"
                         android:gravity="center_vertical|center_horizontal"
+                        android:text="@string/label_maxdamperheatpos"
                         android:textAppearance="@style/label_values" />
 
 
@@ -334,48 +342,49 @@
                         android:id="@+id/maxHeatingDamperPos"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center" />
+                        android:layout_gravity="center"
+                        android:textSize="30sp" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginLeft="42dp"
-                    android:orientation="vertical" >
+                    android:layout_marginStart="42dp"
+                    android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/textMinHeat"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="@string/label_mindamperheatpos"
                         android:gravity="center_vertical|center_horizontal"
+                        android:text="@string/label_mindamperheatpos"
                         android:textAppearance="@style/label_values" />
 
                     <NumberPicker
                         android:id="@+id/minHeatingDamperPos"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center" />
+                        android:layout_gravity="center"
+                        android:textSize="30sp" />
                 </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
 
-        <Button
-            android:id="@+id/setBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginRight="24dp"
-            android:layout_marginBottom="110dp"
-            android:background="@null"
-            android:button="@null"
-            android:fontFamily="@font/lato_regular"
-            android:text="@string/button_set"
-            android:textAllCaps="true"
-            android:textColor="@color/orange_75f"
-            android:textSize="19.5dp" />
+            <Button
+                android:id="@+id/setBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginEnd="24dp"
+                android:layout_marginBottom="30dp"
+                android:background="@null"
+                android:button="@null"
+                android:fontFamily="@font/lato_regular"
+                android:text="@string/button_set"
+                android:textAllCaps="true"
+                android:textColor="@color/orange_75f"
+                android:textSize="19.5sp" />
+        </LinearLayout>
 
     </RelativeLayout>
 </ScrollView>

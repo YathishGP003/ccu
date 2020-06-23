@@ -2,21 +2,22 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_height="match_parent"
     android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical">
 
     <TextView
-        style="@style/WindowTextStyle"
         android:id="@+id/default_text_view"
-        android:layout_height="wrap_content"
+        style="@style/WindowTextStyle"
         android:layout_width="wrap_content"
-        android:paddingBottom="8dp"
-        android:paddingLeft="20dp"
+        android:layout_height="wrap_content"
+        android:paddingStart="20dp"
         android:paddingTop="20dp"
-        android:visibility="gone"
-        android:text="place holder">
-    </TextView>
+        android:paddingEnd="20dp"
+        android:paddingBottom="8dp"
+        android:text="@string/txt_place_holder"
+        android:visibility="gone" />
+
     <RelativeLayout
         android:id="@+id/layoutHeader"
         android:layout_width="match_parent"
@@ -27,9 +28,9 @@
             android:id="@+id/imageGoback"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:padding="2.5dp"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="64dp"
+            android:layout_marginStart="64dp"
+            android:padding="2.5dp"
             android:rotation="180"
             app:srcCompat="@drawable/icon_arrowright" />
 
@@ -37,36 +38,28 @@
             android:id="@+id/textTitleFragment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="180dp"
+            android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
+            android:layout_marginEnd="180dp"
             android:fontFamily="@font/lato_bold"
             android:text="@string/title_smartstatmodule"
             android:textAllCaps="true"
             android:textColor="@color/orange_75f"
-            android:textSize="33.5dp"
+            android:textSize="33.5sp"
             android:textStyle="bold" />
 
     </RelativeLayout>
+
     <LinearLayout
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginTop="24dp"
         android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="24dp"
+        android:layout_weight="1"
         android:orientation="vertical">
 
-        <!--<TextView
-            android:layout_gravity="left"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="60dp"
-            android:layout_marginTop="40dp"
-            android:layout_width="wrap_content"
-            android:text="Select Module Type"
-            android:textSize="@dimen/text_large_xlarge"/>-->
-
         <ScrollView
-            android:layout_height="wrap_content"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:overScrollMode="never">
 
             <LinearLayout
@@ -78,487 +71,287 @@
                 <RelativeLayout
                     android:id="@+id/rl_cpu"
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
-                    android:layout_marginLeft="180dp">
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="180dp">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:layout_marginRight="190dp"
+                        android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
+                        android:layout_marginEnd="190dp"
                         android:orientation="vertical">
+
                         <TextView
                             android:id="@+id/textCPU"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="right"
+                            android:layout_marginBottom="6dp"
                             android:text="@string/title_cpu"
-                            android:textAppearance="@style/title_normal"/>
+                            android:textAppearance="@style/title_normal" />
 
                         <TextView
                             android:id="@+id/textCPUdesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginBottom="12dp"
+                            android:gravity="end"
                             android:text="@string/desc_cpu"
-                            android:gravity="right"
-                            android:textAppearance="@style/text_label"/>
+                            android:textAppearance="@style/text_label" />
 
                     </LinearLayout>
+
                     <ImageView
                         android:layout_width="12dp"
                         android:layout_height="20dp"
-                        android:layout_marginRight="92dp"
-                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:src="@drawable/icon_arrowright"/>
+                        android:layout_marginEnd="92dp"
+                        android:src="@drawable/icon_arrowright" />
+
                     <View
                         android:layout_width="517dp"
-                        android:layout_alignParentRight="true"
                         android:layout_height="0.1dp"
-                        android:background="@color/text_color"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentBottom="true"
                         android:alpha="0.37"
-                        android:layout_alignParentBottom="true"/>
+                        android:background="@color/text_color" />
                 </RelativeLayout>
 
                 <RelativeLayout
                     android:id="@+id/rl_commercial"
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
-                    android:layout_marginLeft="180dp">
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="180dp"
+                    android:visibility="gone">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:layout_marginRight="190dp"
+                        android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
+                        android:layout_marginTop="6dp"
+                        android:layout_marginEnd="190dp"
                         android:orientation="vertical">
+
                         <TextView
                             android:id="@+id/textCommercial"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="right"
+                            android:layout_gravity="end"
                             android:text="@string/title_commercial"
-                            android:textAppearance="@style/title_normal"/>
+                            android:textAppearance="@style/title_normal" />
 
                         <TextView
                             android:id="@+id/textLightdesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginBottom="12dp"
+                            android:gravity="end"
                             android:text="@string/desc_commercial"
-                            android:gravity="right"
-                            android:textAppearance="@style/text_label"/>
+                            android:textAppearance="@style/text_label" />
 
                     </LinearLayout>
+
                     <ImageView
                         android:layout_width="12dp"
                         android:layout_height="20dp"
-                        android:layout_marginRight="92dp"
-                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:src="@drawable/icon_arrowright"/>
+                        android:layout_marginEnd="92dp"
+                        android:src="@drawable/icon_arrowright" />
+
                     <View
                         android:layout_width="517dp"
-                        android:layout_alignParentRight="true"
                         android:layout_height="0.1dp"
-                        android:background="@color/text_color"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentBottom="true"
                         android:alpha="0.37"
-                        android:layout_alignParentBottom="true"/>
+                        android:background="@color/text_color" />
                 </RelativeLayout>
 
                 <RelativeLayout
                     android:id="@+id/rl_hpu"
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
-                    android:layout_marginLeft="180dp">
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="180dp">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:layout_marginRight="190dp"
+                        android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
+                        android:layout_marginTop="6dp"
+                        android:layout_marginEnd="190dp"
                         android:orientation="vertical">
+
                         <TextView
                             android:id="@+id/textHPU"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="right"
+                            android:layout_gravity="end"
                             android:text="@string/title_hpu"
-                            android:textAppearance="@style/title_normal"/>
+                            android:textAppearance="@style/title_normal" />
 
                         <TextView
                             android:id="@+id/textHPUdesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginBottom="12dp"
+                            android:gravity="end"
                             android:text="@string/desc_hpu"
-                            android:gravity="right"
-                            android:textAppearance="@style/text_label"/>
+                            android:textAppearance="@style/text_label" />
 
                     </LinearLayout>
+
                     <ImageView
                         android:layout_width="12dp"
                         android:layout_height="20dp"
-                        android:layout_marginRight="92dp"
-                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:src="@drawable/icon_arrowright"/>
+                        android:layout_marginEnd="92dp"
+                        android:src="@drawable/icon_arrowright" />
+
                     <View
                         android:layout_width="517dp"
-                        android:layout_alignParentRight="true"
                         android:layout_height="0.1dp"
-                        android:background="@color/text_color"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentBottom="true"
                         android:alpha="0.37"
-                        android:layout_alignParentBottom="true"/>
+                        android:background="@color/text_color" />
                 </RelativeLayout>
 
                 <RelativeLayout
                     android:id="@+id/rl_2pipe"
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
-                    android:layout_marginLeft="180dp">
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="180dp">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:layout_marginRight="190dp"
+                        android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
+                        android:layout_marginTop="6dp"
+                        android:layout_marginEnd="190dp"
                         android:orientation="vertical">
+
                         <TextView
                             android:id="@+id/text2Pipe"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="right"
+                            android:layout_gravity="end"
                             android:text="@string/title_2pipe"
-                            android:textAppearance="@style/title_normal"/>
+                            android:textAppearance="@style/title_normal" />
 
                         <TextView
                             android:id="@+id/text2Pipedesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginBottom="12dp"
+                            android:gravity="end"
                             android:text="@string/desc_2pipe"
-                            android:gravity="right"
-                            android:textAppearance="@style/text_label"/>
+                            android:textAppearance="@style/text_label" />
 
                     </LinearLayout>
+
                     <ImageView
                         android:layout_width="12dp"
                         android:layout_height="20dp"
-                        android:layout_marginRight="92dp"
-                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:src="@drawable/icon_arrowright"/>
+                        android:layout_marginEnd="92dp"
+                        android:src="@drawable/icon_arrowright" />
+
                     <View
                         android:layout_width="517dp"
-                        android:layout_alignParentRight="true"
                         android:layout_height="0.1dp"
-                        android:background="@color/text_color"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentBottom="true"
                         android:alpha="0.37"
-                        android:layout_alignParentBottom="true"/>
+                        android:background="@color/text_color" />
                 </RelativeLayout>
 
                 <RelativeLayout
                     android:id="@+id/rl_4pipe"
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
-                    android:layout_marginLeft="180dp">
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="180dp">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:layout_marginRight="190dp"
+                        android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
+                        android:layout_marginTop="6dp"
+                        android:layout_marginEnd="190dp"
                         android:orientation="vertical">
+
                         <TextView
                             android:id="@+id/text4Pipe"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="right"
+                            android:layout_gravity="end"
                             android:text="@string/title_4pipe"
-                            android:textAppearance="@style/title_normal"/>
+                            android:textAppearance="@style/title_normal" />
 
                         <TextView
                             android:id="@+id/text4Pipedesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginBottom="12dp"
+                            android:gravity="end"
                             android:text="@string/desc_4pipe"
-                            android:gravity="right"
-                            android:textAppearance="@style/text_label"/>
+                            android:textAppearance="@style/text_label" />
 
                     </LinearLayout>
+
                     <ImageView
                         android:layout_width="12dp"
                         android:layout_height="20dp"
-                        android:layout_marginRight="92dp"
-                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:src="@drawable/icon_arrowright"/>
+                        android:layout_marginEnd="92dp"
+                        android:src="@drawable/icon_arrowright" />
+
                     <View
                         android:layout_width="517dp"
-                        android:layout_alignParentRight="true"
                         android:layout_height="0.1dp"
-                        android:background="@color/text_color"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentBottom="true"
                         android:alpha="0.37"
-                        android:layout_alignParentBottom="true"/>
+                        android:background="@color/text_color" />
                 </RelativeLayout>
             </LinearLayout>
 
-            <!-- <RadioGroup
-                 android:id="@+id/wrmProfilingRadioGrp"
-                 android:layout_height="match_parent"
-                 android:layout_marginLeft="60dp"
-                 android:layout_width="match_parent"
-                 android:visibility="gone"
-                 android:orientation="vertical">
-
-                 <RadioButton
-                     android:id="@+id/vavModuleTypeRB"
-                     android:layout_height="wrap_content"
-                     android:layout_marginTop="12dp"
-                     android:layout_weight="0.1"
-                     android:layout_width="match_parent"
-                     android:text=" VAV with Reheat"
-                     android:textSize="@dimen/text_medium_xlarge"/>
-
-                 <TextView
-                     android:layout_height="wrap_content"
-                     android:layout_marginLeft="60dp"
-                     android:layout_marginRight="30dp"
-                     android:layout_weight="0.1"
-                     android:layout_width="match_parent"
-                     android:text="Control a VAV box for airflow and reheat valves/electric coils"
-                     android:textSize="@dimen/text_small_xlarge"/>
-
-                 <RadioGroup
-                     android:id="@+id/vavUnitSelector"
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:layout_marginLeft="60dp"
-                     android:orientation="vertical"
-                     android:checkedButton="@id/vavReheat"
-                     android:visibility="gone">
-
-                     <TextView
-                         android:layout_width="wrap_content"
-                         android:layout_height="wrap_content"
-                         android:textStyle="bold"
-                         android:layout_marginTop="30dp"
-                         android:text="Select Unit Type"/>
-
-                     <RadioButton
-                         android:id="@+id/vavReheat"
-                         android:layout_height="wrap_content"
-                         android:layout_marginTop="25dp"
-                         android:layout_weight="0.1"
-                         android:layout_width="wrap_content"
-                         android:text=" Vav Reheat - No Fan"
-                         android:textSize="@dimen/text_medium_xlarge"/>
-
-                     <RadioButton
-                         android:id="@+id/vavSeriesFan"
-                         android:layout_height="wrap_content"
-                         android:layout_marginTop="25dp"
-                         android:layout_weight="0.1"
-                         android:layout_width="wrap_content"
-                         android:text=" Vav Reheat - Series Fan"
-                         android:textSize="@dimen/text_medium_xlarge"/>
-
-                     <RadioButton
-                         android:id="@+id/vavParallelFan"
-                         android:layout_height="wrap_content"
-                         android:layout_marginTop="25dp"
-                         android:layout_weight="0.1"
-                         android:layout_width="wrap_content"
-                         android:text=" Vav Reheat - Parallel Fan"
-                         android:textSize="@dimen/text_medium_xlarge"/>
-
-                 </RadioGroup>
-
-                 <RadioButton
-                     android:id="@+id/dabModuleTypeRB"
-                     android:layout_height="wrap_content"
-                     android:layout_marginTop="12dp"
-                     android:layout_weight="0.1"
-                     android:layout_width="match_parent"
-                     android:text=" Dynamic Airflow Balancing"
-                     android:textSize="@dimen/text_medium_xlarge"/>
-
-                 <TextView
-                     android:layout_height="wrap_content"
-                     android:layout_marginLeft="60dp"
-                     android:layout_marginRight="30dp"
-                     android:layout_weight="0.1"
-                     android:layout_width="match_parent"
-                     android:text="Controls dampers in ductwork to provide zone by zone airflow control"
-                     android:textSize="@dimen/text_small_xlarge"/>
-
-
-                 <RadioButton
-                     android:id="@+id/lcmModuleTypeRB"
-                     android:layout_height="wrap_content"
-                     android:layout_marginTop="25dp"
-                     android:layout_weight="0.1"
-                     android:layout_width="wrap_content"
-                     android:text=" Lighting Control"
-                     android:textSize="@dimen/text_medium_xlarge"/>
-
-                 <TextView
-                     android:layout_height="wrap_content"
-                     android:layout_marginLeft="60dp"
-                     android:layout_marginRight="30dp"
-                     android:layout_weight="0.1"
-                     android:layout_width="match_parent"
-                     android:text="Controls 2 independent zones via relays and 2 variable light units via 0-10v output."
-                     android:textSize="@dimen/text_small_xlarge"/>
-
-                 <RadioButton
-                     android:id="@+id/piModuleTypeRB"
-                     android:layout_height="wrap_content"
-                     android:layout_marginTop="12dp"
-                     android:layout_weight="0.1"
-                     android:layout_width="match_parent"
-                     android:text=" PI Loop Controller"
-                     android:textSize="@dimen/text_medium_xlarge"/>
-
-                 <TextView
-                     android:layout_height="wrap_content"
-                     android:layout_marginLeft="60dp"
-                     android:layout_marginRight="30dp"
-                     android:layout_weight="0.1"
-                     android:layout_width="match_parent"
-                     android:text="Generic PI control for range of applications with sensors connected via analog inputs"
-                     android:textSize="@dimen/text_small_xlarge"/>
-
-                 <RadioButton
-                     android:id="@+id/sseModuleTypeRB"
-                     android:layout_height="wrap_content"
-                     android:layout_marginTop="25dp"
-                     android:layout_weight="0.1"
-                     android:layout_width="match_parent"
-                     android:text=" Single Stage Equipment"
-                     android:textSize="@dimen/text_medium_xlarge"/>
-
-                 <TextView
-                     android:layout_height="wrap_content"
-                     android:layout_marginLeft="60dp"
-                     android:layout_marginRight="30dp"
-                     android:layout_weight="0.1"
-                     android:layout_width="match_parent"
-                     android:text="Controls simple HVAC equipment like split ACs, Heat pumps, fan coil unit etc.,"
-                     android:textSize="@dimen/text_small_xlarge"/>
-
-                 <RadioButton
-                     android:checked="false"
-                     android:clickable="false"
-                     android:focusable="false"
-                     android:id="@+id/rmModuleTypeRB"
-                     android:layout_height="wrap_content"
-                     android:layout_marginTop="25dp"
-                     android:layout_weight="0.1"
-                     android:layout_width="match_parent"
-                     android:text=" Refrigeration"
-                     android:textColor="@color/selection_gray"
-                     android:textSize="@dimen/text_medium_xlarge"
-                     />
-
-                 <TextView
-                     android:layout_height="wrap_content"
-                     android:layout_marginLeft="60dp"
-                     android:layout_marginRight="30dp"
-                     android:layout_weight="0.1"
-                     android:layout_width="match_parent"
-                     android:text="Allows monitoring of refrigeration units via temperature probes"
-                     android:textSize="@dimen/text_small_xlarge"/>
-
-                 <RadioButton
-                     android:checked="false"
-                     android:clickable="false"
-                     android:focusable="false"
-                     android:id="@+id/emrModuleTypeRB"
-                     android:layout_height="wrap_content"
-                     android:layout_marginTop="25dp"
-                     android:layout_weight="0.1"
-                     android:layout_width="match_parent"
-                     android:text=" Energy Meter"
-                     android:textColor="@color/selection_gray"
-                     android:textSize="@dimen/text_medium_xlarge"/>
-
-                 <TextView
-                     android:layout_height="wrap_content"
-                     android:layout_marginLeft="60dp"
-                     android:layout_weight="0.1"
-                     android:layout_width="match_parent"
-                     android:text="Connects to pulse type energy meters or current transformers to monitor energy usage "
-                     android:textSize="@dimen/text_small_xlarge"/>
-
-                 <RadioButton
-                     android:id="@+id/ccmModuleTypeRB"
-                     android:layout_height="wrap_content"
-                     android:layout_marginTop="25dp"
-                     android:layout_weight="0.1"
-                     android:layout_width="match_parent"
-                     android:text=" Custom Control"
-                     android:textSize="@dimen/text_medium_xlarge"/>
-
-                 <TextView
-                     android:layout_height="wrap_content"
-                     android:layout_marginLeft="60dp"
-                     android:layout_marginRight="30dp"
-                     android:layout_weight="0.1"
-                     android:layout_width="match_parent"
-                     android:text="Allows building automation control using combination of modes (DAB, Lighting, Single Stage Equipment, Refrigeration, Energy Meter) and IFTT Rules"
-
-                     android:textSize="@dimen/text_small_xlarge"/>
-
-                 <RadioButton
-                     android:id="@+id/hwpModuleTypeRB"
-                     android:layout_height="wrap_content"
-                     android:layout_marginTop="25dp"
-                     android:layout_weight="0.1"
-                     android:layout_width="match_parent"
-                     android:text=" Hot Water Mixture"
-                     android:textSize="@dimen/text_medium_xlarge"/>
-
-                 <TextView
-                     android:layout_height="wrap_content"
-                     android:layout_marginBottom="30dp"
-                     android:layout_marginLeft="60dp"
-                     android:layout_marginRight="30dp"
-                     android:layout_weight="0.1"
-                     android:layout_width="match_parent"
-                     android:text="Allows monitoring of hotwater units via analog out 1 for control, AnalogIn 1 for current transducer, Airflow-1 for Hot water temperature "
-                     android:textSize="@dimen/text_small_xlarge"/>
-             </RadioGroup>-->
         </ScrollView>
     </LinearLayout>
 
     <LinearLayout
-        android:layout_gravity="right"
-        android:layout_height="wrap_content"
         android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
         android:orientation="horizontal"
-        android:paddingBottom="8dp"
         android:paddingLeft="8dp"
-        android:paddingRight="8dp"
         android:paddingTop="8dp"
+        android:paddingRight="8dp"
+        android:paddingBottom="8dp"
         android:visibility="gone">
 
         <Button
-            style="@style/buttonstyle"
             android:id="@+id/first_button"
-            android:layout_height="wrap_content"
+            style="@style/buttonstyle"
             android:layout_width="wrap_content"
-            android:text="Cancel"></Button>
+            android:layout_height="wrap_content"
+            android:text="@string/txt_cancel" />
 
         <Button
-            style="@style/buttonstyle"
             android:id="@+id/second_button"
-            android:layout_height="wrap_content"
+            style="@style/buttonstyle"
             android:layout_width="wrap_content"
-            android:text="Pair"></Button>
+            android:layout_height="wrap_content"
+            android:text="@string/txt_pair" />
 
     </LinearLayout>
 

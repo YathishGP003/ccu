@@ -388,7 +388,6 @@
                     android:layout_toRightOf="@+id/textInputIP"
                     android:layout_below="@+id/radioGroupConfig"
                     android:layout_marginLeft="36dp"
-                    android:layout_below="@+id/radioGroupConfig"
                     app:errorTextAppearance="@style/error_appearance">
 
                     <EditText

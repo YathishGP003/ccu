@@ -38,6 +38,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logic.bo.building.SensorType;
+import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.tuners.TunerUtil;
 
 public class ZonePoints {
@@ -64,6 +65,7 @@ public class ZonePoints {
             }
             if (zoneEquip.getMarkers().contains("vav")) {
                 updateSupplyAirTemperature(localDevice, zoneAddress, zoneName, zoneDescription, zoneDevice);
+                updateReheatCoil(localDevice, zoneAddress, zoneName, zoneDescription, zoneDevice);
             }
             if(zoneDevice.getMarkers().contains("smartstat")) {
                 updateSensorData(localDevice,zoneAddress,zoneName, zoneDescription,zoneDevice);
@@ -523,8 +525,55 @@ public class ZonePoints {
             e.printStackTrace();
         }
     }
+    
+    public void updateReheatCoil(LocalDevice localDevice, int zoneAddress, String zoneName, String zoneDescription, Device zoneDevice) {
+        try {
+            AnalogValueObject reheatCoilAV;
+            int addressNumber = Integer.parseInt(zoneAddress + "00");
+            int instanceID = addressNumber + BACnetUtils.reheatCoil;
+            if (!localDevice.checkObjectByID(instanceID)) {
+                Log.i("Bacnet", "Creating Reheat Coil:" + instanceID);
+                ReheatType reheatType = getReheatCoilType(zoneDevice.getEquipRef());
+                reheatCoilAV = new AnalogValueObject(localDevice, instanceID, zoneName + "_reheatCoil_"+reheatType.displayName, (float) getReheatCoil(zoneDevice), EngineeringUnits.percent, false);
+                reheatCoilAV.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("Reheat Coil of " + zoneDescription)));
+                reheatCoilAV.supportCommandable(1);
+                TrendLogObject trendObject = new TrendLogObject(localDevice, reheatCoilAV.getInstanceId(), zoneName + "_reheatCoil_trend", new LinkedListLogBuffer<LogRecord>(), true, DateTime.UNSPECIFIED, DateTime.UNSPECIFIED,
+                        new DeviceObjectPropertyReference(localDevice.getInstanceNumber(), reheatCoilAV.getId(), PropertyIdentifier.presentValue), 0, false, BACnetUtils.bufferSize)
+                        .withCov(BACnetUtils.covResubscriptionInterval, new ClientCov(new Real(1f)))
+                        .withPolled(BACnetUtils.logInterval, TimeUnit.SECONDS, true, 2, TimeUnit.SECONDS);
 
-   public double getMaxBuildingLimits(){
+                trendObject.writePropertyInternal(PropertyIdentifier.eventState, EventState.normal);
+                trendObject.makePropertyReadOnly(PropertyIdentifier.logDeviceObjectProperty);
+                readAccessSpecifications.add(new ReadAccessSpecification(reheatCoilAV.getId(),
+                        new SequenceOf<>(new PropertyReference(PropertyIdentifier.presentValue))));
+                listOfObjectPropertyReferences.add(new DeviceObjectPropertyReference(reheatCoilAV.getId(), PropertyIdentifier.presentValue, null, null));
+            } else {
+                setReheatCoil(localDevice, zoneAddress, zoneDevice);
+            }
+        } catch (BACnetServiceException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setReheatCoil(LocalDevice localDevice, int zoneAddress, Device equip) {
+        try {
+            int addressNumber = Integer.parseInt(zoneAddress + "00");
+            int instanceID = addressNumber + BACnetUtils.reheatCoil;
+            if (localDevice.checkObjectByID(instanceID)) {
+                BACnetObject baCnetObject = localDevice.getObjectByID(instanceID);
+                double reheatCoil = getReheatCoil(equip);
+                Log.i("Bacnet", "Updating Reheat Coil:" + instanceID + " Value:" + reheatCoil);
+                baCnetObject.setOverridden(false);
+                if (baCnetObject.readProperty(PropertyIdentifier.outOfService).equals(Boolean.FALSE)) {
+                    baCnetObject.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.presentValue, new Real((int) reheatCoil)));
+                }
+                baCnetObject.setOverridden(true);
+            }
+        } catch (BACnetServiceException e) {
+            e.printStackTrace();
+        }
+    }
+    public double getMaxBuildingLimits(){
         return TunerUtil.readBuildingTunerValByQuery("building and limit and max");
    }
     public double getMinBuildingLimits(){
@@ -590,6 +639,19 @@ public class ZonePoints {
             e.printStackTrace();
             return 0;
         }
+    }
+
+    public double getReheatCoil(Device equip) {
+        try {
+            return CCUHsApi.getInstance().readHisValByQuery("point and zone and reheat and cmd and equipRef == \"" + equip.getEquipRef() + "\"");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+    private static ReheatType getReheatCoilType(String equipRef){
+        double reheatTypeValue = CCUHsApi.getInstance().readDefaultVal("point and zone and reheat and type and config and equipRef == \"" + equipRef + "\"");
+        return ReheatType.values()[(int)reheatTypeValue];
     }
     private static float getMaxUserTempLimits(String tag){
         return (float) TunerUtil.readBuildingTunerValByQuery("user and limit and max and "+tag);

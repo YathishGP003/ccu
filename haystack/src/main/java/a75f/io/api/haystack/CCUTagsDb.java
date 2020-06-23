@@ -855,11 +855,10 @@ public class CCUTagsDb extends HServer {
         if (retVal == null) {
             retVal = hisBox.query().equal(HisItem_.rec, id.toString())
                            .orderDesc(HisItem_.date).build().findFirst();
-            if (retVal == null) {
-                // TODO - Matt Rudd This looks competely wrong; if it's null in the DB we assume it's a double and just create it and put it in the cache?  WTF.
-                retVal = new HisItem(id.toString(), new Date(), 0.0, Boolean.FALSE);
+
+            if (retVal != null) {
+                HisItemCache.getInstance().add(id.toString(), retVal);
             }
-            HisItemCache.getInstance().add(id.toString(), retVal);
         }
         return retVal;
     }

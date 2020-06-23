@@ -642,6 +642,30 @@ public abstract class UtilityApplication extends Application
             }
         });
     }
+    public boolean checkNetworkConnected() {
+        if (!prefs.getBoolean("BACnetLAN")) {
+            ConnectivityManager connManager = (ConnectivityManager) Globals.getInstance().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+            return (networkInfo != null && networkInfo.isConnected());
+        } else {
+            return CheckEthernet();
+        }
+    }
+
+    public class NetworkChangeReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(isBACnetEnabled() && checkNetworkConnected()){
+                if(localDevice == null)
+                    InitialiseBACnet();
+                if(localDevice!= null && localDevice.isInitialized()) {
+                    localDevice.sendLocalBroadcast(new IAmRequest(new ObjectIdentifier(ObjectType.device, localDevice.getInstanceNumber()),
+                            localDevice.get(PropertyIdentifier.maxApduLengthAccepted),
+                            Segmentation.noSegmentation, localDevice.get(PropertyIdentifier.vendorIdentifier)));
+                }
+            }
+        }
+    }
 
     public boolean checkNetworkConnected() {
         if (!prefs.getBoolean("BACnetLAN")) {

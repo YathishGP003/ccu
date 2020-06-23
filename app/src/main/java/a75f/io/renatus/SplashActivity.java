@@ -84,7 +84,7 @@ public class SplashActivity extends Activity {
             PackageManager packageManager = getApplicationContext().getPackageManager();
             PackageInfo packageInfo = packageManager.getPackageInfo("a75f.io.renatus", 0);
             String versionName = packageInfo.versionName;
-            Log.i("SplashActivity", "Starting " + BuildConfig.BUILD_TYPE + " app for " + versionName);
+            //Log.i("SplashActivity", "Starting " + BuildConfig.BUILD_TYPE + " app for " + versionName);
         } catch (PackageManager.NameNotFoundException e) {
             Log.e("SplashActivity","Version information not found", e);
         }

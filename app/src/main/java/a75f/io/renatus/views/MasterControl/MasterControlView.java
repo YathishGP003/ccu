@@ -53,10 +53,10 @@ public class MasterControlView extends LinearLayout {
     private static final String LOG_PREFIX = MasterControlView.class.getSimpleName();
     HorizontalScrollView mHorizontalScrollView;
     MasterControl masterControl;
-    HashMap coolUL;
-    HashMap heatUL;
-    HashMap coolLL;
-    HashMap heatLL;
+    HashMap coolingUpperLimit;
+    HashMap heatingUpperLimit;
+    HashMap coolingLowerLimit;
+    HashMap heatingLowerLimit;
     HashMap buildingMin;
     HashMap buildingMax;
     HashMap setbackMap;
@@ -155,10 +155,10 @@ public class MasterControlView extends LinearLayout {
 
         hdb = TunerUtil.getHeatingDeadband(p.getId());
         cdb = TunerUtil.getCoolingDeadband(p.getId());
-        coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
-        heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user");
-        coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
-        heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user");
+        coolingUpperLimit = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
+        heatingUpperLimit = CCUHsApi.getInstance().read("point and limit and max and heating and user");
+        coolingLowerLimit = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
+        heatingLowerLimit = CCUHsApi.getInstance().read("point and limit and min and heating and user");
         buildingMin = CCUHsApi.getInstance().read("building and limit and min");
         buildingMax = CCUHsApi.getInstance().read("building and limit and max");
         setbackMap = CCUHsApi.getInstance().read("unoccupied and setback and equipRef == \"" + p.getId() + "\"");
@@ -181,19 +181,19 @@ public class MasterControlView extends LinearLayout {
     }
 
     private void checkForSchedules(Dialog dialog, ArrayList<Schedule> schedulesList) {
-        float coolTempUL = masterControl.getUpperCoolingTemp();
-        float coolTempLL = masterControl.getLowerCoolingTemp();
-        float heatTempUL = masterControl.getUpperHeatingTemp();
-        float heatTempLL = masterControl.getLowerHeatingTemp();
+        float coolingTemperatureUpperLimit = masterControl.getUpperCoolingTemp();
+        float coolingTemperatureLowerLimit = masterControl.getLowerCoolingTemp();
+        float heatingTemperatureUpperLimit = masterControl.getUpperHeatingTemp();
+        float heatingTemperatureLowerLimit = masterControl.getLowerHeatingTemp();
 
         ArrayList<String> warningMessage = new ArrayList<>();
         ArrayList<Schedule> schedules = new ArrayList<>();
         ArrayList<Schedule> filterSchedules = new ArrayList<>();
 
-        coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
-        heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user");
-        coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
-        heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user");
+        coolingUpperLimit = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
+        heatingUpperLimit = CCUHsApi.getInstance().read("point and limit and max and heating and user");
+        coolingLowerLimit = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
+        heatingLowerLimit = CCUHsApi.getInstance().read("point and limit and min and heating and user");
         buildingMin = CCUHsApi.getInstance().read("building and limit and min");
         buildingMax = CCUHsApi.getInstance().read("building and limit and max");
 
@@ -217,18 +217,18 @@ public class MasterControlView extends LinearLayout {
                 StringBuilder message = new StringBuilder(schedule.getDis() + "\u0020" + ScheduleUtil.getDayString(days.getDay() + 1) + "\u0020");
                 String coolValues = "";
                 String heatValues = "";
-                if (days.getHeatingVal() < heatTempUL || days.getHeatingVal() > heatTempLL) {
-                    double heatDTValue = getHeatDTemp(days.getHeatingVal(), heatTempUL, heatTempLL);
-                    heatValues = "\u0020" + "Heating (" + days.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatDTValue + ")";
+                if (days.getHeatingVal() < heatingTemperatureUpperLimit || days.getHeatingVal() > heatingTemperatureLowerLimit) {
+                    double heatingDesiredTemperatureValue = getHeatingDesiredTemperature(days.getHeatingVal(), heatingTemperatureUpperLimit, heatingTemperatureLowerLimit);
+                    heatValues = "\u0020" + "Heating (" + days.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatingDesiredTemperatureValue + ")";
 
-                    days.setHeatingVal(heatDTValue);
+                    days.setHeatingVal(heatingDesiredTemperatureValue);
                 }
 
-                if (days.getCoolingVal() < coolTempLL || days.getCoolingVal() > coolTempUL) {
-                    double coolDTValue = getCoolDTemp(days.getCoolingVal(), coolTempLL, coolTempUL);
-                    coolValues = "\u0020 " + "Cooling (" + days.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolDTValue + ")";
+                if (days.getCoolingVal() < coolingTemperatureLowerLimit || days.getCoolingVal() > coolingTemperatureUpperLimit) {
+                    double coolingDesiredTemperatureValue = getCoolingDesiredTemperature(days.getCoolingVal(), coolingTemperatureLowerLimit, coolingTemperatureUpperLimit);
+                    coolValues = "\u0020 " + "Cooling (" + days.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolingDesiredTemperatureValue + ")";
 
-                    days.setCoolingVal(coolDTValue);
+                    days.setCoolingVal(coolingDesiredTemperatureValue);
                 }
 
                 if (!TextUtils.isEmpty(coolValues) && !TextUtils.isEmpty(heatValues)) {
@@ -296,7 +296,6 @@ public class MasterControlView extends LinearLayout {
     }
 
     public ArrayList<HashMap> readAll(HGrid grid) {
-        //CcuLog.d("CCU_HS", "Read Query: " + query);
         ArrayList<HashMap> rowList = new ArrayList<>();
         try {
             if (grid != null) {
@@ -502,14 +501,14 @@ public class MasterControlView extends LinearLayout {
 
     @SuppressLint("StaticFieldLeak")
     private void saveBuildingData(Dialog dialog) {
-        float coolTempUL = masterControl.getUpperCoolingTemp();
-        float coolTempLL = masterControl.getLowerCoolingTemp();
-        float heatTempUL = masterControl.getUpperHeatingTemp();
-        float heatTempLL = masterControl.getLowerHeatingTemp();
-        float buildingTempUL = masterControl.getUpperBuildingTemp();
-        float buildingTempLL = masterControl.getLowerBuildingTemp();
+        float coolingTemperatureUpperLimit = masterControl.getUpperCoolingTemp();
+        float coolingTemperatureLowerLimit = masterControl.getLowerCoolingTemp();
+        float heatingTemperatureUpperLimit = masterControl.getUpperHeatingTemp();
+        float heatingTemperatureLowerLimit = masterControl.getLowerHeatingTemp();
+        float buildingTemperatureUpperLimit = masterControl.getUpperBuildingTemp();
+        float buildingTemperatureLowerLimit = masterControl.getLowerBuildingTemp();
 
-        mOnClickListener.onSaveClick(heatTempLL, heatTempUL, coolTempLL, coolTempUL, buildingTempLL, buildingTempUL,
+        mOnClickListener.onSaveClick(heatingTemperatureLowerLimit, heatingTemperatureUpperLimit, coolingTemperatureLowerLimit, coolingTemperatureUpperLimit, buildingTemperatureLowerLimit, buildingTemperatureUpperLimit,
                 (float) getTuner(setbackMap.get("id").toString()), (float) getTuner(zoneDiffMap.get("id").toString()), (float) hdb, (float) cdb);
 
         if (dialog != null && dialog.isShowing()) {
@@ -522,41 +521,41 @@ public class MasterControlView extends LinearLayout {
                 HashMap ccu = CCUHsApi.getInstance().read("ccu");
                 String ccuName = ccu.get("dis").toString();
 
-                HashMap buildingCoolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
-                HashMap buildingHeatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user");
-                HashMap buildingCoolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
-                HashMap buildingHeatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user");
+                HashMap buildingCoolingUpperLimit = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
+                HashMap buildingHeatingUpperLimit = CCUHsApi.getInstance().read("point and limit and max and heating and user");
+                HashMap buildingCoolingLowerLimit = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
+                HashMap buildingHeatingLowerLimit = CCUHsApi.getInstance().read("point and limit and min and heating and user");
                 HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min");
                 HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max");
 
-                if (buildingCoolUL.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(buildingCoolUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) coolTempUL, 0);
-                    CCUHsApi.getInstance().writeHisValById(buildingCoolUL.get("id").toString(), (double) coolTempUL);
+                if (buildingCoolingUpperLimit.size() != 0) {
+                    CCUHsApi.getInstance().writePoint(buildingCoolingUpperLimit.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) coolingTemperatureUpperLimit, 0);
+                    CCUHsApi.getInstance().writeHisValById(buildingCoolingUpperLimit.get("id").toString(), (double) coolingTemperatureUpperLimit);
                 }
 
-                if (buildingCoolLL.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(buildingCoolLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) coolTempLL, 0);
-                    CCUHsApi.getInstance().writeHisValById(buildingCoolLL.get("id").toString(), (double) coolTempLL);
+                if (buildingCoolingLowerLimit.size() != 0) {
+                    CCUHsApi.getInstance().writePoint(buildingCoolingLowerLimit.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) coolingTemperatureLowerLimit, 0);
+                    CCUHsApi.getInstance().writeHisValById(buildingCoolingLowerLimit.get("id").toString(), (double) coolingTemperatureLowerLimit);
                 }
 
-                if (buildingHeatUL.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(buildingHeatUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) heatTempUL, 0);
-                    CCUHsApi.getInstance().writeHisValById(buildingHeatUL.get("id").toString(), (double) heatTempUL);
+                if (buildingHeatingUpperLimit.size() != 0) {
+                    CCUHsApi.getInstance().writePoint(buildingHeatingUpperLimit.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) heatingTemperatureUpperLimit, 0);
+                    CCUHsApi.getInstance().writeHisValById(buildingHeatingUpperLimit.get("id").toString(), (double) heatingTemperatureUpperLimit);
                 }
 
-                if (buildingHeatLL.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(buildingHeatLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) heatTempLL, 0);
-                    CCUHsApi.getInstance().writeHisValById(buildingHeatLL.get("id").toString(), (double) heatTempLL);
+                if (buildingHeatingLowerLimit.size() != 0) {
+                    CCUHsApi.getInstance().writePoint(buildingHeatingLowerLimit.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) heatingTemperatureLowerLimit, 0);
+                    CCUHsApi.getInstance().writeHisValById(buildingHeatingLowerLimit.get("id").toString(), (double) heatingTemperatureLowerLimit);
                 }
 
                 if (buildingMax.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(buildingMax.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) buildingTempUL, 0);
-                    CCUHsApi.getInstance().writeHisValById(buildingMax.get("id").toString(), (double) buildingTempUL);
+                    CCUHsApi.getInstance().writePoint(buildingMax.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) buildingTemperatureUpperLimit, 0);
+                    CCUHsApi.getInstance().writeHisValById(buildingMax.get("id").toString(), (double) buildingTemperatureUpperLimit);
                 }
 
                 if (buildingMin.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(buildingMin.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) buildingTempLL, 0);
-                    CCUHsApi.getInstance().writeHisValById(buildingMin.get("id").toString(), (double) buildingTempLL);
+                    CCUHsApi.getInstance().writePoint(buildingMin.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) buildingTemperatureLowerLimit, 0);
+                    CCUHsApi.getInstance().writeHisValById(buildingMin.get("id").toString(), (double) buildingTemperatureLowerLimit);
                 }
 
                 return null;
@@ -569,17 +568,18 @@ public class MasterControlView extends LinearLayout {
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
 
-    private double getCoolDTemp(double coolDT, double coolTempLL, double coolTempUL) {
+    private double getCoolingDesiredTemperature(double coolingDesiredTemperature, double coolingTemperatureLowerLimit,
+                                                double coolingTemperatureUpperLimit) {
 
-        double distance1 = Math.abs(coolTempLL - coolDT);
-        double distance2 = Math.abs(coolTempUL - coolDT);
+        double distance1 = Math.abs(coolingTemperatureLowerLimit - coolingDesiredTemperature);
+        double distance2 = Math.abs(coolingTemperatureUpperLimit - coolingDesiredTemperature);
         if (distance1 < distance2) {
-            coolDT = coolTempLL;
+            coolingDesiredTemperature = coolingTemperatureLowerLimit;
         } else {
-            coolDT = coolTempUL;
+            coolingDesiredTemperature = coolingTemperatureUpperLimit;
         }
 
-        return coolDT;
+        return coolingDesiredTemperature;
     }
 
     public static double getTuner(String id) {
@@ -596,15 +596,16 @@ public class MasterControlView extends LinearLayout {
         return 0;
     }
 
-    private double getHeatDTemp(double heatDT, double heatTempUL, double heatTempLL) {
-        double distance1 = Math.abs(heatTempLL - heatDT);
-        double distance2 = Math.abs(heatTempUL - heatDT);
+    private double getHeatingDesiredTemperature(double heatingDesiredTemperature, double heatingTemperatureUpperLimit,
+                                                double heatingTemperatureLowerLimit) {
+        double distance1 = Math.abs(heatingTemperatureLowerLimit - heatingDesiredTemperature);
+        double distance2 = Math.abs(heatingTemperatureUpperLimit - heatingDesiredTemperature);
         if (distance1 < distance2) {
-            heatDT = heatTempLL;
+            heatingDesiredTemperature = heatingTemperatureLowerLimit;
         } else {
-            heatDT = heatTempUL;
+            heatingDesiredTemperature = heatingTemperatureUpperLimit;
         }
-        return heatDT;
+        return heatingDesiredTemperature;
     }
 
     @Override

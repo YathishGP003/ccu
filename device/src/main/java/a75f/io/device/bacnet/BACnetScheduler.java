@@ -1,5 +1,8 @@
 package a75f.io.device.bacnet;
 
+import android.annotation.SuppressLint;
+import android.util.Log;
+
 import com.renovo.bacnet4j.LocalDevice;
 import com.renovo.bacnet4j.enums.DayOfWeek;
 import com.renovo.bacnet4j.enums.Month;
@@ -53,6 +56,7 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 
 public class BACnetScheduler {
 
+    private static final String LOG_PREFIX = "CCU_BACNET";
     public static ScheduleObject buildingSchedule;
     public static ArrayList<Schedule> vacationsList = null;
     public static Schedule schedule = null;
@@ -95,392 +99,275 @@ public class BACnetScheduler {
                 occupancyHeatingTemp = (AnalogValueObject) localDevice.getObjectByID(BACnetUtils.occupanyHeatingDT);
             }
 
-        if(systemSchedule != null && systemSchedule.isBuildingSchedule()) {
-            ArrayList<Schedule.Days> weekDays = systemSchedule.getDays();
-
-            SequenceOf<TimeValue> mondaySchedule = new SequenceOf<>();
-            SequenceOf<TimeValue> tuesdaySchedule = new SequenceOf<>();
-            SequenceOf<TimeValue> wednesdaySchedule = new SequenceOf<>();
-            SequenceOf<TimeValue> thursdaySchedule = new SequenceOf<>();
-            SequenceOf<TimeValue> fridaySchedule = new SequenceOf<>();
-            SequenceOf<TimeValue> saturdaySchedule = new SequenceOf<>();
-            SequenceOf<TimeValue> sundaySchedule = new SequenceOf<>();
-
-            Schedule.Days currentDay = getCurrentDaySchedule(weekDays);
-            java.util.Date currentTime = Calendar.getInstance().getTime();
-            String currentDate = currentTime.getDate()+"/"+(currentTime.getMonth()+1)+"/"+(1900+currentTime.getYear());
-            String strStartTime = currentDate+" "+currentDay.getSthh()+":"+currentDay.getStmm();
-            String strEndTime = currentDate+" "+currentDay.getEthh()+":"+currentDay.getEtmm();
-
-            SimpleDateFormat timeFormat = new SimpleDateFormat("dd/M/yyyy h:mm");
-            java.util.Date scheduleStartTime = null;
-            java.util.Date scheduleEndTime = null;
-            try {
-                scheduleStartTime = timeFormat.parse(strStartTime);
-                scheduleEndTime = timeFormat.parse(strEndTime);
-            } catch (ParseException e) {
-                e.printStackTrace();
+            //75F supports only building schedule for BACNet
+            if (systemSchedule != null && systemSchedule.isBuildingSchedule()) {
+                convertBuildingScheduleToBacnetObjects(localDevice);
             }
-
-            if(currentTime.after(scheduleStartTime) && currentTime.before(scheduleEndTime)) {
-                if(occupancyCoolingTemp.readProperty(PropertyIdentifier.outOfService).equals(Boolean.FALSE)){
-                    occupancyCoolingTemp.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.presentValue, new Real(currentDay.getCoolingVal().floatValue())));
-                    occupancyCoolingTemp.writePropertyInternal(PropertyIdentifier.relinquishDefault, new Real(currentDay.getCoolingVal().floatValue()+(float) getSetbackTemp()));
-                }
-                if(occupancyHeatingTemp.readProperty(PropertyIdentifier.outOfService).equals(Boolean.FALSE)) {
-                    occupancyHeatingTemp.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.presentValue, new Real(currentDay.getHeatingVal().floatValue())));
-                    occupancyHeatingTemp.writePropertyInternal(PropertyIdentifier.relinquishDefault, new Real(currentDay.getHeatingVal().floatValue() - (float) getSetbackTemp()));
-                }
-            }else{
-                if(occupancyCoolingTemp.readProperty(PropertyIdentifier.outOfService).equals(Boolean.FALSE)) {
-                    occupancyCoolingTemp.writePropertyInternal(PropertyIdentifier.relinquishDefault, new Real(currentDay.getCoolingVal().floatValue()+(float) getSetbackTemp()));
-                    occupancyCoolingTemp.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.presentValue, new Null()));
-                }
-                if(occupancyHeatingTemp.readProperty(PropertyIdentifier.outOfService).equals(Boolean.FALSE)) {
-                    occupancyHeatingTemp.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.presentValue, new Null()));
-                    occupancyHeatingTemp.writePropertyInternal(PropertyIdentifier.relinquishDefault, new Real(currentDay.getHeatingVal().floatValue() - (float) getSetbackTemp()));
-                }
-            }
-
-            for (int i = 0; i < weekDays.size(); i++) {
-                if (weekDays.get(i).getDay() == 0) {
-                    Schedule.Days monDay = weekDays.get(i);
-                    mondaySchedule.add(new TimeValue(new Time(monDay.getSthh(), monDay.getStmm(), 0, 0), BinaryPV.active));
-                    mondaySchedule.add(new TimeValue(new Time(monDay.getEthh(), monDay.getEtmm(), 0, 0), BinaryPV.inactive));
-                }
-                if (weekDays.get(i).getDay() == 1) {
-                    Schedule.Days tuesDay = weekDays.get(i);
-                    tuesdaySchedule.add(new TimeValue(new Time(tuesDay.getSthh(), tuesDay.getStmm(), 0, 0), BinaryPV.active));
-                    tuesdaySchedule.add(new TimeValue(new Time(tuesDay.getEthh(), tuesDay.getEtmm(), 0, 0), BinaryPV.inactive));
-                }
-                if (weekDays.get(i).getDay() == 2) {
-                    Schedule.Days wednesDay = weekDays.get(i);
-                    wednesdaySchedule.add(new TimeValue(new Time(wednesDay.getSthh(), wednesDay.getStmm(), 0, 0), BinaryPV.active));
-                    wednesdaySchedule.add(new TimeValue(new Time(wednesDay.getEthh(), wednesDay.getEtmm(), 0, 0), BinaryPV.inactive));
-                }
-                if (weekDays.get(i).getDay() == 3) {
-                    Schedule.Days thursDay = weekDays.get(i);
-                    thursdaySchedule.add(new TimeValue(new Time(thursDay.getSthh(), thursDay.getStmm(), 0, 0), BinaryPV.active));
-                    thursdaySchedule.add(new TimeValue(new Time(thursDay.getEthh(), thursDay.getEtmm(), 0, 0), BinaryPV.inactive));
-                }
-                if (weekDays.get(i).getDay() == 4) {
-                    Schedule.Days friDay = weekDays.get(i);
-                    fridaySchedule.add(new TimeValue(new Time(friDay.getSthh(), friDay.getStmm(), 0, 0), BinaryPV.active));
-                    fridaySchedule.add(new TimeValue(new Time(friDay.getEthh(), friDay.getEtmm(), 0, 0), BinaryPV.inactive));
-                }
-                if (weekDays.get(i).getDay() == 5) {
-                    Schedule.Days satDay = weekDays.get(i);
-                    saturdaySchedule.add(new TimeValue(new Time(satDay.getSthh(), satDay.getStmm(), 0, 0), BinaryPV.active));
-                    saturdaySchedule.add(new TimeValue(new Time(satDay.getEthh(), satDay.getEtmm(), 0, 0), BinaryPV.inactive));
-                }
-                if (weekDays.get(i).getDay() == 6) {
-                    Schedule.Days sunDay = weekDays.get(i);
-                    sundaySchedule.add(new TimeValue(new Time(sunDay.getSthh(), sunDay.getStmm(), 0, 0), BinaryPV.active));
-                    sundaySchedule.add(new TimeValue(new Time(sunDay.getEthh(), sunDay.getEtmm(), 0, 0), BinaryPV.inactive));
-                }
-            }
-
-            BACnetArray<DailySchedule> weeklySchedule = new BACnetArray<>(
-                    new DailySchedule(mondaySchedule),
-                    new DailySchedule(tuesdaySchedule),
-                    new DailySchedule(wednesdaySchedule),
-                    new DailySchedule(thursdaySchedule),
-                    new DailySchedule(fridaySchedule),
-                    new DailySchedule(saturdaySchedule),
-                    new DailySchedule(sundaySchedule)
-            );
-
-
-            if (systemSchedule.isBuildingSchedule()) {
-                vacationsList = CCUHsApi.getInstance().getSystemSchedule( true);
-            }
-            try {
-                final SequenceOf<CalendarEntry> dateList = new SequenceOf<>();
-                CalendarObject calendarObject = null;
-                if(!localDevice.checkObjectByID(BACnetUtils.systemCalendar)){
-                    calendarObject = new CalendarObject(localDevice, BACnetUtils.systemCalendar, "Holiday Calendar", dateList);
-                    calendarObject.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("Holiday Calendar - 75F" )));
-                }else{
-                    calendarObject = (CalendarObject) localDevice.getObjectByID(BACnetUtils.systemCalendar);
-                }
-                if(vacationsList != null) {
-                    SequenceOf<CalendarEntry> vacationCalendarEntry  = calendarObject.get(PropertyIdentifier.dateList); // Todo Fetching Existing datelist
-                    if(compareVacations(vacationCalendarEntry, vacationsList)) {
-                        calendarObject.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.dateList, new SequenceOf<CalendarEntry>()));
-                        SequenceOf<CalendarEntry> newVactionEntry  = calendarObject.get(PropertyIdentifier.dateList);
-                        for (int i = 0; i < vacationsList.size(); i++) {
-                            DateTime vacStartDate = vacationsList.get(i).getStartDate();
-                            DateTime vacEndDate = vacationsList.get(i).getEndDate();
-                            long daysDiff = (vacEndDate.getMillis() - vacStartDate.getMillis()) / (1000 * 60 * 60 * 24);
-                            if (daysDiff == 0) {//Todo Single Calendar Entry
-                                CalendarEntry newCalendarEntry = new CalendarEntry(new Date(vacStartDate.getYear(), Month.valueOf(vacStartDate.getMonthOfYear()), vacStartDate.getDayOfMonth(), DayOfWeek.UNSPECIFIED));
-
-                                if (!newVactionEntry.contains(newCalendarEntry)) {
-                                    newVactionEntry.add(newCalendarEntry);
-                                }
-                            } else {//Todo Multiple Date Calendar Entry
-                                Date startDate = new Date(vacStartDate.getYear(), Month.valueOf(vacStartDate.getMonthOfYear()), vacStartDate.getDayOfMonth(), DayOfWeek.UNSPECIFIED);
-                                Date endDate = new Date(vacEndDate.getYear(), Month.valueOf(vacEndDate.getMonthOfYear()), vacEndDate.getDayOfMonth(), DayOfWeek.UNSPECIFIED);
-                                CalendarEntry newCalendarEntry = new CalendarEntry(new DateRange(startDate, endDate));
-                                if (!newVactionEntry.contains(newCalendarEntry)) {
-                                    newVactionEntry.add(newCalendarEntry);
-                                }
-                            }
-                        }
-                        calendarObject.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.dateList, newVactionEntry));
-                    }
-                }
-
-                final SequenceOf<SpecialEvent> exceptionSchedule = new SequenceOf<>(new SpecialEvent(calendarObject.getId(),
-                        new SequenceOf<>(new TimeValue(new Time(0, 0, 0, 0), BinaryPV.inactive)), new UnsignedInteger(10)));
-
-
-                // Creating Link to Set Temperature BACnet object to BACnet Schedule
-                final SequenceOf<DeviceObjectPropertyReference> listOfObjectPropertyReferences = new SequenceOf<>();
-                listOfObjectPropertyReferences.add(new DeviceObjectPropertyReference(occupancyObject.getId(), PropertyIdentifier.presentValue, null, null));
-                final DateRange effectivePeriod = new DateRange(Date.UNSPECIFIED, Date.UNSPECIFIED);
-                if(!localDevice.checkObjectByID(BACnetUtils.systemSchedule)) {
-                    buildingSchedule = new ScheduleObject(localDevice, BACnetUtils.systemSchedule, "Building Schedule Object", effectivePeriod, weeklySchedule, exceptionSchedule, BinaryPV.inactive, listOfObjectPropertyReferences, 9, false);
-                    buildingSchedule.writePropertyInternal(PropertyIdentifier.description, new CharacterString("Building Schedule - 75F" ));
-                }else{
-                    ScheduleObject oldBuildingSchedule = (ScheduleObject) localDevice.getObjectByID(BACnetUtils.systemSchedule);
-                    oldBuildingSchedule.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.weeklySchedule, weeklySchedule));
-                    oldBuildingSchedule.updatePresentValue();
-                }
-            } catch (BACnetServiceException e) {
-                e.printStackTrace();
-            }
-        }
-        if (schedule != null && schedule.isZoneSchedule()) {
-            ArrayList<Schedule.Days> weekDays = schedule.getDays();
-            SequenceOf<TimeValue> mondaySchedule = new SequenceOf<>();
-            SequenceOf<TimeValue> tuesdaySchedule = new SequenceOf<>();
-            SequenceOf<TimeValue> wednesdaySchedule = new SequenceOf<>();
-            SequenceOf<TimeValue> thursdaySchedule = new SequenceOf<>();
-            SequenceOf<TimeValue> fridaySchedule = new SequenceOf<>();
-            SequenceOf<TimeValue> saturdaySchedule = new SequenceOf<>();
-            SequenceOf<TimeValue> sundaySchedule = new SequenceOf<>();
-            float desiredTemp = (float) getSetTemp(zoneDevice);
-            for (int i = 0; i < weekDays.size(); i++) {
-                if (weekDays.get(i).getDay() == 0) {
-                    Schedule.Days monDay = weekDays.get(i);
-                    mondaySchedule.add(new TimeValue(new Time(monDay.getSthh(), monDay.getStmm(), 0, 0), new Real(desiredTemp)));
-                }
-                if (weekDays.get(i).getDay() == 1) {
-                    Schedule.Days tuesDay = weekDays.get(i);
-                    tuesdaySchedule.add(new TimeValue(new Time(tuesDay.getSthh(), tuesDay.getStmm(), 0, 0), new Real(desiredTemp)));
-                }
-                if (weekDays.get(i).getDay() == 2) {
-                    Schedule.Days wednesDay = weekDays.get(i);
-                    wednesdaySchedule.add(new TimeValue(new Time(wednesDay.getSthh(), wednesDay.getStmm(), 0, 0), new Real(desiredTemp)));
-                }
-                if (weekDays.get(i).getDay() == 3) {
-                    Schedule.Days thursDay = weekDays.get(i);
-                    thursdaySchedule.add(new TimeValue(new Time(thursDay.getSthh(), thursDay.getStmm(), 0, 0), new Real(desiredTemp)));
-                }
-                if (weekDays.get(i).getDay() == 4) {
-                    Schedule.Days friDay = weekDays.get(i);
-                    fridaySchedule.add(new TimeValue(new Time(friDay.getSthh(), friDay.getStmm(), 0, 0), new Real(desiredTemp)));
-                }
-                if (weekDays.get(i).getDay() == 5) {
-                    Schedule.Days satDay = weekDays.get(i);
-                    saturdaySchedule.add(new TimeValue(new Time(satDay.getSthh(), satDay.getStmm(), 0, 0), new Real(desiredTemp)));
-                }
-                if (weekDays.get(i).getDay() == 6) {
-                    Schedule.Days sunDay = weekDays.get(i);
-                    sundaySchedule.add(new TimeValue(new Time(sunDay.getSthh(), sunDay.getStmm(), 0, 0), new Real(desiredTemp)));
-                }
-            }
-
-            BACnetArray<DailySchedule> weeklySchedule = new BACnetArray<>(
-                    new DailySchedule(mondaySchedule),
-                    new DailySchedule(tuesdaySchedule),
-                    new DailySchedule(wednesdaySchedule),
-                    new DailySchedule(thursdaySchedule),
-                    new DailySchedule(fridaySchedule),
-                    new DailySchedule(saturdaySchedule),
-                    new DailySchedule(sundaySchedule)
-            );
-        }
         } catch (BACnetServiceException e) {
             e.printStackTrace();
         }
     }
 
-    public double getSetTemp(Device equip){
-        double setTemp = 0;
-        setTemp = CCUHsApi.getInstance().readHisValByQuery("zone and point and desired and air and temp and average and equipRef == \""+equip.getEquipRef()+"\"");
-        return setTemp;
+    public void convertBuildingScheduleToBacnetObjects(LocalDevice localDevice) throws BACnetServiceException {
+        ArrayList<Schedule.Days> weekDays = systemSchedule.getDays();
+
+        SequenceOf<TimeValue> mondaySchedule = new SequenceOf<>();
+        SequenceOf<TimeValue> tuesdaySchedule = new SequenceOf<>();
+        SequenceOf<TimeValue> wednesdaySchedule = new SequenceOf<>();
+        SequenceOf<TimeValue> thursdaySchedule = new SequenceOf<>();
+        SequenceOf<TimeValue> fridaySchedule = new SequenceOf<>();
+        SequenceOf<TimeValue> saturdaySchedule = new SequenceOf<>();
+        SequenceOf<TimeValue> sundaySchedule = new SequenceOf<>();
+
+        Schedule.Days currentDay = getCurrentDaySchedule(weekDays);
+        java.util.Date currentTime = Calendar.getInstance().getTime();
+        String currentDate = String.format("%d/%d/%d", currentTime.getDate(), currentTime.getMonth() + 1, 1900 + currentTime.getYear());
+        String strStartTime = currentDate + " " + currentDay.getSthh() + ":" + currentDay.getStmm();
+        String strEndTime = currentDate + " " + currentDay.getEthh() + ":" + currentDay.getEtmm();
+
+        SimpleDateFormat timeFormat = new SimpleDateFormat("dd/M/yyyy HH:mm");
+        java.util.Date scheduleStartTime = null;
+        java.util.Date scheduleEndTime = null;
+        try {
+            scheduleStartTime = timeFormat.parse(strStartTime);
+            scheduleEndTime = timeFormat.parse(strEndTime);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Log.i(LOG_PREFIX, "Current Time:" + currentTime + " sT:" + scheduleStartTime + " eT:" + scheduleEndTime + " Date:" + currentDate);
+        if (currentTime.after(scheduleStartTime) && currentTime.before(scheduleEndTime)) {
+            Log.i(LOG_PREFIX, "in Occupied Setting Temp to BS - Cooling DT:" + currentDay.getCoolingVal() + " Heating DT:" + currentDay.getHeatingVal() + " SetBack:" + getSetbackTemp());
+            if (occupancyCoolingTemp.readProperty(PropertyIdentifier.outOfService).equals(Boolean.FALSE)) {
+                occupancyCoolingTemp.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.presentValue, new Real(currentDay.getCoolingVal().floatValue())));
+                occupancyCoolingTemp.writePropertyInternal(PropertyIdentifier.relinquishDefault, new Real(currentDay.getCoolingVal().floatValue() + (float) getSetbackTemp()));
+            }
+            if (occupancyHeatingTemp.readProperty(PropertyIdentifier.outOfService).equals(Boolean.FALSE)) {
+                occupancyHeatingTemp.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.presentValue, new Real(currentDay.getHeatingVal().floatValue())));
+                occupancyHeatingTemp.writePropertyInternal(PropertyIdentifier.relinquishDefault, new Real(currentDay.getHeatingVal().floatValue() - (float) getSetbackTemp()));
+            }
+        } else {
+            if (occupancyCoolingTemp.readProperty(PropertyIdentifier.outOfService).equals(Boolean.FALSE)) {
+                occupancyCoolingTemp.writePropertyInternal(PropertyIdentifier.relinquishDefault, new Real(currentDay.getCoolingVal().floatValue() + (float) getSetbackTemp()));
+                occupancyCoolingTemp.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.presentValue, new Null()));
+            }
+            if (occupancyHeatingTemp.readProperty(PropertyIdentifier.outOfService).equals(Boolean.FALSE)) {
+                occupancyHeatingTemp.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.presentValue, new Null()));
+                occupancyHeatingTemp.writePropertyInternal(PropertyIdentifier.relinquishDefault, new Real(currentDay.getHeatingVal().floatValue() - (float) getSetbackTemp()));
+            }
+        }
+
+        for (int i = 0; i < weekDays.size(); i++) {
+            if (weekDays.get(i).getDay() == 0) {
+                Schedule.Days monDay = weekDays.get(i);
+                mondaySchedule.add(new TimeValue(new Time(monDay.getSthh(), monDay.getStmm(), 0, 0), BinaryPV.active));
+                mondaySchedule.add(new TimeValue(new Time(monDay.getEthh(), monDay.getEtmm(), 0, 0), BinaryPV.inactive));
+            }
+            if (weekDays.get(i).getDay() == 1) {
+                Schedule.Days tuesDay = weekDays.get(i);
+                tuesdaySchedule.add(new TimeValue(new Time(tuesDay.getSthh(), tuesDay.getStmm(), 0, 0), BinaryPV.active));
+                tuesdaySchedule.add(new TimeValue(new Time(tuesDay.getEthh(), tuesDay.getEtmm(), 0, 0), BinaryPV.inactive));
+            }
+            if (weekDays.get(i).getDay() == 2) {
+                Schedule.Days wednesDay = weekDays.get(i);
+                wednesdaySchedule.add(new TimeValue(new Time(wednesDay.getSthh(), wednesDay.getStmm(), 0, 0), BinaryPV.active));
+                wednesdaySchedule.add(new TimeValue(new Time(wednesDay.getEthh(), wednesDay.getEtmm(), 0, 0), BinaryPV.inactive));
+            }
+            if (weekDays.get(i).getDay() == 3) {
+                Schedule.Days thursDay = weekDays.get(i);
+                thursdaySchedule.add(new TimeValue(new Time(thursDay.getSthh(), thursDay.getStmm(), 0, 0), BinaryPV.active));
+                thursdaySchedule.add(new TimeValue(new Time(thursDay.getEthh(), thursDay.getEtmm(), 0, 0), BinaryPV.inactive));
+            }
+            if (weekDays.get(i).getDay() == 4) {
+                Schedule.Days friDay = weekDays.get(i);
+                fridaySchedule.add(new TimeValue(new Time(friDay.getSthh(), friDay.getStmm(), 0, 0), BinaryPV.active));
+                fridaySchedule.add(new TimeValue(new Time(friDay.getEthh(), friDay.getEtmm(), 0, 0), BinaryPV.inactive));
+            }
+            if (weekDays.get(i).getDay() == 5) {
+                Schedule.Days satDay = weekDays.get(i);
+                saturdaySchedule.add(new TimeValue(new Time(satDay.getSthh(), satDay.getStmm(), 0, 0), BinaryPV.active));
+                saturdaySchedule.add(new TimeValue(new Time(satDay.getEthh(), satDay.getEtmm(), 0, 0), BinaryPV.inactive));
+            }
+            if (weekDays.get(i).getDay() == 6) {
+                Schedule.Days sunDay = weekDays.get(i);
+                sundaySchedule.add(new TimeValue(new Time(sunDay.getSthh(), sunDay.getStmm(), 0, 0), BinaryPV.active));
+                sundaySchedule.add(new TimeValue(new Time(sunDay.getEthh(), sunDay.getEtmm(), 0, 0), BinaryPV.inactive));
+            }
+        }
+        //Log.i("Bacnet", "Monday Schedule ST:" + systemSchedule.getDays().get(0).getSthh() + ":" + systemSchedule.getDays().get(0).getStmm() + " ET:" + systemSchedule.getDays().get(0).getEthh() + ":" + systemSchedule.getDays().get(0).getEtmm());
+        BACnetArray<DailySchedule> weeklySchedule = new BACnetArray<>(
+                new DailySchedule(mondaySchedule),
+                new DailySchedule(tuesdaySchedule),
+                new DailySchedule(wednesdaySchedule),
+                new DailySchedule(thursdaySchedule),
+                new DailySchedule(fridaySchedule),
+                new DailySchedule(saturdaySchedule),
+                new DailySchedule(sundaySchedule)
+        );
+
+        convertBuildingVacationToBacnetObjects(localDevice, weeklySchedule);
+
     }
 
-    public static void updateSchedule(BACnetObject scheduleObject,boolean isSameallDay) {
+    public void convertBuildingVacationToBacnetObjects(LocalDevice localDevice, BACnetArray<DailySchedule> weeklySchedule) {
+        if (systemSchedule.isBuildingSchedule()) {
+            vacationsList = CCUHsApi.getInstance().getSystemSchedule(true);
+        }
         try {
-            systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
-            if (scheduleObject.readProperty(PropertyIdentifier.objectType) == ObjectType.schedule ){
-                SequenceOf<DailySchedule> dailySchedules = scheduleObject.get(PropertyIdentifier.weeklySchedule);
-                Primitive activeStatus = new Enumerated(1);
-                Primitive inactiveStatus = new Enumerated(0);
-                for (Schedule.Days sDays : systemSchedule.getDays()) {
-                    if(sDays.getDay() == 0){
-                        SequenceOf<TimeValue> mondaySchedule = dailySchedules.get(0).getDaySchedule();
-                        for(TimeValue daySchedule: mondaySchedule)
-                        {
-                            sDays.setDay(0);
-                            if(daySchedule.getValue().equals(activeStatus)) {
-                                String startTime = daySchedule.getTime().toString();
-                                String startHrs = startTime.split(":")[0];
-                                String startMins = startTime.split(":")[1];
-                                sDays.setSthh(Integer.parseInt(startHrs));
-                                sDays.setStmm(Integer.parseInt(startMins));
-                            }if(daySchedule.getValue().equals(inactiveStatus)) {
-                                String endTime = daySchedule.getTime().toString();
-                                String endHrs = endTime.split(":")[0];
-                                String endMins = endTime.split(":")[1];
-                                sDays.setEthh(Integer.parseInt(endHrs));
-                                sDays.setEtmm(Integer.parseInt(endMins));
+            final SequenceOf<CalendarEntry> dateList = new SequenceOf<>();
+            CalendarObject calendarObject;
+            if (!localDevice.checkObjectByID(BACnetUtils.systemCalendar)) {
+                calendarObject = new CalendarObject(localDevice, BACnetUtils.systemCalendar, "Holiday Calendar", dateList);
+                calendarObject.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("Holiday Calendar - 75F")));
+            } else {
+                calendarObject = (CalendarObject) localDevice.getObjectByID(BACnetUtils.systemCalendar);
+            }
+            if (vacationsList != null) {//Only if vacation added
+                SequenceOf<CalendarEntry> vacationCalendarEntry = calendarObject.get(PropertyIdentifier.dateList); // Fetching Existing datelist
+                if (compareVacations(vacationCalendarEntry, vacationsList)) {
+                    calendarObject.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.dateList, new SequenceOf<CalendarEntry>()));
+                    SequenceOf<CalendarEntry> newVactionEntry = calendarObject.get(PropertyIdentifier.dateList);
+                    for (int i = 0; i < vacationsList.size(); i++) {
+                        DateTime vacStartDate = vacationsList.get(i).getStartDate();
+                        DateTime vacEndDate = vacationsList.get(i).getEndDate();
+                        long daysDiff = (vacEndDate.getMillis() - vacStartDate.getMillis()) / (1000 * 60 * 60 * 24);
+                        if (daysDiff == 0) {// Single Calendar Entry
+                            CalendarEntry newCalendarEntry = new CalendarEntry(new Date(vacStartDate.getYear(), Month.valueOf(vacStartDate.getMonthOfYear()), vacStartDate.getDayOfMonth(), DayOfWeek.UNSPECIFIED));
+
+                            if (!newVactionEntry.contains(newCalendarEntry)) {
+                                newVactionEntry.add(newCalendarEntry);
                             }
-                        }
-                    }if(sDays.getDay() == 1){
-                        SequenceOf<TimeValue> tuesdaySchedule = dailySchedules.get(1).getDaySchedule();
-                        for(TimeValue daySchedule: tuesdaySchedule)
-                        {
-                            sDays.setDay(1);
-                            if(daySchedule.getValue().equals(activeStatus)) {
-                                String startTime = daySchedule.getTime().toString();
-                                String startHrs = startTime.split(":")[0];
-                                String startMins = startTime.split(":")[1];
-                                sDays.setSthh(Integer.parseInt(startHrs));
-                                sDays.setStmm(Integer.parseInt(startMins));
-                            }if(daySchedule.getValue().equals(inactiveStatus)) {
-                                String endTime = daySchedule.getTime().toString();
-                                String endHrs = endTime.split(":")[0];
-                                String endMins = endTime.split(":")[1];
-                                sDays.setEthh(Integer.parseInt(endHrs));
-                                sDays.setEtmm(Integer.parseInt(endMins));
-                            }
-                        }
-                    }if(sDays.getDay() == 2){
-                        SequenceOf<TimeValue> wednesdaySchedule = dailySchedules.get(2).getDaySchedule();
-                        for(TimeValue daySchedule: wednesdaySchedule)
-                        {
-                            sDays.setDay(2);
-                            if(daySchedule.getValue().equals(activeStatus)) {
-                                String startTime = daySchedule.getTime().toString();
-                                String startHrs = startTime.split(":")[0];
-                                String startMins = startTime.split(":")[1];
-                                sDays.setSthh(Integer.parseInt(startHrs));
-                                sDays.setStmm(Integer.parseInt(startMins));
-                            }if(daySchedule.getValue().equals(inactiveStatus)) {
-                                String endTime = daySchedule.getTime().toString();
-                                String endHrs = endTime.split(":")[0];
-                                String endMins = endTime.split(":")[1];
-                                sDays.setEthh(Integer.parseInt(endHrs));
-                                sDays.setEtmm(Integer.parseInt(endMins));
-                            }
-                        }
-                    }if(sDays.getDay() == 3){
-                        SequenceOf<TimeValue> thursdaySchedule = dailySchedules.get(3).getDaySchedule();
-                        for(TimeValue daySchedule: thursdaySchedule)
-                        {
-                            sDays.setDay(3);
-                            if(daySchedule.getValue().equals(activeStatus)) {
-                                String startTime = daySchedule.getTime().toString();
-                                String startHrs = startTime.split(":")[0];
-                                String startMins = startTime.split(":")[1];
-                                sDays.setSthh(Integer.parseInt(startHrs));
-                                sDays.setStmm(Integer.parseInt(startMins));
-                            }if(daySchedule.getValue().equals(inactiveStatus)) {
-                                String endTime = daySchedule.getTime().toString();
-                                String endHrs = endTime.split(":")[0];
-                                String endMins = endTime.split(":")[1];
-                                sDays.setEthh(Integer.parseInt(endHrs));
-                                sDays.setEtmm(Integer.parseInt(endMins));
-                            }
-                        }
-                    }if(sDays.getDay() == 4){
-                        SequenceOf<TimeValue> fridaySchedule = dailySchedules.get(4).getDaySchedule();
-                        for(TimeValue daySchedule: fridaySchedule)
-                        {
-                            sDays.setDay(4);
-                            if(daySchedule.getValue().equals(activeStatus)) {
-                                String startTime = daySchedule.getTime().toString();
-                                String startHrs = startTime.split(":")[0];
-                                String startMins = startTime.split(":")[1];
-                                sDays.setSthh(Integer.parseInt(startHrs));
-                                sDays.setStmm(Integer.parseInt(startMins));
-                            }if(daySchedule.getValue().equals(inactiveStatus)) {
-                                String endTime = daySchedule.getTime().toString();
-                                String endHrs = endTime.split(":")[0];
-                                String endMins = endTime.split(":")[1];
-                                sDays.setEthh(Integer.parseInt(endHrs));
-                                sDays.setEtmm(Integer.parseInt(endMins));
-                            }
-                        }
-                    }if(sDays.getDay() == 5){
-                        SequenceOf<TimeValue> saturdaySchedule = dailySchedules.get(5).getDaySchedule();
-                        for(TimeValue daySchedule: saturdaySchedule)
-                        {
-                            sDays.setDay(5);
-                            if(daySchedule.getValue().equals(activeStatus)) {
-                                String startTime = daySchedule.getTime().toString();
-                                String startHrs = startTime.split(":")[0];
-                                String startMins = startTime.split(":")[1];
-                                sDays.setSthh(Integer.parseInt(startHrs));
-                                sDays.setStmm(Integer.parseInt(startMins));
-                            }if(daySchedule.getValue().equals(inactiveStatus)) {
-                                String endTime = daySchedule.getTime().toString();
-                                String endHrs = endTime.split(":")[0];
-                                String endMins = endTime.split(":")[1];
-                                sDays.setEthh(Integer.parseInt(endHrs));
-                                sDays.setEtmm(Integer.parseInt(endMins));
-                            }
-                        }
-                    }if(sDays.getDay() == 6){
-                        SequenceOf<TimeValue> saturdaySchedule = dailySchedules.get(6).getDaySchedule();
-                        for(TimeValue daySchedule: saturdaySchedule)
-                        {
-                            sDays.setDay(6);
-                            if(daySchedule.getValue().equals(activeStatus)) {
-                                String startTime = daySchedule.getTime().toString();
-                                String startHrs = startTime.split(":")[0];
-                                String startMins = startTime.split(":")[1];
-                                sDays.setSthh(Integer.parseInt(startHrs));
-                                sDays.setStmm(Integer.parseInt(startMins));
-                            }if(daySchedule.getValue().equals(inactiveStatus)) {
-                                String endTime = daySchedule.getTime().toString();
-                                String endHrs = endTime.split(":")[0];
-                                String endMins = endTime.split(":")[1];
-                                sDays.setEthh(Integer.parseInt(endHrs));
-                                sDays.setEtmm(Integer.parseInt(endMins));
+                        } else {// Multiple Date Calendar Entry
+                            Date startDate = new Date(vacStartDate.getYear(), Month.valueOf(vacStartDate.getMonthOfYear()), vacStartDate.getDayOfMonth(), DayOfWeek.UNSPECIFIED);
+                            Date endDate = new Date(vacEndDate.getYear(), Month.valueOf(vacEndDate.getMonthOfYear()), vacEndDate.getDayOfMonth(), DayOfWeek.UNSPECIFIED);
+                            CalendarEntry newCalendarEntry = new CalendarEntry(new DateRange(startDate, endDate));
+                            if (!newVactionEntry.contains(newCalendarEntry)) {
+                                newVactionEntry.add(newCalendarEntry);
                             }
                         }
                     }
-
+                    calendarObject.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.dateList, newVactionEntry));
                 }
-            }if (scheduleObject.readProperty(PropertyIdentifier.objectType) == ObjectType.analogValue) {
-                 if(scheduleObject.getId().getInstanceNumber() == BACnetUtils.occupanyHeatingDT){
-                     if(isSameallDay){
-                         for (Schedule.Days scheduleDays: systemSchedule.getDays()){
-                             scheduleDays.setHeatingVal(Double.parseDouble(scheduleObject.get(PropertyIdentifier.presentValue).toString()));
-                         }
-                     }else{
-                         getCurrentDaySchedule(systemSchedule.getDays()).setHeatingVal(Double.parseDouble(scheduleObject.get(PropertyIdentifier.presentValue).toString()));
-                     }
-                 }if(scheduleObject.getId().getInstanceNumber() == BACnetUtils.occupanyCoolingDT){
-                    if(isSameallDay) {
+            }
+
+            final SequenceOf<SpecialEvent> exceptionSchedule = new SequenceOf<>(new SpecialEvent(calendarObject.getId(),
+                    new SequenceOf<>(new TimeValue(new Time(0, 0, 0, 0), BinaryPV.inactive)), new UnsignedInteger(10)));
+
+
+            // Creating Link to Set Temperature BACnet object to BACnet Schedule
+            final SequenceOf<DeviceObjectPropertyReference> listOfObjectPropertyReferences = new SequenceOf<>();
+            listOfObjectPropertyReferences.add(new DeviceObjectPropertyReference(occupancyObject.getId(), PropertyIdentifier.presentValue, null, null));
+            final DateRange effectivePeriod = new DateRange(Date.UNSPECIFIED, Date.UNSPECIFIED);
+            if (!localDevice.checkObjectByID(BACnetUtils.systemSchedule)) {
+                buildingSchedule = new ScheduleObject(localDevice, BACnetUtils.systemSchedule, "Building Schedule Object", effectivePeriod, weeklySchedule, exceptionSchedule, BinaryPV.inactive, listOfObjectPropertyReferences, 9, false);
+                buildingSchedule.writePropertyInternal(PropertyIdentifier.description, new CharacterString("Building Schedule - 75F"));
+            } else {
+                ScheduleObject oldBuildingSchedule = (ScheduleObject) localDevice.getObjectByID(BACnetUtils.systemSchedule);
+                oldBuildingSchedule.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.weeklySchedule, weeklySchedule));
+                oldBuildingSchedule.updatePresentValue();
+            }
+        } catch (BACnetServiceException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void updateSchedule(BACnetObject scheduleObject, boolean isSameallDay) {
+        try {
+            systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
+            Log.i(LOG_PREFIX, "75F Schedule-Before Change:" + systemSchedule.getDays() + ",==" + systemSchedule.toString());
+            if (scheduleObject.readProperty(PropertyIdentifier.objectType) == ObjectType.schedule) {
+                updateBuildingScheduleChangesFromBacnet(scheduleObject);
+                Log.i(LOG_PREFIX, "75F Schedule-After Change:" + systemSchedule.toString());
+
+            }
+            if (scheduleObject.readProperty(PropertyIdentifier.objectType) == ObjectType.analogValue) {
+                if (scheduleObject.getId().getInstanceNumber() == BACnetUtils.occupanyHeatingDT) {
+                    if (isSameallDay) {
+                        for (Schedule.Days scheduleDays : systemSchedule.getDays()) {
+                            scheduleDays.setHeatingVal(Double.parseDouble(scheduleObject.get(PropertyIdentifier.presentValue).toString()));
+                        }
+                    } else {
+                        getCurrentDaySchedule(systemSchedule.getDays()).setHeatingVal(Double.parseDouble(scheduleObject.get(PropertyIdentifier.presentValue).toString()));
+                    }
+                }
+                if (scheduleObject.getId().getInstanceNumber() == BACnetUtils.occupanyCoolingDT) {
+                    if (isSameallDay) {
                         for (Schedule.Days sDays : systemSchedule.getDays()) {
                             sDays.setCoolingVal(Double.parseDouble(scheduleObject.get(PropertyIdentifier.presentValue).toString()));
                         }
-                    }else {
+                    } else {
                         getCurrentDaySchedule(systemSchedule.getDays()).setCoolingVal(Double.parseDouble(scheduleObject.get(PropertyIdentifier.presentValue).toString()));
                     }
-                 }
+                }
             }
             doScheduleUpdate();
         } catch (BACnetServiceException e) {
             e.printStackTrace();
         }
 
+    }
+
+    private static void updateBuildingScheduleChangesFromBacnet(BACnetObject scheduleObject) {
+        SequenceOf<DailySchedule> bacnetDailySchedules = scheduleObject.get(PropertyIdentifier.weeklySchedule);
+        Primitive activeStatus = new Enumerated(1);
+        Primitive inactiveStatus = new Enumerated(0);
+        for (int index = 0; index < bacnetDailySchedules.size(); index++) {
+            boolean hasBacnetSchedule = false;
+            boolean has75fSchedule = false;
+            Schedule.Days scheduledDays = null;
+            DailySchedule dailySchedule = bacnetDailySchedules.get(index);
+            for (Schedule.Days activeScheduleDay : systemSchedule.getDays()) {
+                if (activeScheduleDay.getDay() == index) {
+                    has75fSchedule = true;
+                    scheduledDays = activeScheduleDay;
+                    break;
+                }
+            }
+            if (!has75fSchedule) {
+                scheduledDays = new Schedule.Days();
+            }
+            if (dailySchedule.getDaySchedule().size() > 0) {
+                for (TimeValue daySchedule : dailySchedule.getDaySchedule()) {
+                    scheduledDays.setDay(index);
+                    hasBacnetSchedule = true;
+                    if (daySchedule.getValue().equals(activeStatus)) {
+                        String startTime = daySchedule.getTime().toString();
+                        String startHrs = startTime.split(":")[0];
+                        String startMins = startTime.split(":")[1];
+                        Log.i(LOG_PREFIX, "75F Schedule=" + "Time:" + startTime + " StHR:" + startHrs + " StMn:" + startMins);
+                        scheduledDays.setSthh(Integer.parseInt(startHrs));
+                        scheduledDays.setStmm(Integer.parseInt(startMins));
+                    }
+                    if (daySchedule.getValue().equals(inactiveStatus)) {
+                        String endTime = daySchedule.getTime().toString();
+                        String endHrs = endTime.split(":")[0];
+                        String endMins = endTime.split(":")[1];
+                        Log.i(LOG_PREFIX, "75F Schedule=" + "Time:" + endTime + " EtHR:" + endHrs + " EtMn:" + endMins);
+                        scheduledDays.setEthh(Integer.parseInt(endHrs));
+                        scheduledDays.setEtmm(Integer.parseInt(endMins));
+                    }
+                }
+            }
+            if (hasBacnetSchedule && !has75fSchedule) {
+                addNewSingleDayScheduleFromBacnet(scheduledDays);
+            }
+            if (!hasBacnetSchedule && has75fSchedule) {
+                systemSchedule.getDays().remove(scheduledDays);
+            }
+        }
+    }
+
+    private static void addNewSingleDayScheduleFromBacnet(Schedule.Days scheduledDays) {
+        scheduledDays.setSunrise(false);
+        scheduledDays.setSunset(false);
+        Occupied systemOccupiedSchedule = systemSchedule.getCurrentValues();
+        if (systemOccupiedSchedule != null) {
+            scheduledDays.setCoolingVal(systemOccupiedSchedule.getCoolingVal());
+            scheduledDays.setHeatingVal(systemOccupiedSchedule.getHeatingVal());
+        } else {
+            scheduledDays.setCoolingVal(70.0);
+            scheduledDays.setHeatingVal(74.0);
+        }
+        systemSchedule.getDays().add(scheduledDays);
     }
 
     private static void doScheduleUpdate() {
@@ -491,22 +378,22 @@ public class BACnetScheduler {
         ScheduleProcessJob.updateSchedules();
     }
 
-    private static Schedule.Days getCurrentDaySchedule(ArrayList<Schedule.Days> weekDays){
+    private static Schedule.Days getCurrentDaySchedule(ArrayList<Schedule.Days> weekDays) {
         Calendar calendar = Calendar.getInstance();
         calendar.setFirstDayOfWeek(Calendar.MONDAY);
-        int day = calendar.get(Calendar.DAY_OF_WEEK)-2;
-        if(day==-1){
+        int day = calendar.get(Calendar.DAY_OF_WEEK) - 2;
+        if (day == -1) {
             day = 6;
         }
         return weekDays.get(day);
     }
 
 
-    public double getSetbackTemp(){
+    public double getSetbackTemp() {
         try {
             CCUHsApi hayStack = CCUHsApi.getInstance();
             HashMap site = hayStack.read("site");
-            HashMap configPoint = hayStack.read("unoccupied and setback and siteRef == \"" +site.get("id").toString() + "\"");
+            HashMap configPoint = hayStack.read("unoccupied and setback and siteRef == \"" + site.get("id").toString() + "\"");
             return hayStack.readHisValById(configPoint.get("id").toString());
         } catch (Exception e) {
             return 0;

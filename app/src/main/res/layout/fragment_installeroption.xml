@@ -335,8 +335,26 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textBacnetEnable"
                 android:layout_marginLeft="96dp"
-                android:layout_marginTop="20dp"
-                >
+                android:layout_marginTop="20dp">
+
+                <RadioGroup
+                    android:id="@+id/radioGroupConfig"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <RadioButton
+                        android:id="@+id/rbAuto"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/rb_auto"/>
+
+                    <RadioButton
+                        android:id="@+id/rbManual"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/rb_manual"
+                        android:layout_marginLeft="36dp"/>
+                </RadioGroup>
 
                 <RadioGroup
                     android:id="@+id/radioGroupConfig"
@@ -386,6 +404,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_toRightOf="@+id/textInputIP"
+                    android:layout_below="@+id/radioGroupConfig"
                     android:layout_marginLeft="36dp"
                     android:layout_below="@+id/radioGroupConfig"
                     app:errorTextAppearance="@style/error_appearance">

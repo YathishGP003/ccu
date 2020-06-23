@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -59,6 +60,7 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
 import a75f.io.renatus.views.TempLimit.TempLimitView;
 
@@ -336,7 +338,6 @@ public class InstallerOptions extends Fragment {
         toggleBACnet.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                LocalDevice localDevice = null;
                 if(isChecked) {
                     if (utilityApplication.checkNetworkConnected()) {
                         relativeLayoutBACnet.setVisibility(View.VISIBLE);
@@ -362,7 +363,7 @@ public class InstallerOptions extends Fragment {
                             editGateway.setText(ethConfig[2]);
                             editSubnet.setText(ethConfig[3]);
                         }
-                    }else {
+                    }else{
                         textNetworkError.setVisibility(View.VISIBLE);
                     }
                 }
@@ -415,21 +416,8 @@ public class InstallerOptions extends Fragment {
 
         getActivity().registerReceiver(mPairingReceiver, new IntentFilter(ACTION_SETTING_SCREEN));
 
-
-        if(utilityApplication.isBACnetEnabled()){
-            toggleBACnet.setChecked(true);
-            relativeLayoutBACnet.setVisibility(View.VISIBLE);
-            if(!utilityApplication.isAutoMode()){ // Check for BACnet Enabled in Auto or Manual
-                networkConfig = prefs.getString("BACnetConfig");
-                radioGroupConfig.check(R.id.rbManual);
-                String[] ethConfig = networkConfig.split(":");
-                editIPAddr.setText(ethConfig[1]);
-                editGateway.setText(ethConfig[2]);
-                editSubnet.setText(ethConfig[3]);
-            }
-            lockBACnetConfig();
-        }
         getBACnetConfig();
+
         return rootView;
     }
 

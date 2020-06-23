@@ -23,6 +23,7 @@ import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatDelegate;
 import android.text.format.Formatter;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.renovo.bacnet4j.LocalDevice;
@@ -83,6 +84,7 @@ import a75f.io.device.mesh.LSerial;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.watchdog.Watchdog;
+import a75f.io.renatus.registration.InstallerOptions;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
@@ -640,6 +642,7 @@ public abstract class UtilityApplication extends Application
             }
         });
     }
+
     public boolean checkNetworkConnected() {
         if (!prefs.getBoolean("BACnetLAN")) {
             ConnectivityManager connManager = (ConnectivityManager) Globals.getInstance().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);

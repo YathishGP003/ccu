@@ -23,6 +23,7 @@ import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatDelegate;
 import android.text.format.Formatter;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.renovo.bacnet4j.LocalDevice;
@@ -83,6 +84,7 @@ import a75f.io.device.mesh.LSerial;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.watchdog.Watchdog;
+import a75f.io.renatus.registration.InstallerOptions;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
@@ -657,6 +659,29 @@ public abstract class UtilityApplication extends Application
                 if(localDevice == null)
                     InitialiseBACnet();
                 if(localDevice!= null && localDevice.isInitialized()) {
+                    localDevice.sendLocalBroadcast(new IAmRequest(new ObjectIdentifier(ObjectType.device, localDevice.getInstanceNumber()),
+                            localDevice.get(PropertyIdentifier.maxApduLengthAccepted),
+                            Segmentation.noSegmentation, localDevice.get(PropertyIdentifier.vendorIdentifier)));
+                }
+            }
+        }
+    }
+
+    public boolean checkNetworkConnected() {
+        if (!prefs.getBoolean("BACnetLAN")) {
+            ConnectivityManager connManager = (ConnectivityManager) Globals.getInstance().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+            return (networkInfo != null && networkInfo.isConnected());
+        } else {
+            return CheckEthernet();
+        }
+    }
+
+    public class NetworkChangeReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(isBACnetEnabled()){
+                if(localDevice.isInitialized()) {
                     localDevice.sendLocalBroadcast(new IAmRequest(new ObjectIdentifier(ObjectType.device, localDevice.getInstanceNumber()),
                             localDevice.get(PropertyIdentifier.maxApduLengthAccepted),
                             Segmentation.noSegmentation, localDevice.get(PropertyIdentifier.vendorIdentifier)));

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -61,6 +62,7 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
 import a75f.io.renatus.views.TempLimit.TempLimitView;
 
@@ -338,7 +340,6 @@ public class InstallerOptions extends Fragment {
         toggleBACnet.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                LocalDevice localDevice = null;
                 if(isChecked) {
                     if (utilityApplication.checkNetworkConnected()) {
                         relativeLayoutBACnet.setVisibility(View.VISIBLE);
@@ -364,7 +365,7 @@ public class InstallerOptions extends Fragment {
                             editGateway.setText(ethConfig[2]);
                             editSubnet.setText(ethConfig[3]);
                         }
-                    }else {
+                    }else{
                         textNetworkError.setVisibility(View.VISIBLE);
                     }
                 }
@@ -418,6 +419,7 @@ public class InstallerOptions extends Fragment {
         getActivity().registerReceiver(mPairingReceiver, new IntentFilter(ACTION_SETTING_SCREEN));
 
         getBACnetConfig();
+
         return rootView;
     }
 

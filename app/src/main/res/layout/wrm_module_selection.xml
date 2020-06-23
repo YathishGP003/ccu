@@ -441,7 +441,8 @@
                     android:id="@+id/rl_tempmonitor"
                     android:layout_width="match_parent"
                     android:layout_height="92dp"
-                    android:layout_marginStart="180dp">
+                    android:layout_marginStart="180dp"
+                    android:visibility="gone">
 
                     <LinearLayout
                         android:layout_width="wrap_content"

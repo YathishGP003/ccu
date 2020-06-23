@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:layout_height="match_parent"
-              android:layout_width="match_parent"
-              android:orientation="vertical"
-        android:background="@color/white">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
 
     <TextView
-        style="@style/WindowTextStyle"
         android:id="@+id/default_text_view"
-        android:layout_height="wrap_content"
+        style="@style/WindowTextStyle"
         android:layout_width="wrap_content"
-        android:paddingBottom="8dp"
-        android:paddingLeft="8dp"
+        android:layout_height="wrap_content"
+        android:paddingStart="8dp"
         android:paddingTop="20dp"
-        android:text="place holder"
-        android:visibility="gone">
-    </TextView>
+        android:paddingEnd="8dp"
+        android:paddingBottom="8dp"
+        android:text="@string/txt_place_holder"
+        android:visibility="gone" />
 
     <RelativeLayout
         android:id="@+id/layoutHeader"
@@ -29,9 +28,9 @@
             android:id="@+id/imageGoback"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:padding="2.5dp"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="64dp"
+            android:layout_marginStart="64dp"
+            android:padding="2.5dp"
             android:rotation="180"
             app:srcCompat="@drawable/icon_arrowright" />
 
@@ -39,21 +38,21 @@
             android:id="@+id/textTitleFragment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="190dp"
+            android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
+            android:layout_marginEnd="190dp"
             android:fontFamily="@font/lato_bold"
             android:text="@string/label_selectdevicetype"
             android:textAllCaps="true"
             android:textColor="@color/orange_75f"
-            android:textSize="33.5dp"
+            android:textSize="33.5sp"
             android:textStyle="bold" />
 
     </RelativeLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
         android:layout_below="@+id/layoutHeader"
         android:layout_marginTop="30dp"
         android:orientation="vertical">
@@ -62,154 +61,163 @@
             android:id="@+id/rl_smartnode"
             android:layout_width="match_parent"
             android:layout_height="130dp"
-            android:layout_marginLeft="440dp">
+            android:layout_marginStart="440dp">
 
             <ImageView
                 android:layout_width="279dp"
                 android:layout_height="130dp"
-                android:src="@drawable/image_sn"
                 android:layout_alignParentBottom="true"
-                />
+                android:src="@drawable/image_sn" />
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight="220dp"
-                android:orientation="vertical"
-                android:layout_centerVertical="true">
-            <TextView
-                android:id="@+id/textSN"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:text="@string/title_sn"
-                android:textAppearance="@style/title_normal"/>
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="220dp"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/textSmartNode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/title_smartnode"
-                android:textAppearance="@style/text_label"/>
+                <TextView
+                    android:id="@+id/textSN"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:text="@string/title_sn"
+                    android:textAppearance="@style/title_normal" />
+
+                <TextView
+                    android:id="@+id/textSmartNode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_smartnode"
+                    android:textAppearance="@style/text_label" />
 
             </LinearLayout>
+
             <ImageView
                 android:id="@+id/nextSN"
                 android:layout_width="12dp"
                 android:layout_height="20dp"
-                android:layout_marginRight="96dp"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:src="@drawable/icon_arrowright"/>
+                android:layout_marginEnd="96dp"
+                android:src="@drawable/icon_arrowright" />
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="0.1dp"
-                android:background="@color/text_color"
+                android:layout_alignParentBottom="true"
                 android:alpha="0.37"
-                android:layout_alignParentBottom="true"/>
+                android:background="@color/text_color" />
         </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/rl_smartstat"
             android:layout_width="match_parent"
             android:layout_height="114dp"
-            android:layout_marginLeft="440dp">
+            android:layout_marginStart="440dp">
 
             <ImageView
                 android:layout_width="279dp"
                 android:layout_height="62dp"
-                android:src="@drawable/image_smartstat"
                 android:layout_alignParentBottom="true"
-                />
+                android:src="@drawable/image_smartstat" />
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight="220dp"
+                android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
+                android:layout_marginEnd="220dp"
                 android:orientation="vertical">
+
                 <TextView
                     android:id="@+id/textSS"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="right"
+                    android:layout_gravity="end"
                     android:text="@string/title_ss"
-                    android:textAppearance="@style/title_normal"/>
+                    android:textAppearance="@style/title_normal" />
 
                 <TextView
                     android:id="@+id/textSmartStat"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/title_smartstat"
-                    android:textAppearance="@style/text_label"/>
+                    android:textAppearance="@style/text_label" />
 
             </LinearLayout>
+
             <ImageView
                 android:id="@+id/nextSS"
                 android:layout_width="12dp"
                 android:layout_height="20dp"
-                android:layout_marginRight="96dp"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:src="@drawable/icon_arrowright"/>
+                android:layout_marginEnd="96dp"
+                android:src="@drawable/icon_arrowright" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="0.1dp"
-                android:background="@color/text_color"
+                android:layout_alignParentBottom="true"
                 android:alpha="0.37"
-                android:layout_alignParentBottom="true"/>
+                android:background="@color/text_color" />
         </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/rl_wirelesstemp"
             android:layout_width="match_parent"
             android:layout_height="114dp"
-            android:layout_marginLeft="440dp">
+            android:layout_marginStart="440dp"
+            android:visibility="gone">
 
             <ImageView
                 android:layout_width="279dp"
                 android:layout_height="83dp"
-                android:src="@drawable/image_wtm"
                 android:layout_alignParentBottom="true"
-                />
+                android:src="@drawable/image_wtm" />
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight="220dp"
+                android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
+                android:layout_marginEnd="220dp"
                 android:orientation="vertical">
+
                 <TextView
                     android:id="@+id/textWTM"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="right"
+                    android:layout_gravity="end"
                     android:text="@string/title_wtm"
-                    android:textAppearance="@style/title_normal"/>
+                    android:textAppearance="@style/title_normal" />
 
                 <TextView
                     android:id="@+id/textWirelessTemp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/title_wirelesstemp"
-                    android:textAppearance="@style/text_label"/>
+                    android:textAppearance="@style/text_label" />
 
             </LinearLayout>
+
             <ImageView
                 android:id="@+id/nextWTM"
                 android:layout_width="12dp"
                 android:layout_height="20dp"
-                android:layout_marginRight="96dp"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:src="@drawable/icon_arrowright"/>
+                android:layout_marginEnd="96dp"
+                android:src="@drawable/icon_arrowright" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="0.1dp"
-                android:background="@color/text_color"
+                android:layout_alignParentBottom="true"
                 android:alpha="0.37"
-                android:layout_alignParentBottom="true"/>
+                android:background="@color/text_color" />
         </RelativeLayout>
 
 
@@ -217,52 +225,55 @@
             android:id="@+id/rl_ccu"
             android:layout_width="match_parent"
             android:layout_height="114dp"
-            android:layout_marginLeft="440dp">
+            android:layout_marginStart="440dp">
 
             <ImageView
                 android:layout_width="300dp"
                 android:layout_height="114dp"
-                android:src="@drawable/image_ccu"
-                android:layout_marginLeft="10dp"
                 android:layout_alignParentBottom="true"
-                />
+                android:layout_marginStart="10dp"
+                android:src="@drawable/image_ccu" />
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight="220dp"
+                android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
+                android:layout_marginEnd="220dp"
                 android:orientation="vertical">
+
                 <TextView
                     android:id="@+id/textCCU"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="right"
+                    android:layout_gravity="end"
                     android:text="@string/title_ccu"
-                    android:textAppearance="@style/title_normal"/>
+                    android:textAppearance="@style/title_normal" />
 
                 <TextView
                     android:id="@+id/textCentralControl"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/ccufullform"
-                    android:textAppearance="@style/text_label"/>
+                    android:textAppearance="@style/text_label" />
 
             </LinearLayout>
+
             <ImageView
                 android:id="@+id/nextCCU"
                 android:layout_width="12dp"
                 android:layout_height="20dp"
-                android:layout_marginRight="96dp"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:src="@drawable/icon_arrowright"/>
+                android:layout_marginEnd="96dp"
+                android:src="@drawable/icon_arrowright" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="0.1dp"
-                android:background="@color/text_color"
+                android:layout_alignParentBottom="true"
                 android:alpha="0.37"
-                android:layout_alignParentBottom="true"/>
+                android:background="@color/text_color" />
         </RelativeLayout>
 
         <RadioGroup
@@ -276,9 +287,9 @@
                 android:id="@+id/smartNode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="70dp"
+                android:layout_marginStart="70dp"
                 android:layout_marginTop="135dp"
-                android:text="Smartnode"
+                android:text="@string/txt_smartnode"
                 android:textSize="@dimen/text_medium_xlarge" />
 
 
@@ -286,9 +297,9 @@
                 android:id="@+id/smartstat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="70dp"
+                android:layout_marginStart="70dp"
                 android:layout_marginTop="200dp"
-                android:text="SmartStat"
+                android:text="@string/txt_smartstat"
                 android:textSize="@dimen/text_medium_xlarge" />
 
 
@@ -304,52 +315,52 @@
                 android:id="@+id/hia"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="50dp"
+                android:layout_marginStart="50dp"
                 android:layout_marginTop="150dp"
                 android:clickable="false"
                 android:focusable="false"
-                android:text="ITM-HIA"
-                android:textColor="@color/selection_gray"/>
+                android:text="@string/txt_itm_hia"
+                android:textColor="@color/selection_gray" />
 
 
             <RadioButton
                 android:id="@+id/lpi"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="50dp"
+                android:layout_marginStart="50dp"
                 android:layout_marginTop="180dp"
                 android:clickable="false"
                 android:focusable="false"
-                android:text="ITM-LPI"
-                android:textColor="@color/selection_gray"/>
+                android:text="@string/txt_itm_lpi"
+                android:textColor="@color/selection_gray" />
         </RadioGroup>
 
     </LinearLayout>
 
     <LinearLayout
-        android:layout_gravity="right"
-        android:layout_height="wrap_content"
         android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
         android:orientation="horizontal"
-        android:paddingBottom="8dp"
         android:paddingLeft="8dp"
-        android:paddingRight="8dp"
         android:paddingTop="8dp"
+        android:paddingRight="8dp"
+        android:paddingBottom="8dp"
         android:visibility="gone">
 
         <Button
-            style="@style/buttonstyle"
             android:id="@+id/first_button"
-            android:layout_height="wrap_content"
+            style="@style/buttonstyle"
             android:layout_width="wrap_content"
-            android:text="Cancel"></Button>
+            android:layout_height="wrap_content"
+            android:text="@string/txt_cancel" />
 
         <Button
-            style="@style/buttonstyle"
             android:id="@+id/second_button"
-            android:layout_height="wrap_content"
+            style="@style/buttonstyle"
             android:layout_width="wrap_content"
-            android:text="Pair"></Button>
+            android:layout_height="wrap_content"
+            android:text="@string/txt_pair" />
 
     </LinearLayout>
 

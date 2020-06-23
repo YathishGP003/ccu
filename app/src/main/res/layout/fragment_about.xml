@@ -30,7 +30,7 @@
                 android:id="@+id/tvSiteId"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="30dp"
+                android:layout_marginStart="30dp"
                 android:layout_weight="0.7"
                 android:textSize="18sp"
                 tools:text="3a97d7ba56025062" />
@@ -55,7 +55,7 @@
                 android:id="@+id/tvSerialNumber"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="30dp"
+                android:layout_marginStart="30dp"
                 android:layout_weight="0.7"
                 android:textSize="18sp"
                 tools:text="3a97d7ba56025062" />
@@ -80,7 +80,7 @@
                 android:id="@+id/tvCcuVersion"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="30dp"
+                android:layout_marginStart="30dp"
                 android:layout_weight="0.7"
                 android:textSize="18sp"
                 tools:text="CCUV2_SN_dev_181.50.0.1901101852" />
@@ -93,6 +93,7 @@
             android:gravity="center"
             android:orientation="horizontal"
             android:padding="8dp"
+            android:visibility="gone"
             android:weightSum="1">
 
             <TextView
@@ -108,7 +109,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.2"
                 android:padding="8dp"
-                app:srcCompat="@drawable/icon_arrowright" />
+                app:srcCompat="@drawable/icon_arrowright"
+                tools:ignore="ContentDescription" />
         </LinearLayout>
 
         <LinearLayout
@@ -118,6 +120,7 @@
             android:gravity="center"
             android:orientation="horizontal"
             android:padding="8dp"
+            android:visibility="gone"
             android:weightSum="1">
 
             <TextView
@@ -132,7 +135,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.2"
                 android:padding="8dp"
-                app:srcCompat="@drawable/icon_arrowright" />
+                app:srcCompat="@drawable/icon_arrowright"
+                tools:ignore="ContentDescription" />
         </LinearLayout>
 
         <LinearLayout
@@ -142,6 +146,7 @@
             android:gravity="center"
             android:orientation="horizontal"
             android:padding="8dp"
+            android:visibility="gone"
             android:weightSum="1">
 
             <TextView
@@ -157,7 +162,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.2"
                 android:padding="8dp"
-                app:srcCompat="@drawable/icon_arrowright" />
+                app:srcCompat="@drawable/icon_arrowright"
+                tools:ignore="ContentDescription" />
         </LinearLayout>
 
     </LinearLayout>

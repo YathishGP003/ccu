@@ -165,6 +165,7 @@ public class VavStagedRtu extends VavSystemProfile
     
     protected synchronized void updateSystemPoints() {
         updateOutsideWeatherParams();
+        double fanMinOutput = 0.0;
         stageStatus = new int[17];
         if (VavSystemController.getInstance().getSystemState() == COOLING)
         {
@@ -284,7 +285,7 @@ public class VavStagedRtu extends VavSystemProfile
                         }
                         else
                         {
-                            relayState = systemFanLoopOp > 0 ? 1 : 0;
+                            relayState = systemFanLoopOp > fanMinOutput ? 1 : 0;
                         }
                         if(relayState != getCmdSignal("fan and stage2"))
                             setCmdSignal("fan and stage2", relayState);

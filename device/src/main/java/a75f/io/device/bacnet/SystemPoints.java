@@ -14,10 +14,8 @@ import com.renovo.bacnet4j.type.constructed.ValueSource;
 import com.renovo.bacnet4j.type.enumerated.BinaryPV;
 import com.renovo.bacnet4j.type.enumerated.EngineeringUnits;
 import com.renovo.bacnet4j.type.enumerated.PropertyIdentifier;
-import com.renovo.bacnet4j.type.enumerated.Relationship;
 import com.renovo.bacnet4j.type.primitive.CharacterString;
 import com.renovo.bacnet4j.type.primitive.Real;
-import com.renovo.bacnet4j.type.primitive.Unsigned16;
 import com.renovo.bacnet4j.type.primitive.UnsignedInteger;
 
 import java.util.ArrayList;
@@ -30,9 +28,7 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
-import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
-import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 
 public class SystemPoints{
 
@@ -64,6 +60,7 @@ public class SystemPoints{
     public SystemPoints() {
     }
     public SystemPoints(LocalDevice localDevice) {
+        ProfileType profileType = L.ccu().systemProfile.getProfileType();
         int addressNumber = Integer.parseInt(localDevice.getId().getInstanceNumber()+"00");
         String ccuName = CCUHsApi.getInstance().read("device and ccu").get("dis").toString();
         int id = Globals.getInstance().getApplicationContext().getResources().getIdentifier("hvac_stage_selector","array",Globals.getInstance().getApplicationContext().getPackageName());
@@ -74,29 +71,20 @@ public class SystemPoints{
         }
         for(int relayNum =1 ; relayNum <= 7; relayNum++){
             if(checkRelay(relayNum) > 0){
-                Stage stage = Stage.values()[(int) getRelayConfigAssociation("relay" + relayNum)];
-                createRelay(localDevice,addressNumber,ccuName,relayOptions,relayNum,stage.name());
+                Log.i("Bacnet","Systempoints = relay= "+relayNum+","+profileType.name());
+                if((profileType == ProfileType.SYSTEM_VAV_ANALOG_RTU || profileType == ProfileType.SYSTEM_DAB_ANALOG_RTU) && ((relayNum == 3) || (relayNum == 7))){
+                    Stage stage = getFullyModulatingRelayConfigOutput(relayNum);
+                    createRelay(localDevice, addressNumber, ccuName, relayOptions, relayNum, stage.name());
+                }else {
+                    Stage stage = Stage.values()[(int) getRelayConfigAssociation("relay" + relayNum)];
+                    createRelay(localDevice, addressNumber, ccuName, relayOptions, relayNum, stage.name());
+                }
             }else{
                 if(localDevice.checkObjectByID(addressNumber+relayNum)){
                     deleteObject(localDevice,localDevice.getObjectByID(addressNumber+relayNum));
                 }
             }
         }
-        /*if(checkRelay(BACnetUtils.relay1) > 0) {
-            createRelay(localDevice,addressNumber,ccuName,relayOptions,BACnetUtils.relay1,"Cooling 1");
-        }if(checkRelay(BACnetUtils.relay2) > 0) {
-            createRelay(localDevice,addressNumber,ccuName,relayOptions,BACnetUtils.relay2,"Cooling 2");
-        }if(checkRelay(BACnetUtils.relay3) > 0) {
-            createRelay(localDevice,addressNumber,ccuName,relayOptions,BACnetUtils.relay3,"Fan 1");
-        }if(checkRelay(BACnetUtils.relay4) > 0) {
-            createRelay(localDevice,addressNumber,ccuName,relayOptions,BACnetUtils.relay4,"Heating 1");
-        }if(checkRelay(BACnetUtils.relay5) > 0) {
-            createRelay(localDevice,addressNumber,ccuName,relayOptions,BACnetUtils.relay5,"Heating 2");
-        }if(checkRelay(BACnetUtils.relay6) > 0) {
-            createRelay(localDevice,addressNumber,ccuName,relayOptions,BACnetUtils.relay6,"Fan 2");
-        }if(checkRelay(BACnetUtils.relay7) > 0) {
-            createRelay7(localDevice,addressNumber,ccuName,relayOptions,BACnetUtils.relay7,"Humidity");
-        }*/
         if(checkAnalog(1) > 0) {
             createAnalogOut1(localDevice,addressNumber,ccuName);
         }else {
@@ -142,6 +130,17 @@ public class SystemPoints{
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap configPoint = hayStack.read("point and system and config and output and association and "+config);
         return hayStack.readPointPriorityVal(configPoint.get("id").toString());
+    }
+    public Stage getFullyModulatingRelayConfigOutput(int relayNum) {
+        Stage stage = Stage.FAN_1;
+        if(relayNum == 7) {
+            double curHumidifierType = CCUHsApi.getInstance().readDefaultVal("point and system and config and relay7 and humidifier and type");
+            if(curHumidifierType == 0.0)
+                stage = Stage.HUMIDIFIER;
+            else
+                stage = Stage.DEHUMIDIFIER;
+        }
+        return stage;
     }
     public double getRelay(int relayNo){
         try {
@@ -254,14 +253,10 @@ public class SystemPoints{
     public void createRelay(LocalDevice localDevice,int addressNumber, String ccuName, List<CharacterString> relayOptions, int relayNumber, String relayOp){
         try {
             BACnetArray<CharacterString> relayModes = new BACnetArray<>(relayOptions);
-            //BinaryValueObject relayProp = new BinaryValueObject(localDevice,addressNumber+relayNumber, ccuName + "_relay"+relayNumber,getRelay(relayNumber) > 0 ? BinaryPV.active : BinaryPV.inactive,false);
             if(!localDevice.checkObjectByID(addressNumber + relayNumber)) {
                 relay1 = new MultistateValueObject(localDevice, addressNumber + relayNumber, ccuName + "_relay" + relayNumber, relayModes.getCount(), relayModes, 1, false);
                 relay1.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("75F System Relay " + relayNumber + " " + relayOp)));
-                //relay1.supportCommandable(new UnsignedInteger(1));
-                //relay1.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.presentValue, new UnsignedInteger((int) getRelay(relayNumber) + 1)));
                 relay1.writePropertyInternal(PropertyIdentifier.presentValue, new UnsignedInteger((int) getRelay(relayNumber)));
-                //relay1.setOverridden(true);
                 relay1.supportCovReporting();
             }else {
                 relay1 = (MultistateValueObject)localDevice.getObjectByID(addressNumber + relayNumber);
@@ -273,93 +268,12 @@ public class SystemPoints{
     }
 	public void createRelay7(LocalDevice localDevice,int addressNumber, String ccuName, List<CharacterString> relayOptions, int relayNumber, String relayOp){
         try {
-            //BACnetArray<CharacterString> relayModes = new BACnetArray<>(relayOptions);
             BinaryValueObject relayProp = new BinaryValueObject(localDevice,addressNumber+relayNumber, ccuName + "_relay"+relayNumber,getRelay(relayNumber) > 0 ? BinaryPV.active : BinaryPV.inactive,false);
             
         } catch (BACnetServiceException e) {
             e.printStackTrace();
         }
     }
-/*
-    public void createRelay2(LocalDevice localDevice,int addressNumber, String ccuName, List<CharacterString> relayOptions){
-        try {
-            BACnetArray<CharacterString> relayModes = new BACnetArray<>(relayOptions);
-            relay2 = new MultistateValueObject(localDevice, addressNumber + 2, ccuName + "_relay2", relayModes.getCount(), relayModes, 1, false);
-            relay2.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("75F System Relay 2")));
-            relay2.supportCommandable(new UnsignedInteger(1));
-            relay2.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.presentValue, new UnsignedInteger((int) getRelay(1) + 1)));
-            relay2.setOverridden(true);
-        } catch (BACnetServiceException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void createRelay3(LocalDevice localDevice,int addressNumber, String ccuName, List<CharacterString> relayOptions){
-        try {
-            BACnetArray<CharacterString> relayModes = new BACnetArray<>(relayOptions);
-            relay3 = new MultistateValueObject(localDevice, addressNumber + 3, ccuName + "_relay3", relayModes.getCount(), relayModes, 1, false);
-            relay3.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("75F System Relay 3")));
-            relay3.supportCommandable(new UnsignedInteger(1));
-            relay3.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.presentValue, new UnsignedInteger((int) getRelay(1) + 1)));
-            relay3.setOverridden(true);
-        } catch (BACnetServiceException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    public void createRelay4(LocalDevice localDevice,int addressNumber, String ccuName, List<CharacterString> relayOptions){
-        try {
-            BACnetArray<CharacterString> relayModes = new BACnetArray<>(relayOptions);
-            relay4 = new MultistateValueObject(localDevice, addressNumber + 4, ccuName + "_relay4", relayModes.getCount(), relayModes, 1, false);
-            relay4.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("75F System Relay 4")));
-            relay4.supportCommandable(new UnsignedInteger(1));
-            relay4.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.presentValue, new UnsignedInteger((int) getRelay(1) + 1)));
-            relay4.setOverridden(true);
-        } catch (BACnetServiceException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void createRelay5(LocalDevice localDevice,int addressNumber, String ccuName, List<CharacterString> relayOptions){
-        try {
-            BACnetArray<CharacterString> relayModes = new BACnetArray<>(relayOptions);
-            relay5 = new MultistateValueObject(localDevice, addressNumber + 5, ccuName + "_relay5", relayModes.getCount(), relayModes, 1, false);
-            relay5.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("75F System Relay 5")));
-            relay5.supportCommandable(new UnsignedInteger(1));
-            relay5.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.presentValue, new UnsignedInteger((int) getRelay(1) + 1)));
-            relay5.setOverridden(true);
-        } catch (BACnetServiceException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    public void createRelay6(LocalDevice localDevice,int addressNumber, String ccuName, List<CharacterString> relayOptions){
-        try {
-            BACnetArray<CharacterString> relayModes = new BACnetArray<>(relayOptions);
-            relay6 = new MultistateValueObject(localDevice, addressNumber + 6, ccuName + "_relay6", relayModes.getCount(), relayModes, 1, false);
-            relay6.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("75F System Relay 6")));
-            relay6.supportCommandable(new UnsignedInteger(1));
-            relay6.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.presentValue, new UnsignedInteger((int) getRelay(1) + 1)));
-            relay6.setOverridden(true);
-        } catch (BACnetServiceException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void createRelay7(LocalDevice localDevice,int addressNumber, String ccuName, List<CharacterString> relayOptions){
-        try {
-            BACnetArray<CharacterString> relayModes = new BACnetArray<>(relayOptions);
-            relay7 = new MultistateValueObject(localDevice, addressNumber + 7, ccuName + "_relay7", relayModes.getCount(), relayModes, 1, false);
-            relay7.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("75F System Relay 7")));
-            relay7.supportCommandable(new UnsignedInteger(1));
-            relay7.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.presentValue, new UnsignedInteger((int) getRelay(1) + 1)));
-            relay7.setOverridden(true);
-        } catch (BACnetServiceException e) {
-            e.printStackTrace();
-        }
-    }*/
 
     public void createAnalogOut1(LocalDevice localDevice, int addressNumber, String ccuName){
         try {
@@ -368,8 +282,6 @@ public class SystemPoints{
                 analogOut1.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("75F System Analog Out 1 - Cooling")));
                 analogOut1.writePropertyInternal(PropertyIdentifier.lowLimit, new Real((int)getAnalogMin(1)));
                 analogOut1.writePropertyInternal(PropertyIdentifier.highLimit, new Real((int)getAnalogMax(1)));
-                //analogOut1.supportCommandable(1);
-                //analogOut1.setOverridden(true);
             }else {
                 analogOut1 = (AnalogValueObject)localDevice.getObjectByID(addressNumber + BACnetUtils.analogOut1);
                 analogOut1.writePropertyInternal(PropertyIdentifier.presentValue, new Real((float)getAnalogOut("analog1")));
@@ -389,8 +301,6 @@ public class SystemPoints{
                 analogOut2.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("75F System Analog Out 2 - Fan Speed")));
                 analogOut2.writePropertyInternal(PropertyIdentifier.lowLimit, new Real((int) getAnalogMin(2)));
                 analogOut2.writePropertyInternal(PropertyIdentifier.highLimit, new Real((int) getAnalogMax(2)));
-                //analogOut2.supportCommandable(1);
-                //analogOut2.setOverridden(true);
             }else{
                 analogOut2 = (AnalogValueObject)localDevice.getObjectByID(addressNumber + BACnetUtils.analogOut2);
                 analogOut2.writePropertyInternal(PropertyIdentifier.presentValue, new Real((float)getAnalogOut("analog2")));
@@ -409,8 +319,6 @@ public class SystemPoints{
                 analogOut3.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("75F System Analog Out 3 - Heating")));
                 analogOut3.writePropertyInternal(PropertyIdentifier.lowLimit, new Real((int) getAnalogMin(3)));
                 analogOut3.writePropertyInternal(PropertyIdentifier.highLimit, new Real((int) getAnalogMax(3)));
-                //analogOut3.supportCommandable(1);
-                //analogOut3.setOverridden(true);
             }else{
                 analogOut3 = (AnalogValueObject)localDevice.getObjectByID(addressNumber + BACnetUtils.analogOut3);
                 analogOut3.writePropertyInternal(PropertyIdentifier.presentValue, new Real((float)getAnalogOut("analog3")));
@@ -429,8 +337,6 @@ public class SystemPoints{
                 analogOut4.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("75F System Analog Out 4 - Outside Air")));
                 analogOut4.writePropertyInternal(PropertyIdentifier.lowLimit, new Real((int) getAnalogMin(4)));
                 analogOut4.writePropertyInternal(PropertyIdentifier.highLimit, new Real((int) getAnalogMax(4)));
-                //analogOut4.supportCommandable(1);
-                //analogOut4.setOverridden(true);
             }else {
                 analogOut4 = (AnalogValueObject)localDevice.getObjectByID(addressNumber + BACnetUtils.analogOut4);
                 analogOut4.writePropertyInternal(PropertyIdentifier.presentValue, new Real((float)getAnalogOut("analog4")));

@@ -328,8 +328,21 @@
                 android:textOff=""
                 android:textOn="" />
 
+            <TextView
+                android:id="@+id/textNetworkError"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/errorNetwork"
+                android:textColor="@color/orange_75f"
+                android:textSize="26dp"
+                android:layout_marginTop="5sp"
+                android:layout_marginLeft="96sp"
+                android:layout_below="@+id/textBacnetEnable"
+                android:visibility="gone"
+                />
+
             <RelativeLayout
-                android:id="@+id/rl_Bacnet"
+                android:id="@+id/relativeLayoutBACnet"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textBacnetEnable"
@@ -337,7 +350,7 @@
                 android:layout_marginTop="20dp">
 
                 <RadioGroup
-                    android:id="@+id/radioGroup_config"
+                    android:id="@+id/radioGroupConfig"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -360,7 +373,7 @@
                     android:id="@+id/textInputIP"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/radioGroup_config"
+                    android:layout_below="@+id/radioGroupConfig"
                     app:errorTextAppearance="@style/error_appearance">
 
                     <EditText
@@ -384,9 +397,9 @@
                     android:id="@+id/textInputSubnet"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/radioGroup_config"
-                    android:layout_marginStart="56dp"
-                    android:layout_toEndOf="@+id/textInputIP"
+                    android:layout_toRightOf="@+id/textInputIP"
+                    android:layout_marginLeft="56dp"
+                    android:layout_below="@+id/radioGroupConfig"
                     app:errorTextAppearance="@style/error_appearance">
 
                     <EditText
@@ -469,8 +482,8 @@
                 android:id="@+id/buttonNext"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/rl_Bacnet"
-                android:layout_alignParentEnd="true"
+                android:layout_below="@+id/relativeLayoutBACnet"
+                android:layout_alignParentRight="true"
                 android:layout_marginTop="36dp"
                 android:layout_marginBottom="24dp"
                 android:background="@null"

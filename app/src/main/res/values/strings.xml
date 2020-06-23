@@ -641,26 +641,5 @@
     <string name="rb_auto">Auto Config</string>
     <string name="rb_manual">Manual Config</string>
     <string name="button_sendIAM">Send IAM</string>
-
-
-    <string name="txt_compensate_humidity">Compensate for Humidity</string>
-    <string name="txt_demand_response_mode">Demand Response Mode</string>
-    <string name="txt_ccu">CCU</string>
-    <string name="txt_system_profile">System Profile</string>
-    <string name="txt_occupancy_status">Occupancy Status:</string>
-    <string name="txt_equipment_status">Equipment Status:</string>
-    <string name="txt_economy">ECONOMY</string>
-    <string name="txt_comfort">COMFORT</string>
-    <string name="txt_min_humidity">Min Inside Humidity</string>
-    <string name="txt_symbol_percent">%</string>
-    <string name="txt_max_humidity">Max Inside Humidity</string>
-    <string name="txt_account">Account</string>
-    <string name="txt_security">Security</string>
-    <string name="txt_wifisettings">WiFiSettings</string>
-    <string name="txt_installer_operations">Installer Operations</string>
-    <string name="txt_temporary_override">Temporary Override</string>
-    <string name="txt_about">About</string>
-    <string name="txt_place_holder">place holder</string>
-    <string name="txt_cancel">Cancel</string>
-    <string name="txt_pair">Pair</string>
+    <string name="errorNetwork">Check WiFi or Ethernet Connectivity</string>
 </resources>

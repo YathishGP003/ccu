@@ -67,6 +67,7 @@ public class BACnetUpdateJob extends BaseJob implements WatchdogMonitor
         boolean isTerminated = false;
         bacnetDevice.terminate();
         isTerminated = bacnetDevice.isInitialized();
+        bacnetDevice = null;
         return isTerminated;
     }
 }

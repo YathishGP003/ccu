@@ -2,7 +2,10 @@ apply plugin: 'com.android.library'
 
 android {
     def Properties properties = new Properties()
-    properties.load(project.rootProject.file("local.properties").newDataInputStream())
+    if (project.rootProject.file("local.properties").exists()) {
+        properties.load(project.rootProject.file("local.properties").newDataInputStream())
+    }
+	
     compileSdkVersion 28
 
     defaultConfig {
@@ -46,7 +49,7 @@ android {
         qa {
             minifyEnabled false
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts-75f-service-qa.azurewebsites.net/\"'
-            buildConfigField "String", 'ALERTS_API_KEY', '\"6ce0475b-1937-4345-b9b4-d1d6b871f96a\"'
+            buildConfigField "String", 'ALERTS_API_KEY', '\"ccu-6ce0475b-1937-4345-b9b4-d1d6b871f96a\"'
         }
         staging {
             minifyEnabled false

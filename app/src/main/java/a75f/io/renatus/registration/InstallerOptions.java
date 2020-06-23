@@ -5,7 +5,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.design.widget.TextInputLayout;
@@ -57,6 +60,7 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
 import a75f.io.renatus.views.TempLimit.TempLimitView;
 
@@ -101,7 +105,7 @@ public class InstallerOptions extends Fragment {
 
     //BACnet Setup
     ToggleButton toggleBACnet;
-    RelativeLayout rl_BACnet;
+    RelativeLayout relativeLayoutBACnet;
     EditText editIPAddr,editSubnet,editGateway;
     Button buttonInitialise;
     String networkConfig = "";
@@ -109,9 +113,11 @@ public class InstallerOptions extends Fragment {
     UtilityApplication utilityApplication;
     LocalDevice baCnetDevice = null;
     TextInputLayout textInputIP;
-    RadioGroup radioGroup_config;
+    RadioGroup radioGroupConfig;
     Button buttonSendIAM;
     TextView textBacnetEnable;
+    TextView textNetworkError;
+    private BroadcastReceiver mNetworkReceiver;
     private static final String TAG = InstallerOptions.class.getSimpleName();
 
     MasterControlView.OnClickListener onSaveChangeListener = (lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, lowerBuildingTemp, upperBuildingTemp, setBack, zoneDiff, hdb, cdb) -> {
@@ -158,6 +164,8 @@ public class InstallerOptions extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        mNetworkReceiver = new NetworkChangeReceiver();
+        getActivity().registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
     @Override
@@ -172,7 +180,7 @@ public class InstallerOptions extends Fragment {
         prefs = new Prefs(mContext);
         isFreshRegister = getActivity() instanceof FreshRegistration;
         CCU_ID = prefs.getString("CCU_ID");
-
+        utilityApplication = new RenatusApp();
         if (!isFreshRegister) {
             ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) rootView.getLayoutParams();
             p.setMargins(50, 0, 0, 0);
@@ -186,18 +194,19 @@ public class InstallerOptions extends Fragment {
 
         //BACnet Setup UI Components
         toggleBACnet = rootView.findViewById(R.id.toggleBACnet);
-        rl_BACnet = rootView.findViewById(R.id.relativeLayoutBACnet);
+        relativeLayoutBACnet = rootView.findViewById(R.id.relativeLayoutBACnet);
         editIPAddr = rootView.findViewById(R.id.editIPaddr);
         editSubnet = rootView.findViewById(R.id.editSubnet);
         editGateway = rootView.findViewById(R.id.editGateway);
         buttonInitialise = rootView.findViewById(R.id.buttonInitialise);
         textInputIP = rootView.findViewById(R.id.textInputIP);
-        radioGroup_config = rootView.findViewById(R.id.radioGroupConfig);
+        radioGroupConfig = rootView.findViewById(R.id.radioGroupConfig);
         buttonSendIAM = rootView.findViewById(R.id.buttonSendIAM);
         textBacnetEnable = rootView.findViewById(R.id.textBacnetEnable);
-        rl_BACnet.setVisibility(View.GONE);
-
-        HRef ccuId = CCUHsApi.getInstance().getCcuId();
+        textNetworkError = rootView.findViewById(R.id.textNetworkError);
+        relativeLayoutBACnet.setVisibility(View.GONE);
+        buttonSendIAM.setVisibility(View.GONE);
+		HRef ccuId = CCUHsApi.getInstance().getCcuId();
         String ccuGuid = null;
 
         if (ccuId != null) {
@@ -211,7 +220,6 @@ public class InstallerOptions extends Fragment {
             toggleBACnet.setVisibility(View.GONE);
         }
         ArrayList<String> addressBand = new ArrayList<>();
-        //addressBand.add("Select SmartNode Address Band");
         for (int addr = 1000; addr <= 9900; addr += 100) {
             addressBand.add(String.valueOf(addr));
         }
@@ -226,7 +234,6 @@ public class InstallerOptions extends Fragment {
         //if ccu exists
         if (ccu.size() > 0) {
             for (String addBand : addressBand) {
-                //Short addB = L.ccu().getSmartNodeAddressBand();
                 String addB = String.valueOf(L.ccu().getSmartNodeAddressBand());
                 if (addBand.equals(addB)) {
                     mAddressBandSpinner.setSelection(analogAdapter.getPosition(addBand));
@@ -255,12 +262,7 @@ public class InstallerOptions extends Fragment {
         mToggleTempAll.setChecked(prefs.getBoolean(getString(R.string.USE_SAME_TEMP_ALL_DAYS)));
         mToggleTempAll.setOnCheckedChangeListener((compoundButton, isChecked) -> prefs.setBoolean(getString(R.string.USE_SAME_TEMP_ALL_DAYS), isChecked));
 
-      /*  imageGoback.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                ((FreshRegistration)getActivity()).selectItem(3);
-            }
-        });*/
+
         if (isFreshRegister) mNext.setVisibility(View.VISIBLE);
         else mNext.setVisibility(View.GONE);
         mNext.setOnClickListener(new View.OnClickListener() {
@@ -336,43 +338,42 @@ public class InstallerOptions extends Fragment {
         toggleBACnet.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                LocalDevice localDevice = null;
-                if(isChecked){
-                    rl_BACnet.setVisibility(View.VISIBLE);
-                    buttonInitialise.setEnabled(true);
-                    buttonInitialise.setText("Initialise");
-                    buttonInitialise.requestFocus();
-                    ((RadioButton)radioGroup_config.getChildAt(0)).setChecked(true);
-                    if(utilityApplication.CheckEthernet()){
-                        isEthernet = true;
-                        networkConfig = utilityApplication.getIPConfig();
-                        String[] ethConfig = networkConfig.split(":");
-                        textInputIP.setHint("Ethernet-IP Address");
-                        editIPAddr.setText(ethConfig[1]);
-                        editGateway.setText(ethConfig[2]);
-                        editSubnet.setText(ethConfig[3]);
-                    }else {
-                        isEthernet = false;
-                        networkConfig = utilityApplication.getWiFiConfig();
-                        textInputIP.setHint("Wifi-IP Address");
-                        String[] ethConfig = networkConfig.split(":");
-                        editIPAddr.setText(ethConfig[1]);
-                        editGateway.setText(ethConfig[2]);
-                        editSubnet.setText(ethConfig[3]);
+                if(isChecked) {
+                    if (utilityApplication.checkNetworkConnected()) {
+                        relativeLayoutBACnet.setVisibility(View.VISIBLE);
+                        buttonInitialise.setEnabled(true);
+                        buttonInitialise.setText("Initialise");
+                        buttonInitialise.requestFocus();
+                        enableConfigType(true);
+                        ((RadioButton) radioGroupConfig.getChildAt(0)).setChecked(true);
+                        if (utilityApplication.CheckEthernet()) {
+                            isEthernet = true;
+                            networkConfig = utilityApplication.getIPConfig();
+                            String[] ethConfig = networkConfig.split(":");
+                            textInputIP.setHint("Ethernet-IP Address");
+                            editIPAddr.setText(ethConfig[1]);
+                            editGateway.setText(ethConfig[2]);
+                            editSubnet.setText(ethConfig[3]);
+                        } else {
+                            isEthernet = false;
+                            networkConfig = utilityApplication.getWiFiConfig();
+                            textInputIP.setHint("Wifi-IP Address");
+                            String[] ethConfig = networkConfig.split(":");
+                            editIPAddr.setText(ethConfig[1]);
+                            editGateway.setText(ethConfig[2]);
+                            editSubnet.setText(ethConfig[3]);
+                        }
+                    }else{
+                        textNetworkError.setVisibility(View.VISIBLE);
                     }
                 }
                 else{
                     try {
-                        rl_BACnet.setVisibility(View.GONE);
-                        //utilityApplication = new RenatusApp();
-                        //BACnetUpdateJob baCnetUpdateJob = new BACnetUpdateJob();
-                        baCnetDevice = utilityApplication.getLocalDevice();
+                        relativeLayoutBACnet.setVisibility(View.GONE);
+                        textNetworkError.setVisibility(View.GONE);
                         utilityApplication.terminateBACnet();
                         L.ccu().setUseBACnet(false);
-                        if(baCnetDevice != null){
-                            baCnetDevice.terminate();
-                            Log.i("Bacnet","Device Status:"+baCnetDevice.isInitialized());
-                        }
+                        setDefaultNetwork();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -380,7 +381,7 @@ public class InstallerOptions extends Fragment {
             }
         });
 
-        radioGroup_config.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
+        radioGroupConfig.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
         {
             public void onCheckedChanged(RadioGroup group, int checkedId)
             {
@@ -399,41 +400,7 @@ public class InstallerOptions extends Fragment {
 
         buttonInitialise.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                LocalDevice localDevice = null;
-                int checkedId = radioGroup_config.getCheckedRadioButtonId();
-                if(checkedId == R.id.rbAuto) {
-                    if (isEthernet) {
-                        localDevice = utilityApplication.enableBACnet(networkConfig);
-                    } else {
-                        localDevice = utilityApplication.enableBACnetWifi();
-                    }
-                    if (localDevice != null) {
-                        utilityApplication = new RenatusApp();
-                        utilityApplication.setLocalDevice(localDevice);
-                        L.ccu().setUseBACnet(true);
-                        lockConfig();
-                        Log.i("Bacnet", "Auto Setup localDevice:" + localDevice.getId() + " object:" + localDevice.getDeviceObject().toString());
-                    }
-                }else if(checkedId == R.id.rbManual){
-                    //localDevice = utilityApplication.enableBACnetManual(editIPAddr.getText().toString(),editGateway.getText().toString(), editSubnet.getText().toString(),isEthernet);
-                    utilityApplication.setNetwork(editIPAddr.getText().toString(),editGateway.getText().toString(), editSubnet.getText().toString(),isEthernet);
-                    localDevice = utilityApplication.enableBACnet(networkConfig);
-                    if (localDevice != null) {
-                        utilityApplication = new RenatusApp();
-                        utilityApplication.setLocalDevice(localDevice);
-                        L.ccu().setUseBACnet(true);
-                        lockConfig();
-                        Log.i("Bacnet", "Manual Setup localDevice:" + localDevice.getId() + " object:" + localDevice.getDeviceObject().toString());
-                    }
-                }
-                //Todo Write to Haystak
-                /*String[] netConfig = networkConfig.split(":");
-                String ccuId = ccu.get("id").toString();
-                ccuId = ccuId.replace("@", "");
-                writeBACnetConfig(netConfig[1],netConfig[2],netConfig[3],ccuId);*/
-                Log.i("Bacnet", "Device Number:" + localDevice.getInstanceNumber()+" isInitialized:"+localDevice.isInitialized());
-                utilityApplication.sendWhoIs(localDevice);
-
+                startBACnetDevice();
             }
         });
 
@@ -449,19 +416,80 @@ public class InstallerOptions extends Fragment {
 
         getActivity().registerReceiver(mPairingReceiver, new IntentFilter(ACTION_SETTING_SCREEN));
 
+        getBACnetConfig();
+
         return rootView;
     }
 
-    private void lockConfig(){
+    private void lockBACnetConfig(){
         Log.i("Bacnet", "Initialize Button Pressed");
+        enableConfigType(false);
         buttonInitialise.setText("BACnet Initialised");
         buttonInitialise.setEnabled(false);
         editIPAddr.setEnabled(false);
         editGateway.setEnabled(false);
         editSubnet.setEnabled(false);
         buttonSendIAM.setEnabled(true);
-        buttonSendIAM.setVisibility(View.GONE);//Testing Purpose make it visible to send I AM
+        buttonSendIAM.setVisibility(View.GONE);
     }
+
+    public void startBACnetDevice(){
+        LocalDevice localDevice = null;
+        int checkedId = radioGroupConfig.getCheckedRadioButtonId();
+        if(checkedId == R.id.rbAuto) {
+            localDevice = autoConfigBACnetDevice();
+        }else if(checkedId == R.id.rbManual){
+            localDevice = manualConfigBACnetDevice();
+        }
+        if(localDevice != null) {
+            lockBACnetConfig();
+            L.ccu().setUseBACnet(true);
+            utilityApplication.sendWhoIs(localDevice);
+            utilityApplication.setWifiasDefault();
+        }
+    }
+
+    public LocalDevice autoConfigBACnetDevice(){
+        LocalDevice localDevice = null;
+        if (isEthernet) {
+            localDevice = utilityApplication.enableBACnet(networkConfig);
+            try {
+                localDevice.initialize();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            localDevice = utilityApplication.enableBACnetWifi();
+        }
+        if (localDevice != null) {
+            utilityApplication.setLocalDevice(localDevice,true);
+        }
+        return localDevice;
+    }
+
+    public LocalDevice manualConfigBACnetDevice(){
+        LocalDevice localDevice = null;
+        String[] manualIp = (editIPAddr.getText().toString()).split("\\.");
+        if(validateIPAddress(manualIp)){
+            utilityApplication.setNetwork(editIPAddr.getText().toString(),editGateway.getText().toString(), editSubnet.getText().toString(),isEthernet);
+            if(isEthernet) {
+                networkConfig = utilityApplication.getIPConfig();
+                prefs.setBoolean("BACnetLAN",true);
+            }else {
+                networkConfig = utilityApplication.getWiFiConfig();
+                prefs.setBoolean("BACnetLAN",false);
+            }
+            localDevice = utilityApplication.enableBACnet(networkConfig);
+            prefs.setString("BACnetConfig",networkConfig);
+            if (localDevice != null) {
+                utilityApplication.setLocalDevice(localDevice,false);
+            }
+        }else {
+            editIPAddr.setError("Invalid IP");
+        }
+        return localDevice;
+    }
+
     // initial master control values
     private void getTempValues() {
 
@@ -524,17 +552,6 @@ public class InstallerOptions extends Fragment {
         }
     }
 
-
-   /* @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser) {
-            prefs = new Prefs(getContext().getApplicationContext());
-            localSiteID = prefs.getString("SITE_ID");
-            loadSiteDetails();
-        }
-    }*/
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -544,14 +561,7 @@ public class InstallerOptions extends Fragment {
     public void onDetach() {
         super.onDetach();
     }
-    /* This site never existed we are creating a new orphaned site. */
 
-    /*  private void goTonext() {
-          //Intent i = new Intent(mContext, RegisterGatherCCUDetails.class);
-          //startActivity(i);
-          ((FreshRegistration)getActivity()).selectItem(5);
-      }
-  */
     private void goTonext() {
         new AsyncTask<Void, Void, Void>() {
             @Override
@@ -590,24 +600,6 @@ public class InstallerOptions extends Fragment {
 
     }
 
-
-    public void writeBACnetConfig(String ipAddress,  String broadCast, String subNet, String ccuID) {
-
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                HashMap ipaddHS = CCUHsApi.getInstance().read("bacnet and ipconfig and sp and equipRef == \"" + ccuID + "\"");
-                String ipddID = ipaddHS.get("id").toString();
-                CCUHsApi hayStack = CCUHsApi.getInstance();
-                CcuLog.d(L.TAG_CCU_UI, "Set His Val "+ipddID+": " +ipAddress);
-                hayStack.writeDefaultValById(ipddID, ipAddress);
-
-            }
-        });
-        thread.start();
-    }
-
     @Override
     public void onDestroyView() {
         if (getActivity() != null){
@@ -635,4 +627,70 @@ public class InstallerOptions extends Fragment {
             }
         }
     };
+
+    public void setDefaultNetwork(){
+        final ConnectivityManager connMgr = (ConnectivityManager) Globals.getInstance().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            ConnectivityManager.setProcessDefaultNetwork(null);
+        } else {
+            connMgr.bindProcessToNetwork(null);
+        }
+    }
+
+    public boolean validateIPAddress(String[] manualIPAddress) {
+        if (manualIPAddress.length == 4) {
+            if (!(manualIPAddress[0].isEmpty() & manualIPAddress[1].isEmpty() & manualIPAddress[2].isEmpty() & manualIPAddress[3].isEmpty())) {
+                return Integer.parseInt(manualIPAddress[0]) <= 255 &
+                        Integer.parseInt(manualIPAddress[1]) <= 255 &
+                        Integer.parseInt(manualIPAddress[2]) <= 255 &
+                        Integer.parseInt(manualIPAddress[3]) <= 255;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    public class NetworkChangeReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(utilityApplication.checkNetworkConnected()) {
+                textNetworkError.setVisibility(View.GONE);
+                getBACnetConfig();
+            }else {
+                if(toggleBACnet.isChecked()) {
+                    textNetworkError.setVisibility(View.VISIBLE);
+                    relativeLayoutBACnet.setVisibility(View.GONE);
+                    if(!utilityApplication.isBACnetEnabled()){
+                        toggleBACnet.setChecked(false);
+                    }
+                }
+            }
+        }
+    }
+
+    public void enableConfigType(boolean lockOption){
+        for (int i = 0; i < radioGroupConfig.getChildCount(); i++) {
+            radioGroupConfig.getChildAt(i).setEnabled(lockOption);
+        }
+    }
+
+    public void getBACnetConfig(){
+        if (utilityApplication.isBACnetEnabled()) {
+            toggleBACnet.setChecked(true);
+            if(utilityApplication.checkNetworkConnected()) {
+                relativeLayoutBACnet.setVisibility(View.VISIBLE);
+                if (!utilityApplication.isAutoMode()) { // Check for BACnet Enabled in Auto or Manual
+                    networkConfig = prefs.getString("BACnetConfig");
+                    radioGroupConfig.check(R.id.rbManual);
+                    String[] ethConfig = networkConfig.split(":");
+                    editIPAddr.setText(ethConfig[1]);
+                    editGateway.setText(ethConfig[2]);
+                    editSubnet.setText(ethConfig[3]);
+                }
+                lockBACnetConfig();
+            }
+        }
+    }
 }

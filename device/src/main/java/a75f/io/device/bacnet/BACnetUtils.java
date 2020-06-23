@@ -10,19 +10,17 @@ import com.renovo.bacnet4j.type.constructed.DateTime;
 import com.renovo.bacnet4j.type.constructed.PropertyValue;
 import com.renovo.bacnet4j.type.enumerated.ObjectType;
 import com.renovo.bacnet4j.type.enumerated.PropertyIdentifier;
-import com.renovo.bacnet4j.type.primitive.Time;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.device.mesh.Pulse;
+import a75f.io.logic.tuners.TunerUtil;
 
 public class BACnetUtils{
 
@@ -112,16 +110,7 @@ public class BACnetUtils{
         offset = (offsetInMillis >= 0 ? "+" : "-") + totalMins;
         Log.i("Bacnet"," offset:"+offset+" inHrs:"+inHrs+" total Offset Mins:"+totalMins);
 
-        //String offset = String.format("%02d:%02d", Math.abs(offsetInMillis / 3600000), Math.abs((offsetInMillis / 60000) % 60));
-        //offset = (offsetInMillis >= 0 ? "+" : "-") + offset;
-
         return -(Integer.parseInt(offset));
-    }
-    public static void removeZone(short nodeAddress) {
-
-        Log.i("BACnet","Remove Zone:"+nodeAddress);
-        if(localDevice != null)
-            new ZonePoints().deleteZonePoints(localDevice,nodeAddress);
     }
 
     public static void removeModule(short nodeAddress) {
@@ -131,57 +120,55 @@ public class BACnetUtils{
 
     }
 
-    public static String getCurrentTimezoneOffset() {
-
-        TimeZone tz = TimeZone.getDefault();
-        Calendar cal = GregorianCalendar.getInstance(tz);
-        int offsetInMillis = tz.getOffset(cal.getTimeInMillis());
-
-        String offset = String.format("%02d:%02d", Math.abs(offsetInMillis / 3600000), Math.abs((offsetInMillis / 60000) % 60));
-        offset = (offsetInMillis >= 0 ? "+" : "-") + offset;
-
-        return offset;
-    }
-
     public static void updateBacnetChanges(Address from, BACnetObject object, PropertyValue pv, boolean isSameallDay, boolean isWeeklySchedule){
-        //if(object.getObjectName().contains("heatingDesiredTemp")){
         Log.i("Bacnet","Write Data-Type:"+object.get(PropertyIdentifier.objectType)+" property:"+ pv.getPropertyIdentifier());
         if(object.get(PropertyIdentifier.objectType) == ObjectType.analogValue && pv.getPropertyIdentifier().equals(PropertyIdentifier.presentValue))
         {
-            String address = String.valueOf(object.getInstanceId()).substring(0,4);
-            int addressNumber = Integer.parseInt(address+"00");
-            int instanceCoolID = addressNumber + BACnetUtils.desiredTempCooling;
-            int instanceHeatID = addressNumber + BACnetUtils.desiredTempHeating;
-                if (object.getInstanceId() == instanceHeatID) {
-                    Pulse.updateSetTempFromBacnet(Short.valueOf(address), Double.parseDouble(pv.getValue().toString()), "heating");
-                }if (object.getInstanceId() == instanceCoolID) {
-                    Pulse.updateSetTempFromBacnet(Short.valueOf(address), Double.parseDouble(pv.getValue().toString()), "cooling");
-                }
-        }else //if(object.getObjectName().contains("Building Schedule")){
-            //TODO handle Schedule and vacation from Bacnet objects for building Schedule changes
-            if(object.get(PropertyIdentifier.objectType) == ObjectType.schedule && isWeeklySchedule)
-            {
+            updateDesiredTemperatureChangesFromBacnet(object,pv);
+        }else if(object.get(PropertyIdentifier.objectType) == ObjectType.schedule && isWeeklySchedule)
+        {
                 Log.i("BACnetUtil","Building Schedule="+object.getObjectName()+" value:"+pv.getValue());
                 Log.i("Bacnet","Building Schedule="+object.getObjectName()+" value:"+pv.getValue());
                 BACnetScheduler.updateSchedule(object,isSameallDay);
-            //}
         }else if(object.getObjectName().contains("Schedule Occupied Heating")){
-            //TODO handle Schedule and vacation from Bacnet objects for building Schedule changes
+            // handle Schedule and vacation from Bacnet objects for building Schedule changes
             Log.i("BACnetUtil","Building Schedule="+object.getObjectName()+" value:"+pv.getValue());
             BACnetScheduler.updateSchedule(object,isSameallDay);
 
         }else if(object.getObjectName().contains("Schedule Occupied Cooling")){
-            //TODO handle Schedule and vacation from Bacnet objects for building Schedule changes
+            // handle Schedule and vacation from Bacnet objects for building Schedule changes
             Log.i("BACnetUtil","Building Schedule="+object.getObjectName()+" value:"+pv.getValue());
             BACnetScheduler.updateSchedule(object,isSameallDay);
 
         }else if(object.get(PropertyIdentifier.objectType).equals(ObjectType.calendar) && pv.getPropertyIdentifier().equals(PropertyIdentifier.dateList)){
-            //TODO handle Vacation from Bacnet objects for building vacation changes
+            // handle Vacation from Bacnet objects for building vacation changes
             Log.i("BACnetUtil","Building Vacations="+object.getObjectName()+" value:"+pv.getValue());
             BACnetScheduler.updateVacations(object);
         }
     }
 
+    private static void updateDesiredTemperatureChangesFromBacnet(BACnetObject object, PropertyValue pv){
+        String address = String.valueOf(object.getInstanceId()).substring(0,4);
+        int addressNumber = Integer.parseInt(address+"00");
+        int instanceCoolID = addressNumber + BACnetUtils.desiredTempCooling;
+        int instanceHeatID = addressNumber + BACnetUtils.desiredTempHeating;
+        double temperatureValue = Double.parseDouble(pv.getValue().toString());
+        if (object.getInstanceId() == instanceHeatID) {//Check for heating desired instance id
+            double heatingUpperLimit = TunerUtil.readBuildingTunerValByQuery("user and limit and max and heating");
+            double heatingLowerLimit = TunerUtil.readBuildingTunerValByQuery("user and limit and min and heating");
+            //beyond limits readjust
+            temperatureValue = (temperatureValue < heatingUpperLimit ? heatingUpperLimit : (Math.min(temperatureValue, heatingLowerLimit)));
+            if(temperatureValue >= heatingUpperLimit && temperatureValue <= heatingLowerLimit)
+                Pulse.updateSetTempFromBacnet(Short.valueOf(address), temperatureValue , "heating");
+        }
+        if (object.getInstanceId() == instanceCoolID) {//check for cooling desired instance id
+            double coolingUpperLimit = TunerUtil.readBuildingTunerValByQuery("user and limit and max and cooling");
+            double coolingLowerLimit = TunerUtil.readBuildingTunerValByQuery("user and limit and min and cooling");
+            temperatureValue = (temperatureValue < coolingLowerLimit ? coolingLowerLimit : (Math.min(temperatureValue, coolingUpperLimit)));
+            if(temperatureValue >= coolingLowerLimit && temperatureValue <= coolingUpperLimit)
+                Pulse.updateSetTempFromBacnet(Short.parseShort(address), temperatureValue, "cooling");
+        }
+    }
     public static String convertDateTime(DateTime dateTime){
             String dateTimeStr = null;
                 int year =  dateTime.getDate().getYear()+1900;
@@ -192,43 +179,6 @@ public class BACnetUtils{
                 int hour =  dateTime.getTime().getHour();
                 int minute =  dateTime.getTime().getMinute();
                 int seconds =  dateTime.getTime().getSecond();
-
-
-                String dateStr = Integer.toString(date);
-                String monthStr = Integer.toString(month);
-                String hrStr = Integer.toString(hour);
-                String minStr = Integer.toString(minute);
-                String secStr = Integer.toString(seconds);
-
-                if(month<10){
-                    monthStr = "0"+month;
-                }if(date<10){
-                    dateStr = "0"+date;
-                }
-                if(hour<10){
-                    hrStr = "0"+hour;
-                }
-                if(minute<10){
-                    minStr = "0"+minute;
-                }
-                if(seconds<10){
-                    secStr = "0"+seconds;
-                }
-
-                dateTimeStr = monthStr+dateStr+hrStr+minStr+year+"."+secStr;
-            return dateTimeStr;
-    }
-
-    public static String convertDateTime(com.renovo.bacnet4j.type.primitive.Date dateValue, Time timeValue){
-                String dateTimeStr = null;
-                int year =  dateValue.getYear()+1900;
-                int date =  dateValue.getDay();
-                Month monthObj = dateValue.getMonth();
-                int month = Month.getIDof(monthObj);
-
-                int hour =  timeValue.getHour();
-                int minute =  timeValue.getMinute();
-                int seconds = timeValue.getSecond();
 
 
                 String dateStr = Integer.toString(date);

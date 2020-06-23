@@ -35,8 +35,8 @@ public class BACnetUtils{
     public static final int desiredTempHeating = 3;
     public static final int damperPos = 4;
     public static final int notificationID = 10001;
-    public static final int occupancyStatus = 5; //setback, setpoint, precondition, temphold, vacation
-    public static final int conditioningStatus = 6; // off, cooling, heating, tempdead
+    public static final int reheatCoil = 5;
+    public static final int supplyAirTemperature = 6;
     public static final int HUMIDITY_SENSOR_VALUE = 7; //7 till 17 we use it for sensor values
     public static final int UVI_SENSOR_VALUE = 17;
     public static final int BATTERY_STATUS = 100;

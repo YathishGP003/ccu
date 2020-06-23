@@ -642,7 +642,7 @@
     <string name="rb_manual">Manual Config</string>
     <string name="button_sendIAM">Send IAM</string>
 
-
+    <string name="errorNetwork">Check WiFi or Ethernet Connectivity</string>
     <string name="txt_compensate_humidity">Compensate for Humidity</string>
     <string name="txt_demand_response_mode">Demand Response Mode</string>
     <string name="txt_ccu">CCU</string>

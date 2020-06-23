@@ -19,6 +19,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import android.widget.Toast;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
@@ -60,7 +61,7 @@ import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
 
 public class MasterControlView extends LinearLayout {
 
-    private static final int ANGLE_WIDTH = 2;
+    private static final String LOG_PREFIX = MasterControlView.class.getSimpleName();
     HorizontalScrollView mHorizontalScrollView;
     MasterControl masterControl;
     HashMap coolUL;
@@ -82,17 +83,17 @@ public class MasterControlView extends LinearLayout {
 
     public MasterControlView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(attrs);
+        init();
     }
 
     public MasterControlView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(attrs);
+        init();
     }
 
     private boolean mAdded = false;
 
-    private void init(AttributeSet attrs) {
+    private void init() {
 
         this.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
             if (!mAdded) {
@@ -108,10 +109,6 @@ public class MasterControlView extends LinearLayout {
     private int mImagePadding = 25;
 
     private void add() {
-        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-
-        int angleWH = (int) (ANGLE_WIDTH * displayMetrics.density);
-
         ImageButton arrowLeftImageButton = new ImageButton(getContext());
         ImageButton arrowRightImageButton = new ImageButton(getContext());
 
@@ -187,7 +184,7 @@ public class MasterControlView extends LinearLayout {
 
         // initial ccu setup building/zone schedules are empty
         if (buildingSchedules == null){
-            saveBuildingData(dialog, p.getSiteRef());
+            saveBuildingData(dialog);
             return;
         }
 
@@ -202,12 +199,7 @@ public class MasterControlView extends LinearLayout {
 
         ArrayList<String> warningMessage = new ArrayList<>();
         ArrayList<Schedule> schedules = new ArrayList<>();
-        ArrayList<Zone> zoneList = new ArrayList<>();
-
         ArrayList<Schedule> filterSchedules = new ArrayList<>();
-
-        HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
-        Equip p = new Equip.Builder().setHashMap(tuner).build();
 
         coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
         heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user");
@@ -223,6 +215,9 @@ public class MasterControlView extends LinearLayout {
                 filterSchedules.add(s);
             }
         }
+
+        CcuLog.i(LOG_PREFIX, "Filtered list to " + filterSchedules.size() + " building and zone schedules");
+
 
         // set schedule temps for building and Zones
         for (Schedule schedule : filterSchedules) {
@@ -262,17 +257,17 @@ public class MasterControlView extends LinearLayout {
         }
 
         if (warningMessage.size() > 0) {
-            disPlayWarningMessage(warningMessage, dialog, schedules, zoneList);
+            disPlayWarningMessage(warningMessage, dialog, schedules);
         } else {
             if (filterSchedules.size()> 0) {
-                saveScheduleData(filterSchedules, zoneList, dialog);
+                saveScheduleData(filterSchedules, dialog);
             }
         }
     }
 
     @SuppressLint("StaticFieldLeak")
     public void getSchedule(String siteRef, Dialog dialog) {
-        ProgressDialogUtils.showProgressDialog(getContext(), "Fetching global schedule data...");
+        ProgressDialogUtils.showProgressDialog(getContext(), "Fetching global schedules...");
 
         final ArrayList<Schedule> scheduleList = new ArrayList<>();
         new AsyncTask<String, Void, ArrayList<Schedule>>() {
@@ -283,12 +278,15 @@ public class MasterControlView extends LinearLayout {
 
                 HDict tDict = new HDictBuilder().add("filter", "schedule and days and siteRef == " + siteRef).toDict();
                 HGrid schedulePoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
-                Iterator it = schedulePoint.iterator();
-                while (it.hasNext())
-                {
-                    HRow r = (HRow) it.next();
-                    scheduleList.add(new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build());
+                if (schedulePoint != null) {
+                    Iterator it = schedulePoint.iterator();
+                    while (it.hasNext()) {
+                        HRow r = (HRow) it.next();
+                        scheduleList.add(new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build());
+                    }
                 }
+
+                CcuLog.i(LOG_PREFIX, "Retrieved schedule list of size " + scheduleList.size() + " for site " + siteRef);
 
                 return scheduleList;
             }
@@ -296,7 +294,11 @@ public class MasterControlView extends LinearLayout {
             @Override
             protected void onPostExecute(ArrayList<Schedule> schedules) {
                 ProgressDialogUtils.hideProgressDialog();
-                checkForSchedules(dialog, schedules);
+                if (scheduleList.isEmpty()) {
+                    Toast.makeText(getContext(), "Unable to fetch schedules, please confirm your WiFi connectivity.", Toast.LENGTH_LONG).show();
+                } else {
+                    checkForSchedules(dialog, schedules);
+                }
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 
@@ -332,7 +334,7 @@ public class MasterControlView extends LinearLayout {
         return rowList;
     }
 
-    private void disPlayWarningMessage(ArrayList<String> warningMessage, Dialog masterControlDialog, ArrayList<Schedule> schedules, ArrayList<Zone> zoneList) {
+    private void disPlayWarningMessage(ArrayList<String> warningMessage, Dialog masterControlDialog, ArrayList<Schedule> schedules) {
         final Dialog warningDialog = new Dialog(getContext());
         warningDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         warningDialog.setCancelable(false);
@@ -351,7 +353,7 @@ public class MasterControlView extends LinearLayout {
 
         warningDialog.findViewById(R.id.btnForceTrim).setOnClickListener(view -> {
 
-            saveScheduleData(schedules, zoneList, masterControlDialog);
+            saveScheduleData(schedules, masterControlDialog);
             warningDialog.dismiss();
             if (masterControlDialog != null && masterControlDialog.isShowing()) {
                 masterControlDialog.dismiss();
@@ -361,11 +363,10 @@ public class MasterControlView extends LinearLayout {
         warningDialog.show();
     }
 
-    private void saveScheduleData(ArrayList<Schedule> schedules, ArrayList<Zone> zoneList, Dialog masterControlDialog) {
+    private void saveScheduleData(ArrayList<Schedule> schedules, Dialog masterControlDialog) {
         //TODO:
         for (Schedule schedule : schedules) {
             if (schedule.isZoneSchedule() && schedule.getRoomRef()!= null) {
-                   // setZoneData(masterControlDialog, schedule.getRoomRef());
                     String scheduleLuid = CCUHsApi.getInstance().getLUID("@" + schedule.getId());
                     if (scheduleLuid != null && schedule.getRoomRef() != null) {
                         schedule.setId(scheduleLuid.replace("@", ""));
@@ -382,7 +383,7 @@ public class MasterControlView extends LinearLayout {
             }
         }
 
-        saveBuildingData(masterControlDialog, schedules.get(0).getmSiteId());
+        saveBuildingData(masterControlDialog);
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -523,69 +524,7 @@ public class MasterControlView extends LinearLayout {
     }
 
     @SuppressLint("StaticFieldLeak")
-    private void setZoneData(Dialog masterControlDialog, String roomRef) {
-        //TODO:
-        float coolTempUL = masterControl.getUpperCoolingTemp();
-        float coolTempLL = masterControl.getLowerCoolingTemp();
-        float heatTempUL = masterControl.getUpperHeatingTemp();
-        float heatTempLL = masterControl.getLowerHeatingTemp();
-
-        if (masterControlDialog != null && masterControlDialog.isShowing()) {
-            masterControlDialog.dismiss();
-        }
-
-        new AsyncTask<String, Void, Void>() {
-            @Override
-            protected Void doInBackground(final String... params) {
-                HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-                HashMap ccu = CCUHsApi.getInstance().read("ccu");
-                String ccuName = ccu.get("dis").toString();
-                HDict tDict = new HDictBuilder().add("filter", "equip and roomRef == " + roomRef).toDict();
-                HGrid hGrid = hClient.call("read", HGridBuilder.dictToGrid(tDict));
-                ArrayList<HashMap> gridList = readAll(hGrid);
-
-                if (gridList.size() == 0) {
-                    return null;
-                }
-                Equip p = new Equip.Builder().setHashMap(gridList.get(0)).build();
-
-                HashMap zoneCoolUL = read("point and limit and max and cooling and user");
-                HashMap zoneHeatUL = read("point and limit and max and heating and user");
-                HashMap zoneCoolLL = read("point and limit and min and cooling and user");
-                HashMap zoneHeatLL = read("point and limit and min and heating and user");
-
-                if (zoneCoolUL.size() != 0) {
-                    writePoint(zoneCoolUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) coolTempUL, 0);
-                    writeHisValById(zoneCoolUL.get("id").toString(), (double) coolTempUL);
-                }
-
-                if (zoneCoolLL.size() != 0) {
-                    writePoint(zoneCoolLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) coolTempLL, 0);
-                    writeHisValById(zoneCoolLL.get("id").toString(), (double) coolTempLL);
-                }
-
-                if (zoneHeatUL.size() != 0) {
-                    writePoint(zoneHeatUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) heatTempUL, 0);
-                    writeHisValById(zoneHeatUL.get("id").toString(), (double) heatTempUL);
-                }
-
-                if (zoneHeatLL.size() != 0) {
-                    writePoint(zoneHeatLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) heatTempLL, 0);
-                    writeHisValById(zoneHeatLL.get("id").toString(), (double) heatTempLL);
-                }
-
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(final Void result) {
-                super.onPostExecute(result);
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    private void saveBuildingData(Dialog dialog, String siteRef) {
+    private void saveBuildingData(Dialog dialog) {
         float coolTempUL = masterControl.getUpperCoolingTemp();
         float coolTempLL = masterControl.getLowerCoolingTemp();
         float heatTempUL = masterControl.getUpperHeatingTemp();
@@ -768,13 +707,6 @@ public class MasterControlView extends LinearLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
-
-        float height = getDefaultSize(getSuggestedMinimumHeight(),
-                heightMeasureSpec);
-        float width = getDefaultSize(getSuggestedMinimumWidth(),
-                widthMeasureSpec);
-
     }
 
     public void setOnClickChangeListener(OnClickListener l)

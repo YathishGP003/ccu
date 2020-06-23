@@ -2,14 +2,11 @@ package a75f.io.renatus.views.MasterControl;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,38 +15,30 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import android.widget.Toast;
-import org.projecthaystack.HDateTime;
+
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
-import org.projecthaystack.HHisItem;
 import org.projecthaystack.HList;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
 import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.client.HClient;
-import org.projecthaystack.io.HZincReader;
 import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Schedule;
-import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.L;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.R;
@@ -183,12 +172,12 @@ public class MasterControlView extends LinearLayout {
         Schedule buildingSchedules = Schedule.getScheduleByEquipId(p.getId());
 
         // initial ccu setup building/zone schedules are empty
-        if (buildingSchedules == null){
+        if (buildingSchedules == null) {
             saveBuildingData(dialog);
             return;
         }
 
-        getSchedule(CCUHsApi.getInstance().getGUID(p.getSiteRef()),dialog);
+        getSchedule(CCUHsApi.getInstance().getGUID(p.getSiteRef()), dialog);
     }
 
     private void checkForSchedules(Dialog dialog, ArrayList<Schedule> schedulesList) {
@@ -208,10 +197,10 @@ public class MasterControlView extends LinearLayout {
         buildingMin = CCUHsApi.getInstance().read("building and limit and min");
         buildingMax = CCUHsApi.getInstance().read("building and limit and max");
 
-        for (Schedule s: schedulesList){
-            if(s.isBuildingSchedule() && !s.isZoneSchedule()){
+        for (Schedule s : schedulesList) {
+            if (s.isBuildingSchedule() && !s.isZoneSchedule()) {
                 filterSchedules.add(s);
-            } else if (!s.isBuildingSchedule() && s.isZoneSchedule() && s.getRoomRef() != null){
+            } else if (!s.isBuildingSchedule() && s.isZoneSchedule() && s.getRoomRef() != null) {
                 filterSchedules.add(s);
             }
         }
@@ -225,19 +214,19 @@ public class MasterControlView extends LinearLayout {
             schedules.add(schedule);
 
             for (Schedule.Days days : scheduleDaysList) {
-                StringBuilder message = new StringBuilder(schedule.getDis()+ "\u0020" + ScheduleUtil.getDayString(days.getDay() + 1) + "\u0020");
+                StringBuilder message = new StringBuilder(schedule.getDis() + "\u0020" + ScheduleUtil.getDayString(days.getDay() + 1) + "\u0020");
                 String coolValues = "";
                 String heatValues = "";
                 if (days.getHeatingVal() < heatTempUL || days.getHeatingVal() > heatTempLL) {
                     double heatDTValue = getHeatDTemp(days.getHeatingVal(), heatTempUL, heatTempLL);
-                    heatValues = "\u0020" +    "Heating ("+ days.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatDTValue+")";
+                    heatValues = "\u0020" + "Heating (" + days.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatDTValue + ")";
 
                     days.setHeatingVal(heatDTValue);
                 }
 
                 if (days.getCoolingVal() < coolTempLL || days.getCoolingVal() > coolTempUL) {
                     double coolDTValue = getCoolDTemp(days.getCoolingVal(), coolTempLL, coolTempUL);
-                    coolValues = "\u0020 " +    "Cooling ("+days.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolDTValue + ")";
+                    coolValues = "\u0020 " + "Cooling (" + days.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolDTValue + ")";
 
                     days.setCoolingVal(coolDTValue);
                 }
@@ -259,8 +248,10 @@ public class MasterControlView extends LinearLayout {
         if (warningMessage.size() > 0) {
             disPlayWarningMessage(warningMessage, dialog, schedules);
         } else {
-            if (filterSchedules.size()> 0) {
+            if (filterSchedules.size() > 0) {
                 saveScheduleData(filterSchedules, dialog);
+            } else {
+                saveBuildingData(dialog);
             }
         }
     }
@@ -304,31 +295,24 @@ public class MasterControlView extends LinearLayout {
 
     }
 
-    public ArrayList<HashMap> readAll(HGrid grid)
-    {
+    public ArrayList<HashMap> readAll(HGrid grid) {
         //CcuLog.d("CCU_HS", "Read Query: " + query);
         ArrayList<HashMap> rowList = new ArrayList<>();
-        try
-        {
-            if (grid != null)
-            {
+        try {
+            if (grid != null) {
                 Iterator it = grid.iterator();
-                while (it.hasNext())
-                {
+                while (it.hasNext()) {
                     HashMap<Object, Object> map = new HashMap<>();
-                    HRow                    r   = (HRow) it.next();
-                    HRow.RowIterator        ri  = (HRow.RowIterator) r.iterator();
-                    while (ri.hasNext())
-                    {
+                    HRow r = (HRow) it.next();
+                    HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
+                    while (ri.hasNext()) {
                         HDict.MapEntry m = (HDict.MapEntry) ri.next();
                         map.put(m.getKey(), m.getValue());
                     }
                     rowList.add(map);
                 }
             }
-        }
-        catch (UnknownRecException e)
-        {
+        } catch (UnknownRecException e) {
             e.printStackTrace();
         }
         return rowList;
@@ -364,19 +348,18 @@ public class MasterControlView extends LinearLayout {
     }
 
     private void saveScheduleData(ArrayList<Schedule> schedules, Dialog masterControlDialog) {
-        //TODO:
         for (Schedule schedule : schedules) {
-            if (schedule.isZoneSchedule() && schedule.getRoomRef()!= null) {
-                    String scheduleLuid = CCUHsApi.getInstance().getLUID("@" + schedule.getId());
-                    if (scheduleLuid != null && schedule.getRoomRef() != null) {
-                        schedule.setId(scheduleLuid.replace("@", ""));
-                        CCUHsApi.getInstance().updateZoneSchedule(schedule, schedule.getRoomRef());
-                    }
+            if (schedule.isZoneSchedule() && schedule.getRoomRef() != null) {
+                String scheduleLuid = CCUHsApi.getInstance().getLUID("@" + schedule.getId());
+                if (scheduleLuid != null && schedule.getRoomRef() != null) {
+                    schedule.setId(scheduleLuid.replace("@", ""));
+                    CCUHsApi.getInstance().updateZoneSchedule(schedule, schedule.getRoomRef());
+                }
                 syncZoneSchedules(schedule);
             } else {
-                String scheduleLuid = CCUHsApi.getInstance().getLUID("@"+schedule.getId());
+                String scheduleLuid = CCUHsApi.getInstance().getLUID("@" + schedule.getId());
                 if (scheduleLuid != null) {
-                    schedule.setId(scheduleLuid.replace("@",""));
+                    schedule.setId(scheduleLuid.replace("@", ""));
                     CCUHsApi.getInstance().updateSchedule(schedule);
                 }
                 syncBuildingSchedules(schedule);
@@ -389,15 +372,14 @@ public class MasterControlView extends LinearLayout {
     @SuppressLint("StaticFieldLeak")
     private void syncZoneSchedules(Schedule schedule) {
         ArrayList<HDict> entities = new ArrayList<>();
-        String scheduleguid = CCUHsApi.getInstance().getGUID("@"+schedule.getId());
-        if ( scheduleguid != null){
-            schedule.setId(scheduleguid.replace("@",""));
+        String scheduleguid = CCUHsApi.getInstance().getGUID("@" + schedule.getId());
+        if (scheduleguid != null) {
+            schedule.setId(scheduleguid.replace("@", ""));
         }
 
         HDict[] days = new HDict[schedule.getDays().size()];
 
-        for (int i = 0; i < schedule.getDays().size(); i++)
-        {
+        for (int i = 0; i < schedule.getDays().size(); i++) {
             Schedule.Days day = schedule.getDays().get(i);
             HDictBuilder hDictDay = new HDictBuilder()
                     .add("day", HNum.make(day.getDay()))
@@ -426,22 +408,20 @@ public class MasterControlView extends LinearLayout {
                 .add("kind", schedule.getKind())
                 .add("dis", schedule.getDis())
                 .add("days", hList)
-                .add("roomRef",HRef.copy(schedule.getRoomRef()))
+                .add("roomRef", HRef.copy(schedule.getRoomRef()))
                 .add("siteRef", HRef.copy(schedule.getmSiteId()));
 
-        for (String marker : schedule.getMarkers())
-        {
+        for (String marker : schedule.getMarkers()) {
             zoneSchedule.add(marker);
         }
-        entities.add( zoneSchedule.toDict());
+        entities.add(zoneSchedule.toDict());
 
         new AsyncTask<String, Void, Void>() {
             @Override
             protected Void doInBackground(final String... params) {
                 HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
                 String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "addEntity", HZincWriter.gridToString(grid));
-                if (response == null)
-                {
+                if (response == null) {
                     CcuLog.i("CCU_HS_SYNC", "Aborting Schedule Sync");
                 }
                 return null;
@@ -458,15 +438,14 @@ public class MasterControlView extends LinearLayout {
     @SuppressLint("StaticFieldLeak")
     private void syncBuildingSchedules(Schedule schedule) {
         ArrayList<HDict> entities = new ArrayList<>();
-        String scheduleguid = CCUHsApi.getInstance().getGUID("@"+schedule.getId());
-        if ( scheduleguid != null){
-            schedule.setId(scheduleguid.replace("@",""));
+        String scheduleguid = CCUHsApi.getInstance().getGUID("@" + schedule.getId());
+        if (scheduleguid != null) {
+            schedule.setId(scheduleguid.replace("@", ""));
         }
 
         HDict[] days = new HDict[schedule.getDays().size()];
 
-        for (int i = 0; i < schedule.getDays().size(); i++)
-        {
+        for (int i = 0; i < schedule.getDays().size(); i++) {
             Schedule.Days day = schedule.getDays().get(i);
             HDictBuilder hDictDay = new HDictBuilder()
                     .add("day", HNum.make(day.getDay()))
@@ -497,8 +476,7 @@ public class MasterControlView extends LinearLayout {
                 .add("days", hList)
                 .add("siteRef", HRef.copy(schedule.getmSiteId()));
 
-        for (String marker : schedule.getMarkers())
-        {
+        for (String marker : schedule.getMarkers()) {
             buildingSchedule.add(marker);
         }
         entities.add(buildingSchedule.toDict());
@@ -508,8 +486,7 @@ public class MasterControlView extends LinearLayout {
             protected Void doInBackground(final String... params) {
                 HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[0]));
                 String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "addEntity", HZincWriter.gridToString(grid));
-                if (response == null)
-                {
+                if (response == null) {
                     CcuLog.i("CCU_HS_SYNC", "Aborting Schedule Sync");
                 }
                 return null;
@@ -532,10 +509,10 @@ public class MasterControlView extends LinearLayout {
         float buildingTempUL = masterControl.getUpperBuildingTemp();
         float buildingTempLL = masterControl.getLowerBuildingTemp();
 
-        mOnClickListener.onSaveClick(heatTempLL, heatTempUL,coolTempLL,coolTempUL,buildingTempLL,buildingTempUL,
-                (float) getTuner(setbackMap.get("id").toString()),(float) getTuner(zoneDiffMap.get("id").toString()),(float)hdb, (float)cdb);
+        mOnClickListener.onSaveClick(heatTempLL, heatTempUL, coolTempLL, coolTempUL, buildingTempLL, buildingTempUL,
+                (float) getTuner(setbackMap.get("id").toString()), (float) getTuner(zoneDiffMap.get("id").toString()), (float) hdb, (float) cdb);
 
-        if (dialog!= null && dialog.isShowing()) {
+        if (dialog != null && dialog.isShowing()) {
             dialog.dismiss();
         }
 
@@ -545,45 +522,41 @@ public class MasterControlView extends LinearLayout {
                 HashMap ccu = CCUHsApi.getInstance().read("ccu");
                 String ccuName = ccu.get("dis").toString();
 
-                HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
-                Equip p = new Equip.Builder().setHashMap(tuner).build();
-                String gUid  = CCUHsApi.getInstance().getGUID(p.getId());
-
-                HashMap buildingCoolUL = read("point and limit and max and cooling and user and equipRef == "+gUid);
-                HashMap buildingHeatUL = read("point and limit and max and heating and user and equipRef == "+gUid);
-                HashMap buildingCoolLL = read("point and limit and min and cooling and user and equipRef == "+gUid);
-                HashMap buildingHeatLL = read("point and limit and min and heating and user and equipRef == "+gUid);
-                HashMap buildingMin = read("building and limit and min and equipRef == "+gUid);
-                HashMap buildingMax = read("building and limit and max and equipRef == "+gUid);
+                HashMap buildingCoolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user");
+                HashMap buildingHeatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user");
+                HashMap buildingCoolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user");
+                HashMap buildingHeatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user");
+                HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min");
+                HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max");
 
                 if (buildingCoolUL.size() != 0) {
-                    writePoint(buildingCoolUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) coolTempUL, 0);
-                    writeHisValById(buildingCoolUL.get("id").toString(), (double) coolTempUL);
+                    CCUHsApi.getInstance().writePoint(buildingCoolUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) coolTempUL, 0);
+                    CCUHsApi.getInstance().writeHisValById(buildingCoolUL.get("id").toString(), (double) coolTempUL);
                 }
 
                 if (buildingCoolLL.size() != 0) {
-                    writePoint(buildingCoolLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) coolTempLL, 0);
-                    writeHisValById(buildingCoolLL.get("id").toString(), (double) coolTempLL);
+                    CCUHsApi.getInstance().writePoint(buildingCoolLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) coolTempLL, 0);
+                    CCUHsApi.getInstance().writeHisValById(buildingCoolLL.get("id").toString(), (double) coolTempLL);
                 }
 
                 if (buildingHeatUL.size() != 0) {
-                    writePoint(buildingHeatUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) heatTempUL, 0);
-                    writeHisValById(buildingHeatUL.get("id").toString(), (double) heatTempUL);
+                    CCUHsApi.getInstance().writePoint(buildingHeatUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) heatTempUL, 0);
+                    CCUHsApi.getInstance().writeHisValById(buildingHeatUL.get("id").toString(), (double) heatTempUL);
                 }
 
                 if (buildingHeatLL.size() != 0) {
-                    writePoint(buildingHeatLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) heatTempLL, 0);
-                    writeHisValById(buildingHeatLL.get("id").toString(), (double) heatTempLL);
+                    CCUHsApi.getInstance().writePoint(buildingHeatLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) heatTempLL, 0);
+                    CCUHsApi.getInstance().writeHisValById(buildingHeatLL.get("id").toString(), (double) heatTempLL);
                 }
 
                 if (buildingMax.size() != 0) {
-                    writePoint(buildingMax.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) buildingTempUL, 0);
-                    writeHisValById(buildingMax.get("id").toString(), (double) buildingTempUL);
+                    CCUHsApi.getInstance().writePoint(buildingMax.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) buildingTempUL, 0);
+                    CCUHsApi.getInstance().writeHisValById(buildingMax.get("id").toString(), (double) buildingTempUL);
                 }
 
                 if (buildingMin.size() != 0) {
-                    writePoint(buildingMin.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) buildingTempLL, 0);
-                    writeHisValById(buildingMin.get("id").toString(), (double) buildingTempLL);
+                    CCUHsApi.getInstance().writePoint(buildingMin.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) buildingTempLL, 0);
+                    CCUHsApi.getInstance().writeHisValById(buildingMin.get("id").toString(), (double) buildingTempLL);
                 }
 
                 return null;
@@ -594,76 +567,6 @@ public class MasterControlView extends LinearLayout {
                 super.onPostExecute(result);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
-    }
-
-    public void writePoint(String guid, int level, String who, double value, int duration)
-    {
-        if (!CCUHsApi.getInstance().isCCURegistered()){
-            return;
-        }
-        HNum val = HNum.make(value);
-        HNum dur = HNum.make(duration);
-        if (dur.unit == null) {
-            dur = HNum.make(dur.val ,"ms");
-        }
-
-        HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-        String lUid = CCUHsApi.getInstance().getLUID(guid);
-
-        if (lUid != null){
-            CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(lUid), level, who, val, dur);
-        }
-
-        hClient.pointWrite(HRef.copy(guid), level, who, val, dur);
-
-        if (guid != null)
-        {
-            HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
-            HDict[] dictArr  = {b.toDict()};
-            String  response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
-            CcuLog.d("CCU_HS", "Response: \n" + response +" guid:\n" + guid);
-        }
-    }
-
-    public synchronized void writeHisValById(String id, Double val)
-    {
-        if (!CCUHsApi.getInstance().isCCURegistered()){
-            return;
-        }
-        HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-        hClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), HNum.make(val))});
-    }
-
-    /**
-     * Read the first matching record
-     */
-    @SuppressLint("StaticFieldLeak")
-    public HashMap read(String query)
-    {
-        //CcuLog.d("CCU_HS", "Read Query: " + query);
-        HashMap<Object, Object> map = new HashMap<>();
-        if (!CCUHsApi.getInstance().isNetworkConnected()){
-            return map;
-        }
-        HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-        HDict tDict = new HDictBuilder().add("filter", query).toDict();
-        HGrid hGrid = hClient.call("read", HGridBuilder.dictToGrid(tDict));
-        if (hGrid == null){
-            return map;
-        }
-        hGrid.dump();
-        Iterator it   = hGrid.iterator();
-        while (it.hasNext())
-        {
-            HRow                    r   = (HRow) it.next();
-            HRow.RowIterator        ri  = (HRow.RowIterator) r.iterator();
-            while (ri.hasNext())
-            {
-                HDict.MapEntry m = (HDict.MapEntry) ri.next();
-                map.put(m.getKey(), m.getValue());
-            }
-        }
-        return map;
     }
 
     private double getCoolDTemp(double coolDT, double coolTempLL, double coolTempUL) {
@@ -709,26 +612,24 @@ public class MasterControlView extends LinearLayout {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
-    public void setOnClickChangeListener(OnClickListener l)
-    {
+    public void setOnClickChangeListener(OnClickListener l) {
         mOnClickListener = l;
     }
 
-    public interface OnClickListener
-    {
+    public interface OnClickListener {
         void onSaveClick(float lowerHeatingTemp, float upperHeatingTemp, float lowerCoolingTemp,
-                     float upperCoolingTemp, float lowerBuildingTemp, float upperBuildingTemp,
-                     float setBack, float zoneDiff, float hdb, float cdb);
+                         float upperCoolingTemp, float lowerBuildingTemp, float upperBuildingTemp,
+                         float setBack, float zoneDiff, float hdb, float cdb);
     }
 
     public void setMasterControl(float lowerHeatingTemp, float upperHeatingTemp, float lowerCoolingTemp,
-                               float upperCoolingTemp, float lowerBuildingTemp, float upperBuildingTemp,
-                               float setBack, float zoneDiff, float hdb, float cdb){
+                                 float upperCoolingTemp, float lowerBuildingTemp, float upperBuildingTemp,
+                                 float setBack, float zoneDiff, float hdb, float cdb) {
 
         if (masterControl != null)
             masterControl.setData(lowerHeatingTemp, upperHeatingTemp,
                     lowerCoolingTemp, upperCoolingTemp,
                     lowerBuildingTemp, upperBuildingTemp,
-                    setBack,zoneDiff,hdb,cdb);
+                    setBack, zoneDiff, hdb, cdb);
     }
 }

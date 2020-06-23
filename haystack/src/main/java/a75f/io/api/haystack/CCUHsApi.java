@@ -407,7 +407,7 @@ public class CCUHsApi
     {
         hsClient.pointWrite(id, level, who, val, dur);
 
-        if (!CCUHsApi.getInstance().isCCURegistered()) {
+        if (CCUHsApi.getInstance().isCCURegistered()) {
             String guid = getGUID(id.toString());
             if (guid != null)
             {

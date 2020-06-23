@@ -1,5 +1,6 @@
 package a75f.io.alerts;
 
+import a75f.io.api.haystack.CCUHsApi;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -23,61 +24,65 @@ public class HttpUtil
 
     public static final String HTTP_SCHEME = "http";
 
-    public static String sendRequest(String endpoint, String postData) {
+    public static String sendRequest(String endpoint, String postData, String apiKey) {
         URL url;
         HttpURLConnection connection = null;
-        try {
-            //Create connection
-            url = new URL(BuildConfig.ALERTS_API_BASE +  endpoint);
+        if (StringUtils.isNotBlank(apiKey)) {
+            try {
+                //Create connection
+                url = new URL(BuildConfig.ALERTS_API_BASE +  endpoint);
 
-            if (StringUtils.equals(url.getProtocol(), HTTP_SCHEME)) {
-                connection = (HttpURLConnection)url.openConnection();
-            } else {
-                connection = NetCipher.getHttpsURLConnection(url);
-            }
+                if (StringUtils.equals(url.getProtocol(), HTTP_SCHEME)) {
+                    connection = (HttpURLConnection)url.openConnection();
+                } else {
+                    connection = NetCipher.getHttpsURLConnection(url);
+                }
 
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type",
-                    "application/json");
-            
-            connection.setUseCaches (false);
-            connection.setDoInput(true);
-            connection.setDoOutput(true);
-            
-            CcuLog.d("CCU_ALERTS",url.toString()+" "+postData);
-            //Send request
-            DataOutputStream wr = new DataOutputStream (connection.getOutputStream());
-            wr.writeBytes (postData);
-            wr.flush ();
-            wr.close ();
-            
-            int responseCode = connection.getResponseCode();
-            if (responseCode != 200) {
-                CcuLog.i("CCU_ALERTS","HttpError: responseCode "+responseCode);
-            }
-            //Get Response
-            InputStream is = connection.getInputStream();
-            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-            String line;
-            StringBuffer response = new StringBuffer();
-            while((line = rd.readLine()) != null) {
-                response.append(line);
-                response.append('\n');
-            }
-            rd.close();
-            
-            return responseCode == 200 ? response.toString() : null;
-            
-        } catch (Exception e) {
-            
-            e.printStackTrace();
-            return null;
-            
-        } finally {
-            
-            if(connection != null) {
-                connection.disconnect();
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Content-Type",
+                        "application/json");
+                connection.setRequestProperty("api-key", apiKey);
+
+                connection.setUseCaches (false);
+                connection.setDoInput(true);
+                connection.setDoOutput(true);
+
+                CcuLog.d("CCU_ALERTS",url.toString()+" "+postData);
+                //Send request
+                DataOutputStream wr = new DataOutputStream (connection.getOutputStream());
+                wr.writeBytes (postData);
+                wr.flush ();
+                wr.close ();
+
+                int responseCode = connection.getResponseCode();
+                if (responseCode != 200) {
+                    CcuLog.i("CCU_ALERTS","HttpError: responseCode "+responseCode);
+                }
+                //Get Response
+                InputStream is = connection.getInputStream();
+                BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+                String line;
+                StringBuffer response = new StringBuffer();
+                while((line = rd.readLine()) != null) {
+                    response.append(line);
+                    response.append('\n');
+                }
+                rd.close();
+
+                return responseCode == 200 ? response.toString() : null;
+
+            } catch (Exception e) {
+
+                e.printStackTrace();
+                return null;
+
+            } finally {
+
+                if(connection != null) {
+                    connection.disconnect();
+                }
             }
         }
+        return null;
     }
 }

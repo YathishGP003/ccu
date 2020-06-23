@@ -12,6 +12,7 @@ import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -22,6 +23,7 @@ import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatDelegate;
 import android.text.format.Formatter;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.renovo.bacnet4j.LocalDevice;
@@ -82,6 +84,7 @@ import a75f.io.device.mesh.LSerial;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.watchdog.Watchdog;
+import a75f.io.renatus.registration.InstallerOptions;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
@@ -138,6 +141,7 @@ public abstract class UtilityApplication extends Application
     private static BACnetUpdateJob   baCnetUpdateJob;
     private static Prefs             prefs;
     private static final String LOG_PREFIX = "CCU_UTILITYAPP";
+    private BroadcastReceiver mNetworkReceiver;
     private final ServiceConnection usbConnection = new ServiceConnection()
     {
         @Override
@@ -184,31 +188,9 @@ public abstract class UtilityApplication extends Application
         context = getApplicationContext();
         prefs = new Prefs(context);
 
-        if(isBACnetEnabled()){ // Check for BACnet Enabled or Not
-            LocalDevice localDevice = null;
-            String networkConfig;
-            if(isAutoMode()){ // Check for BACnet Enabled in Auto or Manual
-                if(CheckEthernet()) {
-                    networkConfig = getIPConfig();
-                    localDevice = enableBACnet(networkConfig);
-                }else{
-                    localDevice = enableBACnetWifi();
-                }
-            }else {
-                networkConfig = prefs.getString("BACnetConfig");
-                if(prefs.getBoolean("BACnetLAN")) { // Check for BACnet Enabled in Ethernet or Wifi
-                    localDevice = enableBACnet(networkConfig);
-                }else{
-                    localDevice = enableBACnetWifi();
-                }
-            }
-            try {
-                localDevice.initialize(RestartReason.unknown);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            setLocalDevice(localDevice,isAutoMode());
-        }
+        mNetworkReceiver = new NetworkChangeReceiver();
+        context.registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        InitialiseBACnet();
     }
 
     private void setUsbFilters()
@@ -585,18 +567,10 @@ public abstract class UtilityApplication extends Application
     }
 
     public boolean isBACnetEnabled(){
-        if(prefs.getBoolean("UseBACnet")) {
-            return true;
-        }else {
-            return false;
-        }
+        return prefs.getBoolean("UseBACnet");
     }
     public boolean isAutoMode(){
-        if(prefs.getBoolean("UseBACnetAuto")) {
-            return true;
-        }else {
-            return false;
-        }
+        return prefs.getBoolean("UseBACnetAuto");
     }
 
     public void setBacnetObject(BACnetUpdateJob bacnetObject){
@@ -669,4 +643,54 @@ public abstract class UtilityApplication extends Application
         });
     }
 
+    public boolean checkNetworkConnected() {
+        if (!prefs.getBoolean("BACnetLAN")) {
+            ConnectivityManager connManager = (ConnectivityManager) Globals.getInstance().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+            return (networkInfo != null && networkInfo.isConnected());
+        } else {
+            return CheckEthernet();
+        }
+    }
+
+    public class NetworkChangeReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(isBACnetEnabled()){
+                if(localDevice.isInitialized()) {
+                    localDevice.sendLocalBroadcast(new IAmRequest(new ObjectIdentifier(ObjectType.device, localDevice.getInstanceNumber()),
+                            localDevice.get(PropertyIdentifier.maxApduLengthAccepted),
+                            Segmentation.noSegmentation, localDevice.get(PropertyIdentifier.vendorIdentifier)));
+                }
+            }
+        }
+    }
+
+    public void InitialiseBACnet() {
+        if (isBACnetEnabled() && checkNetworkConnected()) { // Check for BACnet Enabled or Not
+            LocalDevice localDevice = null;
+            String networkConfig;
+            if (isAutoMode()) { // Check for BACnet Enabled in Auto or Manual
+                if (CheckEthernet()) {
+                    networkConfig = getIPConfig();
+                    localDevice = enableBACnet(networkConfig);
+                } else {
+                    localDevice = enableBACnetWifi();
+                }
+            } else {
+                networkConfig = prefs.getString("BACnetConfig");
+                if (prefs.getBoolean("BACnetLAN")) { // Check for BACnet Enabled in Ethernet or Wifi
+                    localDevice = enableBACnet(networkConfig);
+                } else {
+                    localDevice = enableBACnetWifi();
+                }
+            }
+            try {
+                localDevice.initialize();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            setLocalDevice(localDevice, isAutoMode());
+        }
+    }
 }

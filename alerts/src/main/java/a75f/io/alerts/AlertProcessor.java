@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -17,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.projecthaystack.HRef;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,9 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
-import a75f.io.alerts.BuildConfig;
 import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.Alert_;
 import a75f.io.api.haystack.CCUHsApi;
@@ -62,42 +58,35 @@ public class AlertProcessor
     private Box<Alert> alertBox;
     
     private static final File TEST_DIRECTORY = new File("objectbox-test/alert-db");
-    //private static final File ALERT_DIRECTORY = new File("objectbox-alert/alert-db");
     private static final String PREFS_ALERT_DEFS = "ccu_alerts";
     private static final String PREFS_ALERTS_CUSTOM = "custom_alerts";
     private static final String PREFS_ALERTS_PREDEFINED = "predef_alerts";
 
     HashMap<String, Integer> offsetCounter = new HashMap<>();
     HashSet<String> activeAlertRefs ;
-    private ScheduledExecutorService taskExecutor;
     
     AlertProcessor(Context c) {
         mContext = c;
-        taskExecutor = Executors.newSingleThreadScheduledExecutor();
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         if(boxStore != null && !boxStore.isClosed())
         {
             boxStore.close();
         }
-        boxStore = CCUHsApi.getInstance().tagsDb.getBoxStore();//MyObjectBox.builder().androidContext(c).build();
+        boxStore = CCUHsApi.getInstance().tagsDb.getBoxStore();
         alertBox = boxStore.boxFor(Alert.class);
         parser = new AlertParser();
         predefinedAlerts = getPredefinedAlerts();
-        taskExecutor.scheduleAtFixedRate(getWifiStatusRunnable(), 900, 60, TimeUnit.SECONDS );
+        parseWifiSignalAlertDefinition();
         fetchAllPredefinedAlerts();
     }
 
-    private Runnable getWifiStatusRunnable()
+    private void parseWifiSignalAlertDefinition()
     {
-        return new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                predefinedAlerts.add(parser.parseWifiAlerts(mContext).get(0));
-            }
-        };
+        AlertDefinition wifiSignalDefinition = parser.parseWifiAlerts(mContext).get(0);
+        if (!predefinedAlerts.contains(wifiSignalDefinition)){
+            predefinedAlerts.add(wifiSignalDefinition);
+        }
     }
 
     private void clearElapsedAlerts()
@@ -573,25 +562,6 @@ public class AlertProcessor
             }
         }
     }
-    
-    /*public void updateAlertDefinitions(Context c) {
-        alertDefinitions = parser.parseAllAlerts(c);
-    }
-    
-    public void updateAlertDefinitions(String alerts) {
-        if (alertDefinitions.size() == 0)
-        {
-            alertDefinitions = parser.parseAlertsString(alerts);
-        } else {
-            for (AlertDefinition def :parser.parseAlertsString(alerts)) {
-                alertDefinitions.add(def);
-            }
-        }
-    }
-    
-    public void updateAlertDefinitions(AlertDefinition d) {
-        alertDefinitions.add(d);
-    }*/
     
     public void addAlertDefinition(List<AlertDefinition> list) {
         updateCustomAlertDefinitions(list);

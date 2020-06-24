@@ -95,8 +95,8 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 	{
 		for(Short selectedModule : seletedModules)
 		{
-			L.removeHSDeviceEntities(selectedModule);
 			BACnetUtils.removeModule(selectedModule);
+			L.removeHSDeviceEntities(selectedModule);
 		}
 		
 		new AsyncTask<String, Void, Void>() {

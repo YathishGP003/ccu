@@ -549,6 +549,23 @@ public class LocalDevice {
         return null;
     }
 
+    public BACnetObject getObjectByIDandType(final int instanceID, final ObjectType type) {
+        for (final BACnetObject obj : localObjects) {
+            if (instanceID == obj.getInstanceId() && obj.get(PropertyIdentifier.objectType) == type)
+                return obj;
+        }
+        return null;
+    }
+
+    public BACnetObject removeByObject(final BACnetObject obj) throws BACnetServiceException {
+        System.out.println("Bacnet Remove Object Directly:"+obj);
+        if (obj != null) {
+            localObjects.remove(obj);
+        } else
+            throw new BACnetServiceException(ErrorClass.object, ErrorCode.unknownObject);
+        return obj;
+    }
+
     public void removeObjectByID(final int instanceID) throws BACnetServiceException {
         final BACnetObject obj = getObjectByID(instanceID);
         if (obj != null) {
@@ -611,6 +628,7 @@ public class LocalDevice {
 
     public BACnetObject removeObject(final ObjectIdentifier id) throws BACnetServiceException {
         final BACnetObject obj = getObject(id);
+        System.out.println("Bacnet Remove Object:"+obj);
         if (obj != null) {
             localObjects.remove(obj);
 

@@ -999,51 +999,68 @@ public class CCUHsApi
         p = new EntityParser(syncData);
         p.importSchedules();
         p.importBuildingTuner();
-    
+
         ArrayList<HashMap> writablePoints = CCUHsApi.getInstance().readAll("point and writable");
-        for (HashMap writablePoint : writablePoints) {
-            String writablePointLuid = writablePoint.get("id").toString();
-            String writablePointGuid = CCUHsApi.getInstance().getGUID(writablePointLuid);
-            CcuLog.d("CCU_HS_EXISTINGSITESYNC", "Processing point with GUID " + writablePointGuid + " and description " + writablePoint.get("dis").toString());
-            System.out.println(writablePoint);
-            HDict pid = new HDictBuilder().add("id",HRef.copy(writablePointGuid)).toDict();
-            HGrid wa = hClient.call("pointWrite",HGridBuilder.dictToGrid(pid));
+        ArrayList<HDict> hDicts = new ArrayList<>();
+        for (HashMap m : writablePoints) {
+            System.out.println(m);
+            HDict pid = new HDictBuilder().add("id",HRef.copy(getGUID(m.get("id").toString()))).toDict();
+            hDicts.add(pid);
+        }
+
+        int partitionSize = 20;
+        List<List<HDict>> partitions = new ArrayList<>();
+        for (int i = 0; i<hDicts.size(); i += partitionSize) {
+            partitions.add(hDicts.subList(i, Math.min(i + partitionSize, hDicts.size())));
+        }
+
+        for (List<HDict> sublist : partitions) {
+            String resStr = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "pointWriteMany",
+                    HZincWriter.gridToString(HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()]))), BuildConfig.HAYSTACK_API_KEY);
+
+            HGrid wa = new HZincReader(resStr).readGrid();
+            wa.dump();
             ArrayList<HashMap> valList = new ArrayList<>();
-            if (wa != null) {
-                wa.dump();
-                Iterator it = wa.iterator();
-                while (it.hasNext()) {
-                    HashMap<Object, Object> map = new HashMap<>();
-                    HRow r = (HRow) it.next();
-                    CcuLog.d("CCU_HS_EXISTINGSITESYNC", "Processing Zinc row with " + r.toString());
-                    HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
-                    while (ri.hasNext()) {
-                        HDict.MapEntry e = (HDict.MapEntry) ri.next();
-                        map.put(e.getKey(), e.getValue());
+            Iterator it = wa.iterator();
+            while (it.hasNext()) {
+                HashMap<Object, Object> map = new HashMap<>();
+                HRow r = (HRow) it.next();
+                HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
+                while (ri.hasNext()) {
+                    HDict.MapEntry e = (HDict.MapEntry) ri.next();
+                    map.put(e.getKey(), e.getValue());
+                }
+                valList.add(map);
+            }
+
+            for(HashMap v : valList)
+            {
+                String val =  v.get("data").toString().replaceAll("[\\[\\](){}]","");
+
+                HashMap<String, String> map = new HashMap<>();
+                if (!TextUtils.isEmpty(val)){
+                    if (val.contains(",")){
+                        String[] parts = val.split(",");
+                        val = parts[0];
                     }
-                    valList.add(map);
+                    String[] hisVal = val.split("\\s+");
+                    for (String keys: hisVal){
+
+                        String[] vals = keys.split(":");
+                        map.put(vals[0],vals[1]);
+                    }
+
+                    CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(getLUID(v.get("id").toString())),
+                            Integer.parseInt(map.get("level")), map.get("who").replaceAll("^\"|\"$", ""),
+                            v.get("kind").toString().equals("string") ? HStr.make(map.get("val")) : HNum.make(Double.parseDouble(map.get("val"))),HNum.make(0));
+
+                    //save data locally
+                    HDict rec = hsClient.readById(HRef.copy(getLUID(v.get("id").toString())));
+                    tagsDb.onHisWrite(rec,new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), v.get("kind").toString().equals("string") ? HStr.make(map.get("val")) : HNum.make(Double.parseDouble(map.get("val"))))});
                 }
             }
-
-            for(HashMap v : valList) {
-                int level = Integer.parseInt(v.get("level").toString());
-                String who = v.get("who").toString();
-                String kind = writablePoint.get("kind").toString();
-
-                CcuLog.d("CCU_HS_EXISTINGSITESYNC", "Syncing remote point to local with LUID "
-                        + writablePointLuid + "; GUID " + writablePointGuid + "; level " + level);
-
-                CCUHsApi.getInstance().getHSClient().pointWrite(
-                        HRef.copy(writablePointLuid),
-                        level,
-                        who,
-                        StringUtils.equals(kind,"string") ? HStr.make(v.get("val").toString()) : HNum.make(Double.parseDouble(v.get("val").toString())),
-                        HNum.make(0)
-                );
-            }
-        
         }
-        
+
         tagsDb.log();
 
         return true;

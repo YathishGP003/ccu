@@ -77,7 +77,6 @@ public class AlertProcessor
         alertBox = boxStore.boxFor(Alert.class);
         parser = new AlertParser();
         predefinedAlerts = getPredefinedAlerts();
-        parseWifiSignalAlertDefinition();
         fetchAllPredefinedAlerts();
     }
 
@@ -578,6 +577,7 @@ public class AlertProcessor
     public void fetchAllPredefinedAlerts(){
         if (predefinedAlerts == null || predefinedAlerts.size() == 0) {
             fetchPredefinedAlerts();
+            parseWifiSignalAlertDefinition();
         }
     }
 }

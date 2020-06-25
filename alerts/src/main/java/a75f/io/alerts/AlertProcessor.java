@@ -151,6 +151,7 @@ public class AlertProcessor
             if ( alertDef != null) {
                 AlertDefinition[] pojos = objectMapper.readValue(alertDef, AlertDefinition[].class);
                 predefinedAlerts = new ArrayList<>(Arrays.asList(pojos));
+                parseWifiSignalAlertDefinition();
             }
             if (predefinedAlerts!= null  && predefinedAlerts.size()>0)
             for (AlertDefinition d : predefinedAlerts)
@@ -577,6 +578,7 @@ public class AlertProcessor
     public void fetchAllPredefinedAlerts(){
         if (predefinedAlerts == null || predefinedAlerts.size() == 0) {
             fetchPredefinedAlerts();
+        } else {
             parseWifiSignalAlertDefinition();
         }
     }

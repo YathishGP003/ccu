@@ -258,6 +258,7 @@ public class SystemPoints{
                 relay1.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("75F System Relay " + relayNumber + " " + relayOp)));
                 relay1.writePropertyInternal(PropertyIdentifier.presentValue, new UnsignedInteger((int) getRelay(relayNumber)));
                 relay1.supportCovReporting();
+                incrementDBRevision(localDevice);
             }else {
                 relay1 = (MultistateValueObject)localDevice.getObjectByID(addressNumber + relayNumber);
                 relay1.writePropertyInternal(PropertyIdentifier.presentValue, new UnsignedInteger((int) getRelay(relayNumber)));
@@ -282,6 +283,7 @@ public class SystemPoints{
                 analogOut1.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("75F System Analog Out 1 - Cooling")));
                 analogOut1.writePropertyInternal(PropertyIdentifier.lowLimit, new Real((int)getAnalogMin(1)));
                 analogOut1.writePropertyInternal(PropertyIdentifier.highLimit, new Real((int)getAnalogMax(1)));
+                incrementDBRevision(localDevice);
             }else {
                 analogOut1 = (AnalogValueObject)localDevice.getObjectByID(addressNumber + BACnetUtils.analogOut1);
                 analogOut1.writePropertyInternal(PropertyIdentifier.presentValue, new Real((float)getAnalogOut("analog1")));
@@ -301,6 +303,7 @@ public class SystemPoints{
                 analogOut2.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("75F System Analog Out 2 - Fan Speed")));
                 analogOut2.writePropertyInternal(PropertyIdentifier.lowLimit, new Real((int) getAnalogMin(2)));
                 analogOut2.writePropertyInternal(PropertyIdentifier.highLimit, new Real((int) getAnalogMax(2)));
+                incrementDBRevision(localDevice);
             }else{
                 analogOut2 = (AnalogValueObject)localDevice.getObjectByID(addressNumber + BACnetUtils.analogOut2);
                 analogOut2.writePropertyInternal(PropertyIdentifier.presentValue, new Real((float)getAnalogOut("analog2")));
@@ -319,6 +322,7 @@ public class SystemPoints{
                 analogOut3.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("75F System Analog Out 3 - Heating")));
                 analogOut3.writePropertyInternal(PropertyIdentifier.lowLimit, new Real((int) getAnalogMin(3)));
                 analogOut3.writePropertyInternal(PropertyIdentifier.highLimit, new Real((int) getAnalogMax(3)));
+                incrementDBRevision(localDevice);
             }else{
                 analogOut3 = (AnalogValueObject)localDevice.getObjectByID(addressNumber + BACnetUtils.analogOut3);
                 analogOut3.writePropertyInternal(PropertyIdentifier.presentValue, new Real((float)getAnalogOut("analog3")));
@@ -337,6 +341,7 @@ public class SystemPoints{
                 analogOut4.writeProperty(new ValueSource(), new PropertyValue(PropertyIdentifier.description, new CharacterString("75F System Analog Out 4 - Outside Air")));
                 analogOut4.writePropertyInternal(PropertyIdentifier.lowLimit, new Real((int) getAnalogMin(4)));
                 analogOut4.writePropertyInternal(PropertyIdentifier.highLimit, new Real((int) getAnalogMax(4)));
+                incrementDBRevision(localDevice);
             }else {
                 analogOut4 = (AnalogValueObject)localDevice.getObjectByID(addressNumber + BACnetUtils.analogOut4);
                 analogOut4.writePropertyInternal(PropertyIdentifier.presentValue, new Real((float)getAnalogOut("analog4")));
@@ -357,6 +362,9 @@ public class SystemPoints{
         }
     }
 
+    public void incrementDBRevision(LocalDevice localDevice){
+        if(localDevice != null) localDevice.incrementDatabaseRevision();
+    }
     public void clearSystemPoints(LocalDevice localDevice) {
 
         try {

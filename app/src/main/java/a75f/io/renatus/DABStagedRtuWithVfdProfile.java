@@ -291,8 +291,8 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
     private void updateAnalogOptions() {
         systemProfile.updateStagesSelected();
         boolean analogEnabled = analog2Tb.isChecked();
-        analog2Economizer.setEnabled(false);
-        analog2Recirculate.setEnabled(false);
+        analog2Economizer.setEnabled(true);
+        analog2Recirculate.setEnabled(true);
         analog2CoolStage1.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.COOLING_1));
         analog2CoolStage2.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.COOLING_2));
         analog2CoolStage3.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.COOLING_3));

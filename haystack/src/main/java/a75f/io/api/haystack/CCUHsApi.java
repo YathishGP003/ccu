@@ -972,7 +972,7 @@ public class CCUHsApi
         hisSyncHandler.sync();
     }
 
-    public synchronized boolean syncExistingSite(String siteId) {
+    public boolean syncExistingSite(String siteId) {
         siteId = StringUtils.stripStart(siteId,"@");
 
         if (StringUtils.isBlank(siteId)) {
@@ -992,13 +992,18 @@ public class CCUHsApi
         Log.d("CCU_HS_EXISTINGSITESYNC","Added Site "+s.getId());
     
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-        HDict navIdDict = new HDictBuilder().add("navId", HRef.make(siteId)).toDict();
-        HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
-        HGrid syncData = hClient.call("sync", hGrid);
-        
-        p = new EntityParser(syncData);
-        p.importSchedules();
-        p.importBuildingTuner();
+
+        //import building schedule data
+        HDict hDict = new HDictBuilder().add("filter", "building and schedule and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+        HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(hDict));
+
+        importBuildingSchedule(buildingSch);
+
+        //import building tuners
+        HDict tDict = new HDictBuilder().add("filter", "tuner and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+        HGrid tunerGrid = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+
+        importBuildingTuners(tunerGrid);
 
         ArrayList<HashMap> writablePoints = CCUHsApi.getInstance().readAll("point and writable");
         ArrayList<HDict> hDicts = new ArrayList<>();
@@ -1015,10 +1020,8 @@ public class CCUHsApi
         }
 
         for (List<HDict> sublist : partitions) {
-            String resStr = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "pointWriteMany",
-                    HZincWriter.gridToString(HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()]))), BuildConfig.HAYSTACK_API_KEY);
 
-            HGrid wa = new HZincReader(resStr).readGrid();
+            HGrid wa = hClient.call("pointWriteMany",HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
             wa.dump();
             ArrayList<HashMap> valList = new ArrayList<>();
             Iterator it = wa.iterator();
@@ -1064,6 +1067,87 @@ public class CCUHsApi
         tagsDb.log();
 
         return true;
+    }
+
+
+    private void importBuildingSchedule(HGrid mGrid){
+            if (mGrid == null) {
+                return;
+            }
+            try {
+                Iterator it = mGrid.iterator();
+                while (it.hasNext())
+                {
+                    HRow r = (HRow) it.next();
+                    Schedule buildingSchedule =  new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
+
+                    String guid = buildingSchedule.getId();
+                    buildingSchedule.setmSiteId(CCUHsApi.getInstance().getSiteId().toString());
+                    HRef localId = HRef.make(UUID.randomUUID().toString());
+                    buildingSchedule.setId(localId.toVal());
+                    CCUHsApi.getInstance().addSchedule(localId.toVal(), buildingSchedule.getScheduleHDict());
+                    CCUHsApi.getInstance().putUIDMap(localId.toString(), "@" + guid);
+                }
+            } catch (UnknownRecException e) {
+                e.printStackTrace();
+            }
+    }
+
+    private void importBuildingTuners(HGrid mGrid) {
+
+        if (mGrid == null) {
+            return;
+        }
+        ArrayList<Equip>        equips        = new ArrayList<>();
+        ArrayList<Point>        points        = new ArrayList<>();
+        try {
+            Iterator it = mGrid.iterator();
+            while (it.hasNext())
+            {
+                HashMap<Object, Object> map = new HashMap<>();
+                HRow r = (HRow) it.next();
+                HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
+                while (ri.hasNext())
+                {
+                    HDict.MapEntry m = (HDict.MapEntry) ri.next();
+                    map.put(m.getKey(), m.getValue());
+                }
+
+                if (map.get("equip") != null) {
+                    equips.add(new Equip.Builder().setHashMap(map).build());
+                } else if (map.get("point") != null ) {
+                    points.add(new Point.Builder().setHashMap(map).build());
+                }
+            }
+        } catch (UnknownRecException e) {
+            e.printStackTrace();
+        }
+
+
+        CCUHsApi hsApi = CCUHsApi.getInstance();
+        for (Equip q : equips) {
+            if (q.getMarkers().contains("tuner"))
+            {
+                q.setSiteRef(hsApi.getSiteId().toString());
+                q.setFloorRef("@SYSTEM");
+                q.setRoomRef("@SYSTEM");
+                String equipLuid = hsApi.addEquip(q);
+                hsApi.putUIDMap(equipLuid, q.getId());
+                //Points
+                for (Point p : points)
+                {
+                    if (p.getEquipRef().equals(q.getId()))
+                    {
+                        p.setSiteRef(hsApi.getSiteId().toString());
+                        p.setFloorRef("@SYSTEM");
+                        p.setRoomRef("@SYSTEM");
+                        p.setEquipRef(equipLuid);
+                        hsApi.putUIDMap(hsApi.addPoint(p), p.getId());
+                    }
+                }
+            }
+        }
+
     }
 
     public HGrid getRemoteSiteDetails(String siteId)

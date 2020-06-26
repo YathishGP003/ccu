@@ -289,6 +289,19 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         analog2HeatStage5.setSelection((int)systemProfile.getConfigVal("analog2 and heating and stage5"), false);
 
         analog2TestSpinner.setOnItemSelectedListener(this);
+        analog2Economizer.setOnItemSelectedListener(this);
+        analog2Recirculate.setOnItemSelectedListener(this);
+        analog2CoolStage1.setOnItemSelectedListener(this);
+        analog2CoolStage2.setOnItemSelectedListener(this);
+        analog2CoolStage3.setOnItemSelectedListener(this);
+        analog2CoolStage4.setOnItemSelectedListener(this);
+        analog2CoolStage5.setOnItemSelectedListener(this);
+        analog2HeatStage1.setOnItemSelectedListener(this);
+        analog2HeatStage2.setOnItemSelectedListener(this);
+        analog2HeatStage3.setOnItemSelectedListener(this);
+        analog2HeatStage4.setOnItemSelectedListener(this);
+        analog2HeatStage5.setOnItemSelectedListener(this);
+
         updateAnalogOptions();
     }
 

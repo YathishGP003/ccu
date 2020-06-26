@@ -9,7 +9,7 @@
         "condition": "=="
       }
     ],
-    "offset": "0",
+    "offset": "15",
     "alert": {
       "mTitle": "CCU Server No Communication",
       "mMessage": "CCU doesn't have communication with server",

@@ -94,7 +94,6 @@ public class RenatusApp extends UtilityApplication
 							output += new String(buffer, 0, read);
 						}
 						p.waitFor();
-						wait(5000);
 						Log.d("CCU_DOWNLOAD", output.trim() + " (" + p.exitValue() + ")");
 						ApplicationInfo appInfo2 = RenatusApp.getAppContext().getApplicationInfo();
 						Log.d("CCU_DOWNLOAD", "RenatusAPP ExecuteAsRoot END===>"+(appInfo2.flags & ApplicationInfo.FLAG_SYSTEM));
@@ -131,7 +130,7 @@ public class RenatusApp extends UtilityApplication
 	public static void closeApp() {
 		setIntentToRestartCCU();
 
-		Log.d("CCU_DEBUG", "************Houston, CCU Is Going Down!!!************");
+		Log.d("CCU_DEBUG", "************Houston, CCU Is Going Down-CloseApp!!!************");
 		NotificationHandler.clearAllNotifications();
 		android.os.Process.killProcess(android.os.Process.myPid());
 		System.exit(0);

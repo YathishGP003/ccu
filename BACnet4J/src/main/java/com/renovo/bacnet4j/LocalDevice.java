@@ -541,6 +541,15 @@ public class LocalDevice {
         return false;
     }
 
+
+    public boolean checkObjectByIDandType(final int instanceID, final ObjectType type) {
+        for (final BACnetObject obj : localObjects) {
+            if (instanceID == obj.getInstanceId() && obj.get(PropertyIdentifier.objectType) == type)
+                return true;
+        }
+        return false;
+    }
+
     public BACnetObject getObjectByID(final int instanceID) {
         for (final BACnetObject obj : localObjects) {
             if (instanceID == obj.getInstanceId())

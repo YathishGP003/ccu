@@ -417,7 +417,12 @@ public class VavStagedRtu extends VavSystemProfile
         if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
             status.insert(0, "Free Cooling Used | ");
         }
-    
+        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU) {
+            if (getConfigEnabled("analog2") > 0)
+            {
+                status.append(getCmdSignal("fan and modulating") > 0 ? " Analog Fan ON " : "");
+            }
+        }
         return status.toString().equals("")? "System OFF" : status.toString();
     }
     

@@ -189,7 +189,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             double spSpMin = VavTRTuners.getStaticPressureTRTunerVal("spmin");
     
             CcuLog.d(L.TAG_CCU_SYSTEM,"spSpMax :"+spSpMax+" spSpMin: "+spSpMin+" SP: "+getStaticPressure());
-            systemFanLoopOp = (int) (getStaticPressure()  * 100 / spSpMax) ;
+            systemFanLoopOp = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax -spSpMin)) ;
         } else if (VavSystemController.getInstance().getSystemState() == HEATING){
             systemFanLoopOp = (int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier);
         } else {

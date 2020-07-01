@@ -1057,9 +1057,9 @@ public class CCUHsApi
                             Integer.parseInt(map.get("level")), map.get("who").replaceAll("^\"|\"$", ""),
                             v.get("kind").toString().equals("string") ? HStr.make(map.get("val")) : HNum.make(Double.parseDouble(map.get("val"))),HNum.make(0));
 
-                    //save data locally
+                    //save his data to local cache
                     HDict rec = hsClient.readById(HRef.copy(getLUID(v.get("id").toString())));
-                    tagsDb.onHisWrite(rec,new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), v.get("kind").toString().equals("string") ? HStr.make(map.get("val")) : HNum.make(Double.parseDouble(map.get("val"))))});
+                    tagsDb.saveHisItemsToCache(rec,new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), v.get("kind").toString().equals("string") ? HStr.make(map.get("val")) : HNum.make(Double.parseDouble(map.get("val"))))});
                 }
             }
         }

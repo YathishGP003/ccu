@@ -818,6 +818,18 @@ public class CCUTagsDb extends HServer {
         }
     }
 
+    public void saveHisItemsToCache (HDict rec, HHisItem[] items) {
+        for (HHisItem item : items) {
+            HisItem hisItem = new HisItem();
+            hisItem.setDate(new Date(item.ts.millis()));
+            hisItem.setRec(rec.get("id").toString());
+            hisItem.setVal(Double.parseDouble(item.val.toString()));
+            hisItem.setSyncStatus(true);
+            hisBox.put(hisItem);
+            HisItemCache.getInstance().add(rec.get("id").toString(), hisItem);
+        }
+    }
+
     //////////////////////////////////////////////////////////////////////////
     // Actions
     //////////////////////////////////////////////////////////////////////////

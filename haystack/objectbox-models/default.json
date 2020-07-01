@@ -10,23 +10,32 @@
       "properties": [
         {
           "id": "1:3695294132339087731",
-          "name": "id"
+          "name": "id",
+          "type": 6,
+          "flags": 1
         },
         {
           "id": "2:3721575554880413599",
-          "name": "rec"
+          "name": "rec",
+          "type": 9
         },
         {
           "id": "3:2636138725932829874",
-          "name": "date"
+          "name": "date",
+          "type": 6,
+          "flags": 4
         },
         {
           "id": "4:5458775097776216905",
-          "name": "val"
+          "name": "val",
+          "type": 8,
+          "flags": 2
         },
         {
           "id": "5:4375675092661972556",
-          "name": "syncStatus"
+          "name": "syncStatus",
+          "type": 1,
+          "flags": 4
         }
       ],
       "relations": []
@@ -38,63 +47,85 @@
       "properties": [
         {
           "id": "1:1266283906766086815",
-          "name": "id"
+          "name": "id",
+          "type": 6,
+          "flags": 1
         },
         {
           "id": "3:4972674601855791834",
-          "name": "mTitle"
+          "name": "mTitle",
+          "type": 9
         },
         {
           "id": "4:2586924490983167743",
-          "name": "mMessage"
+          "name": "mMessage",
+          "type": 9
         },
         {
           "id": "5:3279220949577218363",
-          "name": "mNotificationMsg"
+          "name": "mNotificationMsg",
+          "type": 9
         },
         {
           "id": "6:8256445436889612611",
-          "name": "mSeverity"
+          "name": "mSeverity",
+          "type": 5,
+          "flags": 2
         },
         {
           "id": "8:8688767729521073221",
-          "name": "startTime"
+          "name": "startTime",
+          "type": 6,
+          "flags": 4
         },
         {
           "id": "9:6508014023708824090",
-          "name": "endTime"
+          "name": "endTime",
+          "type": 6,
+          "flags": 4
         },
         {
           "id": "10:1223141086957328758",
-          "name": "isFixed"
+          "name": "isFixed",
+          "type": 1,
+          "flags": 4
         },
         {
           "id": "13:3554938844371872188",
-          "name": "ref"
+          "name": "ref",
+          "type": 9
         },
         {
           "id": "14:5199480498727618562",
-          "name": "deviceRef"
+          "name": "deviceRef",
+          "type": 9
         },
         {
           "id": "15:6784406268212841692",
-          "name": "siteRef"
+          "name": "siteRef",
+          "type": 9
         },
         {
           "id": "16:1166649113366590750",
-          "name": "syncStatus"
+          "name": "syncStatus",
+          "type": 1,
+          "flags": 4
         },
         {
           "id": "17:813217564508575276",
-          "name": "mEnabled"
+          "name": "mEnabled",
+          "type": 1,
+          "flags": 4
         },
         {
           "id": "18:7517296999905547159",
-          "name": "_id"
+          "name": "_id",
+          "type": 9
         },
         {
           "id": "19:1563815564009531725",
-          "name": "mAlertType"
+          "name": "mAlertType",
+          "type": 9
         }
       ],
       "relations": []
@@ -104,8 +135,8 @@
   "lastIndexId": "3:6552647423424257173",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
-  "modelVersion": 4,
-  "modelVersionParserMinimum": 4,
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
   "retiredEntityUids": [],
   "retiredIndexUids": [
     5977877711410822094,

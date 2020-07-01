@@ -2,11 +2,11 @@ package a75f.io.renatus;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.HashMap;
 
@@ -15,19 +15,22 @@ import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.Prefs;
 
 public class SplashActivity extends Activity {
+    
+    public static final int CCU_PERMISSION_REQUEST_ID = 1;
+    
     public static final String TAG = SplashActivity.class.getSimpleName();
     Prefs prefs;
-
+    private Thread registrationThread;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
         setContentView(R.layout.splash);
 
         prefs = new Prefs(this);
         Log.i(TAG, "Splash");
-        Log.i(TAG, "Waiting 5 seconds and navigating to the registered screen");
         
-        Thread registrationThread = new Thread() {
+        registrationThread = new Thread() {
             public void run() {
                 try {
                     Thread.sleep(5000);
@@ -79,15 +82,29 @@ public class SplashActivity extends Activity {
                 }
             }
         };
-
-        try {
-            PackageManager packageManager = getApplicationContext().getPackageManager();
-            PackageInfo packageInfo = packageManager.getPackageInfo("a75f.io.renatus", 0);
-            String versionName = packageInfo.versionName;
-            //Log.i("SplashActivity", "Starting " + BuildConfig.BUILD_TYPE + " app for " + versionName);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e("SplashActivity","Version information not found", e);
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+    
+        PermissionHandler permissionHandler = new PermissionHandler();
+        if (permissionHandler.hasAppPermissions(this)) {
+            registrationThread.start();
+        }
+    }
+    
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == CCU_PERMISSION_REQUEST_ID) {
+            for (int result : grantResults) {
+                if (result == PackageManager.PERMISSION_DENIED) {
+                    Toast.makeText(this, R.string.toast_msg_permission_denial, Toast.LENGTH_LONG).show();
+                    break;
+                }
+            }
         }
         registrationThread.start();
     }
 }
+

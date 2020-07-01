@@ -671,7 +671,10 @@ public class ZonePoints {
                 if (zoneEquip.getMarkers().contains("smartstat")) {
                     deleteZonePoints = deleteSmartStatPoints(localDevice, prefixAddress);
                 }
-                if (zoneEquip.getMarkers().contains("sse")) {
+                if (zoneEquip.getMarkers().contains("dab")) {
+                    deleteZonePoints = deleteDABObjects(localDevice, prefixAddress);
+                }
+                if (zoneEquip.getMarkers().contains("sse")||zoneEquip.getMarkers().contains("ti")) {
                     deleteZonePoints = true;
                 }
                 if (commonPointsDeleted && deleteZonePoints) {
@@ -685,6 +688,7 @@ public class ZonePoints {
     public boolean deleteVAVObjects(LocalDevice localDevice, int prefixAddress) {
         int supplyAirObjectID = prefixAddress + BACnetUtils.supplyAirTemperature;
         int reheatCoilObjectID = prefixAddress + BACnetUtils.reheatCoil;
+        int damperObjectID = prefixAddress + BACnetUtils.damperPos;
         boolean isDeleted = false;
         try {
             if (localDevice.checkObjectByID(supplyAirObjectID)) {
@@ -699,6 +703,28 @@ public class ZonePoints {
                 localDevice.removeObjectByID(reheatCoilObjectID);
                 isDeleted = true;
             }
+            if (localDevice.checkObjectByIDandType(damperObjectID,ObjectType.analogValue)) {
+                BACnetObject trendDamper = localDevice.getObjectByIDandType(damperObjectID, ObjectType.trendLog);
+                localDevice.removeByObject(trendDamper);
+                localDevice.removeObjectByID(damperObjectID);
+                isDeleted = true;
+            }
+        } catch (BACnetServiceException e) {
+            e.printStackTrace();
+        }
+        return isDeleted;
+    }
+
+    public boolean deleteDABObjects(LocalDevice localDevice, int prefixAddress) {
+        int damperObjectID = prefixAddress + BACnetUtils.damperPos;
+        boolean isDeleted = false;
+        try {
+            if (localDevice.checkObjectByIDandType(damperObjectID,ObjectType.analogValue)) {
+                BACnetObject trendDamper = localDevice.getObjectByIDandType(damperObjectID, ObjectType.trendLog);
+                localDevice.removeByObject(trendDamper);
+                localDevice.removeObjectByID(damperObjectID);
+                isDeleted = true;
+            }
         } catch (BACnetServiceException e) {
             e.printStackTrace();
         }
@@ -709,33 +735,31 @@ public class ZonePoints {
         int dtCoolObjectID = prefixAddress + BACnetUtils.desiredTempCooling;
         int dtHeatObjectID = prefixAddress + BACnetUtils.desiredTempHeating;
         int ctObjectID = prefixAddress + BACnetUtils.currentTemp;
-        int damperObjectID = prefixAddress + BACnetUtils.damperPos;
+
         boolean isDeleted = false;
         try {
-            if (localDevice.checkObjectByID(dtCoolObjectID)) {
+            if (localDevice.checkObjectByIDandType(dtCoolObjectID,ObjectType.analogValue)) {
                 BACnetObject trendDtCool = localDevice.getObjectByIDandType(dtCoolObjectID, ObjectType.trendLog);
+                BACnetObject dtCoolObject = localDevice.getObjectByIDandType(dtCoolObjectID, ObjectType.analogValue);
                 localDevice.removeByObject(trendDtCool);
-                localDevice.removeObjectByID(dtCoolObjectID);
+                localDevice.removeByObject(dtCoolObject);
                 isDeleted = true;
             }
-            if (localDevice.checkObjectByID(dtHeatObjectID)) {
+            if (localDevice.checkObjectByIDandType(dtHeatObjectID,ObjectType.analogValue)) {
                 BACnetObject trendDtHeat = localDevice.getObjectByIDandType(dtHeatObjectID, ObjectType.trendLog);
+                BACnetObject dtHeatObject = localDevice.getObjectByIDandType(dtHeatObjectID, ObjectType.analogValue);
                 localDevice.removeByObject(trendDtHeat);
-                localDevice.removeObjectByID(dtHeatObjectID);
+                localDevice.removeByObject(dtHeatObject);
                 isDeleted = true;
             }
-            if (localDevice.checkObjectByID(ctObjectID)) {
+            if (localDevice.checkObjectByIDandType(ctObjectID,ObjectType.analogValue)) {
                 BACnetObject trendCurrentTemp = localDevice.getObjectByIDandType(ctObjectID, ObjectType.trendLog);
+                BACnetObject ctObject = localDevice.getObjectByIDandType(ctObjectID, ObjectType.analogValue);
                 localDevice.removeByObject(trendCurrentTemp);
-                localDevice.removeObjectByID(ctObjectID);
+                localDevice.removeByObject(ctObject);
                 isDeleted = true;
             }
-            if (localDevice.checkObjectByID(damperObjectID)) {
-                BACnetObject trendDamper = localDevice.getObjectByIDandType(damperObjectID, ObjectType.trendLog);
-                localDevice.removeByObject(trendDamper);
-                localDevice.removeObjectByID(damperObjectID);
-                isDeleted = true;
-            }
+
         } catch (BACnetServiceException e) {
             e.printStackTrace();
         }

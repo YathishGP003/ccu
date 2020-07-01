@@ -401,6 +401,7 @@ public class CreateNewSite extends Fragment {
                 showUnregisterAlertDialog();
             } else {
                 btnEditSite.setEnabled(true);
+                btnUnregisterSite.setEnabled(false);
                 CCUHsApi.getInstance().deleteEntity(CCUHsApi.getInstance().getCcuId().toString());
 
                 ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU...");
@@ -429,6 +430,7 @@ public class CreateNewSite extends Fragment {
                             ccuRegistrationHandler.postDelayed(this, 30000);
                         } else {
                             btnUnregisterSite.setText("Unregister");
+                            btnUnregisterSite.setEnabled(true);
                             btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
                             setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
                             Toast.makeText(getActivity(), "CCU Registered Successfully "+ ccuGuid, Toast.LENGTH_LONG).show();

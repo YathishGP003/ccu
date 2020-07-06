@@ -272,6 +272,8 @@ public class VavStagedRtu extends VavSystemProfile
                         if ((systemMode != SystemMode.OFF && (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
                                 && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)) || (systemFanLoopOp > 0)) {
                                 relayState = 1;
+                        }else if ((L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU) && ((systemCoolingLoopOp > 0) || (systemHeatingLoopOp > 0) )) {
+                            relayState =  (systemCoolingLoopOp > 0 || systemHeatingLoopOp > 0) ? 1 :0;
                         } else {
                             relayState = 0;
                         }

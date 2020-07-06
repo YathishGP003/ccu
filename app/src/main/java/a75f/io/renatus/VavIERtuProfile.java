@@ -145,6 +145,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
 
         mNext.setOnClickListener(v -> {
             goTonext();
+            mNext.setEnabled(false);
         });
 
         analog1Cb.setOnCheckedChangeListener(this);

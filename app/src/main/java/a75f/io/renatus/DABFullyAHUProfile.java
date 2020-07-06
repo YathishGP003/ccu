@@ -152,6 +152,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 goTonext();
+                mNext.setEnabled(false);
             }
         });
 

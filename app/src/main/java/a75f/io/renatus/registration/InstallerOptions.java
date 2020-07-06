@@ -272,6 +272,7 @@ public class InstallerOptions extends Fragment {
                 if (ccu.size() == 0) {
                     return;
                 }
+                mNext.setEnabled(false);
                 String ccuId = ccu.get("id").toString();
                 ccuId = ccuId.replace("@", "");
                 String ccuName = ccu.get("dis").toString();

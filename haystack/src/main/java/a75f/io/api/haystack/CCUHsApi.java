@@ -994,12 +994,10 @@ public class CCUHsApi
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
 
         //import building schedule data
-        HDict buildingDict = new HDictBuilder().add("filter", "building and schedule and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
-        importBuildingSchedule(buildingDict, hClient);
+        importBuildingSchedule(siteId, hClient);
 
         //import building tuners
-        HDict tunerDict = new HDictBuilder().add("filter", "tuner and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
-        importBuildingTuners(tunerDict, hClient);
+        importBuildingTuners(siteId, hClient);
 
         ArrayList<HashMap> writablePoints = CCUHsApi.getInstance().readAll("point and writable");
         ArrayList<HDict> hDicts = new ArrayList<>();
@@ -1054,7 +1052,7 @@ public class CCUHsApi
 
                     //save his data to local cache
                     HDict rec = hsClient.readById(HRef.copy(getLUID(v.get("id").toString())));
-                    tagsDb.saveHisItemsToCache(rec,new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), v.get("kind").toString().equals("string") ? HStr.make(map.get("val")) : HNum.make(Double.parseDouble(map.get("val"))))});
+                    tagsDb.saveHisItemsToCache(rec, new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), v.get("kind").toString().equals("string") ? HStr.make(map.get("val")) : HNum.make(Double.parseDouble(map.get("val"))))}, true);
                 }
             }
         }
@@ -1065,10 +1063,12 @@ public class CCUHsApi
     }
 
 
-    private void importBuildingSchedule(HDict buildingDict, HClient hClient){
+    private void importBuildingSchedule(String siteId, HClient hClient){
 
             try {
+                HDict buildingDict = new HDictBuilder().add("filter", "building and schedule and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
                 HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(buildingDict));
+
                 if (buildingSch == null) {
                     return;
                 }
@@ -1091,11 +1091,12 @@ public class CCUHsApi
             }
     }
 
-    private void importBuildingTuners(HDict tunerDict, HClient hClient) {
+    private void importBuildingTuners(String siteId, HClient hClient) {
 
         ArrayList<Equip>        equips        = new ArrayList<>();
         ArrayList<Point>        points        = new ArrayList<>();
         try {
+            HDict tunerDict = new HDictBuilder().add("filter", "tuner and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
             HGrid tunerGrid = hClient.call("read", HGridBuilder.dictToGrid(tunerDict));
             if (tunerGrid == null) {
                 return;

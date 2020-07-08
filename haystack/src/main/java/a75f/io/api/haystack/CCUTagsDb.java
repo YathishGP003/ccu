@@ -803,28 +803,17 @@ public class CCUTagsDb extends HServer {
     }
 
     public void onHisWrite(HDict rec, HHisItem[] items) {
-        /*if (boxStore != null && boxStore.isClosed()){
-            return;
-        }*/
-        for (HHisItem item : items) {
-            HisItem hisItem = new HisItem();
-            hisItem.setDate(new Date(item.ts.millis()));
-            hisItem.setRec(rec.get("id").toString());
-            hisItem.setVal(Double.parseDouble(item.val.toString()));
-            hisItem.setSyncStatus(false);
-            CcuLog.d(TAG,"Write historized value to local DB for point ID " + rec.get("id").toString() + "; description " + rec.get("dis").toString() + "; value "  + item.val.toString());
-            hisBox.put(hisItem);
-            HisItemCache.getInstance().add(rec.get("id").toString(), hisItem);
-        }
+        saveHisItemsToCache(rec,items, false);
     }
 
-    public void saveHisItemsToCache (HDict rec, HHisItem[] items) {
+    public void saveHisItemsToCache (HDict rec, HHisItem[] items, boolean syncItems) {
         for (HHisItem item : items) {
             HisItem hisItem = new HisItem();
             hisItem.setDate(new Date(item.ts.millis()));
             hisItem.setRec(rec.get("id").toString());
             hisItem.setVal(Double.parseDouble(item.val.toString()));
-            hisItem.setSyncStatus(true);
+            hisItem.setSyncStatus(syncItems);
+            CcuLog.d(TAG,"Write historized value to local DB for point ID " + rec.get("id").toString() + "; description " + rec.get("dis").toString() + "; value "  + item.val.toString());
             hisBox.put(hisItem);
             HisItemCache.getInstance().add(rec.get("id").toString(), hisItem);
         }

@@ -1120,7 +1120,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
         if(dynamicSetpoint == 1) {
             plcPoints.put("Dynamic Setpoint",true);
-            targetValue = CCUHsApi.getInstance().readHisValByQuery("point and setpoint and variable and equipRef == \""+equipID+"\"") + offsetValue;
+            targetValue = CCUHsApi.getInstance().readHisValByQuery("point and dynamic and target and value and equipRef == \""+equipID+"\"") + offsetValue;
         }else {
             if(dynamicSetpoint == 0)
                 plcPoints.put("Dynamic Setpoint",false);

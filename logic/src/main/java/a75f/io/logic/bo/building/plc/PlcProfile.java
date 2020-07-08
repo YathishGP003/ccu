@@ -21,9 +21,9 @@ public class PlcProfile extends ZoneProfile
 {
     PlcEquip plcEquip;
     
-    public void addPlcEquip(short addr, PlcProfileConfiguration config, String floorRef, String roomRef) {
+    public void addPlcEquip(short addr, PlcProfileConfiguration config, String floorRef, String roomRef, String processVariable, String dynamicTargetTag) {
         plcEquip = new PlcEquip(getProfileType(), addr);
-        plcEquip.createEntities(config, floorRef, roomRef);
+        plcEquip.createEntities(config, floorRef, roomRef, processVariable, dynamicTargetTag);
         plcEquip.init();
     }
     
@@ -32,8 +32,8 @@ public class PlcProfile extends ZoneProfile
         plcEquip.init();
     }
     
-    public void updatePlcEquip(PlcProfileConfiguration config) {
-        plcEquip.update(config);
+    public void updatePlcEquip(PlcProfileConfiguration config, String floorRef, String zoneRef, String processTag, String dynamicTargetTag) {
+        plcEquip.update(config,floorRef,zoneRef,processTag, dynamicTargetTag);
         plcEquip.init();
     }
     

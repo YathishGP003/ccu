@@ -447,10 +447,22 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         p.setpointSensorOffset = Double.parseDouble(sensorOffsetSp.getSelectedItem().toString());
     
         mPlcProfile.getProfileConfiguration().put(mSmartNodeAddress, p);
+
+        String processVariableTag = analog1InSensorSp.getSelectedItem().toString();
+        String dynamicTargetTag = analog2InSensorSp.getSelectedItem().toString();
+        if (p.analog1InputSensor > 0){
+            processVariableTag = analog1InSensorSp.getSelectedItem().toString();
+        } else if(p.th1InputSensor > 0){
+            processVariableTag = th1InSensorSp.getSelectedItem().toString();
+        }
+        if(!p.useAnalogIn2ForSetpoint){
+            dynamicTargetTag = " ";
+        }
+
         if (mProfileConfig == null) {
-            mPlcProfile.addPlcEquip(mSmartNodeAddress, p, floorRef, zoneRef );
+            mPlcProfile.addPlcEquip(mSmartNodeAddress, p, floorRef, zoneRef, processVariableTag, dynamicTargetTag);
         } else {
-            mPlcProfile.updatePlcEquip(p);
+            mPlcProfile.updatePlcEquip(p,floorRef, zoneRef, processVariableTag, dynamicTargetTag);
         }
         L.ccu().zoneProfiles.add(mPlcProfile);
         CcuLog.d(L.TAG_CCU_UI, "Set Plc Config: Profiles - "+L.ccu().zoneProfiles.size());

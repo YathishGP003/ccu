@@ -990,25 +990,20 @@ public class CCUHsApi
         Site s = p.getSite();
         tagsDb.idMap.put("@"+tagsDb.addSite(s), s.getId());
         Log.d("CCU_HS_EXISTINGSITESYNC","Added Site "+s.getId());
-    
+
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
 
         //import building schedule data
-        HDict hDict = new HDictBuilder().add("filter", "building and schedule and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
-        HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(hDict));
-
-        importBuildingSchedule(buildingSch);
+        HDict buildingDict = new HDictBuilder().add("filter", "building and schedule and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+        importBuildingSchedule(buildingDict, hClient);
 
         //import building tuners
-        HDict tDict = new HDictBuilder().add("filter", "tuner and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
-        HGrid tunerGrid = hClient.call("read", HGridBuilder.dictToGrid(tDict));
-
-        importBuildingTuners(tunerGrid);
+        HDict tunerDict = new HDictBuilder().add("filter", "tuner and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+        importBuildingTuners(tunerDict, hClient);
 
         ArrayList<HashMap> writablePoints = CCUHsApi.getInstance().readAll("point and writable");
         ArrayList<HDict> hDicts = new ArrayList<>();
         for (HashMap m : writablePoints) {
-            System.out.println(m);
             HDict pid = new HDictBuilder().add("id",HRef.copy(getGUID(m.get("id").toString()))).toDict();
             hDicts.add(pid);
         }
@@ -1070,12 +1065,15 @@ public class CCUHsApi
     }
 
 
-    private void importBuildingSchedule(HGrid mGrid){
-            if (mGrid == null) {
-                return;
-            }
+    private void importBuildingSchedule(HDict buildingDict, HClient hClient){
+
             try {
-                Iterator it = mGrid.iterator();
+                HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(buildingDict));
+                if (buildingSch == null) {
+                    return;
+                }
+
+                Iterator it = buildingSch.iterator();
                 while (it.hasNext())
                 {
                     HRow r = (HRow) it.next();
@@ -1093,15 +1091,17 @@ public class CCUHsApi
             }
     }
 
-    private void importBuildingTuners(HGrid mGrid) {
+    private void importBuildingTuners(HDict tunerDict, HClient hClient) {
 
-        if (mGrid == null) {
-            return;
-        }
         ArrayList<Equip>        equips        = new ArrayList<>();
         ArrayList<Point>        points        = new ArrayList<>();
         try {
-            Iterator it = mGrid.iterator();
+            HGrid tunerGrid = hClient.call("read", HGridBuilder.dictToGrid(tunerDict));
+            if (tunerGrid == null) {
+                return;
+            }
+
+            Iterator it = tunerGrid.iterator();
             while (it.hasNext())
             {
                 HashMap<Object, Object> map = new HashMap<>();

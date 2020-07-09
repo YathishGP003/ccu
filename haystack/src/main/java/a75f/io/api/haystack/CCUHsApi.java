@@ -1006,16 +1006,14 @@ public class CCUHsApi
             hDicts.add(pid);
         }
 
-        int partitionSize = 20;
+        int partitionSize = 25;
         List<List<HDict>> partitions = new ArrayList<>();
         for (int i = 0; i<hDicts.size(); i += partitionSize) {
             partitions.add(hDicts.subList(i, Math.min(i + partitionSize, hDicts.size())));
         }
 
         for (List<HDict> sublist : partitions) {
-
-            HGrid wa = hClient.call("pointWriteMany",HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
-            wa.dump();
+            HGrid wa = hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
             ArrayList<HashMap> valList = new ArrayList<>();
             Iterator it = wa.iterator();
             while (it.hasNext()) {
@@ -1029,6 +1027,7 @@ public class CCUHsApi
                 valList.add(map);
             }
 
+            ArrayList<HDict> hisDicts = new ArrayList<>();
             for(HashMap v : valList)
             {
                 String val =  v.get("data").toString().replaceAll("[\\[\\](){}]","");
@@ -1046,18 +1045,23 @@ public class CCUHsApi
                         map.put(vals[0],vals[1]);
                     }
 
-                    CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(getLUID(v.get("id").toString())),
-                            Integer.parseInt(map.get("level")), map.get("who").replaceAll("^\"|\"$", ""),
-                            v.get("kind").toString().equals("string") ? HStr.make(map.get("val")) : HNum.make(Double.parseDouble(map.get("val"))),HNum.make(0));
+                    HDict pid = new HDictBuilder().add("id", HRef.copy(v.get("id").toString()))
+                            .add("level", Integer.parseInt(map.get("level")))
+                            .add("who", map.get("who").replaceAll("^\"|\"$", ""))
+                            .add("val", v.get("kind").toString().equals("string") ? HStr.make(map.get("val")) : HNum.make(Double.parseDouble(map.get("val")))).toDict();
+                    hisDicts.add(pid);
 
                     //save his data to local cache
                     HDict rec = hsClient.readById(HRef.copy(getLUID(v.get("id").toString())));
                     tagsDb.saveHisItemsToCache(rec, new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), v.get("kind").toString().equals("string") ? HStr.make(map.get("val")) : HNum.make(Double.parseDouble(map.get("val"))))}, true);
+
+                    //save points on tagsDb
+                   tagsDb.onPointWrite(rec,Integer.parseInt(map.get("level")), v.get("kind").toString().equals("string") ? HStr.make(map.get("val")) : HNum.make(Double.parseDouble(map.get("val"))),map.get("who").replaceAll("^\"|\"$", ""),HNum.make(0), rec);
                 }
             }
-        }
 
-        tagsDb.log();
+            HGrid responseGrid = hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(hisDicts.toArray(new HDict[hisDicts.size()])));
+        }
 
         return true;
     }

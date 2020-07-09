@@ -1013,37 +1013,16 @@ public class CCUHsApi
         }
 
         for (List<HDict> sublist : partitions) {
-            HGrid wa = hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
-            ArrayList<HashMap> valList = new ArrayList<>();
-            Iterator it = wa.iterator();
-            while (it.hasNext()) {
-                HashMap<Object, Object> map = new HashMap<>();
-                HRow r = (HRow) it.next();
-                HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
-                while (ri.hasNext()) {
-                    HDict.MapEntry e = (HDict.MapEntry) ri.next();
-                    map.put(e.getKey(), e.getValue());
-                }
-                valList.add(map);
-            }
+            HGrid responseGrid = hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
+            ArrayList<HashMap> valList = HSUtil.gridToMapList(responseGrid);
 
             ArrayList<HDict> hisDicts = new ArrayList<>();
             for(HashMap v : valList)
             {
-                String val =  v.get("data").toString().replaceAll("[\\[\\](){}]","");
+                String val =  HSUtil.formatDataObject(v.get("data").toString());
 
-                HashMap<String, String> map = new HashMap<>();
                 if (!TextUtils.isEmpty(val)){
-                    if (val.contains(",")){
-                        String[] parts = val.split(",");
-                        val = parts[0];
-                    }
-                    String[] hisVal = val.split("\\s+");
-                    for (String keys: hisVal){
-
-                        String[] vals = keys.split(":");
-                        map.put(vals[0],vals[1]);
-                    }
+                    HashMap<String, String>  map = HSUtil.getDataMap(val);
 
                     HDict pid = new HDictBuilder().add("id", HRef.copy(v.get("id").toString()))
                             .add("level", Integer.parseInt(map.get("level")))
@@ -1060,7 +1039,7 @@ public class CCUHsApi
                 }
             }
 
-            HGrid responseGrid = hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(hisDicts.toArray(new HDict[hisDicts.size()])));
+            HGrid response = hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(hisDicts.toArray(new HDict[hisDicts.size()])));
         }
 
         return true;

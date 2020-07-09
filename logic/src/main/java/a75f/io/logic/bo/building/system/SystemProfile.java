@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.system;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
@@ -14,6 +15,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -157,10 +159,13 @@ public abstract class SystemProfile
         
         for (HashMap m : equips)
         {
-            Equip q = new Equip.Builder().setHashMap(m)/*.setAhuRef(systemEquipId)*/.build();
-            if(q.getMarkers().contains("dab") || q.getMarkers().contains("vav")|| q.getMarkers().contains("oao"))
+            Equip q = new Equip.Builder().setHashMap(m).build();
+            if (q.getMarkers().contains("dab") || q.getMarkers().contains("vav") || q.getMarkers().contains("ti") || q.getMarkers().contains("oao"))
                 q.setAhuRef(systemEquipId);
-            else q.setGatewayRef(systemEquipId);
+            else if(q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid") || q.getMarkers().contains("sse"))
+                q.setGatewayRef(systemEquipId);
+            else
+                Toast.makeText(Globals.getInstance().getApplicationContext(),"Invalid profile, AhuRef is not updated for "+q.getDisplayName(),Toast.LENGTH_SHORT);
             CCUHsApi.getInstance().updateEquip(q, q.getId());
         }
         CCUHsApi.getInstance().updateDiagGatewayRef(systemEquipId);
@@ -696,10 +701,13 @@ public abstract class SystemProfile
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
         for (HashMap m : equips)
         {
-            Equip q = new Equip.Builder().setHashMap(m)/*.setGatewayRef(systemEquipId)*/.build();
-            if (q.getMarkers().contains("dab") || q.getMarkers().contains("vav"))
+            Equip q = new Equip.Builder().setHashMap(m).build();
+            if (q.getMarkers().contains("dab") || q.getMarkers().contains("vav") || q.getMarkers().contains("ti") || q.getMarkers().contains("oao"))
                 q.setAhuRef(systemEquipId);
-            else q.setGatewayRef(systemEquipId);
+            else if(q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid") || q.getMarkers().contains("sse"))
+                q.setGatewayRef(systemEquipId);
+            else
+                Toast.makeText(Globals.getInstance().getApplicationContext(),"Invalid profile, AhuRef is not updated for "+q.getDisplayName(),Toast.LENGTH_SHORT);
             CCUHsApi.getInstance().updateEquip(q, q.getId());
         }
         CCUHsApi.getInstance().updateDiagGatewayRef(systemEquipId);

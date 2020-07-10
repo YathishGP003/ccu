@@ -77,7 +77,6 @@ public class PlcEquip {
                 .setFloorRef(floorRef)
                 .setProfile(profileType.name())
                 .addMarker("equip").addMarker("pid").addMarker("zone")
-                /*.setAhuRef(ahuRef)*/
                 .setGatewayRef(ahuRef)
                 .setTz(tz)
                 .setGroup(String.valueOf(nodeAddr)).build();
@@ -121,7 +120,7 @@ public class PlcEquip {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("config").addMarker("pid").addMarker("zone").addMarker("writable")
+                .addMarker("config").addMarker("pid").addMarker("his").addMarker("zone").addMarker("writable")
                 .addMarker("target").addMarker("value")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("V")

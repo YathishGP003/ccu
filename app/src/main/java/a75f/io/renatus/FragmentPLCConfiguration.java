@@ -449,14 +449,12 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         mPlcProfile.getProfileConfiguration().put(mSmartNodeAddress, p);
 
         String processVariableTag = analog1InSensorSp.getSelectedItem().toString();
-        String dynamicTargetTag = analog2InSensorSp.getSelectedItem().toString();
+        String dynamicTargetTag = p.useAnalogIn2ForSetpoint ? analog2InSensorSp.getSelectedItem().toString() : " ";
+
         if (p.analog1InputSensor > 0){
             processVariableTag = analog1InSensorSp.getSelectedItem().toString();
         } else if(p.th1InputSensor > 0){
             processVariableTag = th1InSensorSp.getSelectedItem().toString();
-        }
-        if(!p.useAnalogIn2ForSetpoint){
-            dynamicTargetTag = " ";
         }
 
         if (mProfileConfig == null) {

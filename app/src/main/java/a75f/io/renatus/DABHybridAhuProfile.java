@@ -579,6 +579,7 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
             @Override
             protected void onPostExecute(final Void result)
             {
+                systemProfile.updateStagesSelected();
                 if (val == 0) {
                     updateSystemMode();
                 }

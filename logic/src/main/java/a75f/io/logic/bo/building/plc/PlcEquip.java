@@ -157,6 +157,7 @@ public class PlcEquip {
                 .build();
         String analog1AtMinOutputId = hayStack.addPoint(analog1AtMinOutput);
         hayStack.writeDefaultValById(analog1AtMinOutputId, config.analog1AtMinOutput);
+        hayStack.writeHisValById(analog1AtMinOutputId, config.analog1AtMinOutput);
 
         Point analog1AtMaxOutput = new Point.Builder()
                 .setDisplayName(equipDis + "-analog1AtMaxOutput")
@@ -172,6 +173,7 @@ public class PlcEquip {
                 .build();
         String analog1AtMaxOutputId = hayStack.addPoint(analog1AtMaxOutput);
         hayStack.writeDefaultValById(analog1AtMaxOutputId, config.analog1AtMaxOutput);
+        hayStack.writeHisValById(analog1AtMaxOutputId, config.analog1AtMaxOutput);
 
         Point useAnalogIn2ForSetpoint = new Point.Builder()
                 .setDisplayName(equipDis + "-useAnalogIn2ForSetpoint")
@@ -452,6 +454,7 @@ public class PlcEquip {
 
         if (!config.useAnalogIn2ForSetpoint){
             hayStack.writeDefaultVal("point and config and target and value and equipRef == \"" + equipRef + "\"", config.pidTargetValue);
+            hayStack.writeHisValByQuery("point and config and target and value and equipRef == \"" + equipRef + "\"", config.pidTargetValue);
         }
 
         hayStack.writeDefaultVal("point and config and prange and equipRef == \"" + equipRef + "\"", config.pidProportionalRange);
@@ -464,8 +467,10 @@ public class PlcEquip {
         hayStack.writeHisValByQuery("point and config and setpoint and sensor and offset and equipRef == \"" + equipRef + "\"", config.setpointSensorOffset);
 
         hayStack.writeDefaultVal("point and config and analog1 and min and output and equipRef == \"" + equipRef + "\"", config.analog1AtMinOutput);
+        hayStack.writeHisValByQuery("point and config and analog1 and min and output and equipRef == \"" + equipRef + "\"", config.analog1AtMinOutput);
 
         hayStack.writeDefaultVal("point and config and analog1 and max and output and equipRef == \"" + equipRef + "\"", config.analog1AtMaxOutput);
+        hayStack.writeHisValByQuery("point and config and analog1 and max and output and equipRef == \"" + equipRef + "\"", config.analog1AtMaxOutput);
 
         hayStack.writeDefaultVal("point and config and enabled and zero and error and midpoint and equipRef == \"" + equipRef + "\"", config.expectZeroErrorAtMidpoint ? 1.0 : 0);
         SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_OUT_ONE.toString(), (int) config.analog1AtMinOutput + "-" + (int) config.analog1AtMaxOutput);
@@ -481,10 +486,12 @@ public class PlcEquip {
 
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
+        String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
+        String equipDis = siteDis + "-PID-" + nodeAddr;
 
         Point processVariableTag = new Point.Builder()
-                .setDisplayName("ProcessVariable - " + processTag)
+                .setDisplayName(equipDis +"-processVariable- " + processTag)
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -499,6 +506,7 @@ public class PlcEquip {
                 .build();
         String processVariableTagId = hayStack.addPoint(processVariableTag);
         hayStack.writeDefaultValById(processVariableTagId, 0.0);
+        hayStack.writeHisValById(processVariableTagId, 0.0);
 
         return processVariableTagId;
     }
@@ -507,10 +515,12 @@ public class PlcEquip {
 
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
+        String siteDis = (String) siteMap.get("dis");
+        String equipDis = siteDis + "-PID-" + nodeAddr;
         String tz = siteMap.get("tz").toString();
 
         Point DynamicTargetValueTag = new Point.Builder()
-                .setDisplayName("DynamicTargetValue - " + dynamicTargetTag)
+                .setDisplayName(equipDis +"-dynamicTargetValue-" + dynamicTargetTag)
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -525,6 +535,7 @@ public class PlcEquip {
                 .build();
         String DynamicTargetValueTagId = hayStack.addPoint(DynamicTargetValueTag);
         hayStack.writeDefaultValById(DynamicTargetValueTagId, 0.0);
+        hayStack.writeHisValById(DynamicTargetValueTagId, 0.0);
 
         return DynamicTargetValueTagId;
     }
@@ -551,6 +562,7 @@ public class PlcEquip {
                 .build();
         String pidTargetValueId = hayStack.addPoint(pidTargetValue);
         hayStack.writeDefaultValById(pidTargetValueId,targetValue);
+        hayStack.writeHisValById(pidTargetValueId, targetValue);
 
         return pidTargetValueId;
     }

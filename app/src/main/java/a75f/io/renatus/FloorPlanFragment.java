@@ -150,7 +150,9 @@ public class FloorPlanFragment extends Fragment
 									//Update BACnet Database Revision by adding new module to zone
 									ArrayList<Equip> zoneEquips = HSUtil.getEquips(getSelectedZone().getId());
 									if (zoneEquips.size() == 1) {
-										BACnetUtils.updateDatabaseRevision();
+										if (!zoneEquips.get(0).getMarkers().contains("pid") && !zoneEquips.get(0).getMarkers().contains("emr")) {
+											BACnetUtils.updateDatabaseRevision();
+										}
 									}
 								}
 								//Crash here because of activity null while moving to other fragment and return back here after edit config

@@ -128,6 +128,7 @@ public class PlcEquip {
                 .build();
         String pidTargetValueId = hayStack.addPoint(pidTargetValue);
         hayStack.writeDefaultValById(pidTargetValueId, (double) config.pidTargetValue);
+        hayStack.writeHisValById(pidTargetValueId, (double) config.pidTargetValue);
 
         Point pidProportionalRange = new Point.Builder()
                 .setDisplayName(equipDis + "-pidProportionalRange")

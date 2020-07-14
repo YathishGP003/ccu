@@ -1109,7 +1109,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
 
         plcPoints.put("Target Value",targetValue);
-        if(analog1sensorType == 1)
+        if(analog1sensorType == 1 || analog1sensorType == 0)
         {
             plcPoints.put("Unit Type","Voltage");
             plcPoints.put("Unit","V");

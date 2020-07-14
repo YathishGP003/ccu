@@ -1,5 +1,6 @@
 package a75f.io.logic.jobs;
 
+import android.content.Intent;
 import android.os.StrictMode;
 import android.util.Log;
 
@@ -24,6 +25,7 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BaseJob;
 import a75f.io.logic.BuildConfig;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -69,6 +71,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 {
 
     private static final String TAG = "ScheduleProcessJob";
+    public static final String ACTION_OCCUPANCY_CHANGE = "occupancy_change";
 
     static HashMap<String, Occupied> occupiedHashMap = new HashMap<String, Occupied>();
 
@@ -610,6 +613,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         if ((systemOccupancy == UNOCCUPIED )&& (getSystemTemporaryHoldExpiry() > 0)) {
             systemOccupancy = FORCEDOCCUPIED;
         }
+
+        double systemOccupancyValue = CCUHsApi.getInstance().readHisValByQuery("point and system and his and occupancy and mode");
+        if (systemOccupancyValue != systemOccupancy.ordinal()){
+            Globals.getInstance().getApplicationContext().sendBroadcast(new Intent(ACTION_OCCUPANCY_CHANGE));
+        }
         
         CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and mode",(double)systemOccupancy.ordinal());
         CcuLog.d(TAG_CCU_JOB, "systemOccupancy status : " + systemOccupancy.name());
@@ -692,13 +700,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             } else {
                 Log.d(L.TAG_CCU_JOB, "ScheduleStatus not changed for  "+equip.getDisplayName());
             }
-        }/*
-
-        ArrayList occ = CCUHsApi.getInstance().readAll("point and occupancy and mode and equipRef == \""+equip.getId()+"\"");
-        if (occ != null && occ.size() > 0) {
-            String id = ((HashMap) occ.get(0)).get("id").toString();
-            CCUHsApi.getInstance().writeHisValById(id, (double) zoneOccupancy.ordinal());
-        }*/
+        }
     }
 
     public static HashMap getDABEquipPoints(String equipID) {
@@ -731,11 +733,6 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     }
     public static HashMap getTIEquipPoints(String equipID) {
 
-
-        //damperPos: ['zone', 'damper', 'base'],
-        //equipStatusMessage: ['zone', 'message', 'status'],
-        //dischargeAirTemp: ['zone', 'discharge', 'air', 'temp'],
-
         HashMap tiPoints = new HashMap();
         tiPoints.put("Profile","TEMP_INFLUENCE");
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
@@ -748,11 +745,6 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         return tiPoints;
     }
     public static HashMap getSSEEquipPoints(String equipID) {
-
-
-        //damperPos: ['zone', 'damper', 'base'],
-        //equipStatusMessage: ['zone', 'message', 'status'],
-        //dischargeAirTemp: ['zone', 'discharge', 'air', 'temp'],
 
         HashMap ssePoints = new HashMap();
         ssePoints.put("Profile","SSE");
@@ -776,7 +768,6 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
     public static HashMap getVAVEquipPoints(String equipID) {
         HashMap vavPoints = new HashMap();
-
 
         vavPoints.put("Profile","VAV Reheat - No Fan");
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
@@ -867,8 +858,6 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     public static HashMap get4PFCUEquipPoints(String equipID) {
         HashMap p4FCUPoints = new HashMap();
 
-
-
         p4FCUPoints.put("Profile","Smartstat - 4 Pipe FCU");
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
         double fanopModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and fan and mode and operation and equipRef == \""+equipID+"\"");
@@ -884,7 +873,6 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         if (equipStatusPoint.length() > 0)
         {
             p4FCUPoints.put("Status",equipStatusPoint);
-            //vavPoints.add(status);
         }else{
             p4FCUPoints.put("Status","OFF");
         }
@@ -1080,11 +1068,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         HashMap plcPoints = new HashMap();
 
         plcPoints.put("Profile","Pi Loop Controller");
-        //this.getZoneSettings('piDynamicSetpointValue', this.helperService.getPointIdbyTags(profileObj, ['analog2', 'config', 'enabled'], this.roomRef), 'write', profileObj.name);
         ArrayList equipStatusPoint = CCUHsApi.getInstance().readAll("point and status and message and equipRef == \""+equipID+"\"");
         ArrayList inputValue = CCUHsApi.getInstance().readAll("point and process and logical and variable and equipRef == \""+equipID+"\"");
-        //ArrayList offsetValue = CCUHsApi.getInstance().readAll("point and setpoint and sensor and offset and equipRef == \""+equipID+"\"");
-        //ArrayList targetValue = CCUHsApi.getInstance().readAll("point and zone and pid and target and config and value and equipRef == \""+equipID+"\"");
         ArrayList piSensorValue = CCUHsApi.getInstance().readAll("point and analog1 and config and input and sensor and equipRef == \""+equipID+"\"");
         double dynamicSetpoint = CCUHsApi.getInstance().readDefaultVal("point and analog2 and config and enabled and equipRef == \""+equipID+"\"");
         double targetValue = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and pid and target and config and equipRef == \""+equipID+"\"");
@@ -1115,12 +1100,6 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             double piSensorVal = CCUHsApi.getInstance().readHisValById(id);
             plcPoints.put("Pi Sensor Value",piSensorVal);
         }
-        /*if (dynamicSetpoint != null && dynamicSetpoint.size() > 0)
-        {
-            ///String id = ((HashMap) dynamicSetpoint.get(0)).get("id").toString();
-            //double dynamicSPval = CCUHsApi.getInstance().readPointPriorityVal(id);
-
-        }*/
         if(dynamicSetpoint == 1) {
             plcPoints.put("Dynamic Setpoint",true);
             targetValue = CCUHsApi.getInstance().readHisValByQuery("point and setpoint and variable and equipRef == \""+equipID+"\"") + offsetValue;
@@ -1245,7 +1224,6 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 CCUHsApi.getInstance().writeHisValById(id, (double) c.ordinal());
         }
         if((zoneDataInterface != null) && (cachedOccupied != null)){
-            //Log.d("ZoneSchedule","updateZoneOccupancy11==>>"+equip.getDisplayName()+","+cachedOccupied.isForcedOccupied()+","+cachedOccupied.isOccupied()+","+cachedOccupied.isPreconditioning()+","+totEquipsInZone.toString());
             zoneDataInterface.refreshDesiredTemp(equip.getGroup(), "","");
         }
         
@@ -1336,8 +1314,6 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     }
                 }
             }
-            
-            //HSUtil.printPointArr(point);
         }
     }
     public static void handleManualDesiredTempUpdate(Point coolpoint,Point heatpoint, Point avgpoint, double coolval, double heatval, double avgval) {
@@ -1543,8 +1519,6 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     }
     
     public static long getTemporaryHoldExpiry(Equip q) {
-        
-        //Equip q = HSUtil.getEquipFromZone(zoneRef);
         
         HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \""+q.getId()+"\"");
         if (coolDT.size() > 0) {

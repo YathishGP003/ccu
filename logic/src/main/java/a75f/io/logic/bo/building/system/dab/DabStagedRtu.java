@@ -195,8 +195,10 @@ public class DabStagedRtu extends DabSystemProfile
                         break;
                     case FAN_1:
                         if ((systemMode != SystemMode.OFF && (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
-                                && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)) || (systemFanLoopOp > 0)) {
+                                && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)) || ((L.ccu().systemProfile.getProfileType() != ProfileType.SYSTEM_DAB_STAGED_VFD_RTU) &&(systemFanLoopOp > 0))) {
                                 relayState = 1;
+                        }else if ((L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU) && ((systemCoolingLoopOp > 0) || (systemHeatingLoopOp > 0))){
+                            relayState =  (systemCoolingLoopOp > 0 || systemHeatingLoopOp > 0) ? 1 :0;
                         } else {
                             relayState = 0;
                         }
@@ -343,7 +345,13 @@ public class DabStagedRtu extends DabSystemProfile
         if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
             status.insert(0, "Free Cooling Used | ");
         }
-        
+
+        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU) {
+            if (getConfigEnabled("analog2") > 0)
+            {
+                status.append(getCmdSignal("fan and modulating") > 0 ? " Analog Fan ON " : "");
+            }
+        }
         return status.toString().equals("")? "System OFF" : status.toString();
     }
     

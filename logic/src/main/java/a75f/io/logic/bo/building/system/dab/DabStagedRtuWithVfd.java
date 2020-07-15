@@ -75,8 +75,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
     public synchronized void updateSystemPoints()
     {
         super.updateSystemPoints();
-        //updateOutsideWeatherParams();
-        
+        boolean isEconomizingAvailable = CCUHsApi.getInstance().readHisValByQuery("point and oao and economizing and available") > 0 ;
         double signal = 0;
         if (getConfigEnabled("analog2") > 0)
         {
@@ -109,6 +108,9 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
                         }
                     }
                 }
+            }
+            else if(isEconomizingAvailable && (systemCoolingLoopOp > 0)){
+                signal = getConfigVal("analog2 and economizer");
             }
             else if (stageStatus[FAN_1.ordinal()] > 0)
             {

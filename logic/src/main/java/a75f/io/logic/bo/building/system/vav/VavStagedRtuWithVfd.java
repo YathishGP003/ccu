@@ -100,8 +100,8 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
     
     public synchronized void updateSystemPoints()
     {
-        //updateOutsideWeatherParams();
         super.updateSystemPoints();
+        boolean isEconomizingAvailable = CCUHsApi.getInstance().readHisValByQuery("point and oao and economizing and available") > 0.0;
         double signal = 0;
         if (getConfigEnabled("analog2") > 0)
         {
@@ -134,6 +134,9 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
                         }
                     }
                 }
+            }
+            else if (isEconomizingAvailable && (systemCoolingLoopOp > 0)){
+                signal = getConfigVal("analog2 and economizer");
             }
             else if (stageStatus[FAN_1.ordinal()] > 0)
             {

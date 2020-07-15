@@ -244,9 +244,14 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
         if ((getConfigVal("relay3 and output and enabled") > 0) && (systemMode != SystemMode.OFF))
         {
-            double staticPressuremOp = getStaticPressure() - SystemConstants.SP_CONFIG_MIN;
-
-            signal = ((ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION) || (staticPressuremOp > 0)) ? 1 : 0;
+            double systemStaticPressureOoutput = getStaticPressure() - SystemConstants.SP_CONFIG_MIN;
+            signal = 0;
+            if((ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION))
+                signal = 1;
+            else if((VavSystemController.getInstance().getSystemState() == COOLING) && (systemStaticPressureOoutput > 0))
+                signal = 1;
+            else if((VavSystemController.getInstance().getSystemState() == HEATING) && (systemFanLoopOp > 0))
+                signal = 1;
             if(signal != getCmdSignal("occupancy"))
                 setCmdSignal("occupancy",signal);
         } else {
@@ -277,7 +282,6 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                     signal = curSignal;
                 }
                 setCmdSignal("humidifier",signal);
-                //setCmdSignal("dehumidifier",0);
             } else {
                 //Dehumidification
                 int curSignal = (int)ControlMote.getRelayState("relay7");
@@ -289,7 +293,6 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                     signal = curSignal;
                 }
                 setCmdSignal("dehumidifier",signal);
-                //setCmdSignal("humidifier",0);
             }
             CcuLog.d(L.TAG_CCU_SYSTEM,"humidity :"+humidity+" targetMinHumidity: "+targetMinHumidity+" humidityHysteresis: "+humidityHysteresis+
                                       " targetMaxHumidity: "+targetMaxHumidity+" signal: "+signal*100);
@@ -338,7 +341,6 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                 hayStack.deleteEntityTree(equip.get("id").toString());
             } else {
                 initTRSystem();
-                //sysEquip = new SystemEquip(equip.get("id").toString());
                 return;
             }
         }
@@ -361,7 +363,6 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         addTunerPoints(equipRef);
         addVavSystemTuners(equipRef);
         updateAhuRef(equipRef);
-        //sysEquip = new SystemEquip(equipRef);
         new ControlMote(equipRef);
         initTRSystem();
         L.saveCCUState();
@@ -379,70 +380,6 @@ public class VavFullyModulatingRtu extends VavSystemProfile
     }
     
     private void addCmdPoints(String equipref) {
-        /*HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-        String equipDis = siteMap.get("dis").toString()+"-SystemEquip";
-        String siteRef = siteMap.get("id").toString();
-        String tz = siteMap.get("tz").toString();
-        Point coolingSignal = new Point.Builder()
-                            .setDisplayName(equipDis+"-"+"coolingSignal")
-                            .setSiteRef(siteRef)
-                            .setEquipRef(equipref)
-                            .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("his").addMarker("runtime").setUnit("%")
-                            .setTz(tz)
-                            .build();
-        CCUHsApi.getInstance().addPoint(coolingSignal);
-    
-        Point heatingSignal = new Point.Builder()
-                                      .setDisplayName(equipDis+"-"+"heatingSignal")
-                                      .setSiteRef(siteRef)
-                                      .setEquipRef(equipref)
-                                      .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("modulating").addMarker("his").addMarker("runtime")
-                                      .setUnit("%").setTz(tz)
-                                      .build();
-        CCUHsApi.getInstance().addPoint(heatingSignal);
-    
-        Point fanSignal = new Point.Builder()
-                                      .setDisplayName(equipDis+"-"+"fanSignal")
-                                      .setSiteRef(siteRef)
-                                      .setEquipRef(equipref)
-                                      .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").addMarker("runtime")
-                                      .setUnit("%").setTz(tz)
-                                      .build();
-        CCUHsApi.getInstance().addPoint(fanSignal);
-    
-        Point co2Signal = new Point.Builder()
-                                  .setDisplayName(equipDis+"-"+"co2Signal")
-                                  .setSiteRef(siteRef)
-                                  .setEquipRef(equipref)
-                                  .addMarker("system").addMarker("cmd").addMarker("co2").addMarker("modulating").addMarker("his").addMarker("runtime")
-                                  .setUnit("%").setTz(tz)
-                                  .build();
-        CCUHsApi.getInstance().addPoint(co2Signal);
-        Point occupancySignal = new Point.Builder()
-                                  .setDisplayName(equipDis+"-"+"occupancySignal")
-                                  .setSiteRef(siteRef)
-                                  .setEquipRef(equipref)
-                                  .addMarker("system").addMarker("cmd").addMarker("occupancy").addMarker("his").addMarker("runtime")
-                                  .setTz(tz)
-                                  .build();
-        CCUHsApi.getInstance().addPoint(occupancySignal);
-        Point humidifierSignal = new Point.Builder()
-                                  .setDisplayName(equipDis+"-humidifier")
-                                  .setSiteRef(siteRef)
-                                  .setEquipRef(equipref)
-                                  .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his").addMarker("runtime")
-                                  .setTz(tz)
-                                  .build();
-        CCUHsApi.getInstance().addPoint(humidifierSignal);*/
-    
-        /*Point dehumidifierSignal = new Point.Builder()
-                                         .setDisplayName(equipDis+"-"+"dehumidifierSignal")
-                                         .setSiteRef(siteRef)
-                                         .setEquipRef(equipref)
-                                         .addMarker("system").addMarker("cmd").addMarker("dehumidifier").addMarker("his")
-                                         .setUnit("%").setTz(tz)
-                                         .build();
-        CCUHsApi.getInstance().addPoint(dehumidifierSignal);*/
     }
     
     public double getCmdSignal(String cmd) {
@@ -682,8 +619,6 @@ public class VavFullyModulatingRtu extends VavSystemProfile
     }
     public double getConfigEnabled(String config) {
 
-        //return sysEquip.getConfigEnabled(config)? 1:0;
-        //return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and enabled and "+config);
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap configPoint = hayStack.read("point and system and config and output and enabled and "+config);
         return hayStack.readPointPriorityVal(configPoint.get("id").toString());

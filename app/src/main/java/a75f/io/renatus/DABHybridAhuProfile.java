@@ -573,13 +573,13 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
             protected Void doInBackground(final String... params)
             {
                 systemProfile.setConfigEnabled(config, val);
-                systemProfile.updateStagesSelected();
                 return null;
             }
             
             @Override
             protected void onPostExecute(final Void result)
             {
+                systemProfile.updateStagesSelected();
                 if (val == 0) {
                     updateSystemMode();
                 }
@@ -600,13 +600,13 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
             protected Void doInBackground(final String... params)
             {
                 systemProfile.setConfigAssociation(config, val);
-                systemProfile.updateStagesSelected();
                 return null;
             }
             
             @Override
             protected void onPostExecute(final Void result)
             {
+                systemProfile.updateStagesSelected();
                 updateSystemMode();
                 ProgressDialogUtils.hideProgressDialog();
             }

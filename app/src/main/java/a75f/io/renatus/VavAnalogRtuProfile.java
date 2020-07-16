@@ -161,6 +161,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				goTonext();
+				mNext.setEnabled(false);
 			}
 		});
 

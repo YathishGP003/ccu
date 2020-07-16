@@ -179,6 +179,7 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 goTonext();
+                mNext.setEnabled(false);
             }
         });
 

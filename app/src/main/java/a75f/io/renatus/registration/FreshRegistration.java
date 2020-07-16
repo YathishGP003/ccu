@@ -252,15 +252,19 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         buttonNext.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
+                buttonNext.setEnabled(false);
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
                 if (currentFragment instanceof FloorPlanFragment) {
                     selectItem(20);
+                    buttonNext.setEnabled(true);
                 }
                 if (currentFragment instanceof SystemFragment) {
                     selectItem(21);
+                    buttonNext.setEnabled(true);
                 }
                 if (currentFragment instanceof WifiFragment) {
+                    buttonNext.setEnabled(true);
                     String INSTALL_TYPE = prefs.getString("INSTALL_TYPE");
                     ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                     NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
@@ -287,6 +291,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 if (currentFragment instanceof CongratsFragment) {
                     prefs.setBoolean("REGISTRATION", true);
                     updateCCURegistrationInfo();
+                    buttonNext.setEnabled(true);
                 }
             }
         });
@@ -1168,6 +1173,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
     private void updateCCURegistrationInfo() {
         ProgressDialogUtils.showProgressDialog(this,"CCU Registering...");
         String installerEmail = prefs.getString("installerEmail");
+        buttonNext.setEnabled(false);
 
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override

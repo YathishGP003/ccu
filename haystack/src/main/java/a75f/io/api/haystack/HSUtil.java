@@ -4,13 +4,10 @@ import android.util.Log;
 
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
-import org.projecthaystack.HGrid;
-import org.projecthaystack.HRow;
 import org.projecthaystack.HVal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /**

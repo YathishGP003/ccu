@@ -213,8 +213,7 @@ public class OAOProfile
             }
         } else {
             setEconomizingAvailable(false);
-            if(epidemicState == EpidemicState.OFF)
-                economizingLoopOutput = 0;
+            economizingLoopOutput = 0;
         }
         oaoEquip.setHisVal("economizing and available", economizingAvailable?1:0);
         oaoEquip.setHisVal("economizing and loop and output", economizingLoopOutput);

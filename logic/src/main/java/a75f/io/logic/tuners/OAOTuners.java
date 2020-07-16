@@ -138,7 +138,147 @@ public class OAOTuners
         String economizingToMainCoolingLoopMapId = hayStack.addPoint(economizingToMainCoolingLoopMap);
         hayStack.writePoint(economizingToMainCoolingLoopMapId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_ECONOMIZING_TO_MAIN_COOLING_LOOP_MAP, 0);
         hayStack.writeHisValById(economizingToMainCoolingLoopMapId, TunerConstants.OAO_ECONOMIZING_TO_MAIN_COOLING_LOOP_MAP);
-        
+
+        Point smartPrePurgeRuntime  = new Point.Builder()
+                .setDisplayName(equipDis+"-OAO-"+"systemPrePurgeRuntimeTuner")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
+                .addMarker("sp").addMarker("prePurge").addMarker("runtime")
+                .setMinVal("0").setMaxVal("360").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                .setUnit("min")
+                .setTz(tz)
+                .build();
+        String smartPrePurgeRuntimeId = hayStack.addPoint(smartPrePurgeRuntime);
+        hayStack.writePoint(smartPrePurgeRuntimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_SMART_PURGE_RUNTIME_DEFAULT, 0);
+        hayStack.writeHisValById(smartPrePurgeRuntimeId, TunerConstants.OAO_SMART_PURGE_RUNTIME_DEFAULT);
+
+        Point smartPrePurgeStartTimeOffset  = new Point.Builder()
+                .setDisplayName(equipDis+"-OAO-"+"systemPrePurgeOccupiedTimeOffsetTuner")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
+                .addMarker("sp").addMarker("prePurge").addMarker("occupied").addMarker("time").addMarker("offset")
+                .setMinVal("0").setMaxVal("360").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                .setUnit("min")
+                .setTz(tz)
+                .build();
+        String smartPrePurgeStartTimeOffsetId = hayStack.addPoint(smartPrePurgeStartTimeOffset);
+        hayStack.writePoint(smartPrePurgeStartTimeOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_SMART_PRE_PURGE_START_TIME_OFFSET, 0);
+        hayStack.writeHisValById(smartPrePurgeStartTimeOffsetId, TunerConstants.OAO_SMART_PRE_PURGE_START_TIME_OFFSET);
+
+        Point smartPrePurgeFanSpeed  = new Point.Builder()
+                .setDisplayName(equipDis+"-OAO-"+"systemPrePurgeFanSpeedTuner")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
+                .addMarker("sp").addMarker("prePurge").addMarker("fan").addMarker("speed")
+                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                .setUnit("%")
+                .setTz(tz)
+                .build();
+        String smartPrePurgeFanSpeedId = hayStack.addPoint(smartPrePurgeFanSpeed);
+        hayStack.writePoint(smartPrePurgeFanSpeedId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_SMART_PURGE_FAN_SPEED, 0);
+        hayStack.writeHisValById(smartPrePurgeFanSpeedId, TunerConstants.OAO_SMART_PURGE_FAN_SPEED);
+
+        Point smartPostPurgeRuntime  = new Point.Builder()
+                .setDisplayName(equipDis+"-OAO-"+"systemPostPurgeRuntimeTuner")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
+                .addMarker("sp").addMarker("postPurge").addMarker("runtime")
+                .setMinVal("0").setMaxVal("360").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                .setUnit("min")
+                .setTz(tz)
+                .build();
+        String smartPostPurgeRuntimeId = hayStack.addPoint(smartPostPurgeRuntime);
+        hayStack.writePoint(smartPostPurgeRuntimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_SMART_PURGE_RUNTIME_DEFAULT, 0);
+        hayStack.writeHisValById(smartPostPurgeRuntimeId, TunerConstants.OAO_SMART_PURGE_RUNTIME_DEFAULT);
+
+        Point smartPostPurgeStartTimeOffset  = new Point.Builder()
+                .setDisplayName(equipDis+"-OAO-"+"systemPostPurgeOccupiedTimeOffsetTuner")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
+                .addMarker("sp").addMarker("postPurge").addMarker("occupied").addMarker("time").addMarker("offset")
+                .setMinVal("0").setMaxVal("360").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                .setUnit("min")
+                .setTz(tz)
+                .build();
+        String smartPostPurgeStartTimeOffsetId = hayStack.addPoint(smartPostPurgeStartTimeOffset);
+        hayStack.writePoint(smartPostPurgeStartTimeOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_SMART_POST_PURGE_START_TIME_OFFSET, 0);
+        hayStack.writeHisValById(smartPostPurgeStartTimeOffsetId, TunerConstants.OAO_SMART_POST_PURGE_START_TIME_OFFSET);
+
+        Point smartPostPurgeFanSpeed  = new Point.Builder()
+                .setDisplayName(equipDis+"-OAO-"+"systemPostPurgeFanSpeedTuner")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
+                .addMarker("sp").addMarker("postPurge").addMarker("fan").addMarker("speed")
+                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                .setUnit("%")
+                .setTz(tz)
+                .build();
+        String smartPostPurgeFanSpeedId = hayStack.addPoint(smartPostPurgeFanSpeed);
+        hayStack.writePoint(smartPostPurgeFanSpeedId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_SMART_PURGE_FAN_SPEED, 0);
+        hayStack.writeHisValById(smartPostPurgeFanSpeedId, TunerConstants.OAO_SMART_PURGE_FAN_SPEED);
+
+        Point smartPurgeDabFanLoopOutput  = new Point.Builder()
+                .setDisplayName(equipDis+"-OAO-"+"systemPurgeDabFanLoopOutput")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
+                .addMarker("sp").addMarker("purge").addMarker("dab").addMarker("fan").addMarker("loop").addMarker("output").addMarker("min")
+                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                .setUnit("%")
+                .setTz(tz)
+                .build();
+        String smartPurgeDabFanLoopOutputId = hayStack.addPoint(smartPurgeDabFanLoopOutput);
+        hayStack.writePoint(smartPurgeDabFanLoopOutputId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_SMART_PURGE_FAN_LOOP_OUTPUT_MIN, 0);
+        hayStack.writeHisValById(smartPurgeDabFanLoopOutputId, TunerConstants.OAO_SMART_PURGE_FAN_LOOP_OUTPUT_MIN);
+
+        Point smartPurgeVavFanLoopOutput  = new Point.Builder()
+                .setDisplayName(equipDis+"-OAO-"+"systemPurgeVavFanLoopOutput")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his")
+                .addMarker("sp").addMarker("purge").addMarker("oao").addMarker("vav").addMarker("fan").addMarker("loop").addMarker("output").addMarker("min")
+                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                .setUnit("%")
+                .setTz(tz)
+                .build();
+        String smartPurgeVavFanLoopOutputId = hayStack.addPoint(smartPurgeVavFanLoopOutput);
+        hayStack.writePoint(smartPurgeVavFanLoopOutputId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_SMART_PURGE_FAN_LOOP_OUTPUT_MIN, 0);
+        hayStack.writeHisValById(smartPurgeVavFanLoopOutputId, TunerConstants.OAO_SMART_PURGE_FAN_LOOP_OUTPUT_MIN);
+
+        Point smartPurgeDabDamperMinOpenMultiplier  = new Point.Builder()
+                .setDisplayName(equipDis+"-OAO-"+"systemPurgeDabDamperMinOpenMultiplier")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his")
+                .addMarker("sp").addMarker("purge").addMarker("dab").addMarker("damper").addMarker("pos").addMarker("multiplier").addMarker("min")
+                .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                .setUnit("%")
+                .setTz(tz)
+                .build();
+        String smartPurgeDabDamperMinOpenMultiplierId = hayStack.addPoint(smartPurgeDabDamperMinOpenMultiplier);
+        hayStack.writePoint(smartPurgeDabDamperMinOpenMultiplierId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_SMART_PURGE_MIN_DAMPER_OPEN_MULTIPLIER, 0);
+        hayStack.writeHisValById(smartPurgeDabDamperMinOpenMultiplierId, TunerConstants.OAO_SMART_PURGE_MIN_DAMPER_OPEN_MULTIPLIER);
+
+
+        Point smartPurgeVavDamperMinOpenMultiplier  = new Point.Builder()
+                .setDisplayName(equipDis+"-OAO-"+"systemPurgeVavDamperMinOpenMultiplier")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his")
+                .addMarker("sp").addMarker("purge").addMarker("vav").addMarker("damper").addMarker("pos").addMarker("multiplier").addMarker("min")
+                .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                .setUnit("%")
+                .setTz(tz)
+                .build();
+        String smartPurgeVavDamperMinOpenMultiplierId = hayStack.addPoint(smartPurgeVavDamperMinOpenMultiplier);
+        hayStack.writePoint(smartPurgeVavDamperMinOpenMultiplierId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_SMART_PURGE_MIN_DAMPER_OPEN_MULTIPLIER, 0);
+        hayStack.writeHisValById(smartPurgeVavDamperMinOpenMultiplierId, TunerConstants.OAO_SMART_PURGE_MIN_DAMPER_OPEN_MULTIPLIER);
     }
     
     public static void addEquipTuners(String equipdis, String siteRef, String equipref, String tz) {
@@ -148,7 +288,7 @@ public class OAOTuners
                                            .setSiteRef(siteRef)
                                            .setEquipRef(equipref).setHisInterpolate("cov")
                                            .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
-                                           .addMarker("co2").addMarker("damper").addMarker("opening").addMarker("rate")
+                                           .addMarker("co2").addMarker("damper").addMarker("opening").addMarker("rate").addMarker("system")
                                            .setMinVal("0").setMaxVal("200").setIncrementVal("10").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                            .setTz(tz)
                                            .build();
@@ -169,7 +309,7 @@ public class OAOTuners
                                              .setSiteRef(siteRef)
                                              .setEquipRef(equipref).setHisInterpolate("cov")
                                              .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
-                                             .addMarker("enthalpy").addMarker("duct").addMarker("compensation").addMarker("offset")
+                                             .addMarker("enthalpy").addMarker("duct").addMarker("compensation").addMarker("offset").addMarker("system")
                                              .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                              .setTz(tz)
                                              .build();
@@ -190,7 +330,7 @@ public class OAOTuners
                                                        .setSiteRef(siteRef)
                                                        .setEquipRef(equipref).setHisInterpolate("cov")
                                                        .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
-                                                       .addMarker("economizing").addMarker("min").addMarker("temp")
+                                                       .addMarker("economizing").addMarker("min").addMarker("temp").addMarker("system")
                                                        .setMinVal("-50").setMaxVal("80").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                        .setUnit("\u00B0F")
                                                        .setTz(tz)
@@ -212,7 +352,7 @@ public class OAOTuners
                                                   .setSiteRef(siteRef)
                                                   .setEquipRef(equipref).setHisInterpolate("cov")
                                                   .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
-                                                  .addMarker("economizing").addMarker("max").addMarker("temp")
+                                                  .addMarker("economizing").addMarker("max").addMarker("temp").addMarker("system")
                                                   .setMinVal("-50").setMaxVal("120").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                   .setUnit("\u00B0F")
                                                   .setTz(tz)
@@ -234,7 +374,7 @@ public class OAOTuners
                                                   .setSiteRef(siteRef)
                                                   .setEquipRef(equipref).setHisInterpolate("cov")
                                                   .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
-                                                  .addMarker("economizing").addMarker("min").addMarker("humidity")
+                                                  .addMarker("economizing").addMarker("min").addMarker("humidity").addMarker("system")
                                                   .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                   .setUnit("%")
                                                   .setTz(tz)
@@ -256,7 +396,7 @@ public class OAOTuners
                                                .setSiteRef(siteRef)
                                                .setEquipRef(equipref).setHisInterpolate("cov")
                                                .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
-                                               .addMarker("economizing").addMarker("max").addMarker("humidity")
+                                               .addMarker("economizing").addMarker("max").addMarker("humidity").addMarker("system")
                                                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                .setUnit("%")
                                                .setTz(tz)
@@ -278,7 +418,7 @@ public class OAOTuners
                                                .setSiteRef(siteRef)
                                                .setEquipRef(equipref).setHisInterpolate("cov")
                                                .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
-                                               .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("target")
+                                               .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("target").addMarker("system")
                                                .setMinVal("30").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                .setUnit("\u00B0F")
                                                .setTz(tz)
@@ -300,7 +440,7 @@ public class OAOTuners
                                                     .setSiteRef(siteRef)
                                                     .setEquipRef(equipref).setHisInterpolate("cov")
                                                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
-                                                    .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("minimum")
+                                                    .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("minimum").addMarker("system")
                                                     .setMinVal("30").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                     .setUnit("\u00B0F")
                                                     .setTz(tz)
@@ -321,7 +461,7 @@ public class OAOTuners
                                                      .setDisplayName(equipdis+"-"+"economizingToMainCoolingLoopMap")
                                                      .setSiteRef(siteRef)
                                                      .setEquipRef(equipref).setHisInterpolate("cov")
-                                                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
+                                                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his").addMarker("system")
                                                      .addMarker("economizing").addMarker("main").addMarker("cooling").addMarker("loop").addMarker("map")
                                                      .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                                                      .setUnit("%")
@@ -338,6 +478,219 @@ public class OAOTuners
             }
         }
         hayStack.writeHisValById(economizingToMainCoolingLoopMapId, HSUtil.getPriorityVal(economizingToMainCoolingLoopMapId));
+
+
+
+        Point smartPrePurgeRuntime  = new Point.Builder()
+                .setDisplayName(equipdis+"-OAO-"+"systemPrePurgeRuntimeTuner")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
+                .addMarker("sp").addMarker("prePurge").addMarker("runtime").addMarker("system")
+                .setMinVal("0").setMaxVal("360").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                .setUnit("min")
+                .setTz(tz)
+                .build();
+        String smartPrePurgeRuntimeId = hayStack.addPoint(smartPrePurgeRuntime);
+        HashMap smartPrePurgeRuntimePoint = hayStack.read("point and tuner and default and oao and prePurge and runtime");
+        ArrayList<HashMap> smartPrePurgeRuntimePointArr = hayStack.readPoint(smartPrePurgeRuntimePoint.get("id").toString());
+        for (HashMap valMap : smartPrePurgeRuntimePointArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(smartPrePurgeRuntimeId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(smartPrePurgeRuntimeId, HSUtil.getPriorityVal(smartPrePurgeRuntimeId));
+
+        Point smartPrePurgeStartTimeOffset  = new Point.Builder()
+                .setDisplayName(equipdis+"-OAO-"+"systemPrePurgeOccupiedTimeOffsetTuner")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("system").addMarker("oao").addMarker("writable").addMarker("his")
+                .addMarker("sp").addMarker("prePurge").addMarker("occupied").addMarker("time").addMarker("offset")
+                .setMinVal("0").setMaxVal("360").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                .setUnit("min")
+                .setTz(tz)
+                .build();
+        String smartPrePurgeStartTimeOffsetId = hayStack.addPoint(smartPrePurgeStartTimeOffset);
+        HashMap smartPrePurgeStartTimeOffsetPoint = hayStack.read("point and tuner and default and oao and prePurge and occupied and time and offset");
+        ArrayList<HashMap> smartPrePurgeStartTimeOffsetPointArr = hayStack.readPoint(smartPrePurgeStartTimeOffsetPoint.get("id").toString());
+        for (HashMap valMap : smartPrePurgeStartTimeOffsetPointArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(smartPrePurgeStartTimeOffsetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(smartPrePurgeRuntimeId, HSUtil.getPriorityVal(smartPrePurgeStartTimeOffsetId));
+
+        Point smartPrePurgeFanSpeed  = new Point.Builder()
+                .setDisplayName(equipdis+"-OAO-"+"systemPrePurgeFanSpeedTuner")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("system").addMarker("oao").addMarker("writable").addMarker("his")
+                .addMarker("sp").addMarker("prePurge").addMarker("fan").addMarker("speed")
+                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                .setUnit("%")
+                .setTz(tz)
+                .build();
+        String smartPrePurgeFanSpeedId = hayStack.addPoint(smartPrePurgeFanSpeed);
+        HashMap smartPrePurgeFanSpeedPoint = hayStack.read("point and tuner and default and oao and prePurge and fan and speed");
+        ArrayList<HashMap> smartPrePurgeFanSpeedPointArr = hayStack.readPoint(smartPrePurgeFanSpeedPoint.get("id").toString());
+        for (HashMap valMap : smartPrePurgeFanSpeedPointArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(smartPrePurgeFanSpeedId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(smartPrePurgeFanSpeedId, HSUtil.getPriorityVal(smartPrePurgeFanSpeedId));
+
+        Point smartPostPurgeRuntime  = new Point.Builder()
+                .setDisplayName(equipdis+"-OAO-"+"systemPostPurgeRuntimeTuner")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("system").addMarker("oao").addMarker("writable").addMarker("his")
+                .addMarker("sp").addMarker("postPurge").addMarker("runtime")
+                .setMinVal("0").setMaxVal("360").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                .setUnit("min")
+                .setTz(tz)
+                .build();
+        String smartPostPurgeRuntimeId = hayStack.addPoint(smartPostPurgeRuntime);
+        HashMap smartPostPurgeRuntimePoint = hayStack.read("point and tuner and default and oao and postPurge and runtime");
+        ArrayList<HashMap> smartPostPurgeRuntimePointArr = hayStack.readPoint(smartPostPurgeRuntimePoint.get("id").toString());
+        for (HashMap valMap : smartPostPurgeRuntimePointArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(smartPostPurgeRuntimeId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(smartPostPurgeRuntimeId, HSUtil.getPriorityVal(smartPostPurgeRuntimeId));
+
+        Point smartPostPurgeStartTimeOffset  = new Point.Builder()
+                .setDisplayName(equipdis+"-OAO-"+"systemPostPurgeOccupiedTimeOffsetTuner")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("system").addMarker("oao").addMarker("writable").addMarker("his")
+                .addMarker("sp").addMarker("postPurge").addMarker("occupied").addMarker("time").addMarker("offset")
+                .setMinVal("0").setMaxVal("360").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                .setUnit("min")
+                .setTz(tz)
+                .build();
+        String smartPostPurgeStartTimeOffsetId = hayStack.addPoint(smartPostPurgeStartTimeOffset);
+        HashMap smartPostPurgeStartTimeOffsetPoint = hayStack.read("point and tuner and default and oao and postPurge and occupied and time and offset");
+        ArrayList<HashMap> smartPostPurgeStartTimeOffsetPointArr = hayStack.readPoint(smartPostPurgeStartTimeOffsetPoint.get("id").toString());
+        for (HashMap valMap : smartPostPurgeStartTimeOffsetPointArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(smartPostPurgeStartTimeOffsetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(smartPostPurgeStartTimeOffsetId, HSUtil.getPriorityVal(smartPostPurgeStartTimeOffsetId));
+
+        Point smartPostPurgeFanSpeed  = new Point.Builder()
+                .setDisplayName(equipdis+"-OAO-"+"systemPostPurgeFanSpeedTuner")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("system").addMarker("oao").addMarker("writable").addMarker("his")
+                .addMarker("sp").addMarker("postPurge").addMarker("fan").addMarker("speed")
+                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                .setUnit("%")
+                .setTz(tz)
+                .build();
+        String smartPostPurgeFanSpeedId = hayStack.addPoint(smartPostPurgeFanSpeed);
+        HashMap smartPostPurgeFanSpeedPoint = hayStack.read("point and tuner and default and oao and postPurge and fan and speed");
+        ArrayList<HashMap> smartPostPurgeFanSpeedPointArr = hayStack.readPoint(smartPostPurgeFanSpeedPoint.get("id").toString());
+        for (HashMap valMap : smartPostPurgeFanSpeedPointArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(smartPostPurgeFanSpeedId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(smartPostPurgeFanSpeedId, HSUtil.getPriorityVal(smartPostPurgeFanSpeedId));
+
+        Point smartPurgeDabFanLoopOutput  = new Point.Builder()
+                .setDisplayName(equipdis+"-OAO-"+"systemPurgeDabFanLoopOutput")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("system").addMarker("oao").addMarker("writable").addMarker("his")
+                .addMarker("sp").addMarker("purge").addMarker("dab").addMarker("fan").addMarker("loop").addMarker("output").addMarker("min")
+                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                .setUnit("%")
+                .setTz(tz)
+                .build();
+        String smartPurgeDabFanLoopOutputId = hayStack.addPoint(smartPurgeDabFanLoopOutput);
+        HashMap smartPurgeDabFanLoopOutputPoint = hayStack.read("point and tuner and default and oao and purge and dab and fan and loop and output and min");
+        ArrayList<HashMap> smartPurgeDabFanLoopOutputPointArr = hayStack.readPoint(smartPurgeDabFanLoopOutputPoint.get("id").toString());
+        for (HashMap valMap : smartPurgeDabFanLoopOutputPointArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(smartPurgeDabFanLoopOutputId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(smartPurgeDabFanLoopOutputId, HSUtil.getPriorityVal(smartPurgeDabFanLoopOutputId));
+
+        Point smartPurgeVavFanLoopOutput  = new Point.Builder()
+                .setDisplayName(equipdis+"-OAO-"+"systemPurgeVavFanLoopOutput")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("system").addMarker("oao").addMarker("writable").addMarker("his")
+                .addMarker("sp").addMarker("purge").addMarker("vav").addMarker("fan").addMarker("loop").addMarker("output").addMarker("min")
+                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                .setUnit("%")
+                .setTz(tz)
+                .build();
+        String smartPurgeVavFanLoopOutputId = hayStack.addPoint(smartPurgeVavFanLoopOutput);
+        HashMap smartPurgeVavFanLoopOutputPoint = hayStack.read("point and tuner and default and purge and vav and fan and loop and output and min");
+        ArrayList<HashMap> smartPurgeVavFanLoopOutputPointArr = hayStack.readPoint(smartPurgeVavFanLoopOutputPoint.get("id").toString());
+        for (HashMap valMap : smartPurgeVavFanLoopOutputPointArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(smartPurgeVavFanLoopOutputId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(smartPurgeVavFanLoopOutputId, HSUtil.getPriorityVal(smartPurgeVavFanLoopOutputId));
+
+        Point smartPurgeDabDamperMinOpenMultiplier  = new Point.Builder()
+                .setDisplayName(equipdis+"-OAO-"+"systemPurgeDabDamperMinOpenMultiplier")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("system").addMarker("writable").addMarker("his")
+                .addMarker("sp").addMarker("purge").addMarker("dab").addMarker("damper").addMarker("pos").addMarker("multiplier").addMarker("min")
+                .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                .setUnit("%")
+                .setTz(tz)
+                .build();
+        String smartPurgeDabDamperMinOpenMultiplierId = hayStack.addPoint(smartPurgeDabDamperMinOpenMultiplier);
+        HashMap smartPurgeDabDamperMinOpenMultiplierPoint = hayStack.read("point and tuner and default and purge and dab and damper and pos and multiplier and min");
+        ArrayList<HashMap> smartPurgeDabDamperMinOpenMultiplierPointArr = hayStack.readPoint(smartPurgeDabDamperMinOpenMultiplierPoint.get("id").toString());
+        for (HashMap valMap : smartPurgeDabDamperMinOpenMultiplierPointArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(smartPurgeDabDamperMinOpenMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(smartPurgeDabDamperMinOpenMultiplierId, HSUtil.getPriorityVal(smartPurgeDabDamperMinOpenMultiplierId));
+
+
+        Point smartPurgeVavDamperMinOpenMultiplier  = new Point.Builder()
+                .setDisplayName(equipdis+"-OAO-"+"systemPurgeVavDamperMinOpenMultiplier")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref).setHisInterpolate("cov")
+                .addMarker("tuner").addMarker("system").addMarker("writable").addMarker("his")
+                .addMarker("sp").addMarker("purge").addMarker("vav").addMarker("damper").addMarker("pos").addMarker("multiplier").addMarker("min")
+                .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                .setUnit("%")
+                .setTz(tz)
+                .build();
+        String smartPurgeVavDamperMinOpenMultiplierId = hayStack.addPoint(smartPurgeVavDamperMinOpenMultiplier);
+        HashMap smartPurgeVavDamperMinOpenMultiplierPoint = hayStack.read("point and tuner and default and purge and vav and damper and pos and multiplier and min");
+        ArrayList<HashMap> smartPurgeVavDamperMinOpenMultiplierPointArr = hayStack.readPoint(smartPurgeVavDamperMinOpenMultiplierPoint.get("id").toString());
+        for (HashMap valMap : smartPurgeVavDamperMinOpenMultiplierPointArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(smartPurgeVavDamperMinOpenMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(smartPurgeVavDamperMinOpenMultiplierId, HSUtil.getPriorityVal(smartPurgeVavDamperMinOpenMultiplierId));
         
     }
 }

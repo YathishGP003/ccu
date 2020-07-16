@@ -8,6 +8,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.haystack.device.ControlMote;
@@ -102,6 +103,8 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
     {
         super.updateSystemPoints();
         boolean isEconomizingAvailable = CCUHsApi.getInstance().readHisValByQuery("point and oao and economizing and available") > 0.0;
+        double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+getSystemEquipRef()+"\"");
+        EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
         double signal = 0;
         if (getConfigEnabled("analog2") > 0)
         {
@@ -134,6 +137,8 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
                         }
                     }
                 }
+            }else if (epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE){
+                signal = systemFanLoopOp;
             }
             else if (isEconomizingAvailable && (systemCoolingLoopOp > 0)){
                 signal = getConfigVal("analog2 and economizer");

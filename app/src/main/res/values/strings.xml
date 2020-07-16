@@ -590,6 +590,12 @@
     <string name="label_co2offset">CO2 Alert Offset Time</string>
     <string name="label_current_transformer_type">Current Transformer Type</string>
     <string name="label_currtrans">Curr Transformer\n(Analog-in 2)</string>
+    <string name="label_smartpurge_outside_damper_min">Smart Purge Outside Damper Min Open</string>
+    <string name="label_enhanced_ventilation_outside_damper_min">Enhanced Ventilation Outside Damper Min Open</string>
+    <string name="lable_smart_prepurge">Smart Pre Purge</string>
+    <string name="lable_smart_postpurge">Smart Post Purge</string>
+    <string name="lable_enhanced_ventilation">Enhanced Ventilation</string>
+    <string name="lable_epidemic_settings_text">Epidemic Mode Settings</string>
 
     <!--PAIRING INSTRUCTION Screen-->
     <string name="title_pairsn">SMART NODE | PAIRING STEPS </string>

@@ -4,9 +4,11 @@ import android.content.Context;
 import android.util.Log;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Occupied;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
+import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemController;
@@ -30,6 +32,7 @@ public class OAOProfile
     double outsideAirLoopOutput;
     double outsideAirFinalLoopOutput;
     double returnAirFinalOutput;
+    EpidemicState epidemicState = EpidemicState.OFF;
     
     OAOEquip oaoEquip;
     
@@ -77,7 +80,8 @@ public class OAOProfile
     }
     
     public void doOAO() {
-        
+
+        doEpidemicControl();
         doEconomizing();
         doDcvControl();
         
@@ -127,7 +131,24 @@ public class OAOProfile
             oaoEquip.setHisVal("cmd and exhaust and fan and stage2",0);
         }
     }
-    
+    public void doEpidemicControl(){
+        if (ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED) {
+            boolean isSmartPrePurge = TunerUtil.readSystemUserIntentVal("prePurge and enabled ") > 0;
+            boolean isSmartPostPurge = TunerUtil.readSystemUserIntentVal("postPurge and enabled ") > 0;
+            if(isSmartPrePurge) {
+                handleSmartPrePurgeControl();
+            }
+            if(isSmartPostPurge) {
+                handleSmartPostPurgeControl();
+            }else if(!isSmartPostPurge && !isSmartPrePurge) {
+                CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.OFF.ordinal());
+                epidemicState = EpidemicState.OFF;
+            }
+        }else {
+            CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.OFF.ordinal());
+            epidemicState = EpidemicState.OFF;
+        }
+    }
     public void doEconomizing() {
         
         double externalTemp , externalHumidity;
@@ -192,7 +213,8 @@ public class OAOProfile
             }
         } else {
             setEconomizingAvailable(false);
-            economizingLoopOutput = 0;
+            if(epidemicState == EpidemicState.OFF)
+                economizingLoopOutput = 0;
         }
         oaoEquip.setHisVal("economizing and available", economizingAvailable?1:0);
         oaoEquip.setHisVal("economizing and loop and output", economizingLoopOutput);
@@ -218,8 +240,9 @@ public class OAOProfile
         }
         oaoEquip.setHisVal("co2 and weighted and average", L.ccu().systemProfile.getWeightedAverageCO2());
         double outsideDamperMinOpen = oaoEquip.getConfigNumVal("oao and outside and damper and min and open");
-        outsideAirCalculatedMinDamper = outsideDamperMinOpen + dcvCalculatedMinDamper;
-        if (ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED || ScheduleProcessJob.getSystemOccupancy() == Occupancy.VACATION) {
+        outsideDamperMinOpen = epidemicState != EpidemicState.OFF ? outsideAirCalculatedMinDamper : outsideDamperMinOpen;
+        outsideAirCalculatedMinDamper = Math.min(outsideDamperMinOpen + dcvCalculatedMinDamper,100);
+        if (((ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED)  && (epidemicState == EpidemicState.OFF))|| ScheduleProcessJob.getSystemOccupancy() == Occupancy.VACATION) {
             outsideAirCalculatedMinDamper = 0;
             Log.d(L.TAG_CCU_OAO,"System Unoccupied, Disable DCV ");
         }
@@ -253,5 +276,35 @@ public class OAOProfile
         Log.d(L.TAG_CCU_OAO, "averageTemp "+averageTemp+" averageHumidity "+averageHumidity+" Enthalpy "+H);
         return CCUUtils.roundToTwoDecimal(H);
     }
-    
+
+    private void handleSmartPrePurgeControl(){
+        double smartPrePurgeRunTime = TunerUtil.readTunerValByQuery("prePurge and runtime and oao and system", oaoEquip.equipRef);
+        double smartPrePurgeOccupiedTimeOffset = TunerUtil.readTunerValByQuery("prePurge and occupied and time and offset and oao and system", oaoEquip.equipRef);
+        Occupied occuSchedule = ScheduleProcessJob.getNextOccupiedTimeInMillis();
+        int minutesToOccupancy = occuSchedule != null ? (int)occuSchedule.getMillisecondsUntilNextChange()/60000 : -1;
+        if((minutesToOccupancy != -1) && (smartPrePurgeOccupiedTimeOffset >= minutesToOccupancy) && (minutesToOccupancy >= (smartPrePurgeOccupiedTimeOffset - smartPrePurgeRunTime))) {
+            outsideAirCalculatedMinDamper = oaoEquip.getConfigNumVal("userIntent and purge and outside and damper and pos and min and open");
+            CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.PREPURGE.ordinal());
+            epidemicState = EpidemicState.PREPURGE;
+        }else {
+            CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.OFF.ordinal());
+            epidemicState = EpidemicState.OFF;
+        }
+    }
+    private void handleSmartPostPurgeControl(){
+        double smartPostPurgeRunTime = TunerUtil.readTunerValByQuery("postPurge and runtime and oao and system", oaoEquip.equipRef);
+        double smartPostPurgeOccupiedTimeOffset = TunerUtil.readTunerValByQuery("postPurge and occupied and time and offset and oao and system", oaoEquip.equipRef);
+        Occupied occuSchedule = ScheduleProcessJob.getPrevOccupiedTimeInMillis();
+        if(occuSchedule != null)
+            Log.d(L.TAG_CCU_OAO, "System Unoccupied, check postpurge22 = "+occuSchedule.getMillisecondsUntilPrevChange()+","+(occuSchedule.getMillisecondsUntilPrevChange())/60000+","+smartPostPurgeOccupiedTimeOffset+","+smartPostPurgeRunTime);
+        int minutesInUnoccupied = occuSchedule != null ? (int)(occuSchedule.getMillisecondsUntilPrevChange()/60000) : -1;
+        if((minutesInUnoccupied != -1) && (minutesInUnoccupied  >= smartPostPurgeOccupiedTimeOffset) && (minutesInUnoccupied <= (smartPostPurgeRunTime + smartPostPurgeOccupiedTimeOffset))) {
+            outsideAirCalculatedMinDamper = oaoEquip.getConfigNumVal("userIntent and purge and outside and damper and pos and min and open");
+            CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.POSTPURGE.ordinal());
+            epidemicState = EpidemicState.POSTPURGE;
+        }else {
+            CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.OFF.ordinal());
+            epidemicState = EpidemicState.OFF;
+        }
+    }
 }

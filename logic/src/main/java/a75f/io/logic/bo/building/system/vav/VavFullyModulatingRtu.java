@@ -14,6 +14,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
@@ -183,7 +184,22 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         ControlMote.setAnalogOut("analog3", signal);
         
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
-        if (VavSystemController.getInstance().getSystemState() == COOLING)
+        double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+getSystemEquipRef()+"\"");
+        EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
+        if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE) && (L.ccu().oaoProfile != null)){
+            double smartPurgeDabFanLoopOp = TunerUtil.readTunerValByQuery("system and purge and dab and fan and loop and output", L.ccu().oaoProfile.getEquipRef());
+            double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
+            double spSpMin = VavTRTuners.getStaticPressureTRTunerVal("spmin");
+            double staticPressureLoopOutput = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax -spSpMin)) ;
+            if((VavSystemController.getInstance().getSystemState() == COOLING)) {
+                if(staticPressureLoopOutput < ((spSpMax - spSpMin) * smartPurgeDabFanLoopOp))
+                    systemFanLoopOp = ((spSpMax - spSpMin) * smartPurgeDabFanLoopOp);
+                else systemFanLoopOp = smartPurgeDabFanLoopOp;
+            }else if(VavSystemController.getInstance().getSystemState() == HEATING)
+                systemFanLoopOp = Math.max((int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier),smartPurgeDabFanLoopOp);
+            else
+                systemFanLoopOp = 0;
+        }else if (VavSystemController.getInstance().getSystemState() == COOLING)
         {
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
             double spSpMin = VavTRTuners.getStaticPressureTRTunerVal("spmin");

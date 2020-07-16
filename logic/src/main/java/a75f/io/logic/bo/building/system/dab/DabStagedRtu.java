@@ -8,6 +8,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
@@ -116,9 +117,22 @@ public class DabStagedRtu extends DabSystemProfile
         } else {
             systemHeatingLoopOp = 0;
         }
-        
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
-        if (getSystemController().getSystemState() == COOLING)
+        double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+getSystemEquipRef()+"\"");
+        EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
+        if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE) && L.ccu().oaoProfile != null){
+            double smartPurgeDabFanLoopOp = TunerUtil.readTunerValByQuery("system and purge and dab and fan and loop and output", L.ccu().oaoProfile.getEquipRef());
+            if(L.ccu().oaoProfile.isEconomizingAvailable()) {
+                double economizingToMainCoolingLoopMap = TunerUtil.readTunerValByQuery("oao and economizing and main and cooling and loop and map",
+                        L.ccu().oaoProfile.getEquipRef());
+                systemFanLoopOp = Math.max(Math.max(systemCoolingLoopOp * 100 / economizingToMainCoolingLoopMap, systemHeatingLoopOp), smartPurgeDabFanLoopOp);
+            }else if(getSystemController().getSystemState() == COOLING){
+                systemFanLoopOp = Math.max(systemCoolingLoopOp * analogFanSpeedMultiplier, smartPurgeDabFanLoopOp);
+            }else if(getSystemController().getSystemState() == HEATING)
+                systemFanLoopOp = Math.max(systemHeatingLoopOp * analogFanSpeedMultiplier, smartPurgeDabFanLoopOp);
+            else
+                systemFanLoopOp = smartPurgeDabFanLoopOp;
+        } else if (getSystemController().getSystemState() == COOLING)
         {
             systemFanLoopOp = (int) (systemCoolingLoopOp * analogFanSpeedMultiplier);
         } else if (getSystemController().getSystemState() == HEATING){

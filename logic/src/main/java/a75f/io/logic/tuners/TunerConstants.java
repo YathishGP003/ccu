@@ -108,6 +108,13 @@ public class TunerConstants
     public static final double OAO_OA_DAMPER_MAT_MIN = 44 ;
     public static final double OAO_ECONOMIZING_TO_MAIN_COOLING_LOOP_MAP = 30 ;
     public static final double OAO_ENTHALPY_DUCT_COMPENSATION_OFFSET = 0 ;
+    public static final double OAO_SMART_PURGE_RUNTIME_DEFAULT = 120 ;
+    public static final double OAO_SMART_PRE_PURGE_START_TIME_OFFSET = 180 ;
+    public static final double OAO_SMART_POST_PURGE_START_TIME_OFFSET = 20 ;
+    public static final double OAO_SMART_PURGE_FAN_SPEED = 50 ;
+    public static final double OAO_SMART_PURGE_FAN_LOOP_OUTPUT_MIN = 50 ;
+    public static final double OAO_SMART_PURGE_MIN_DAMPER_OPEN_MULTIPLIER = 1.5 ;
+
 	public static final String VAV_TUNER_GROUP = "VAV";
     public static final String DAB_TUNER_GROUP = "DAB";
     public static final String OAO_TUNER_GROUP = "OAO";

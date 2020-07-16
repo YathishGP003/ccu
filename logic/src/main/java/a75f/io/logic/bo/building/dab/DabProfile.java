@@ -174,9 +174,9 @@ public class DabProfile extends ZoneProfile
 
         double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
-        if(epidemicState != EpidemicState.OFF && L.ccu().oaoProfile != null){
-            int smartPurgeDABDamperMinOpenMultiplier = (int)TunerUtil.readTunerValByQuery("purge and system and dab and damper and pos and multiplier and min ", L.ccu().oaoProfile.getEquipRef());
-            damper.iaqCompensatedMinPos = damper.minPosition * smartPurgeDABDamperMinOpenMultiplier;
+        if((epidemicState != EpidemicState.OFF) && (L.ccu().oaoProfile != null)){
+            double smartPurgeDABDamperMinOpenMultiplier = TunerUtil.readTunerValByQuery("purge and system and dab and damper and pos and multiplier and min ", L.ccu().oaoProfile.getEquipRef());
+            damper.iaqCompensatedMinPos =(int) (damper.minPosition * smartPurgeDABDamperMinOpenMultiplier);
         }else
             damper.iaqCompensatedMinPos = damper.minPosition;
         //CO2 loop output from 0-50% modulates damper min position.

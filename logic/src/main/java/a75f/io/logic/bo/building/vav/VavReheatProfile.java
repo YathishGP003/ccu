@@ -208,10 +208,9 @@ public class VavReheatProfile extends VavProfile
             boolean occupied = (occ == null ? false : occ.isOccupied()) || (ScheduleProcessJob.getSystemOccupancy() == Occupancy.PRECONDITIONING);
             double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");
             EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
-            Log.d(L.TAG_CCU_ZONE, "Zone VAV OAO occupaancy : "+occupied+" occ "+occ+","+epidemicMode+","+epidemicState.name());
             if(epidemicState != EpidemicState.OFF && L.ccu().oaoProfile != null){
-                int smartPurgeDABDamperMinOpenMultiplier = (int)TunerUtil.readTunerValByQuery("purge and system and vav and damper and pos and min and multiplier", L.ccu().oaoProfile.getEquipRef());
-                damper.iaqCompensatedMinPos =(damper.minPosition * smartPurgeDABDamperMinOpenMultiplier);
+                double smartPurgeDABDamperMinOpenMultiplier = TunerUtil.readTunerValByQuery("purge and system and vav and damper and pos and min and multiplier", L.ccu().oaoProfile.getEquipRef());
+                damper.iaqCompensatedMinPos = (int)(damper.minPosition * smartPurgeDABDamperMinOpenMultiplier);
             }else
                 damper.iaqCompensatedMinPos = damper.minPosition;
             //CO2 loop output from 0-50% modulates damper min position.

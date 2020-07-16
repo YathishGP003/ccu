@@ -76,6 +76,7 @@ public abstract class BaseDialogFragment extends DialogFragment
         {
             if(fragment instanceof BaseDialogFragment)
             {
+				    ((BaseDialogFragment) fragment).dismiss();
 					removeDialogFragment(((BaseDialogFragment) fragment).getIdString());
             }
         }

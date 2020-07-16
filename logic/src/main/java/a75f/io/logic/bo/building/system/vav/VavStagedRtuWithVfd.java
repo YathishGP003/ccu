@@ -138,7 +138,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
                     }
                 }
             }else if (epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE){
-                signal = systemFanLoopOp;
+                signal = systemFanLoopOp/10;
             }
             else if (isEconomizingAvailable && (systemCoolingLoopOp > 0)){
                 signal = getConfigVal("analog2 and economizer");

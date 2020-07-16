@@ -182,43 +182,4 @@ public class HSUtil
         }
         return null;
     }
-
-    public static String formatDataObject(String data){
-        return data.replaceAll("[\\[\\](){}]","");
-    }
-
-    public static HashMap<String, String> getDataMap(String data){
-
-        HashMap<String, String> map = new HashMap<>();
-        if (data.contains(",")){
-            String[] parts = data.split(",");
-            data = parts[0];
-        }
-        String[] hisVal = data.split("\\s+");
-        for (String keys: hisVal){
-
-            String[] vals = keys.split(":");
-            map.put(vals[0],vals[1]);
-        }
-
-        return map;
-    }
-
-    public static ArrayList<HashMap> gridToMapList(HGrid hGrid){
-
-        ArrayList<HashMap> valList = new ArrayList<>();
-        Iterator it = hGrid.iterator();
-        while (it.hasNext()) {
-            HashMap<Object, Object> map = new HashMap<>();
-            HRow r = (HRow) it.next();
-            HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
-            while (ri.hasNext()) {
-                HDict.MapEntry e = (HDict.MapEntry) ri.next();
-                map.put(e.getKey(), e.getValue());
-            }
-            valList.add(map);
-        }
-
-        return valList;
-    }
 }

@@ -1,14 +1,9 @@
 package a75f.io.api.haystack;
 
-import a75f.io.constants.CcuFieldConstants;
-import a75f.io.constants.HttpConstants;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Looper;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -22,6 +17,7 @@ import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HHisItem;
+import org.projecthaystack.HList;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
@@ -47,8 +43,9 @@ import a75f.io.api.haystack.sync.EntityParser;
 import a75f.io.api.haystack.sync.EntitySyncHandler;
 import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.constants.CcuFieldConstants;
+import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
-import a75f.io.api.haystack.BuildConfig;
 
 public class CCUHsApi
 {
@@ -1013,33 +1010,41 @@ public class CCUHsApi
         }
 
         for (List<HDict> sublist : partitions) {
-            HGrid responseGrid = hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
-            ArrayList<HashMap> valList = HSUtil.gridToMapList(responseGrid);
+            HGrid wa = hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
+            ArrayList<HDict> hDictList = new ArrayList<>();
 
-            ArrayList<HDict> hisDicts = new ArrayList<>();
-            for(HashMap v : valList)
-            {
-                String val =  HSUtil.formatDataObject(v.get("data").toString());
+            Iterator rowIterator = wa.iterator();
+            while (rowIterator.hasNext()) {
+                HRow row = (HRow) rowIterator.next();
+                String id = row.get("id").toString();
+                String kind = row.get("kind").toString();
+                HVal data = row.get("data");
 
-                if (!TextUtils.isEmpty(val)){
-                    HashMap<String, String>  map = HSUtil.getDataMap(val);
+                if (data instanceof HList && ((HList) data).size() > 0) {
+                    HList dataList = (HList) data;
+                    HDict dataElement = (HDict) dataList.get(0);
 
-                    HDict pid = new HDictBuilder().add("id", HRef.copy(v.get("id").toString()))
-                            .add("level", Integer.parseInt(map.get("level")))
-                            .add("who", map.get("who").replaceAll("^\"|\"$", ""))
-                            .add("val", v.get("kind").toString().equals("string") ? HStr.make(map.get("val")) : HNum.make(Double.parseDouble(map.get("val")))).toDict();
-                    hisDicts.add(pid);
+                    String who = dataElement.getStr("who");
+                    String level = dataElement.get("level").toString();
+                    HVal val = dataElement.get("val");
+
+                    HDict pid = new HDictBuilder().add("id", HRef.copy(id))
+                            .add("level", Integer.parseInt(level))
+                            .add("who", who)
+                            .add("val", kind.equals("string") ? HStr.make(val.toString()) : val).toDict();
+                    hDictList.add(pid);
 
                     //save his data to local cache
-                    HDict rec = hsClient.readById(HRef.copy(getLUID(v.get("id").toString())));
-                    tagsDb.saveHisItemsToCache(rec, new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), v.get("kind").toString().equals("string") ? HStr.make(map.get("val")) : HNum.make(Double.parseDouble(map.get("val"))))}, true);
+                    HDict rec = hsClient.readById(HRef.copy(getLUID(id)));
+                    tagsDb.saveHisItemsToCache(rec, new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), kind.equals("string") ? HStr.make(val.toString()) : val)}, true);
 
                     //save points on tagsDb
-                   tagsDb.onPointWrite(rec,Integer.parseInt(map.get("level")), v.get("kind").toString().equals("string") ? HStr.make(map.get("val")) : HNum.make(Double.parseDouble(map.get("val"))),map.get("who").replaceAll("^\"|\"$", ""),HNum.make(0), rec);
+                    tagsDb.onPointWrite(rec, Integer.parseInt(level), kind.equals("string") ? HStr.make(val.toString()) : val, who, HNum.make(0), rec);
                 }
+
             }
 
-            HGrid response = hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(hisDicts.toArray(new HDict[hisDicts.size()])));
+            HGrid responseGrid = hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(hDictList.toArray(new HDict[hDictList.size()])));
         }
 
         return true;
@@ -1076,8 +1081,8 @@ public class CCUHsApi
 
     private void importBuildingTuners(String siteId, HClient hClient) {
 
-        ArrayList<Equip>        equips        = new ArrayList<>();
-        ArrayList<Point>        points        = new ArrayList<>();
+        ArrayList<Equip> equips = new ArrayList<>();
+        ArrayList<Point> points = new ArrayList<>();
         try {
             HDict tunerDict = new HDictBuilder().add("filter", "tuner and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
             HGrid tunerGrid = hClient.call("read", HGridBuilder.dictToGrid(tunerDict));

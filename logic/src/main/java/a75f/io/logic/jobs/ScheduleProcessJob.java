@@ -618,7 +618,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         if (systemOccupancyValue != systemOccupancy.ordinal()){
             Globals.getInstance().getApplicationContext().sendBroadcast(new Intent(ACTION_OCCUPANCY_CHANGE));
         }
-        
+
         CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and mode",(double)systemOccupancy.ordinal());
         CcuLog.d(TAG_CCU_JOB, "systemOccupancy status : " + systemOccupancy.name());
     }
@@ -1127,46 +1127,82 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
 
         plcPoints.put("Target Value",targetValue);
-        if(analog1sensorType == 1 || analog1sensorType == 0)
-        {
-            plcPoints.put("Unit Type","Voltage");
-            plcPoints.put("Unit","V");
+        if (dynamicSetpoint > 0){
+            if(analog2sensorType == 0)
+            {
+                plcPoints.put("Dynamic Unit Type","Voltage");
+                plcPoints.put("Dynamic Unit","V");
+            }
+            if(analog2sensorType == 1 || analog2sensorType == 2)
+            {
+                plcPoints.put("Dynamic Unit Type","Pressure");
+                plcPoints.put("Dynamic Unit","WC");
+            }
+            if(analog2sensorType == 3)
+            {
+                plcPoints.put("Dynamic Unit Type","Airflow");
+                plcPoints.put("Dynamic Unit","%");
+            }
+            if(analog2sensorType == 4)
+            {
+                plcPoints.put("Dynamic Unit Type","Humidity");
+                plcPoints.put("Dynamic Unit","%");
+            }
+            if(analog2sensorType == 5)
+            {
+                plcPoints.put("Dynamic Unit Type","CO2");
+                plcPoints.put("Dynamic Unit","PPM");
+            }
+            if(analog2sensorType == 6)
+            {
+                plcPoints.put("Dynamic Unit Type","CO");
+                plcPoints.put("Dynamic Unit","PPM");
+            }
+            if(analog2sensorType == 7)
+            {
+                plcPoints.put("Dynamic Unit Type","NO2");
+                plcPoints.put("Dynamic Unit","PPM");
+            }
+            if(analog2sensorType == 8 || analog2sensorType == 9 || analog2sensorType == 10)
+            {
+                plcPoints.put("Dynamic Unit Type","Current");
+                plcPoints.put("Dynamic Unit","AMPS");
+            }
         }
-        if(analog1sensorType == 2 || analog1sensorType == 3)
-        {
-            plcPoints.put("Unit Type","Pressure");
-            plcPoints.put("Unit","WC");
-        }
-        if(analog1sensorType == 4)
-        {
-            plcPoints.put("Unit Type","Airflow");
-            plcPoints.put("Unit","%");
-        }
-        if(analog1sensorType == 5)
-        {
-            plcPoints.put("Unit Type","Humidity");
-            plcPoints.put("Unit","%");
-        }
-        if(analog1sensorType == 6)
-        {
-            plcPoints.put("Unit Type","CO2");
-            plcPoints.put("Unit","PPM");
-        }
-        if(analog1sensorType == 7)
-        {
-            plcPoints.put("Unit Type","CO");
-            plcPoints.put("Unit","PPM");
-        }
-        if(analog1sensorType == 8)
-        {
-            plcPoints.put("Unit Type","NO2");
-            plcPoints.put("Unit","PPM");
-        }
-        if(analog1sensorType == 9 || analog1sensorType == 10 || analog1sensorType == 11)
-        {
-            plcPoints.put("Unit Type","Current");
-            plcPoints.put("Unit","AMPS");
-        }
+
+            if (analog1sensorType == 0 || analog1sensorType == 1) {
+                plcPoints.put("Unit Type", "Voltage");
+                plcPoints.put("Unit", "V");
+            }
+            if (analog1sensorType == 2 || analog1sensorType == 3) {
+                plcPoints.put("Unit Type", "Pressure");
+                plcPoints.put("Unit", "WC");
+            }
+            if (analog1sensorType == 4) {
+                plcPoints.put("Unit Type", "Airflow");
+                plcPoints.put("Unit", "%");
+            }
+            if (analog1sensorType == 5) {
+                plcPoints.put("Unit Type", "Humidity");
+                plcPoints.put("Unit", "%");
+            }
+            if (analog1sensorType == 6) {
+                plcPoints.put("Unit Type", "CO2");
+                plcPoints.put("Unit", "PPM");
+            }
+            if (analog1sensorType == 7) {
+                plcPoints.put("Unit Type", "CO");
+                plcPoints.put("Unit", "PPM");
+            }
+            if (analog1sensorType == 8) {
+                plcPoints.put("Unit Type", "NO2");
+                plcPoints.put("Unit", "PPM");
+            }
+            if (analog1sensorType == 9 || analog1sensorType == 10 || analog1sensorType == 11) {
+                plcPoints.put("Unit Type", "Current");
+                plcPoints.put("Unit", "AMPS");
+            }
+
         return plcPoints;
     }
 
@@ -1539,7 +1575,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     }
     
     public static long getTemporaryHoldExpiry(Equip q) {
-        
+
         HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \""+q.getId()+"\"");
         if (coolDT.size() > 0) {
             HashMap thMap = HSUtil.getPriorityLevel(coolDT.get("id").toString(), 4);

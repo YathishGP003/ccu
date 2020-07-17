@@ -56,7 +56,7 @@ public class OAOEquip
         Equip.Builder b = new Equip.Builder().setSiteRef(siteRef).setDisplayName(equipDis).setRoomRef(roomRef).setFloorRef(floorRef).setProfile(profileType.name()).addMarker("equip").addMarker("oao").setAhuRef(ahuRef).setTz(tz).setGroup(String.valueOf(nodeAddr));
         equipRef = hayStack.addEquip(b.build());
         
-        OAOTuners.updateOaoSystemTuners(siteDis + "-OAO-" + nodeAddr, siteRef, equipRef, tz);
+        OAOTuners.updateOaoSystemTuners( siteRef, equipRef,siteDis + "-OAO-" + nodeAddr, tz);
         
         createConfigPoints(config, equipRef);
     

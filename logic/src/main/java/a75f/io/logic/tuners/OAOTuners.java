@@ -308,7 +308,6 @@ public class OAOTuners
         HashMap verifyablePoint = CCUHsApi.getInstance().read("point and tuner and "+defaulttuner+" and oao and "+tags+" and equipRef == \"" + equipref + "\"");
         if (verifyablePoint != null && verifyablePoint.size() > 0) {
             if(defaulttuner.equals("not default")) {
-                Log.d("OAO","verifyPointAvailability="+verifyablePoint.toString());
                 Point p = new Point.Builder().setHashMap(verifyablePoint).build();
                 if (!p.getMarkers().contains("system"))
                     p.getMarkers().add("system");

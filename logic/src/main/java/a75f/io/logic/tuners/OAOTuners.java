@@ -305,10 +305,11 @@ public class OAOTuners
 
     }
     private static boolean verifyPointsAvailability(String defaulttuner, String tags, String equipref){
-        ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and tuner and "+defaulttuner+" and oao and "+tags+" and equipRef == \"" + equipref + "\"");
-        if (points != null && points.size() > 0) {
+        HashMap verifyablePoint = CCUHsApi.getInstance().read("point and tuner and "+defaulttuner+" and oao and "+tags+" and equipRef == \"" + equipref + "\"");
+        if (verifyablePoint != null && verifyablePoint.size() > 0) {
             if(defaulttuner.equals("not default")) {
-                Point p = new Point.Builder().setHashMap(points.get(0)).build();
+                Log.d("OAO","verifyPointAvailability="+verifyablePoint.toString());
+                Point p = new Point.Builder().setHashMap(verifyablePoint).build();
                 if (!p.getMarkers().contains("system"))
                     p.getMarkers().add("system");
             }
@@ -316,7 +317,7 @@ public class OAOTuners
         }
         return false;
     }
-    public static void updateOaoSystemTuners(String equipdis, String siteRef, String equipref, String tz) {
+    public static void updateOaoSystemTuners(String siteRef, String equipref, String equipdis, String tz) {
 
         CCUHsApi hayStack = CCUHsApi.getInstance();
         if (!verifyPointsAvailability("not default","co2 and damper and opening and rate and multiplier and min",equipref)) {

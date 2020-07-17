@@ -468,7 +468,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                         currOccupied.getCurrentlyOccupiedSchedule().getEtmm());
 
             case PRECONDITIONING:
-                return String.format("%sIn Preconditioning", epidemicString);
+                return String.format("In Preconditioning");
 
             case UNOCCUPIED:
                 if (nextOccupied == null || nextOccupied.getNextOccupiedSchedule() == null ){

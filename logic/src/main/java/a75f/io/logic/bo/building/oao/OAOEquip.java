@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.oao;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -31,6 +32,8 @@ public class OAOEquip
         if (equipMap != null && equipMap.size() > 0)
         {
             equipRef = equipMap.get("id").toString();
+            OAOTuners.updateOaoSystemTuners(equipMap.get("siteRef").toString(), equipRef, equipMap.get("dis").toString(),equipMap.get("tz").toString());
+            updateNewConfigParams(equipMap.get("siteRef").toString(), equipRef, equipMap.get("dis").toString(),equipMap.get("tz").toString());
         } else {
             throw new IllegalStateException("Equip should be created before init");
         }
@@ -53,7 +56,7 @@ public class OAOEquip
         Equip.Builder b = new Equip.Builder().setSiteRef(siteRef).setDisplayName(equipDis).setRoomRef(roomRef).setFloorRef(floorRef).setProfile(profileType.name()).addMarker("equip").addMarker("oao").setAhuRef(ahuRef).setTz(tz).setGroup(String.valueOf(nodeAddr));
         equipRef = hayStack.addEquip(b.build());
         
-        OAOTuners.addEquipTuners(siteDis + "-OAO-" + nodeAddr, siteRef, equipRef, tz);
+        OAOTuners.updateOaoSystemTuners(siteDis + "-OAO-" + nodeAddr, siteRef, equipRef, tz);
         
         createConfigPoints(config, equipRef);
     
@@ -498,7 +501,36 @@ public class OAOEquip
         hayStack.writeDefaultValById(enhancedVentilationMinDamperOpenId, config.enhancedVentilationMinDamperOpen);
         hayStack.writeHisValById(enhancedVentilationMinDamperOpenId, config.enhancedVentilationMinDamperOpen);
     }
-    
+    public void updateNewConfigParams(String siteRef,String equipRef, String equipDis, String tz){
+        ArrayList<HashMap> purgePoints = CCUHsApi.getInstance().readAll("point and userIntent and oao and purge and outside and damper and pos and min and open and equipRef == \"" + equipRef + "\"");
+        if (purgePoints == null || purgePoints.size() == 0) {
+            Point smartPurgeMinDamperOpen = new Point.Builder().setDisplayName(equipDis + "-systemPurgeOutsideDamperMinPos")
+                    .setEquipRef(equipRef)
+                    .setSiteRef(siteRef).setHisInterpolate("cov")
+                    .addMarker("config").addMarker("oao").addMarker("writable").addMarker("purge").addMarker("damper").addMarker("sp").addMarker("his")
+                    .addMarker("pos").addMarker("min").addMarker("open").addMarker("outside").addMarker("userIntent")
+                    .setGroup(String.valueOf(nodeAddr))
+                    .setUnit("%")
+                    .setTz(tz).build();
+            String smartPurgeMinDamperOpenId = CCUHsApi.getInstance().addPoint(smartPurgeMinDamperOpen);
+            hayStack.writeDefaultValById(smartPurgeMinDamperOpenId, 100.0);
+            hayStack.writeHisValById(smartPurgeMinDamperOpenId, 100.0);
+        }
+        ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and userIntent and oao and enhanced and ventilation and outside and damper and pos and min and open and equipRef == \"" + equipRef + "\"");
+        if (points == null || points.size() == 0) {
+            Point enhancedVentilationMinDamperOpen = new Point.Builder().setDisplayName(equipDis + "-systemEnhancedVentilationOutsideDamperMinPos")
+                    .setEquipRef(equipRef)
+                    .setSiteRef(siteRef).setHisInterpolate("cov")
+                    .addMarker("config").addMarker("oao").addMarker("writable").addMarker("enhanced").addMarker("ventilation").addMarker("damper").addMarker("sp").addMarker("his")
+                    .addMarker("pos").addMarker("min").addMarker("open").addMarker("outside").addMarker("userIntent")
+                    .setGroup(String.valueOf(nodeAddr))
+                    .setUnit("%")
+                    .setTz(tz).build();
+            String enhancedVentilationMinDamperOpenId = CCUHsApi.getInstance().addPoint(enhancedVentilationMinDamperOpen);
+            hayStack.writeDefaultValById(enhancedVentilationMinDamperOpenId, 50.0);
+            hayStack.writeHisValById(enhancedVentilationMinDamperOpenId, 50.0);
+        }
+    }
     public double getHisVal(String tags) {
         return hayStack.readHisValByQuery("point and oao and "+tags+" and group == \""+nodeAddr+'\"');
     }
@@ -523,6 +555,8 @@ public class OAOEquip
         config.co2Threshold = getConfigNumVal("co2 and threshold");
         config.exhaustFanHysteresis = getConfigNumVal("exhaust and fan and hysteresis");
         config.usePerRoomCO2Sensing = getConfigNumVal("config and oao and co2 and sensing") > 0? true : false;
+        config.smartPurgeMinDamperOpen = getConfigNumVal("userIntent and purge and outside and damper and pos and min and open");
+        config.enhancedVentilationMinDamperOpen = getConfigNumVal("userIntent and enhanced and ventilation and outside and damper and pos and min and open");
         
         config.setNodeType(NodeType.SMART_NODE);
         

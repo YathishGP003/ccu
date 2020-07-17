@@ -109,8 +109,8 @@ public class VavStagedRtu extends VavSystemProfile
                 hayStack.deleteEntityTree(equip.get("id").toString());
             } else {
                 initTRSystem();
+                addNewSystemUserIntentPoints(equip.get("id").toString());
                 updateStagesSelected();
-                //sysEquip = new SystemEquip(equip.get("id").toString());
                 return;
             }
         }

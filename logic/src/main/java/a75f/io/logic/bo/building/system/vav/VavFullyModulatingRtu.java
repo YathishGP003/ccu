@@ -357,6 +357,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                 hayStack.deleteEntityTree(equip.get("id").toString());
             } else {
                 initTRSystem();
+                addNewSystemUserIntentPoints(equip.get("id").toString());
                 return;
             }
         }

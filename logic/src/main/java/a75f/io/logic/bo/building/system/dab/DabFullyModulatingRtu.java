@@ -296,7 +296,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             if (!equip.get("profile").equals(ProfileType.SYSTEM_DAB_ANALOG_RTU.name())) {
                 hayStack.deleteEntityTree(equip.get("id").toString());
             } else {
-                //sysEquip = new SystemEquip(equip.get("id").toString());
+                addNewSystemUserIntentPoints(equip.get("id").toString());
                 return;
             }
         }

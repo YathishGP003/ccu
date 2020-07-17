@@ -777,6 +777,40 @@ public abstract class SystemProfile
         Point averageTemperature = new Point.Builder().setDisplayName(equipDis + "-" + "averageTemperature").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("average").addMarker("temp").addMarker("his").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(averageTemperature);
         addCMPoints(siteRef, equipref, equipDis, tz);
+        addNewSystemUserIntentPoints(equipref);
+    }
+    private boolean verifyPointsAvailability(String tags, String equipRef){
+        ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and system and userIntent and "+tags+" and equipRef == \"" + equipRef + "\"");
+        if (points != null || points.size() > 0) {
+            return  true;
+        }
+        return false;
+    }
+    public void addNewSystemUserIntentPoints(String equipref){
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap siteMap = hayStack.read(Tags.SITE);
+        String siteRef = (String) siteMap.get(Tags.ID);
+        String tz = siteMap.get("tz").toString();
+        String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
+        if(!verifyPointsAvailability("prePurge and enabled",equipref)) {
+            Point smartPrePurgePoint = new Point.Builder().setDisplayName(equipDis + "-" + "systemPrePurgeEnabled").setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("prePurge").addMarker("enabled").setEnums("false,true").setTz(tz).build();
+            String smartPrePurgePointId = CCUHsApi.getInstance().addPoint(smartPrePurgePoint);
+            CCUHsApi.getInstance().writePoint(smartPrePurgePointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
+            CCUHsApi.getInstance().writeHisValById(smartPrePurgePointId, 0.0);
+        }
+        if(!verifyPointsAvailability("postPurge and enabled",equipref)) {
+            Point smartPostPurgePoint = new Point.Builder().setDisplayName(equipDis + "-" + "systemPostPurgeEnabled").setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("postPurge").addMarker("enabled").setEnums("false,true").setTz(tz).build();
+            String smartPostPurgePointId = CCUHsApi.getInstance().addPoint(smartPostPurgePoint);
+            CCUHsApi.getInstance().writePoint(smartPostPurgePointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
+            CCUHsApi.getInstance().writeHisValById(smartPostPurgePointId, 0.0);
+        }
+
+        if(!verifyPointsAvailability("enhanced and ventilation and enabled",equipref)) {
+            Point enhancedVentilationPoint = new Point.Builder().setDisplayName(equipDis + "-" + "systemEnhancedVentilationEnabled").setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("enhanced").addMarker("ventilation").addMarker("enabled").setEnums("false,true").setTz(tz).build();
+            String enhancedVentilationPointId = CCUHsApi.getInstance().addPoint(enhancedVentilationPoint);
+            CCUHsApi.getInstance().writePoint(enhancedVentilationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
+            CCUHsApi.getInstance().writeHisValById(enhancedVentilationPointId, 0.0);
+        }
     }
     
     public void updateOutsideWeatherParams() {

@@ -306,7 +306,7 @@ public class OAOTuners
     }
     private static boolean verifyPointsAvailability(String defaulttuner, String tags, String equipref){
         ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and tuner and "+defaulttuner+" and oao and "+tags+" and equipRef == \"" + equipref + "\"");
-        if (points != null || points.size() > 0) {
+        if (points != null && points.size() > 0) {
             if(defaulttuner.equals("not default")) {
                 Point p = new Point.Builder().setHashMap(points.get(0)).build();
                 if (!p.getMarkers().contains("system"))

@@ -781,7 +781,7 @@ public abstract class SystemProfile
     }
     private boolean verifyPointsAvailability(String tags, String equipRef){
         ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and system and userIntent and "+tags+" and equipRef == \"" + equipRef + "\"");
-        if (points != null || points.size() > 0) {
+        if (points != null && points.size() > 0) {
             return  true;
         }
         return false;

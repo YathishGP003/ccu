@@ -144,6 +144,14 @@ public class OAOProfile
                 CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.OFF.ordinal());
                 epidemicState = EpidemicState.OFF;
             }
+        }else if((ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED) && (ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION) && (ScheduleProcessJob.getSystemOccupancy() != Occupancy.PRECONDITIONING)){
+            boolean isEnhancedVentilation = TunerUtil.readSystemUserIntentVal("enhanced and ventilation and enabled ") > 0;
+            if(isEnhancedVentilation)
+                handleEnhancedVentilationControl();
+            else {
+                CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.OFF.ordinal());
+                epidemicState = EpidemicState.OFF;
+            }
         }else {
             CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.OFF.ordinal());
             epidemicState = EpidemicState.OFF;
@@ -305,5 +313,11 @@ public class OAOProfile
             CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.OFF.ordinal());
             epidemicState = EpidemicState.OFF;
         }
+    }
+    private void handleEnhancedVentilationControl(){
+        outsideAirCalculatedMinDamper = CCUHsApi.getInstance().readDefaultVal("enhanced and ventilation and outside and damper and pos and min and open and equipRef ==\""+oaoEquip.equipRef+"\"");
+        CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.ENHANCED_VENTILATION.ordinal());
+        Log.d(L.TAG_CCU_OAO, "System occupied, check enhanced ventilation = "+outsideAirCalculatedMinDamper+","+epidemicState.name());
+        epidemicState = EpidemicState.ENHANCED_VENTILATION;
     }
 }

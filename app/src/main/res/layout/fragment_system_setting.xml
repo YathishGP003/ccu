@@ -367,6 +367,34 @@
                         android:textOff=""
                         android:textOn="" />
                 </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="30dp"
+                        android:layout_gravity="start"
+                        android:text="@string/lable_enhanced_ventilation"
+                        android:textAppearance="@style/label_black" />
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                    <ToggleButton
+                        android:id="@+id/tbEnhancedVentilation"
+                        android:layout_width="46.12dp"
+                        android:layout_height="27.42dp"
+                        android:layout_gravity="end"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="false"
+                        android:textOff=""
+                        android:textOn="" />
+                </LinearLayout>
             </LinearLayout>
 
 

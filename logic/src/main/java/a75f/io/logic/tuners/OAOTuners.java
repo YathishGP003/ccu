@@ -138,12 +138,12 @@ public class OAOTuners
         String economizingToMainCoolingLoopMapId = hayStack.addPoint(economizingToMainCoolingLoopMap);
         hayStack.writePoint(economizingToMainCoolingLoopMapId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_ECONOMIZING_TO_MAIN_COOLING_LOOP_MAP, 0);
         hayStack.writeHisValById(economizingToMainCoolingLoopMapId, TunerConstants.OAO_ECONOMIZING_TO_MAIN_COOLING_LOOP_MAP);
-        updateNewTuners(siteRef,equipRef, equipDis,tz);
+        updateNewTuners( siteRef,equipRef, equipDis,tz,true);
     }
 
-    public static void updateNewTuners(String siteRef, String equipRef, String equipDis, String tz){
+    public static void updateNewTuners(String siteRef, String equipRef, String equipDis, String tz,boolean isNewSite){
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        if(!verifyPointsAvailability("default","prePurge and runtime",equipRef)) {
+        if(isNewSite || !verifyPointsAvailability("default","prePurge and runtime",equipRef)) {
             Point smartPrePurgeRuntime  = new Point.Builder()
                     .setDisplayName(equipDis+"-OAO-"+"systemPrePurgeRuntimeTuner")
                     .setSiteRef(siteRef)
@@ -159,7 +159,7 @@ public class OAOTuners
             hayStack.writeHisValById(smartPrePurgeRuntimeId, TunerConstants.OAO_SMART_PURGE_RUNTIME_DEFAULT);
         }
 
-        if(!verifyPointsAvailability("default","prePurge and occupied and time and offset",equipRef)) {
+        if(isNewSite || !verifyPointsAvailability("default","prePurge and occupied and time and offset",equipRef)) {
             Point smartPrePurgeStartTimeOffset = new Point.Builder()
                     .setDisplayName(equipDis + "-OAO-" + "systemPrePurgeOccupiedTimeOffsetTuner")
                     .setSiteRef(siteRef)
@@ -175,7 +175,7 @@ public class OAOTuners
             hayStack.writeHisValById(smartPrePurgeStartTimeOffsetId, TunerConstants.OAO_SMART_PRE_PURGE_START_TIME_OFFSET);
         }
 
-        if(!verifyPointsAvailability("default","prePurge and fan and speed",equipRef)) {
+        if(isNewSite || !verifyPointsAvailability("default","prePurge and fan and speed",equipRef)) {
             Point smartPrePurgeFanSpeed = new Point.Builder()
                     .setDisplayName(equipDis + "-OAO-" + "systemPrePurgeFanSpeedTuner")
                     .setSiteRef(siteRef)
@@ -191,7 +191,7 @@ public class OAOTuners
             hayStack.writeHisValById(smartPrePurgeFanSpeedId, TunerConstants.OAO_SMART_PURGE_FAN_SPEED);
         }
 
-        if(!verifyPointsAvailability("default","postPurge and runtime",equipRef)) {
+        if(isNewSite || !verifyPointsAvailability("default","postPurge and runtime",equipRef)) {
             Point smartPostPurgeRuntime = new Point.Builder()
                     .setDisplayName(equipDis + "-OAO-" + "systemPostPurgeRuntimeTuner")
                     .setSiteRef(siteRef)
@@ -207,7 +207,7 @@ public class OAOTuners
             hayStack.writeHisValById(smartPostPurgeRuntimeId, TunerConstants.OAO_SMART_PURGE_RUNTIME_DEFAULT);
         }
 
-        if(!verifyPointsAvailability("default","postPurge and occupied and time and offset",equipRef)) {
+        if(isNewSite || !verifyPointsAvailability("default","postPurge and occupied and time and offset",equipRef)) {
             Point smartPostPurgeStartTimeOffset = new Point.Builder()
                     .setDisplayName(equipDis + "-OAO-" + "systemPostPurgeOccupiedTimeOffsetTuner")
                     .setSiteRef(siteRef)
@@ -223,7 +223,7 @@ public class OAOTuners
             hayStack.writeHisValById(smartPostPurgeStartTimeOffsetId, TunerConstants.OAO_SMART_POST_PURGE_START_TIME_OFFSET);
         }
 
-        if(!verifyPointsAvailability("default","postPurge and fan and speed",equipRef)) {
+        if(isNewSite || !verifyPointsAvailability("default","postPurge and fan and speed",equipRef)) {
             Point smartPostPurgeFanSpeed = new Point.Builder()
                     .setDisplayName(equipDis + "-OAO-" + "systemPostPurgeFanSpeedTuner")
                     .setSiteRef(siteRef)
@@ -239,7 +239,7 @@ public class OAOTuners
             hayStack.writeHisValById(smartPostPurgeFanSpeedId, TunerConstants.OAO_SMART_PURGE_FAN_SPEED);
         }
 
-        if(!verifyPointsAvailability("default","purge and dab and fan and loop and output and min",equipRef)) {
+        if(isNewSite || !verifyPointsAvailability("default","purge and dab and fan and loop and output and min",equipRef)) {
             Point smartPurgeDabFanLoopOutput = new Point.Builder()
                     .setDisplayName(equipDis + "-OAO-" + "systemPurgeDabFanLoopOutput")
                     .setSiteRef(siteRef)
@@ -255,7 +255,7 @@ public class OAOTuners
             hayStack.writeHisValById(smartPurgeDabFanLoopOutputId, TunerConstants.OAO_SMART_PURGE_FAN_LOOP_OUTPUT_MIN);
         }
 
-        if(!verifyPointsAvailability("default","purge and vav and fan and loop and output and min",equipRef)) {
+        if(isNewSite || !verifyPointsAvailability("default","purge and vav and fan and loop and output and min",equipRef)) {
             Point smartPurgeVavFanLoopOutput = new Point.Builder()
                     .setDisplayName(equipDis + "-OAO-" + "systemPurgeVavFanLoopOutput")
                     .setSiteRef(siteRef)
@@ -271,7 +271,7 @@ public class OAOTuners
             hayStack.writeHisValById(smartPurgeVavFanLoopOutputId, TunerConstants.OAO_SMART_PURGE_FAN_LOOP_OUTPUT_MIN);
         }
 
-        if(!verifyPointsAvailability("default","purge and dab and damper and pos and multiplier and min",equipRef)) {
+        if(isNewSite || !verifyPointsAvailability("default","purge and dab and damper and pos and multiplier and min",equipRef)) {
             Point smartPurgeDabDamperMinOpenMultiplier = new Point.Builder()
                     .setDisplayName(equipDis + "-OAO-" + "systemPurgeDabDamperMinOpenMultiplier")
                     .setSiteRef(siteRef)
@@ -287,7 +287,7 @@ public class OAOTuners
             hayStack.writeHisValById(smartPurgeDabDamperMinOpenMultiplierId, TunerConstants.OAO_SMART_PURGE_MIN_DAMPER_OPEN_MULTIPLIER);
         }
 
-        if(!verifyPointsAvailability("default","purge and vav and damper and pos and multiplier and min",equipRef)) {
+        if(isNewSite || !verifyPointsAvailability("default","purge and vav and damper and pos and multiplier and min",equipRef)) {
             Point smartPurgeVavDamperMinOpenMultiplier = new Point.Builder()
                     .setDisplayName(equipDis + "-OAO-" + "systemPurgeVavDamperMinOpenMultiplier")
                     .setSiteRef(siteRef)

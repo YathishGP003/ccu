@@ -50,7 +50,7 @@ public class BuildingTuners
             HashMap siteMap = hayStack.read(Tags.SITE);
             siteRef = siteMap.get(Tags.ID).toString();
             tz = siteMap.get("tz").toString();
-            OAOTuners.updateNewTuners(siteRef,equipRef, equipDis,tz);
+            OAOTuners.updateNewTuners(siteRef,equipRef, equipDis,tz,false);
             CcuLog.d(L.TAG_CCU_SYSTEM,"BuildingTuner equip already present");
             return;
         }

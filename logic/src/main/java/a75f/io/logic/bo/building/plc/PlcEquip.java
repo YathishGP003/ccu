@@ -114,22 +114,6 @@ public class PlcEquip {
         String th1InputSensorId = hayStack.addPoint(th1InputSensor);
         hayStack.writeDefaultValById(th1InputSensorId, (double) config.th1InputSensor);
 
-        Point pidTargetValue = new Point.Builder()
-                .setDisplayName(equipDis + "-pidTargetValue")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef)
-                .addMarker("config").addMarker("pid").addMarker("his").addMarker("zone").addMarker("writable")
-                .addMarker("target").addMarker("value")
-                .setGroup(String.valueOf(nodeAddr))
-                .setUnit("V")
-                .setTz(tz)
-                .build();
-        String pidTargetValueId = hayStack.addPoint(pidTargetValue);
-        hayStack.writeDefaultValById(pidTargetValueId, (double) config.pidTargetValue);
-        hayStack.writeHisValById(pidTargetValueId, (double) config.pidTargetValue);
-
         Point pidProportionalRange = new Point.Builder()
                 .setDisplayName(equipDis + "-pidProportionalRange")
                 .setEquipRef(equipRef)
@@ -282,12 +266,14 @@ public class PlcEquip {
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
 
         if (config.analog1InputSensor > 0) {
+            updateTargetValue(config.pidTargetValue,floorRef, roomRef, getUnit(config.analog1InputSensor));
             String processVariableId = updateProcessVariable(floorRef, roomRef, processVar, getUnit(config.analog1InputSensor));
             device.analog1In.setPointRef(processVariableId);
             device.analog1In.setEnabled(true);
             device.analog1In.setType(String.valueOf(config.analog1InputSensor - 1));
         } else {
-            String processVariableId = updateProcessVariable(floorRef, roomRef, processVar, "F");
+            updateTargetValue(config.pidTargetValue,floorRef, roomRef, "\u00B0F");
+            String processVariableId = updateProcessVariable(floorRef, roomRef, processVar, "\u00B0F");
             device.th1In.setPointRef(processVariableId);
             device.th1In.setEnabled(true);
             device.th1In.setType(String.valueOf(config.th1InputSensor - 1));
@@ -406,14 +392,23 @@ public class PlcEquip {
                 if (dynamicTarget != null && dynamicTarget.get("id") != null){
                     CCUHsApi.getInstance().deleteEntityTree(dynamicTarget.get("id").toString());
                 }
+                
                 if (targetValuePoint == null || targetValuePoint.get("id") == null){
-                    updateTargetValue(config.pidTargetValue, floorRef, roomRef);
+                    updateTargetValue(config.pidTargetValue, floorRef, roomRef, getUnit(config.analog1InputSensor));
                 }
             }
 
             String id = processVariable.get("id").toString();
             if (getProfileConfiguration().analog1InputSensor != config.analog1InputSensor) {
                 id = updateProcessVariable(floorRef, roomRef, processTag, getUnit(config.analog1InputSensor));
+
+                //delete  and update target values
+                if (targetValuePoint != null && targetValuePoint.get("id") != null){
+                    CCUHsApi.getInstance().deleteEntityTree(targetValuePoint.get("id").toString());
+                    if (!config.useAnalogIn2ForSetpoint) {
+                        updateTargetValue(config.pidTargetValue, floorRef, roomRef, getUnit(config.analog1InputSensor));
+                    }
+                }
             }
 
             SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_IN_ONE.name(), true);
@@ -433,13 +428,21 @@ public class PlcEquip {
                 }
 
                 if (targetValuePoint == null || targetValuePoint.get("id") == null){
-                    updateTargetValue(config.pidTargetValue, floorRef, roomRef);
+                    updateTargetValue(config.pidTargetValue, floorRef, roomRef, "\u00B0F");
                 }
             }
 
             String id = processVariable.get("id").toString();
             if (getProfileConfiguration().th1InputSensor != config.th1InputSensor) {
-                id = updateProcessVariable(floorRef, roomRef, processTag, "F");
+                id = updateProcessVariable(floorRef, roomRef, processTag, "\u00B0F");
+
+                //delete  and update target values
+                if (targetValuePoint != null && targetValuePoint.get("id") != null){
+                    CCUHsApi.getInstance().deleteEntityTree(targetValuePoint.get("id").toString());
+                    if (!config.useAnalogIn2ForSetpoint) {
+                        updateTargetValue(config.pidTargetValue, floorRef, roomRef, "\u00B0F");
+                    }
+                }
             }
 
             SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_IN_ONE.name(), false);
@@ -541,7 +544,7 @@ public class PlcEquip {
         return DynamicTargetValueTagId;
     }
 
-    private String updateTargetValue(double targetValue, String floorRef, String roomRef){
+    private String updateTargetValue(double targetValue, String floorRef, String roomRef, String unit){
 
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
@@ -558,7 +561,7 @@ public class PlcEquip {
                 .addMarker("config").addMarker("pid").addMarker("zone").addMarker("his").addMarker("writable")
                 .addMarker("target").addMarker("value")
                 .setGroup(String.valueOf(nodeAddr))
-                .setUnit("V")
+                .setUnit(unit)
                 .setTz(tz)
                 .build();
         String pidTargetValueId = hayStack.addPoint(pidTargetValue);

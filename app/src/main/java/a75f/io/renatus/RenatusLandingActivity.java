@@ -52,6 +52,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.pubnub.RemoteCommandHandleInterface;
 import a75f.io.logic.pubnub.RemoteCommandUpdateHandler;
+import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.ENGG.AppInstaller;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 import a75f.io.renatus.registration.CustomViewPager;
@@ -174,7 +175,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             String siteCountry = site.get("geoCountry").toString();
             String siteZipCode = site.get("geoPostalCode").toString();
             CCUUtils.getLocationInfo(siteCountry + " " + siteZipCode);
-
+            BuildingTuners.getInstance().addBuildingTunerEquip();
             floorMenu.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

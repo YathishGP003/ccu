@@ -132,29 +132,36 @@ public class OAOProfile
         }
     }
     public void doEpidemicControl(){
-        if (ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED) {
-            boolean isSmartPrePurge = TunerUtil.readSystemUserIntentVal("prePurge and enabled ") > 0;
-            boolean isSmartPostPurge = TunerUtil.readSystemUserIntentVal("postPurge and enabled ") > 0;
-            if(isSmartPrePurge) {
-                handleSmartPrePurgeControl();
-            }
-            if(isSmartPostPurge) {
-                handleSmartPostPurgeControl();
-            }else if(!isSmartPostPurge && !isSmartPrePurge) {
+        Occupancy systemOccupancy = ScheduleProcessJob.getSystemOccupancy();
+        switch (systemOccupancy){
+            case UNOCCUPIED:
+                boolean isSmartPrePurge = TunerUtil.readSystemUserIntentVal("prePurge and enabled ") > 0;
+                boolean isSmartPostPurge = TunerUtil.readSystemUserIntentVal("postPurge and enabled ") > 0;
+                if(isSmartPrePurge) {
+                    handleSmartPrePurgeControl();
+                }
+                if(isSmartPostPurge) {
+                    handleSmartPostPurgeControl();
+                }else if(!isSmartPostPurge && !isSmartPrePurge) {
+                    CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.OFF.ordinal());
+                    epidemicState = EpidemicState.OFF;
+                }
+                break;
+            case OCCUPIED:
+            case FORCEDOCCUPIED:
+            case OCCUPANCYSENSING:
+                boolean isEnhancedVentilation = TunerUtil.readSystemUserIntentVal("enhanced and ventilation and enabled ") > 0;
+                if(isEnhancedVentilation)
+                    handleEnhancedVentilationControl();
+                else {
+                    CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.OFF.ordinal());
+                    epidemicState = EpidemicState.OFF;
+                }
+                break;
+            default:
                 CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.OFF.ordinal());
                 epidemicState = EpidemicState.OFF;
-            }
-        }else if((ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED) && (ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION) && (ScheduleProcessJob.getSystemOccupancy() != Occupancy.PRECONDITIONING)){
-            boolean isEnhancedVentilation = TunerUtil.readSystemUserIntentVal("enhanced and ventilation and enabled ") > 0;
-            if(isEnhancedVentilation)
-                handleEnhancedVentilationControl();
-            else {
-                CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.OFF.ordinal());
-                epidemicState = EpidemicState.OFF;
-            }
-        }else {
-            CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.OFF.ordinal());
-            epidemicState = EpidemicState.OFF;
+                break;
         }
     }
     public void doEconomizing() {

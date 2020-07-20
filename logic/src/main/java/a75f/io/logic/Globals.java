@@ -1,8 +1,6 @@
 package a75f.io.logic;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.gson.JsonElement;
@@ -63,11 +61,8 @@ import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.logic.jobs.BuildingProcessJob;
-import a75f.io.logic.jobs.PrintProcessJob;
-import a75f.io.logic.jobs.PrintProcessJobTwo;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.pubnub.PubNubHandler;
-import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.watchdog.Watchdog;
 
 /*
@@ -389,7 +384,6 @@ public class Globals {
             CcuLog.d(L.TAG_CCU, "Site does not exist. Profiles not loaded");
             return;
         }
-        BuildingTuners.getInstance();
         HashMap equip = CCUHsApi.getInstance().read("equip and system");
         boolean isDefaultSystem = false;
         if (equip != null && equip.size() > 0) {

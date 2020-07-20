@@ -61,7 +61,6 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.LOutput;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.jobs.ScheduleProcessJob;
@@ -1386,7 +1385,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         nonTempControl.setPiInputText(String.format("%.2f", inputValue));
                         nonTempControl.setPiOutputText(String.valueOf(targetValue));
                         nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
-                        nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
+                        if ((boolean) plcPoints.get("Dynamic Setpoint")){
+                            nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());
+                        } else {
+                            nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
+                        }
                     }
                 }
             }
@@ -1633,7 +1636,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             nonTempControl.setPiInputText(String.format("%.2f", inputValue));
                             nonTempControl.setPiOutputText(String.valueOf(targetValue));
                             nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
-                            nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
+                            if ((boolean) plcPoints.get("Dynamic Setpoint")){
+                                nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());
+                            } else {
+                                nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
+                            }
                         }
                     }else{
                         //Non paired devices

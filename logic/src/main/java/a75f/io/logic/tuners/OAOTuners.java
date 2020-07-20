@@ -622,7 +622,7 @@ public class OAOTuners
             }
             hayStack.writeHisValById(smartPostPurgeStartTimeOffsetId, HSUtil.getPriorityVal(smartPostPurgeStartTimeOffsetId));
         }
-        if(!verifyPointsAvailability("not default","prePurge and fan and speed",equipref)) {
+        if(!verifyPointsAvailability("not default","postPurge and fan and speed",equipref)) {
             Point smartPostPurgeFanSpeed = new Point.Builder()
                     .setDisplayName(equipdis + "-OAO-" + "systemPostPurgeFanSpeedTuner")
                     .setSiteRef(siteRef)

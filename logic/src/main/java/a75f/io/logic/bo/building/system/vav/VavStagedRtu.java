@@ -165,8 +165,9 @@ public class VavStagedRtu extends VavSystemProfile
     
     protected synchronized void updateSystemPoints() {
         updateOutsideWeatherParams();
+        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
         stageStatus = new int[17];
-        if (VavSystemController.getInstance().getSystemState() == COOLING)
+        if ((VavSystemController.getInstance().getSystemState() == COOLING) && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
         {
             double satSpMax = VavTRTuners.getSatTRTunerVal("spmax");
             double satSpMin = VavTRTuners.getSatTRTunerVal("spmin");
@@ -185,7 +186,7 @@ public class VavStagedRtu extends VavSystemProfile
         }
         
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
-        if (VavSystemController.getInstance().getSystemState() == COOLING)
+        if ((VavSystemController.getInstance().getSystemState() == COOLING) && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
         {
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
             double spSpMin = VavTRTuners.getStaticPressureTRTunerVal("spmin");
@@ -213,7 +214,6 @@ public class VavStagedRtu extends VavSystemProfile
         double relayDeactHysteresis = TunerUtil.readTunerValByQuery("relay and deactivation and hysteresis", getSystemEquipRef());
         CcuLog.d(L.TAG_CCU_SYSTEM, "systemCoolingLoopOp: "+systemCoolingLoopOp + " systemHeatingLoopOp: " + systemHeatingLoopOp+" systemFanLoopOp: "+systemFanLoopOp);
         CcuLog.d(L.TAG_CCU_SYSTEM, "coolingStages: "+coolingStages + " heatingStages: "+heatingStages+" fanStages: "+fanStages);
-        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
         for (int i = 1; i <=7 ;i++)
         {
             double relayState = 0;

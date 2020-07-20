@@ -118,7 +118,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
     
     private synchronized void updateSystemPoints() {
         updateOutsideWeatherParams();
-        if (VavSystemController.getInstance().getSystemState() == COOLING)
+        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
+        if (VavSystemController.getInstance().getSystemState() == COOLING && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
         {
             double satSpMax = VavTRTuners.getSatTRTunerVal("spmax");
             double satSpMin = VavTRTuners.getSatTRTunerVal("spmin");
@@ -183,7 +184,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         ControlMote.setAnalogOut("analog3", signal);
         
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
-        if (VavSystemController.getInstance().getSystemState() == COOLING)
+        if ((VavSystemController.getInstance().getSystemState() == COOLING) && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
         {
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
             double spSpMin = VavTRTuners.getStaticPressureTRTunerVal("spmin");
@@ -240,15 +241,13 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             signal = 0;
         }
         ControlMote.setAnalogOut("analog4", signal);
-    
-        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
-        if ((getConfigVal("relay3 and output and enabled") > 0) && (systemMode != SystemMode.OFF))
+        if (getConfigVal("relay3 and output and enabled") > 0)
         {
             double systemStaticPressureOoutput = getStaticPressure() - SystemConstants.SP_CONFIG_MIN;
             signal = 0;
-            if((ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION))
+            if((systemMode != SystemMode.OFF ) && (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION))
                 signal = 1;
-            else if((VavSystemController.getInstance().getSystemState() == COOLING) && (systemStaticPressureOoutput > 0))
+            else if((VavSystemController.getInstance().getSystemState() == COOLING) && (systemStaticPressureOoutput > 0) && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
                 signal = 1;
             else if((VavSystemController.getInstance().getSystemState() == HEATING) && (systemFanLoopOp > 0))
                 signal = 1;

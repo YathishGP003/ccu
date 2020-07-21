@@ -304,7 +304,7 @@ public class OAOProfile
         if(occuSchedule != null)
             Log.d(L.TAG_CCU_OAO, "System Unoccupied, check postpurge22 = "+occuSchedule.getMillisecondsUntilPrevChange()+","+(occuSchedule.getMillisecondsUntilPrevChange())/60000+","+smartPostPurgeOccupiedTimeOffset+","+smartPostPurgeRunTime);
         int minutesInUnoccupied = occuSchedule != null ? (int)(occuSchedule.getMillisecondsUntilPrevChange()/60000) : -1;
-        if((minutesInUnoccupied != -1) && (minutesInUnoccupied  >= smartPostPurgeOccupiedTimeOffset) && (minutesInUnoccupied <= (smartPostPurgeRunTime + smartPostPurgeOccupiedTimeOffset))) {
+        if( (epidemicState == EpidemicState.OFF) && (minutesInUnoccupied != -1) && (minutesInUnoccupied  >= smartPostPurgeOccupiedTimeOffset) && (minutesInUnoccupied <= (smartPostPurgeRunTime + smartPostPurgeOccupiedTimeOffset))) {
             outsideAirCalculatedMinDamper = oaoEquip.getConfigNumVal("userIntent and purge and outside and damper and pos and min and open");
             CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.POSTPURGE.ordinal());
             epidemicState = EpidemicState.POSTPURGE;

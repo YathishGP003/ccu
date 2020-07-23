@@ -153,19 +153,22 @@ public abstract class SystemProfile
         }
         return equipRef;
     }
-    
+
     public void updateAhuRef(String systemEquipId) {
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
-        
-        for (HashMap m : equips)
-        {
+        if (L.ccu().oaoProfile != null) {
+            equips.add(CCUHsApi.getInstance().read("equip and oao"));
+        }
+
+        for (HashMap m : equips) {
             Equip q = new Equip.Builder().setHashMap(m).build();
-            if (q.getMarkers().contains("dab") || q.getMarkers().contains("vav") || q.getMarkers().contains("ti") || q.getMarkers().contains("oao"))
+            if (q.getMarkers().contains("dab") || q.getMarkers().contains("vav") || q.getMarkers().contains("ti") || q.getMarkers().contains("oao") || q.getMarkers().contains("sse")) {
                 q.setAhuRef(systemEquipId);
-            else if(q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid") || q.getMarkers().contains("sse"))
+            } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid")) {
                 q.setGatewayRef(systemEquipId);
-            else
-                Toast.makeText(Globals.getInstance().getApplicationContext(),"Invalid profile, AhuRef is not updated for "+q.getDisplayName(),Toast.LENGTH_SHORT);
+            } else {
+                Toast.makeText(Globals.getInstance().getApplicationContext(), "Invalid profile, AhuRef is not updated for " + q.getDisplayName(), Toast.LENGTH_SHORT);
+            }
             CCUHsApi.getInstance().updateEquip(q, q.getId());
         }
         CCUHsApi.getInstance().updateDiagGatewayRef(systemEquipId);
@@ -695,19 +698,22 @@ public abstract class SystemProfile
         }
         hayStack.writeHisValById(humidityCompensationOffsetId, HSUtil.getPriorityVal(humidityCompensationOffsetId));
     }
-    
-    public void updateGatewayRef(String systemEquipId)
-    {
+
+    public void updateGatewayRef(String systemEquipId) {
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
-        for (HashMap m : equips)
-        {
+        if (L.ccu().oaoProfile != null) {
+            equips.add(CCUHsApi.getInstance().read("equip and oao"));
+        }
+
+        for (HashMap m : equips) {
             Equip q = new Equip.Builder().setHashMap(m).build();
-            if (q.getMarkers().contains("dab") || q.getMarkers().contains("vav") || q.getMarkers().contains("ti") || q.getMarkers().contains("oao"))
+            if (q.getMarkers().contains("dab") || q.getMarkers().contains("vav") || q.getMarkers().contains("ti") || q.getMarkers().contains("oao") || q.getMarkers().contains("sse")) {
                 q.setAhuRef(systemEquipId);
-            else if(q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid") || q.getMarkers().contains("sse"))
+            } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid")) {
                 q.setGatewayRef(systemEquipId);
-            else
-                Toast.makeText(Globals.getInstance().getApplicationContext(),"Invalid profile, AhuRef is not updated for "+q.getDisplayName(),Toast.LENGTH_SHORT);
+            } else {
+                Toast.makeText(Globals.getInstance().getApplicationContext(), "Invalid profile, AhuRef is not updated for " + q.getDisplayName(), Toast.LENGTH_SHORT);
+            }
             CCUHsApi.getInstance().updateEquip(q, q.getId());
         }
         CCUHsApi.getInstance().updateDiagGatewayRef(systemEquipId);

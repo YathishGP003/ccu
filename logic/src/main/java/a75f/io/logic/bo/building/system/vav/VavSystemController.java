@@ -282,10 +282,10 @@ public class VavSystemController extends SystemController
         }
         
         piController.dump();
-        if (systemState == COOLING) {
+        if ((systemState == COOLING) && (systemMode == COOLONLY || systemMode == AUTO)){
             heatingSignal = 0;
             coolingSignal = (int)piController.getLoopOutput(weightedAverageCoolingOnlyLoadPostML, 0);
-        } else if (systemState == HEATING){
+        } else if ((systemState == HEATING) && (systemMode == HEATONLY || systemMode == AUTO)){
             coolingSignal = 0;
             heatingSignal = (int)piController.getLoopOutput(weightedAverageHeatingOnlyLoadPostML, 0);
         } else {

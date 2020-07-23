@@ -15,6 +15,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemConstants;
+import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.jobs.ScheduleProcessJob;
@@ -143,8 +144,9 @@ public class VavIERtu extends VavSystemProfile
     
     private synchronized void updateSystemPoints() {
         updateOutsideWeatherParams();
+        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
         
-        if (VavSystemController.getInstance().getSystemState() == COOLING)
+        if (VavSystemController.getInstance().getSystemState() == COOLING && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
         {
             double satSpMax = VavTRTuners.getSatTRTunerVal("spmax");
             double satSpMin = VavTRTuners.getSatTRTunerVal("spmin");
@@ -208,13 +210,13 @@ public class VavIERtu extends VavSystemProfile
         ControlMote.setAnalogOut("analog1", datSp);
         
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
-        if (VavSystemController.getInstance().getSystemState() == COOLING)
+        if ((VavSystemController.getInstance().getSystemState() == COOLING) && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
         {
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
             double spSpMin = VavTRTuners.getStaticPressureTRTunerVal("spmin");
             
             CcuLog.d(L.TAG_CCU_SYSTEM,"spSpMax :"+spSpMax+" spSpMin: "+spSpMin+" SP: "+getStaticPressure());
-            systemFanLoopOp = (int) (getStaticPressure()  * 100 / spSpMax) ;
+            systemFanLoopOp = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax -spSpMin))  ;
         } else if (VavSystemController.getInstance().getSystemState() == HEATING){
             systemFanLoopOp = (int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier);
         } else {

@@ -220,7 +220,7 @@ public class VavIERtu extends VavSystemProfile
 
             CcuLog.d(L.TAG_CCU_SYSTEM,"spSpMax :"+spSpMax+" spSpMin: "+spSpMin+" SP: "+getStaticPressure());
             double staticPressureLoopOutput = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax -spSpMin)) ;
-            if(VavSystemController.getInstance().getSystemState() == COOLING) {
+            if(VavSystemController.getInstance().getSystemState() == COOLING && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO)) {
                 if(staticPressureLoopOutput < ((spSpMax - spSpMin) * smartPurgeDabFanLoopOp))
                     systemFanLoopOp = ((spSpMax - spSpMin) * smartPurgeDabFanLoopOp);
                 else

@@ -241,7 +241,7 @@ public class OAOTuners
 
         if(isNewSite || !verifyPointsAvailability("default","purge and dab and fan and loop and output and min",equipRef)) {
             Point smartPurgeDabFanLoopOutput = new Point.Builder()
-                    .setDisplayName(equipDis + "-OAO-" + "systemPurgeDabFanLoopOutput")
+                    .setDisplayName(equipDis + "-OAO-" + "systemPurgeDabMinFanLoopOutput")
                     .setSiteRef(siteRef)
                     .setEquipRef(equipRef).setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
@@ -257,7 +257,7 @@ public class OAOTuners
 
         if(isNewSite || !verifyPointsAvailability("default","purge and vav and fan and loop and output and min",equipRef)) {
             Point smartPurgeVavFanLoopOutput = new Point.Builder()
-                    .setDisplayName(equipDis + "-OAO-" + "systemPurgeVavFanLoopOutput")
+                    .setDisplayName(equipDis + "-OAO-" + "systemPurgeVavMinFanLoopOutput")
                     .setSiteRef(siteRef)
                     .setEquipRef(equipRef).setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his")
@@ -645,7 +645,7 @@ public class OAOTuners
         }
         if(!verifyPointsAvailability("not default","purge and dab and fan and loop and output and min",equipref)) {
             Point smartPurgeDabFanLoopOutput = new Point.Builder()
-                    .setDisplayName(equipdis + "-OAO-" + "systemPurgeDabFanLoopOutput")
+                    .setDisplayName(equipdis + "-OAO-" + "systemPurgeDabMinFanLoopOutput")
                     .setSiteRef(siteRef)
                     .setEquipRef(equipref).setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("system").addMarker("oao").addMarker("writable").addMarker("his")
@@ -666,7 +666,7 @@ public class OAOTuners
         }
         if(!verifyPointsAvailability("not default","purge and vav and fan and loop and output and min",equipref)) {
             Point smartPurgeVavFanLoopOutput = new Point.Builder()
-                    .setDisplayName(equipdis + "-OAO-" + "systemPurgeVavFanLoopOutput")
+                    .setDisplayName(equipdis + "-OAO-" + "systemPurgeVavMinFanLoopOutput")
                     .setSiteRef(siteRef)
                     .setEquipRef(equipref).setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("system").addMarker("oao").addMarker("writable").addMarker("his")

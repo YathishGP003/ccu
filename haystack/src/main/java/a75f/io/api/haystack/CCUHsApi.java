@@ -1,14 +1,9 @@
 package a75f.io.api.haystack;
 
-import a75f.io.constants.CcuFieldConstants;
-import a75f.io.constants.HttpConstants;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Looper;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -22,6 +17,7 @@ import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HHisItem;
+import org.projecthaystack.HList;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
@@ -47,8 +43,9 @@ import a75f.io.api.haystack.sync.EntityParser;
 import a75f.io.api.haystack.sync.EntitySyncHandler;
 import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.constants.CcuFieldConstants;
+import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
-import a75f.io.api.haystack.BuildConfig;
 
 public class CCUHsApi
 {
@@ -972,7 +969,7 @@ public class CCUHsApi
         hisSyncHandler.sync();
     }
 
-    public synchronized boolean syncExistingSite(String siteId) {
+    public boolean syncExistingSite(String siteId) {
         siteId = StringUtils.stripStart(siteId,"@");
 
         if (StringUtils.isBlank(siteId)) {
@@ -990,63 +987,156 @@ public class CCUHsApi
         Site s = p.getSite();
         tagsDb.idMap.put("@"+tagsDb.addSite(s), s.getId());
         Log.d("CCU_HS_EXISTINGSITESYNC","Added Site "+s.getId());
-    
+
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-        HDict navIdDict = new HDictBuilder().add("navId", HRef.make(siteId)).toDict();
-        HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
-        HGrid syncData = hClient.call("sync", hGrid);
-        
-        p = new EntityParser(syncData);
-        p.importSchedules();
-        p.importBuildingTuner();
-    
+
+        //import building schedule data
+        importBuildingSchedule(siteId, hClient);
+
+        //import building tuners
+        importBuildingTuners(siteId, hClient);
+
         ArrayList<HashMap> writablePoints = CCUHsApi.getInstance().readAll("point and writable");
-        for (HashMap writablePoint : writablePoints) {
-            String writablePointLuid = writablePoint.get("id").toString();
-            String writablePointGuid = CCUHsApi.getInstance().getGUID(writablePointLuid);
-            CcuLog.d("CCU_HS_EXISTINGSITESYNC", "Processing point with GUID " + writablePointGuid + " and description " + writablePoint.get("dis").toString());
-            System.out.println(writablePoint);
-            HDict pid = new HDictBuilder().add("id",HRef.copy(writablePointGuid)).toDict();
-            HGrid wa = hClient.call("pointWrite",HGridBuilder.dictToGrid(pid));
-            ArrayList<HashMap> valList = new ArrayList<>();
-            if (wa != null) {
-                wa.dump();
-                Iterator it = wa.iterator();
-                while (it.hasNext()) {
-                    HashMap<Object, Object> map = new HashMap<>();
-                    HRow r = (HRow) it.next();
-                    CcuLog.d("CCU_HS_EXISTINGSITESYNC", "Processing Zinc row with " + r.toString());
-                    HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
-                    while (ri.hasNext()) {
-                        HDict.MapEntry e = (HDict.MapEntry) ri.next();
-                        map.put(e.getKey(), e.getValue());
-                    }
-                    valList.add(map);
-                }
-            }
-
-            for(HashMap v : valList) {
-                int level = Integer.parseInt(v.get("level").toString());
-                String who = v.get("who").toString();
-                String kind = writablePoint.get("kind").toString();
-
-                CcuLog.d("CCU_HS_EXISTINGSITESYNC", "Syncing remote point to local with LUID "
-                        + writablePointLuid + "; GUID " + writablePointGuid + "; level " + level);
-
-                CCUHsApi.getInstance().getHSClient().pointWrite(
-                        HRef.copy(writablePointLuid),
-                        level,
-                        who,
-                        StringUtils.equals(kind,"string") ? HStr.make(v.get("val").toString()) : HNum.make(Double.parseDouble(v.get("val").toString())),
-                        HNum.make(0)
-                );
-            }
-        
+        ArrayList<HDict> hDicts = new ArrayList<>();
+        for (HashMap m : writablePoints) {
+            HDict pid = new HDictBuilder().add("id",HRef.copy(getGUID(m.get("id").toString()))).toDict();
+            hDicts.add(pid);
         }
-        
-        tagsDb.log();
+
+        int partitionSize = 25;
+        List<List<HDict>> partitions = new ArrayList<>();
+        for (int i = 0; i<hDicts.size(); i += partitionSize) {
+            partitions.add(hDicts.subList(i, Math.min(i + partitionSize, hDicts.size())));
+        }
+
+        for (List<HDict> sublist : partitions) {
+            HGrid wa = hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
+            ArrayList<HDict> hDictList = new ArrayList<>();
+
+            Iterator rowIterator = wa.iterator();
+            while (rowIterator.hasNext()) {
+                HRow row = (HRow) rowIterator.next();
+                String id = row.get("id").toString();
+                String kind = row.get("kind").toString();
+                HVal data = row.get("data");
+
+                if (data instanceof HList && ((HList) data).size() > 0) {
+                    HList dataList = (HList) data;
+                    HDict dataElement = (HDict) dataList.get(0);
+
+                    String who = dataElement.getStr("who");
+                    String level = dataElement.get("level").toString();
+                    HVal val = dataElement.get("val");
+
+                    HDict pid = new HDictBuilder().add("id", HRef.copy(id))
+                            .add("level", Integer.parseInt(level))
+                            .add("who", who)
+                            .add("val", kind.equals("string") ? HStr.make(val.toString()) : val).toDict();
+                    hDictList.add(pid);
+
+                    //save his data to local cache
+                    HDict rec = hsClient.readById(HRef.copy(getLUID(id)));
+                    tagsDb.saveHisItemsToCache(rec, new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), kind.equals("string") ? HStr.make(val.toString()) : val)}, true);
+
+                    //save points on tagsDb
+                    tagsDb.onPointWrite(rec, Integer.parseInt(level), kind.equals("string") ? HStr.make(val.toString()) : val, who, HNum.make(0), rec);
+                }
+
+            }
+
+            HGrid responseGrid = hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(hDictList.toArray(new HDict[hDictList.size()])));
+        }
 
         return true;
+    }
+
+
+    private void importBuildingSchedule(String siteId, HClient hClient){
+
+            try {
+                HDict buildingDict = new HDictBuilder().add("filter", "building and schedule and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+                HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(buildingDict));
+
+                if (buildingSch == null) {
+                    return;
+                }
+
+                Iterator it = buildingSch.iterator();
+                while (it.hasNext())
+                {
+                    HRow r = (HRow) it.next();
+                    Schedule buildingSchedule =  new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
+
+                    String guid = buildingSchedule.getId();
+                    buildingSchedule.setmSiteId(CCUHsApi.getInstance().getSiteId().toString());
+                    HRef localId = HRef.make(UUID.randomUUID().toString());
+                    buildingSchedule.setId(localId.toVal());
+                    CCUHsApi.getInstance().addSchedule(localId.toVal(), buildingSchedule.getScheduleHDict());
+                    CCUHsApi.getInstance().putUIDMap(localId.toString(), "@" + guid);
+                }
+            } catch (UnknownRecException e) {
+                e.printStackTrace();
+            }
+    }
+
+    private void importBuildingTuners(String siteId, HClient hClient) {
+
+        ArrayList<Equip> equips = new ArrayList<>();
+        ArrayList<Point> points = new ArrayList<>();
+        try {
+            HDict tunerDict = new HDictBuilder().add("filter", "tuner and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+            HGrid tunerGrid = hClient.call("read", HGridBuilder.dictToGrid(tunerDict));
+            if (tunerGrid == null) {
+                return;
+            }
+
+            Iterator it = tunerGrid.iterator();
+            while (it.hasNext())
+            {
+                HashMap<Object, Object> map = new HashMap<>();
+                HRow r = (HRow) it.next();
+                HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
+                while (ri.hasNext())
+                {
+                    HDict.MapEntry m = (HDict.MapEntry) ri.next();
+                    map.put(m.getKey(), m.getValue());
+                }
+
+                if (map.get("equip") != null) {
+                    equips.add(new Equip.Builder().setHashMap(map).build());
+                } else if (map.get("point") != null ) {
+                    points.add(new Point.Builder().setHashMap(map).build());
+                }
+            }
+        } catch (UnknownRecException e) {
+            e.printStackTrace();
+        }
+
+
+        CCUHsApi hsApi = CCUHsApi.getInstance();
+        for (Equip q : equips) {
+            if (q.getMarkers().contains("tuner"))
+            {
+                q.setSiteRef(hsApi.getSiteId().toString());
+                q.setFloorRef("@SYSTEM");
+                q.setRoomRef("@SYSTEM");
+                String equipLuid = hsApi.addEquip(q);
+                hsApi.putUIDMap(equipLuid, q.getId());
+                //Points
+                for (Point p : points)
+                {
+                    if (p.getEquipRef().equals(q.getId()))
+                    {
+                        p.setSiteRef(hsApi.getSiteId().toString());
+                        p.setFloorRef("@SYSTEM");
+                        p.setRoomRef("@SYSTEM");
+                        p.setEquipRef(equipLuid);
+                        hsApi.putUIDMap(hsApi.addPoint(p), p.getId());
+                    }
+                }
+            }
+        }
+
     }
 
     public HGrid getRemoteSiteDetails(String siteId)

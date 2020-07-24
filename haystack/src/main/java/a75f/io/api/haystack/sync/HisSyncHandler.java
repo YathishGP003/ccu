@@ -213,6 +213,7 @@ public class HisSyncHandler
         for (HashMap entity : entityList) {
             if (CCUHsApi.getInstance().getGUID(entity.get("id").toString()) != null) {
                 entitiesWithGuid.add(entity);
+            } else if (!entitySyncRequired) {
                 entitySyncRequired = true;
             }
         }

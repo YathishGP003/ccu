@@ -2,6 +2,7 @@ package a75f.io.alerts;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
 
@@ -25,8 +26,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.Alert_;
@@ -64,6 +63,7 @@ public class AlertProcessor
 
     HashMap<String, Integer> offsetCounter = new HashMap<>();
     HashSet<String> activeAlertRefs ;
+    ObjectMapper objectMapper;
     
     AlertProcessor(Context c) {
         mContext = c;
@@ -76,6 +76,11 @@ public class AlertProcessor
         boxStore = CCUHsApi.getInstance().tagsDb.getBoxStore();
         alertBox = boxStore.boxFor(Alert.class);
         parser = new AlertParser();
+
+        objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+
         predefinedAlerts = getPredefinedAlerts();
         fetchAllPredefinedAlerts();
     }
@@ -130,42 +135,60 @@ public class AlertProcessor
     }
     
     public void fetchPredefinedAlerts() {
-        try
-        {
-            HashMap site = CCUHsApi.getInstance().read("site");
+
+            final HashMap site = CCUHsApi.getInstance().read("site");
             if (site == null || site.get("id") == null){
                 return;
             }
 
-            if (BuildConfig.DEBUG)
-            {
-                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-                StrictMode.setThreadPolicy(policy);
-            }
-            String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
-            String alertDef = HttpUtil.sendRequest("readPredefined", new JSONObject().put("siteRef", siteGUID.replace("@","")).toString(), BuildConfig.ALERTS_API_KEY);
-            //CcuLog.d("CCU_ALERTS", " alertDef " + alertDef);
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-            if ( alertDef != null) {
-                AlertDefinition[] pojos = objectMapper.readValue(alertDef, AlertDefinition[].class);
-                predefinedAlerts = new ArrayList<>(Arrays.asList(pojos));
-                parseWifiSignalAlertDefinition();
-            }
-            if (predefinedAlerts!= null  && predefinedAlerts.size()>0)
-            for (AlertDefinition d : predefinedAlerts)
-            {
-                CcuLog.d("CCU_ALERTS", "Predefined alertDef Fetched: " + d.toString());
-            }
-            if(alertDef != null)savePredefinedAlertDefinitions(alertDef);
-        }catch (JsonParseException | IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+            new AsyncTask<Void, Void, String>() {
+
+                @Override
+                protected String doInBackground(Void... voids) {
+                    String alertDefResponse = null;
+                    String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
+
+                    if (siteGUID == null){
+                        return null;
+                    }
+
+                    try {
+                        alertDefResponse = HttpUtil.sendRequest("readPredefined", new JSONObject().put("siteRef", siteGUID.replace("@","")).toString(), BuildConfig.ALERTS_API_KEY);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    return alertDefResponse;
+                }
+
+                @Override
+                protected void onPostExecute(String alertDefResponse) {
+                    super.onPostExecute(alertDefResponse);
+
+                    //parse alert definition response
+                    if ( alertDefResponse != null) {
+                        AlertDefinition[] pojos = new AlertDefinition[0];
+                        try {
+                            pojos = objectMapper.readValue(alertDefResponse, AlertDefinition[].class);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        predefinedAlerts = new ArrayList<>(Arrays.asList(pojos));
+                        //add wifi signal alert definition
+                        parseWifiSignalAlertDefinition();
+
+                        if (predefinedAlerts != null  && predefinedAlerts.size() > 0)
+                            for (AlertDefinition d : predefinedAlerts)
+                            {
+                                CcuLog.d("CCU_ALERTS", "Predefined alertDef Fetched: " + d.toString());
+                            }
+
+                        //save predefined alert definitions to SharedPreferences
+                        savePredefinedAlertDefinitions(alertDefResponse);
+                    }
+                }
+            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
     }
     
     public void savePredefinedAlertDefinitions(String alerts) {

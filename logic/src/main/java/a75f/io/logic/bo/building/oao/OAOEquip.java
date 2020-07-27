@@ -7,6 +7,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -32,7 +33,7 @@ public class OAOEquip
         if (equipMap != null && equipMap.size() > 0)
         {
             equipRef = equipMap.get("id").toString();
-            OAOTuners.updateOaoSystemTuners(equipMap.get("siteRef").toString(), equipRef, equipMap.get("dis").toString(),equipMap.get("tz").toString());
+            OAOTuners.updateOaoSystemTuners(equipMap.get("siteRef").toString(), equipRef, equipMap.get("dis").toString(),equipMap.get("tz").toString(),getSystemProfileType());
             updateNewConfigParams(equipMap.get("siteRef").toString(), equipRef, equipMap.get("dis").toString(),equipMap.get("tz").toString());
         } else {
             throw new IllegalStateException("Equip should be created before init");
@@ -56,7 +57,7 @@ public class OAOEquip
         Equip.Builder b = new Equip.Builder().setSiteRef(siteRef).setDisplayName(equipDis).setRoomRef(roomRef).setFloorRef(floorRef).setProfile(profileType.name()).addMarker("equip").addMarker("oao").setAhuRef(ahuRef).setTz(tz).setGroup(String.valueOf(nodeAddr));
         equipRef = hayStack.addEquip(b.build());
         
-        OAOTuners.updateOaoSystemTuners( siteRef, equipRef,siteDis + "-OAO-" + nodeAddr, tz);
+        OAOTuners.updateOaoSystemTuners( siteRef, equipRef,siteDis + "-OAO-" + nodeAddr, tz,getSystemProfileType());
         
         createConfigPoints(config, equipRef);
     
@@ -598,5 +599,22 @@ public class OAOEquip
     
     public double getConfigNumVal(String tags) {
         return hayStack.readDefaultVal("point and config and oao and "+tags+" and group == \""+nodeAddr+"\"");
+    }
+    private String getSystemProfileType(){
+        ProfileType profileType =  L.ccu().systemProfile.getProfileType();
+        switch (profileType){
+            case SYSTEM_DAB_ANALOG_RTU:
+            case SYSTEM_DAB_HYBRID_RTU:
+            case SYSTEM_DAB_STAGED_RTU:
+            case SYSTEM_DAB_STAGED_VFD_RTU:
+                return "dab";
+            case SYSTEM_VAV_ANALOG_RTU:
+            case SYSTEM_VAV_HYBRID_RTU:
+            case SYSTEM_VAV_IE_RTU:
+            case SYSTEM_VAV_STAGED_RTU:
+            case SYSTEM_VAV_STAGED_VFD_RTU:
+                return "vav";
+        }
+        return "default";
     }
 }

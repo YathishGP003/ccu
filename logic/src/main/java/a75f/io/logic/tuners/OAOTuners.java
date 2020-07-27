@@ -316,7 +316,7 @@ public class OAOTuners
         }
         return false;
     }
-    public static void updateOaoSystemTuners(String siteRef, String equipref, String equipdis, String tz) {
+    public static void updateOaoSystemTuners(String siteRef, String equipref, String equipdis, String tz,String systemProfile) {
 
         CCUHsApi hayStack = CCUHsApi.getInstance();
         if (!verifyPointsAvailability("not default","co2 and damper and opening and rate and multiplier and min",equipref)) {
@@ -643,7 +643,7 @@ public class OAOTuners
             }
             hayStack.writeHisValById(smartPostPurgeFanSpeedId, HSUtil.getPriorityVal(smartPostPurgeFanSpeedId));
         }
-        if(!verifyPointsAvailability("not default","purge and dab and fan and loop and output and min",equipref)) {
+        if(!verifyPointsAvailability("not default","purge and dab and fan and loop and output and min",equipref) && systemProfile.equals("dab")) {
             Point smartPurgeDabFanLoopOutput = new Point.Builder()
                     .setDisplayName(equipdis + "-OAO-" + "systemPurgeDabMinFanLoopOutput")
                     .setSiteRef(siteRef)
@@ -663,8 +663,10 @@ public class OAOTuners
                 }
             }
             hayStack.writeHisValById(smartPurgeDabFanLoopOutputId, HSUtil.getPriorityVal(smartPurgeDabFanLoopOutputId));
+        }else{
+            deleteNonUsableSystemPoints("purge and dab and fan and loop and output and min",equipref);
         }
-        if(!verifyPointsAvailability("not default","purge and vav and fan and loop and output and min",equipref)) {
+        if(!verifyPointsAvailability("not default","purge and vav and fan and loop and output and min",equipref) && systemProfile.equals("vav")) {
             Point smartPurgeVavFanLoopOutput = new Point.Builder()
                     .setDisplayName(equipdis + "-OAO-" + "systemPurgeVavMinFanLoopOutput")
                     .setSiteRef(siteRef)
@@ -684,8 +686,10 @@ public class OAOTuners
                 }
             }
             hayStack.writeHisValById(smartPurgeVavFanLoopOutputId, HSUtil.getPriorityVal(smartPurgeVavFanLoopOutputId));
+        }else{
+            deleteNonUsableSystemPoints("purge and vav and fan and loop and output and min",equipref);
         }
-        if(!verifyPointsAvailability("not default","purge and dab and damper and pos and multiplier and min",equipref)) {
+        if(!verifyPointsAvailability("not default","purge and dab and damper and pos and multiplier and min",equipref) && systemProfile.equals("dab")) {
             Point smartPurgeDabDamperMinOpenMultiplier = new Point.Builder()
                     .setDisplayName(equipdis + "-OAO-" + "systemPurgeDabDamperMinOpenMultiplier")
                     .setSiteRef(siteRef)
@@ -705,9 +709,10 @@ public class OAOTuners
                 }
             }
             hayStack.writeHisValById(smartPurgeDabDamperMinOpenMultiplierId, HSUtil.getPriorityVal(smartPurgeDabDamperMinOpenMultiplierId));
+        }else{
+            deleteNonUsableSystemPoints("purge and dab and damper and pos and multiplier and min",equipref);
         }
-        if(!verifyPointsAvailability("not default","purge and vav and damper and pos and multiplier and min",equipref)) {
-
+        if(!verifyPointsAvailability("not default","purge and vav and damper and pos and multiplier and min",equipref) && systemProfile.equals("vav")) {
             Point smartPurgeVavDamperMinOpenMultiplier = new Point.Builder()
                     .setDisplayName(equipdis + "-OAO-" + "systemPurgeVavDamperMinOpenMultiplier")
                     .setSiteRef(siteRef)
@@ -727,6 +732,14 @@ public class OAOTuners
                 }
             }
             hayStack.writeHisValById(smartPurgeVavDamperMinOpenMultiplierId, HSUtil.getPriorityVal(smartPurgeVavDamperMinOpenMultiplierId));
+        }else{
+            deleteNonUsableSystemPoints("purge and vav and damper and pos and multiplier and min",equipref);
+        }
+    }
+    private static void deleteNonUsableSystemPoints(String tags, String equipref){
+        HashMap deletablePoint = CCUHsApi.getInstance().read("point and tuner and system and oao and "+tags+" and equipRef == \"" + equipref + "\"");
+        if (deletablePoint != null && deletablePoint.size() > 0) {
+            CCUHsApi.getInstance().deleteEntity(deletablePoint.get("id").toString());
         }
     }
 }

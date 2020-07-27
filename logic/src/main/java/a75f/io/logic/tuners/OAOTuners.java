@@ -663,7 +663,7 @@ public class OAOTuners
                 }
             }
             hayStack.writeHisValById(smartPurgeDabFanLoopOutputId, HSUtil.getPriorityVal(smartPurgeDabFanLoopOutputId));
-        }else{
+        }else if(systemProfile.equals("vav")){
             deleteNonUsableSystemPoints("purge and dab and fan and loop and output and min",equipref);
         }
         if(!verifyPointsAvailability("not default","purge and vav and fan and loop and output and min",equipref) && systemProfile.equals("vav")) {
@@ -686,7 +686,7 @@ public class OAOTuners
                 }
             }
             hayStack.writeHisValById(smartPurgeVavFanLoopOutputId, HSUtil.getPriorityVal(smartPurgeVavFanLoopOutputId));
-        }else{
+        }else if(systemProfile.equals("dab")){
             deleteNonUsableSystemPoints("purge and vav and fan and loop and output and min",equipref);
         }
         if(!verifyPointsAvailability("not default","purge and dab and damper and pos and multiplier and min",equipref) && systemProfile.equals("dab")) {
@@ -709,7 +709,7 @@ public class OAOTuners
                 }
             }
             hayStack.writeHisValById(smartPurgeDabDamperMinOpenMultiplierId, HSUtil.getPriorityVal(smartPurgeDabDamperMinOpenMultiplierId));
-        }else{
+        }else if(systemProfile.equals("vav")){
             deleteNonUsableSystemPoints("purge and dab and damper and pos and multiplier and min",equipref);
         }
         if(!verifyPointsAvailability("not default","purge and vav and damper and pos and multiplier and min",equipref) && systemProfile.equals("vav")) {
@@ -732,7 +732,7 @@ public class OAOTuners
                 }
             }
             hayStack.writeHisValById(smartPurgeVavDamperMinOpenMultiplierId, HSUtil.getPriorityVal(smartPurgeVavDamperMinOpenMultiplierId));
-        }else{
+        }else if(systemProfile.equals("dab")){
             deleteNonUsableSystemPoints("purge and vav and damper and pos and multiplier and min",equipref);
         }
     }

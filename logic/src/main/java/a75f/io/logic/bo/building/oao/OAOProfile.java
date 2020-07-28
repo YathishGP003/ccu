@@ -226,7 +226,6 @@ public class OAOProfile
             case FORCEDOCCUPIED:
                 if(systemMode != SystemMode.OFF) {
                     double outsideDamperMinOpen = oaoEquip.getConfigNumVal("oao and outside and damper and min and open");
-                    outsideDamperMinOpen = epidemicState != EpidemicState.OFF ? outsideAirCalculatedMinDamper : outsideDamperMinOpen;
                     outsideAirCalculatedMinDamper = Math.min(outsideDamperMinOpen + dcvCalculatedMinDamper, 100);
                 }else
                     outsideAirCalculatedMinDamper = 0;

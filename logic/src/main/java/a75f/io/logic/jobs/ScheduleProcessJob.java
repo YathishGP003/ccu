@@ -1206,13 +1206,15 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                         } else
                             clearTempOverrides(equip.getId());
                     } else {
+                        SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
                         boolean isZoneHasStandaloneEquip = (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse"));
-                        if (isZonePreconditioningActive(equip.getId(), cachedOccupied, isZoneHasStandaloneEquip) || cachedOccupied.isPreconditioning()) {
+                        if ((systemMode != SystemMode.OFF) && (isZonePreconditioningActive(equip.getId(), cachedOccupied, isZoneHasStandaloneEquip) || cachedOccupied.isPreconditioning())) {
                             c = PRECONDITIONING;
-                        } else if (!isZoneHasStandaloneEquip && getSystemOccupancy() == PRECONDITIONING)
+                        } else if (!isZoneHasStandaloneEquip && getSystemOccupancy() == PRECONDITIONING){
                             c = PRECONDITIONING;
-                        else if ((prevStatus == PRECONDITIONING) || cachedOccupied.isPreconditioning())
+                        }else if ((systemMode != SystemMode.OFF) && ((prevStatus == PRECONDITIONING) || cachedOccupied.isPreconditioning())) {
                             c = PRECONDITIONING;
+                        }
                     }
                 }
             }

@@ -11,6 +11,7 @@ import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemController;
+import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.util.CCUUtils;
@@ -31,7 +32,8 @@ public class OAOProfile
     double outsideAirLoopOutput;
     double outsideAirFinalLoopOutput;
     double returnAirFinalOutput;
-    
+    EpidemicState epidemicState = EpidemicState.OFF;
+    SystemMode systemMode;
     OAOEquip oaoEquip;
     
     public boolean isEconomizingAvailable()
@@ -78,7 +80,8 @@ public class OAOProfile
     }
     
     public void doOAO() {
-        
+
+        systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
         doEconomizing();
         doDcvControl();
         
@@ -222,8 +225,12 @@ public class OAOProfile
         switch (systemOccupancy) {
             case OCCUPIED:
             case FORCEDOCCUPIED:
-                double outsideDamperMinOpen = oaoEquip.getConfigNumVal("oao and outside and damper and min and open");
-                outsideAirCalculatedMinDamper = Math.min(outsideDamperMinOpen + dcvCalculatedMinDamper,100);
+                if(systemMode != SystemMode.OFF) {
+                    double outsideDamperMinOpen = oaoEquip.getConfigNumVal("oao and outside and damper and min and open");
+                    outsideDamperMinOpen = epidemicState != EpidemicState.OFF ? outsideAirCalculatedMinDamper : outsideDamperMinOpen;
+                    outsideAirCalculatedMinDamper = Math.min(outsideDamperMinOpen + dcvCalculatedMinDamper, 100);
+                }else
+                    outsideAirCalculatedMinDamper = 0;
                 break;
             case PRECONDITIONING:
             case VACATION:

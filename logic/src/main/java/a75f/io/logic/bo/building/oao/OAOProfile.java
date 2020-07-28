@@ -32,7 +32,6 @@ public class OAOProfile
     double outsideAirLoopOutput;
     double outsideAirFinalLoopOutput;
     double returnAirFinalOutput;
-    EpidemicState epidemicState = EpidemicState.OFF;
     SystemMode systemMode;
     OAOEquip oaoEquip;
     

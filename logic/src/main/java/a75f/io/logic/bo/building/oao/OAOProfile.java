@@ -12,6 +12,7 @@ import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemController;
+import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.util.CCUUtils;
@@ -33,7 +34,7 @@ public class OAOProfile
     double outsideAirFinalLoopOutput;
     double returnAirFinalOutput;
     EpidemicState epidemicState = EpidemicState.OFF;
-    
+    SystemMode systemMode;
     OAOEquip oaoEquip;
     
     public boolean isEconomizingAvailable()
@@ -81,6 +82,7 @@ public class OAOProfile
     
     public void doOAO() {
 
+        systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
         doEpidemicControl();
         doEconomizing();
         doDcvControl();
@@ -133,18 +135,20 @@ public class OAOProfile
     }
     public void doEpidemicControl(){
         epidemicState = EpidemicState.OFF;
-        Occupancy systemOccupancy = ScheduleProcessJob.getSystemOccupancy();
-        switch (systemOccupancy){
-            case UNOCCUPIED:
-                boolean isSmartPrePurge = TunerUtil.readSystemUserIntentVal("prePurge and enabled ") > 0;
-                boolean isSmartPostPurge = TunerUtil.readSystemUserIntentVal("postPurge and enabled ") > 0;
-                if(isSmartPrePurge) {
-                    handleSmartPrePurgeControl();
-                }
-                if(isSmartPostPurge) {
-                    handleSmartPostPurgeControl();
-                }
-                break;
+        if(systemMode != SystemMode.OFF) {
+            Occupancy systemOccupancy = ScheduleProcessJob.getSystemOccupancy();
+            switch (systemOccupancy) {
+                case UNOCCUPIED:
+                    boolean isSmartPrePurge = TunerUtil.readSystemUserIntentVal("prePurge and enabled ") > 0;
+                    boolean isSmartPostPurge = TunerUtil.readSystemUserIntentVal("postPurge and enabled ") > 0;
+                    if (isSmartPrePurge) {
+                        handleSmartPrePurgeControl();
+                    }
+                    if (isSmartPostPurge) {
+                        handleSmartPostPurgeControl();
+                    }
+                    break;
+            }
         }
         if(epidemicState == EpidemicState.OFF) {
             double prevEpidemicStateValue = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and mode and state");
@@ -241,12 +245,25 @@ public class OAOProfile
             Log.d(L.TAG_CCU_OAO," dcvCalculatedMinDamper "+dcvCalculatedMinDamper+" returnAirCO2 "+returnAirCO2+" co2Threshold "+co2Threshold);
         }
         oaoEquip.setHisVal("co2 and weighted and average", L.ccu().systemProfile.getWeightedAverageCO2());
-        double outsideDamperMinOpen = oaoEquip.getConfigNumVal("oao and outside and damper and min and open");
-        outsideDamperMinOpen = epidemicState != EpidemicState.OFF ? outsideAirCalculatedMinDamper : outsideDamperMinOpen;
-        outsideAirCalculatedMinDamper = Math.min(outsideDamperMinOpen + dcvCalculatedMinDamper,100);
-        if (((ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED)  && (epidemicState == EpidemicState.OFF))|| ScheduleProcessJob.getSystemOccupancy() == Occupancy.VACATION) {
-            outsideAirCalculatedMinDamper = 0;
-            Log.d(L.TAG_CCU_OAO,"System Unoccupied, Disable DCV ");
+        Occupancy systemOccupancy = ScheduleProcessJob.getSystemOccupancy();
+        switch (systemOccupancy) {
+            case OCCUPIED:
+            case FORCEDOCCUPIED:
+                if(systemMode != SystemMode.OFF) {
+                    double outsideDamperMinOpen = oaoEquip.getConfigNumVal("oao and outside and damper and min and open");
+                    outsideDamperMinOpen = epidemicState != EpidemicState.OFF ? outsideAirCalculatedMinDamper : outsideDamperMinOpen;
+                    outsideAirCalculatedMinDamper = Math.min(outsideDamperMinOpen + dcvCalculatedMinDamper, 100);
+                }else
+                    outsideAirCalculatedMinDamper = 0;
+                break;
+            case PRECONDITIONING:
+            case VACATION:
+                outsideAirCalculatedMinDamper = 0;
+                break;
+            case UNOCCUPIED:
+                if(epidemicState == EpidemicState.OFF)
+                    outsideAirCalculatedMinDamper = 0;
+                break;
         }
         oaoEquip.setHisVal("outside and air and calculated and min and damper", outsideAirCalculatedMinDamper);
     }

@@ -189,7 +189,7 @@ public class VavStagedRtu extends VavSystemProfile
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
         double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+getSystemEquipRef()+"\"");
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
-        if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE ) && (L.ccu().oaoProfile != null) && (systemMode != SystemMode.OFF)){
+        if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE ) && (L.ccu().oaoProfile != null)){
             double smartPurgeDabFanLoopOp = TunerUtil.readTunerValByQuery("system and purge and vav and fan and loop and output", L.ccu().oaoProfile.getEquipRef());
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
             double spSpMin = VavTRTuners.getStaticPressureTRTunerVal("spmin");
@@ -290,7 +290,7 @@ public class VavStagedRtu extends VavSystemProfile
                                 && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)) || ((L.ccu().systemProfile.getProfileType() != ProfileType.SYSTEM_VAV_STAGED_VFD_RTU)  && (systemFanLoopOp > 0))) {
                                 relayState = 1;
                         }else if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU) {
-                            if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE) && (systemMode != SystemMode.OFF))
+                            if(epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE)
                                 relayState = systemFanLoopOp > 0 ? 1 : 0;
                             else
                                 relayState =  (systemCoolingLoopOp > 0 || systemHeatingLoopOp > 0) ? 1 :0;

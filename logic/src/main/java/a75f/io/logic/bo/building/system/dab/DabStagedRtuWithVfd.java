@@ -12,6 +12,7 @@ import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_5;
 import static a75f.io.logic.bo.building.hvac.Stage.FAN_1;
@@ -111,12 +112,11 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
                         }
                     }
                 }
-            }
-            else if (epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE){
-                signal = systemFanLoopOp/10;
-            }
-            else if(isEconomizingAvailable && (systemCoolingLoopOp > 0)){
+            } else if(isEconomizingAvailable && (systemCoolingLoopOp > 0)){
                 signal = getConfigVal("analog2 and economizer");
+            } else if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE) && L.ccu().oaoProfile != null){
+                double smartPurgeDabFanLoopOp = TunerUtil.readTunerValByQuery("system and purge and dab and fan and loop and output", L.ccu().oaoProfile.getEquipRef());
+                signal = smartPurgeDabFanLoopOp/10;
             }
             else if (stageStatus[FAN_1.ordinal()] > 0)
             {

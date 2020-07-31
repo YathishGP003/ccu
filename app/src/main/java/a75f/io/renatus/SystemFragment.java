@@ -98,10 +98,18 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	public void refreshScreen(String id)
 	{
-		if (!(L.ccu().systemProfile instanceof DefaultSystem))
-		{
-			checkForOao();
-			fetchPoints();
+		if(getActivity() != null) {
+			getActivity().runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					if (!(L.ccu().systemProfile instanceof DefaultSystem)) {
+						checkForOao();
+						fetchPoints();
+					}
+
+				}
+			});
 		}
 	}
 	public void refreshDesiredTemp(String nodeAddress,String  coolDt, String heatDt){}

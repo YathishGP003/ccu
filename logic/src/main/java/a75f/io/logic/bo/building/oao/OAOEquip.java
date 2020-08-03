@@ -323,7 +323,7 @@ public class OAOEquip
         device.analog1Out.setType(config.outsideDamperAtMinDrive+"-"+config.outsideDamperAtMaxDrive);
         device.analog2Out.setEnabled(config.isOpConfigured(Port.ANALOG_OUT_TWO));
         device.analog2Out.setPointRef(returnAirDamperId);
-        device.analog1Out.setType(config.returnDamperAtMinDrive+"-"+config.returnDamperAtMaxDrive);
+        device.analog2Out.setType(config.returnDamperAtMinDrive+"-"+config.returnDamperAtMaxDrive);
         
         device.relay1.setEnabled(config.isOpConfigured(Port.RELAY_ONE));
         device.relay1.setPointRef(exhaustFanStage1Id);

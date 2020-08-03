@@ -4,12 +4,14 @@ import android.content.Context;
 import android.util.Log;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Occupied;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemController;
+import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.util.CCUUtils;
@@ -30,7 +32,7 @@ public class OAOProfile
     double outsideAirLoopOutput;
     double outsideAirFinalLoopOutput;
     double returnAirFinalOutput;
-    
+    SystemMode systemMode;
     OAOEquip oaoEquip;
     
     public boolean isEconomizingAvailable()
@@ -77,7 +79,8 @@ public class OAOProfile
     }
     
     public void doOAO() {
-        
+
+        systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
         doEconomizing();
         doDcvControl();
         
@@ -217,11 +220,21 @@ public class OAOProfile
             Log.d(L.TAG_CCU_OAO," dcvCalculatedMinDamper "+dcvCalculatedMinDamper+" returnAirCO2 "+returnAirCO2+" co2Threshold "+co2Threshold);
         }
         oaoEquip.setHisVal("co2 and weighted and average", L.ccu().systemProfile.getWeightedAverageCO2());
-        double outsideDamperMinOpen = oaoEquip.getConfigNumVal("oao and outside and damper and min and open");
-        outsideAirCalculatedMinDamper = outsideDamperMinOpen + dcvCalculatedMinDamper;
-        if (ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED || ScheduleProcessJob.getSystemOccupancy() == Occupancy.VACATION) {
-            outsideAirCalculatedMinDamper = 0;
-            Log.d(L.TAG_CCU_OAO,"System Unoccupied, Disable DCV ");
+        Occupancy systemOccupancy = ScheduleProcessJob.getSystemOccupancy();
+        switch (systemOccupancy) {
+            case OCCUPIED:
+            case FORCEDOCCUPIED:
+                if(systemMode != SystemMode.OFF) {
+                    double outsideDamperMinOpen = oaoEquip.getConfigNumVal("oao and outside and damper and min and open");
+                    outsideAirCalculatedMinDamper = Math.min(outsideDamperMinOpen + dcvCalculatedMinDamper, 100);
+                }else
+                    outsideAirCalculatedMinDamper = 0;
+                break;
+            case PRECONDITIONING:
+            case VACATION:
+            case UNOCCUPIED:
+				outsideAirCalculatedMinDamper = 0;
+                break;
         }
         oaoEquip.setHisVal("outside and air and calculated and min and damper", outsideAirCalculatedMinDamper);
     }

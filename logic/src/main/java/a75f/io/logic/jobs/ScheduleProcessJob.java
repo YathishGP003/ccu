@@ -32,6 +32,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemController;
+import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.watchdog.WatchdogMonitor;
@@ -579,32 +580,31 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         {
             double preconDegree = 0;
             double preconRate = CCUHsApi.getInstance().getPredictedPreconRate(L.ccu().systemProfile.getSystemEquipRef());
-            if (preconRate == 0 && nextOccupied != null) {
+            SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
+            if (nextOccupied != null) {
                 if (L.ccu().systemProfile.getAverageTemp() > 0)
                 {
                     if (L.ccu().systemProfile.getSystemController().getConditioningForecast(nextOccupied) == SystemController.State.COOLING)
                     {
-                        preconRate = TunerUtil.readTunerValByQuery("cooling and precon and rate", L.ccu().systemProfile.getSystemEquipRef());
+                        if(preconRate == 0)
+                            preconRate = TunerUtil.readTunerValByQuery("cooling and precon and rate", L.ccu().systemProfile.getSystemEquipRef());
                         preconDegree = L.ccu().systemProfile.getAverageTemp() - nextOccupied.getCoolingVal();
                     }
                     else if (L.ccu().systemProfile.getSystemController().getConditioningForecast(nextOccupied) == SystemController.State.HEATING)
                     {
-                        preconRate = TunerUtil.readTunerValByQuery("heating and precon and rate", L.ccu().systemProfile.getSystemEquipRef());
+                        if(preconRate == 0)
+                            preconRate = TunerUtil.readTunerValByQuery("heating and precon and rate", L.ccu().systemProfile.getSystemEquipRef());
                         preconDegree = nextOccupied.getHeatingVal() - L.ccu().systemProfile.getAverageTemp();
                     }
                 }
             }
-            if(preconRate == 0 && (L.ccu().systemProfile.getAverageTemp() > 0)){
-                preconRate = 15;
-                preconDegree = 1;
-            }
-            if ( (preconDegree != 0) && (millisToOccupancy > 0) && (preconDegree * preconRate * 60 * 1000 >= millisToOccupancy))
+            if ((systemMode != SystemMode.OFF) && (preconDegree > 0) && (millisToOccupancy > 0) && (preconDegree * preconRate * 60 * 1000 >= millisToOccupancy))
             {
                 systemOccupancy = PRECONDITIONING;
             }else{
                 double sysOccValue = CCUHsApi.getInstance().readHisValByQuery("point and system and his and occupancy and mode");
                 Occupancy prevOccuStatus = Occupancy.values()[(int)sysOccValue];
-                if(prevOccuStatus == PRECONDITIONING)
+                if((prevOccuStatus == PRECONDITIONING) && (systemMode != SystemMode.OFF))
                     systemOccupancy = PRECONDITIONING;
             }
             CcuLog.d(L.TAG_CCU_JOB, "preconRate : "+preconRate+" preconDegree: "+preconDegree+","+systemOccupancy.name());
@@ -1206,13 +1206,15 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                         } else
                             clearTempOverrides(equip.getId());
                     } else {
+                        SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
                         boolean isZoneHasStandaloneEquip = (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse"));
-                        if (isZonePreconditioningActive(equip.getId(), cachedOccupied, isZoneHasStandaloneEquip) || cachedOccupied.isPreconditioning()) {
+                        if ((systemMode != SystemMode.OFF) && (isZonePreconditioningActive(equip.getId(), cachedOccupied, isZoneHasStandaloneEquip) || cachedOccupied.isPreconditioning())) {
                             c = PRECONDITIONING;
-                        } else if (!isZoneHasStandaloneEquip && getSystemOccupancy() == PRECONDITIONING)
+                        } else if (!isZoneHasStandaloneEquip && getSystemOccupancy() == PRECONDITIONING){
                             c = PRECONDITIONING;
-                        else if ((prevStatus == PRECONDITIONING) || cachedOccupied.isPreconditioning())
+                        }else if ((systemMode != SystemMode.OFF) && ((prevStatus == PRECONDITIONING) || cachedOccupied.isPreconditioning())) {
                             c = PRECONDITIONING;
+                        }
                     }
                 }
             }

@@ -692,13 +692,15 @@ public class CCUHsApi
         }
     }
 
-    public void deleteEntity(String id)
-    {
+    public void deleteEntity(String id) {
         CcuLog.d("CCU_HS", "deleteEntity " + CCUHsApi.getInstance().readMapById(id).toString());
         tagsDb.tagsMap.remove(id.replace("@", ""));
-        if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.removeIdMap.put(id, tagsDb.idMap.remove(id));
+        if (tagsDb.idMap.get(id) != null) {
+            String guid = getGUID(id);
+            if (guid != null) {
+                tagsDb.removeIdMap.put(id, guid);
+            }
+            tagsDb.idMap.remove(id);
         }
     }
     

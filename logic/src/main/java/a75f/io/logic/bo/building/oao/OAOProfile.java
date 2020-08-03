@@ -53,6 +53,7 @@ public class OAOProfile
     public void addOaoEquip(short addr) {
         oaoEquip = new OAOEquip(getProfileType(), addr);
         oaoEquip.init();
+        oaoEquip.update((OAOProfileConfiguration)getProfileConfiguration(addr));
     }
     
     public void updateOaoEquip(OAOProfileConfiguration config) {

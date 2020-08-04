@@ -201,8 +201,12 @@ public class VavStagedRtu extends VavSystemProfile
                     systemFanLoopOp = ((spSpMax - spSpMin) * smartPurgeDabFanLoopOp);
                 else
                     systemFanLoopOp = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax -spSpMin)) ;
-            }else if(VavSystemController.getInstance().getSystemState() == HEATING)
-                systemFanLoopOp = Math.max((int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier),smartPurgeDabFanLoopOp);
+            }else if(VavSystemController.getInstance().getSystemState() == HEATING) {
+                systemFanLoopOp = Math.max((int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier), smartPurgeDabFanLoopOp);
+            }else{
+                systemFanLoopOp = smartPurgeDabFanLoopOp;
+            }
+
         }else if (VavSystemController.getInstance().getSystemState() == COOLING && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
         {
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");

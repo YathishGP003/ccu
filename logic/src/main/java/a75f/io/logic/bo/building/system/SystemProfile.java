@@ -153,7 +153,7 @@ public abstract class SystemProfile
         }
         return equipRef;
     }
-    
+
     public void updateAhuRef(String systemEquipId) {
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
         if (L.ccu().oaoProfile != null) {

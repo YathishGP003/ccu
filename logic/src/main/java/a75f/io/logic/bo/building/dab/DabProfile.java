@@ -20,6 +20,7 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.system.SystemController;
+import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
@@ -135,8 +136,8 @@ public class DabProfile extends ZoneProfile
         Log.d(L.TAG_CCU_ZONE, "DAB : roomTemp" + roomTemp + " setTempCooling:  " + setTempCooling+" setTempHeating: "+setTempHeating);
     
         SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
-    
-        if (roomTemp > setTempCooling && conditioning == SystemController.State.COOLING)
+        SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
+        if ((roomTemp > setTempCooling) && (conditioning == SystemController.State.COOLING) && (systemMode != SystemMode.OFF))
         {
             //Zone is in Cooling
             if (state != COOLING)
@@ -146,7 +147,7 @@ public class DabProfile extends ZoneProfile
             }
             damperOpController.updateControlVariable(roomTemp, setTempCooling);
         }
-        else if (roomTemp < setTempHeating && conditioning == SystemController.State.HEATING)
+        else if ((roomTemp < setTempHeating) && (conditioning == SystemController.State.HEATING) && (systemMode != SystemMode.OFF))
         {
             //Zone is in heating
             if (state != HEATING)

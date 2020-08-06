@@ -107,11 +107,17 @@ public class DabProfile extends ZoneProfile
             if (!curStatus.equals("Zone Temp Dead"))
             {
                 CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + dabEquip.nodeAddr + "\"", "Zone Temp Dead");
-    
+
+                SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
                 double damperMin = dabEquip.getDamperLimit(state == HEATING ? "heating":"cooling", "min");
                 double damperMax = dabEquip.getDamperLimit(state == HEATING ? "heating":"cooling", "max");
-                
-                double damperPos = (damperMax+damperMin)/2;
+
+                double damperPos =(damperMax+damperMin)/2;
+                if(systemMode == SystemMode.OFF) {
+                    HashMap damper = CCUHsApi.getInstance().read("point and damper and base and cmd and equipRef == \""+dabEquip.getId()+"\"");
+                    double curDamperPos = CCUHsApi.getInstance().readHisValById(damper.get("id").toString());
+                    damperPos = curDamperPos > 0 ? curDamperPos : damperMin;
+                }
                 dabEquip.setDamperPos(damperPos, "primary");
                 dabEquip.setDamperPos(damperPos, "secondary");
                 dabEquip.setNormalizedDamperPos(damperPos, "primary");

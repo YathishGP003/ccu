@@ -196,7 +196,7 @@ public class DabSystemController extends SystemController
         }
         weightedAverageLoadMA = weightedAverageLoadPostMLQSum/weightedAverageLoadPostMLQ.size();
         
-        if ((systemState != HEATING) && buildingLimitMaxBreached("dab")) {
+        if ((systemState != HEATING) && buildingLimitMaxBreached("dab") && (systemMode != SystemMode.OFF)) {
             CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency COOLING Active");
             emergencyMode = true;
             if (systemMode == COOLONLY || systemMode == AUTO)
@@ -214,7 +214,7 @@ public class DabSystemController extends SystemController
                 piController.reset();
             }
             
-        } else if ((systemState != COOLING) && buildingLimitMinBreached("dab")) {
+        } else if ((systemState != COOLING) && buildingLimitMinBreached("dab") && (systemMode != SystemMode.OFF)) {
             CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency HEATING Active");
             emergencyMode = true;
             if (systemMode == HEATONLY || systemMode == AUTO)

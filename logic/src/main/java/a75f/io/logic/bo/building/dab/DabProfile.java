@@ -114,9 +114,7 @@ public class DabProfile extends ZoneProfile
 
                 double damperPos =(damperMax+damperMin)/2;
                 if(systemMode == SystemMode.OFF) {
-                    HashMap damper = CCUHsApi.getInstance().read("point and damper and base and cmd and equipRef == \""+dabEquip.getId()+"\"");
-                    double curDamperPos = CCUHsApi.getInstance().readHisValById(damper.get("id").toString());
-                    damperPos = curDamperPos > 0 ? curDamperPos : damperMin;
+                    damperPos = dabEquip.getDamperPos() > 0 ? dabEquip.getDamperPos() : damperMin;
                 }
                 dabEquip.setDamperPos(damperPos, "primary");
                 dabEquip.setDamperPos(damperPos, "secondary");

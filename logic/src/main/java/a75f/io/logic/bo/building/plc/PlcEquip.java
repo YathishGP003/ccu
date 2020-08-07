@@ -190,21 +190,6 @@ public class PlcEquip {
         String analog2InputSensorId = hayStack.addPoint(analog2InputSensor);
         hayStack.writeDefaultValById(analog2InputSensorId, (double) config.analog2InputSensor);
 
-        Point setpointSensorOffset = new Point.Builder()
-                .setDisplayName(equipDis + "-setpointSensorOffset")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("config").addMarker("pid").addMarker("zone").addMarker("writable")
-                .addMarker("setpoint").addMarker("sensor").addMarker("offset").addMarker("his")
-                .setGroup(String.valueOf(nodeAddr))
-                .setTz(tz)
-                .build();
-        String setpointSensorOffsetId = hayStack.addPoint(setpointSensorOffset);
-        hayStack.writeDefaultValById(setpointSensorOffsetId, config.setpointSensorOffset);
-        hayStack.writeHisValById(setpointSensorOffsetId, config.setpointSensorOffset);
-
         Point expectZeroErrorAtMidpoint = new Point.Builder()
                 .setDisplayName(equipDis + "-expectZeroErrorAtMidpoint")
                 .setEquipRef(equipRef)
@@ -284,6 +269,7 @@ public class PlcEquip {
             device.analog2In.setPointRef(setPointVariableId);
             device.analog2In.setEnabled(true);
             device.analog2In.setType(String.valueOf(config.analog2InputSensor));
+            updateOffsetSensorValue(config.setpointSensorOffset, floorRef, roomRef);
         }
 
         device.analog1Out.setPointRef(controlVariableId);
@@ -350,6 +336,7 @@ public class PlcEquip {
 
         HashMap dynamicTarget = hayStack.read("point and dynamic and target and value and equipRef == \"" + equipRef + "\"");
         HashMap targetValuePoint = hayStack.read("point and config and target and value and equipRef == \"" + equipRef + "\"");
+        HashMap offsetSensorPoint = hayStack.read("point and config and setpoint and sensor and offset and equipRef == \"" + equipRef + "\"");
 
         //delete last point
         if (dynamicTarget != null && dynamicTarget.get("id") != null && (config.useAnalogIn2ForSetpoint && getProfileConfiguration().analog2InputSensor != config.analog2InputSensor)) {
@@ -371,10 +358,16 @@ public class PlcEquip {
             if (id == null || getProfileConfiguration().analog2InputSensor != config.analog2InputSensor) {
                 id = updateDynamicTargetInput(config.analog2InputSensor, floorRef, roomRef, dynamicTargetTag);
             }
+            // add offset sensor point
+            if (offsetSensorPoint == null || offsetSensorPoint.get("id") == null){
+                updateOffsetSensorValue(config.setpointSensorOffset, floorRef, roomRef);
+            }
 
             SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_IN_TWO.name(), true);
             SmartNode.updatePhysicalPointRef(nodeAddr, Port.ANALOG_IN_TWO.name(), id);
             SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_IN_TWO.name(), String.valueOf(config.analog2InputSensor));
+            // add offset value with dynamic target value and update
+            setSpVariable(getSpVariable() + getSpSensorOffset());
         }
 
         HashMap processVariable = hayStack.read("point and process and variable and equipRef == \"" + equipRef + "\"");
@@ -387,10 +380,14 @@ public class PlcEquip {
         }
 
         if (config.analog1InputSensor > 0) {
-            //add target value points if useAnalogIn2ForSetpoint off
+            //add target value points and offset sensor if useAnalogIn2ForSetpoint off
             if (!config.useAnalogIn2ForSetpoint){
                 if (dynamicTarget != null && dynamicTarget.get("id") != null){
                     CCUHsApi.getInstance().deleteEntityTree(dynamicTarget.get("id").toString());
+                }
+
+                if (offsetSensorPoint != null && offsetSensorPoint.get("id") != null){
+                    CCUHsApi.getInstance().deleteEntityTree(offsetSensorPoint.get("id").toString());
                 }
                 
                 if (targetValuePoint == null || targetValuePoint.get("id") == null){
@@ -420,11 +417,15 @@ public class PlcEquip {
 
         } else if (config.th1InputSensor > 0) {
 
-            //add target value points if useAnalogIn2ForSetpoint off and analog1InputSensor not used
+            //add target value points  and offset sensor point if useAnalogIn2ForSetpoint off and analog1InputSensor not used
             if (!config.useAnalogIn2ForSetpoint && config.analog1InputSensor == 0){
 
                 if (dynamicTarget != null && dynamicTarget.get("id") != null){
                     CCUHsApi.getInstance().deleteEntityTree(dynamicTarget.get("id").toString());
+                }
+
+                if (offsetSensorPoint != null && offsetSensorPoint.get("id") != null){
+                    CCUHsApi.getInstance().deleteEntityTree(offsetSensorPoint.get("id").toString());
                 }
 
                 if (targetValuePoint == null || targetValuePoint.get("id") == null){
@@ -467,8 +468,10 @@ public class PlcEquip {
 
         hayStack.writeDefaultVal("point and config and analog2 and input and sensor and equipRef == \"" + equipRef + "\"", (double) config.analog2InputSensor);
 
-        hayStack.writeDefaultVal("point and config and setpoint and sensor and offset and equipRef == \"" + equipRef + "\"", config.setpointSensorOffset);
-        hayStack.writeHisValByQuery("point and config and setpoint and sensor and offset and equipRef == \"" + equipRef + "\"", config.setpointSensorOffset);
+        if (config.useAnalogIn2ForSetpoint) {
+            hayStack.writeDefaultVal("point and config and setpoint and sensor and offset and equipRef == \"" + equipRef + "\"", config.setpointSensorOffset);
+            hayStack.writeHisValByQuery("point and config and setpoint and sensor and offset and equipRef == \"" + equipRef + "\"", config.setpointSensorOffset);
+        }
 
         hayStack.writeDefaultVal("point and config and analog1 and min and output and equipRef == \"" + equipRef + "\"", config.analog1AtMinOutput);
         hayStack.writeHisValByQuery("point and config and analog1 and min and output and equipRef == \"" + equipRef + "\"", config.analog1AtMinOutput);
@@ -502,14 +505,13 @@ public class PlcEquip {
                 .setFloorRef(floorRef)
                 .setHisInterpolate("cov")
                 .addMarker("logical").addMarker("pid").addMarker("zone").addMarker("his").addMarker("cur")
-                .addMarker("writable").addMarker("sp")
+                .addMarker("sp")
                 .addMarker("process").addMarker("variable")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit(unit)
                 .setTz(tz)
                 .build();
         String processVariableTagId = hayStack.addPoint(processVariableTag);
-        hayStack.writeDefaultValById(processVariableTagId, 0.0);
         hayStack.writeHisValById(processVariableTagId, 0.0);
 
         return processVariableTagId;
@@ -531,17 +533,41 @@ public class PlcEquip {
                 .setFloorRef(floorRef)
                 .setHisInterpolate("cov")
                 .addMarker("logical").addMarker("pid").addMarker("zone").addMarker("his").addMarker("cur")
-                .addMarker("writable").addMarker("sp")
+                .addMarker("sp")
                 .addMarker("dynamic").addMarker("target").addMarker("value")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit(getUnitForDy(inputSensor))
                 .setTz(tz)
                 .build();
         String DynamicTargetValueTagId = hayStack.addPoint(DynamicTargetValueTag);
-        hayStack.writeDefaultValById(DynamicTargetValueTagId, 0.0);
         hayStack.writeHisValById(DynamicTargetValueTagId, 0.0);
 
         return DynamicTargetValueTagId;
+    }
+
+    private String updateOffsetSensorValue(double spSensorOffset,String floorRef, String roomRef) {
+
+        HashMap siteMap = hayStack.read(Tags.SITE);
+        String siteRef = (String) siteMap.get(Tags.ID);
+        String siteDis = (String) siteMap.get("dis");
+        String equipDis = siteDis + "-PID-" + nodeAddr;
+        String tz = siteMap.get("tz").toString();
+
+        Point setpointSensorOffset = new Point.Builder()
+                .setDisplayName(equipDis + "-setpointSensorOffset")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef).setHisInterpolate("cov")
+                .addMarker("config").addMarker("pid").addMarker("zone").addMarker("writable")
+                .addMarker("setpoint").addMarker("sensor").addMarker("offset").addMarker("his")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+        String setpointSensorOffsetId = hayStack.addPoint(setpointSensorOffset);
+        hayStack.writeDefaultValById(setpointSensorOffsetId, spSensorOffset);
+        hayStack.writeHisValById(setpointSensorOffsetId, spSensorOffset);
+        return setpointSensorOffsetId;
     }
 
     private String updateTargetValue(double targetValue, String floorRef, String roomRef, String unit){

@@ -312,13 +312,23 @@ public class Schedule extends Entity
                         .withSecondOfMinute(0);
                 occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
                 if( (i != 0) && (scheduledIntervals.get(i-1) != null) && scheduledIntervals.get(i-1).isBefore(getTime().getMillis())){
-                    DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
-                            .withHourOfDay(daysSorted.get(i-1).getEthh())
-                            .withMinuteOfHour(daysSorted.get(i-1).getEtmm())
-                            .withDayOfWeek(daysSorted.get(i-1).getDay() + 1)
-                            .withSecondOfMinute(0);
-                    occupied.setPreviouslyOccupiedSchedule(daysSorted.get(i -1));
-                    occupied.setMillisecondsUntilPrevChange(MockTime.getInstance().getMockTime() -endDateTime.getMillis());
+                    if(daysSorted.get(i-1).getSthh() > daysSorted.get(i-1).getEthh()) {
+                        DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
+                                .withHourOfDay(daysSorted.get(i - 1).getEthh())
+                                .withMinuteOfHour(daysSorted.get(i - 1).getEtmm())
+                                .withDayOfWeek(daysSorted.get(i).getDay() + 1)
+                                .withSecondOfMinute(0);
+                        occupied.setPreviouslyOccupiedSchedule(daysSorted.get(i -1));
+                        occupied.setMillisecondsUntilPrevChange(MockTime.getInstance().getMockTime() -endDateTime.getMillis());
+					}else {
+                        DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
+                                .withHourOfDay(daysSorted.get(i - 1).getEthh())
+                                .withMinuteOfHour(daysSorted.get(i - 1).getEtmm())
+                                .withDayOfWeek(daysSorted.get(i - 1).getDay() + 1)
+                                .withSecondOfMinute(0);
+                        occupied.setPreviouslyOccupiedSchedule(daysSorted.get(i -1));
+                        occupied.setMillisecondsUntilPrevChange(MockTime.getInstance().getMockTime() -endDateTime.getMillis());
+                    }
                 }
                 return occupied;
             }

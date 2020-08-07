@@ -64,7 +64,8 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.ViewHo
             if (DateUtils.isSameDay(today,endDate)){
                 viewHolder.mVacationEdit.setVisibility(View.VISIBLE);
             } else if (today.after(endDate)) {
-                viewHolder.mVacationEdit.setVisibility(View.INVISIBLE);
+                viewHolder.itemView.setVisibility(View.GONE);
+                viewHolder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0, 0));
             }
         } catch (ParseException e) {
             e.printStackTrace();

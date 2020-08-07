@@ -635,8 +635,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             Occupied prevOccupied = null;
             for (Occupied occ : occupiedHashMap.values()) {
                 Schedule.Days occDay = occ.getPreviouslyOccupiedSchedule();
-                if (prevOccupied == null || occDay.getEthh() > prevOccupied.getPreviouslyOccupiedSchedule().getEthh()
-                        || (occDay.getEthh() == prevOccupied.getPreviouslyOccupiedSchedule().getEthh() && occDay.getEtmm() > prevOccupied.getPreviouslyOccupiedSchedule().getEtmm()) )
+                if (prevOccupied == null || ((occDay != null) && (occDay.getEthh() > prevOccupied.getPreviouslyOccupiedSchedule().getEthh()
+                        || (occDay.getEthh() == prevOccupied.getPreviouslyOccupiedSchedule().getEthh() && occDay.getEtmm() > prevOccupied.getPreviouslyOccupiedSchedule().getEtmm())) ))
                 {
                     prevOccupied = occ;
                 }

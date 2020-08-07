@@ -114,9 +114,12 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
                 }
             } else if(isEconomizingAvailable && (systemCoolingLoopOp > 0)){
                 signal = getConfigVal("analog2 and economizer");
-            } else if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE) && L.ccu().oaoProfile != null){
-                double smartPurgeDabFanLoopOp = TunerUtil.readTunerValByQuery("system and purge and dab and fan and loop and output", L.ccu().oaoProfile.getEquipRef());
-                signal = smartPurgeDabFanLoopOp/10;
+            } else if((epidemicState == EpidemicState.PREPURGE) && L.ccu().oaoProfile != null){
+                double smartPrePurgeFanSpeed = TunerUtil.readTunerValByQuery("system and prePurge and fan and speed", L.ccu().oaoProfile.getEquipRef());
+                signal = smartPrePurgeFanSpeed/10;
+            }else if((epidemicState == EpidemicState.POSTPURGE) && L.ccu().oaoProfile != null){
+                double smartPurgeFanLoopOp = TunerUtil.readTunerValByQuery("system and postPurge and fan and speed", L.ccu().oaoProfile.getEquipRef());
+                signal = smartPurgeFanLoopOp/10;
             }
             else if (stageStatus[FAN_1.ordinal()] > 0)
             {

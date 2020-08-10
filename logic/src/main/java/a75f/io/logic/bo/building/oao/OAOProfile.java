@@ -49,12 +49,12 @@ public class OAOProfile
     public void addOaoEquip(short addr, OAOProfileConfiguration config, String floorRef, String roomRef) {
         oaoEquip = new OAOEquip(getProfileType(), addr);
         oaoEquip.createEntities(config, floorRef, roomRef);
-        oaoEquip.init();
     }
     
     public void addOaoEquip(short addr) {
         oaoEquip = new OAOEquip(getProfileType(), addr);
         oaoEquip.init();
+        oaoEquip.update((OAOProfileConfiguration)getProfileConfiguration(addr));
     }
     
     public void updateOaoEquip(OAOProfileConfiguration config) {

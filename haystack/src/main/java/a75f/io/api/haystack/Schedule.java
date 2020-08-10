@@ -12,8 +12,10 @@ import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -330,6 +332,32 @@ public class Schedule extends Entity
                         occupied.setMillisecondsUntilPrevChange(MockTime.getInstance().getMockTime() -endDateTime.getMillis());
                     }
                 }
+                return occupied;
+            }else if ( (daysSorted.get(i).getDay() == getCurrentDayOfWeekWithMondayAsStart() )&& scheduledIntervals.get(i).isBefore(getTime().getMillis())){
+                int nextSchedule;
+                if(i == daysSorted.size()-1)
+                    nextSchedule = 0;
+                else
+                    nextSchedule = i+1;
+                occupied = new Occupied();
+                occupied.setOccupied(false);
+                occupied.setValue(daysSorted.get(nextSchedule).mVal);
+                occupied.setCoolingVal(daysSorted.get(nextSchedule).mCoolingVal);
+                occupied.setHeatingVal(daysSorted.get(nextSchedule).mHeatingVal);
+                occupied.setNextOccupiedSchedule(daysSorted.get(nextSchedule));
+                DateTime startDateTime = new DateTime(MockTime.getInstance().getMockTime())
+                        .withHourOfDay(daysSorted.get(nextSchedule).getSthh())
+                        .withMinuteOfHour(daysSorted.get(nextSchedule).getStmm())
+                        .withDayOfWeek(daysSorted.get(nextSchedule).getDay() + 1)
+                        .withSecondOfMinute(0);
+                occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
+                DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
+                        .withHourOfDay(daysSorted.get(i).getEthh())
+                        .withMinuteOfHour(daysSorted.get(i).getEtmm())
+                        .withDayOfWeek(daysSorted.get(i).getDay() + 1)
+                        .withSecondOfMinute(0);
+                occupied.setPreviouslyOccupiedSchedule(daysSorted.get(i));
+                occupied.setMillisecondsUntilPrevChange(MockTime.getInstance().getMockTime() -endDateTime.getMillis());
                 return occupied;
             }
         }
@@ -822,7 +850,20 @@ public class Schedule extends Entity
             }
         }
     }
-
+    public static int getCurrentDayOfWeekWithMondayAsStart() {
+        Calendar calendar = GregorianCalendar.getInstance();
+        switch (calendar.get(Calendar.DAY_OF_WEEK))
+        {
+            case Calendar.MONDAY: return 0;
+            case Calendar.TUESDAY: return 1;
+            case Calendar.WEDNESDAY: return 2;
+            case Calendar.THURSDAY: return 3;
+            case Calendar.FRIDAY: return 4;
+            case Calendar.SATURDAY: return 5;
+            case Calendar.SUNDAY: return 6;
+        }
+        return 0;
+    }
 
     public static class Builder
     {

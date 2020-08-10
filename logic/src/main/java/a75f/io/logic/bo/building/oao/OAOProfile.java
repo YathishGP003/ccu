@@ -49,7 +49,6 @@ public class OAOProfile
     public void addOaoEquip(short addr, OAOProfileConfiguration config, String floorRef, String roomRef) {
         oaoEquip = new OAOEquip(getProfileType(), addr);
         oaoEquip.createEntities(config, floorRef, roomRef);
-        oaoEquip.init();
     }
     
     public void addOaoEquip(short addr) {

@@ -334,16 +334,21 @@ public class Schedule extends Entity
                 }
                 return occupied;
             }else if ( (daysSorted.get(i).getDay() == getCurrentDayOfWeekWithMondayAsStart() )&& scheduledIntervals.get(i).isBefore(getTime().getMillis())){
+                int nextSchedule;
+                if(i == daysSorted.size()-1)
+                    nextSchedule = 0;
+                else
+                    nextSchedule = i+1;
                 occupied = new Occupied();
                 occupied.setOccupied(false);
-                occupied.setValue(daysSorted.get(0).mVal);
-                occupied.setCoolingVal(daysSorted.get(0).mCoolingVal);
-                occupied.setHeatingVal(daysSorted.get(0).mHeatingVal);
-                occupied.setNextOccupiedSchedule(daysSorted.get(0));
+                occupied.setValue(daysSorted.get(nextSchedule).mVal);
+                occupied.setCoolingVal(daysSorted.get(nextSchedule).mCoolingVal);
+                occupied.setHeatingVal(daysSorted.get(nextSchedule).mHeatingVal);
+                occupied.setNextOccupiedSchedule(daysSorted.get(nextSchedule));
                 DateTime startDateTime = new DateTime(MockTime.getInstance().getMockTime())
-                        .withHourOfDay(daysSorted.get(0).getSthh())
-                        .withMinuteOfHour(daysSorted.get(0).getStmm())
-                        .withDayOfWeek(daysSorted.get(0).getDay() + 1)
+                        .withHourOfDay(daysSorted.get(nextSchedule).getSthh())
+                        .withMinuteOfHour(daysSorted.get(nextSchedule).getStmm())
+                        .withDayOfWeek(daysSorted.get(nextSchedule).getDay() + 1)
                         .withSecondOfMinute(0);
                 occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
                 DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())

@@ -319,7 +319,7 @@ public class OAOTuners
     public static void updateOaoSystemTuners(String siteRef, String equipref, String equipdis, String tz,String systemProfile) {
 
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        if (!verifyPointsAvailability("not default","co2 and damper and opening and rate and min",equipref)) {
+        if (!verifyPointsAvailability("not default","co2 and damper and opening and rate",equipref)) {
             Point co2DamperOpeningRate = new Point.Builder()
                     .setDisplayName(equipdis + "-" + "co2DamperOpeningRate")
                     .setSiteRef(siteRef)

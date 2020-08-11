@@ -319,7 +319,7 @@ public class OAOTuners
     public static void updateOaoSystemTuners(String siteRef, String equipref, String equipdis, String tz,String systemProfile) {
 
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        if (!verifyPointsAvailability("not default","co2 and damper and opening and rate and multiplier and min",equipref)) {
+        if (!verifyPointsAvailability("not default","co2 and damper and opening and rate and min",equipref)) {
             Point co2DamperOpeningRate = new Point.Builder()
                     .setDisplayName(equipdis + "-" + "co2DamperOpeningRate")
                     .setSiteRef(siteRef)
@@ -477,7 +477,7 @@ public class OAOTuners
                     .setSiteRef(siteRef)
                     .setEquipRef(equipref).setHisInterpolate("cov")
                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
-                    .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("minimum").addMarker("system")
+                    .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("min").addMarker("system")
                     .setMinVal("30").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
                     .setUnit("\u00B0F")
                     .setTz(tz)

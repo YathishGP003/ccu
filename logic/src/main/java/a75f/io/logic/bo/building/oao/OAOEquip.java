@@ -33,6 +33,7 @@ public class OAOEquip
         if (equipMap != null && equipMap.size() > 0)
         {
             equipRef = equipMap.get("id").toString();
+            OAOTuners.updateOaoSystemTuners(equipMap.get("siteRef").toString(), equipRef, equipMap.get("dis").toString(),equipMap.get("tz").toString(),getSystemProfileType());
             updateNewConfigParams(equipMap.get("siteRef").toString(), equipRef, equipMap.get("dis").toString(),equipMap.get("tz").toString());
         } else {
             throw new IllegalStateException("Equip should be created before init");

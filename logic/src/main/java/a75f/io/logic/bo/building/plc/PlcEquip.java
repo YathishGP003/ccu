@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.plc;
 
+import android.os.Bundle;
+
 import java.util.HashMap;
 
 import a75.io.algos.GenericPIController;
@@ -90,10 +92,10 @@ public class PlcEquip {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
+                .setShortDis("Analog1 Input Config")
                 .addMarker("config").addMarker("pid").addMarker("zone").addMarker("writable")
                 .addMarker("analog1").addMarker("input").addMarker("sensor")
                 .setGroup(String.valueOf(nodeAddr))
-                .setUnit("mV")
                 .setTz(tz)
                 .build();
         String analog1InputSensorId = hayStack.addPoint(analog1InputSensor);
@@ -120,6 +122,7 @@ public class PlcEquip {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
+                .setShortDis("PID Proportional Range")
                 .addMarker("config").addMarker("pid").addMarker("zone").addMarker("writable")
                 .addMarker("prange")
                 .setGroup(String.valueOf(nodeAddr))
@@ -251,14 +254,14 @@ public class PlcEquip {
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
 
         if (config.analog1InputSensor > 0) {
-            updateTargetValue(config.pidTargetValue,floorRef, roomRef, getUnit(config.analog1InputSensor));
-            String processVariableId = updateProcessVariable(floorRef, roomRef, processVar, getUnit(config.analog1InputSensor));
+            updateTargetValue(config.pidTargetValue,floorRef, roomRef, getAnalog1Bundle(config.analog1InputSensor));
+            String processVariableId = updateProcessVariable(floorRef, roomRef, processVar, getAnalog1Bundle(config.analog1InputSensor));
             device.analog1In.setPointRef(processVariableId);
             device.analog1In.setEnabled(true);
             device.analog1In.setType(String.valueOf(config.analog1InputSensor - 1));
         } else {
-            updateTargetValue(config.pidTargetValue,floorRef, roomRef, "\u00B0F");
-            String processVariableId = updateProcessVariable(floorRef, roomRef, processVar, "\u00B0F");
+            updateTargetValue(config.pidTargetValue,floorRef, roomRef, getThermistorBundle(config.th1InputSensor));
+            String processVariableId = updateProcessVariable(floorRef, roomRef, processVar, getThermistorBundle(config.th1InputSensor));
             device.th1In.setPointRef(processVariableId);
             device.th1In.setEnabled(true);
             device.th1In.setType(String.valueOf(config.th1InputSensor - 1));
@@ -280,36 +283,202 @@ public class PlcEquip {
         hayStack.syncEntityTree();
     }
 
-    private String getUnit(int analog1InputSensor) {
+    private Bundle getAnalog1Bundle(int analog1InputSensor) {
+        Bundle mBundle = new Bundle();
+        String shortDis = "Generic 0-10 Voltage";
         String unit = "V";
-        if (analog1InputSensor == 1 || analog1InputSensor == 0) {
+        String maxVal = "10";
+        String incrementVal = "0.1";
+        String[] markers = null;
+
+        if (analog1InputSensor == 0 || analog1InputSensor == 1) {
+            shortDis = "Generic 0-10 Voltage";
             unit = "V";
-        } else if (analog1InputSensor == 2 || analog1InputSensor == 3) {
-            unit = "WC";
-        } else if (analog1InputSensor == 4 || analog1InputSensor == 5) {
+            maxVal = "10";
+            incrementVal = "0.1";
+            markers = null;
+        } else if (analog1InputSensor == 2) {
+            shortDis = "Pressure [0-2 in.]";
+            unit = "Inch wc";
+            maxVal = "2";
+            incrementVal = "0.1";
+            markers = new String[]{"pressure"};
+        } else if (analog1InputSensor == 3) {
+            shortDis = "Pressure[0-0.25 in. Differential]";
+            unit = "Inch wc";
+            maxVal = "0.25";
+            incrementVal = "0.01";
+            markers = new String[]{"pressure"};
+        } else if (analog1InputSensor == 4) {
+            shortDis = "Airflow";
+            unit = "CFM";
+            maxVal = "1000";
+            incrementVal = "10";
+            markers = new String[]{"airflow"};
+        } else if (analog1InputSensor == 5) {
+            shortDis = "Humidity";
             unit = "%";
-        } else if (analog1InputSensor == 6 || analog1InputSensor == 7 || analog1InputSensor == 8) {
-            unit = "PPM";
-        } else if (analog1InputSensor == 9 || analog1InputSensor == 10 || analog1InputSensor == 11) {
-            unit = "AMPS";
+            maxVal = "100";
+            incrementVal = "1.0";
+            markers = new String[]{"humidity"};
+        } else if (analog1InputSensor == 6) {
+            shortDis = "CO2 Level";
+            unit = "ppm";
+            maxVal = "2000";
+            incrementVal = "100";
+            markers = new String[]{"co2"};
+        } else if (analog1InputSensor == 7) {
+            shortDis = "CO Level";
+            unit = "ppm";
+            maxVal = "100";
+            incrementVal = "1.0";
+            markers = new String[]{"co"};
+        } else if (analog1InputSensor == 8) {
+            shortDis = "NO2 Level";
+            unit = "ppm";
+            maxVal = "5";
+            incrementVal = "0.1";
+            markers = new String[]{"no2"};
+        } else if (analog1InputSensor == 9) {
+            shortDis = "Current Drawn[CT 0-10]";
+            unit = "A";
+            maxVal = "10";
+            incrementVal = "0.1";
+            markers = new String[]{"current","transformer"};
+        } else if (analog1InputSensor == 10) {
+            shortDis = "Current Drawn[CT 0-20]";
+            unit = "A";
+            maxVal = "20";
+            incrementVal = "0.1";
+            markers = new String[]{"current","transformer"};
+        } else if (analog1InputSensor == 11) {
+            shortDis = "Current Drawn[CT 0-30]";
+            unit = "A";
+            maxVal = "50";
+            incrementVal = "0.1";
+            markers = new String[]{"current","transformer"};
         }
-        return unit;
+        mBundle.putString("shortDis",shortDis);
+        mBundle.putString("unit",unit);
+        mBundle.putString("maxVal",maxVal);
+        mBundle.putString("incrementVal",incrementVal);
+        mBundle.putStringArray("markers",markers);
+
+        return mBundle;
     }
 
-    private String getUnitForDy(int dynamicInputSensor) {
+    private Bundle getAnalog2ShortDis(int dynamicInputSensor) {
+        Bundle mBundle = new Bundle();
+        String shortDis = "Generic 0-10 Voltage";
         String unit = "V";
+        String maxVal = "10";
+        String incrementVal = "0.1";
+        String[] markers = null;
+
         if (dynamicInputSensor == 0) {
+            shortDis = "Generic 0-10 Voltage";
             unit = "V";
-        } else if (dynamicInputSensor == 1 || dynamicInputSensor == 2) {
-            unit = "WC";
-        } else if (dynamicInputSensor == 3 || dynamicInputSensor == 4) {
+            maxVal = "10";
+            incrementVal = "0.1";
+            markers = null;
+        } else if (dynamicInputSensor == 1) {
+            shortDis = "Pressure [0-2 in.]";
+            unit = "Inch wc";
+            maxVal = "2";
+            incrementVal = "0.1";
+            markers = new String[]{"pressure"};
+        } else if (dynamicInputSensor == 2) {
+            shortDis = "Pressure[0-0.25 in. Differential]";
+            unit = "Inch wc";
+            maxVal = "0.25";
+            incrementVal = "0.01";
+            markers = new String[]{"pressure"};
+        } else if (dynamicInputSensor == 3) {
+            shortDis = "Airflow";
+            unit = "CFM";
+            maxVal = "1000";
+            incrementVal = "10";
+            markers = new String[]{"airflow"};
+        } else if (dynamicInputSensor == 4) {
+            shortDis = "Humidity";
             unit = "%";
-        } else if (dynamicInputSensor == 5 || dynamicInputSensor == 6 || dynamicInputSensor == 7) {
-            unit = "PPM";
-        } else if (dynamicInputSensor == 8 || dynamicInputSensor == 9 || dynamicInputSensor == 10) {
-            unit = "AMPS";
+            maxVal = "100";
+            incrementVal = "1.0";
+            markers = new String[]{"humidity"};
+        } else if (dynamicInputSensor == 5) {
+            shortDis = "CO2 Level";
+            unit = "ppm";
+            maxVal = "2000";
+            incrementVal = "100";
+            markers = new String[]{"co2"};
+        } else if (dynamicInputSensor == 6) {
+            shortDis = "CO Level";
+            unit = "ppm";
+            maxVal = "100";
+            incrementVal = "1.0";
+            markers = new String[]{"co"};
+        } else if (dynamicInputSensor == 7) {
+            shortDis = "NO2 Level";
+            unit = "ppm";
+            maxVal = "5";
+            incrementVal = "0.1";
+            markers = new String[]{"no2"};
+        } else if (dynamicInputSensor == 8) {
+            shortDis = "Current Drawn[CT 0-10]";
+            unit = "A";
+            maxVal = "10";
+            incrementVal = "0.1";
+            markers = new String[]{"current", "transformer"};
+        } else if (dynamicInputSensor == 9) {
+            shortDis = "Current Drawn[CT 0-20]";
+            unit = "A";
+            maxVal = "20";
+            incrementVal = "0.1";
+            markers = new String[]{"current", "transformer"};
+        } else if (dynamicInputSensor == 10) {
+            shortDis = "Current Drawn[CT 0-30]";
+            unit = "A";
+            maxVal = "50";
+            incrementVal = "0.1";
+            markers = new String[]{"current", "transformer"};
         }
-        return unit;
+        mBundle.putString("shortDis", shortDis);
+        mBundle.putString("unit", unit);
+        mBundle.putString("maxVal", maxVal);
+        mBundle.putString("incrementVal", incrementVal);
+        mBundle.putStringArray("markers", markers);
+
+        return mBundle;
+    }
+
+    private Bundle getThermistorBundle(int thermistorInputSensor) {
+        Bundle mBundle = new Bundle();
+        String shortDis = "10K type 2 probe \u00B0F";
+        String unit = "\u00B0F";
+        String maxVal = "10";
+        String incrementVal = "0.1";
+        String[] markers = null;
+
+        if (thermistorInputSensor == 0 || thermistorInputSensor == 1) {
+            shortDis = "10K type 2 probe \u00B0F";
+            unit = "\u00B0F";
+            maxVal = "10";
+            incrementVal = "0.1";
+            markers = null;
+        } else if (thermistorInputSensor == 2) {
+            shortDis = "Generic 1-100k ohms \u00B0F";
+            unit = "\u00B0F";
+            maxVal = "10";
+            incrementVal = "0.1";
+            markers = null;
+        }
+        mBundle.putString("shortDis", shortDis);
+        mBundle.putString("unit", unit);
+        mBundle.putString("maxVal", maxVal);
+        mBundle.putString("incrementVal", incrementVal);
+        mBundle.putStringArray("markers", markers);
+
+        return mBundle;
     }
 
     public PlcProfileConfiguration getProfileConfiguration() {
@@ -391,19 +560,19 @@ public class PlcEquip {
                 }
                 
                 if (targetValuePoint == null || targetValuePoint.get("id") == null){
-                    updateTargetValue(config.pidTargetValue, floorRef, roomRef, getUnit(config.analog1InputSensor));
+                    updateTargetValue(config.pidTargetValue, floorRef, roomRef, getAnalog1Bundle(config.analog1InputSensor));
                 }
             }
 
             String id = processVariable.get("id").toString();
             if (getProfileConfiguration().analog1InputSensor != config.analog1InputSensor) {
-                id = updateProcessVariable(floorRef, roomRef, processTag, getUnit(config.analog1InputSensor));
+                id = updateProcessVariable(floorRef, roomRef, processTag, getAnalog1Bundle(config.analog1InputSensor));
 
                 //delete  and update target values
                 if (targetValuePoint != null && targetValuePoint.get("id") != null){
                     CCUHsApi.getInstance().deleteEntityTree(targetValuePoint.get("id").toString());
                     if (!config.useAnalogIn2ForSetpoint) {
-                        updateTargetValue(config.pidTargetValue, floorRef, roomRef, getUnit(config.analog1InputSensor));
+                        updateTargetValue(config.pidTargetValue, floorRef, roomRef, getAnalog1Bundle(config.analog1InputSensor));
                     }
                 }
             }
@@ -429,19 +598,19 @@ public class PlcEquip {
                 }
 
                 if (targetValuePoint == null || targetValuePoint.get("id") == null){
-                    updateTargetValue(config.pidTargetValue, floorRef, roomRef, "\u00B0F");
+                    updateTargetValue(config.pidTargetValue, floorRef, roomRef, getThermistorBundle(config.th1InputSensor));
                 }
             }
 
             String id = processVariable.get("id").toString();
             if (getProfileConfiguration().th1InputSensor != config.th1InputSensor) {
-                id = updateProcessVariable(floorRef, roomRef, processTag, "\u00B0F");
+                id = updateProcessVariable(floorRef, roomRef, processTag, getThermistorBundle(config.th1InputSensor));
 
                 //delete  and update target values
                 if (targetValuePoint != null && targetValuePoint.get("id") != null){
                     CCUHsApi.getInstance().deleteEntityTree(targetValuePoint.get("id").toString());
                     if (!config.useAnalogIn2ForSetpoint) {
-                        updateTargetValue(config.pidTargetValue, floorRef, roomRef, "\u00B0F");
+                        updateTargetValue(config.pidTargetValue, floorRef, roomRef, getThermistorBundle(config.th1InputSensor));
                     }
                 }
             }
@@ -489,7 +658,7 @@ public class PlcEquip {
         isEnabledZeroErrorMidpoint = config.expectZeroErrorAtMidpoint;
     }
 
-    private String updateProcessVariable(String floorRef, String roomRef, String processTag, String unit) {
+    private String updateProcessVariable(String floorRef, String roomRef, String processTag, Bundle bundle) {
 
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
@@ -497,21 +666,34 @@ public class PlcEquip {
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis + "-PID-" + nodeAddr;
 
-        Point processVariableTag = new Point.Builder()
-                .setDisplayName(equipDis +"-processVariable- " + processTag)
+        String shortDis = bundle.getString("shortDis");
+        String unit = bundle.getString("unit");
+        String maxVal = bundle.getString("maxVal");
+        String[] markers = bundle.getStringArray("markers");
+
+        Point.Builder processVariableTag = new Point.Builder()
+                .setDisplayName(equipDis + "-processVariable- " + processTag)
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
+                .setShortDis(shortDis)
                 .setHisInterpolate("cov")
                 .addMarker("logical").addMarker("pid").addMarker("zone").addMarker("his").addMarker("cur")
                 .addMarker("sp")
                 .addMarker("process").addMarker("variable")
                 .setGroup(String.valueOf(nodeAddr))
+                .setMinVal("0")
+                .setMaxVal(maxVal)
                 .setUnit(unit)
-                .setTz(tz)
-                .build();
-        String processVariableTagId = hayStack.addPoint(processVariableTag);
+                .setTz(tz);
+        if (markers != null) {
+            for (String marker : markers) {
+                processVariableTag.addMarker(marker);
+            }
+        }
+
+        String processVariableTagId = hayStack.addPoint(processVariableTag.build());
         hayStack.writeHisValById(processVariableTagId, 0.0);
 
         return processVariableTagId;
@@ -525,18 +707,28 @@ public class PlcEquip {
         String equipDis = siteDis + "-PID-" + nodeAddr;
         String tz = siteMap.get("tz").toString();
 
+        Bundle bundle = getAnalog2ShortDis(inputSensor);
+        String shortDis = bundle.getString("shortDis");
+        String unit = bundle.getString("unit");
+        String maxVal = bundle.getString("maxVal");
+        String incrementVal = bundle.getString("incrementVal");
+
         Point DynamicTargetValueTag = new Point.Builder()
                 .setDisplayName(equipDis +"-dynamicTargetValue-" + dynamicTargetTag)
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
+                .setShortDis(shortDis)
                 .setHisInterpolate("cov")
                 .addMarker("logical").addMarker("pid").addMarker("zone").addMarker("his").addMarker("cur")
                 .addMarker("sp")
                 .addMarker("dynamic").addMarker("target").addMarker("value")
                 .setGroup(String.valueOf(nodeAddr))
-                .setUnit(getUnitForDy(inputSensor))
+                .setMinVal("0")
+                .setMaxVal(maxVal)
+                .setIncrementVal(incrementVal)
+                .setUnit(unit)
                 .setTz(tz)
                 .build();
         String DynamicTargetValueTagId = hayStack.addPoint(DynamicTargetValueTag);
@@ -570,7 +762,7 @@ public class PlcEquip {
         return setpointSensorOffsetId;
     }
 
-    private String updateTargetValue(double targetValue, String floorRef, String roomRef, String unit){
+    private String updateTargetValue(double targetValue, String floorRef, String roomRef, Bundle bundle){
 
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
@@ -578,16 +770,25 @@ public class PlcEquip {
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis + "-PID-" + nodeAddr;
 
+        String shortDis = bundle.getString("shortDis");
+        String unit = bundle.getString("unit");
+        String maxVal = bundle.getString("maxVal");
+        String incrementVal = bundle.getString("incrementVal");
+
         Point pidTargetValue = new Point.Builder()
                 .setDisplayName(equipDis + "-pidTargetValue")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
+                .setShortDis(shortDis)
                 .addMarker("config").addMarker("pid").addMarker("zone").addMarker("his").addMarker("writable")
                 .addMarker("target").addMarker("value")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit(unit)
+                .setMinVal("0")
+                .setMaxVal(maxVal)
+                .setIncrementVal(incrementVal)
                 .setTz(tz)
                 .build();
         String pidTargetValueId = hayStack.addPoint(pidTargetValue);

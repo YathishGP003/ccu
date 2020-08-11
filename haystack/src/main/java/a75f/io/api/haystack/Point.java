@@ -28,7 +28,8 @@ public class Point extends Entity
     private String            incrementVal;
     private String            tunerGroup;
     private String            hisInterpolate;
-    
+    private String            shortDis;
+
     public void setDisplayName(String displayName)
     {
         this.displayName = displayName;
@@ -106,13 +107,16 @@ public class Point extends Entity
     public String getIncrementVal(){return incrementVal;}
     public String getTunerGroup(){return tunerGroup;}
     public String getHisInterpolate(){return hisInterpolate;}
+    public String getShortDis() {
+        return shortDis;
+    }
     public void setEnums(String enums)
     {
         this.enums = enums;
     }
     private Point(){
     }
-    
+
     public static class Builder{
         private String displayName;
         private ArrayList<String> markers = new ArrayList<>();
@@ -129,6 +133,7 @@ public class Point extends Entity
         private String incrementVal;
         private String tunerGroup;
         private String hisInterpolate;
+        private String shortDis;
         public Builder setKind(String kind)
         {
             this.kind = kind;
@@ -221,6 +226,10 @@ public class Point extends Entity
             this.hisInterpolate = ipolate;
             return this;
         }
+        public Builder setShortDis(String shortDis) {
+            this.shortDis = shortDis;
+            return this;
+        }
         public Point build(){
             Point p = new Point();
             p.displayName = this.displayName;
@@ -240,6 +249,7 @@ public class Point extends Entity
             p.incrementVal = this.incrementVal;
             p.tunerGroup = this.tunerGroup;
             p.hisInterpolate = this.hisInterpolate;
+            p.shortDis = this.shortDis;
             return p;
         }
     
@@ -317,6 +327,9 @@ public class Point extends Entity
                 else if (pair.getKey().equals("hisInterpolate"))
                 {
                     this.hisInterpolate = pair.getValue().toString();
+                }else if (pair.getKey().equals("shortDis"))
+                {
+                    this.shortDis = pair.getValue().toString();
                 }
                 //it.remove();
             }

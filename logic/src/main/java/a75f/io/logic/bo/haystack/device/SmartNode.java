@@ -78,6 +78,7 @@ public class SmartNode
     private void createPoints() {
         analog1In = new RawPoint.Builder()
                                 .setDisplayName("Analog1In-"+smartNodeAddress)
+                                .setShortDis("Analog1-In Physical Sensor")
                                 .setDeviceRef(deviceRef)
                                 .setSiteRef(siteRef)
                                 .setPort(Port.ANALOG_IN_ONE.toString())
@@ -86,6 +87,8 @@ public class SmartNode
                                 .setFloorRef(floorRef)
                                 .addMarker("sensor").addMarker("his")
                                 .setUnit("mV")
+                                .setMinVal("0")
+                                .setMaxVal("1000")
                                 .setTz(tz)
                                 .build();
     

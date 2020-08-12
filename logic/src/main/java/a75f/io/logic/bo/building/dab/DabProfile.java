@@ -20,6 +20,7 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.system.SystemController;
+import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
@@ -106,11 +107,15 @@ public class DabProfile extends ZoneProfile
             if (!curStatus.equals("Zone Temp Dead"))
             {
                 CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + dabEquip.nodeAddr + "\"", "Zone Temp Dead");
-    
+
+                SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
                 double damperMin = dabEquip.getDamperLimit(state == HEATING ? "heating":"cooling", "min");
                 double damperMax = dabEquip.getDamperLimit(state == HEATING ? "heating":"cooling", "max");
-                
-                double damperPos = (damperMax+damperMin)/2;
+
+                double damperPos =(damperMax+damperMin)/2;
+                if(systemMode == SystemMode.OFF) {
+                    damperPos = dabEquip.getDamperPos() > 0 ? dabEquip.getDamperPos() : damperMin;
+                }
                 dabEquip.setDamperPos(damperPos, "primary");
                 dabEquip.setDamperPos(damperPos, "secondary");
                 dabEquip.setNormalizedDamperPos(damperPos, "primary");
@@ -135,8 +140,8 @@ public class DabProfile extends ZoneProfile
         Log.d(L.TAG_CCU_ZONE, "DAB : roomTemp" + roomTemp + " setTempCooling:  " + setTempCooling+" setTempHeating: "+setTempHeating);
     
         SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
-    
-        if (roomTemp > setTempCooling && conditioning == SystemController.State.COOLING)
+        SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
+        if ((roomTemp > setTempCooling) && (conditioning == SystemController.State.COOLING) && (systemMode != SystemMode.OFF))
         {
             //Zone is in Cooling
             if (state != COOLING)
@@ -146,7 +151,7 @@ public class DabProfile extends ZoneProfile
             }
             damperOpController.updateControlVariable(roomTemp, setTempCooling);
         }
-        else if (roomTemp < setTempHeating && conditioning == SystemController.State.HEATING)
+        else if ((roomTemp < setTempHeating) && (conditioning == SystemController.State.HEATING) && (systemMode != SystemMode.OFF))
         {
             //Zone is in heating
             if (state != HEATING)

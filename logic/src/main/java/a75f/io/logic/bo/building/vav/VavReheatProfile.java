@@ -70,9 +70,13 @@ public class VavReheatProfile extends VavProfile
                 {
                     CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
                     VAVLogicalMap vavDevice = vavDeviceMap.get(node);
+                    SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
                     double damperMin = vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "min");
                     double damperMax = vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "max");
                     double damperPos = (damperMax+damperMin)/2;
+                    if(systemMode == SystemMode.OFF) {
+                        damperPos = vavDevice.getDamperPos() > 0 ? vavDevice.getDamperPos() : damperMin;
+                    }
                     vavDevice.setDamperPos(damperPos);
                     vavDevice.setNormalizedDamperPos(damperPos);
                     vavDevice.setReheatPos(0);
@@ -115,13 +119,12 @@ public class VavReheatProfile extends VavProfile
             //locked out.
             SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
             SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
-            if (roomTemp > setTempCooling)
+            if ((roomTemp > setTempCooling) && (systemMode != SystemMode.OFF) )
             {
                 //Zone is in Cooling
                 if (state != COOLING)
                 {
                     state = COOLING;
-                    //valveController.reset();
                     valve.currentPosition = 0;
                     coolingLoop.setEnabled();
                     heatingLoop.setDisabled();
@@ -132,7 +135,7 @@ public class VavReheatProfile extends VavProfile
                 }
                 
             }
-            else if (roomTemp < setTempHeating)
+            else if ((roomTemp < setTempHeating) && (systemMode != SystemMode.OFF))
             {
                 //Zone is in heating
                 if (state != HEATING)
@@ -189,7 +192,6 @@ public class VavReheatProfile extends VavProfile
                 //Zone is in deadband
                 if (state != DEADBAND) {
                     state = DEADBAND;
-                    //valveController.reset();
                     valve.currentPosition = 0;
                     heatingLoop.setDisabled();
                     coolingLoop.setDisabled();
@@ -236,18 +238,6 @@ public class VavReheatProfile extends VavProfile
             {
                 damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
             }
-            //In any Mode except Unoccupied, the hot water valve shall be
-            //modulated to maintain a supply air temperature no lower than 50°F.
-            /*if (state != HEATING && supplyAirTemp < REHEAT_THRESHOLD_TEMP*//* && mode != UNOCCUPIED*//*)
-            {
-                satCompensationEnabled = true;
-                valveController.updateControlVariable(REHEAT_THRESHOLD_TEMP, supplyAirTemp);
-                valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
-                Log.d(TAG, "SAT below threshold "+supplyAirTemp+" => valve :  " + valve.currentPosition);
-            } else if (satCompensationEnabled) {
-                satCompensationEnabled = false;
-                valveController.reset();
-            }*/
     
             //REHEAT control during heating does not follow RP1455.
             if (conditioning == SystemController.State.HEATING && state == HEATING)

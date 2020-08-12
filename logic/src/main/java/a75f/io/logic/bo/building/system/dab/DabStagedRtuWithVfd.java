@@ -237,8 +237,9 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
         String siteRef = siteMap.get("id").toString();
         String tz = siteMap.get("tz").toString();
-        Point coolingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "FanSignal").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").setUnit("%").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(coolingSignal);
+        Point analogSignal = new Point.Builder().setDisplayName(equipDis + "-" + "FanSignal").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").setUnit("%").setTz(tz).build();
+        String fansignalCmdPt = CCUHsApi.getInstance().addPoint(analogSignal);
+        CCUHsApi.getInstance().writeDefaultValById(fansignalCmdPt,0.0);
     }
     
     public double getCmdSignal(String cmd) {

@@ -148,6 +148,13 @@ public class OAOProfile
                         handleSmartPostPurgeControl();
                     }
                     break;
+                case OCCUPIED:
+                case FORCEDOCCUPIED:
+                case OCCUPANCYSENSING:
+                    boolean isEnhancedVentilation = TunerUtil.readSystemUserIntentVal("enhanced and ventilation and enabled ") > 0;
+                    if (isEnhancedVentilation)
+                        handleEnhancedVentilationControl();
+                    break;
             }
         }
         if(epidemicState == EpidemicState.OFF) {
@@ -319,5 +326,11 @@ public class OAOProfile
             CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.POSTPURGE.ordinal());
             epidemicState = EpidemicState.POSTPURGE;
         }
+    }
+    private void handleEnhancedVentilationControl(){
+        epidemicState = EpidemicState.ENHANCED_VENTILATION;
+        outsideAirCalculatedMinDamper = CCUHsApi.getInstance().readDefaultVal("enhanced and ventilation and outside and damper and pos and min and open and equipRef ==\""+oaoEquip.equipRef+"\"");
+        CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.ENHANCED_VENTILATION.ordinal());
+        Log.d(L.TAG_CCU_OAO, "System occupied, check enhanced ventilation = "+outsideAirCalculatedMinDamper+","+epidemicState.name());
     }
 }

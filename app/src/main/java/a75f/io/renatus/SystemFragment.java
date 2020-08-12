@@ -60,6 +60,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	ToggleButton tbDemandResponse;
 	ToggleButton tbSmartPrePurge;
 	ToggleButton tbSmartPostPurge;
+	ToggleButton tbEnhancedVentilation;
 	LinearLayout purgeLayout;
 
 
@@ -271,6 +272,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		tbDemandResponse = view.findViewById(R.id.tbDemandResponse);
 		tbSmartPrePurge = view.findViewById(R.id.tbSmartPrePurge);
 		tbSmartPostPurge = view.findViewById(R.id.tbSmartPostPurge);
+		tbEnhancedVentilation = view.findViewById(R.id.tbEnhancedVentilation);
 		tbCompHumidity.setEnabled(false);
 		tbDemandResponse.setEnabled(false);
 
@@ -296,6 +298,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			tbDemandResponse.setEnabled(false);
 			tbSmartPrePurge.setEnabled(false);
 			tbSmartPostPurge.setEnabled(false);
+			tbEnhancedVentilation.setEnabled(false);
 			purgeLayout.setVisibility(View.GONE);
 			return;
 		}
@@ -379,6 +382,18 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				}
 			}
 		});
+		tbEnhancedVentilation.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+		{
+			@Override
+			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
+			{
+				if (compoundButton.isPressed())
+				{
+					setUserIntentBackground("enhanced and ventilation and enabled", b ? 1 : 0);
+				}
+			}
+		});
+		getActivity().registerReceiver(occupancyReceiver, new IntentFilter(ACTION_OCCUPANCY_CHANGE));
 
 	}
 
@@ -388,6 +403,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			purgeLayout.setVisibility(View.VISIBLE);
 			tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);
 			tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("postPurge and enabled") > 0);
+			tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("enhanced and ventilation") > 0);
 			ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and oao");
 
 			if (equips != null && equips.size() > 0) {
@@ -438,6 +454,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						tbDemandResponse.setChecked(false);
 						tbSmartPrePurge.setChecked(false);
 						tbSmartPostPurge.setChecked(false);
+						tbEnhancedVentilation.setChecked(false);
 						sbComfortValue.setProgress(0);
 						sbComfortValue.setContentDescription("0");
 						targetMaxInsideHumidity.setSelection(humidityAdapter
@@ -453,6 +470,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
 						tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);
 						tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("postPurge and enabled") > 0);
+						tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("enhanced and ventilation and enabled") > 0);
 						sbComfortValue.setProgress(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci"));
 						sbComfortValue.setContentDescription(String.valueOf(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci")));
 

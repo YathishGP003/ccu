@@ -1,0 +1,101 @@
+ - Merge branch 'bug/mahesh/1933-CCU_schedule_edit_delete_fix' into 'master'
+ - Merge branch 'story/anilkumar/1184-Epidemic_mode_enhanced_ventilation_logic' into 'master'
+ - Merge branch 'story/anilkumar/1182-Epidemic_mode_purge_algorithm' into 'master'
+ - handle vacation in epidemic mode and tuners fix
+ - resolve merge conflicts
+ - handle vacation mode and temporary hold mode for epidemic
+ - resolve merge conflicts with master rebase
+ - rebase to master, fixes 1902, 1884, 239
+ - Merge branch 'bug/anilkumar/1902-Damper_positions_should_not_vary_in_system_OFF_mode' into 'master'
+ - MAT min tuner value wrong fetch
+ - Merge branch 'bug/anilkumar/1884-OAO_Return_air_damper_fetches_wrong_values' into 'master'
+ - Merge branch 'story/anilkumar/239-CCU_OAO_tuners_should_be_displayed_at_system_level' into 'master'
+ - config outside min damper pos not consumed
+ - update economizing min temp tuner miss
+ - oao tuners backward compatibility check
+ - oao tuners backward compatibility check
+ - oao tuners backward compatibility check
+ - oao tuners backward compatibility check
+ - handle post purge if no more schedules in a week
+ - handle post purge if no more schedules in a week
+ - multiple schedule handle update
+ - duplicate tuners
+ - multiple schedule in a day not triggering post purge
+ - #1182- post purge not kicking in, when no more schedules for next days
+ - #1182, purge fan speed tuner not updated
+ - simplify
+ - sort by schedule days and start time
+ - multiple schedule in a day not triggering post purge
+ - multiple schedule in a day not triggering post purge
+ - Damper positions should hold to prev value when in OFF mode
+ - Damper positions should hold to prev value when in OFF mode
+ - rebase to master, resolve merge conflict
+ - #1902, damper positions should not vary in system OFF mode
+ - rebase to master merge conflicts
+ - 1184, In heatonly mode, in cooling direction, fan stage not ON
+ - 1182, In heatonly mode, in cooling direction, fan stage not ON
+ - #1884, OAO Return air damper writes a wrong physical value
+ - rebase to master 1716 and 1309 merges
+ - rebase to master 1716 and 1309 merges
+ - Merge branch 'bug/anilkumar/1309-Switching_system_profiles_orphans_TI_profile' into 'master'
+ - OAO backward compatibility check to update config params.
+ - Merge branch 'bug/anilkumar/1716_Preconditioning_should_not_trigger_in_heatonly_mode_when_call_for_cooling' into 'master'
+ - system page toggle button crash fix for epidemic modes
+ - system page toggle button crash fix for epidemic modes
+ - VFD Fan stage handling for Epidemic mode purge
+ - #1182, VFD Fan stage handling for Epidemic mode purge
+ - handle system off mode in epidemic state
+ - handle system mode OFF during epidemic
+ - handle system mode OFF during epidemic
+ - Vav Fully modulating, fan on status not updated during preconditoning
+ - #1716- DCV shouldnt be ON in system OFF mode
+ - #1716- DCV shouldnt be ON in system OFF mode
+ - #1716- DCV shouldnt be ON in system OFF mode
+ - preconditioning should not kickin during OFF condition mode
+ - System calls for cooling, in heatonly mode, precondition shouldnt kick in and dcv should be off
+ - rebase to master hissync fix
+ - rebase to master hisync fix
+ - clean delete entity
+ - update oao and sse ahu ref when system profile changes
+ - rebase and commit
+ - 1309 switching system profiles orphans TI profile
+ - add system profile selection based tuners alone for system level tuners
+ - add system profile selection based tuners alone to system profile
+ - add system profile selection based tuners alone for system level tuners
+ - add system profile based tuners alone
+ - Merge branch 'bug/mrudd/1695-Entity_sync_run_during_historized_syncing_despite_already_synced' into 'master'
+ - 1695: Matt Rudd - Updated the historized syncing process to only sync the entity tree if there are points without a GUID
+ - update system mode changes for epidemic mode and rename tuner
+ - update system mode changes for epidemic mode and rename changes
+ - rebase master 533 version
+ - rebase to master
+ - prepurge check update
+ - 1182, prepurge not triggering fix
+ - prepurge fix update
+ - 1182, prepurge not triggering fix
+ - 1184, prepurge not triggering
+ -  update oao tag
+ - 1184- oao tag update
+ - 1184- postpurge tag update
+ - 1182 Epidemic mode, postPurge tag miss
+ - 1182 Epidemic mode, backward compatability check
+ - 1184-use switch statement for clear functionality, and remove unwanted imports
+ - 1184 Epidemic mode, backward compatability check
+ - 1182 Epidemic mode, backward compatability check
+ -  oao tuner update
+ - enhanced ventilation logic - oao tuner update
+ - #1184, Epidemic mode, enhanced ventilation logic - remove unwanted log
+ - #1182-Epidemic mode purge feature - remove unwanted log
+ - #1182-Epidemic mode purge feature - backward compatibility check2
+ - #1184, Epidemic mode, enhanced ventilation logic
+ - #1184, Epidemic mode, enhanced ventilation logic
+ - #1182-Epidemic mode purge feature - backward compatibility check
+ - #1184, Epidemic mode, enhanced ventilation logic
+ - #1182-Epidemic mode purge feature - backward compatibility
+ - #1182-Epidemic mode purge feature - analog value check
+ - #1182-Epidemic mode purge feature
+ - #1182-Epidemic mode purge feature
+ - #1182-Epidemic mode purge feature
+ - #1182-Epidemic mode purge feature
+ - #1182-Epidemic mode purge feature
+ - #239 OAO tuners add system tag to display in heatmap

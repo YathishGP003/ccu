@@ -361,7 +361,7 @@ public class OAOTuners
             }
             hayStack.writeHisValById(enthalpyDuctCompensationOffsetId, HSUtil.getPriorityVal(enthalpyDuctCompensationOffsetId));
         }
-        if (!verifyPointsAvailability("not default","enthalpy and duct and compensation and offset",equipref)) {
+        if (!verifyPointsAvailability("not default","economizing and min and temp",equipref)) {
             Point economizingMinTemperature = new Point.Builder()
                     .setDisplayName(equipdis + "-" + "economizingMinTemperature")
                     .setSiteRef(siteRef)

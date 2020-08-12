@@ -519,15 +519,12 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         systemOccupancy = UNOCCUPIED;
         
         if (systemVacation) {
-            double curOccupancy = CCUHsApi.getInstance().readHisValByQuery("point and system and his and occupancy and mode");
             if (getSystemTemporaryHoldExpiry() > 0) {
                 systemOccupancy = FORCEDOCCUPIED;
-            }
-            if (curOccupancy != VACATION.ordinal())
-            {
+            }else {
                 systemOccupancy = VACATION;
-                CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and mode", (double) systemOccupancy.ordinal());
             }
+            CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and mode", (double) systemOccupancy.ordinal());
             Log.d(TAG_CCU_JOB, " In SystemVacation : systemOccupancy : "+systemOccupancy);
             return;
         }

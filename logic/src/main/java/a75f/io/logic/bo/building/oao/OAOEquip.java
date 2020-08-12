@@ -547,7 +547,7 @@ public class OAOEquip
         config.outsideDamperAtMaxDrive = getConfigNumVal("outside and damper and max and drive");
         config.returnDamperAtMinDrive =  getConfigNumVal("return and damper and min and drive");
         config.returnDamperAtMaxDrive =  getConfigNumVal("return and damper and max and drive");
-        config.outsideDamperMinOpen = getConfigNumVal("outside and damper and min and open");
+        config.outsideDamperMinOpen = getConfigNumVal("not purge and not enhanced and outside and damper and min and open");
         config.returnDamperMinOpen = getConfigNumVal("return and damper and min and open");
         
         config.exhaustFanStage1Threshold = getConfigNumVal("exhaust and fan and stage1 and threshold") ;
@@ -576,7 +576,7 @@ public class OAOEquip
         setConfigNumVal("outside and damper and max and drive", config.outsideDamperAtMaxDrive);
         setConfigNumVal("return and damper and min and drive", config.returnDamperAtMinDrive);
         setConfigNumVal("return and damper and max and drive", config.returnDamperAtMaxDrive);
-        setConfigNumVal("outside and damper and min and open", config.outsideDamperMinOpen);
+        setConfigNumVal("not purge and not enhanced and outside and damper and min and open", config.outsideDamperMinOpen);
         setConfigNumVal("return and damper and min and open", config.returnDamperMinOpen);
         setConfigNumVal("exhaust and fan and stage1 and threshold", config.exhaustFanStage1Threshold);
         setConfigNumVal("exhaust and fan and stage2 and threshold", config.exhaustFanStage2Threshold);

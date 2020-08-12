@@ -239,7 +239,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         String tz = siteMap.get("tz").toString();
         Point analogSignal = new Point.Builder().setDisplayName(equipDis + "-" + "FanSignal").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").setUnit("%").setTz(tz).build();
         String fansignalCmdPt = CCUHsApi.getInstance().addPoint(analogSignal);
-        CCUHsApi.getInstance().writeDefaultValById(fansignalCmdPt,0.0);
+        CCUHsApi.getInstance().writeHisValById(fansignalCmdPt,0.0);
     }
     
     public double getCmdSignal(String cmd) {

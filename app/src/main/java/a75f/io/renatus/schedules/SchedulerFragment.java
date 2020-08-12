@@ -532,6 +532,9 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     public boolean onClickSave(int position, double coolingTemp, double heatingTemp, int startTimeHour, int endTimeHour, int startTimeMinute, int endTimeMinute, ArrayList<DAYS> days) {
         
         if (position != ManualSchedulerDialogFragment.NO_REPLACE) {
+            //sort schedule days according to the start hour of the day
+            Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+            Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
             removeEntry = schedule.getDays().remove(position);
         } else {
             removeEntry = null;

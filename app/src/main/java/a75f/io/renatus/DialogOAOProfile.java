@@ -67,6 +67,7 @@ public class DialogOAOProfile extends BaseDialogFragment
     @BindView(R.id.exFanStage2Threshold)  Spinner      exFanStage2Threshold;
     @BindView(R.id.co2Threshold)          Spinner      co2Threshold;
     @BindView(R.id.roomCO2Sensing)        ToggleButton roomCO2Sensing;
+    @BindView(R.id.smartPurgeOutsideDamperMinOpen) Spinner smartPurgeOutsideDamperMinOpen;
 
     public DialogOAOProfile()
     {
@@ -198,6 +199,7 @@ public class DialogOAOProfile extends BaseDialogFragment
         exFanStage1Threshold.setAdapter(percentAdapter);
         exFanStage2Threshold.setAdapter(percentAdapter);
         exFanHysteresis.setAdapter(percentAdapter);
+        smartPurgeOutsideDamperMinOpen.setAdapter(percentAdapter);
     
         ArrayList<Integer> co2Array = new ArrayList<>();
         for (int val = 0; val <= 2000; val+=10) {
@@ -235,6 +237,7 @@ public class DialogOAOProfile extends BaseDialogFragment
             co2Threshold.setSelection(co2Adapter.getPosition((int)mProfileConfig.co2Threshold));
             currentTransformerType.setSelection((int)mProfileConfig.currentTranformerType-CT_INDEX_START);
             roomCO2Sensing.setChecked(mProfileConfig.usePerRoomCO2Sensing);
+            smartPurgeOutsideDamperMinOpen.setSelection((int)mProfileConfig.smartPurgeMinDamperOpen,false);
         } else {
             oaDamperAtMin.setSelection(2);
             oaDamperAtMax.setSelection(10);
@@ -247,6 +250,7 @@ public class DialogOAOProfile extends BaseDialogFragment
             exFanHysteresis.setSelection(5);
             co2Threshold.setSelection(co2Adapter.getPosition(1000));
             currentTransformerType.setSelection(1);
+            smartPurgeOutsideDamperMinOpen.setSelection(100,false);
         }
     }
     
@@ -286,6 +290,7 @@ public class DialogOAOProfile extends BaseDialogFragment
         oaoConfig.exhaustFanStage1Threshold = Double.parseDouble(exFanStage1Threshold.getSelectedItem().toString());
         oaoConfig.exhaustFanStage2Threshold = Double.parseDouble(exFanStage2Threshold.getSelectedItem().toString());
         oaoConfig.exhaustFanHysteresis = Double.parseDouble(exFanHysteresis.getSelectedItem().toString());
+        oaoConfig.smartPurgeMinDamperOpen = Double.parseDouble(smartPurgeOutsideDamperMinOpen.getSelectedItem().toString());
         oaoConfig.currentTranformerType = CT_INDEX_START + currentTransformerType.getSelectedItemPosition();//TODO- Sensor offset
         oaoConfig.usePerRoomCO2Sensing = roomCO2Sensing.isChecked();
         if (mProfileConfig == null) {

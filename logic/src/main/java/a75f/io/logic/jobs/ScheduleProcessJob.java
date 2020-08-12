@@ -27,6 +27,7 @@ import a75f.io.logic.BaseJob;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
@@ -447,7 +448,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             }
             return "In Energy saving Vacation";
         }
-        
+        double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and mode and state and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");
+        EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
+        String epidemicString = (epidemicState != EpidemicState.OFF) ? "["+epidemicState.name()+"] " : "";
         if (L.ccu().systemProfile.getSystemController().isEmergencyMode()) {
             if (L.ccu().systemProfile.getSystemController().getSystemState() == SystemController.State.HEATING) {
                 return "Building Limit Breach | Emergency Heating turned ON";
@@ -461,18 +464,18 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 if (currOccupied == null || currOccupied.getCurrentlyOccupiedSchedule() == null){
                     return "No schedule configured";
                 }
-                return String.format("In %s | Changes to Energy saving Unoccupied mode at %02d:%02d", "Occupied mode",
+                return String.format("%sIn %s | Changes to Energy saving Unoccupied mode at %02d:%02d", epidemicString,"Occupied mode",
                         currOccupied.getCurrentlyOccupiedSchedule().getEthh(),
                         currOccupied.getCurrentlyOccupiedSchedule().getEtmm());
 
             case PRECONDITIONING:
-                return "In Preconditioning";
+                return String.format("In Preconditioning");
 
             case UNOCCUPIED:
                 if (nextOccupied == null || nextOccupied.getNextOccupiedSchedule() == null ){
                     return "No schedule configured";
                 }
-                return String.format("In Energy saving %s | Changes to %.1f-%.1fF at %02d:%02d", "Unoccupied mode",
+                return String.format("%sIn Energy saving %s | Changes to %.1f-%.1fF at %02d:%02d",epidemicString, "Unoccupied mode",
                         nextOccupied.getHeatingVal(),
                         nextOccupied.getCoolingVal(),
                         nextOccupied.getNextOccupiedSchedule().getSthh(),
@@ -480,7 +483,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             case FORCEDOCCUPIED:
                 DateTime et = new DateTime(getSystemTemporaryHoldExpiry());
                 int min = et.getMinuteOfHour();
-                return String.format("In Temporary Hold | till %s", et.getHourOfDay()+":"+(min < 10 ? "0"+min : min));
+                return String.format("%sIn Temporary Hold | till %s",epidemicString, et.getHourOfDay()+":"+(min < 10 ? "0"+min : min));
     
     
         }
@@ -516,15 +519,12 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         systemOccupancy = UNOCCUPIED;
         
         if (systemVacation) {
-            double curOccupancy = CCUHsApi.getInstance().readHisValByQuery("point and system and his and occupancy and mode");
             if (getSystemTemporaryHoldExpiry() > 0) {
                 systemOccupancy = FORCEDOCCUPIED;
-            }
-            if (curOccupancy != VACATION.ordinal())
-            {
+            }else {
                 systemOccupancy = VACATION;
-                CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and mode", (double) systemOccupancy.ordinal());
             }
+            CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and mode", (double) systemOccupancy.ordinal());
             Log.d(TAG_CCU_JOB, " In SystemVacation : systemOccupancy : "+systemOccupancy);
             return;
         }
@@ -622,7 +622,25 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and mode",(double)systemOccupancy.ordinal());
         CcuLog.d(TAG_CCU_JOB, "systemOccupancy status : " + systemOccupancy.name());
     }
-    
+    public static Occupied getNextOccupiedTimeInMillis(){
+        return nextOccupied;
+    }
+    public static Occupied getPrevOccupiedTimeInMillis(){
+        if(currOccupied != null)
+            return currOccupied;
+        else {
+            Occupied prevOccupied = null;
+            for (Occupied occ : occupiedHashMap.values()) {
+                Schedule.Days occDay = occ.getPreviouslyOccupiedSchedule();
+                if (prevOccupied == null || ((occDay != null) && (occDay.getEthh() > prevOccupied.getPreviouslyOccupiedSchedule().getEthh()
+                        || (occDay.getEthh() == prevOccupied.getPreviouslyOccupiedSchedule().getEthh() && occDay.getEtmm() > prevOccupied.getPreviouslyOccupiedSchedule().getEtmm())) ))
+                {
+                    prevOccupied = occ;
+                }
+            }
+            return prevOccupied;
+        }
+    }
     public static Occupancy getSystemOccupancy() {
         return systemOccupancy == null ? UNOCCUPIED : systemOccupancy;
     }

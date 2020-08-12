@@ -52,7 +52,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
                 hayStack.deleteEntityTree(equip.get("id").toString());
             } else {
                 initTRSystem();
-                //sysEquip = new SystemEquip(equip.get("id").toString());
+                addNewSystemUserIntentPoints(equip.get("id").toString());
                 updateStagesSelected();
                 return;
             }

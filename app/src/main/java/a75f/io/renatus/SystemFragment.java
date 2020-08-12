@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.SeekBar;
 import android.widget.Spinner;
@@ -55,11 +56,11 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	
 	Spinner targetMaxInsideHumidity;
 	Spinner targetMinInsideHumidity;
-	
-	//SwitchCompat tbCompHumidity;
-	//SwitchCompat cbDemandResponse;
 	ToggleButton tbCompHumidity;
 	ToggleButton tbDemandResponse;
+	ToggleButton tbSmartPrePurge;
+	ToggleButton tbSmartPostPurge;
+	LinearLayout purgeLayout;
 
 
 	
@@ -97,9 +98,18 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	public void refreshScreen(String id)
 	{
-		if (!(L.ccu().systemProfile instanceof DefaultSystem))
-		{
-			fetchPoints();
+		if(getActivity() != null) {
+			getActivity().runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					if (!(L.ccu().systemProfile instanceof DefaultSystem)) {
+						checkForOao();
+						fetchPoints();
+					}
+
+				}
+			});
 		}
 	}
 	public void refreshDesiredTemp(String nodeAddress,String  coolDt, String heatDt){}
@@ -155,6 +165,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		ccuName.setText(ccu.get("dis").toString());
 		profileTitle = view.findViewById(R.id.profileTitle);
 		oaoArc = view.findViewById(R.id.oaoArc);
+		purgeLayout = view.findViewById(R.id.purgelayout);
 		systemModePicker = view.findViewById(R.id.systemModePicker);
 		coolingAvailable = L.ccu().systemProfile.isCoolingAvailable();
 		heatingAvailable = L.ccu().systemProfile.isHeatingAvailable();
@@ -258,7 +269,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		
 		tbCompHumidity = view.findViewById(R.id.tbCompHumidity);
 		tbDemandResponse = view.findViewById(R.id.tbDemandResponse);
-
+		tbSmartPrePurge = view.findViewById(R.id.tbSmartPrePurge);
+		tbSmartPostPurge = view.findViewById(R.id.tbSmartPostPurge);
 		tbCompHumidity.setEnabled(false);
 		tbDemandResponse.setEnabled(false);
 
@@ -282,6 +294,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			targetMinInsideHumidity.setEnabled(false);
 			tbCompHumidity.setEnabled(false);
 			tbDemandResponse.setEnabled(false);
+			tbSmartPrePurge.setEnabled(false);
+			tbSmartPostPurge.setEnabled(false);
+			purgeLayout.setVisibility(View.GONE);
 			return;
 		}
 		
@@ -342,14 +357,37 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				}
 			}
 		});
-
-		getActivity().registerReceiver(occupancyReceiver, new IntentFilter(ACTION_OCCUPANCY_CHANGE));
+		tbSmartPrePurge.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+		{
+			@Override
+			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
+			{
+				if (compoundButton.isPressed())
+				{
+					setUserIntentBackground("prePurge and enabled", b ? 1 : 0);
+				}
+			}
+		});
+		tbSmartPostPurge.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+		{
+			@Override
+			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
+			{
+				if (compoundButton.isPressed())
+				{
+					setUserIntentBackground("postPurge and enabled", b ? 1 : 0);
+				}
+			}
+		});
 
 	}
 
 	private void checkForOao() {
 		if (L.ccu().oaoProfile != null) {
 			oaoArc.setVisibility(View.VISIBLE);
+			purgeLayout.setVisibility(View.VISIBLE);
+			tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);
+			tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("postPurge and enabled") > 0);
 			ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and oao");
 
 			if (equips != null && equips.size() > 0) {
@@ -381,6 +419,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 		} else {
 			oaoArc.setVisibility(View.GONE);
+			purgeLayout.setVisibility(View.GONE);
 		}
 	}
 
@@ -397,6 +436,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						occupancyStatus.setText("No Central equipment connected.");
 						tbCompHumidity.setChecked(false);
 						tbDemandResponse.setChecked(false);
+						tbSmartPrePurge.setChecked(false);
+						tbSmartPostPurge.setChecked(false);
 						sbComfortValue.setProgress(0);
 						sbComfortValue.setContentDescription("0");
 						targetMaxInsideHumidity.setSelection(humidityAdapter
@@ -410,6 +451,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());
 						tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
 						tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
+						tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);
+						tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("postPurge and enabled") > 0);
 						sbComfortValue.setProgress(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci"));
 						sbComfortValue.setContentDescription(String.valueOf(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci")));
 

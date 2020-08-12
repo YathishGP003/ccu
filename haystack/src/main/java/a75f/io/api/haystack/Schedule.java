@@ -12,8 +12,10 @@ import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -311,7 +313,25 @@ public class Schedule extends Entity
                         .withDayOfWeek(daysSorted.get(i).getDay() + 1)
                         .withSecondOfMinute(0);
                 occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
-
+                if( (i != 0) && (scheduledIntervals.get(i-1) != null) && scheduledIntervals.get(i-1).isBefore(getTime().getMillis())){
+                    if(daysSorted.get(i-1).getSthh() > daysSorted.get(i-1).getEthh()) {
+                        DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
+                                .withHourOfDay(daysSorted.get(i - 1).getEthh())
+                                .withMinuteOfHour(daysSorted.get(i - 1).getEtmm())
+                                .withDayOfWeek(daysSorted.get(i).getDay() + 1)
+                                .withSecondOfMinute(0);
+                        occupied.setPreviouslyOccupiedSchedule(daysSorted.get(i -1));
+                        occupied.setMillisecondsUntilPrevChange(MockTime.getInstance().getMockTime() -endDateTime.getMillis());
+					}else {
+                        DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
+                                .withHourOfDay(daysSorted.get(i - 1).getEthh())
+                                .withMinuteOfHour(daysSorted.get(i - 1).getEtmm())
+                                .withDayOfWeek(daysSorted.get(i - 1).getDay() + 1)
+                                .withSecondOfMinute(0);
+                        occupied.setPreviouslyOccupiedSchedule(daysSorted.get(i -1));
+                        occupied.setMillisecondsUntilPrevChange(MockTime.getInstance().getMockTime() -endDateTime.getMillis());
+                    }
+                }
                 return occupied;
             }
         }
@@ -320,6 +340,7 @@ public class Schedule extends Entity
         /* In case it runs off the ends of the schedule */
         if (daysSorted.size() > 0)
         {
+            int j = daysSorted.size() -1;
             occupied = new Occupied();
             occupied.setOccupied(false);
             occupied.setValue(daysSorted.get(0).mVal);
@@ -332,6 +353,15 @@ public class Schedule extends Entity
                     .withDayOfWeek(daysSorted.get(0).getDay() + 1)
                     .withSecondOfMinute(0);
             occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
+
+            DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
+                    .withHourOfDay(daysSorted.get(j).getEthh())
+                    .withMinuteOfHour(daysSorted.get(j).getEtmm())
+                    .withDayOfWeek(daysSorted.get(j).getDay() + 1)
+                    .withSecondOfMinute(0);
+            occupied.setPreviouslyOccupiedSchedule(daysSorted.get(j));
+            occupied.setMillisecondsUntilPrevChange(MockTime.getInstance().getMockTime() - endDateTime.getMillis());
+            
         }
 
         return occupied;
@@ -804,7 +834,20 @@ public class Schedule extends Entity
             }
         }
     }
-
+    public static int getCurrentDayOfWeekWithMondayAsStart() {
+        Calendar calendar = GregorianCalendar.getInstance();
+        switch (calendar.get(Calendar.DAY_OF_WEEK))
+        {
+            case Calendar.MONDAY: return 0;
+            case Calendar.TUESDAY: return 1;
+            case Calendar.WEDNESDAY: return 2;
+            case Calendar.THURSDAY: return 3;
+            case Calendar.FRIDAY: return 4;
+            case Calendar.SATURDAY: return 5;
+            case Calendar.SUNDAY: return 6;
+        }
+        return 0;
+    }
 
     public static class Builder
     {

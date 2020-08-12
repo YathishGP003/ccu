@@ -16,6 +16,7 @@ import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
+import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
@@ -175,11 +176,18 @@ public class DabProfile extends ZoneProfile
         String zoneId = HSUtil.getZoneIdFromEquipId(dabEquip.getId());
         Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
         boolean occupied = (occ == null ? false : occ.isOccupied());
-        
+
+        double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");
+        EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
+        if((epidemicState != EpidemicState.OFF) && (L.ccu().oaoProfile != null)){
+            double smartPurgeDABDamperMinOpenMultiplier = TunerUtil.readTunerValByQuery("purge and system and dab and damper and pos and multiplier and min ", L.ccu().oaoProfile.getEquipRef());
+            damper.iaqCompensatedMinPos =(int) (damper.minPosition * smartPurgeDABDamperMinOpenMultiplier);
+        }else
+            damper.iaqCompensatedMinPos = damper.minPosition;
         //CO2 loop output from 0-50% modulates damper min position.
         if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0)
         {
-            damper.iaqCompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * Math.min(50, co2Loop.getLoopOutput()) / 50;
+            damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * Math.min(50, co2Loop.getLoopOutput()) / 50;
             CcuLog.d(L.TAG_CCU_ZONE, "CO2LoopOp :" + co2Loop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
         }
     

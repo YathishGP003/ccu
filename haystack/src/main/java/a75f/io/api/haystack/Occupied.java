@@ -14,8 +14,10 @@ public class Occupied {
     private Double        mCoolingVal;
     private Double        mHeatingVal;
     private long          mMillisecondsUntilNextChange;
+    private long          mMillisecondsUntilPrevChange;
     private Schedule.Days mCurrentlyOccupiedScheduleDay;
     private Schedule.Days mNextOccupiedScheduleDay;
+    private Schedule.Days mPrevOccupiedScheduleDay;
     private Double        mHeatingDeadband;
     private Double        mCoolingDeadband;
     private Schedule      vacation;
@@ -105,7 +107,13 @@ public class Occupied {
     public void setMillisecondsUntilNextChange(long millisecondsUntilNextChange) {
         this.mMillisecondsUntilNextChange = millisecondsUntilNextChange;
     }
+    public long getMillisecondsUntilPrevChange() {
+        return mMillisecondsUntilPrevChange;
+    }
 
+    public void setMillisecondsUntilPrevChange(long millisecondsUntilNextChange) {
+        this.mMillisecondsUntilPrevChange = millisecondsUntilNextChange;
+    }
     public void setCurrentlyOccupiedSchedule(Schedule.Days days) {
         mCurrentlyOccupiedScheduleDay = days;
     }
@@ -122,6 +130,12 @@ public class Occupied {
         return mNextOccupiedScheduleDay;
     }
 
+    public void setPreviouslyOccupiedSchedule(Schedule.Days days) {
+        mPrevOccupiedScheduleDay = days;
+    }
+    public Schedule.Days getPreviouslyOccupiedSchedule(){
+        return mPrevOccupiedScheduleDay;
+    }
     public void setHeatingDeadBand(double heatingDeadBand)
     {
         mHeatingDeadband = heatingDeadBand;

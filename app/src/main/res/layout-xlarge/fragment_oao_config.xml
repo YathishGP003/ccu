@@ -233,6 +233,33 @@
 
 
                         </RelativeLayout>
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="30dp">
+
+                            <TextView
+                                android:id="@+id/textSmartPurgeOutsideDamperMinOpen"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:layout_alignParentStart="true"
+                                android:text="@string/label_smartpurge_outside_damper_min"
+                                android:layout_toStartOf="@+id/smartPurgeOutsideDamperMinOpen"
+                                android:layout_marginEnd="5dp"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/smartPurgeOutsideDamperMinOpen"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_gravity="center_vertical"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+
+
+                        </RelativeLayout>
 
                     </LinearLayout>
 
@@ -410,6 +437,34 @@
                                 android:textOn="" />
 
                         </RelativeLayout>
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="30dp">
+
+                            <TextView
+                                android:id="@+id/textEnhancedVentiDamperMinOpen"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:layout_alignParentStart="true"
+                                android:text="@string/label_enhanced_ventilation_outside_damper_min"
+                                android:layout_toStartOf="@+id/enhancedVentiOutsideDamperMinOpen"
+                                android:layout_marginEnd="5dp"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/enhancedVentiOutsideDamperMinOpen"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentRight="true"
+                                android:layout_gravity="center_vertical"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+
+                        </RelativeLayout>
+
+
                     </LinearLayout>
 
                 </LinearLayout>

@@ -17,4 +17,6 @@ public class OAOProfileConfiguration extends BaseProfileConfiguration
     public double co2Threshold;
     public double exhaustFanHysteresis;
     public boolean usePerRoomCO2Sensing;
+    public double smartPurgeMinDamperOpen;
+    public double enhancedVentilationMinDamperOpen;
 }

@@ -90,7 +90,7 @@ public class OAOProfile
         outsideAirLoopOutput = Math.max(economizingLoopOutput, outsideAirCalculatedMinDamper);
         
         double outsideDamperMatTarget = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and target",oaoEquip.equipRef);
-        double outsideDamperMatMin = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and minimum",oaoEquip.equipRef);
+        double outsideDamperMatMin = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and min",oaoEquip.equipRef);
     
         double matTemp  = oaoEquip.getHisVal("mixed and air and temp and sensor");
     

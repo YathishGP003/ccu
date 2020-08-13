@@ -10,10 +10,7 @@ import java.util.HashMap;
 import a75.io.algos.ControlLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.Floor;
-import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
-import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZonePriority;
@@ -31,13 +28,13 @@ import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 import static a75f.io.logic.bo.building.system.SystemMode.AUTO;
 import static a75f.io.logic.bo.building.system.SystemMode.COOLONLY;
 import static a75f.io.logic.bo.building.system.SystemMode.HEATONLY;
-/**
- * Created by samjithsadasivan on 11/9/18.
- */
+
+
 
 /**
- * DxController applies Weighted average and Moving average filters on temperature diffs.
+ * VavSystemController applies Weighted average and Moving average filters on temperature diffs.
  * MA value is used to determine AHU change over. WA determines the heating signal.
+ *
  */
 public class VavSystemController extends SystemController
 {
@@ -72,8 +69,6 @@ public class VavSystemController extends SystemController
     double weightedAverageCoolingOnlyLoadMA;
     double weightedAverageHeatingOnlyLoadMA;
     
-    //int systemOccupancy = 0;
-    
     double averageSystemHumidity = 0;
     double averageSystemTemperature = 0;
     
@@ -81,7 +76,15 @@ public class VavSystemController extends SystemController
     double weightedAverageHeatingOnlyLoadPostML;
     double weightedAverageLoadPostML;
     
-    double co2WA = 0;
+    double co2WeightedAverage = 0;
+
+    private SystemMode conditioningMode = SystemMode.OFF;
+    private VavSystemProfile systemProfile = null;
+    double prioritySum = 0;
+    double co2LoopWeightedAverageASum = 0;
+    double co2WeightedAverageSum = 0;
+    int zoneDeadCount = 0;
+    boolean hasTi = false;
     
     private VavSystemController()
     {
@@ -94,73 +97,165 @@ public class VavSystemController extends SystemController
     }
     
     public void runVavSystemControlAlgo() {
+
+        initializeAlgoLoopVariables();
+
+        ArrayList<HashMap<Object, Object>> allEquips = CCUHsApi
+                                                           .getInstance()
+                                                           .readAllEntities("(equip and zone and vav) or " +
+                                                                            "(equip and zone and ti)"
+        );
+
+        updateSystemTempHumidity(allEquips);
+
+        processZoneEquips(allEquips);
+        processCCUAsZoneEquip();
         
-        double prioritySum = 0;
-        VavSystemProfile profile = (VavSystemProfile) L.ccu().systemProfile;
-        ciDesired = (int)profile.getUserIntentVal("desired and ci");
-        SystemMode systemMode = SystemMode.values()[(int)profile.getUserIntentVal("conditioning and mode")];
-        CcuLog.d(L.TAG_CCU_SYSTEM, "runVavSystemControlAlgo -> ciDesired: " + ciDesired + " systemMode: " + systemMode);
+        if (prioritySum == 0 || zoneCount == 0) {
+            CcuLog.d(L.TAG_CCU_SYSTEM, "No valid temperature, Skip VavSystemControlAlgo");
+            systemState = OFF;
+            reset();
+            return;
+        }else if(systemState == OFF) {
+            systemState = COOLING;
+            piController.reset();
+        }
+
+        updateWeightedAverageLoad();
+
+        if (isEmergencyCoolingRequired()) {
+            handleEmergencyCooling();
+        } else if (isEmergencyHeatingRequired()) {
+            handleEmergencyHeating();
+        } else {
+            handleOperationalChangeOver();
+        }
+
+
+        updateLoopOpSignals();
+
+        logAlgoLoopVariables();
+
+        ArrayList<HashMap<Object, Object>> vavEquips = CCUHsApi.getInstance()
+                                                               .readAllEntities("equip and zone and vav");
+        HashMap<String, Double> damperPosMap;
+
+        if (systemState == HEATING && conditioningMode != SystemMode.OFF)
+        {
+            HashMap<String, Double> normalizedDamperPosMap = getNormalizedDamperPosMap(vavEquips,
+                                                                              getBaseDamperPosMap(vavEquips));
+            damperPosMap = getAdjustedDamperPosMap(vavEquips, normalizedDamperPosMap,
+                                                            systemProfile.getSystemEquipRef());
+        } else {
+            damperPosMap = getBaseDamperPosMap(vavEquips);
+        }
+
+        applyLimitsAndSetDamperPosition(vavEquips, damperPosMap);
     
-        weightedAverageCoolingOnlyLoadSum = weightedAverageHeatingOnlyLoadSum = weightedAverageLoadSum = 0;
-        totalCoolingLoad = totalHeatingLoad = zoneCount = 0;
+    }
+
+    private void initializeAlgoLoopVariables() {
+
+        systemProfile = (VavSystemProfile) L.ccu().systemProfile;
+        ciDesired = (int)systemProfile.getUserIntentVal("desired and ci");
+        conditioningMode = SystemMode.values()[(int)systemProfile.getUserIntentVal("conditioning and mode")];
+        CcuLog.d(L.TAG_CCU_SYSTEM, "runDabSystemControlAlgo -> ciDesired: " + ciDesired
+                                        + " conditioningMode: " + conditioningMode
+        );
+
+        weightedAverageCoolingOnlyLoadSum = 0;
+        weightedAverageHeatingOnlyLoadSum = 0;
+        weightedAverageLoadSum = 0;
+        co2WeightedAverage = 0;
+        totalCoolingLoad = 0;
+        totalHeatingLoad = 0;
+        zoneCount = 0;
+        prioritySum = 0;
+        co2LoopWeightedAverageASum = 0;
+        co2WeightedAverageSum = 0;
+        zoneDeadCount = 0;
+        hasTi = false;
+    }
+
+    private void updateSystemTempHumidity(ArrayList<HashMap<Object, Object>> allEquips) {
         
-        updateSystemHumidity();
-        updateSystemTemperature();
+        updateSystemHumidity(allEquips);
+        updateSystemTemperature(allEquips);
         updateSystemDesiredTemp();
         
-        profile.setSystemPoint("average and humidity", averageSystemHumidity);
-        profile.setSystemPoint("average and temp", averageSystemTemperature);
+        systemProfile.setSystemPoint("average and humidity", averageSystemHumidity);
+        systemProfile.setSystemPoint("average and temp", averageSystemTemperature);
 
-        int zoneDeadCount = 0;
-        boolean hasTi = false;
-        double co2WASum = 0;
-        for (Floor f: HSUtil.getFloors())
-        {
-            for(Zone z: HSUtil.getZones(f.getId())) {
-                for (Equip q : HSUtil.getEquips(z.getId()))
-                {
-                    //isVav or CCu as zone profile
-                    boolean isVavOrTi = (q.getMarkers().contains("vav") == false) ? (q.getMarkers().contains("ti") == false) ? false: true : true;
-                    hasTi = !hasTi ? q.getMarkers().contains("ti") : true;
-                    if(!isVavOrTi)
-                        continue;
-                    else if( isVavOrTi && isZoneDead(q)){
-                        zoneDeadCount++;
-                        continue;
-                    }else if(!hasTemp(q))
-                        continue;
-                    double zoneCurTemp = getEquipCurrentTemp(q.getId());
-                    double desiredTempCooling = HSEquipUtil.getDesiredTempCooling(q.getId());
-                    double desiredTempHeating = HSEquipUtil.getDesiredTempHeating(q.getId());
-                    
-                    double zoneCoolingLoad = zoneCurTemp > desiredTempCooling ? zoneCurTemp - desiredTempCooling : 0;
-                    double zoneHeatingLoad = zoneCurTemp < desiredTempHeating ? desiredTempHeating - zoneCurTemp : 0;
-                    double zoneDynamicPriority = getEquipDynamicPriority(zoneCoolingLoad > 0 ? zoneCoolingLoad : zoneHeatingLoad, q.getId());
-                    totalCoolingLoad += zoneCoolingLoad;
-                    totalHeatingLoad += zoneHeatingLoad;
-                    zoneCount++;
-                    weightedAverageCoolingOnlyLoadSum += zoneCoolingLoad * zoneDynamicPriority;
-                    weightedAverageHeatingOnlyLoadSum += zoneHeatingLoad * zoneDynamicPriority;
-                    weightedAverageLoadSum += (zoneCoolingLoad * zoneDynamicPriority) - (zoneHeatingLoad * zoneDynamicPriority);
-                    prioritySum += zoneDynamicPriority;
-                    co2WASum += (getEquipCo2(q.getId()) * zoneDynamicPriority);
-                    CcuLog.d(L.TAG_CCU_SYSTEM, q.getDisplayName() + " zoneDynamicPriority: " + zoneDynamicPriority + " zoneCoolingLoad: " + zoneCoolingLoad + " zoneHeatingLoad: " + zoneHeatingLoad+" co2WASum "+co2WASum);
-                    CcuLog.d(L.TAG_CCU_SYSTEM, q.getDisplayName() + " weightedAverageCoolingOnlyLoadSum:" + weightedAverageCoolingOnlyLoadSum + " weightedAverageHeatingOnlyLoadSum " + weightedAverageHeatingOnlyLoadSum);
-                }
-            }
+    }
+    
+    private boolean isEmergencyCoolingRequired() {
+        return systemState !=  HEATING &&
+               buildingLimitMaxBreached("vav") &&
+               conditioningMode != SystemMode.OFF;
+    }
+    
+    private boolean isEmergencyHeatingRequired() {
+        return systemState != COOLING &&
+               buildingLimitMinBreached("vav") &&
+               conditioningMode != SystemMode.OFF;
+    }
+
+    private void processZoneEquips(ArrayList<HashMap<Object, Object>> allEquips) {
         
+        for (HashMap<Object, Object> equipMap : allEquips) {
+
+            Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+            hasTi = hasTi || equip.getMarkers().contains("ti");
+
+            if (isZoneDead(equip)) {
+                zoneDeadCount++;
+            } else if (hasTemp(equip)) {
+                double zoneCurTemp = getEquipCurrentTemp(equip.getId());
+                double desiredTempCooling = HSEquipUtil.getDesiredTempCooling(equip.getId());
+                double desiredTempHeating = HSEquipUtil.getDesiredTempHeating(equip.getId());
+
+                double zoneCoolingLoad = zoneCurTemp > desiredTempCooling ? zoneCurTemp - desiredTempCooling : 0;
+                double zoneHeatingLoad = zoneCurTemp < desiredTempHeating ? desiredTempHeating - zoneCurTemp : 0;
+                double zoneDynamicPriority = getEquipDynamicPriority(zoneCoolingLoad > 0 ? zoneCoolingLoad : zoneHeatingLoad, equip.getId());
+                totalCoolingLoad += zoneCoolingLoad;
+                totalHeatingLoad += zoneHeatingLoad;
+                zoneCount++;
+                weightedAverageCoolingOnlyLoadSum += zoneCoolingLoad * zoneDynamicPriority;
+                weightedAverageHeatingOnlyLoadSum += zoneHeatingLoad * zoneDynamicPriority;
+                weightedAverageLoadSum += (zoneCoolingLoad * zoneDynamicPriority) - (zoneHeatingLoad * zoneDynamicPriority);
+                prioritySum += zoneDynamicPriority;
+                co2WeightedAverageSum += (getEquipCo2(equip.getId()) * zoneDynamicPriority);
+                CcuLog.d(L.TAG_CCU_SYSTEM, equip.getDisplayName() + " zoneDynamicPriority: " + zoneDynamicPriority +
+                                           " zoneCoolingLoad: " + zoneCoolingLoad + " zoneHeatingLoad: " + zoneHeatingLoad+
+                                           " co2WASum "+co2WeightedAverageSum
+                );
+                CcuLog.d(L.TAG_CCU_SYSTEM, equip.getDisplayName() + " weightedAverageCoolingOnlyLoadSum:" +
+                                           weightedAverageCoolingOnlyLoadSum +
+                                           " weightedAverageHeatingOnlyLoadSum " + weightedAverageHeatingOnlyLoadSum
+                );
+            }
         }
-        double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("dead and percent and influence",L.ccu().systemProfile.getSystemEquipRef());
+
+    }
+
+    private void processCCUAsZoneEquip() {
+
+        double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("dead and percent and influence",
+                                                                               L.ccu().systemProfile.getSystemEquipRef());
         if(zoneDeadCount > 0 )
-            CcuLog.d(L.TAG_CCU_SYSTEM, "VavSysController = "+hasTi+","+zoneDeadCount+","+zoneCount+","+cmTempInfForPercentileZonesDead+","+((zoneDeadCount*100)/(zoneDeadCount + zoneCount)));
-        if((zoneCount == 0) || (!hasTi && ((zoneDeadCount > 0) && (((zoneDeadCount*100)/(zoneDeadCount + zoneCount)) >= cmTempInfForPercentileZonesDead)))){
+            CcuLog.d(L.TAG_CCU_SYSTEM, "VavSysController = "+hasTi+","+zoneDeadCount+","+zoneCount+","+
+                                       cmTempInfForPercentileZonesDead+","+((zoneDeadCount*100)/(zoneDeadCount + zoneCount))
+            );
+
+        if((zoneCount == 0) || (!hasTi && ((zoneDeadCount > 0) && (((double)(zoneDeadCount*100)/(zoneDeadCount + zoneCount))
+                                                                   >= cmTempInfForPercentileZonesDead)))){
 
 
             String sysEquip = L.ccu().systemProfile.getSystemEquipRef();
             if(sysEquip != null) {
 
                 double cmCurrentTemp = getCMCurrentTemp(sysEquip);
-                if(!isCMTempDead(cmCurrentTemp)) {
+                if(isCMTempDead(cmCurrentTemp)) {
                     double desiredTempCooling = ScheduleProcessJob.getSystemCoolingDesiredTemp();
                     double desiredTempHeating = ScheduleProcessJob.getSystemHeatingDesiredTemp();
 
@@ -174,119 +269,135 @@ public class VavSystemController extends SystemController
                     weightedAverageHeatingOnlyLoadSum += zoneHeatingLoad * zoneDynamicPriority;
                     weightedAverageLoadSum += (zoneCoolingLoad * zoneDynamicPriority) - (zoneHeatingLoad * zoneDynamicPriority);
                     prioritySum += zoneDynamicPriority;
-                    CcuLog.d(L.TAG_CCU_SYSTEM, "CM zoneDynamicPriority: " + zoneDynamicPriority + " zoneCoolingLoad: " + zoneCoolingLoad + " zoneHeatingLoad: " + zoneHeatingLoad + " weightedAverageCoolingOnlyLoadSum " + weightedAverageCoolingOnlyLoadSum + "," + prioritySum + "," + cmCurrentTemp);
+                    CcuLog.d(L.TAG_CCU_SYSTEM, "CM zoneDynamicPriority: " + zoneDynamicPriority +
+                                               " zoneCoolingLoad: " + zoneCoolingLoad + " zoneHeatingLoad: " +
+                                               "" + zoneHeatingLoad + " weightedAverageCoolingOnlyLoadSum " +
+                                               weightedAverageCoolingOnlyLoadSum + ", prioritySum" + prioritySum +
+                                               ", cmCurrentTemp" + cmCurrentTemp
+                    );
                 }
             }
         }
-        
-        if (prioritySum == 0 || zoneCount == 0) {
-            CcuLog.d(L.TAG_CCU_SYSTEM, "No valid temperature, Skip VavSystemControlAlgo");
-            systemState = OFF;
-            reset();
-            return;
-        }else if(systemState == OFF){
-            systemState = COOLING;
-            piController.reset();
-        }
+    }
+
+
+    private void updateWeightedAverageLoad() {
         
         weightedAverageCoolingOnlyLoad = weightedAverageCoolingOnlyLoadSum / prioritySum;
         weightedAverageHeatingOnlyLoad = weightedAverageHeatingOnlyLoadSum / prioritySum;
         weightedAverageLoad = weightedAverageLoadSum / prioritySum;
-        co2WA = co2WASum/prioritySum;
+        co2WeightedAverage = co2WeightedAverageSum/prioritySum;
         comfortIndex = (int)(totalCoolingLoad + totalHeatingLoad) /zoneCount;
-        
-        profile.setSystemPoint("ci and running", comfortIndex);
+
+        systemProfile.setSystemPoint("ci and running", comfortIndex);
     
         weightedAverageCoolingOnlyLoadPostML = weightedAverageCoolingOnlyLoad ;//+buildingLoadOffsetML
         weightedAverageHeatingOnlyLoadPostML = weightedAverageHeatingOnlyLoad ;//+buildingLoadOffsetML
         weightedAverageLoadPostML = weightedAverageLoad ;///+buildingLoadOffsetML
-        
+
         weightedAverageCoolingOnlyLoadMAQueue.add(weightedAverageCoolingOnlyLoadPostML);
         weightedAverageHeatingOnlyLoadMAQueue.add(weightedAverageHeatingOnlyLoadPostML);
-        
+
         double weightedAverageCoolingOnlyLoadMASum = 0;
         for (double val : weightedAverageCoolingOnlyLoadMAQueue) {
             weightedAverageCoolingOnlyLoadMASum += val;
         }
         weightedAverageCoolingOnlyLoadMA = weightedAverageCoolingOnlyLoadMASum/weightedAverageCoolingOnlyLoadMAQueue.size();
-        
+
         double weightedAverageHeatingOnlyLoadMASum = 0;
         for (double val : weightedAverageHeatingOnlyLoadMAQueue) {
             weightedAverageHeatingOnlyLoadMASum += val;
         }
         weightedAverageHeatingOnlyLoadMA = weightedAverageHeatingOnlyLoadMASum/weightedAverageHeatingOnlyLoadMAQueue.size();
-    
-        if ((systemState !=  HEATING) && buildingLimitMaxBreached("vav") && (systemMode != SystemMode.OFF)) {
-            CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency COOLING Active");
-            emergencyMode = true;
-            if ((systemMode == COOLONLY || systemMode == AUTO) && weightedAverageCoolingOnlyLoadMA > 0)
-            {
-                if (systemState != COOLING)
-                {
-                    systemState = COOLING;
-                    piController.reset();
-                }
-            } else {
-                //systemState = OFF;
+        
+        systemProfile.setSystemPoint("moving and average and cooling and load",
+                                     CCUUtils.roundToTwoDecimal(weightedAverageCoolingOnlyLoadMA));
+        systemProfile.setSystemPoint("moving and average and heating and load",
+                                     CCUUtils.roundToTwoDecimal(weightedAverageHeatingOnlyLoadMA));
 
-                coolingSignal = 0;
-                heatingSignal = 0;
-                piController.reset();
-            }
-        } else if ( (systemState != COOLING) && buildingLimitMinBreached("vav") && (systemMode != SystemMode.OFF)) {
-            CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency HEATING Active");
-            emergencyMode = true;
-            if ((systemMode == HEATONLY || systemMode == AUTO) && (weightedAverageCoolingOnlyLoadMA == 0 && weightedAverageHeatingOnlyLoadMA > 0))
-            {
-                if (systemState != HEATING)
-                {
-                    systemState = HEATING;
-                    piController.reset();
-                }
-            } else {
-                //systemState = OFF;
-                coolingSignal = 0;
-                heatingSignal = 0;
-                piController.reset();
-            }
-        } else
+
+    }
+
+    private void handleEmergencyCooling() {
+
+        CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency COOLING Active");
+        emergencyMode = true;
+        if ((conditioningMode == COOLONLY || conditioningMode == AUTO) && weightedAverageCoolingOnlyLoadMA > 0)
         {
-            if (emergencyMode) {
-                CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency CONDITIONING Disabled");
+            if (systemState != COOLING)
+            {
+                systemState = COOLING;
                 piController.reset();
-                emergencyMode = false;
             }
-            if ((systemMode == COOLONLY || systemMode == AUTO) && weightedAverageCoolingOnlyLoadMA > 0)
-            {
-                if (systemState != COOLING)
-                {
-                    systemState = COOLING;
-                    piController.reset();
-                }
-            }
-            else if ((systemMode == HEATONLY || systemMode == AUTO) && (weightedAverageCoolingOnlyLoadMA == 0 && weightedAverageHeatingOnlyLoadMA > 0))
-            {
-                if (systemState != HEATING)
-                {
-                    systemState = HEATING;
-                    piController.reset();
-                }
-            }
-            else
-            {
-                //systemState = OFF;
+        } else {
+            //systemState = OFF;
 
-                coolingSignal = 0;
-                heatingSignal = 0;
+            coolingSignal = 0;
+            heatingSignal = 0;
+            piController.reset();
+        }
+    }
+
+    private void handleEmergencyHeating() {
+
+        CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency HEATING Active");
+        emergencyMode = true;
+        if ((conditioningMode == HEATONLY || conditioningMode == AUTO) &&
+            (weightedAverageCoolingOnlyLoadMA == 0 && weightedAverageHeatingOnlyLoadMA > 0))
+        {
+            if (systemState != HEATING)
+            {
+                systemState = HEATING;
+                piController.reset();
+            }
+        } else {
+            //systemState = OFF;
+            coolingSignal = 0;
+            heatingSignal = 0;
+            piController.reset();
+        }
+    }
+
+    private void handleOperationalChangeOver() {
+
+        if (emergencyMode) {
+            CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency CONDITIONING Disabled");
+            piController.reset();
+            emergencyMode = false;
+        }
+        if ((conditioningMode == COOLONLY || conditioningMode == AUTO) && weightedAverageCoolingOnlyLoadMA > 0)
+        {
+            if (systemState != COOLING)
+            {
+                systemState = COOLING;
                 piController.reset();
             }
         }
+        else if ((conditioningMode == HEATONLY || conditioningMode == AUTO) && (weightedAverageCoolingOnlyLoadMA == 0 && weightedAverageHeatingOnlyLoadMA > 0))
+        {
+            if (systemState != HEATING)
+            {
+                systemState = HEATING;
+                piController.reset();
+            }
+        }
+        else
+        {
+            //systemState = OFF;
+
+            coolingSignal = 0;
+            heatingSignal = 0;
+            piController.reset();
+        }
+    }
+
+    private void updateLoopOpSignals() {
         
         piController.dump();
-        if ((systemState == COOLING) && (systemMode == COOLONLY || systemMode == AUTO)){
+        if ((systemState == COOLING) && (conditioningMode == COOLONLY || conditioningMode == AUTO)){
             heatingSignal = 0;
             coolingSignal = (int)piController.getLoopOutput(weightedAverageCoolingOnlyLoadPostML, 0);
-        } else if ((systemState == HEATING) && (systemMode == HEATONLY || systemMode == AUTO)){
+        } else if ((systemState == HEATING) && (conditioningMode == HEATONLY || conditioningMode == AUTO)){
             coolingSignal = 0;
             heatingSignal = (int)piController.getLoopOutput(weightedAverageHeatingOnlyLoadPostML, 0);
         } else {
@@ -295,37 +406,32 @@ public class VavSystemController extends SystemController
             piController.reset();
         }
         piController.dump();
-        CcuLog.d(L.TAG_CCU_SYSTEM, "weightedAverageCoolingOnlyLoadMA: "+weightedAverageCoolingOnlyLoadMA+" weightedAverageHeatingOnlyLoadMA: "
-                                                    +weightedAverageHeatingOnlyLoadMA +" systemState: "+systemState+" coolingSignal: "+coolingSignal+" heatingSignal: "+heatingSignal);
-    
-        profile.setSystemPoint("moving and average and cooling and load", CCUUtils.roundToTwoDecimal(weightedAverageCoolingOnlyLoadMA));
-        profile.setSystemPoint("moving and average and heating and load",CCUUtils.roundToTwoDecimal(weightedAverageHeatingOnlyLoadMA));
-    
-        ArrayList<HashMap> vavEquips = CCUHsApi.getInstance().readAll("equip and vav and zone");
-        HashMap<String, Double> damperPosMap;
-        
-        if ((systemState == HEATING) && (systemMode != SystemMode.OFF))
-        {
-            HashMap<String, Double> normalizedDamperPosMap = getNormalizedDamperPosMap(vavEquips,
-                                                                              getBaseDamperPosMap(vavEquips));
-            damperPosMap = getAdjustedDamperPosMap(vavEquips, normalizedDamperPosMap,
-                                                            profile.getSystemEquipRef());
-        } else {
-            damperPosMap = getBaseDamperPosMap(vavEquips);
-        }
-    
-        applyLimitsAndSetDamperPosition(vavEquips, damperPosMap);
-    
     }
     
-    private HashMap<String, Double> getBaseDamperPosMap(ArrayList<HashMap> vavEquips) {
+    private void logAlgoLoopVariables() {
+
+        CcuLog.d(L.TAG_CCU_SYSTEM, "weightedAverageCoolingOnlyLoadMA: "+weightedAverageCoolingOnlyLoadMA+
+                                   " weightedAverageHeatingOnlyLoadMA: " +weightedAverageHeatingOnlyLoadMA +
+                                   " systemState: "+systemState+
+                                   " coolingSignal: "+coolingSignal+
+                                   " heatingSignal: "+heatingSignal
+        );
+    }
+    
+    private HashMap<String, Double> getBaseDamperPosMap(ArrayList<HashMap<Object, Object>> vavEquips) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
     
         HashMap<String, Double> baseDamperPosMap = new HashMap<>();
-        for (HashMap m : vavEquips) {
-            HashMap damper = hayStack.read("point and damper and base and cmd and equipRef == \""+m.get("id").toString()+"\"");
+        for (HashMap<Object, Object> equip : vavEquips) {
+            HashMap<Object, Object> damper =
+                hayStack.readEntity("point and damper and base and cmd and equipRef == \""+equip.get("id")
+                                                                                                .toString()+"\""
+            );
             double damperPos = hayStack.readHisValById(damper.get("id").toString());
-            HashMap normalizedDamper = hayStack.read("point and damper and normalized and cmd and equipRef == \""+m.get("id").toString()+"\"");
+            HashMap<Object, Object> normalizedDamper =
+                hayStack.readEntity("point and damper and normalized and cmd and equipRef == \""+equip.get("id")
+                                                                                                      .toString()+ "\""
+            );
             baseDamperPosMap.put(normalizedDamper.get("id").toString(), damperPos);
         }
         return baseDamperPosMap;
@@ -362,38 +468,28 @@ public class VavSystemController extends SystemController
     }
     
     public double getEquipCurrentTemp(String equipRef) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \""+equipRef+"\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == " +
+                                                        "\""+equipRef+"\""
+        );
     }
 
     public double getCMCurrentTemp(String equipRef) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and system and temp and cm and current and equipRef == \""+equipRef+"\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and system and temp and cm and current and equipRef == " +
+                                                        "\""+equipRef+"\""
+        );
     }
     public ZonePriority getEquipPriority(String equipRef) {
-        double priorityVal = CCUHsApi.getInstance().readDefaultVal("point and zone and config and priority and equipRef == \""+equipRef+"\"");
+        double priorityVal = CCUHsApi.getInstance().readDefaultVal("point and zone and config and priority and " +
+                                                                   "equipRef == \""+equipRef+"\""
+        );
         return ZonePriority.values()[(int) priorityVal];
-    }
-    
-    public double getEquipDesiredTemp(String equipRef) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and air and temp and desired and equipRef == \""+equipRef+"\"");
-    
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("val") != null) {
-                    return Double.parseDouble(valMap.get("val").toString());
-                }
-            }
-        }
-        return 72;
     }
     
     public boolean isZoneDead(Equip q) {
         try
         {
-            return CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and equipRef == \"" + q.getId() + "\"").equals("Zone Temp Dead");
+            return CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and equipRef == \""
+                                                            + q.getId() + "\"").equals("Zone Temp Dead");
         } catch (Exception e) {
             //Handle non-temp equips
             return false;
@@ -405,15 +501,9 @@ public class VavSystemController extends SystemController
         double buildingLimitMin =  TunerUtil.readBuildingTunerValByQuery("building and limit and min");
 
         double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
-
-        if (cmTemp > (buildingLimitMax + tempDeadLeeway)
-                || cmTemp < (buildingLimitMin - tempDeadLeeway))
-        {
-            return true;
-        }
-
-        return false;
+        return !(cmTemp > (buildingLimitMax + tempDeadLeeway)) && !(cmTemp < (buildingLimitMin - tempDeadLeeway));
     }
+
     public boolean hasTemp(Equip q) {
         try
         {
@@ -429,24 +519,32 @@ public class VavSystemController extends SystemController
         double zonePriorityMultiplier = TunerUtil.readTunerValByQuery("point and default and tuner and zone and priority and multiplier and vav");
         return p.val * Math.pow(zonePriorityMultiplier, (zoneLoad/zonePrioritySpread) > 10 ? 10 : (zoneLoad/zonePrioritySpread));
     }
+
     public double getEquipDynamicPriority(double zoneLoad, String equipRef) {
         ZonePriority p = getEquipPriority(equipRef);
         if (getEquipCurrentTemp(equipRef) == 0) {
             return p.val;
         }
     
-        double zonePrioritySpread = TunerUtil.readTunerValByQuery("point and tuner and zone and priority and spread and equipRef == \""+equipRef+"\"");;
-        double zonePriorityMultiplier = TunerUtil.readTunerValByQuery("point and tuner and zone and priority and multiplier and equipRef == \""+equipRef+"\"");
+        double zonePrioritySpread = TunerUtil.readTunerValByQuery("point and tuner and zone and priority and spread and " +
+                                                                  "equipRef == \""+equipRef+"\""
+        );
+        double zonePriorityMultiplier = TunerUtil.readTunerValByQuery("point and tuner and zone and priority and multiplier " +
+                                                                      "and equipRef == \""+equipRef+"\""
+        );
 
-        double equipDynamicPriority = p.val * Math.pow(zonePriorityMultiplier, (zoneLoad/zonePrioritySpread) > 10 ? 10 : (zoneLoad/zonePrioritySpread));
+        double equipDynamicPriority = p.val * Math.pow(zonePriorityMultiplier, (zoneLoad/zonePrioritySpread) > 10 ? 10 :
+                                                                                   (zoneLoad/zonePrioritySpread));
         equipDynamicPriority = CCUUtils.roundToTwoDecimal(equipDynamicPriority);
         try {
-            HashMap zdpPoint = CCUHsApi.getInstance().read("point and zone and dynamic and priority and equipRef == \"" + equipRef + "\"");
+            HashMap<Object, Object> zdpPoint = CCUHsApi.getInstance().readEntity("point and zone and dynamic and priority and" +
+                                                                         " equipRef == \"" + equipRef + "\""
+            );
             double zdpPointValue = CCUHsApi.getInstance().readHisValById(zdpPoint.get("id").toString());
             if (zdpPointValue != equipDynamicPriority)
                 CCUHsApi.getInstance().writeHisValById(zdpPoint.get("id").toString(), equipDynamicPriority);
         }catch (Exception e){
-
+            e.printStackTrace();
         }
         return equipDynamicPriority;
     }
@@ -457,20 +555,19 @@ public class VavSystemController extends SystemController
     
     @Override
     public double getSystemCO2WA() {
-        return co2WA;
+        return co2WeightedAverage;
     }
     
-    public void updateSystemHumidity() {
+    public void updateSystemHumidity(ArrayList<HashMap<Object, Object>> allEquips) {
         //Average across zones or from proxy zone.
         double humiditySum = 0;
         double humidityZones = 0;
-    
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        ArrayList<HashMap> vavEquips = hayStack.readAll("equip and zone");
-    
-        for (HashMap q : vavEquips)
+
+        for (HashMap<Object, Object> equip : allEquips)
         {
-            double humidityVal = hayStack.readHisValByQuery("point and air and humidity and sensor and current and equipRef == \""+q.get("id")+"\"");
+            double humidityVal = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity and sensor and current " +
+                                                                "and equipRef == \""+equip.get("id")+"\""
+            );
     
             if (humidityVal != 0) {
                 humiditySum += humidityVal;
@@ -491,30 +588,39 @@ public class VavSystemController extends SystemController
 
             double desiredTempCooling = ScheduleProcessJob.getSystemCoolingDesiredTemp();
             double desiredTempHeating = ScheduleProcessJob.getSystemHeatingDesiredTemp();
-            HashMap coolTempPoint = CCUHsApi.getInstance().read("point and system and cm and cooling and desired and temp and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
+            HashMap<Object, Object> coolTempPoint = CCUHsApi.getInstance()
+                                                            .readEntity("point and system and cm and cooling and " +
+                                                                        "desired and temp and equipRef == " + "\"" +
+                                                                         L.ccu().systemProfile.getSystemEquipRef() + "\""
+            );
+
             CCUHsApi.getInstance().writeHisValById(coolTempPoint.get("id").toString(), desiredTempCooling);
-            HashMap heatTempPoint = CCUHsApi.getInstance().read("point and system and cm and heating and desired and temp and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
+
+            HashMap<Object, Object> heatTempPoint = CCUHsApi.getInstance().readEntity("point and system and cm and " +
+                                                                           "heating and desired and temp and equipRef == \"" +
+                                                                            L.ccu().systemProfile.getSystemEquipRef() + "\""
+            );
             CCUHsApi.getInstance().writeHisValById(heatTempPoint.get("id").toString(), desiredTempHeating);
         }catch (Exception e){
-
+            e.printStackTrace();
         }
     }
-    public void updateSystemTemperature() {
+
+    public void updateSystemTemperature(ArrayList<HashMap<Object, Object>> allEquips) {
         //Average across zones or from proxy zone.
         double tempSum = 0;
         double tempZones = 0;
         int totalEquips = 0;
         boolean hasTi = false;
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        ArrayList<HashMap> vavEquips = hayStack.readAll("equip and zone");
-        
-        for (HashMap q : vavEquips)
+
+        for (HashMap<Object, Object> equipMap : allEquips)
         {
-            Equip equip = new Equip.Builder().setHashMap(q).build();
+            Equip equip = new Equip.Builder().setHashMap(equipMap).build();
             if(equip.getMarkers().contains("vav") || equip.getMarkers().contains("ti")) {
-                double tempVal = hayStack.readHisValByQuery(
-                    "point and air and temp and sensor and current and equipRef == \"" + q.get("id") + "\"");
-                hasTi = !hasTi ? equip.getMarkers().contains("ti") : true;
+                double tempVal = CCUHsApi.getInstance().readHisValByQuery(
+                    "point and air and temp and sensor and current and equipRef == \"" + equipMap.get("id") + "\""
+                );
+                hasTi = hasTi || equip.getMarkers().contains("ti");
                 if (!isZoneDead(equip) && (tempVal > 0)) {
                     tempSum += tempVal;
                     tempZones++;
@@ -532,7 +638,7 @@ public class VavSystemController extends SystemController
         if((totalEquips == 0) || (!hasTi && ((((totalEquips - tempZones)*100)/(totalEquips))
                                              >= cmTempInfForPercentileZonesDead))){
             double cmTemp = getCMCurrentTemp(L.ccu().systemProfile.getSystemEquipRef());
-            if(!isCMTempDead(cmTemp)) {
+            if(isCMTempDead(cmTemp)) {
                 tempSum += cmTemp;
                 tempZones++;
             }
@@ -557,7 +663,7 @@ public class VavSystemController extends SystemController
     * calculated damper positions of 40, 70, 80, 90. Then we increase each by 11% to get rounded values of
     * 44, 78,89, 100% after normalizing.
     * */
-    private HashMap<String, Double> getNormalizedDamperPosMap(ArrayList<HashMap> vavEquips,
+    private HashMap<String, Double> getNormalizedDamperPosMap(ArrayList<HashMap<Object, Object>> vavEquips,
                                                              HashMap<String, Double> damperPosMap) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         double maxDamperPos = getMaxDamperPos(vavEquips);
@@ -570,36 +676,38 @@ public class VavSystemController extends SystemController
         HashMap<String, Double> normalizedDamperPosMap = new HashMap<>();
         double targetPercent = (100 - maxDamperPos) * 100/ maxDamperPos ;
         
-    
-        for (HashMap m : vavEquips) {
+        for (HashMap<Object, Object> equip : vavEquips) {
             
-            HashMap normalizedDamper = hayStack.read(
-                "point and damper and normalized and cmd and equipRef == \"" + m.get("id").toString() + "\"");
+            HashMap<Object, Object> normalizedDamper = hayStack.readEntity(
+                "point and damper and normalized and cmd and equipRef == \"" + equip.get("id").toString() + "\""
+            );
     
             double damperPos = damperPosMap.get(normalizedDamper.get("id").toString());
             double normalizedDamperPos;
-            if (isZoneDead(new Equip.Builder().setHashMap(m).build())) {
+            if (isZoneDead(new Equip.Builder().setHashMap(equip).build())) {
                 normalizedDamperPos = damperPos;
             } else {
                 normalizedDamperPos = (damperPos + damperPos * targetPercent / 100);
             }
             
             CcuLog.d(L.TAG_CCU_SYSTEM,
-                     "normalizeAirflow" + "Equip: " + m.get("dis") + ",damperPos :" + damperPos
-                     + " targetPercent:" + targetPercent + " normalizedDamper:" + normalizedDamperPos);
+                     "normalizeAirflow" + "Equip: " + equip.get("dis") + ",damperPos :" + damperPos
+                     + " targetPercent:" + targetPercent + " normalizedDamper:" + normalizedDamperPos
+            );
             normalizedDamperPosMap.put(normalizedDamper.get("id").toString(), normalizedDamperPos);
         }
         return normalizedDamperPosMap;
     }
     
-    public double getMaxDamperPos(ArrayList<HashMap> vavEquips) {
+    public double getMaxDamperPos(ArrayList<HashMap<Object, Object>> vavEquips) {
         double maxDamperPos = 0;
-        for (HashMap m : vavEquips) {
-            if (isZoneDead(new Equip.Builder().setHashMap(m).build())) {
+        for (HashMap<Object, Object> equip : vavEquips) {
+            if (isZoneDead(new Equip.Builder().setHashMap(equip).build())) {
                 continue;
             }
-            HashMap damper = CCUHsApi.getInstance().read("point and damper and base and cmd and equipRef == \""
-                                           +m.get("id").toString()+"\"");
+            HashMap<Object, Object> damper = CCUHsApi.getInstance().readEntity("point and damper and base and cmd and " +
+                                                                       "equipRef == \"" +equip.get("id").toString()+"\""
+            );
             double damperPos = CCUHsApi.getInstance().readHisValById(damper.get("id").toString());
             if ( damperPos >= maxDamperPos) {
                 maxDamperPos = damperPos;
@@ -607,13 +715,14 @@ public class VavSystemController extends SystemController
         }
         return maxDamperPos;
     }
+
     /*
      * Take weighted damper opening (where weightedDamperOpening = (zone1_damper_opening*zone1_damper_size +
      * zone2_damper_opening*zone2_damper_size +..)/(zone1_damper_size + zone2_damper_size + .. )
      * If weighted damper opening is < targetCumulativeDamper  increase the dampers proportionally so that the
      * cumulative damper opening is at least targetCumulativeDamper
      **/
-    public HashMap<String, Double> getAdjustedDamperPosMap (ArrayList<HashMap> vavEquips,
+    public HashMap<String, Double> getAdjustedDamperPosMap (ArrayList<HashMap<Object, Object>> vavEquips,
                                                             HashMap<String, Double> normalizedDamperPosMap,
                                                             String systemEquipRef) {
     
@@ -626,23 +735,26 @@ public class VavSystemController extends SystemController
         
             int damperAdjPercent = getDamperAdjustmentTargetPercent(vavEquips,
                                                                     normalizedDamperPosMap,
-                                                                    cumulativeDamperTarget);
+                                                                    cumulativeDamperTarget
+            );
         
             HashMap<String, Double> adjustedDamperPosMap = adjustDamperOpening(vavEquips,
                                                                                normalizedDamperPosMap,
-                                                                               damperAdjPercent);
+                                                                               damperAdjPercent
+            );
         
         
             weightedDamperOpening = getWeightedDamperOpening(vavEquips, normalizedDamperPosMap);
             CcuLog.d(L.TAG_CCU_SYSTEM, "weightedDamperOpening : " + weightedDamperOpening +
                                        " cumulativeDamperTarget : " + cumulativeDamperTarget +
-                                       " damperAdjPercent : "+damperAdjPercent);
+                                       " damperAdjPercent : "+damperAdjPercent
+            );
             return adjustedDamperPosMap;
         }
         return normalizedDamperPosMap;
     }
     
-    public int getDamperAdjustmentTargetPercent(ArrayList<HashMap> vavEquips,
+    public int getDamperAdjustmentTargetPercent(ArrayList<HashMap<Object, Object>> vavEquips,
                                                 HashMap<String, Double> damperPosMap,
                                                 double damperTargetOpening) {
         
@@ -650,7 +762,8 @@ public class VavSystemController extends SystemController
         
         HashMap<String, Double> adjustedDamperPosMap = adjustDamperOpening(vavEquips,
                                                                            damperPosMap,
-                                                                           DEFAULT_DAMPER_ADJ_INCREMENT);
+                                                                           DEFAULT_DAMPER_ADJ_INCREMENT
+        );
         
         double adjustedWeightedDamperOpening = getWeightedDamperOpening(vavEquips, adjustedDamperPosMap);
         
@@ -662,37 +775,40 @@ public class VavSystemController extends SystemController
         
     }
     
-    public double getWeightedDamperOpening(ArrayList<HashMap> vavEquips,
+    public double getWeightedDamperOpening(ArrayList<HashMap<Object, Object>> vavEquips,
                                            HashMap<String, Double> normalizedDamperPosMap) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         int damperSizeSum = 0;
         int weightedDamperOpeningSum = 0;
-        for (HashMap m : vavEquips) {
-            HashMap damperPos = hayStack.read("point and damper and normalized and cmd and equipRef == \""
-                                              +m.get("id").toString()+"\"");
-            HashMap damperSize = hayStack.read("point and config and damper and size and equipRef == \""
-                                               +m.get("id").toString()+"\"");
+        for (HashMap<Object, Object> equip : vavEquips) {
+            HashMap<Object, Object> damperPos = hayStack.readEntity("point and damper and normalized and cmd and " +
+                                                                    "equipRef == \""+equip.get("id").toString()+"\""
+            );
+            HashMap<Object, Object> damperSize = hayStack.readEntity("point and config and damper and size and " +
+                                                                     "equipRef == \""+equip.get("id").toString()+"\""
+            );
         
             double damperPosVal = normalizedDamperPosMap.get(damperPos.get("id").toString());
             double damperSizeVal = hayStack.readDefaultValById(damperSize.get("id").toString());
             weightedDamperOpeningSum += damperPosVal * damperSizeVal;
             damperSizeSum += damperSizeVal;
         }
-        return damperSizeSum == 0 ? 0 : weightedDamperOpeningSum / damperSizeSum;
+        return damperSizeSum == 0 ? 0 : (double) weightedDamperOpeningSum / damperSizeSum;
     }
     
-    public HashMap<String, Double> adjustDamperOpening(ArrayList<HashMap> vavEquips,
-                                    HashMap<String, Double> normalizedDamperPosMap,
-                                    int percent) {
+    public HashMap<String, Double> adjustDamperOpening(ArrayList<HashMap<Object, Object>> vavEquips,
+                                                       HashMap<String, Double> normalizedDamperPosMap,
+                                                       int percent) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap<String, Double> adjustedDamperOpeningMap = new HashMap<>();
-        for (HashMap m : vavEquips) {
-            if (isZoneDead(new Equip.Builder().setHashMap(m).build())) {
-                Log.d("CCU_SYSTEM", "Skip Cumulative damper adjustment, Equip Dead " + m.toString());
+        for (HashMap<Object, Object> equip : vavEquips) {
+            if (isZoneDead(new Equip.Builder().setHashMap(equip).build())) {
+                Log.d("CCU_SYSTEM", "Skip Cumulative damper adjustment, Equip Dead " + equip.toString());
                 continue;
             }
-            HashMap damperPos = hayStack.read("point and damper and normalized and cmd and equipRef == \""+
-                                              m.get("id").toString()+"\"");
+            HashMap<Object, Object> damperPos = hayStack.readEntity("point and damper and normalized and cmd and equipRef " +
+                                                              "== \""+ equip.get("id").toString()+"\""
+            );
             double damperPosVal = normalizedDamperPosMap.get(damperPos.get("id").toString());
             double adjustedDamperPos = damperPosVal + (damperPosVal * percent) / 100.0;
             adjustedDamperOpeningMap.put(damperPos.get("id").toString() , adjustedDamperPos);
@@ -700,26 +816,27 @@ public class VavSystemController extends SystemController
         return adjustedDamperOpeningMap;
     }
     
-    public void applyLimitsAndSetDamperPosition(ArrayList<HashMap> vavEquips,
+    public void applyLimitsAndSetDamperPosition(ArrayList<HashMap<Object, Object>> vavEquips,
                                                 HashMap<String, Double> normalizedDamperMap) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        for (HashMap m : vavEquips) {
-            HashMap damperPos = hayStack.read("point and damper and normalized and cmd and equipRef == \""
-                                              +m.get("id").toString()+"\"");
+        for (HashMap<Object, Object> equip : vavEquips) {
+            HashMap<Object, Object> damperPos = hayStack.readEntity("point and damper and normalized and cmd and " +
+                                                                 "equipRef == \""
+                                              +equip.get("id").toString()+"\"");
             double normalizedDamperPos = normalizedDamperMap.get(damperPos.get("id").toString());
             double minLimit = 0, maxLimit = 0;
-            if (getStatus(m.get("group").toString()) == ZoneState.COOLING.ordinal()) {
+            if (getStatus(equip.get("group").toString()) == ZoneState.COOLING.ordinal()) {
                 minLimit = hayStack.readDefaultVal("point and zone and config and vav and min and damper " +
-                                                   "and cooling and equipRef == \""+m.get("id").toString()+"\"");
+                                                   "and cooling and equipRef == \""+equip.get("id").toString()+"\"");
                 maxLimit = hayStack.readDefaultVal("point and zone and config and vav and max and damper" +
-                                                   " and cooling and equipRef == \""+m.get("id").toString()+"\"");
-            } else if (getStatus(m.get("group").toString()) == ZoneState.HEATING.ordinal()
-                      || getStatus(m.get("group").toString()) == ZoneState.DEADBAND.ordinal()
-                      || getStatus(m.get("group").toString()) == ZoneState.TEMPDEAD.ordinal()) {
+                                                   " and cooling and equipRef == \""+equip.get("id").toString()+"\"");
+            } else if (getStatus(equip.get("group").toString()) == ZoneState.HEATING.ordinal()
+                      || getStatus(equip.get("group").toString()) == ZoneState.DEADBAND.ordinal()
+                      || getStatus(equip.get("group").toString()) == ZoneState.TEMPDEAD.ordinal()) {
                 minLimit = hayStack.readDefaultVal("point and zone and config and vav and min and damper" +
-                                                   " and heating and equipRef == \""+m.get("id").toString()+"\"");
+                                                   " and heating and equipRef == \""+equip.get("id").toString()+"\"");
                 maxLimit = hayStack.readDefaultVal("point and zone and config and vav and max and damper " +
-                                                   "and heating and equipRef == \""+m.get("id").toString()+"\"");
+                                                   "and heating and equipRef == \""+equip.get("id").toString()+"\"");
             }
             
             double limitedNormalizedDamperPos = Math.min(normalizedDamperPos, maxLimit);
@@ -730,9 +847,10 @@ public class VavSystemController extends SystemController
                 hayStack.writeHisValById(damperPos.get("id").toString() , limitedNormalizedDamperPos);
             }
     
-            CcuLog.d(L.TAG_CCU_SYSTEM,"setDamperLimits : Equip "+m.get("dis")+" minLimit "
+            CcuLog.d(L.TAG_CCU_SYSTEM,"setDamperLimits : Equip "+equip.get("dis")+" minLimit "
                                       +minLimit+" maxLimit "+maxLimit+" normalizedDamperPos "+normalizedDamperPos
-                                        +" limitedNormalizedDamperPos :"+limitedNormalizedDamperPos);
+                                        +" limitedNormalizedDamperPos :"+limitedNormalizedDamperPos
+            );
     
         }
     }

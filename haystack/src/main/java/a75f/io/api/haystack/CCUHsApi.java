@@ -1722,4 +1722,64 @@ public class CCUHsApi
     }
 
 
+
+    /**
+     * Returns parameterized HashMaps.
+     * Existing readAll() methods returns raw type and generates compiler warnings.
+     */
+    public ArrayList<HashMap<Object, Object>> readAllEntities(String query)
+    {
+        ArrayList<HashMap<Object, Object>> rowList = new ArrayList<>();
+        try
+        {
+            HGrid grid = hsClient.readAll(query);
+            if (grid != null)
+            {
+                Iterator it = grid.iterator();
+                while (it != null && it.hasNext())
+                {
+                    HashMap<Object, Object> map = new HashMap<>();
+                    HRow r   = (HRow) it.next();
+                    HRow.RowIterator        ri  = (HRow.RowIterator) r.iterator();
+                    while (ri!= null && ri.hasNext())
+                    {
+                        HDict.MapEntry m = (HDict.MapEntry) ri.next();
+                        map.put(m.getKey(), m.getValue());
+                    }
+                    rowList.add(map);
+                }
+            }
+        }
+        catch (UnknownRecException e)
+        {
+            e.printStackTrace();
+        }
+        return rowList;
+    }
+
+    /**
+     * Returns parameterized HashMap.
+     * Existing read() method returns raw type and generates compiler warnings.
+     */
+    public HashMap<Object, Object> readEntity(String query)
+    {
+        HashMap<Object, Object> map = new HashMap<>();
+        try
+        {
+            HDict    dict = hsClient.read(query, true);
+            if (dict != null) {
+                Iterator iterator = dict.iterator();
+                while (iterator != null && iterator.hasNext()) {
+                    Map.Entry entry = (Map.Entry) iterator.next();
+                    map.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+        catch (UnknownRecException e)
+        {
+            e.printStackTrace();
+        }
+        return map;
+    }
+
 }

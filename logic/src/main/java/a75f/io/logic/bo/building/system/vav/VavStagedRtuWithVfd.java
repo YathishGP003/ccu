@@ -70,7 +70,9 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
         addVavSystemTuners(equipRef);
         
         addAnalogConfigPoints(equipRef);
-        addAnalogCmdPoints(equipRef);
+        if (getConfigEnabled("analog2") > 0){
+            addAnalogCmdPoints(equipRef);
+        }
         updateAhuRef(equipRef);
         //sysEquip = new SystemEquip(equipRef);
         new ControlMote(equipRef);
@@ -256,7 +258,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
         CCUHsApi.getInstance().writeDefaultVal("point and system and config and "+tags, val);
     }
     
-    private void addAnalogCmdPoints(String equipref)
+    public void addAnalogCmdPoints(String equipref)
     {
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String equipDis = siteMap.get("dis").toString() + "-SystemEquip";

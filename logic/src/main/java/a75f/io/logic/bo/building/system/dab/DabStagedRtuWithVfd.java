@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.system.dab;
 
+import android.util.Log;
+
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -66,7 +68,9 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         addConfigPoints(equipRef);
         addDabSystemTuners(equipRef);
         addAnalogConfigPoints(equipRef);
-        addAnalogCmdPoints(equipRef);
+        if (getConfigEnabled("analog2") > 0) {
+            addAnalogCmdPoints(equipRef);
+        }
         updateAhuRef(equipRef);
         
         new ControlMote(equipRef);
@@ -231,7 +235,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         CCUHsApi.getInstance().writeDefaultVal("point and system and config and "+tags, val);
     }
     
-    private void addAnalogCmdPoints(String equipref)
+    public void addAnalogCmdPoints(String equipref)
     {
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String equipDis = siteMap.get("dis").toString() + "-SystemEquip";

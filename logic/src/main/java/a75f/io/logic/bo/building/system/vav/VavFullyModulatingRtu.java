@@ -267,6 +267,9 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                 signal = 1;
             else if((VavSystemController.getInstance().getSystemState() == HEATING) && (systemFanLoopOp > 0))
                 signal = 1;
+            else if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE) && (L.ccu().oaoProfile != null) && (systemFanLoopOp > 0)){
+                signal = 1;
+            }
             if(signal != getCmdSignal("occupancy"))
                 setCmdSignal("occupancy",signal);
         } else {

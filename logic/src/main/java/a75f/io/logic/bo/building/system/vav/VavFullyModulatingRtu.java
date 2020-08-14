@@ -199,7 +199,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             }else if(VavSystemController.getInstance().getSystemState() == HEATING)
                 systemFanLoopOp = Math.max((int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier),smartPurgeVAVFanLoopOp);
             else
-                systemFanLoopOp = 0;
+                systemFanLoopOp = smartPurgeVAVFanLoopOp;
         }else if ((VavSystemController.getInstance().getSystemState() == COOLING) && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
         {
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");

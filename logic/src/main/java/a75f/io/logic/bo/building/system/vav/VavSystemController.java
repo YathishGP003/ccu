@@ -15,6 +15,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneState;
+import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.util.CCUUtils;
@@ -38,8 +39,6 @@ import static a75f.io.logic.bo.building.system.SystemMode.HEATONLY;
  */
 public class VavSystemController extends SystemController
 {
-    private static final int DEFAULT_DAMPER_ADJ_INCREMENT = 1;
-    
     private static VavSystemController instance = new VavSystemController();
     
     ControlLoop piController;
@@ -762,7 +761,7 @@ public class VavSystemController extends SystemController
         
         HashMap<String, Double> adjustedDamperPosMap = adjustDamperOpening(vavEquips,
                                                                            damperPosMap,
-                                                                           DEFAULT_DAMPER_ADJ_INCREMENT
+                                                                           SystemConstants.DEFAULT_DAMPER_ADJ_INCREMENT
         );
         
         double adjustedWeightedDamperOpening = getWeightedDamperOpening(vavEquips, adjustedDamperPosMap);
@@ -811,6 +810,8 @@ public class VavSystemController extends SystemController
             );
             double damperPosVal = normalizedDamperPosMap.get(damperPos.get("id").toString());
             double adjustedDamperPos = damperPosVal + (damperPosVal * percent) / 100.0;
+            adjustedDamperPos = Math.min(adjustedDamperPos, SystemConstants.DAMPER_POSITION_MAX);
+            
             adjustedDamperOpeningMap.put(damperPos.get("id").toString() , adjustedDamperPos);
         }
         return adjustedDamperOpeningMap;

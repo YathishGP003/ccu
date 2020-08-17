@@ -17,6 +17,7 @@ import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.dab.DabProfile;
+import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.util.CCUUtils;
@@ -37,8 +38,6 @@ import static a75f.io.logic.bo.building.system.SystemMode.HEATONLY;
 
 public class DabSystemController extends SystemController
 {
-    private static final int DEFAULT_DAMPER_ADJ_INCREMENT = 1;
-    
     private static DabSystemController instance = new DabSystemController();
     
     ControlLoop piController;
@@ -816,7 +815,8 @@ public class DabSystemController extends SystemController
         
         HashMap<String, Double> adjustedDamperPosMap = adjustDamperOpening(dabEquips,
                                                                            damperPosMap,
-                                                                           DEFAULT_DAMPER_ADJ_INCREMENT);
+                                                                           SystemConstants.DEFAULT_DAMPER_ADJ_INCREMENT
+        );
         
         double adjustedWeightedDamperOpening = getWeightedDamperOpening(dabEquips, adjustedDamperPosMap);
         
@@ -883,7 +883,8 @@ public class DabSystemController extends SystemController
              );
             double primaryDamperVal = normalizedDamperPosMap.get(damperPosPrimary.get("id").toString());
             double adjustedDamperPos = primaryDamperVal + (primaryDamperVal * percent) / 100;
-    
+            adjustedDamperPos = Math.min(adjustedDamperPos, SystemConstants.DAMPER_POSITION_MAX);
+            
             if (isZoneDead(new Equip.Builder().setHashMap(dabEquip).build())) {
                 Log.d("CCU_SYSTEM", "Skip Cumulative damper adjustment, Equip Dead " + dabEquip.toString());
                 adjustedDamperOpeningMap.put(damperPosPrimary.get("id").toString(), primaryDamperVal);
@@ -897,7 +898,8 @@ public class DabSystemController extends SystemController
             );
             double secondaryDamperVal = normalizedDamperPosMap.get(damperPosSecondary.get("id").toString());
             adjustedDamperPos = secondaryDamperVal + (secondaryDamperVal * percent) / 100;
-    
+            adjustedDamperPos = Math.min(adjustedDamperPos, SystemConstants.DAMPER_POSITION_MAX);
+            
             if (isZoneDead(new Equip.Builder().setHashMap(dabEquip).build())) {
                 Log.d("CCU_SYSTEM", "Skip Cumulative damper adjustment, Equip Dead " + dabEquip.toString());
                 adjustedDamperOpeningMap.put(damperPosSecondary.get("id").toString(), secondaryDamperVal);

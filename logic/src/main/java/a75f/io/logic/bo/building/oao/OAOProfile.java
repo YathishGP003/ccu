@@ -91,28 +91,29 @@ public class OAOProfile
         
         double outsideDamperMatTarget = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and target",oaoEquip.equipRef);
         double outsideDamperMatMin = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and min",oaoEquip.equipRef);
-    
+
+        double returnDamperMinOpen = oaoEquip.getConfigNumVal("oao and return and damper and min and open");
         double matTemp  = oaoEquip.getHisVal("mixed and air and temp and sensor");
     
         Log.d(L.TAG_CCU_OAO,"outsideAirLoopOutput "+outsideAirLoopOutput+" outsideDamperMatTarget "+outsideDamperMatTarget+" outsideDamperMatMin "+outsideDamperMatMin
                             +" matTemp "+matTemp);
-        if (outsideAirLoopOutput > 0) {
+        if (outsideAirLoopOutput > outsideAirCalculatedMinDamper) {
             if (matTemp < outsideDamperMatTarget && matTemp > outsideDamperMatMin) {
                 outsideAirFinalLoopOutput = outsideAirLoopOutput - outsideAirLoopOutput * ((outsideDamperMatTarget - matTemp) / (outsideDamperMatTarget - outsideDamperMatMin));
             }
             else {
-                outsideAirFinalLoopOutput = (matTemp <= outsideDamperMatMin) ? 0 : outsideAirLoopOutput;
+                outsideAirFinalLoopOutput = (matTemp <= outsideDamperMatMin) ? outsideAirCalculatedMinDamper : outsideAirLoopOutput;
             }
         } else {
             outsideAirFinalLoopOutput = outsideAirLoopOutput;
         }
-        outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , 0);
+        outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , outsideAirCalculatedMinDamper);
         outsideAirFinalLoopOutput = Math.min(outsideAirFinalLoopOutput , 100);
         
-        returnAirFinalOutput = 100 - outsideAirFinalLoopOutput;
+        returnAirFinalOutput = Math.max(returnDamperMinOpen ,(100 - outsideAirFinalLoopOutput));
     
         Log.d(L.TAG_CCU_OAO," economizingLoopOutput "+economizingLoopOutput+" outsideAirCalculatedMinDamper "+outsideAirCalculatedMinDamper
-                                            +" outsideAirFinalLoopOutput "+outsideAirFinalLoopOutput);
+                                            +" outsideAirFinalLoopOutput "+outsideAirFinalLoopOutput+","+returnAirFinalOutput);
     
         oaoEquip.setHisVal("outside and air and final and loop", outsideAirFinalLoopOutput);
         oaoEquip.setHisVal("outside and air and damper and cmd", outsideAirFinalLoopOutput);
@@ -252,24 +253,24 @@ public class OAOProfile
             Log.d(L.TAG_CCU_OAO," dcvCalculatedMinDamper "+dcvCalculatedMinDamper+" returnAirCO2 "+returnAirCO2+" co2Threshold "+co2Threshold);
         }
         oaoEquip.setHisVal("co2 and weighted and average", L.ccu().systemProfile.getWeightedAverageCO2());
+        double outsideDamperMinOpen = oaoEquip.getConfigNumVal("oao and not purge and not enhanced and outside and damper and min and open");
         Occupancy systemOccupancy = ScheduleProcessJob.getSystemOccupancy();
         switch (systemOccupancy) {
             case OCCUPIED:
             case FORCEDOCCUPIED:
                 if(systemMode != SystemMode.OFF) {
-                    double outsideDamperMinOpen = oaoEquip.getConfigNumVal("oao and outside and damper and min and open");
                     outsideDamperMinOpen = epidemicState != EpidemicState.OFF ? outsideAirCalculatedMinDamper : outsideDamperMinOpen;
                     outsideAirCalculatedMinDamper = Math.min(outsideDamperMinOpen + dcvCalculatedMinDamper, 100);
                 }else
-                    outsideAirCalculatedMinDamper = 0;
+                    outsideAirCalculatedMinDamper = outsideDamperMinOpen;
                 break;
             case PRECONDITIONING:
             case VACATION:
-                outsideAirCalculatedMinDamper = 0;
+                outsideAirCalculatedMinDamper = outsideDamperMinOpen;
                 break;
             case UNOCCUPIED:
                 if(epidemicState == EpidemicState.OFF)
-                    outsideAirCalculatedMinDamper = 0;
+                    outsideAirCalculatedMinDamper = outsideDamperMinOpen;
                 break;
         }
         oaoEquip.setHisVal("outside and air and calculated and min and damper", outsideAirCalculatedMinDamper);

@@ -300,6 +300,104 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/purgelayout"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/lable_epidemic_settings_text"
+                    android:textColor="@color/grey_select"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:layout_gravity="start"
+                        android:text="@string/lable_smart_prepurge"
+                        android:textAppearance="@style/label_black" />
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                    <ToggleButton
+                        android:id="@+id/tbSmartPrePurge"
+                        android:layout_width="46.12dp"
+                        android:layout_height="27.42dp"
+                        android:layout_gravity="end"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="false"
+                        android:textOff=""
+                        android:textOn="" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:layout_gravity="start"
+                        android:text="@string/lable_smart_postpurge"
+                        android:textAppearance="@style/label_black" />
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                    <ToggleButton
+                        android:id="@+id/tbSmartPostPurge"
+                        android:layout_width="46.12dp"
+                        android:layout_height="27.42dp"
+                        android:layout_gravity="end"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="false"
+                        android:textOff=""
+                        android:textOn="" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="30dp"
+                        android:layout_gravity="start"
+                        android:text="@string/lable_enhanced_ventilation"
+                        android:textAppearance="@style/label_black" />
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                    <ToggleButton
+                        android:id="@+id/tbEnhancedVentilation"
+                        android:layout_width="46.12dp"
+                        android:layout_height="27.42dp"
+                        android:layout_gravity="end"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="false"
+                        android:textOff=""
+                        android:textOn="" />
+                </LinearLayout>
+            </LinearLayout>
+
+
         </LinearLayout>
     </LinearLayout>
 

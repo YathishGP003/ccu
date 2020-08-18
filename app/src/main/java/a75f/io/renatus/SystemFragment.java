@@ -1,9 +1,10 @@
 package a75f.io.renatus;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,7 +19,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
-import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.SeekBar;
 import android.widget.Spinner;
@@ -40,8 +41,9 @@ import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.util.Prefs;
-import a75f.io.renatus.views.NumberPicker.SystemNumberPicker;
 import a75f.io.renatus.views.OaoArc;
+
+import static a75f.io.logic.jobs.ScheduleProcessJob.ACTION_OCCUPANCY_CHANGE;
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
@@ -54,11 +56,12 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	
 	Spinner targetMaxInsideHumidity;
 	Spinner targetMinInsideHumidity;
-	
-	//SwitchCompat tbCompHumidity;
-	//SwitchCompat cbDemandResponse;
 	ToggleButton tbCompHumidity;
 	ToggleButton tbDemandResponse;
+	ToggleButton tbSmartPrePurge;
+	ToggleButton tbSmartPostPurge;
+	ToggleButton tbEnhancedVentilation;
+	LinearLayout purgeLayout;
 
 
 	
@@ -96,10 +99,18 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	public void refreshScreen(String id)
 	{
-		if (!(L.ccu().systemProfile instanceof DefaultSystem))
-		{
-			//Log.i("PubNub","Updated Point:"+id);
-			fetchPoints();
+		if(getActivity() != null) {
+			getActivity().runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					if (!(L.ccu().systemProfile instanceof DefaultSystem)) {
+						checkForOao();
+						fetchPoints();
+					}
+
+				}
+			});
 		}
 	}
 	public void refreshDesiredTemp(String nodeAddress,String  coolDt, String heatDt){}
@@ -116,9 +127,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		if(getUserVisibleHint()) {
             fetchPoints();
             if (prefs.getBoolean("REGISTRATION")) {
-                //CCUHsApi.setSystemDataInterface(this);
                 UpdatePointHandler.setSystemDataInterface(this);
-                //UpdatePointHandler.setZoneDataInterface(this);
             }
         }
 	}
@@ -127,9 +136,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public void onPause() {
 		super.onPause();
 		if (prefs.getBoolean("REGISTRATION")) {
-			//CCUHsApi.setSystemDataInterface(this);
 			UpdatePointHandler.setSystemDataInterface(null);
-			//UpdatePointHandler.setZoneDataInterface(this);
 		}
 	}
 
@@ -159,6 +166,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		ccuName.setText(ccu.get("dis").toString());
 		profileTitle = view.findViewById(R.id.profileTitle);
 		oaoArc = view.findViewById(R.id.oaoArc);
+		purgeLayout = view.findViewById(R.id.purgelayout);
 		systemModePicker = view.findViewById(R.id.systemModePicker);
 		coolingAvailable = L.ccu().systemProfile.isCoolingAvailable();
 		heatingAvailable = L.ccu().systemProfile.isHeatingAvailable();
@@ -262,7 +270,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		
 		tbCompHumidity = view.findViewById(R.id.tbCompHumidity);
 		tbDemandResponse = view.findViewById(R.id.tbDemandResponse);
-
+		tbSmartPrePurge = view.findViewById(R.id.tbSmartPrePurge);
+		tbSmartPostPurge = view.findViewById(R.id.tbSmartPostPurge);
+		tbEnhancedVentilation = view.findViewById(R.id.tbEnhancedVentilation);
 		tbCompHumidity.setEnabled(false);
 		tbDemandResponse.setEnabled(false);
 
@@ -286,6 +296,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			targetMinInsideHumidity.setEnabled(false);
 			tbCompHumidity.setEnabled(false);
 			tbDemandResponse.setEnabled(false);
+			tbSmartPrePurge.setEnabled(false);
+			tbSmartPostPurge.setEnabled(false);
+			tbEnhancedVentilation.setEnabled(false);
+			purgeLayout.setVisibility(View.GONE);
 			return;
 		}
 		
@@ -346,31 +360,50 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				}
 			}
 		});
-
-		/*final Handler handler = new Handler();
-		handler.post(new Runnable() {
+		tbSmartPrePurge.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+		{
 			@Override
-			public void run() {
-				systemModePicker.setValue((int)TunerUtil.readSystemUserIntentVal("rtu and mode"));
-				String status = L.ccu().systemProfile.getStatusMessage();
-				equipmentStatus.setText(status.equals("") ? "OFF":status);
-				occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());
-				tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
-				tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
-				sbComfortValue.setProgress(5 - (int)TunerUtil.readSystemUserIntentVal("desired and ci"));
-
-				targetMaxInsideHumidity.setSelection(humidityAdapter
-						                                     .getPosition(TunerUtil.readSystemUserIntentVal("target and max and inside and humidity")), false);
-				targetMinInsideHumidity.setSelection(humidityAdapter
-						                                     .getPosition(TunerUtil.readSystemUserIntentVal("target and min and inside and humidity")), false);
+			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
+			{
+				if (compoundButton.isPressed())
+				{
+					setUserIntentBackground("prePurge and enabled", b ? 1 : 0);
+				}
 			}
-		});*/
+		});
+		tbSmartPostPurge.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+		{
+			@Override
+			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
+			{
+				if (compoundButton.isPressed())
+				{
+					setUserIntentBackground("postPurge and enabled", b ? 1 : 0);
+				}
+			}
+		});
+		tbEnhancedVentilation.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+		{
+			@Override
+			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
+			{
+				if (compoundButton.isPressed())
+				{
+					setUserIntentBackground("enhanced and ventilation and enabled", b ? 1 : 0);
+				}
+			}
+		});
+		getActivity().registerReceiver(occupancyReceiver, new IntentFilter(ACTION_OCCUPANCY_CHANGE));
 
 	}
 
 	private void checkForOao() {
 		if (L.ccu().oaoProfile != null) {
 			oaoArc.setVisibility(View.VISIBLE);
+			purgeLayout.setVisibility(View.VISIBLE);
+			tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);
+			tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("postPurge and enabled") > 0);
+			tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("enhanced and ventilation") > 0);
 			ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and oao");
 
 			if (equips != null && equips.size() > 0) {
@@ -402,6 +435,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 		} else {
 			oaoArc.setVisibility(View.GONE);
+			purgeLayout.setVisibility(View.GONE);
 		}
 	}
 
@@ -418,6 +452,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						occupancyStatus.setText("No Central equipment connected.");
 						tbCompHumidity.setChecked(false);
 						tbDemandResponse.setChecked(false);
+						tbSmartPrePurge.setChecked(false);
+						tbSmartPostPurge.setChecked(false);
+						tbEnhancedVentilation.setChecked(false);
 						sbComfortValue.setProgress(0);
 						sbComfortValue.setContentDescription("0");
 						targetMaxInsideHumidity.setSelection(humidityAdapter
@@ -431,6 +468,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());
 						tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
 						tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
+						tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("prePurge and enabled") > 0);
+						tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("postPurge and enabled") > 0);
+						tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("enhanced and ventilation and enabled") > 0);
 						sbComfortValue.setProgress(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci"));
 						sbComfortValue.setContentDescription(String.valueOf(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci")));
 
@@ -512,5 +552,30 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
+	@Override
+	public void onDestroyView() {
+		try {
+			if (getActivity() != null){
+				getActivity().unregisterReceiver(occupancyReceiver);
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		super.onDestroyView();
+	}
+
+	private final BroadcastReceiver occupancyReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (intent == null || intent.getAction() == null) {
+				return;
+			}
+			if (getActivity() != null && isAdded()) {
+				if (!(L.ccu().systemProfile instanceof DefaultSystem)) {
+					fetchPoints();
+				}
+			}
+		}
+	};
 
 }

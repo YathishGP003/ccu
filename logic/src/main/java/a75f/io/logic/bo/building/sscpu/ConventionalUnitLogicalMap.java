@@ -11,6 +11,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
@@ -526,10 +527,11 @@ public class ConventionalUnitLogicalMap {
 		setScheduleStatus("");
 		setSmartStatStatus("OFF"); //Intialize with off
         Schedule schedule = Schedule.getScheduleByEquipId(equipRef);
-        if(schedule != null && schedule.getCurrentValues() != null) {
-            defaultDesiredTemp = (schedule.getCurrentValues().getCoolingVal() + schedule.getCurrentValues().getHeatingVal()) / 2.0;
-            coolingVal = schedule.getCurrentValues().getCoolingVal();
-            heatingVal = schedule.getCurrentValues().getHeatingVal();
+        Occupied curOccupied = schedule.getCurrentValues();
+        if(schedule != null &&  curOccupied != null) {
+            defaultDesiredTemp = (curOccupied.getCoolingVal() + curOccupied.getHeatingVal()) / 2.0;
+            coolingVal = curOccupied.getCoolingVal();
+            heatingVal = curOccupied.getHeatingVal();
         }
 
         setDesiredTempCooling(coolingVal);

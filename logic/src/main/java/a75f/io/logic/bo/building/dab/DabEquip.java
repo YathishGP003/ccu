@@ -445,6 +445,7 @@ public class DabEquip
                                    .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                    .addMarker("damper").addMarker("primary").addMarker("type").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
+                                   .setEnums("ZeroToTenV,TwoToTenV,TenToTwov,TenToZeroV,mat")
                                    .setTz(tz)
                                    .build();
         String damperTypeId = CCUHsApi.getInstance().addPoint(damper1Type);
@@ -457,7 +458,6 @@ public class DabEquip
                                    .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                    .addMarker("damper").addMarker("primary").addMarker("size").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
-                                   .setEnums("ZeroToTenV,TwoToTenV,TenToTwov,TenToZeroV,mat")
                                    .setTz(tz)
                                    .build();
         String damper1SizeId = CCUHsApi.getInstance().addPoint(damper1Size);

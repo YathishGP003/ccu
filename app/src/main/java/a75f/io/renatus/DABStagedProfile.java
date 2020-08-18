@@ -159,6 +159,7 @@ public class DABStagedProfile extends Fragment implements AdapterView.OnItemSele
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 goTonext();
+                mNext.setEnabled(false);
             }
         });
 
@@ -394,12 +395,12 @@ public class DABStagedProfile extends Fragment implements AdapterView.OnItemSele
             @Override
             protected Void doInBackground( final String ... params ) {
                 systemProfile.setConfigEnabled(config, val);
-                systemProfile.updateStagesSelected();
                 return null;
             }
             
             @Override
             protected void onPostExecute( final Void result ) {
+                systemProfile.updateStagesSelected();
                 if (val == 0) {
                     updateSystemMode();
                 }
@@ -417,12 +418,12 @@ public class DABStagedProfile extends Fragment implements AdapterView.OnItemSele
             @Override
             protected Void doInBackground( final String ... params ) {
                 systemProfile.setConfigAssociation(config, val);
-                systemProfile.updateStagesSelected();
                 return null;
             }
             
             @Override
             protected void onPostExecute( final Void result ) {
+                systemProfile.updateStagesSelected();
                 updateSystemMode();
                 ProgressDialogUtils.hideProgressDialog();
             }

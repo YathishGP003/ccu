@@ -2,6 +2,8 @@ package a75f.io.logic.bo.building.vav;
 
 import android.util.Log;
 
+import java.util.HashMap;
+
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
 import a75.io.algos.GenericPIController;
@@ -12,6 +14,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -69,9 +72,13 @@ public class VavReheatProfile extends VavProfile
                 {
                     CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
                     VAVLogicalMap vavDevice = vavDeviceMap.get(node);
+                    SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
                     double damperMin = vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "min");
                     double damperMax = vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "max");
                     double damperPos = (damperMax+damperMin)/2;
+                    if(systemMode == SystemMode.OFF) {
+                        damperPos = vavDevice.getDamperPos() > 0 ? vavDevice.getDamperPos() : damperMin;
+                    }
                     vavDevice.setDamperPos(damperPos);
                     vavDevice.setNormalizedDamperPos(damperPos);
                     vavDevice.setReheatPos(0);
@@ -114,13 +121,12 @@ public class VavReheatProfile extends VavProfile
             //locked out.
             SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
             SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
-            if (roomTemp > setTempCooling)
+            if ((roomTemp > setTempCooling) && (systemMode != SystemMode.OFF) )
             {
                 //Zone is in Cooling
                 if (state != COOLING)
                 {
                     state = COOLING;
-                    //valveController.reset();
                     valve.currentPosition = 0;
                     coolingLoop.setEnabled();
                     heatingLoop.setDisabled();
@@ -131,7 +137,7 @@ public class VavReheatProfile extends VavProfile
                 }
                 
             }
-            else if (roomTemp < setTempHeating)
+            else if ((roomTemp < setTempHeating) && (systemMode != SystemMode.OFF))
             {
                 //Zone is in heating
                 if (state != HEATING)
@@ -188,7 +194,6 @@ public class VavReheatProfile extends VavProfile
                 //Zone is in deadband
                 if (state != DEADBAND) {
                     state = DEADBAND;
-                    //valveController.reset();
                     valve.currentPosition = 0;
                     heatingLoop.setDisabled();
                     coolingLoop.setDisabled();
@@ -205,11 +210,17 @@ public class VavReheatProfile extends VavProfile
             String zoneId = HSUtil.getZoneIdFromEquipId(vavEquip.getId());
             Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
             boolean occupied = (occ == null ? false : occ.isOccupied()) || (ScheduleProcessJob.getSystemOccupancy() == Occupancy.PRECONDITIONING);
-            Log.d(L.TAG_CCU_ZONE, "Zone occupaancy : "+occupied+" occ "+occ);
+            double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");
+            EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
+            if(epidemicState != EpidemicState.OFF && L.ccu().oaoProfile != null){
+                double smartPurgeDABDamperMinOpenMultiplier = TunerUtil.readTunerValByQuery("purge and system and vav and damper and pos and min and multiplier", L.ccu().oaoProfile.getEquipRef());
+                damper.iaqCompensatedMinPos = (int)(damper.minPosition * smartPurgeDABDamperMinOpenMultiplier);
+            }else
+                damper.iaqCompensatedMinPos = damper.minPosition;
             //CO2 loop output from 0-50% modulates damper min position.
             if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0)
             {
-                damper.iaqCompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * Math.min(50, co2Loop.getLoopOutput()) / 50;
+                damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * Math.min(50, co2Loop.getLoopOutput()) / 50;
                 CcuLog.d(L.TAG_CCU_ZONE,"CO2LoopOp :"+co2Loop.getLoopOutput()+", adjusted minposition "+damper.iaqCompensatedMinPos);
             }
     
@@ -219,7 +230,8 @@ public class VavReheatProfile extends VavProfile
                 damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * Math.min(50, vocLoop.getLoopOutput()) / 50;
                 CcuLog.d(L.TAG_CCU_ZONE,"VOCLoopOp :"+vocLoop.getLoopOutput()+", adjusted minposition "+damper.iaqCompensatedMinPos);
             }
-            
+            CcuLog.d(L.TAG_CCU_ZONE,"VAVLoopOp :"+loopOp+", adjusted minposition "+damper.iaqCompensatedMinPos+","+damper.currentPosition);
+
             if (loopOp == 0)
             {
                 damper.currentPosition = damper.iaqCompensatedMinPos;
@@ -228,18 +240,6 @@ public class VavReheatProfile extends VavProfile
             {
                 damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
             }
-            //In any Mode except Unoccupied, the hot water valve shall be
-            //modulated to maintain a supply air temperature no lower than 50°F.
-            /*if (state != HEATING && supplyAirTemp < REHEAT_THRESHOLD_TEMP*//* && mode != UNOCCUPIED*//*)
-            {
-                satCompensationEnabled = true;
-                valveController.updateControlVariable(REHEAT_THRESHOLD_TEMP, supplyAirTemp);
-                valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
-                Log.d(TAG, "SAT below threshold "+supplyAirTemp+" => valve :  " + valve.currentPosition);
-            } else if (satCompensationEnabled) {
-                satCompensationEnabled = false;
-                valveController.reset();
-            }*/
     
             //REHEAT control during heating does not follow RP1455.
             if (conditioning == SystemController.State.HEATING && state == HEATING)

@@ -308,6 +308,7 @@ public class Security extends Fragment {
         mNext.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
+                mNext.setEnabled(false);
                 goTonext();
             }
         });

@@ -16,10 +16,12 @@ import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
+import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.system.SystemController;
+import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
@@ -106,11 +108,15 @@ public class DabProfile extends ZoneProfile
             if (!curStatus.equals("Zone Temp Dead"))
             {
                 CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + dabEquip.nodeAddr + "\"", "Zone Temp Dead");
-    
+
+                SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
                 double damperMin = dabEquip.getDamperLimit(state == HEATING ? "heating":"cooling", "min");
                 double damperMax = dabEquip.getDamperLimit(state == HEATING ? "heating":"cooling", "max");
-                
-                double damperPos = (damperMax+damperMin)/2;
+
+                double damperPos =(damperMax+damperMin)/2;
+                if(systemMode == SystemMode.OFF) {
+                    damperPos = dabEquip.getDamperPos() > 0 ? dabEquip.getDamperPos() : damperMin;
+                }
                 dabEquip.setDamperPos(damperPos, "primary");
                 dabEquip.setDamperPos(damperPos, "secondary");
                 dabEquip.setNormalizedDamperPos(damperPos, "primary");
@@ -135,8 +141,8 @@ public class DabProfile extends ZoneProfile
         Log.d(L.TAG_CCU_ZONE, "DAB : roomTemp" + roomTemp + " setTempCooling:  " + setTempCooling+" setTempHeating: "+setTempHeating);
     
         SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
-    
-        if (roomTemp > setTempCooling && conditioning == SystemController.State.COOLING)
+        SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
+        if ((roomTemp > setTempCooling) && (conditioning == SystemController.State.COOLING) && (systemMode != SystemMode.OFF))
         {
             //Zone is in Cooling
             if (state != COOLING)
@@ -146,7 +152,7 @@ public class DabProfile extends ZoneProfile
             }
             damperOpController.updateControlVariable(roomTemp, setTempCooling);
         }
-        else if (roomTemp < setTempHeating && conditioning == SystemController.State.HEATING)
+        else if ((roomTemp < setTempHeating) && (conditioning == SystemController.State.HEATING) && (systemMode != SystemMode.OFF))
         {
             //Zone is in heating
             if (state != HEATING)
@@ -170,11 +176,18 @@ public class DabProfile extends ZoneProfile
         String zoneId = HSUtil.getZoneIdFromEquipId(dabEquip.getId());
         Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
         boolean occupied = (occ == null ? false : occ.isOccupied());
-        
+
+        double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");
+        EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
+        if((epidemicState != EpidemicState.OFF) && (L.ccu().oaoProfile != null)){
+            double smartPurgeDABDamperMinOpenMultiplier = TunerUtil.readTunerValByQuery("purge and system and dab and damper and pos and multiplier and min ", L.ccu().oaoProfile.getEquipRef());
+            damper.iaqCompensatedMinPos =(int) (damper.minPosition * smartPurgeDABDamperMinOpenMultiplier);
+        }else
+            damper.iaqCompensatedMinPos = damper.minPosition;
         //CO2 loop output from 0-50% modulates damper min position.
         if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0)
         {
-            damper.iaqCompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * Math.min(50, co2Loop.getLoopOutput()) / 50;
+            damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * Math.min(50, co2Loop.getLoopOutput()) / 50;
             CcuLog.d(L.TAG_CCU_ZONE, "CO2LoopOp :" + co2Loop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
         }
     

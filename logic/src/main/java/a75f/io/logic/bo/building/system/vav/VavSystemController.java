@@ -215,7 +215,7 @@ public class VavSystemController extends SystemController
         }
         weightedAverageHeatingOnlyLoadMA = weightedAverageHeatingOnlyLoadMASum/weightedAverageHeatingOnlyLoadMAQueue.size();
     
-        if ((systemState !=  HEATING) && buildingLimitMaxBreached("vav")) {
+        if ((systemState !=  HEATING) && buildingLimitMaxBreached("vav") && (systemMode != SystemMode.OFF)) {
             CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency COOLING Active");
             emergencyMode = true;
             if ((systemMode == COOLONLY || systemMode == AUTO) && weightedAverageCoolingOnlyLoadMA > 0)
@@ -232,7 +232,7 @@ public class VavSystemController extends SystemController
                 heatingSignal = 0;
                 piController.reset();
             }
-        } else if ( (systemState != COOLING) && buildingLimitMinBreached("vav")) {
+        } else if ( (systemState != COOLING) && buildingLimitMinBreached("vav") && (systemMode != SystemMode.OFF)) {
             CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency HEATING Active");
             emergencyMode = true;
             if ((systemMode == HEATONLY || systemMode == AUTO) && (weightedAverageCoolingOnlyLoadMA == 0 && weightedAverageHeatingOnlyLoadMA > 0))
@@ -282,10 +282,10 @@ public class VavSystemController extends SystemController
         }
         
         piController.dump();
-        if (systemState == COOLING) {
+        if ((systemState == COOLING) && (systemMode == COOLONLY || systemMode == AUTO)){
             heatingSignal = 0;
             coolingSignal = (int)piController.getLoopOutput(weightedAverageCoolingOnlyLoadPostML, 0);
-        } else if (systemState == HEATING){
+        } else if ((systemState == HEATING) && (systemMode == HEATONLY || systemMode == AUTO)){
             coolingSignal = 0;
             heatingSignal = (int)piController.getLoopOutput(weightedAverageHeatingOnlyLoadPostML, 0);
         } else {
@@ -300,7 +300,7 @@ public class VavSystemController extends SystemController
         profile.setSystemPoint("moving and average and cooling and load", CCUUtils.roundToTwoDecimal(weightedAverageCoolingOnlyLoadMA));
         profile.setSystemPoint("moving and average and heating and load",CCUUtils.roundToTwoDecimal(weightedAverageHeatingOnlyLoadMA));
         
-        if (systemState == HEATING)
+        if ((systemState == HEATING) && (systemMode != SystemMode.OFF))
         {
             normalizeAirflow();
             adjustDamperForCumulativeTarget(profile.getSystemEquipRef());

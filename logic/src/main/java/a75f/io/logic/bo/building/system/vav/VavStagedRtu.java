@@ -9,6 +9,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
@@ -108,8 +109,8 @@ public class VavStagedRtu extends VavSystemProfile
                 hayStack.deleteEntityTree(equip.get("id").toString());
             } else {
                 initTRSystem();
+                addNewSystemUserIntentPoints(equip.get("id").toString());
                 updateStagesSelected();
-                //sysEquip = new SystemEquip(equip.get("id").toString());
                 return;
             }
         }
@@ -165,8 +166,9 @@ public class VavStagedRtu extends VavSystemProfile
     
     protected synchronized void updateSystemPoints() {
         updateOutsideWeatherParams();
+        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
         stageStatus = new int[17];
-        if (VavSystemController.getInstance().getSystemState() == COOLING)
+        if ((VavSystemController.getInstance().getSystemState() == COOLING) && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
         {
             double satSpMax = VavTRTuners.getSatTRTunerVal("spmax");
             double satSpMin = VavTRTuners.getSatTRTunerVal("spmin");
@@ -185,7 +187,27 @@ public class VavStagedRtu extends VavSystemProfile
         }
         
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
-        if (VavSystemController.getInstance().getSystemState() == COOLING)
+        double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+getSystemEquipRef()+"\"");
+        EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
+        if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE ) && (L.ccu().oaoProfile != null)){
+            double smartPurgeDabFanLoopOp = TunerUtil.readTunerValByQuery("system and purge and vav and fan and loop and output", L.ccu().oaoProfile.getEquipRef());
+            double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
+            double spSpMin = VavTRTuners.getStaticPressureTRTunerVal("spmin");
+
+            CcuLog.d(L.TAG_CCU_SYSTEM,"spSpMax :"+spSpMax+" spSpMin: "+spSpMin+" SP: "+getStaticPressure()+","+smartPurgeDabFanLoopOp);
+            double staticPressureLoopOutput = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax -spSpMin)) ;
+            if((VavSystemController.getInstance().getSystemState() == COOLING) && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO)) {
+                if(staticPressureLoopOutput < ((spSpMax - spSpMin) * smartPurgeDabFanLoopOp))
+                    systemFanLoopOp = ((spSpMax - spSpMin) * smartPurgeDabFanLoopOp);
+                else
+                    systemFanLoopOp = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax -spSpMin)) ;
+            }else if(VavSystemController.getInstance().getSystemState() == HEATING) {
+                systemFanLoopOp = Math.max((int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier), smartPurgeDabFanLoopOp);
+            }else{
+                systemFanLoopOp = smartPurgeDabFanLoopOp;
+            }
+
+        }else if (VavSystemController.getInstance().getSystemState() == COOLING && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
         {
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
             double spSpMin = VavTRTuners.getStaticPressureTRTunerVal("spmin");
@@ -213,7 +235,6 @@ public class VavStagedRtu extends VavSystemProfile
         double relayDeactHysteresis = TunerUtil.readTunerValByQuery("relay and deactivation and hysteresis", getSystemEquipRef());
         CcuLog.d(L.TAG_CCU_SYSTEM, "systemCoolingLoopOp: "+systemCoolingLoopOp + " systemHeatingLoopOp: " + systemHeatingLoopOp+" systemFanLoopOp: "+systemFanLoopOp);
         CcuLog.d(L.TAG_CCU_SYSTEM, "coolingStages: "+coolingStages + " heatingStages: "+heatingStages+" fanStages: "+fanStages);
-        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
         for (int i = 1; i <=7 ;i++)
         {
             double relayState = 0;
@@ -270,8 +291,13 @@ public class VavStagedRtu extends VavSystemProfile
                         break;
                     case FAN_1:
                         if ((systemMode != SystemMode.OFF && (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
-                                && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)) || (systemFanLoopOp > 0)) {
+                                && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)) || ((L.ccu().systemProfile.getProfileType() != ProfileType.SYSTEM_VAV_STAGED_VFD_RTU)  && (systemFanLoopOp > 0))) {
                                 relayState = 1;
+                        }else if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU) {
+                            if(epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE)
+                                relayState = systemFanLoopOp > 0 ? 1 : 0;
+                            else
+                                relayState =  (systemCoolingLoopOp > 0 || systemHeatingLoopOp > 0) ? 1 :0;
                         } else {
                             relayState = 0;
                         }
@@ -417,7 +443,12 @@ public class VavStagedRtu extends VavSystemProfile
         if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
             status.insert(0, "Free Cooling Used | ");
         }
-    
+        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU) {
+            if (getConfigEnabled("analog2") > 0)
+            {
+                status.append(getCmdSignal("fan and modulating") > 0 ? " Analog Fan ON " : "");
+            }
+        }
         return status.toString().equals("")? "System OFF" : status.toString();
     }
     

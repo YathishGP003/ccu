@@ -196,7 +196,7 @@ public class DabSystemController extends SystemController
         }
         weightedAverageLoadMA = weightedAverageLoadPostMLQSum/weightedAverageLoadPostMLQ.size();
         
-        if ((systemState != HEATING) && buildingLimitMaxBreached("dab")) {
+        if ((systemState != HEATING) && buildingLimitMaxBreached("dab") && (systemMode != SystemMode.OFF)) {
             CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency COOLING Active");
             emergencyMode = true;
             if (systemMode == COOLONLY || systemMode == AUTO)
@@ -214,7 +214,7 @@ public class DabSystemController extends SystemController
                 piController.reset();
             }
             
-        } else if ((systemState != COOLING) && buildingLimitMinBreached("dab")) {
+        } else if ((systemState != COOLING) && buildingLimitMinBreached("dab") && (systemMode != SystemMode.OFF)) {
             CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency HEATING Active");
             emergencyMode = true;
             if (systemMode == HEATONLY || systemMode == AUTO)
@@ -273,10 +273,10 @@ public class DabSystemController extends SystemController
         weightedAverageHeatingLoadPostML = weightedAverageLoadPostML < 0 ? Math.abs(weightedAverageLoadPostML) : 0;
     
         piController.dump();
-        if (systemState == COOLING) {
+        if ((systemState == COOLING) && (systemMode == COOLONLY || systemMode == AUTO)){
             heatingSignal = 0;
             coolingSignal = (int)piController.getLoopOutput(weightedAverageCoolingLoadPostML, 0);
-        } else if (systemState == HEATING){
+        } else if ((systemState == HEATING) && (systemMode == HEATONLY || systemMode == AUTO)){
             coolingSignal = 0;
             heatingSignal = (int)piController.getLoopOutput(weightedAverageHeatingLoadPostML, 0);
         } else {
@@ -291,7 +291,7 @@ public class DabSystemController extends SystemController
         profile.setSystemPoint("weighted and average and cooling and load",CCUUtils.roundToTwoDecimal(weightedAverageCoolingLoadPostML));
         profile.setSystemPoint("weighted and average and heating and load",CCUUtils.roundToTwoDecimal(weightedAverageHeatingLoadPostML));
         
-        if (systemState != OFF)
+        if ((systemState != OFF) && (coolingSignal > 0 || heatingSignal > 0) && (systemMode != SystemMode.OFF))
         {
             normalizeAirflow();
             adjustDamperForCumulativeTarget(profile.getSystemEquipRef());

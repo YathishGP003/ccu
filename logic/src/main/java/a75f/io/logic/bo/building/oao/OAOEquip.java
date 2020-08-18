@@ -1,11 +1,13 @@
 package a75f.io.logic.bo.building.oao;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -31,6 +33,8 @@ public class OAOEquip
         if (equipMap != null && equipMap.size() > 0)
         {
             equipRef = equipMap.get("id").toString();
+            OAOTuners.updateOaoSystemTuners(equipMap.get("siteRef").toString(), equipRef, equipMap.get("dis").toString(),equipMap.get("tz").toString(),getSystemProfileType());
+            updateNewConfigParams(equipMap.get("siteRef").toString(), equipRef, equipMap.get("dis").toString(),equipMap.get("tz").toString());
         } else {
             throw new IllegalStateException("Equip should be created before init");
         }
@@ -53,7 +57,7 @@ public class OAOEquip
         Equip.Builder b = new Equip.Builder().setSiteRef(siteRef).setDisplayName(equipDis).setRoomRef(roomRef).setFloorRef(floorRef).setProfile(profileType.name()).addMarker("equip").addMarker("oao").setAhuRef(ahuRef).setTz(tz).setGroup(String.valueOf(nodeAddr));
         equipRef = hayStack.addEquip(b.build());
         
-        OAOTuners.addEquipTuners(siteDis + "-OAO-" + nodeAddr, siteRef, equipRef, tz);
+        OAOTuners.updateOaoSystemTuners( siteRef, equipRef,siteDis + "-OAO-" + nodeAddr, tz,getSystemProfileType());
         
         createConfigPoints(config, equipRef);
     
@@ -319,7 +323,7 @@ public class OAOEquip
         device.analog1Out.setType(config.outsideDamperAtMinDrive+"-"+config.outsideDamperAtMaxDrive);
         device.analog2Out.setEnabled(config.isOpConfigured(Port.ANALOG_OUT_TWO));
         device.analog2Out.setPointRef(returnAirDamperId);
-        device.analog1Out.setType(config.returnDamperAtMinDrive+"-"+config.returnDamperAtMaxDrive);
+        device.analog2Out.setType(config.returnDamperAtMinDrive+"-"+config.returnDamperAtMaxDrive);
         
         device.relay1.setEnabled(config.isOpConfigured(Port.RELAY_ONE));
         device.relay1.setPointRef(exhaustFanStage1Id);
@@ -471,8 +475,63 @@ public class OAOEquip
         String usePerRoomCO2SensingId = CCUHsApi.getInstance().addPoint(usePerRoomCO2Sensing );
         hayStack.writeDefaultValById(usePerRoomCO2SensingId, config.usePerRoomCO2Sensing ? 1.0 :0);
         hayStack.writeHisValById(usePerRoomCO2SensingId, config.usePerRoomCO2Sensing ? 1.0 :0);
+
+
+        Point smartPurgeMinDamperOpen  = new Point.Builder().setDisplayName(equipDis + "-systemPurgeOutsideDamperMinPos")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef).setHisInterpolate("cov")
+                .addMarker("config").addMarker("oao").addMarker("writable").addMarker("purge").addMarker("damper").addMarker("sp").addMarker("his")
+                .addMarker("pos").addMarker("min").addMarker("open").addMarker("outside").addMarker("userIntent")
+                .setGroup(String.valueOf(nodeAddr))
+                .setUnit("%")
+                .setTz(tz).build();
+        String smartPurgeMinDamperOpenId = CCUHsApi.getInstance().addPoint(smartPurgeMinDamperOpen );
+        hayStack.writeDefaultValById(smartPurgeMinDamperOpenId, config.smartPurgeMinDamperOpen);
+        hayStack.writeHisValById(smartPurgeMinDamperOpenId, config.smartPurgeMinDamperOpen);
+
+
+        Point enhancedVentilationMinDamperOpen  = new Point.Builder().setDisplayName(equipDis + "-systemEnhancedVentilationOutsideDamperMinPos")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef).setHisInterpolate("cov")
+                .addMarker("config").addMarker("oao").addMarker("writable").addMarker("enhanced").addMarker("ventilation").addMarker("damper").addMarker("sp").addMarker("his")
+                .addMarker("pos").addMarker("min").addMarker("open").addMarker("outside").addMarker("userIntent")
+                .setGroup(String.valueOf(nodeAddr))
+                .setUnit("%")
+                .setTz(tz).build();
+        String enhancedVentilationMinDamperOpenId = CCUHsApi.getInstance().addPoint(enhancedVentilationMinDamperOpen );
+        hayStack.writeDefaultValById(enhancedVentilationMinDamperOpenId, config.enhancedVentilationMinDamperOpen);
+        hayStack.writeHisValById(enhancedVentilationMinDamperOpenId, config.enhancedVentilationMinDamperOpen);
     }
-    
+    public void updateNewConfigParams(String siteRef,String equipRef, String equipDis, String tz){
+        ArrayList<HashMap> purgePoints = CCUHsApi.getInstance().readAll("point and userIntent and oao and purge and outside and damper and pos and min and open and equipRef == \"" + equipRef + "\"");
+        if (purgePoints == null || purgePoints.size() == 0) {
+            Point smartPurgeMinDamperOpen = new Point.Builder().setDisplayName(equipDis + "-systemPurgeOutsideDamperMinPos")
+                    .setEquipRef(equipRef)
+                    .setSiteRef(siteRef).setHisInterpolate("cov")
+                    .addMarker("config").addMarker("oao").addMarker("writable").addMarker("purge").addMarker("damper").addMarker("sp").addMarker("his")
+                    .addMarker("pos").addMarker("min").addMarker("open").addMarker("outside").addMarker("userIntent")
+                    .setGroup(String.valueOf(nodeAddr))
+                    .setUnit("%")
+                    .setTz(tz).build();
+            String smartPurgeMinDamperOpenId = CCUHsApi.getInstance().addPoint(smartPurgeMinDamperOpen);
+            hayStack.writeDefaultValById(smartPurgeMinDamperOpenId, 100.0);
+            hayStack.writeHisValById(smartPurgeMinDamperOpenId, 100.0);
+        }
+        ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and userIntent and oao and enhanced and ventilation and outside and damper and pos and min and open and equipRef == \"" + equipRef + "\"");
+        if (points == null || points.size() == 0) {
+            Point enhancedVentilationMinDamperOpen = new Point.Builder().setDisplayName(equipDis + "-systemEnhancedVentilationOutsideDamperMinPos")
+                    .setEquipRef(equipRef)
+                    .setSiteRef(siteRef).setHisInterpolate("cov")
+                    .addMarker("config").addMarker("oao").addMarker("writable").addMarker("enhanced").addMarker("ventilation").addMarker("damper").addMarker("sp").addMarker("his")
+                    .addMarker("pos").addMarker("min").addMarker("open").addMarker("outside").addMarker("userIntent")
+                    .setGroup(String.valueOf(nodeAddr))
+                    .setUnit("%")
+                    .setTz(tz).build();
+            String enhancedVentilationMinDamperOpenId = CCUHsApi.getInstance().addPoint(enhancedVentilationMinDamperOpen);
+            hayStack.writeDefaultValById(enhancedVentilationMinDamperOpenId, 50.0);
+            hayStack.writeHisValById(enhancedVentilationMinDamperOpenId, 50.0);
+        }
+    }
     public double getHisVal(String tags) {
         return hayStack.readHisValByQuery("point and oao and "+tags+" and group == \""+nodeAddr+'\"');
     }
@@ -488,7 +547,7 @@ public class OAOEquip
         config.outsideDamperAtMaxDrive = getConfigNumVal("outside and damper and max and drive");
         config.returnDamperAtMinDrive =  getConfigNumVal("return and damper and min and drive");
         config.returnDamperAtMaxDrive =  getConfigNumVal("return and damper and max and drive");
-        config.outsideDamperMinOpen = getConfigNumVal("outside and damper and min and open");
+        config.outsideDamperMinOpen = getConfigNumVal("not purge and not enhanced and outside and damper and min and open");
         config.returnDamperMinOpen = getConfigNumVal("return and damper and min and open");
         
         config.exhaustFanStage1Threshold = getConfigNumVal("exhaust and fan and stage1 and threshold") ;
@@ -497,64 +556,15 @@ public class OAOEquip
         config.co2Threshold = getConfigNumVal("co2 and threshold");
         config.exhaustFanHysteresis = getConfigNumVal("exhaust and fan and hysteresis");
         config.usePerRoomCO2Sensing = getConfigNumVal("config and oao and co2 and sensing") > 0? true : false;
+        config.smartPurgeMinDamperOpen = getConfigNumVal("userIntent and purge and outside and damper and pos and min and open");
+        config.enhancedVentilationMinDamperOpen = getConfigNumVal("userIntent and enhanced and ventilation and outside and damper and pos and min and open");
         
         config.setNodeType(NodeType.SMART_NODE);
-        
-        
-        /*RawPoint a1 = SmartNode.getPhysicalPoint(nodeAddr, Port.ANALOG_OUT_ONE.toString());
-        if (a1 != null && a1.getEnabled()) {
-            Output analogOne = new Output();
-            analogOne.setAddress((short)nodeAddr);
-            analogOne.setPort(Port.ANALOG_OUT_ONE);
-            Log.d("CCU_OAO", " a1.getType "+a1.getType());
-            analogOne.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(a1.getType());
-            config.getOutputs().add(analogOne);
-        }
-        
-        RawPoint a2 = SmartNode.getPhysicalPoint(nodeAddr, Port.ANALOG_OUT_TWO.toString());
-        if (a2 != null && a2.getEnabled()) {
-            Output analogTwo = new Output();
-            analogTwo.setAddress((short)nodeAddr);
-            analogTwo.setPort(Port.ANALOG_OUT_TWO);
-            analogTwo.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(a2.getType());
-            config.getOutputs().add(analogTwo);
-        }
-    
-        RawPoint r1 = SmartNode.getPhysicalPoint(nodeAddr, Port.RELAY_ONE.toString());
-        if (r1 != null && r1.getEnabled()) {
-            Output relay1 = new Output();
-            relay1.setAddress((short)nodeAddr);
-            relay1.setPort(Port.RELAY_ONE);
-            relay1.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(r1.getType());
-            config.getOutputs().add(relay1);
-        }
-    
-        RawPoint r2 = SmartNode.getPhysicalPoint(nodeAddr, Port.RELAY_TWO.toString());
-        if (r2 != null && r2.getEnabled()) {
-            Output relay2 = new Output();
-            relay2.setAddress((short)nodeAddr);
-            relay2.setPort(Port.RELAY_TWO);
-            relay2.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(r2.getType());
-            config.getOutputs().add(relay2);
-        }*/
         
         return config;
     }
     
     public void update(OAOProfileConfiguration config) {
-        /*for (Output op : config.getOutputs()) {
-            switch (op.getPort()) {
-                case ANALOG_OUT_ONE:
-                case ANALOG_OUT_TWO:
-                    CcuLog.d(L.TAG_CCU_ZONE, " Update analog" + op.getPort() + " type " + op.getAnalogActuatorType());
-                    SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
-                    break;
-                case RELAY_ONE:
-                case RELAY_TWO:
-                    SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getRelayActuatorType());
-                    break;
-            }
-        }*/
     
         SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_OUT_ONE.name(), config.outsideDamperAtMinDrive+"-"+config.outsideDamperAtMaxDrive);
         SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_OUT_TWO.name(), config.returnDamperAtMinDrive+"-"+config.returnDamperAtMaxDrive);
@@ -566,16 +576,20 @@ public class OAOEquip
         setConfigNumVal("outside and damper and max and drive", config.outsideDamperAtMaxDrive);
         setConfigNumVal("return and damper and min and drive", config.returnDamperAtMinDrive);
         setConfigNumVal("return and damper and max and drive", config.returnDamperAtMaxDrive);
-        setConfigNumVal("outside and damper and min and open", config.outsideDamperMinOpen);
+        setConfigNumVal("not purge and not enhanced and outside and damper and min and open", config.outsideDamperMinOpen);
         setConfigNumVal("return and damper and min and open", config.returnDamperMinOpen);
         setConfigNumVal("exhaust and fan and stage1 and threshold", config.exhaustFanStage1Threshold);
         setConfigNumVal("exhaust and fan and stage2 and threshold", config.exhaustFanStage2Threshold);
         setConfigNumVal("current and transformer and type", config.currentTranformerType);
         setConfigNumVal("co2 and threshold", config.co2Threshold);
         setConfigNumVal("exhaust and fan and hysteresis", config.exhaustFanHysteresis);
-        setConfigNumVal("config and oao and co2 and sensing", config.usePerRoomCO2Sensing? 1:0);
+        setConfigNumVal("co2 and sensing", config.usePerRoomCO2Sensing? 1:0);
+        setConfigNumVal("userIntent and purge and outside and damper and pos and min and open",config.smartPurgeMinDamperOpen);
+        setConfigNumVal("userIntent and enhanced and ventilation and outside and damper and pos and min and open",config.enhancedVentilationMinDamperOpen);
         CCUHsApi.getInstance().writeHisValByQuery("point and config and oao and co2 and sensing", config.usePerRoomCO2Sensing? 1.0:0);
         CCUHsApi.getInstance().writeHisValByQuery("point and config and oao and co2 and threshold", config.co2Threshold);
+        CCUHsApi.getInstance().writeHisValByQuery("point and oao and userIntent and purge and outside and damper and pos and min and open",config.smartPurgeMinDamperOpen);
+        CCUHsApi.getInstance().writeHisValByQuery("point and oao and userIntent and enhanced and ventilation and outside and damper and pos and min and open",config.enhancedVentilationMinDamperOpen);
         
     }
     
@@ -585,5 +599,22 @@ public class OAOEquip
     
     public double getConfigNumVal(String tags) {
         return hayStack.readDefaultVal("point and config and oao and "+tags+" and group == \""+nodeAddr+"\"");
+    }
+    private String getSystemProfileType(){
+        ProfileType profileType =  L.ccu().systemProfile.getProfileType();
+        switch (profileType){
+            case SYSTEM_DAB_ANALOG_RTU:
+            case SYSTEM_DAB_HYBRID_RTU:
+            case SYSTEM_DAB_STAGED_RTU:
+            case SYSTEM_DAB_STAGED_VFD_RTU:
+                return "dab";
+            case SYSTEM_VAV_ANALOG_RTU:
+            case SYSTEM_VAV_HYBRID_RTU:
+            case SYSTEM_VAV_IE_RTU:
+            case SYSTEM_VAV_STAGED_RTU:
+            case SYSTEM_VAV_STAGED_VFD_RTU:
+                return "vav";
+        }
+        return "default";
     }
 }

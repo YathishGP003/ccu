@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.system;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
@@ -14,6 +15,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -151,16 +153,22 @@ public abstract class SystemProfile
         }
         return equipRef;
     }
-    
+
     public void updateAhuRef(String systemEquipId) {
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
-        
-        for (HashMap m : equips)
-        {
-            Equip q = new Equip.Builder().setHashMap(m)/*.setAhuRef(systemEquipId)*/.build();
-            if(q.getMarkers().contains("dab") || q.getMarkers().contains("vav")|| q.getMarkers().contains("oao"))
+        if (L.ccu().oaoProfile != null) {
+            equips.add(CCUHsApi.getInstance().read("equip and oao"));
+        }
+
+        for (HashMap m : equips) {
+            Equip q = new Equip.Builder().setHashMap(m).build();
+            if (q.getMarkers().contains("dab") || q.getMarkers().contains("vav") || q.getMarkers().contains("ti") || q.getMarkers().contains("oao") || q.getMarkers().contains("sse")) {
                 q.setAhuRef(systemEquipId);
-            else q.setGatewayRef(systemEquipId);
+            } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid")) {
+                q.setGatewayRef(systemEquipId);
+            } else {
+                Toast.makeText(Globals.getInstance().getApplicationContext(), "Invalid profile, AhuRef is not updated for " + q.getDisplayName(), Toast.LENGTH_SHORT);
+            }
             CCUHsApi.getInstance().updateEquip(q, q.getId());
         }
         CCUHsApi.getInstance().updateDiagGatewayRef(systemEquipId);
@@ -690,16 +698,22 @@ public abstract class SystemProfile
         }
         hayStack.writeHisValById(humidityCompensationOffsetId, HSUtil.getPriorityVal(humidityCompensationOffsetId));
     }
-    
-    public void updateGatewayRef(String systemEquipId)
-    {
+
+    public void updateGatewayRef(String systemEquipId) {
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
-        for (HashMap m : equips)
-        {
-            Equip q = new Equip.Builder().setHashMap(m)/*.setGatewayRef(systemEquipId)*/.build();
-            if (q.getMarkers().contains("dab") || q.getMarkers().contains("vav"))
+        if (L.ccu().oaoProfile != null) {
+            equips.add(CCUHsApi.getInstance().read("equip and oao"));
+        }
+
+        for (HashMap m : equips) {
+            Equip q = new Equip.Builder().setHashMap(m).build();
+            if (q.getMarkers().contains("dab") || q.getMarkers().contains("vav") || q.getMarkers().contains("ti") || q.getMarkers().contains("oao") || q.getMarkers().contains("sse")) {
                 q.setAhuRef(systemEquipId);
-            else q.setGatewayRef(systemEquipId);
+            } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid")) {
+                q.setGatewayRef(systemEquipId);
+            } else {
+                Toast.makeText(Globals.getInstance().getApplicationContext(), "Invalid profile, AhuRef is not updated for " + q.getDisplayName(), Toast.LENGTH_SHORT);
+            }
             CCUHsApi.getInstance().updateEquip(q, q.getId());
         }
         CCUHsApi.getInstance().updateDiagGatewayRef(systemEquipId);
@@ -762,6 +776,9 @@ public abstract class SystemProfile
         Point systemOccupancy = new Point.Builder().setDisplayName(equipDis + "-" + "occupancy").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp").setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing").setTz(tz).build();
         String sysOccupancyId = CCUHsApi.getInstance().addPoint(systemOccupancy);
         CCUHsApi.getInstance().writeHisValById(sysOccupancyId, 0.0);
+        Point epidemicModeSystemState = new Point.Builder().setDisplayName(equipDis + "-" + "epidemicModeSystemState").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("epidemic").addMarker("mode").addMarker("state").addMarker("his").addMarker("sp").setEnums("off,prepurge,postpurge,enhancedventilation").setTz(tz).build();
+        String epidemicModeSystemStateId = CCUHsApi.getInstance().addPoint(epidemicModeSystemState);
+        CCUHsApi.getInstance().writeHisValById(epidemicModeSystemStateId, 0.0);
         Point systemOperatingMode = new Point.Builder().setDisplayName(equipDis + "-" + "operatingMode").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("operating").addMarker("mode").addMarker("his").addMarker("sp").setEnums("off,cooling,heating").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(systemOperatingMode);
         Point ciRunning = new Point.Builder().setDisplayName(equipDis + "-" + "systemCI").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("ci").addMarker("running").addMarker("his").addMarker("sp").setTz(tz).build();
@@ -774,6 +791,40 @@ public abstract class SystemProfile
         Point averageTemperature = new Point.Builder().setDisplayName(equipDis + "-" + "averageTemperature").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("average").addMarker("temp").addMarker("his").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(averageTemperature);
         addCMPoints(siteRef, equipref, equipDis, tz);
+        addNewSystemUserIntentPoints(equipref);
+    }
+    private boolean verifyPointsAvailability(String tags, String equipRef){
+        ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and system and userIntent and "+tags+" and equipRef == \"" + equipRef + "\"");
+        if (points != null && points.size() > 0) {
+            return  true;
+        }
+        return false;
+    }
+    public void addNewSystemUserIntentPoints(String equipref){
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap siteMap = hayStack.read(Tags.SITE);
+        String siteRef = (String) siteMap.get(Tags.ID);
+        String tz = siteMap.get("tz").toString();
+        String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
+        if(!verifyPointsAvailability("prePurge and enabled",equipref)) {
+            Point smartPrePurgePoint = new Point.Builder().setDisplayName(equipDis + "-" + "systemPrePurgeEnabled").setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("prePurge").addMarker("enabled").setEnums("false,true").setTz(tz).build();
+            String smartPrePurgePointId = CCUHsApi.getInstance().addPoint(smartPrePurgePoint);
+            CCUHsApi.getInstance().writePoint(smartPrePurgePointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
+            CCUHsApi.getInstance().writeHisValById(smartPrePurgePointId, 0.0);
+        }
+        if(!verifyPointsAvailability("postPurge and enabled",equipref)) {
+            Point smartPostPurgePoint = new Point.Builder().setDisplayName(equipDis + "-" + "systemPostPurgeEnabled").setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("postPurge").addMarker("enabled").setEnums("false,true").setTz(tz).build();
+            String smartPostPurgePointId = CCUHsApi.getInstance().addPoint(smartPostPurgePoint);
+            CCUHsApi.getInstance().writePoint(smartPostPurgePointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
+            CCUHsApi.getInstance().writeHisValById(smartPostPurgePointId, 0.0);
+        }
+
+        if(!verifyPointsAvailability("enhanced and ventilation and enabled",equipref)) {
+            Point enhancedVentilationPoint = new Point.Builder().setDisplayName(equipDis + "-" + "systemEnhancedVentilationEnabled").setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("enhanced").addMarker("ventilation").addMarker("enabled").setEnums("false,true").setTz(tz).build();
+            String enhancedVentilationPointId = CCUHsApi.getInstance().addPoint(enhancedVentilationPoint);
+            CCUHsApi.getInstance().writePoint(enhancedVentilationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
+            CCUHsApi.getInstance().writeHisValById(enhancedVentilationPointId, 0.0);
+        }
     }
     
     public void updateOutsideWeatherParams() {

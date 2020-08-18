@@ -156,6 +156,7 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 goTonext();
+                mNext.setEnabled(false);
             }
         });
 
@@ -411,12 +412,12 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
             @Override
             protected Void doInBackground( final String ... params ) {
                 systemProfile.setConfigAssociation(config, val);
-                systemProfile.updateStagesSelected();
                 return null;
             }
 
             @Override
             protected void onPostExecute( final Void result ) {
+                systemProfile.updateStagesSelected();
                 updateSystemMode();
                 ProgressDialogUtils.hideProgressDialog();
             }

@@ -225,4 +225,10 @@ public class BACnetUtils{
         }
         return dateTimeStr;
     }
+
+    public static void updateDatabaseRevision() {
+        if (localDevice != null) {
+            localDevice.incrementDatabaseRevision();
+        }
+    }
 }

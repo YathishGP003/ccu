@@ -8,13 +8,14 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_5;
 import static a75f.io.logic.bo.building.hvac.Stage.FAN_1;
-import static a75f.io.logic.bo.building.hvac.Stage.HEATING_5;
 
 public class DabStagedRtuWithVfd extends DabStagedRtu
 {
@@ -41,6 +42,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
             if (!equip.get("profile").equals(ProfileType.SYSTEM_DAB_STAGED_VFD_RTU.name())) {
                 hayStack.deleteEntityTree(equip.get("id").toString());
             } else {
+                addNewSystemUserIntentPoints(equip.get("id").toString());
                 updateStagesSelected();
                 return;
             }
@@ -75,8 +77,9 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
     public synchronized void updateSystemPoints()
     {
         super.updateSystemPoints();
-        //updateOutsideWeatherParams();
-        
+        boolean isEconomizingAvailable = CCUHsApi.getInstance().readHisValByQuery("point and oao and economizing and available") > 0 ;
+        double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+getSystemEquipRef()+"\"");
+        EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
         double signal = 0;
         if (getConfigEnabled("analog2") > 0)
         {
@@ -109,6 +112,14 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
                         }
                     }
                 }
+            } else if(isEconomizingAvailable && (systemCoolingLoopOp > 0)){
+                signal = getConfigVal("analog2 and economizer");
+            } else if((epidemicState == EpidemicState.PREPURGE) && L.ccu().oaoProfile != null){
+                double smartPrePurgeFanSpeed = TunerUtil.readTunerValByQuery("system and prePurge and fan and speed", L.ccu().oaoProfile.getEquipRef());
+                signal = smartPrePurgeFanSpeed/10;
+            }else if((epidemicState == EpidemicState.POSTPURGE) && L.ccu().oaoProfile != null){
+                double smartPurgeFanLoopOp = TunerUtil.readTunerValByQuery("system and postPurge and fan and speed", L.ccu().oaoProfile.getEquipRef());
+                signal = smartPurgeFanLoopOp/10;
             }
             else if (stageStatus[FAN_1.ordinal()] > 0)
             {

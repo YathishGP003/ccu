@@ -117,17 +117,21 @@ public class RegisterGatherCCUDetails extends Activity {
         mCreateNewCCU.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mCreateNewCCU.setEnabled(false);
                 String ccuName = mCCUNameET.getText().toString();
                 String installerEmail = mInstallerEmailET.getText().toString();
                 String managerEmail = mManagerEmailET.getText().toString();
                 if (ccuName.trim().length() == 0) {
                     Toast.makeText(RegisterGatherCCUDetails.this, "Enter CCU name", Toast.LENGTH_SHORT).show();
+                    mCreateNewCCU.setEnabled(true);
                     return;
                 } else if (installerEmail.trim().length() == 0) {
                     Toast.makeText(RegisterGatherCCUDetails.this, "Enter Installer email", Toast.LENGTH_SHORT).show();
+                    mCreateNewCCU.setEnabled(true);
                     return;
                 } else if (managerEmail.trim().length() == 0) {
                     Toast.makeText(RegisterGatherCCUDetails.this, "Enter Manager email", Toast.LENGTH_SHORT).show();
+                    mCreateNewCCU.setEnabled(true);
                     return;
                 }
 

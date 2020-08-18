@@ -156,6 +156,7 @@ public class AddtoExisting extends Fragment {
         mNext1.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
+                mNext1.setEnabled(false);
                 int[] mandotaryIds = new int []
                         {
                                 R.id.editSiteID
@@ -319,6 +320,8 @@ public class AddtoExisting extends Fragment {
                 } else {
                     Toast.makeText(getActivity(), "Site not found", Toast.LENGTH_LONG).show();
                 }
+
+                mNext1.setEnabled(true);
             }
         };
         getHSClientTask.execute();

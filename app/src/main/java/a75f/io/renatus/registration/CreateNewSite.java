@@ -238,6 +238,7 @@ public class CreateNewSite extends Fragment {
         mNext.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
+                mNext.setEnabled(false);
                 int[] mandotaryIds = new int[]
                         {
                                 R.id.editSitename,
@@ -251,7 +252,9 @@ public class CreateNewSite extends Fragment {
                                 R.id.editFacilityOrganization,
                                 R.id.editInstallerEmail,
                         };
-                if (!validateEditText(mandotaryIds) && Patterns.EMAIL_ADDRESS.matcher(mSiteEmailId.getText().toString()).matches()) {
+                if (!validateEditText(mandotaryIds) && Patterns.EMAIL_ADDRESS.matcher(mSiteEmailId.getText().toString()).matches()
+                    && Patterns.EMAIL_ADDRESS.matcher(mSiteInstallerEmailId.getText().toString()).matches()) {
+                    ProgressDialogUtils.showProgressDialog(getActivity(),"Adding New Site...");
                     String siteName = mSiteName.getText().toString();
                     String siteCity = mSiteCity.getText().toString();
                     String siteZip = mSiteZip.getText().toString();
@@ -264,7 +267,6 @@ public class CreateNewSite extends Fragment {
                     String installerOrg = mSiteOrg.getText().toString();
                     String ccuName = mSiteCCU.getText().toString();
 
-                    ProgressDialogUtils.showProgressDialog(getActivity(),"Adding New Site...");
                     if (site.size() > 0) {
                         String siteId = site.get("id").toString();
                         updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId,installerOrg, installerEmail, managerEmail);
@@ -284,10 +286,13 @@ public class CreateNewSite extends Fragment {
                     new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                         @Override
                         public void run() {
+                            mNext.setEnabled(true);
                             ProgressDialogUtils.hideProgressDialog();
                             goTonext();
                         }
                     }, 1000);
+                } else {
+                    mNext.setEnabled(true);
                 }
             }
         });
@@ -396,6 +401,7 @@ public class CreateNewSite extends Fragment {
                 showUnregisterAlertDialog();
             } else {
                 btnEditSite.setEnabled(true);
+                btnUnregisterSite.setEnabled(false);
                 CCUHsApi.getInstance().deleteEntity(CCUHsApi.getInstance().getCcuId().toString());
 
                 ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU...");
@@ -424,6 +430,7 @@ public class CreateNewSite extends Fragment {
                             ccuRegistrationHandler.postDelayed(this, 30000);
                         } else {
                             btnUnregisterSite.setText("Unregister");
+                            btnUnregisterSite.setEnabled(true);
                             btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
                             setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
                             Toast.makeText(getActivity(), "CCU Registered Successfully "+ ccuGuid, Toast.LENGTH_LONG).show();
@@ -778,8 +785,6 @@ public class CreateNewSite extends Fragment {
     }
 
     private void goTonext() {
-        //Intent i = new Intent(mContext, RegisterGatherCCUDetails.class);
-        //startActivity(i);
         prefs.setBoolean("CCU_SETUP", false);
         ((FreshRegistration) getActivity()).selectItem(4);
     }

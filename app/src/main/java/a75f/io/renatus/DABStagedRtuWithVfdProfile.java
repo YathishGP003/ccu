@@ -175,6 +175,7 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 goTonext();
+                mNext.setEnabled(false);
             }
         });
 
@@ -259,9 +260,9 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         analog2TestSpinner.setAdapter(analogAdapter);
         
         analog2Economizer.setAdapter(analogAdapter);
-        analog2Economizer.setSelection((int)systemProfile.getConfigVal("analog2 and economizer"));
+        analog2Economizer.setSelection((int)systemProfile.getConfigVal("analog2 and economizer"),false);
         analog2Recirculate.setAdapter(analogAdapter);;
-        analog2Recirculate.setSelection((int)systemProfile.getConfigVal("analog2 and recirculate"));
+        analog2Recirculate.setSelection((int)systemProfile.getConfigVal("analog2 and recirculate"), false);
         analog2CoolStage1.setAdapter(analogAdapter);
         analog2CoolStage1.setSelection((int)systemProfile.getConfigVal("analog2 and cooling and stage1"), false);
         analog2CoolStage2.setAdapter(analogAdapter);
@@ -285,14 +286,26 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         analog2HeatStage5.setSelection((int)systemProfile.getConfigVal("analog2 and heating and stage5"), false);
         
         analog2TestSpinner.setOnItemSelectedListener(this);
+        analog2Economizer.setOnItemSelectedListener(this);
+        analog2Recirculate.setOnItemSelectedListener(this);
+        analog2CoolStage1.setOnItemSelectedListener(this);
+        analog2CoolStage2.setOnItemSelectedListener(this);
+        analog2CoolStage3.setOnItemSelectedListener(this);
+        analog2CoolStage4.setOnItemSelectedListener(this);
+        analog2CoolStage5.setOnItemSelectedListener(this);
+        analog2HeatStage1.setOnItemSelectedListener(this);
+        analog2HeatStage2.setOnItemSelectedListener(this);
+        analog2HeatStage3.setOnItemSelectedListener(this);
+        analog2HeatStage4.setOnItemSelectedListener(this);
+        analog2HeatStage5.setOnItemSelectedListener(this);
         updateAnalogOptions();
     }
     
     private void updateAnalogOptions() {
         systemProfile.updateStagesSelected();
         boolean analogEnabled = analog2Tb.isChecked();
-        analog2Economizer.setEnabled(false);
-        analog2Recirculate.setEnabled(false);
+        analog2Economizer.setEnabled(analogEnabled);
+        analog2Recirculate.setEnabled(analogEnabled);
         analog2CoolStage1.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.COOLING_1));
         analog2CoolStage2.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.COOLING_2));
         analog2CoolStage3.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.COOLING_3));
@@ -508,12 +521,12 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
             @Override
             protected Void doInBackground( final String ... params ) {
                 systemProfile.setConfigEnabled(config, val);
-                systemProfile.updateStagesSelected();
                 return null;
             }
             
             @Override
             protected void onPostExecute( final Void result ) {
+                systemProfile.updateStagesSelected();
                 if (val == 0) {
                     updateSystemMode();
                 }
@@ -531,12 +544,12 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
             @Override
             protected Void doInBackground( final String ... params ) {
                 systemProfile.setConfigAssociation(config, val);
-                systemProfile.updateStagesSelected();
                 return null;
             }
             
             @Override
             protected void onPostExecute( final Void result ) {
+                systemProfile.updateStagesSelected();
                 updateSystemMode();
                 ProgressDialogUtils.hideProgressDialog();
             }

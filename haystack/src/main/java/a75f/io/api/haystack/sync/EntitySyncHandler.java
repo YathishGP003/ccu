@@ -8,13 +8,16 @@ import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
+import org.projecthaystack.HRow;
 import org.projecthaystack.HStr;
+import org.projecthaystack.io.HZincReader;
 import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -181,15 +184,28 @@ public class EntitySyncHandler
             b.add("id", HRef.make(removeId.replace("@","")));
             entities.add(b.toDict());
         }
-        
-        
-        HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
-        String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "removeEntity", HZincWriter.gridToString(grid));
-        if (response != null)
-        {
-            CCUHsApi.getInstance().tagsDb.removeIdMap.clear();
+
+        int partitionSize = 20;
+        ArrayList<List<HDict>> partitions = new ArrayList<>();
+        for (int i = 0; i<entities.size(); i += partitionSize) {
+            partitions.add(entities.subList(i, Math.min(i + partitionSize, entities.size())));
         }
-        CcuLog.i(TAG, "Response: \n" + response);
+
+        for (List<HDict> subEntities : partitions) {
+            HGrid grid = HGridBuilder.dictsToGrid(subEntities.toArray(new HDict[subEntities.size()]));
+            String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "removeEntity", HZincWriter.gridToString(grid));
+            if (response != null)
+            {
+                HZincReader zReader = new HZincReader(response);
+                Iterator it = zReader.readGrid().iterator();
+                while (it.hasNext()) {
+                    HRow row = (HRow) it.next();
+                    String id = row.get("id").toString();
+                    CCUHsApi.getInstance().tagsDb.removeIdMap.values().remove(id);
+                }
+            }
+            CcuLog.i(TAG, "Response: \n" + response);
+        }
     }
 
     public static HashSet<String> ref = new HashSet<>();

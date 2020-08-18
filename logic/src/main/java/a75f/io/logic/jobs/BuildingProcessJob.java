@@ -9,6 +9,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.BaseJob;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.watchdog.WatchdogMonitor;
@@ -72,6 +73,8 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
     
             if (L.ccu().oaoProfile != null) {
                 L.ccu().oaoProfile.doOAO();
+            }else {
+                CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.OFF.ordinal());
             }
             
             L.ccu().systemProfile.doSystemControl();

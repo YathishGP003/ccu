@@ -282,79 +282,92 @@ public class PlcEquip {
         String maxVal = "10";
         String incrementVal = "0.1";
         String[] markers = null;
-
-        if (analog1InputSensor == 0 || analog1InputSensor == 1) {
-            shortDis = "Generic 0-10 Voltage";
-            unit = "V";
-            maxVal = "10";
-            incrementVal = "0.1";
-            markers = null;
-        } else if (analog1InputSensor == 2) {
-            shortDis = "Pressure [0-2 in.]";
-            unit = "Inch wc";
-            maxVal = "2";
-            incrementVal = "0.1";
-            markers = new String[]{"pressure"};
-        } else if (analog1InputSensor == 3) {
-            shortDis = "Pressure[0-0.25 in. Differential]";
-            unit = "Inch wc";
-            maxVal = "0.25";
-            incrementVal = "0.01";
-            markers = new String[]{"pressure"};
-        } else if (analog1InputSensor == 4) {
-            shortDis = "Airflow";
-            unit = "CFM";
-            maxVal = "1000";
-            incrementVal = "10";
-            markers = new String[]{"airflow"};
-        } else if (analog1InputSensor == 5) {
-            shortDis = "Humidity";
-            unit = "%";
-            maxVal = "100";
-            incrementVal = "1.0";
-            markers = new String[]{"humidity"};
-        } else if (analog1InputSensor == 6) {
-            shortDis = "CO2 Level";
-            unit = "ppm";
-            maxVal = "2000";
-            incrementVal = "100";
-            markers = new String[]{"co2"};
-        } else if (analog1InputSensor == 7) {
-            shortDis = "CO Level";
-            unit = "ppm";
-            maxVal = "100";
-            incrementVal = "1.0";
-            markers = new String[]{"co"};
-        } else if (analog1InputSensor == 8) {
-            shortDis = "NO2 Level";
-            unit = "ppm";
-            maxVal = "5";
-            incrementVal = "0.1";
-            markers = new String[]{"no2"};
-        } else if (analog1InputSensor == 9) {
-            shortDis = "Current Drawn[CT 0-10]";
-            unit = "A";
-            maxVal = "10";
-            incrementVal = "0.1";
-            markers = new String[]{"current","transformer"};
-        } else if (analog1InputSensor == 10) {
-            shortDis = "Current Drawn[CT 0-20]";
-            unit = "A";
-            maxVal = "20";
-            incrementVal = "0.1";
-            markers = new String[]{"current","transformer"};
-        } else if (analog1InputSensor == 11) {
-            shortDis = "Current Drawn[CT 0-30]";
-            unit = "A";
-            maxVal = "50";
-            incrementVal = "0.1";
-            markers = new String[]{"current","transformer"};
+        switch (analog1InputSensor) {
+            case 0:
+            case 1:
+                shortDis = "Generic 0-10 Voltage";
+                unit = "V";
+                maxVal = "10";
+                incrementVal = "0.1";
+                markers = null;
+                break;
+            case 2:
+                shortDis = "Pressure [0-2 in.]";
+                unit = "Inch wc";
+                maxVal = "2";
+                incrementVal = "0.1";
+                markers = new String[]{"pressure"};
+                break;
+            case 3:
+                shortDis = "Pressure[0-0.25 in. Differential]";
+                unit = "Inch wc";
+                maxVal = "0.25";
+                incrementVal = "0.01";
+                markers = new String[]{"pressure"};
+                break;
+            case 4:
+                shortDis = "Airflow";
+                unit = "CFM";
+                maxVal = "1000";
+                incrementVal = "10";
+                markers = new String[]{"airflow"};
+                break;
+            case 5:
+                shortDis = "Humidity";
+                unit = "%";
+                maxVal = "100";
+                incrementVal = "1.0";
+                markers = new String[]{"humidity"};
+                break;
+            case 6:
+                shortDis = "CO2 Level";
+                unit = "ppm";
+                maxVal = "2000";
+                incrementVal = "100";
+                markers = new String[]{"co2"};
+                break;
+            case 7:
+                shortDis = "CO Level";
+                unit = "ppm";
+                maxVal = "100";
+                incrementVal = "1.0";
+                markers = new String[]{"co"};
+                break;
+            case 8:
+                shortDis = "NO2 Level";
+                unit = "ppm";
+                maxVal = "5";
+                incrementVal = "0.1";
+                markers = new String[]{"no2"};
+                break;
+            case 9:
+                shortDis = "Current Drawn[CT 0-10]";
+                unit = "A";
+                maxVal = "10";
+                incrementVal = "0.1";
+                markers = new String[]{"current", "transformer"};
+                break;
+            case 10:
+                shortDis = "Current Drawn[CT 0-20]";
+                unit = "A";
+                maxVal = "20";
+                incrementVal = "0.1";
+                markers = new String[]{"current", "transformer"};
+                break;
+            case 11:
+                shortDis = "Current Drawn[CT 0-50]";
+                unit = "A";
+                maxVal = "50";
+                incrementVal = "0.1";
+                markers = new String[]{"current", "transformer"};
+                break;
         }
-        mBundle.putString("shortDis",shortDis);
-        mBundle.putString("unit",unit);
-        mBundle.putString("maxVal",maxVal);
-        mBundle.putString("incrementVal",incrementVal);
-        mBundle.putStringArray("markers",markers);
+
+        mBundle.putString("shortDis", shortDis);
+        mBundle.putString("unit", unit);
+        mBundle.putString("maxVal", maxVal);
+        mBundle.putString("incrementVal", incrementVal);
+        mBundle.putStringArray("markers", markers);
 
         return mBundle;
     }
@@ -366,74 +379,86 @@ public class PlcEquip {
         String maxVal = "10";
         String incrementVal = "0.1";
         String[] markers = null;
-
-        if (dynamicInputSensor == 0) {
-            shortDis = "Generic 0-10 Voltage";
-            unit = "V";
-            maxVal = "10";
-            incrementVal = "0.1";
-            markers = null;
-        } else if (dynamicInputSensor == 1) {
-            shortDis = "Pressure [0-2 in.]";
-            unit = "Inch wc";
-            maxVal = "2";
-            incrementVal = "0.1";
-            markers = new String[]{"pressure"};
-        } else if (dynamicInputSensor == 2) {
-            shortDis = "Pressure[0-0.25 in. Differential]";
-            unit = "Inch wc";
-            maxVal = "0.25";
-            incrementVal = "0.01";
-            markers = new String[]{"pressure"};
-        } else if (dynamicInputSensor == 3) {
-            shortDis = "Airflow";
-            unit = "CFM";
-            maxVal = "1000";
-            incrementVal = "10";
-            markers = new String[]{"airflow"};
-        } else if (dynamicInputSensor == 4) {
-            shortDis = "Humidity";
-            unit = "%";
-            maxVal = "100";
-            incrementVal = "1.0";
-            markers = new String[]{"humidity"};
-        } else if (dynamicInputSensor == 5) {
-            shortDis = "CO2 Level";
-            unit = "ppm";
-            maxVal = "2000";
-            incrementVal = "100";
-            markers = new String[]{"co2"};
-        } else if (dynamicInputSensor == 6) {
-            shortDis = "CO Level";
-            unit = "ppm";
-            maxVal = "100";
-            incrementVal = "1.0";
-            markers = new String[]{"co"};
-        } else if (dynamicInputSensor == 7) {
-            shortDis = "NO2 Level";
-            unit = "ppm";
-            maxVal = "5";
-            incrementVal = "0.1";
-            markers = new String[]{"no2"};
-        } else if (dynamicInputSensor == 8) {
-            shortDis = "Current Drawn[CT 0-10]";
-            unit = "A";
-            maxVal = "10";
-            incrementVal = "0.1";
-            markers = new String[]{"current", "transformer"};
-        } else if (dynamicInputSensor == 9) {
-            shortDis = "Current Drawn[CT 0-20]";
-            unit = "A";
-            maxVal = "20";
-            incrementVal = "0.1";
-            markers = new String[]{"current", "transformer"};
-        } else if (dynamicInputSensor == 10) {
-            shortDis = "Current Drawn[CT 0-30]";
-            unit = "A";
-            maxVal = "50";
-            incrementVal = "0.1";
-            markers = new String[]{"current", "transformer"};
+        switch (dynamicInputSensor) {
+            case 0:
+                shortDis = "Generic 0-10 Voltage";
+                unit = "V";
+                maxVal = "10";
+                incrementVal = "0.1";
+                markers = null;
+                break;
+            case 1:
+                shortDis = "Pressure [0-2 in.]";
+                unit = "Inch wc";
+                maxVal = "2";
+                incrementVal = "0.1";
+                markers = new String[]{"pressure"};
+                break;
+            case 2:
+                shortDis = "Pressure[0-0.25 in. Differential]";
+                unit = "Inch wc";
+                maxVal = "0.25";
+                incrementVal = "0.01";
+                markers = new String[]{"pressure"};
+                break;
+            case 3:
+                shortDis = "Airflow";
+                unit = "CFM";
+                maxVal = "1000";
+                incrementVal = "10";
+                markers = new String[]{"airflow"};
+                break;
+            case 4:
+                shortDis = "Humidity";
+                unit = "%";
+                maxVal = "100";
+                incrementVal = "1.0";
+                markers = new String[]{"humidity"};
+                break;
+            case 5:
+                shortDis = "CO2 Level";
+                unit = "ppm";
+                maxVal = "2000";
+                incrementVal = "100";
+                markers = new String[]{"co2"};
+                break;
+            case 6:
+                shortDis = "CO Level";
+                unit = "ppm";
+                maxVal = "100";
+                incrementVal = "1.0";
+                markers = new String[]{"co"};
+                break;
+            case 7:
+                shortDis = "NO2 Level";
+                unit = "ppm";
+                maxVal = "5";
+                incrementVal = "0.1";
+                markers = new String[]{"no2"};
+                break;
+            case 8:
+                shortDis = "Current Drawn[CT 0-10]";
+                unit = "A";
+                maxVal = "10";
+                incrementVal = "0.1";
+                markers = new String[]{"current", "transformer"};
+                break;
+            case 9:
+                shortDis = "Current Drawn[CT 0-20]";
+                unit = "A";
+                maxVal = "20";
+                incrementVal = "0.1";
+                markers = new String[]{"current", "transformer"};
+                break;
+            case 10:
+                shortDis = "Current Drawn[CT 0-50]";
+                unit = "A";
+                maxVal = "50";
+                incrementVal = "0.1";
+                markers = new String[]{"current", "transformer"};
+                break;
         }
+
         mBundle.putString("shortDis", shortDis);
         mBundle.putString("unit", unit);
         mBundle.putString("maxVal", maxVal);
@@ -450,20 +475,24 @@ public class PlcEquip {
         String maxVal = "10";
         String incrementVal = "0.1";
         String[] markers = null;
-
-        if (thermistorInputSensor == 0 || thermistorInputSensor == 1) {
-            shortDis = "10K type 2 probe \u00B0F";
-            unit = "\u00B0F";
-            maxVal = "10";
-            incrementVal = "0.1";
-            markers = null;
-        } else if (thermistorInputSensor == 2) {
-            shortDis = "Generic 1-100k ohms \u00B0F";
-            unit = "\u00B0F";
-            maxVal = "10";
-            incrementVal = "0.1";
-            markers = null;
+        switch (thermistorInputSensor) {
+            case 0:
+            case 1:
+                shortDis = "10K type 2 probe \u00B0F";
+                unit = "\u00B0F";
+                maxVal = "10";
+                incrementVal = "0.1";
+                markers = null;
+                break;
+            case 2:
+                shortDis = "Generic 1-100k ohms \u00B0F";
+                unit = "\u00B0F";
+                maxVal = "10";
+                incrementVal = "0.1";
+                markers = null;
+                break;
         }
+
         mBundle.putString("shortDis", shortDis);
         mBundle.putString("unit", unit);
         mBundle.putString("maxVal", maxVal);
@@ -503,7 +532,6 @@ public class PlcEquip {
         //delete last point
         if (dynamicTarget != null && dynamicTarget.get("id") != null && (config.useAnalogIn2ForSetpoint && getProfileConfiguration().analog2InputSensor != config.analog2InputSensor)) {
             CCUHsApi.getInstance().deleteEntityTree(dynamicTarget.get("id").toString());
-            CCUHsApi.getInstance().deleteEntityTree(prangePoint.get("id").toString());
         }
 
         if (config.useAnalogIn2ForSetpoint) {
@@ -513,20 +541,25 @@ public class PlcEquip {
             if (targetValuePoint != null && targetValuePoint.get("id") != null){
                 CCUHsApi.getInstance().deleteEntityTree(targetValuePoint.get("id").toString());
             }
+            //delete old prange values
+            if (prangePoint != null && prangePoint.get("id") != null && ((getProfileConfiguration().useAnalogIn2ForSetpoint != config.useAnalogIn2ForSetpoint)
+                    || (getProfileConfiguration().analog2InputSensor != config.analog2InputSensor))) {
+                CCUHsApi.getInstance().deleteEntityTree(prangePoint.get("id").toString());
+            }
 
             if (dynamicTarget != null && dynamicTarget.get("id") != null) {
                 id = dynamicTarget.get("id").toString();
             }
             if (id == null || getProfileConfiguration().analog2InputSensor != config.analog2InputSensor) {
                 id = updateDynamicTargetInput(config.analog2InputSensor, floorRef, roomRef, dynamicTargetTag);
-                updateProportionalRange(config.pidProportionalRange,floorRef,roomRef,getAnalog2Bundle(config.analog2InputSensor));
             }
             // add offset sensor point
             if (offsetSensorPoint == null || offsetSensorPoint.get("id") == null){
                 updateOffsetSensorValue(config.setpointSensorOffset, floorRef, roomRef);
             }
-            // add offset sensor point
-            if (prangePoint == null || prangePoint.get("id") == null){
+            // add proportional range point
+            if (prangePoint == null || prangePoint.get("id") == null || (getProfileConfiguration().analog2InputSensor != config.analog2InputSensor)
+            || (getProfileConfiguration().useAnalogIn2ForSetpoint != config.useAnalogIn2ForSetpoint)){
                 updateProportionalRange(config.pidProportionalRange,floorRef,roomRef,getAnalog2Bundle(config.analog2InputSensor));
             }
 
@@ -544,9 +577,6 @@ public class PlcEquip {
                 || (config.th1InputSensor > 0 && getProfileConfiguration().th1InputSensor != config.th1InputSensor)) {
 
             CCUHsApi.getInstance().deleteEntityTree(processVariable.get("id").toString());
-            if (!config.useAnalogIn2ForSetpoint){
-                CCUHsApi.getInstance().deleteEntityTree(prangePoint.get("id").toString());
-            }
         }
 
         if (config.analog1InputSensor > 0) {
@@ -554,6 +584,10 @@ public class PlcEquip {
             if (!config.useAnalogIn2ForSetpoint){
                 if (dynamicTarget != null && dynamicTarget.get("id") != null){
                     CCUHsApi.getInstance().deleteEntityTree(dynamicTarget.get("id").toString());
+                }
+                if (prangePoint != null && prangePoint.get("id") != null && ((getProfileConfiguration().useAnalogIn2ForSetpoint != config.useAnalogIn2ForSetpoint) || (getProfileConfiguration().analog1InputSensor != config.analog1InputSensor))){
+                    CCUHsApi.getInstance().deleteEntityTree(prangePoint.get("id").toString());
+                    updateProportionalRange(config.pidProportionalRange, floorRef, roomRef, getAnalog1Bundle(config.analog1InputSensor));
                 }
 
                 if (offsetSensorPoint != null && offsetSensorPoint.get("id") != null){
@@ -572,9 +606,6 @@ public class PlcEquip {
             String id = processVariable.get("id").toString();
             if (getProfileConfiguration().analog1InputSensor != config.analog1InputSensor) {
                 id = updateProcessVariable(floorRef, roomRef, processTag, getAnalog1Bundle(config.analog1InputSensor));
-                if (!config.useAnalogIn2ForSetpoint) {
-                    updateProportionalRange(config.pidProportionalRange, floorRef, roomRef, getAnalog1Bundle(config.analog1InputSensor));
-                }
 
                 //delete  and update target values
                 if (targetValuePoint != null && targetValuePoint.get("id") != null){
@@ -600,6 +631,11 @@ public class PlcEquip {
                 if (dynamicTarget != null && dynamicTarget.get("id") != null){
                     CCUHsApi.getInstance().deleteEntityTree(dynamicTarget.get("id").toString());
                 }
+                if (prangePoint != null && prangePoint.get("id") != null && ((getProfileConfiguration().useAnalogIn2ForSetpoint != config.useAnalogIn2ForSetpoint)
+                        ||(getProfileConfiguration().th1InputSensor != config.th1InputSensor))){
+                    CCUHsApi.getInstance().deleteEntityTree(prangePoint.get("id").toString());
+                    updateProportionalRange(config.pidProportionalRange, floorRef, roomRef, getThermistorBundle(config.th1InputSensor));
+                }
 
                 if (offsetSensorPoint != null && offsetSensorPoint.get("id") != null){
                     CCUHsApi.getInstance().deleteEntityTree(offsetSensorPoint.get("id").toString());
@@ -616,9 +652,6 @@ public class PlcEquip {
             String id = processVariable.get("id").toString();
             if (getProfileConfiguration().th1InputSensor != config.th1InputSensor) {
                 id = updateProcessVariable(floorRef, roomRef, processTag, getThermistorBundle(config.th1InputSensor));
-                if (!config.useAnalogIn2ForSetpoint) {
-                    updateProportionalRange(config.pidProportionalRange, floorRef, roomRef, getThermistorBundle(config.th1InputSensor));
-                }
 
                 //delete  and update target values
                 if (targetValuePoint != null && targetValuePoint.get("id") != null){

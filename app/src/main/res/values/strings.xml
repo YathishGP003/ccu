@@ -400,7 +400,7 @@
     <string name="label_heatstage5">Analog-out2 \nDuring Heat Stage 5</string>
 
 
-    <string name="label_vfd_analog2_min">Analog-out2 Minimum</string>
+    <string name="label_vfd_analog2_min">Analog-out2 Default</string>
 
 
     <!--VAV Advanced Hybrid AHU Profile-->

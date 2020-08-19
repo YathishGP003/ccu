@@ -163,7 +163,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
             }
             else {
                 //For all other cases analog2-out should be the minimum config value
-                signal = getConfigVal("analog2 and minimum");
+                signal = getConfigVal("analog2 and default");
             }
         }
         setCmdSignal("fan and modulating",10*signal);
@@ -217,17 +217,17 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
         String analog2AtRecirculateId = hayStack.addPoint(analog2AtRecirculate);
         hayStack.writeDefaultValById(analog2AtRecirculateId, 4.0 );
     
-        Point analog2AtMinimum = new Point.Builder()
-                                     .setDisplayName(equipDis+"-"+"analog2AtMinimum")
+        Point analog2Default = new Point.Builder()
+                                     .setDisplayName(equipDis+"-"+"analog2Default")
                                      .setSiteRef(siteRef)
                                      .setEquipRef(equipref)
                                      .addMarker("system").addMarker("config").addMarker("analog2")
-                                     .addMarker("minimum").addMarker("writable").addMarker("sp")
+                                     .addMarker("default").addMarker("writable").addMarker("sp")
                                      .setUnit("V")
                                      .setTz(tz)
                                      .build();
-        String analog2AtMinimumId = hayStack.addPoint(analog2AtMinimum);
-        hayStack.writeDefaultValById(analog2AtMinimumId, 0.0 );
+        String analog2DefaultId = hayStack.addPoint(analog2Default);
+        hayStack.writeDefaultValById(analog2DefaultId, 0.0 );
         
         addConfigPointForStage(siteMap, equipref, "analog2AtCoolStage1", "cooling", "stage1", 7);
         addConfigPointForStage(siteMap, equipref, "analog2AtCoolStage2", "cooling", "stage2", 10);

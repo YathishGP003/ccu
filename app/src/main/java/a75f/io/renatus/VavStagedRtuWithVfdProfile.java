@@ -76,7 +76,7 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
     @BindView(R.id.analog2HeatStage3) Spinner analog2HeatStage3;
     @BindView(R.id.analog2HeatStage4) Spinner analog2HeatStage4;
     @BindView(R.id.analog2HeatStage5) Spinner analog2HeatStage5;
-    @BindView(R.id.analog2Min) Spinner analog2MinSpinner;
+    @BindView(R.id.analog2Default) Spinner analog2DefaultSpinner;
 
     @BindView(R.id.relay1Test) ToggleButton relay1Test;
     @BindView(R.id.relay2Test) ToggleButton relay2Test;
@@ -290,8 +290,8 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         analog2HeatStage5.setAdapter(analogAdapter);
         analog2HeatStage5.setSelection((int)systemProfile.getConfigVal("analog2 and heating and stage5"), false);
     
-        analog2MinSpinner.setAdapter(analogAdapter);
-        analog2MinSpinner.setSelection((int)systemProfile.getConfigVal("analog2 and minimum"));
+        analog2DefaultSpinner.setAdapter(analogAdapter);
+        analog2DefaultSpinner.setSelection((int)systemProfile.getConfigVal("analog2 and default"));
 
         analog2TestSpinner.setOnItemSelectedListener(this);
         analog2Economizer.setOnItemSelectedListener(this);
@@ -306,7 +306,7 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         analog2HeatStage3.setOnItemSelectedListener(this);
         analog2HeatStage4.setOnItemSelectedListener(this);
         analog2HeatStage5.setOnItemSelectedListener(this);
-        analog2MinSpinner.setOnItemSelectedListener(this);
+        analog2DefaultSpinner.setOnItemSelectedListener(this);
         updateAnalogOptions();
     }
 
@@ -326,7 +326,7 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         analog2HeatStage3.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.HEATING_3));
         analog2HeatStage4.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.HEATING_4));
         analog2HeatStage5.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.HEATING_5));
-        analog2MinSpinner.setEnabled(analogEnabled);
+        analog2DefaultSpinner.setEnabled(analogEnabled);
     }
 
     @Override
@@ -474,8 +474,8 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
             case R.id.analog2HeatStage5:
                 setConfigBackground("analog2 and heating and stage5", Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
-            case R.id.analog2Min:
-                setConfigBackground("analog2 and minimum", Double.parseDouble(arg0.getSelectedItem().toString()));
+            case R.id.analog2Default:
+                setConfigBackground("analog2 and default", Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
 
         }

@@ -1071,7 +1071,7 @@
                         android:layout_height="@dimen/vfd_profile_config_layout_height">
 
                         <TextView
-                            android:id="@+id/textAnalog2Min"
+                            android:id="@+id/textAnalog2Default"
                             android:layout_width="@dimen/vfd_profile_config_text_width"
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
@@ -1081,12 +1081,12 @@
                             android:text="@string/label_vfd_analog2_min"/>
 
                         <Spinner
-                            android:id="@+id/analog2Min"
+                            android:id="@+id/analog2Default"
                             android:layout_width="@dimen/vfd_profile_spinner_width"
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
                             android:layout_marginLeft="@dimen/vfd_profile_spinner_margin_left"
-                            android:layout_toRightOf="@+id/textAnalog2Min"
+                            android:layout_toRightOf="@+id/textAnalog2Default"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>

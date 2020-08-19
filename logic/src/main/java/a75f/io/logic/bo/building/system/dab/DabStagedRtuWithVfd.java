@@ -129,14 +129,15 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
                     }
                 }
             }
-        }
 
-        if((epidemicState == EpidemicState.PREPURGE) && L.ccu().oaoProfile != null){
-            double smartPrePurgeFanSpeed = TunerUtil.readTunerValByQuery("system and prePurge and fan and speed", L.ccu().oaoProfile.getEquipRef());
-            signal = Math.max(signal,smartPrePurgeFanSpeed/10);
-        }else if((epidemicState == EpidemicState.POSTPURGE) && L.ccu().oaoProfile != null){
-            double smartPurgeFanLoopOp = TunerUtil.readTunerValByQuery("system and postPurge and fan and speed", L.ccu().oaoProfile.getEquipRef());
-            signal = Math.max(signal,smartPurgeFanLoopOp/10);
+
+            if((epidemicState == EpidemicState.PREPURGE) && L.ccu().oaoProfile != null){
+                double smartPrePurgeFanSpeed = TunerUtil.readTunerValByQuery("system and prePurge and fan and speed", L.ccu().oaoProfile.getEquipRef());
+                signal = Math.max(signal,smartPrePurgeFanSpeed/10);
+            }else if((epidemicState == EpidemicState.POSTPURGE) && L.ccu().oaoProfile != null){
+                double smartPurgeFanLoopOp = TunerUtil.readTunerValByQuery("system and postPurge and fan and speed", L.ccu().oaoProfile.getEquipRef());
+                signal = Math.max(signal,smartPurgeFanLoopOp/10);
+            }
         }
         if(signal != getCmdSignal("fan and modulating"))
             setCmdSignal("fan and modulating",10*signal);

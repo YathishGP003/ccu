@@ -8,6 +8,10 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.common.base.Splitter;
+
+import java.util.Iterator;
+
 import a75f.io.renatus.R;
 
 public class NonTempControl extends RelativeLayout {
@@ -188,7 +192,19 @@ public class NonTempControl extends RelativeLayout {
 
     public void setPiOutputText(String piOutputText) {
         this.piOutputText = piOutputText;
-        if(piOutputText != null && piOutput != null){
+        if (piOutputText.length() > 4) {
+            Iterable<String> piOutList = Splitter.fixedLength(4).split(piOutputText);
+            Iterator iterator = piOutList.iterator();
+            StringBuilder mBuilder = new StringBuilder();
+            while (iterator.hasNext()) {
+                mBuilder.append((String) iterator.next());
+                if (iterator.hasNext()) {
+                    mBuilder.append("\n");
+                }
+            }
+            piOutputText = mBuilder.toString();
+        }
+        if (piOutputText != null && piOutput != null) {
             piOutput.setText(piOutputText);
         }
     }

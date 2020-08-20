@@ -1128,86 +1128,89 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
 
         plcPoints.put("Target Value",targetValue);
-        if (dynamicSetpoint > 0){
-            if(analog2sensorType == 0)
-            {
-                plcPoints.put("Dynamic Unit Type","Voltage");
-                plcPoints.put("Dynamic Unit","V");
-            }
-            if(analog2sensorType == 1 || analog2sensorType == 2)
-            {
-                plcPoints.put("Dynamic Unit Type","Pressure");
-                plcPoints.put("Dynamic Unit","WC");
-            }
-            if(analog2sensorType == 3)
-            {
-                plcPoints.put("Dynamic Unit Type","Airflow");
-                plcPoints.put("Dynamic Unit","%");
-            }
-            if(analog2sensorType == 4)
-            {
-                plcPoints.put("Dynamic Unit Type","Humidity");
-                plcPoints.put("Dynamic Unit","%");
-            }
-            if(analog2sensorType == 5)
-            {
-                plcPoints.put("Dynamic Unit Type","CO2");
-                plcPoints.put("Dynamic Unit","PPM");
-            }
-            if(analog2sensorType == 6)
-            {
-                plcPoints.put("Dynamic Unit Type","CO");
-                plcPoints.put("Dynamic Unit","PPM");
-            }
-            if(analog2sensorType == 7)
-            {
-                plcPoints.put("Dynamic Unit Type","NO2");
-                plcPoints.put("Dynamic Unit","PPM");
-            }
-            if(analog2sensorType == 8 || analog2sensorType == 9 || analog2sensorType == 10)
-            {
-                plcPoints.put("Dynamic Unit Type","Current");
-                plcPoints.put("Dynamic Unit","AMPS");
+        if (dynamicSetpoint > 0) {
+            switch ((int) analog2sensorType) {
+                case 0:
+                    plcPoints.put("Dynamic Unit Type", "Voltage");
+                    plcPoints.put("Dynamic Unit", "V");
+                    break;
+                case 1:
+                case 2:
+                    plcPoints.put("Dynamic Unit Type", "Pressure");
+                    plcPoints.put("Dynamic Unit", "WC");
+                    break;
+                case 3:
+                    plcPoints.put("Dynamic Unit Type", "Airflow");
+                    plcPoints.put("Dynamic Unit", "%");
+                    break;
+                case 4:
+                    plcPoints.put("Dynamic Unit Type", "Humidity");
+                    plcPoints.put("Dynamic Unit", "%");
+                    break;
+                case 5:
+                    plcPoints.put("Dynamic Unit Type", "CO2");
+                    plcPoints.put("Dynamic Unit", "PPM");
+                    break;
+                case 6:
+                    plcPoints.put("Dynamic Unit Type", "CO");
+                    plcPoints.put("Dynamic Unit", "PPM");
+                    break;
+                case 7:
+                    plcPoints.put("Dynamic Unit Type", "NO2");
+                    plcPoints.put("Dynamic Unit", "PPM");
+                    break;
+                case 8:
+                case 9:
+                case 10:
+                    plcPoints.put("Dynamic Unit Type", "Current");
+                    plcPoints.put("Dynamic Unit", "AMPS");
+                    break;
             }
         }
 
-            if (analog1sensorType == 0 || analog1sensorType == 1) {
+        switch ((int) analog1sensorType) {
+            case 0:
+            case 1:
                 plcPoints.put("Unit Type", "Voltage");
                 plcPoints.put("Unit", "V");
-            }
-            if (analog1sensorType == 2 || analog1sensorType == 3) {
+                break;
+            case 2:
+            case 3:
                 plcPoints.put("Unit Type", "Pressure");
                 plcPoints.put("Unit", "WC");
-            }
-            if (analog1sensorType == 4) {
+                break;
+            case 4:
                 plcPoints.put("Unit Type", "Airflow");
                 plcPoints.put("Unit", "%");
-            }
-            if (analog1sensorType == 5) {
+                break;
+            case 5:
                 plcPoints.put("Unit Type", "Humidity");
                 plcPoints.put("Unit", "%");
-            }
-            if (analog1sensorType == 6) {
+                break;
+            case 6:
                 plcPoints.put("Unit Type", "CO2");
                 plcPoints.put("Unit", "PPM");
-            }
-            if (analog1sensorType == 7) {
+                break;
+            case 7:
                 plcPoints.put("Unit Type", "CO");
                 plcPoints.put("Unit", "PPM");
-            }
-            if (analog1sensorType == 8) {
+                break;
+            case 8:
                 plcPoints.put("Unit Type", "NO2");
                 plcPoints.put("Unit", "PPM");
-            }
-            if (analog1sensorType == 9 || analog1sensorType == 10 || analog1sensorType == 11) {
+                break;
+            case 9:
+            case 10:
+            case 11:
                 plcPoints.put("Unit Type", "Current");
                 plcPoints.put("Unit", "AMPS");
-            }
+                break;
+        }
 
-            if (th1InputSensor == 1 || th1InputSensor == 2) {
-                plcPoints.put("Unit Type", "Temperature");
-                plcPoints.put("Unit", "\u00B0F");
-            }
+        if (th1InputSensor == 1 || th1InputSensor == 2) {
+            plcPoints.put("Unit Type", "Temperature");
+            plcPoints.put("Unit", "\u00B0F");
+        }
 
         return plcPoints;
     }

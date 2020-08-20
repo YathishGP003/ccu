@@ -51,8 +51,7 @@
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="420"
-                android:textSize="30sp"
-                android:layout_marginLeft="5dp"
+                android:textSize="28sp"
                 android:layout_marginTop="166dp"/>
             <TextView
                 android:id="@+id/textOutputCFM"

@@ -108,7 +108,7 @@ public class OAOProfile
         } else {
             outsideAirFinalLoopOutput = outsideDamperMinOpen;
         }
-        outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , outsideAirCalculatedMinDamper);
+        outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , outsideDamperMinOpen);
         outsideAirFinalLoopOutput = Math.min(outsideAirFinalLoopOutput , 100);
         
         returnAirFinalOutput = Math.max(returnDamperMinOpen ,(100 - outsideAirFinalLoopOutput));

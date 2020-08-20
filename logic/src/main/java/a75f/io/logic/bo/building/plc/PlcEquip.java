@@ -247,7 +247,7 @@ public class PlcEquip {
             device.analog1In.setPointRef(processVariableId);
             device.analog1In.setEnabled(true);
             device.analog1In.setType(String.valueOf(config.analog1InputSensor - 1));
-        } else {
+        } else if(config.th1InputSensor > 0) {
             updateTargetValue(config.pidTargetValue,floorRef, roomRef, getThermistorBundle(config.th1InputSensor));
             if (!config.useAnalogIn2ForSetpoint){
                 updateProportionalRange(config.pidProportionalRange,floorRef, roomRef,getThermistorBundle(config.th1InputSensor));
@@ -759,14 +759,15 @@ public class PlcEquip {
         String unit = bundle.getString("unit");
         String maxVal = bundle.getString("maxVal");
         String incrementVal = bundle.getString("incrementVal");
+        String[] markers = bundle.getStringArray("markers");
 
-        Point DynamicTargetValueTag = new Point.Builder()
-                .setDisplayName(equipDis +"-dynamicTargetValue-" + dynamicTargetTag)
+        Point.Builder dynamicTargetValueTag = new Point.Builder()
+                .setDisplayName(equipDis + "-dynamicTargetValue-" + dynamicTargetTag)
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .setShortDis("Dynamic"+" "+shortDis)
+                .setShortDis("Dynamic" + " " + shortDis)
                 .setHisInterpolate("cov")
                 .addMarker("logical").addMarker("pid").addMarker("zone").addMarker("his").addMarker("cur")
                 .addMarker("sp")
@@ -776,12 +777,17 @@ public class PlcEquip {
                 .setMaxVal(maxVal)
                 .setIncrementVal(incrementVal)
                 .setUnit(unit)
-                .setTz(tz)
-                .build();
-        String DynamicTargetValueTagId = hayStack.addPoint(DynamicTargetValueTag);
-        hayStack.writeHisValById(DynamicTargetValueTagId, 0.0);
+                .setTz(tz);
+        if (markers != null) {
+            for (String marker : markers) {
+                dynamicTargetValueTag.addMarker(marker);
+            }
+        }
 
-        return DynamicTargetValueTagId;
+        String dynamicTargetValueTagId = hayStack.addPoint(dynamicTargetValueTag.build());
+        hayStack.writeHisValById(dynamicTargetValueTagId, 0.0);
+
+        return dynamicTargetValueTagId;
     }
 
     private String updateOffsetSensorValue(double spSensorOffset,String floorRef, String roomRef) {
@@ -821,8 +827,9 @@ public class PlcEquip {
         String unit = bundle.getString("unit");
         String maxVal = bundle.getString("maxVal");
         String incrementVal = bundle.getString("incrementVal");
+        String[] markers = bundle.getStringArray("markers");
 
-        Point pidTargetValue = new Point.Builder()
+        Point.Builder pidTargetValue = new Point.Builder()
                 .setDisplayName(equipDis + "-pidTargetValue")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
@@ -836,9 +843,14 @@ public class PlcEquip {
                 .setMinVal("0")
                 .setMaxVal(maxVal)
                 .setIncrementVal(incrementVal)
-                .setTz(tz)
-                .build();
-        String pidTargetValueId = hayStack.addPoint(pidTargetValue);
+                .setTz(tz);
+
+        if (markers != null) {
+            for (String marker : markers) {
+                pidTargetValue.addMarker(marker);
+            }
+        }
+        String pidTargetValueId = hayStack.addPoint(pidTargetValue.build());
         hayStack.writeDefaultValById(pidTargetValueId,targetValue);
         hayStack.writeHisValById(pidTargetValueId, targetValue);
 

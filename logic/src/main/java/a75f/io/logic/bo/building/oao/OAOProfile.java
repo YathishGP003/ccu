@@ -83,9 +83,10 @@ public class OAOProfile
     public void doOAO() {
 
         systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
+        double outsideDamperMinOpen = oaoEquip.getConfigNumVal("oao and not purge and not enhanced and outside and damper and min and open");
         doEpidemicControl();
         doEconomizing();
-        doDcvControl();
+        doDcvControl(outsideDamperMinOpen);
         
         outsideAirLoopOutput = Math.max(economizingLoopOutput, outsideAirCalculatedMinDamper);
         
@@ -97,15 +98,15 @@ public class OAOProfile
     
         Log.d(L.TAG_CCU_OAO,"outsideAirLoopOutput "+outsideAirLoopOutput+" outsideDamperMatTarget "+outsideDamperMatTarget+" outsideDamperMatMin "+outsideDamperMatMin
                             +" matTemp "+matTemp);
-        if (outsideAirLoopOutput > outsideAirCalculatedMinDamper) {
+        if (outsideAirLoopOutput > outsideDamperMinOpen) {
             if (matTemp < outsideDamperMatTarget && matTemp > outsideDamperMatMin) {
                 outsideAirFinalLoopOutput = outsideAirLoopOutput - outsideAirLoopOutput * ((outsideDamperMatTarget - matTemp) / (outsideDamperMatTarget - outsideDamperMatMin));
             }
             else {
-                outsideAirFinalLoopOutput = (matTemp <= outsideDamperMatMin) ? outsideAirCalculatedMinDamper : outsideAirLoopOutput;
+                outsideAirFinalLoopOutput = (matTemp <= outsideDamperMatMin) ? outsideDamperMinOpen : outsideAirLoopOutput;
             }
         } else {
-            outsideAirFinalLoopOutput = outsideAirLoopOutput;
+            outsideAirFinalLoopOutput = outsideDamperMinOpen;
         }
         outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , outsideAirCalculatedMinDamper);
         outsideAirFinalLoopOutput = Math.min(outsideAirFinalLoopOutput , 100);
@@ -234,7 +235,7 @@ public class OAOProfile
         oaoEquip.setHisVal("economizing and loop and output", economizingLoopOutput);
     }
     
-    public void doDcvControl() {
+    public void doDcvControl(double outsideDamperMinOpen) {
         double dcvCalculatedMinDamper = 0;
         boolean usePerRoomCO2Sensing = oaoEquip.getConfigNumVal("config and oao and co2 and sensing") > 0? true : false;
         if (usePerRoomCO2Sensing)
@@ -253,7 +254,6 @@ public class OAOProfile
             Log.d(L.TAG_CCU_OAO," dcvCalculatedMinDamper "+dcvCalculatedMinDamper+" returnAirCO2 "+returnAirCO2+" co2Threshold "+co2Threshold);
         }
         oaoEquip.setHisVal("co2 and weighted and average", L.ccu().systemProfile.getWeightedAverageCO2());
-        double outsideDamperMinOpen = oaoEquip.getConfigNumVal("oao and not purge and not enhanced and outside and damper and min and open");
         Occupancy systemOccupancy = ScheduleProcessJob.getSystemOccupancy();
         switch (systemOccupancy) {
             case OCCUPIED:

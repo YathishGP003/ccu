@@ -88,7 +88,7 @@ public class SmartNode
                                 .addMarker("sensor").addMarker("his")
                                 .setUnit("mV")
                                 .setMinVal("0")
-                                .setMaxVal("1000")
+                                .setMaxVal("10")
                                 .setTz(tz)
                                 .build();
     
@@ -105,7 +105,7 @@ public class SmartNode
                             .addMarker("sensor").addMarker("his")
                             .setUnit("mV")
                             .setMinVal("0")
-                            .setMaxVal("1000")
+                            .setMaxVal("10")
                             .setTz(tz)
                             .build();
     
@@ -147,7 +147,7 @@ public class SmartNode
                             .addMarker("cmd").addMarker("his")
                             .setUnit("dV")
                             .setMinVal("0")
-                            .setMaxVal("100")
+                            .setMaxVal("10")
                             .setTz(tz)
                             .build();
     
@@ -163,7 +163,7 @@ public class SmartNode
                              .addMarker("cmd").addMarker("his")
                              .setUnit("dV")
                              .setMinVal("0")
-                             .setMaxVal("100")
+                             .setMaxVal("10")
                              .setTz(tz)
                              .build();
     

@@ -168,7 +168,11 @@ public class Pulse
 					case ANALOG_IN_TWO:
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput2.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
+						if(logPointInfo.getMarkers().contains("pid")){
+							double dynamicVar = getAnalogConversion(phyPoint, logPoint, val);
+							hayStack.writeHisValById(logPoint.get("id").toString(),dynamicVar + getPiOffsetValue(nodeAddr) );
+						}else
+							hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
 						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : analog2In "+getAnalogConversion(phyPoint, logPoint, val));
 						break;
 					case TH1_IN:
@@ -313,8 +317,9 @@ public class Pulse
 			return analogVal;
 		}
 		Log.d(L.TAG_CCU_DEVICE,"Sensor input : type "+pp.get("analogType").toString()+" val "+analogVal);
-		return analogSensor.minEngineeringValue +
-		                (analogSensor.maxEngineeringValue- analogSensor.minEngineeringValue) * analogVal / (analogSensor.maxVoltage - analogSensor.minVoltage);
+		double analogConversion = analogSensor.minEngineeringValue +
+				(analogSensor.maxEngineeringValue- analogSensor.minEngineeringValue) * analogVal / (analogSensor.maxVoltage - analogSensor.minVoltage);
+		return CCUUtils.roundToTwoDecimal(analogConversion);
 		
 	}
 	
@@ -609,7 +614,7 @@ public class Pulse
 						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
 						break;
 					case ANALOG_IN_TWO:
-						val = smartStatRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
+						val = smartStatRegularUpdateMessage_t.update.externalAnalogVoltageInput2.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint,val));
 						break;
@@ -1110,5 +1115,13 @@ public class Pulse
 				LSerial.getInstance().setNodeSeeding(false);
 				break;
 		}
+	}
+
+	private static double getPiOffsetValue(short nodeAddr){
+		double isAnalog2Enabled = CCUHsApi.getInstance().readDefaultVal("point and pid and config and analog2 and enabled and setpoint and group == \"" + nodeAddr + "\"");
+		if(isAnalog2Enabled > 0)
+			return CCUHsApi.getInstance().readDefaultVal("point and pid and config and setpoint and sensor and offset and group == \"" + nodeAddr + "\"");
+		else
+			return 0;
 	}
 }

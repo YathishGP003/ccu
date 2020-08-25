@@ -73,7 +73,7 @@ public class PlcProfile extends ZoneProfile
         
         if (plcEquip.isEnabledAnalog2InForSp()) {
             Log.d(L.TAG_CCU_ZONE,"Use analog 2 offset "+plcEquip.getSpVariable());
-            tv = plcEquip.getSpVariable() + plcEquip.getSpSensorOffset();
+            tv = plcEquip.getSpVariable();
         }
         
         plcEquip.getPIController().updateControlVariable(tv, pv);

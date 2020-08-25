@@ -1634,7 +1634,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             double targetValue = (double) plcPoints.get("Target Value");
                             double inputValue = (double) plcPoints.get("Input Value");
                             nonTempControl.setPiInputText(String.format("%.2f", inputValue));
-                            nonTempControl.setPiOutputText(String.valueOf(122.01763));
+                            nonTempControl.setPiOutputText(String.valueOf(targetValue));
                             nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
                             if ((boolean) plcPoints.get("Dynamic Setpoint")){
                                 nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());

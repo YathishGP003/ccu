@@ -172,12 +172,20 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
     {
         super.onStop();
         EventBus.getDefault().unregister(this);
-        mBLEProvisionService.disconnect();
-        getActivity().unbindService(mServiceConnection);
-        mBLEProvisionService = null;
+        if (mBLEProvisionService != null){
+            mBLEProvisionService.disconnect();
+            mBLEProvisionService = null;
+        }
     }
-    
-    
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (getActivity() != null && isAdded()){
+            getActivity().unbindService(mServiceConnection);
+        }
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)

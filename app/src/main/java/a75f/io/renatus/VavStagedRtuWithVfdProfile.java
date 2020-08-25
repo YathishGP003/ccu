@@ -22,6 +22,7 @@ import android.widget.Spinner;
 import android.widget.ToggleButton;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.MeshUtil;
@@ -364,6 +365,11 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 break;
             case R.id.toggleAnalog2:
                 setConfigEnabledBackground("analog2",analog2Tb.isChecked() ? 1: 0);
+                if (analog2Tb.isChecked()){
+                    addFanSignal();
+                } else {
+                    deleteFanSignalExists();
+                }
                 break;
             case R.id.relay1Test:
             case R.id.relay2Test:
@@ -599,5 +605,31 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         msg.analog1.set((short)(10 * Double.parseDouble(analog2TestSpinner.getSelectedItem().toString())));
         msg.relayBitmap.set(relayStatus);
         MeshUtil.sendStructToCM(msg);
+    }
+
+    private void addFanSignal() {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(final Void... params) {
+                HashMap fanSignal = CCUHsApi.getInstance().read("point and system and cmd and fan and modulating");
+                if (systemProfile != null && systemProfile.getSystemEquipRef() != null && (fanSignal == null || fanSignal.get("id") == null)) {
+                    systemProfile.addAnalogCmdPoints(systemProfile.getSystemEquipRef());
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(final Void result) {
+                // continue what you are doing...
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void deleteFanSignalExists() {
+        HashMap fanSignal = CCUHsApi.getInstance().read("point and system and cmd and fan and modulating");
+        if ((fanSignal != null && fanSignal.get("id") != null)) {
+            CCUHsApi.getInstance().deleteEntity(fanSignal.get("id").toString());
+            CCUHsApi.getInstance().syncEntityTree();
+        }
     }
 }

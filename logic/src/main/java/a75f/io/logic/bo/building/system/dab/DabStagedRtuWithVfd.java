@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.system.dab;
 
+import android.util.Log;
+
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -66,7 +68,9 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         addConfigPoints(equipRef);
         addDabSystemTuners(equipRef);
         addAnalogConfigPoints(equipRef);
-        addAnalogCmdPoints(equipRef);
+        if (getConfigEnabled("analog2") > 0) {
+            addAnalogCmdPoints(equipRef);
+        }
         updateAhuRef(equipRef);
         
         new ControlMote(equipRef);
@@ -114,12 +118,6 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
                 }
             } else if(isEconomizingAvailable && (systemCoolingLoopOp > 0)){
                 signal = getConfigVal("analog2 and economizer");
-            } else if((epidemicState == EpidemicState.PREPURGE) && L.ccu().oaoProfile != null){
-                double smartPrePurgeFanSpeed = TunerUtil.readTunerValByQuery("system and prePurge and fan and speed", L.ccu().oaoProfile.getEquipRef());
-                signal = smartPrePurgeFanSpeed/10;
-            }else if((epidemicState == EpidemicState.POSTPURGE) && L.ccu().oaoProfile != null){
-                double smartPurgeFanLoopOp = TunerUtil.readTunerValByQuery("system and postPurge and fan and speed", L.ccu().oaoProfile.getEquipRef());
-                signal = smartPurgeFanLoopOp/10;
             }
             else if (stageStatus[FAN_1.ordinal()] > 0)
             {
@@ -138,6 +136,13 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
             else {
                 //For all other cases analog2-out should be the minimum config value
                 signal = getConfigVal("analog2 and default");
+            }
+            if((epidemicState == EpidemicState.PREPURGE) && L.ccu().oaoProfile != null){
+                double smartPrePurgeFanSpeed = TunerUtil.readTunerValByQuery("system and prePurge and fan and speed", L.ccu().oaoProfile.getEquipRef());
+                signal = Math.max(signal,smartPrePurgeFanSpeed/10);
+            }else if((epidemicState == EpidemicState.POSTPURGE) && L.ccu().oaoProfile != null){
+                double smartPurgeFanLoopOp = TunerUtil.readTunerValByQuery("system and postPurge and fan and speed", L.ccu().oaoProfile.getEquipRef());
+                signal = Math.max(signal,smartPurgeFanLoopOp/10);
             }
         }
         if(signal != getCmdSignal("fan and modulating"))
@@ -247,14 +252,15 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         CCUHsApi.getInstance().writeDefaultVal("point and system and config and "+tags, val);
     }
     
-    private void addAnalogCmdPoints(String equipref)
+    public void addAnalogCmdPoints(String equipref)
     {
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
         String siteRef = siteMap.get("id").toString();
         String tz = siteMap.get("tz").toString();
-        Point coolingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "FanSignal").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").setUnit("%").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(coolingSignal);
+        Point analogSignal = new Point.Builder().setDisplayName(equipDis + "-" + "FanSignal").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cmd").addMarker("fan").addMarker("modulating").addMarker("his").setUnit("%").setTz(tz).build();
+        String fansignalCmdPt = CCUHsApi.getInstance().addPoint(analogSignal);
+        CCUHsApi.getInstance().writeHisValById(fansignalCmdPt,0.0);
     }
     
     public double getCmdSignal(String cmd) {

@@ -250,9 +250,9 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                     return;
                 }
                 ArrayList<Double> targetVal = new ArrayList<Double>();
-                Sensor r = Sensor.getSensorList().get(i-1);
-                for (int pos = (int)(10*r.minEngineeringValue); pos <= (10*r.maxEngineeringValue); pos+=(10*r.incrementEgineeringValue)) {
-                    targetVal.add(pos /10.0);
+                Thermistor r = Thermistor.getThermistorList().get(i-1);
+                for (int pos = (int)(r.minEngineeringValue); pos <= (r.maxEngineeringValue); pos+=(r.incrementEgineeringValue)) {
+                    targetVal.add((double)pos);
                 }
                 ArrayAdapter<Double> targetValAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, targetVal);
                 targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

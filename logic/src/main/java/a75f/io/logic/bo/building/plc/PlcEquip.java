@@ -397,7 +397,7 @@ public class PlcEquip {
     private Bundle getAnalog2Bundle(int dynamicInputSensor) {
         Bundle mBundle = new Bundle();
         String shortDis = "Generic 0-10 Voltage";
-        String shortDisTarget = "Target Voltage";
+        String shortDisTarget = "Dynamic Target Voltage";
         String unit = "V";
         String maxVal = "10";
         String minVal = "0";
@@ -406,7 +406,7 @@ public class PlcEquip {
         switch (dynamicInputSensor) {
             case 0:
                 shortDis = "Generic 0-10 Voltage";
-                shortDisTarget = "Target Voltage";
+                shortDisTarget = "Dynamic Target Voltage";
                 unit = "V";
                 maxVal = "10";
                 minVal = "0";
@@ -415,7 +415,7 @@ public class PlcEquip {
                 break;
             case 1:
                 shortDis = "Pressure [0-2 in.]";
-                shortDisTarget = "Target Pressure";
+                shortDisTarget = "Dynamic Target Pressure";
                 unit = "Inch wc";
                 maxVal = "2";
                 minVal = "0";
@@ -424,7 +424,7 @@ public class PlcEquip {
                 break;
             case 2:
                 shortDis = "Pressure[0-0.25 in. Differential]";
-                shortDisTarget = "Target Pressure Differential";
+                shortDisTarget = "Dynamic Target Pressure Differential";
                 unit = "Inch wc";
                 maxVal = "0.25";
                 minVal = "-0.25";
@@ -433,7 +433,7 @@ public class PlcEquip {
                 break;
             case 3:
                 shortDis = "Airflow";
-                shortDisTarget = "Target Airflow";
+                shortDisTarget = "Dynamic Target Airflow";
                 unit = "CFM";
                 maxVal = "1000";
                 minVal = "0";
@@ -442,7 +442,7 @@ public class PlcEquip {
                 break;
             case 4:
                 shortDis = "Humidity";
-                shortDisTarget = "Target Humidity";
+                shortDisTarget = "Dynamic Target Humidity";
                 unit = "%";
                 maxVal = "100";
                 minVal = "0";
@@ -451,7 +451,7 @@ public class PlcEquip {
                 break;
             case 5:
                 shortDis = "CO2 Level";
-                shortDisTarget = "Target CO2 Level";
+                shortDisTarget = "Dynamic Target CO2 Level";
                 unit = "ppm";
                 maxVal = "2000";
                 minVal = "0";
@@ -460,7 +460,7 @@ public class PlcEquip {
                 break;
             case 6:
                 shortDis = "CO Level";
-                shortDisTarget = "Target CO Level";
+                shortDisTarget = "Dynamic Target CO Level";
                 unit = "ppm";
                 maxVal = "100";
                 minVal = "0";
@@ -469,7 +469,7 @@ public class PlcEquip {
                 break;
             case 7:
                 shortDis = "NO2 Level";
-                shortDisTarget = "Target NO2 Level";
+                shortDisTarget = "Dynamic Target NO2 Level";
                 unit = "ppm";
                 maxVal = "5";
                 minVal = "0";
@@ -478,7 +478,7 @@ public class PlcEquip {
                 break;
             case 8:
                 shortDis = "Current Drawn[CT 0-10]";
-                shortDisTarget = "Target Current Draw";
+                shortDisTarget = "Dynamic Target Current Draw";
                 unit = "A";
                 maxVal = "10";
                 minVal = "0";
@@ -487,7 +487,7 @@ public class PlcEquip {
                 break;
             case 9:
                 shortDis = "Current Drawn[CT 0-20]";
-                shortDisTarget = "Target Current Draw";
+                shortDisTarget = "Dynamic Target Current Draw";
                 unit = "A";
                 maxVal = "20";
                 minVal = "0";
@@ -496,7 +496,7 @@ public class PlcEquip {
                 break;
             case 10:
                 shortDis = "Current Drawn[CT 0-50]";
-                shortDisTarget = "Target Current Draw";
+                shortDisTarget = "Dynamic Target Current Draw";
                 unit = "A";
                 maxVal = "50";
                 minVal = "0";
@@ -534,7 +534,7 @@ public class PlcEquip {
                 maxVal = "302";
                 minVal = "-40";
                 incrementVal = "1.0";
-                markers = null;
+                markers = new String[]{"temp"};
                 break;
             case 2:
                 shortDis = "Generic 1-100kohms";
@@ -543,7 +543,7 @@ public class PlcEquip {
                 maxVal = "302";
                 minVal = "-40";
                 incrementVal = "1.0";
-                markers = null;
+                markers = new String[]{"temp"};
                 break;
         }
 

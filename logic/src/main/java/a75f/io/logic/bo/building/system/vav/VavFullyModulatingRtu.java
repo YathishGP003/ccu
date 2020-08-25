@@ -199,7 +199,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             }else if(VavSystemController.getInstance().getSystemState() == HEATING)
                 systemFanLoopOp = Math.max((int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier),smartPurgeVAVFanLoopOp);
             else
-                systemFanLoopOp = 0;
+                systemFanLoopOp = smartPurgeVAVFanLoopOp;
         }else if ((VavSystemController.getInstance().getSystemState() == COOLING) && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
         {
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
@@ -267,6 +267,9 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                 signal = 1;
             else if((VavSystemController.getInstance().getSystemState() == HEATING) && (systemFanLoopOp > 0))
                 signal = 1;
+            else if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE) && (L.ccu().oaoProfile != null) && (systemFanLoopOp > 0)){
+                signal = 1;
+            }
             if(signal != getCmdSignal("occupancy"))
                 setCmdSignal("occupancy",signal);
         } else {

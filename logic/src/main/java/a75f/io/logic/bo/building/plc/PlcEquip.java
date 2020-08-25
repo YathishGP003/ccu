@@ -264,7 +264,7 @@ public class PlcEquip {
         }
 
         device.analog1Out.setPointRef(controlVariableId);
-        device.analog1Out.setType(config.analog1AtMinOutput + "-" + config.analog1AtMaxOutput);
+        device.analog1Out.setType(config.analog1AtMinOutput + "-" + config.analog1AtMaxOutput+"v");
         device.analog1Out.setEnabled(true);
         device.addPointsToDb();
 
@@ -752,7 +752,7 @@ public class PlcEquip {
         hayStack.writeHisValByQuery("point and config and analog1 and max and output and equipRef == \"" + equipRef + "\"", config.analog1AtMaxOutput);
 
         hayStack.writeDefaultVal("point and config and enabled and zero and error and midpoint and equipRef == \"" + equipRef + "\"", config.expectZeroErrorAtMidpoint ? 1.0 : 0);
-        SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_OUT_ONE.toString(), (int) config.analog1AtMinOutput + "-" + (int) config.analog1AtMaxOutput);
+        SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_OUT_ONE.toString(), (int) config.analog1AtMinOutput + "-" + (int) config.analog1AtMaxOutput +"v");
 
 
         targetValue = config.pidTargetValue;

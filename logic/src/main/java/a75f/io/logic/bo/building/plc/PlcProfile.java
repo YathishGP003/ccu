@@ -20,6 +20,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 public class PlcProfile extends ZoneProfile
 {
     PlcEquip plcEquip;
+    int outputSignal = 0;
     
     public void addPlcEquip(short addr, PlcProfileConfiguration config, String floorRef, String roomRef, String processVariable, String dynamicTargetTag) {
         plcEquip = new PlcEquip(getProfileType(), addr);
@@ -92,7 +93,10 @@ public class PlcProfile extends ZoneProfile
         int eStatus = (int)(Math.round(100*cv)/100);
         if(plcEquip.getControlVariable() != curCv )
             plcEquip.setControlVariable(curCv);
-        plcEquip.setEquipStatus(eStatus);
+        if (eStatus != outputSignal){
+            plcEquip.setEquipStatus(eStatus);
+        }
+        outputSignal = eStatus;
         plcEquip.getPIController().dump();
         Log.d(L.TAG_CCU_ZONE, "PlcProfile, pv: "+pv+", tv: "+tv+", cv: "+cv);
     }

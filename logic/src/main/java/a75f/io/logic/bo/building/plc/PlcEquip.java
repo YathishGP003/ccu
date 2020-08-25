@@ -915,6 +915,7 @@ public class PlcEquip {
                 .setShortDis(shortDisTarget)
                 .addMarker("config").addMarker("pid").addMarker("zone").addMarker("his").addMarker("writable")
                 .addMarker("target").addMarker("value")
+                .setHisInterpolate("cov")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit(unit)
                 .setMinVal(minVal)

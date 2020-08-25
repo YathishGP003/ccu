@@ -264,7 +264,7 @@ public class PlcEquip {
         }
 
         device.analog1Out.setPointRef(controlVariableId);
-        device.analog1Out.setType(config.analog1AtMinOutput + "-" + config.analog1AtMaxOutput+"v");
+        device.analog1Out.setType((int)config.analog1AtMinOutput + "-" + (int)config.analog1AtMaxOutput+"v");
         device.analog1Out.setEnabled(true);
         device.addPointsToDb();
 
@@ -518,7 +518,7 @@ public class PlcEquip {
 
     private Bundle getThermistorBundle(int thermistorInputSensor) {
         Bundle mBundle = new Bundle();
-        String shortDis = "10K type 2 probe";
+        String shortDis = "Temperature";
         String shortDisTarget = "Target Temperature";
         String unit = "\u00B0F";
         String maxVal = "302";
@@ -528,16 +528,8 @@ public class PlcEquip {
         switch (thermistorInputSensor) {
             case 0:
             case 1:
-                shortDis = "10K type 2 probe";
-                shortDisTarget = "Target Temperature";
-                unit = "\u00B0F";
-                maxVal = "302";
-                minVal = "-40";
-                incrementVal = "1.0";
-                markers = new String[]{"temp"};
-                break;
             case 2:
-                shortDis = "Generic 1-100kohms";
+                shortDis = "Temperature";
                 shortDisTarget = "Target Temperature";
                 unit = "\u00B0F";
                 maxVal = "302";

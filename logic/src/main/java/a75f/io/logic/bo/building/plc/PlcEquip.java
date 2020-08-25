@@ -110,7 +110,6 @@ public class PlcEquip {
                 .addMarker("config").addMarker("pid").addMarker("zone").addMarker("writable")
                 .addMarker("th1").addMarker("input").addMarker("sensor")
                 .setGroup(String.valueOf(nodeAddr))
-                .setUnit("Ohm")
                 .setTz(tz)
                 .build();
         String th1InputSensorId = hayStack.addPoint(th1InputSensor);
@@ -125,7 +124,6 @@ public class PlcEquip {
                 .addMarker("config").addMarker("pid").addMarker("zone").addMarker("his").addMarker("writable")
                 .addMarker("analog1").addMarker("min").addMarker("output")
                 .setGroup(String.valueOf(nodeAddr))
-                .setUnit("V")
                 .setTz(tz)
                 .build();
         String analog1AtMinOutputId = hayStack.addPoint(analog1AtMinOutput);
@@ -141,7 +139,6 @@ public class PlcEquip {
                 .addMarker("config").addMarker("pid").addMarker("zone").addMarker("his").addMarker("writable")
                 .addMarker("analog1").addMarker("max").addMarker("output")
                 .setGroup(String.valueOf(nodeAddr))
-                .setUnit("V")
                 .setTz(tz)
                 .build();
         String analog1AtMaxOutputId = hayStack.addPoint(analog1AtMaxOutput);
@@ -172,7 +169,6 @@ public class PlcEquip {
                 .addMarker("config").addMarker("pid").addMarker("zone").addMarker("writable")
                 .addMarker("analog2").addMarker("input").addMarker("sensor")
                 .setGroup(String.valueOf(nodeAddr))
-                .setUnit("mV")
                 .setTz(tz)
                 .build();
         String analog2InputSensorId = hayStack.addPoint(analog2InputSensor);

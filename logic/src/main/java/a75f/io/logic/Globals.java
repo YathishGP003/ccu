@@ -63,6 +63,7 @@ import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.pubnub.PubNubHandler;
+import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.watchdog.Watchdog;
 
 /*
@@ -384,6 +385,7 @@ public class Globals {
             CcuLog.d(L.TAG_CCU, "Site does not exist. Profiles not loaded");
             return;
         }
+        BuildingTuners.getInstance().addBuildingTunerEquip();
         HashMap equip = CCUHsApi.getInstance().read("equip and system");
         boolean isDefaultSystem = false;
         if (equip != null && equip.size() > 0) {

@@ -356,7 +356,7 @@ public class PlcEquip {
                 break;
             case 9:
                 shortDis = "Current Drawn[CT 0-10]";
-                shortDisTarget = "Target Current Drawn[CT 0-10]";
+                shortDisTarget = "Target Current Draw[CT 0-10]";
                 unit = "A";
                 maxVal = "10";
                 minVal = "0";
@@ -365,7 +365,7 @@ public class PlcEquip {
                 break;
             case 10:
                 shortDis = "Current Drawn[CT 0-20]";
-                shortDisTarget = "Target Current Drawn[CT 0-20]";
+                shortDisTarget = "Target Current Draw[CT 0-20]";
                 unit = "A";
                 maxVal = "20";
                 minVal = "0";
@@ -374,7 +374,7 @@ public class PlcEquip {
                 break;
             case 11:
                 shortDis = "Current Drawn[CT 0-50]";
-                shortDisTarget = "Target Current Drawn[CT 0-50]";
+                shortDisTarget = "Target Current Draw[CT 0-50]";
                 unit = "A";
                 maxVal = "50";
                 minVal = "0";
@@ -478,7 +478,7 @@ public class PlcEquip {
                 break;
             case 8:
                 shortDis = "Current Drawn[CT 0-10]";
-                shortDisTarget = "Dynamic Target Current Drawn[CT 0-10]";
+                shortDisTarget = "Dynamic Target Current Draw[CT 0-10]";
                 unit = "A";
                 maxVal = "10";
                 minVal = "0";
@@ -487,7 +487,7 @@ public class PlcEquip {
                 break;
             case 9:
                 shortDis = "Current Drawn[CT 0-20]";
-                shortDisTarget = "Dynamic Target Current Drawn[CT 0-20]";
+                shortDisTarget = "Dynamic Target Current Draw[CT 0-20]";
                 unit = "A";
                 maxVal = "20";
                 minVal = "0";
@@ -496,7 +496,7 @@ public class PlcEquip {
                 break;
             case 10:
                 shortDis = "Current Drawn[CT 0-50]";
-                shortDisTarget = "Dynamic Target Current Drawn[CT 0-50]";
+                shortDisTarget = "Dynamic Target Current Draw[CT 0-50]";
                 unit = "A";
                 maxVal = "50";
                 minVal = "0";

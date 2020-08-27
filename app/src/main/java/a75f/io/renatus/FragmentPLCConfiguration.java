@@ -1,7 +1,6 @@
 package a75f.io.renatus;
 
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -251,8 +250,8 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 }
                 ArrayList<Double> targetVal = new ArrayList<Double>();
                 Thermistor r = Thermistor.getThermistorList().get(i-1);
-                for (int pos = (int)(r.minEngineeringValue); pos <= (r.maxEngineeringValue); pos+=(r.incrementEgineeringValue)) {
-                    targetVal.add((double)pos);
+                for (int pos = (int)(100.0*r.minEngineeringValue); pos <= (100.0*r.maxEngineeringValue); pos+=(100.0*r.incrementEngineeringValue)) {
+                    targetVal.add(pos/100.0);
                 }
                 ArrayAdapter<Double> targetValAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, targetVal);
                 targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

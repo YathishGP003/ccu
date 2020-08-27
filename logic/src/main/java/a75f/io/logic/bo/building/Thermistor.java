@@ -14,7 +14,7 @@ public class Thermistor
     public String mappingTable;//: "20K probe lookup table"
     public double minEngineeringValue;//: -40
     public double maxEngineeringValue;//: 302
-    public double incrementEgineeringValue;//: 1.0
+    public double incrementEngineeringValue;//: 0.5
     
     //TODO- Table
     public Thermistor(String name, String unit, String table, double minEngVal, double maxEngVal,double incVal) {
@@ -23,14 +23,14 @@ public class Thermistor
         this.mappingTable = table;
         this.minEngineeringValue = minEngVal;
         this.maxEngineeringValue = maxEngVal;
-        this.incrementEgineeringValue = incVal;
+        this.incrementEngineeringValue = incVal;
         
     }
     
     public static List<Thermistor> getThermistorList() {
         ArrayList<Thermistor> thermistors = new ArrayList<>();
-        thermistors.add(new Thermistor("10K type 2 probe","\u00B0F","20K probe lookup table",-40,302,1));
-        thermistors.add(new Thermistor("Generic 1-100kohms","\u00B0F","20K probe lookup table",-40,302,1));
+        thermistors.add(new Thermistor("10K type 2 probe","\u00B0F","20K probe lookup table",-40,302,0.5));
+        thermistors.add(new Thermistor("Generic 1-100kohms","\u00B0F","20K probe lookup table",-40,302,0.5));
         
         return thermistors;
     }

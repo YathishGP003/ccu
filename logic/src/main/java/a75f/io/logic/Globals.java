@@ -385,10 +385,10 @@ public class Globals {
             CcuLog.d(L.TAG_CCU, "Site does not exist. Profiles not loaded");
             return;
         }
-        BuildingTuners.getInstance().addBuildingTunerEquip();
         HashMap equip = CCUHsApi.getInstance().read("equip and system");
         boolean isDefaultSystem = false;
         if (equip != null && equip.size() > 0) {
+            BuildingTuners.getInstance().addBuildingTunerEquip();
             Equip eq = new Equip.Builder().setHashMap(equip).build();
             CcuLog.d(L.TAG_CCU, "Load SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
             switch (ProfileType.valueOf(eq.getProfile())) {

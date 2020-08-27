@@ -356,7 +356,7 @@ public class PlcEquip {
                 break;
             case 9:
                 shortDis = "Current Drawn[CT 0-10]";
-                shortDisTarget = "Target Current Draw[CT 0-10]";
+                shortDisTarget = "Target Current Draw";
                 unit = "A";
                 maxVal = "10";
                 minVal = "0";
@@ -365,7 +365,7 @@ public class PlcEquip {
                 break;
             case 10:
                 shortDis = "Current Drawn[CT 0-20]";
-                shortDisTarget = "Target Current Draw[CT 0-20]";
+                shortDisTarget = "Target Current Draw";
                 unit = "A";
                 maxVal = "20";
                 minVal = "0";
@@ -374,7 +374,7 @@ public class PlcEquip {
                 break;
             case 11:
                 shortDis = "Current Drawn[CT 0-50]";
-                shortDisTarget = "Target Current Draw[CT 0-50]";
+                shortDisTarget = "Target Current Draw";
                 unit = "A";
                 maxVal = "50";
                 minVal = "0";
@@ -478,7 +478,7 @@ public class PlcEquip {
                 break;
             case 8:
                 shortDis = "Current Drawn[CT 0-10]";
-                shortDisTarget = "Dynamic Target Current Draw[CT 0-10]";
+                shortDisTarget = "Dynamic Target Current Draw";
                 unit = "A";
                 maxVal = "10";
                 minVal = "0";
@@ -487,7 +487,7 @@ public class PlcEquip {
                 break;
             case 9:
                 shortDis = "Current Drawn[CT 0-20]";
-                shortDisTarget = "Dynamic Target Current Draw[CT 0-20]";
+                shortDisTarget = "Dynamic Target Current Draw";
                 unit = "A";
                 maxVal = "20";
                 minVal = "0";
@@ -496,7 +496,7 @@ public class PlcEquip {
                 break;
             case 10:
                 shortDis = "Current Drawn[CT 0-50]";
-                shortDisTarget = "Dynamic Target Current Draw[CT 0-50]";
+                shortDisTarget = "Dynamic Target Current Draw";
                 unit = "A";
                 maxVal = "50";
                 minVal = "0";
@@ -523,7 +523,7 @@ public class PlcEquip {
         String unit = "\u00B0F";
         String maxVal = "302";
         String minVal = "-40";
-        String incrementVal = "1.0";
+        String incrementVal = "0.5";
         String[] markers = null;
         switch (thermistorInputSensor) {
             case 0:
@@ -534,7 +534,7 @@ public class PlcEquip {
                 unit = "\u00B0F";
                 maxVal = "302";
                 minVal = "-40";
-                incrementVal = "1.0";
+                incrementVal = "0.5";
                 markers = new String[]{"temp"};
                 break;
         }

@@ -235,8 +235,8 @@ public class PlcEquip {
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
 
         if (config.analog1InputSensor > 0) {
-            updateTargetValue(floorRef, roomRef, config);
             if (!config.useAnalogIn2ForSetpoint) {
+                updateTargetValue(floorRef, roomRef, config);
                 updateProportionalRange(config.pidProportionalRange, floorRef, roomRef, getAnalog1Bundle(config.analog1InputSensor));
             }
             String processVariableId = updateProcessVariable(floorRef, roomRef, processVar, config);
@@ -244,8 +244,8 @@ public class PlcEquip {
             device.analog1In.setEnabled(true);
             device.analog1In.setType(String.valueOf(config.analog1InputSensor - 1));
         } else if(config.th1InputSensor > 0) {
-            updateTargetValue(floorRef, roomRef, config);
             if (!config.useAnalogIn2ForSetpoint){
+                updateTargetValue(floorRef, roomRef, config);
                 updateProportionalRange(config.pidProportionalRange,floorRef, roomRef,getThermistorBundle(config.th1InputSensor));
             }
             String processVariableId = updateProcessVariable(floorRef, roomRef, processVar, config);

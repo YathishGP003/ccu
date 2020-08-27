@@ -175,7 +175,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             String siteCountry = site.get("geoCountry").toString();
             String siteZipCode = site.get("geoPostalCode").toString();
             CCUUtils.getLocationInfo(siteCountry + " " + siteZipCode);
-            BuildingTuners.getInstance().addBuildingTunerEquip();
             floorMenu.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

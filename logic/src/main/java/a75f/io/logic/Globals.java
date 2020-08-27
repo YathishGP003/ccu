@@ -63,6 +63,7 @@ import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.pubnub.PubNubHandler;
+import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.watchdog.Watchdog;
 
 /*
@@ -183,7 +184,12 @@ public class Globals {
             @Override
             public void run()
             {
-                CCUHsApi.getInstance().importBuildingTuners();
+                //If site already exists , import building tuners from backend before initializing building tuner equip.
+                HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
+                if (!site.isEmpty()) {
+                    CCUHsApi.getInstance().importBuildingTuners();
+                    BuildingTuners.getInstance().updateBuildingTuners();
+                }
             
                 loadEquipProfiles();
             
@@ -192,8 +198,7 @@ public class Globals {
             
                 if (!isPubnubSubscribed())
                 {
-                    HashMap site = CCUHsApi.getInstance().read("site");
-                    if (site.size() > 0) {
+                    if (!site.isEmpty()) {
                         String siteLUID = site.get("id").toString();
                         String siteGUID = CCUHsApi.getInstance().getGUID(siteLUID);
                         if (siteGUID != null && siteGUID != "") {

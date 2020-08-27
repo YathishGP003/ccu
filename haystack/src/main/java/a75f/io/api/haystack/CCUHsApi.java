@@ -1050,7 +1050,6 @@ public class CCUHsApi
 
             HGrid responseGrid = hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(hDictList.toArray(new HDict[hDictList.size()])));
         }
-
         return true;
     }
 
@@ -1131,11 +1130,17 @@ public class CCUHsApi
                 {
                     if (p.getEquipRef().equals(q.getId()))
                     {
-                        p.setSiteRef(hsApi.getSiteId().toString());
-                        p.setFloorRef("@SYSTEM");
-                        p.setRoomRef("@SYSTEM");
-                        p.setEquipRef(equipLuid);
-                        hsApi.putUIDMap(hsApi.addPoint(p), p.getId());
+                        String guidKey = StringUtils.prependIfMissing(p.getId(), "@");
+                        if (getLUID(guidKey) == null) {
+                            p.setSiteRef(hsApi.getSiteId().toString());
+                            p.setFloorRef("@SYSTEM");
+                            p.setRoomRef("@SYSTEM");
+                            p.setEquipRef(equipLuid);
+                            hsApi.putUIDMap(hsApi.addPoint(p), p.getId());
+                        } else {
+                            CcuLog.i(TAG, "Point already imported "+p.getId());
+                        }
+                        
                     }
                 }
             }
@@ -1147,7 +1152,7 @@ public class CCUHsApi
         String siteId = getSiteGuid();
         
         if (StringUtils.isBlank(siteId)) {
-            CcuLog.e("CCU_HS", " Site ID Invalid : Skip Importing building tuner.");
+            CcuLog.e(TAG, " Site ID Invalid : Skip Importing building tuner.");
             return;
         }
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
@@ -1794,5 +1799,4 @@ public class CCUHsApi
         }
         return map;
     }
-
 }

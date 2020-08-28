@@ -197,6 +197,7 @@ public class PlcEquip {
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("sp").addMarker("pid").addMarker("zone").addMarker("his").addMarker("logical")
                 .addMarker("control").addMarker("variable")
+                .setUnit("%")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();

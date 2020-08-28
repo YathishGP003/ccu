@@ -1059,6 +1059,46 @@
 
                 </TableRow>
 
+                <TableRow
+                    android:id="@+id/tableRow16"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/vfd_profile_config_margin_top" >
+
+                    <RelativeLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="@dimen/vfd_profile_config_layout_height">
+
+                        <TextView
+                            android:id="@+id/textAnalog2Default"
+                            android:layout_width="@dimen/vfd_profile_config_text_width"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_alignParentLeft="true"
+                            android:textSize="@dimen/text_small_xlarge"
+                            android:textAppearance="@style/text_appearance"
+                            android:text="@string/label_vfd_analog2_min"/>
+
+                        <Spinner
+                            android:id="@+id/analog2Default"
+                            android:layout_width="@dimen/vfd_profile_spinner_width"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginLeft="@dimen/vfd_profile_spinner_margin_left"
+                            android:layout_toRightOf="@+id/textAnalog2Default"
+                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            android:entries="@array/hvac_stage_selector"
+                            tools:listitem="@layout/spinner_dropdown_item"/>
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="@dimen/vfd_profile_config_layout_height">
+                    </RelativeLayout>
+                </TableRow>
+
 
             </TableLayout>
 

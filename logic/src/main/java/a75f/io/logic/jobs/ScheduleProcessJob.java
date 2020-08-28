@@ -618,7 +618,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         if (systemOccupancyValue != systemOccupancy.ordinal()){
             Globals.getInstance().getApplicationContext().sendBroadcast(new Intent(ACTION_OCCUPANCY_CHANGE));
         }
-        
+
         CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and mode",(double)systemOccupancy.ordinal());
         CcuLog.d(TAG_CCU_JOB, "systemOccupancy status : " + systemOccupancy.name());
     }
@@ -1090,7 +1090,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         ArrayList inputValue = CCUHsApi.getInstance().readAll("point and process and logical and variable and equipRef == \""+equipID+"\"");
         ArrayList piSensorValue = CCUHsApi.getInstance().readAll("point and analog1 and config and input and sensor and equipRef == \""+equipID+"\"");
         double dynamicSetpoint = CCUHsApi.getInstance().readDefaultVal("point and analog2 and config and enabled and equipRef == \""+equipID+"\"");
-        double targetValue = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and pid and target and config and equipRef == \""+equipID+"\"");
+        int th1InputSensor =  CCUHsApi.getInstance().readDefaultVal("point and config and th1 and input and sensor and equipRef == \"" + equipID + "\"").intValue();
+        double targetValue = dynamicSetpoint > 0 ? 0: CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and pid and target and config and equipRef == \""+equipID+"\"");
         double analog1sensorType = CCUHsApi.getInstance().readPointPriorityValByQuery("point and analog1 and config and input and sensor and equipRef == \""+equipID+"\"");
         double analog2sensorType = CCUHsApi.getInstance().readPointPriorityValByQuery("point and analog2 and config and input and sensor and equipRef == \""+equipID+"\"");
         double offsetValue = CCUHsApi.getInstance().readDefaultVal("point and config and setpoint and sensor and offset and equipRef == \""+equipID+"\"");
@@ -1120,53 +1121,97 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
         if(dynamicSetpoint == 1) {
             plcPoints.put("Dynamic Setpoint",true);
-            targetValue = CCUHsApi.getInstance().readHisValByQuery("point and setpoint and variable and equipRef == \""+equipID+"\"") + offsetValue;
+            targetValue = CCUHsApi.getInstance().readHisValByQuery("point and dynamic and target and value and equipRef == \""+equipID+"\"");
         }else {
             if(dynamicSetpoint == 0)
                 plcPoints.put("Dynamic Setpoint",false);
         }
 
         plcPoints.put("Target Value",targetValue);
-        if(analog1sensorType == 1 || analog1sensorType == 0)
-        {
-            plcPoints.put("Unit Type","Voltage");
-            plcPoints.put("Unit","V");
+        if (dynamicSetpoint > 0) {
+            switch ((int) analog2sensorType) {
+                case 0:
+                    plcPoints.put("Dynamic Unit Type", "Voltage");
+                    plcPoints.put("Dynamic Unit", "V");
+                    break;
+                case 1:
+                case 2:
+                    plcPoints.put("Dynamic Unit Type", "Pressure");
+                    plcPoints.put("Dynamic Unit", "WC");
+                    break;
+                case 3:
+                    plcPoints.put("Dynamic Unit Type", "Airflow");
+                    plcPoints.put("Dynamic Unit", "%");
+                    break;
+                case 4:
+                    plcPoints.put("Dynamic Unit Type", "Humidity");
+                    plcPoints.put("Dynamic Unit", "%");
+                    break;
+                case 5:
+                    plcPoints.put("Dynamic Unit Type", "CO2");
+                    plcPoints.put("Dynamic Unit", "PPM");
+                    break;
+                case 6:
+                    plcPoints.put("Dynamic Unit Type", "CO");
+                    plcPoints.put("Dynamic Unit", "PPM");
+                    break;
+                case 7:
+                    plcPoints.put("Dynamic Unit Type", "NO2");
+                    plcPoints.put("Dynamic Unit", "PPM");
+                    break;
+                case 8:
+                case 9:
+                case 10:
+                    plcPoints.put("Dynamic Unit Type", "Current");
+                    plcPoints.put("Dynamic Unit", "AMPS");
+                    break;
+            }
         }
-        if(analog1sensorType == 2 || analog1sensorType == 3)
-        {
-            plcPoints.put("Unit Type","Pressure");
-            plcPoints.put("Unit","WC");
+
+        switch ((int) analog1sensorType) {
+            case 0:
+            case 1:
+                plcPoints.put("Unit Type", "Voltage");
+                plcPoints.put("Unit", "V");
+                break;
+            case 2:
+            case 3:
+                plcPoints.put("Unit Type", "Pressure");
+                plcPoints.put("Unit", "WC");
+                break;
+            case 4:
+                plcPoints.put("Unit Type", "Airflow");
+                plcPoints.put("Unit", "%");
+                break;
+            case 5:
+                plcPoints.put("Unit Type", "Humidity");
+                plcPoints.put("Unit", "%");
+                break;
+            case 6:
+                plcPoints.put("Unit Type", "CO2");
+                plcPoints.put("Unit", "PPM");
+                break;
+            case 7:
+                plcPoints.put("Unit Type", "CO");
+                plcPoints.put("Unit", "PPM");
+                break;
+            case 8:
+                plcPoints.put("Unit Type", "NO2");
+                plcPoints.put("Unit", "PPM");
+                break;
+            case 9:
+            case 10:
+            case 11:
+                plcPoints.put("Unit Type", "Current");
+                plcPoints.put("Unit", "AMPS");
+                break;
         }
-        if(analog1sensorType == 4)
-        {
-            plcPoints.put("Unit Type","Airflow");
-            plcPoints.put("Unit","%");
+
+        if (th1InputSensor == 1 || th1InputSensor == 2) {
+            plcPoints.put("Unit Type", "Temperature");
+            plcPoints.put("Unit", "\u00B0F");
         }
-        if(analog1sensorType == 5)
-        {
-            plcPoints.put("Unit Type","Humidity");
-            plcPoints.put("Unit","%");
-        }
-        if(analog1sensorType == 6)
-        {
-            plcPoints.put("Unit Type","CO2");
-            plcPoints.put("Unit","PPM");
-        }
-        if(analog1sensorType == 7)
-        {
-            plcPoints.put("Unit Type","CO");
-            plcPoints.put("Unit","PPM");
-        }
-        if(analog1sensorType == 8)
-        {
-            plcPoints.put("Unit Type","NO2");
-            plcPoints.put("Unit","PPM");
-        }
-        if(analog1sensorType == 9 || analog1sensorType == 10 || analog1sensorType == 11)
-        {
-            plcPoints.put("Unit Type","Current");
-            plcPoints.put("Unit","AMPS");
-        }
+
         return plcPoints;
     }
 
@@ -1539,7 +1584,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     }
     
     public static long getTemporaryHoldExpiry(Equip q) {
-        
+
         HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \""+q.getId()+"\"");
         if (coolDT.size() > 0) {
             HashMap thMap = HSUtil.getPriorityLevel(coolDT.get("id").toString(), 4);

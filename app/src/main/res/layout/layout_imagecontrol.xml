@@ -35,15 +35,15 @@
                 android:layout_marginLeft="142dp"
                 android:layout_marginTop="30dp"
                 android:text="420"
-                android:textSize="30sp" />
+                android:textSize="18sp" />
             <TextView
                 android:id="@+id/textInputCFM"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="CFM"
-                android:textSize="20sp"
+                android:textSize="16sp"
                 android:textColor="@color/orange_75f"
-                android:layout_marginTop="-12dp"
+                android:layout_marginTop="-8dp"
                 android:layout_alignLeft="@+id/textInput"
                 android:layout_below="@+id/textInput"/>
             <TextView
@@ -51,17 +51,16 @@
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="420"
-                android:textSize="30sp"
-                android:layout_marginLeft="5dp"
-                android:layout_marginTop="166dp"/>
+                android:textSize="16sp"
+                android:layout_marginTop="170dp"/>
             <TextView
                 android:id="@+id/textOutputCFM"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="CFM"
-                android:textSize="20sp"
+                android:textSize="16sp"
                 android:textColor="@color/orange_75f"
-                android:layout_marginTop="-12dp"
+                android:layout_marginTop="-8dp"
                 android:layout_alignLeft="@+id/textOutput"
                 android:layout_below="@+id/textOutput"/>
         </RelativeLayout>
@@ -83,13 +82,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:text="2456.4"
-                android:textSize="39sp" />
+                android:textSize="16sp" />
             <TextView
                 android:id="@+id/textTotalUnit"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="KWh"
-                android:textSize="24sp"
+                android:textSize="16sp"
                 android:textColor="@color/orange_75f"
                 android:layout_marginTop="5dp"
                 android:layout_toEndOf="@+id/textEmTotal"
@@ -101,13 +100,13 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textEmTotal"
                 android:text="25"
-                android:textSize="39sp" />
+                android:textSize="16sp" />
             <TextView
                 android:id="@+id/textCurrentUnit"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="KWh"
-                android:textSize="24sp"
+                android:textSize="16sp"
                 android:textColor="@color/orange_75f"
                 android:layout_marginTop="5dp"
                 android:layout_toEndOf="@+id/textEmCurrent"

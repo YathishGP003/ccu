@@ -63,6 +63,7 @@ import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.pubnub.PubNubHandler;
+import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.watchdog.Watchdog;
 
 /*
@@ -387,6 +388,7 @@ public class Globals {
         HashMap equip = CCUHsApi.getInstance().read("equip and system");
         boolean isDefaultSystem = false;
         if (equip != null && equip.size() > 0) {
+            BuildingTuners.getInstance().addBuildingTunerEquip();
             Equip eq = new Equip.Builder().setHashMap(equip).build();
             CcuLog.d(L.TAG_CCU, "Load SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
             switch (ProfileType.valueOf(eq.getProfile())) {

@@ -1,25 +1,40 @@
- - Merge branch 'Bug/samjith/1692_Intermediate_damper_values_historized' into 'master'
- - Merge branch 'story/mahesh/1814-CCU_hide_expired_vacations' into 'master'
- - Merge branch 'story/anilkumar/2108-OAO_outside_damper_min_open_consumption_along_with_return_damper_min' into 'master'
- - Merge branch 'story/anilkumar/2109_Fan_speed_consumption_during_purge_changes' into 'master'
- - Merge branch 'bug/anilkumar/2137-Epidemic_VAV_fully_modulating_in_heatonly_cooling_direction_fan_signal_off' into 'master'
- - Merge branch 'bug/mahesh/119-CCU_crash_when_minimize_during_registration' into 'master'
- - outside damper min fix,when co2 is higher and mat is lower
- - outside damper min fix,when co2 is higher and mat is lower
- - rebase to master
- - Merge branch 'bug/anilkumar/1965-Fan_signal_his_value_default_write_for_DAB_with_VFD' into 'master'
- - handle purge fan speed changes, toggle off
- - BUG : 1690 invalid damper pos during adjustment
- - 2108, OAO outside damper min open and return damper min open consumption
- - 2109, Fan speed, take max value during purge
- - During purge, enable relay 3 fan
- - handle service on background
- - set system profile fragment
- - #2137, during purge, fan speed should turn on, in heatonly mode and system calls for cooling
- - Resolved review comments and compiler warnings
- - BUG 1692 : Unwanted 'his' data writes during Normalization and Damper target adjustments
- - delete fan signal if analog 2 disabled
- - add fan signal if analog out 2 enabled
- - init fan signal his value with 0
- - initialize fansignal for VFD while registration
- - hide expired vactions from the list
+ - Merge branch 'Bug/samjith/2051_ccu_requires_reboot_after_upgrade' into 'master'
+ - Merge branch 'story/samjith/2105_Analog2Out_minimum_for_vfd_profiles' into 'master'
+ - Merge branch 'bug/anilkumar/2441-Upgrade_ccu_causing_crash' into 'master'
+ - Merge branch 'story/mahesh/116-CCU_PI_profile_logical_tags_creation' into 'master'
+ - fix and clean code
+ - clean up
+ - fix target shortDis for current
+ - shortDis fix for current
+ - fixes
+ - update physical sensor min, max
+ - update markers for thermistor
+ - fix the physical type
+ - update unit
+ - clean
+ - fixes
+ - update pi logic tags
+ - fix for 2304
+ - update sn points
+ - update additional markers for dynamic and target points
+ - fix and simplify
+ - simplify
+ - update proportional range
+ - update his interpolate
+ - pi equip update
+ - update pi equip tag
+ - update unit on pi profile image
+ - update target value unit
+ - set thermal input sensor unit
+ - set unit type when analog 2 sensor select
+ - set target 0 when dynamic selected
+ - write his for target value
+ - fixes
+ - fixes
+ - add his marker
+ - 116, pi profile logical tags creation based on config parameters
+ - 2441 - upgrade ccu crashes due to building tuners not synced
+ - Merge master
+ - Update the label from 'minimum' to 'default'
+ - BUG: 2051 CCU Renatus installation requires a tablet reboot to have new changes reflected
+ - Story 2015 : Analog2-Out during setback for VAV/DAB Staged With Vfd

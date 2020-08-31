@@ -30,6 +30,7 @@ import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartStatConditioningMode_t;
 import a75f.io.device.serial.SmartStatFanSpeed_t;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
@@ -261,6 +262,19 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
 
             }
         });
+        view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+
+            @Override
+            public void onViewAttachedToWindow(View view) {
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View view) {
+                if (Globals.getInstance().isTestMode()) {
+                    Globals.getInstance().setTestMode(false);
+                }
+            }
+        });
     }
 
     private void setup4PFCUZoneProfile() {
@@ -411,6 +425,16 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
         msg.controls.relay4.set((short)(testAuxHeating.isChecked() ? 1 : 0));
         msg.controls.relay6.set((short)(testWaterValve.isChecked() ? 1 : 0));
         MeshUtil.sendStructToCM(msg);
+        if (testFanMediumY1.isChecked() || testFanHighY2.isChecked() || testFanLowG.isChecked()
+                || testAuxHeating.isChecked() || testWaterValve.isChecked()) {
+            if (!Globals.getInstance().isTestMode()) {
+                Globals.getInstance().setTestMode(true);
+            }
+        } else {
+            if (Globals.getInstance().isTestMode()) {
+                Globals.getInstance().setTestMode(false);
+            }
+        }
     }
     public static double getDesiredTemp(short node)
     {

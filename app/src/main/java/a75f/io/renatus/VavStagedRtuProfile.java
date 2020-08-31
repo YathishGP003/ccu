@@ -25,6 +25,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemMode;
@@ -173,6 +174,19 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
                 imageView.setLayoutParams(lp);
             }
         }
+        view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+
+            @Override
+            public void onViewAttachedToWindow(View view) {
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View view) {
+                if (Globals.getInstance().isTestMode()) {
+                    Globals.getInstance().setTestMode(false);
+                }
+            }
+        });
     }
 
     private void goTonext() {
@@ -438,5 +452,14 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
         
         msg.relayBitmap.set(relayStatus);
         MeshUtil.sendStructToCM(msg);
+        if (relayStatus > 0) {
+            if (!Globals.getInstance().isTestMode()) {
+                Globals.getInstance().setTestMode(true);
+            }
+        } else {
+            if (Globals.getInstance().isTestMode()) {
+                Globals.getInstance().setTestMode(false);
+            }
+        }
     }
 }

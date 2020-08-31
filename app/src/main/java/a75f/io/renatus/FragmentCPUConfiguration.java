@@ -1,7 +1,6 @@
 package a75f.io.renatus;
 
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
@@ -32,6 +31,7 @@ import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartStatConditioningMode_t;
 import a75f.io.device.serial.SmartStatFanSpeed_t;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
@@ -307,6 +307,19 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
 
             }
         });
+        view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+
+            @Override
+            public void onViewAttachedToWindow(View view) {
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View view) {
+                if (Globals.getInstance().isTestMode()) {
+                    Globals.getInstance().setTestMode(false);
+                }
+            }
+        });
     }
 
     private void setupCPUZoneProfile() {
@@ -497,6 +510,16 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
         msg.controls.relay5.set((short) (testHeatingW2.isChecked() ? 1 : 0));
         msg.controls.relay6.set((short) (testFanHighOb.isChecked() ? 1 : 0));
         MeshUtil.sendStructToCM(msg);
+        if (testCoolingY1.isChecked() || testCoolingY2.isChecked() || testFanLowG.isChecked()
+                || testHeatingW1.isChecked() || testHeatingW2.isChecked() || testFanHighOb.isChecked()) {
+            if (!Globals.getInstance().isTestMode()) {
+                Globals.getInstance().setTestMode(true);
+            }
+        } else {
+            if (Globals.getInstance().isTestMode()) {
+                Globals.getInstance().setTestMode(false);
+            }
+        }
     }
 
     public static double getDesiredTemp(short node) {

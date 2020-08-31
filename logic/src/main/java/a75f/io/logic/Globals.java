@@ -139,6 +139,11 @@ public class Globals {
                       .getBoolean("test_mode", false);
     }
 
+    public void setTestMode(boolean isTestMode) {
+        Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                .edit().putBoolean("test_mode", isTestMode).apply();
+    }
+
 
     public Context getApplicationContext() {
         return mApplicationContext;

@@ -27,6 +27,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
@@ -194,6 +195,19 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 imageView.setLayoutParams(lp);
             }
         }
+        view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+
+            @Override
+            public void onViewAttachedToWindow(View view) {
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View view) {
+                if (Globals.getInstance().isTestMode()) {
+                    Globals.getInstance().setTestMode(false);
+                }
+            }
+        });
     }
 
     private void goTonext() {
@@ -600,6 +614,15 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         msg.relayBitmap.set(relayStatus);
         msg.analog1.set((short)(10 * Double.parseDouble(analog2TestSpinner.getSelectedItem().toString())));
         MeshUtil.sendStructToCM(msg);
+        if (relayStatus > 0 || Double.parseDouble(analog2TestSpinner.getSelectedItem().toString()) > 0) {
+            if (!Globals.getInstance().isTestMode()) {
+                Globals.getInstance().setTestMode(true);
+            }
+        } else {
+            if (Globals.getInstance().isTestMode()) {
+                Globals.getInstance().setTestMode(false);
+            }
+        }
     }
 
     private void addFanSignal() {

@@ -365,6 +365,9 @@ public class LSmartNode
                 String [] arrOfStr = type.split("-");
                 if (arrOfStr.length == 2)
                 {
+                    if (arrOfStr[1].contains("v")) {
+                        arrOfStr[1] = arrOfStr[1].replace("v", "");
+                    }
                     int min = (int)Double.parseDouble(arrOfStr[0]);
                     int max = (int)Double.parseDouble(arrOfStr[1]);
                     if (max > min) {

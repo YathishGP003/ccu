@@ -1,7 +1,6 @@
 package a75f.io.renatus;
 
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
@@ -425,6 +424,8 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
         msg.controls.relay4.set((short)(testAuxHeating.isChecked() ? 1 : 0));
         msg.controls.relay6.set((short)(testWaterValve.isChecked() ? 1 : 0));
         MeshUtil.sendStructToCM(msg);
+        updateSmartStatForceTestControls(mSmartNodeAddress);
+
         if (testFanMediumY1.isChecked() || testFanHighY2.isChecked() || testFanLowG.isChecked()
                 || testAuxHeating.isChecked() || testWaterValve.isChecked()) {
             if (!Globals.getInstance().isTestMode()) {
@@ -444,5 +445,15 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
             return 72;
         }
         return CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());
+    }
+
+    public void updateSmartStatForceTestControls(short node) {
+        if (mProfileConfig != null) {
+            fourPfcuProfile.setCmdSignal("fan and low", testFanLowG.isChecked() ? 1 : 0, node);
+            fourPfcuProfile.setCmdSignal("fan and medium", testFanMediumY1.isChecked() ? 1 : 0, node);
+            fourPfcuProfile.setCmdSignal("fan and high", testFanHighY2.isChecked() ? 1 : 0, node);
+            fourPfcuProfile.setCmdSignal("water and valve and cooling", testWaterValve.isChecked() ? 1 : 0, node);
+            fourPfcuProfile.setCmdSignal("water and valve and heating", testAuxHeating.isChecked() ? 1 : 0, node);
+        }
     }
 }

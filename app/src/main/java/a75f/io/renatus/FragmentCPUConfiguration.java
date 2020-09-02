@@ -510,6 +510,8 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
         msg.controls.relay5.set((short) (testHeatingW2.isChecked() ? 1 : 0));
         msg.controls.relay6.set((short) (testFanHighOb.isChecked() ? 1 : 0));
         MeshUtil.sendStructToCM(msg);
+        updateSmartStatForceTestControls(mSmartNodeAddress);
+
         if (testCoolingY1.isChecked() || testCoolingY2.isChecked() || testFanLowG.isChecked()
                 || testHeatingW1.isChecked() || testHeatingW2.isChecked() || testFanHighOb.isChecked()) {
             if (!Globals.getInstance().isTestMode()) {
@@ -529,5 +531,16 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
             return 72;
         }
         return CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());
+    }
+
+    public void updateSmartStatForceTestControls(short node){
+        if(mProfileConfig != null){
+            mCPUProfile.setCmdSignal("cooling and stage1",testCoolingY1.isChecked()? 1 : 0,node);
+            mCPUProfile.setCmdSignal("cooling and stage2",testCoolingY2.isChecked()? 1 : 0,node);
+            mCPUProfile.setCmdSignal("fan and stage1",testFanLowG.isChecked()? 1 : 0,node);
+            mCPUProfile.setCmdSignal("fan and stage2",testFanHighOb.isChecked()? 1 : 0,node);
+            mCPUProfile.setCmdSignal("heating and stage1",testHeatingW1.isChecked()? 1 : 0,node);
+            mCPUProfile.setCmdSignal("heating and stage2",testHeatingW2.isChecked()? 1 : 0,node);
+        }
     }
 }

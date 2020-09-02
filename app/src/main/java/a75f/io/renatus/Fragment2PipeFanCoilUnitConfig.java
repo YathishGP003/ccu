@@ -416,6 +416,8 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
         msg.controls.relay4.set((short)(testAuxHeating.isChecked() ? 1 : 0));
         msg.controls.relay6.set((short)(testWaterValve.isChecked() ? 1 : 0));
         MeshUtil.sendStructToCM(msg);
+        updateSmartStatForceTestControls(mSmartNodeAddress);
+
         if (testFanMediumY1.isChecked() || testFanHighY2.isChecked() || testFanLowG.isChecked()
                 || testAuxHeating.isChecked() || testWaterValve.isChecked()) {
             if (!Globals.getInstance().isTestMode()) {
@@ -435,5 +437,15 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
             return 72;
         }
         return CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());
+    }
+
+    public void updateSmartStatForceTestControls(short node) {
+        if (mProfileConfig != null) {
+            twoPfcuProfile.setCmdSignal("fan and low", testFanLowG.isChecked() ? 1 : 0, node);
+            twoPfcuProfile.setCmdSignal("fan and medium", testFanMediumY1.isChecked() ? 1 : 0, node);
+            twoPfcuProfile.setCmdSignal("fan and high", testFanHighY2.isChecked() ? 1 : 0, node);
+            twoPfcuProfile.setCmdSignal("pipe2 and fcu and water and valve", testWaterValve.isChecked() ? 1 : 0, node);
+            twoPfcuProfile.setCmdSignal("aux and heating", testAuxHeating.isChecked() ? 1 : 0, node);
+        }
     }
 }

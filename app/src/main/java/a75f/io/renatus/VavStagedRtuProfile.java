@@ -30,6 +30,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
+import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.Prefs;
@@ -452,6 +453,15 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
         
         msg.relayBitmap.set(relayStatus);
         MeshUtil.sendStructToCM(msg);
+
+        ControlMote.setRelayState("relay1",relay1Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay2",relay2Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay3",relay3Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay4",relay4Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay5",relay5Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay6",relay6Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay7",relay7Test.isChecked() ? 1 : 0);
+
         if (relayStatus > 0) {
             if (!Globals.getInstance().isTestMode()) {
                 Globals.getInstance().setTestMode(true);

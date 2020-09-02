@@ -34,6 +34,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
+import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.Prefs;
@@ -619,6 +620,16 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         msg.analog1.set((short)(10 * Double.parseDouble(analog2TestSpinner.getSelectedItem().toString())));
         msg.relayBitmap.set(relayStatus);
         MeshUtil.sendStructToCM(msg);
+
+        ControlMote.setAnalogOut("analog2",Double.parseDouble(analog2TestSpinner.getSelectedItem().toString()));
+        ControlMote.setRelayState("relay1",relay1Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay2",relay2Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay3",relay3Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay4",relay4Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay5",relay5Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay6",relay6Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay7",relay7Test.isChecked() ? 1 : 0);
+
         if (relayStatus > 0 || Double.parseDouble(analog2TestSpinner.getSelectedItem().toString()) > 0) {
             if (!Globals.getInstance().isTestMode()) {
                 Globals.getInstance().setTestMode(true);

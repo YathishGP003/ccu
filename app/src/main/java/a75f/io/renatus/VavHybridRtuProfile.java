@@ -33,6 +33,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
+import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.registration.FreshRegistration;
@@ -641,8 +642,20 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
                                      | (relay7Test.isChecked() ? 1 << 6 : 0));
     
         msg.relayBitmap.set(relayStatus);
-        
         MeshUtil.sendStructToCM(msg);
+
+        ControlMote.setAnalogOut("analog1",Double.parseDouble(ahuAnalog1Test.getSelectedItem().toString()));
+        ControlMote.setAnalogOut("analog2",Double.parseDouble(ahuAnalog2Test.getSelectedItem().toString()));
+        ControlMote.setAnalogOut("analog3",Double.parseDouble(ahuAnalog3Test.getSelectedItem().toString()));
+        ControlMote.setAnalogOut("analog4",Double.parseDouble(ahuAnalog4Test.getSelectedItem().toString()));
+        ControlMote.setRelayState("relay1",relay1Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay2",relay2Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay3",relay3Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay4",relay4Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay5",relay5Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay6",relay6Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay7",relay7Test.isChecked() ? 1 : 0);
+
         if (relayStatus > 0 || Double.parseDouble(ahuAnalog1Test.getSelectedItem().toString()) > 0 || Double.parseDouble(ahuAnalog2Test.getSelectedItem().toString()) > 0
                 || Double.parseDouble(ahuAnalog3Test.getSelectedItem().toString()) > 0 || Double.parseDouble(ahuAnalog4Test.getSelectedItem().toString()) > 0) {
             if (!Globals.getInstance().isTestMode()) {

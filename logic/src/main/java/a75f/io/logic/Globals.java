@@ -207,8 +207,9 @@ public class Globals {
         Watchdog.getInstance().start();
         
         CCUHsApi.getInstance().syncEntityWithPointWrite();
-        
-    
+        if (isTestMode()) {
+            setTestMode(false);
+        }
     }
 
     private void populate() {

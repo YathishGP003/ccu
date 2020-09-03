@@ -172,12 +172,17 @@ public class Pulse
 					case ANALOG_IN_TWO:
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput2.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						if(logPointInfo.getMarkers().contains("pid")){
-							double dynamicVar = getAnalogConversion(phyPoint, logPoint, val);
-							hayStack.writeHisValById(logPoint.get("id").toString(),dynamicVar + getPiOffsetValue(nodeAddr) );
-						}else
-							hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : analog2In "+getAnalogConversion(phyPoint, logPoint, val));
+						double oldDynamicVar = hayStack.readHisValById(logPoint.get("id").toString());
+						double dynamicVar = getAnalogConversion(phyPoint, logPoint, val);
+						if (oldDynamicVar != dynamicVar) {
+							if (logPointInfo.getMarkers().contains("pid")) {
+								hayStack.writeHisValById(logPoint.get("id").toString(), dynamicVar + getPiOffsetValue(nodeAddr));
+								if (currentTempInterface != null) {
+									currentTempInterface.updateSensorValue(nodeAddr);
+								}
+							} else
+								hayStack.writeHisValById(logPoint.get("id").toString(), dynamicVar);
+						}
 						break;
 					case TH1_IN:
 						val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput1.get();

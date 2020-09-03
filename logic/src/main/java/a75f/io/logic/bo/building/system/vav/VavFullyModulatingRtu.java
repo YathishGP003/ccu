@@ -148,8 +148,9 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemCoolingLoopOp/100)));
             }
 
-            if(signal != getCmdSignal("cooling"))
-                setCmdSignal("cooling",signal);
+            if (systemCoolingLoopOp != getCmdSignal("cooling")) {
+                setCmdSignal("cooling", systemCoolingLoopOp);
+            }
         } else {
             signal = 0;
         }
@@ -177,8 +178,11 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             {
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemHeatingLoopOp / 100)));
             }
-            if(signal != getCmdSignal("heating"))
-                setCmdSignal("heating", signal);
+            
+            if (systemHeatingLoopOp != getCmdSignal("heating")) {
+                setCmdSignal("heating", systemHeatingLoopOp);
+            }
+            
         } else {
             signal = 0;
         }
@@ -230,8 +234,10 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             {
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemFanLoopOp/100)));
             }
-            if(signal != getCmdSignal("fan"))
-                setCmdSignal("fan", signal);
+            
+            if (systemFanLoopOp != getCmdSignal("fan")) {
+                setCmdSignal("fan", systemFanLoopOp);
+            }
         } else {
             signal = 0;
         }
@@ -251,8 +257,10 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             } else {
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * systemCo2LoopOp/100));
             }
-            if(signal != getCmdSignal("co2"))
-                setCmdSignal("co2",signal);
+            
+            if (systemCo2LoopOp != getCmdSignal("co2")) {
+                setCmdSignal("co2", systemCo2LoopOp);
+            }
         } else {
             signal = 0;
         }

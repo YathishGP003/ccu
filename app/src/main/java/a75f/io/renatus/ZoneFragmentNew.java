@@ -120,6 +120,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     Equip equipment;
 
     boolean zoneOpen = false;
+    boolean zoneNonTempOpen = false;
     SeekArc seekArcOpen;
     NonTempControl nonTempControlOpen;
     View zonePointsOpen;
@@ -368,7 +369,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
     public void updateSensorValue(short nodeAddress){
         if(getActivity() != null) {
-            if(zoneOpen) {
+            if(zoneNonTempOpen) {
                 if (equipOpen.getProfile().contains("PLC") || equipOpen.getProfile().contains("EMR") || equipOpen.getProfile().contains("monitor")) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -948,6 +949,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             }
 
                             zoneOpen = true;
+                            zoneNonTempOpen = false;
                             seekArcOpen = seekArc;
                             zonePointsOpen = zoneDetails;
                             equipOpen = p;
@@ -987,6 +989,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     }
                 } else {
                     zoneOpen = true;
+                    zoneNonTempOpen = false;
                     seekArcOpen = seekArc;
                     zonePointsOpen = zoneDetails;
                     equipOpen = p;
@@ -1534,7 +1537,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                     break;
                                 }
                             }
-                            zoneOpen = true;
+                            zoneOpen = false;
+                            zoneNonTempOpen = true;
                             zonePointsOpen = zoneDetails;
                             equipOpen = nonTempEquip;
                             openZoneMap = zoneMap;
@@ -1571,7 +1575,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         isExpanded = false;
                     }
                 } else {
-                    zoneOpen = true;
+                    zoneOpen = false;
+                    zoneNonTempOpen = true;
                     zonePointsOpen = zoneDetails;
                     equipOpen = nonTempEquip;
                     openZoneMap = zoneMap;

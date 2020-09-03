@@ -158,12 +158,16 @@ public class Pulse
 						break;
 					case ANALOG_IN_ONE:
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
+						double oldDisAnalogVal = hayStack.readHisValById(logPoint.get("id").toString());
+						double curDisAnalogVal = getAnalogConversion(phyPoint, logPoint, val);
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : analog1In "+getAnalogConversion(phyPoint, logPoint, val));
-						if (currentTempInterface != null) {
-							if(getAnalogConversion(phyPoint, logPoint, val) > 0) currentTempInterface.updateSensorValue(nodeAddr);
+						if (oldDisAnalogVal != curDisAnalogVal) {
+							hayStack.writeHisValById(logPoint.get("id").toString(), curDisAnalogVal);
+							if (currentTempInterface != null) {
+								currentTempInterface.updateSensorValue(nodeAddr);
+							}
 						}
+						CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : analog1In " + curDisAnalogVal +" " +oldDisAnalogVal);
 						break;
 					case ANALOG_IN_TWO:
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput2.get();
@@ -182,8 +186,12 @@ public class Pulse
 						double curDisTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
 						curDisTempVal = CCUUtils.roundToOneDecimal(curDisTempVal);
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						if(oldDisTempVal != curDisTempVal)
+						if(oldDisTempVal != curDisTempVal) {
 							hayStack.writeHisValById(logPoint.get("id").toString(), curDisTempVal);
+							if (currentTempInterface != null && logPointInfo.getMarkers().contains("pid")) {
+								currentTempInterface.updateSensorValue(nodeAddr);
+							}
+						}
 						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : Thermistor1 "+curDisTempVal+","+oldDisTempVal+","+logPointInfo.getMarkers().toString()+","+logPoint.get("id").toString());
 						break;
 				}

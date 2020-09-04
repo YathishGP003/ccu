@@ -827,26 +827,29 @@ public abstract class SystemProfile
             CCUHsApi.getInstance().writeHisValById(enhancedVentilationPointId, 0.0);
         }
     }
-    
-    public void updateOutsideWeatherParams() {
-        try {
-            double externalTemp = CCUHsApi.getInstance().getExternalTemp();
-            double externalHumidity = CCUHsApi.getInstance().getExternalHumidity();
 
+    public void updateOutsideWeatherParams() {
+        double externalTemp, externalHumidity;
+        try {
             if (Globals.getInstance().isWeatherTest()) {
                 externalTemp = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                         .getInt("outside_temp", 0);
                 externalHumidity = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                         .getInt("outside_humidity", 0);
+            } else {
+                externalTemp = CCUHsApi.getInstance().getExternalTemp();
+                externalHumidity = CCUHsApi.getInstance().getExternalHumidity();
             }
-
-            CCUHsApi.getInstance().writeHisValByQuery("system and outside and temp", externalTemp);
-            CCUHsApi.getInstance().writeHisValByQuery("system and outside and humidity", externalHumidity);
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
+            externalTemp = CCUHsApi.getInstance().readHisValByQuery("system and outside and temp");
+            externalHumidity = CCUHsApi.getInstance().readHisValByQuery("system and outside and humidity");
+
             Log.d(L.TAG_CCU_OAO, " Failed to read external Temp or Humidity , Disable Economizing");
         }
+
+        CCUHsApi.getInstance().writeHisValByQuery("system and outside and temp", externalTemp);
+        CCUHsApi.getInstance().writeHisValByQuery("system and outside and humidity", externalHumidity);
     }
     
     public void reset() {

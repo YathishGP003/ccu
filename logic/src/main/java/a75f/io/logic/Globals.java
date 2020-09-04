@@ -139,6 +139,11 @@ public class Globals {
                       .getBoolean("test_mode", false);
     }
 
+    public boolean isWeatherTest() {
+        return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                .getBoolean("weather_test", false);
+    }
+
 
     public Context getApplicationContext() {
         return mApplicationContext;

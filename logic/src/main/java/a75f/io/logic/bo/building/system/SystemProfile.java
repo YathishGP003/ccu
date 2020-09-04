@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.system;
 
+import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -829,8 +830,18 @@ public abstract class SystemProfile
     
     public void updateOutsideWeatherParams() {
         try {
-            CCUHsApi.getInstance().writeHisValByQuery("system and outside and temp", CCUHsApi.getInstance().getExternalTemp());
-            CCUHsApi.getInstance().writeHisValByQuery("system and outside and humidity", CCUHsApi.getInstance().getExternalHumidity());
+            double externalTemp = CCUHsApi.getInstance().getExternalTemp();
+            double externalHumidity = CCUHsApi.getInstance().getExternalHumidity();
+
+            if (Globals.getInstance().isWeatherTest()) {
+                externalTemp = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                        .getInt("outside_temp", 0);
+                externalHumidity = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                        .getInt("outside_humidity", 0);
+            }
+
+            CCUHsApi.getInstance().writeHisValByQuery("system and outside and temp", externalTemp);
+            CCUHsApi.getInstance().writeHisValByQuery("system and outside and humidity", externalHumidity);
         } catch (Exception e)
         {
             e.printStackTrace();

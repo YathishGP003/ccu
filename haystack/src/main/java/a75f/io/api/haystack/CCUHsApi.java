@@ -1491,6 +1491,15 @@ public class CCUHsApi
                     }
                 }
             }
+        } else {
+            HGrid hisGrid = hClient.hisRead(tempWeatherRef, "current");
+            if (hisGrid != null && hisGrid.numRows() > 0) {
+                hisGrid.dump();
+                HRow r = hisGrid.row(hisGrid.numRows() - 1);
+                return Double.parseDouble(r.get("val").toString());
+            } else {
+                return CCUHsApi.getInstance().readHisValByQuery("system and outside and temp");
+            }
         }
         return 0;
     }
@@ -1522,6 +1531,16 @@ public class CCUHsApi
 
                     }
                 }
+            }
+        } else {
+            HGrid hisGrid = hClient.hisRead(humidityWeatherRef, "current");
+            if (hisGrid != null && hisGrid.numRows() > 0) {
+                hisGrid.dump();
+                HRow r = hisGrid.row(hisGrid.numRows() - 1);
+                double humidityVal = Double.parseDouble(r.get("val").toString());
+                return 100 * humidityVal;
+            } else {
+                return CCUHsApi.getInstance().readHisValByQuery("system and outside and humidity");
             }
         }
         return 0;

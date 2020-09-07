@@ -191,12 +191,12 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             public void onCheckedChanged(CompoundButton compoundButton, boolean b)
             {
                 Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                       .edit().putBoolean("test_mode", b).apply();
+                       .edit().putBoolean("weather_test", b).apply();
                 testModLayout.setVisibility(b?View.VISIBLE :View.INVISIBLE);
             }
         });
-        testModBtn.setChecked(Globals.getInstance().isTestMode());
-        testModLayout.setVisibility(Globals.getInstance().isTestMode()?View.VISIBLE :View.INVISIBLE);
+        testModBtn.setChecked(Globals.getInstance().isWeatherTest());
+        testModLayout.setVisibility(Globals.getInstance().isWeatherTest()?View.VISIBLE :View.INVISIBLE);
     
         ArrayList<Integer> zoroToHundred = new ArrayList<>();
         for (int val = 0;  val <= 100; val++)

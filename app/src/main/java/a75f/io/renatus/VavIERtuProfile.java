@@ -345,7 +345,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                 setConfigBackground("heating and dat and max", val);
                 break;
             case R.id.analog1RTUTest:
-            case R.id.analog3Spinner:
+            case R.id.analog3RTUTest:
                 checkTestMode();
                 DaikinIE.sendCoolingDATAutoControl(val);
                 break;

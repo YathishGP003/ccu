@@ -1141,7 +1141,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     break;
                 case 3:
                     plcPoints.put("Dynamic Unit Type", "Airflow");
-                    plcPoints.put("Dynamic Unit", "%");
+                    plcPoints.put("Dynamic Unit", "CFM");
                     break;
                 case 4:
                     plcPoints.put("Dynamic Unit Type", "Humidity");
@@ -1163,7 +1163,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 case 9:
                 case 10:
                     plcPoints.put("Dynamic Unit Type", "Current");
-                    plcPoints.put("Dynamic Unit", "AMPS");
+                    plcPoints.put("Dynamic Unit", "A");
                     break;
             }
         }
@@ -1181,7 +1181,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 break;
             case 4:
                 plcPoints.put("Unit Type", "Airflow");
-                plcPoints.put("Unit", "%");
+                plcPoints.put("Unit", "CFM");
                 break;
             case 5:
                 plcPoints.put("Unit Type", "Humidity");
@@ -1203,7 +1203,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             case 10:
             case 11:
                 plcPoints.put("Unit Type", "Current");
-                plcPoints.put("Unit", "AMPS");
+                plcPoints.put("Unit", "A");
                 break;
         }
 

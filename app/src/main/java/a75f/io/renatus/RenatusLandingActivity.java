@@ -52,7 +52,6 @@ import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.pubnub.RemoteCommandHandleInterface;
 import a75f.io.logic.pubnub.RemoteCommandUpdateHandler;
-import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.ENGG.AppInstaller;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 import a75f.io.renatus.registration.CustomViewPager;
@@ -407,7 +406,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
             Button negButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
             negButton.setOnClickListener(view -> {
-                if (position == 0){
+                if (position == 0 && key.equals(getString(R.string.USE_SETUP_PASSWORD_KEY))) {
                     btnTabs.getTabAt(1).setIcon(R.drawable.ic_dashboard_orange);
                     btnTabs.getTabAt(1).select();
                     mViewPager.setAdapter(mStatusPagerAdapter);
@@ -415,6 +414,10 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
                     menuToggle.setVisibility(View.GONE);
                     floorMenu.setVisibility(View.VISIBLE);
+                    dialog.dismiss();
+                    return;
+                } else if (position == 0 && key.equals(getString(R.string.ZONE_SETTINGS_PASSWORD_KEY))) {
+                    mViewPager.setCurrentItem(3);
                     dialog.dismiss();
                     return;
                 }

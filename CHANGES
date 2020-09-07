@@ -1,40 +1,6 @@
- - Merge branch 'Bug/samjith/2051_ccu_requires_reboot_after_upgrade' into 'master'
- - Merge branch 'story/samjith/2105_Analog2Out_minimum_for_vfd_profiles' into 'master'
- - Merge branch 'bug/anilkumar/2441-Upgrade_ccu_causing_crash' into 'master'
- - Merge branch 'story/mahesh/116-CCU_PI_profile_logical_tags_creation' into 'master'
- - fix and clean code
- - clean up
- - fix target shortDis for current
- - shortDis fix for current
- - fixes
- - update physical sensor min, max
- - update markers for thermistor
- - fix the physical type
- - update unit
- - clean
- - fixes
- - update pi logic tags
- - fix for 2304
- - update sn points
- - update additional markers for dynamic and target points
- - fix and simplify
- - simplify
- - update proportional range
- - update his interpolate
- - pi equip update
- - update pi equip tag
- - update unit on pi profile image
- - update target value unit
- - set thermal input sensor unit
- - set unit type when analog 2 sensor select
- - set target 0 when dynamic selected
- - write his for target value
- - fixes
- - fixes
- - add his marker
- - 116, pi profile logical tags creation based on config parameters
- - 2441 - upgrade ccu crashes due to building tuners not synced
- - Merge master
- - Update the label from 'minimum' to 'default'
- - BUG: 2051 CCU Renatus installation requires a tablet reboot to have new changes reflected
- - Story 2015 : Analog2-Out during setback for VAV/DAB Staged With Vfd
+ - Merge branch 'bug/mahesh/2688-CCU_Pi_loop_fix' into 'master'
+ - Refactor: Update minor version to 536
+ - fix for analog1 max select
+ - Merge branch 'bug/mahesh/2546-dynamic-target-both-points-added' into 'master'
+ - add unit to control variable
+ - fixed the issue

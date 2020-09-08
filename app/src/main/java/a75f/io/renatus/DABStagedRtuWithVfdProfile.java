@@ -379,8 +379,6 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 setConfigEnabledBackground("analog2",analog2Tb.isChecked() ? 1: 0);
                 if (analog2Tb.isChecked()){
                     addFanSignal();
-                } else {
-                    deleteFanSignalExists();
                 }
                 break;
             case R.id.relay1Test:
@@ -652,13 +650,5 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 // continue what you are doing...
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-    private void deleteFanSignalExists() {
-        HashMap fanSignal = CCUHsApi.getInstance().read("point and system and cmd and fan and modulating");
-        if ((fanSignal != null && fanSignal.get("id") != null)) {
-            CCUHsApi.getInstance().deleteEntity(fanSignal.get("id").toString());
-            CCUHsApi.getInstance().syncEntityTree();
-        }
     }
 }

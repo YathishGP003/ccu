@@ -1,6 +1,20 @@
- - Merge branch 'bug/mahesh/2688-CCU_Pi_loop_fix' into 'master'
- - Refactor: Update minor version to 536
- - fix for analog1 max select
- - Merge branch 'bug/mahesh/2546-dynamic-target-both-points-added' into 'master'
- - add unit to control variable
- - fixed the issue
+ - Merge branch 'bug/mahesh/2168-CCU_force_test_feature' into 'master'
+ - remove delete signal points
+ - resolve merge conflict
+ - Merge branch 'bug/mahesh/2689-CCU_outside_air_temp_humidity_update' into 'master'
+ - handle force test for daikin ie
+ - handle force test for daikin ie
+ - Merge branch 'bug/mahesh/2263-CCU_status_delay' into 'master'
+ - Merge branch 'bug/mahesh/2742-CCU_pi_loop_auto_update' into 'master'
+ - fix
+ - Merge branch 'bug/mahesh/2479-CCU_password_failure' into 'master'
+ - update weather test mode on dev setting
+ - update equip status
+ - auto update dynamic value
+ - update thermistor input
+ - SS test signal update
+ - set analog out and relay state when test signal enable
+ - Refactor: Update minor version to 537
+ - redirect to alert page if cancel
+ - check temp ref is availble fetch his value and update
+ - update test mode and check for test mode before update zone and system points

@@ -673,6 +673,6 @@
     <string name="txt_itm_hia">ITM-HIA</string>
     <string name="txt_itm_lpi">ITM-LPI</string>
 
-    <string name="toast_msg_permission_denial">"All the required permissions are not granted. CCU may to work as expected.\n " +
-                                         "You may grant missing permissions to Renatus app from System Settings"</string>
+    <string name="toast_msg_permission_denial">"All the required permissions are not granted. CCU may not work as
+        expected.\nYou may grant missing permissions to Renatus app from System Settings"</string>
 </resources>

@@ -1,0 +1,653 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/damperscrollView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:overScrollMode="never">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:id="@+id/layoutHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp">
+                <TextView
+                    android:id="@+id/textTitleFragment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:fontFamily="@font/lato_bold"
+                    android:text="@string/dab_dual_duct_title"
+                    android:textAllCaps="true"
+                    android:textColor="@color/orange_75f"
+                    android:textSize="33.5sp"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginTop="20dp"
+                android:layout_gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textTempOffset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:text="@string/dab_dual_duct_label_temp_offset"
+                    android:textAppearance="@style/label_values" />
+
+                <NumberPicker
+                    android:id="@+id/temperatureOffset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_gravity="center"
+                    android:textColor="#202020"
+                    android:textSize="30sp" />
+            </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginLeft="36dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginRight="36dp"
+                android:orientation="horizontal"
+                android:paddingTop="20dp">
+
+                <TextView
+                    android:id="@+id/analog1OutTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
+                    android:text="@string/label_analog1"
+                    android:textAppearance="@style/label_values" />
+
+                <Spinner
+                    android:id="@+id/analog1OutSpinner"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="160dp"
+                    android:layout_height="42dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="80dp"
+                    android:layout_toEndOf="@+id/analog1OutTextView"
+                    android:entries="@array/dab_dual_duct_actuator_types"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+
+                <TextView
+                    android:id="@+id/thermistor1TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="136dp"
+                    android:layout_toStartOf="@+id/thermistor1Spinner"
+                    android:text="@string/dab_dual_duct_label_thermistor1"
+                    android:textAppearance="@style/label_values" />
+
+                <Spinner
+                    android:id="@+id/thermistor1Spinner"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="20dp"
+                    android:layout_alignParentRight="true"
+                    android:entries="@array/dab_dual_duct_thermistor1_options"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+
+                <TextView
+                    android:id="@+id/analog2OutTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_below="@+id/analog1OutTextView"
+                    android:layout_alignStart="@+id/analog1OutTextView"
+                    android:text="@string/label_analog2"
+                    android:textAppearance="@style/label_values" />
+
+                <Spinner
+                    android:id="@+id/analog2OutSpinner"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="160dp"
+                    android:layout_height="42dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="80dp"
+                    android:layout_below="@+id/analog1OutSpinner"
+                    android:layout_toEndOf="@+id/analog2OutTextView"
+                    android:entries="@array/dab_dual_duct_actuator_types"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+
+                <TextView
+                    android:id="@+id/thermistor2TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="136dp"
+                    android:layout_below="@+id/thermistor1TextView"
+                    android:layout_toStartOf="@+id/thermistor2Spinner"
+                    android:text="@string/dab_dual_duct_label_thermistor2"
+                    android:textAppearance="@style/label_values" />
+
+                <Spinner
+                    android:id="@+id/thermistor2Spinner"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="20dp"
+                    android:layout_below="@+id/thermistor1Spinner"
+                    android:layout_alignParentRight="true"
+                    android:entries="@array/dab_dual_duct_thermistor2_options"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="42dp"
+                android:layout_marginRight="10dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+
+                    <TextView
+                        android:id="@+id/textMaxCool"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:text="@string/label_maxdampercoolpos"
+                        android:textAppearance="@style/label_values" />
+
+                    <NumberPicker
+                        android:id="@+id/maxDamperPos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:textSize="30sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="42dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textMinCool"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:text="@string/label_mindampercoolpos"
+                        android:textAppearance="@style/label_values" />
+
+                    <NumberPicker
+                        android:id="@+id/minDamperPos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:textSize="30sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="42dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textMaxHeat"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:text="@string/label_maxdamperheatpos"
+                        android:textAppearance="@style/label_values" />
+
+
+                    <NumberPicker
+                        android:id="@+id/maxHeatingDamperPos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:textSize="30sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="42dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textMinHeat"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:text="@string/label_mindamperheatpos"
+                        android:textAppearance="@style/label_values" />
+
+                    <NumberPicker
+                        android:id="@+id/minHeatingDamperPos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:textSize="30sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginLeft="94dp"
+                android:layout_marginRight="94dp"
+                android:layout_marginTop="20dp"
+                android:orientation="horizontal"
+                android:paddingTop="20dp">
+
+
+                <TextView
+                    android:id="@+id/textEnableOccupancy"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="32dp"
+                    android:text="@string/label_enableoccupance"
+                    android:textAppearance="@style/label_values" />
+
+                <ToggleButton
+                    android:id="@+id/enableOccupancyControl"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="35dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_toEndOf="@+id/textEnableOccupancy"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
+                <TextView
+                    android:id="@+id/textEnableCO2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toStartOf="@+id/enableCO2Control"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginRight="16dp"
+                    android:text="@string/label_enableCO2"
+                    android:textAppearance="@style/label_values" />
+
+                <ToggleButton
+                    android:id="@+id/enableCO2Control"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="35dp"
+                    android:background="@drawable/toggle_selector"
+                    android:layout_alignParentRight="true"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
+
+                <TextView
+                    android:id="@+id/textEnableIAQ"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textEnableOccupancy"
+                    android:layout_alignStart="@+id/textEnableOccupancy"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="32dp"
+                    android:text="@string/label_enableIAQ"
+                    android:textAppearance="@style/label_values" />
+
+                <ToggleButton
+                    android:id="@+id/enableIAQControl"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_below="@+id/enableOccupancyControl"
+                    android:layout_alignEnd="@id/enableOccupancyControl"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="35dp"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
+                <!--<TextView
+                    android:id="@+id/textZonePriority"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/damper2Shape"
+                    android:layout_alignStart="@+id/textDamper2Size"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="34dp"
+                    android:text="@string/label_zonepriority"
+                    android:textAppearance="@style/title_normal" />
+
+                <Spinner
+                    android:id="@+id/zonePriority"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_below="@+id/damper2Shape"
+                    android:layout_alignEnd="@+id/damper2Shape"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="34dp"
+                    android:entries="@array/hvac_stage_selector"
+                    android:minWidth="76dp"
+                    tools:listitem="@layout/spinner_dropdown_item" />-->
+
+            </RelativeLayout>
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="94dp"
+                android:layout_marginRight="94dp"
+                android:layout_marginBottom="20dp"
+                android:layout_marginTop="20dp"
+                android:columnCount="4">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_gravity="left"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginTop="14dp"
+                    android:layout_row="0"
+                    android:text="@string/dab_dual_duct_label_ao1_min_damp_heat_pos"
+                    android:textColor="@color/black"
+                    android:textAppearance="@style/label_values"/>
+
+                <Spinner
+                    android:id="@+id/ao1MinDamperHeatingPos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginBottom="14dp"
+                    android:dropDownWidth="match_parent"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginLeft="14dp"
+                    android:layout_marginTop="14dp"
+                    android:text="@string/dab_dual_duct_label_ao1_max_damp_heat_pos"
+                    android:textColor="@color/black"
+                    android:textAppearance="@style/label_values"/>
+
+                <Spinner
+                    android:id="@+id/ao1MaxDamperHeatingPos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="3"
+                    android:layout_marginBottom="14dp"
+                    android:layout_marginLeft="20dp"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_gravity="left"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginTop="14dp"
+                    android:layout_row="1"
+                    android:text="@string/dab_dual_duct_label_ao1_min_damp_cool_pos"
+                    android:textColor="@color/black"
+                    android:textAppearance="@style/label_values"/>
+
+                <Spinner
+                    android:id="@+id/ao1MinDamperCoolingPos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginBottom="14dp"
+                    android:layout_marginLeft="20dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginLeft="14dp"
+                    android:layout_marginTop="14dp"
+                    android:text="@string/dab_dual_duct_label_ao1_max_damp_cool_pos"
+                    android:textColor="@color/black"
+                    android:textAppearance="@style/label_values"/>
+
+                <Spinner
+                    android:id="@+id/ao1MaxDamperCoolingPos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:layout_marginBottom="14dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_gravity="left"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginTop="14dp"
+                    android:layout_row="2"
+                    android:text="@string/dab_dual_duct_label_ao2_min_damp_heat_pos"
+                    android:textColor="@color/black"
+                    android:textAppearance="@style/label_values"/>
+
+                <Spinner
+                    android:id="@+id/ao2MinDamperHeatingPos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginBottom="14dp"
+                    android:layout_marginLeft="20dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginLeft="40dp"
+                    android:layout_marginTop="14dp"
+                    android:text="@string/dab_dual_duct_label_ao2_max_damp_heat_pos"
+                    android:textColor="@color/black"
+                    android:textAppearance="@style/label_values"/>
+
+                <Spinner
+                    android:id="@+id/ao2MaxDamperHeatingPos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:layout_marginBottom="14dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_gravity="left"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginTop="14dp"
+                    android:layout_row="3"
+                    android:text="@string/dab_dual_duct_label_ao2_min_damp_cool_pos"
+                    android:textColor="@color/black"
+                    android:textAppearance="@style/label_values"/>
+
+                <Spinner
+                    android:id="@+id/ao2MinDamperCoolingPos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginBottom="14dp"
+                    android:layout_marginLeft="20dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginLeft="40dp"
+                    android:layout_marginTop="14dp"
+                    android:text="@string/dab_dual_duct_label_ao2_max_damp_cool_pos"
+                    android:textColor="@color/black"
+                    android:textAppearance="@style/label_values"/>
+
+                <Spinner
+                    android:id="@+id/ao2MaxDamperCoolingPos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:layout_marginBottom="14dp"/>
+
+            </GridLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginLeft="36dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginRight="36dp"
+                android:orientation="horizontal"
+                android:paddingTop="20dp">
+
+                <TextView
+                    android:id="@+id/co2ThresholdTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
+                    android:text="@string/dab_dual_duct_label_co2_threshold"
+                    android:textAppearance="@style/label_values" />
+
+                <Spinner
+                    android:id="@+id/co2ThresholdSpinner"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="160dp"
+                    android:layout_height="42dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="80dp"
+                    android:layout_toEndOf="@+id/co2ThresholdTextView"
+                    android:entries="@array/dab_dual_duct_actuator_types"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+
+                <TextView
+                    android:id="@+id/co2TargetTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="136dp"
+                    android:layout_toStartOf="@+id/co2TargetSpinner"
+                    android:text="@string/dab_dual_duct_label_co2_target"
+                    android:textAppearance="@style/label_values" />
+
+                <Spinner
+                    android:id="@+id/co2TargetSpinner"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="20dp"
+                    android:layout_alignParentRight="true"
+                    android:entries="@array/dab_dual_duct_thermistor1_options"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+
+                <TextView
+                    android:id="@+id/vocThresholdTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_below="@+id/co2ThresholdTextView"
+                    android:layout_alignStart="@+id/co2ThresholdTextView"
+                    android:text="@string/dab_dual_duct_label_voc_threshold"
+                    android:textAppearance="@style/label_values" />
+
+                <Spinner
+                    android:id="@+id/vocThresholdSpinner"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="160dp"
+                    android:layout_height="42dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="80dp"
+                    android:layout_below="@+id/co2ThresholdSpinner"
+                    android:layout_toEndOf="@+id/vocThresholdTextView"
+                    android:entries="@array/dab_dual_duct_actuator_types"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+
+                <TextView
+                    android:id="@+id/vocTargetTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="136dp"
+                    android:layout_below="@+id/co2ThresholdTextView"
+                    android:layout_toStartOf="@+id/vocTargetSpinner"
+                    android:text="@string/dab_dual_duct_label_voc_target"
+                    android:textAppearance="@style/label_values" />
+
+                <Spinner
+                    android:id="@+id/vocTargetSpinner"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="20dp"
+                    android:layout_below="@+id/co2TargetSpinner"
+                    android:layout_alignParentRight="true"
+                    android:entries="@array/dab_dual_duct_thermistor2_options"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+
+            </RelativeLayout>
+
+
+            <Button
+                android:id="@+id/setBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginEnd="24dp"
+                android:layout_marginBottom="30dp"
+                android:background="@null"
+                android:button="@null"
+                android:fontFamily="@font/lato_regular"
+                android:text="@string/button_set"
+                android:textAllCaps="true"
+                android:textColor="@color/orange_75f"
+                android:textSize="19.5sp" />
+        </LinearLayout>
+
+    </RelativeLayout>
+</ScrollView>

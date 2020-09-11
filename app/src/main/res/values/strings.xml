@@ -641,6 +641,46 @@
     </string-array>
 
 
+
+    <!--DAB Dual Duct-->
+    <string name="dab_dual_duct_title">DAB Dual Duct</string>
+    <string name="dab_dual_duct_label_temp_offset">TEMP OFFSET</string>
+
+    <string name="dab_dual_duct_label_thermistor1">Thermistor-1</string>
+    <string name="dab_dual_duct_label_thermistor2">Thermistor-2</string>
+
+
+
+    <string name="dab_dual_duct_label_ao1_min_damp_heat_pos">Analog-out1 at Min\n Damper Heating Pos</string>
+    <string name="dab_dual_duct_label_ao1_max_damp_heat_pos">Analog-out1 at Max\n Damper Heating Pos</string>
+    <string name="dab_dual_duct_label_ao1_min_damp_cool_pos">Analog-out1 at Min\n Damper Cooling Pos</string>
+    <string name="dab_dual_duct_label_ao1_max_damp_cool_pos">Analog-out1 at Max\n Damper Cooling Pos</string>
+    <string name="dab_dual_duct_label_ao2_min_damp_heat_pos">Analog-out2 at Min\n Damper Heating Pos</string>
+    <string name="dab_dual_duct_label_ao2_max_damp_heat_pos">Analog-out2 at Max\n Damper Heating Pos</string>
+    <string name="dab_dual_duct_label_ao2_min_damp_cool_pos">Analog-out2 at Min\n Damper Cooling Pos</string>
+    <string name="dab_dual_duct_label_ao2_max_damp_cool_pos">Analog-out2 at Max\n Damper Cooling Pos</string>
+
+    <string name="dab_dual_duct_label_co2_threshold">Zone CO2 Threshold</string>
+    <string name="dab_dual_duct_label_co2_target">Zone CO2 Target</string>
+    <string name="dab_dual_duct_label_voc_threshold">Zone VOC Threshold</string>
+    <string name="dab_dual_duct_label_voc_target">Zone VOC Target</string>
+
+    <string-array name="dab_dual_duct_actuator_types">
+        <item>  Not Used </item>
+        <item>  Composite Damper Actuator </item>
+        <item>  Cooling Damper Actuator </item>
+        <item>  Heating Damper Actuator </item>
+    </string-array>
+
+    <string-array name="dab_dual_duct_thermistor1_options">
+        <item>  Discharge Airflow Temp </item>
+    </string-array>
+
+    <string-array name="dab_dual_duct_thermistor2_options">
+        <item>  Cooling Supply Air Temp </item>
+    </string-array>
+
+
     <!--BACnet Option-->
     <string name="enable_bacnet">Use BACnet</string>
     <string name="hint_deviceIP">Device IP Address</string>

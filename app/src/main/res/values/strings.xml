@@ -500,6 +500,9 @@
     <string name="vav_parallelfan">VAV Reheat - Parallel fan</string>
     <string name="desc_parallelfan">Control a parallel fan powered VAV box</string>
 
+    <string name="title_dab_single_duct">DAB</string>
+    <string name="title_dab_dual_duct">DAB Dual Duct</string>
+    <string name="desc_dab_dual_duct">Custom terminal profile control for Dual Duct systems with cooling and heating duct</string>
     <!--SMART STAT Module Screen-->
     <string name="title_smartstatmodule">SMART STAT | SELECT MODULE TYPE</string>
     <string name="title_cpu">Conventional Package Unit</string>

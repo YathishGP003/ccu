@@ -102,6 +102,22 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @Nullable
     @BindView(R.id.imageGoback)
     ImageView imageGoback;
+    
+    @Nullable
+    @BindView(R.id.ll_dabmods)
+    LinearLayout lt_DabProfile;
+    
+    @Nullable
+    @BindView(R.id.rl_dabSingleDuct)
+    RelativeLayout rlDabSingleDuct;
+    
+    @Nullable
+    @BindView(R.id.rl_dabDualDuct)
+    RelativeLayout rlDabDualDuct;
+    
+    @Nullable
+    @BindView(R.id.dabImageViewArrow)
+    ImageView dabImageViewArrow;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -139,12 +155,48 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
             }
         }
     }
-
+    
     @Optional
-    @OnClick(R.id.rl_dab)
-    void onDABOnClick()
+    @OnClick(R.id.rl_dabTitle)
+    void onDabOnClick()
     {
-        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.DAB, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+        if(lt_DabProfile.getVisibility() == View.VISIBLE)
+        {
+            lt_DabProfile.setVisibility(View.GONE);
+            dabImageViewArrow.setRotation(0);
+        }else {
+            if (lt_DabProfile.getVisibility() == View.GONE) {
+                lt_DabProfile.setVisibility(View.VISIBLE);
+                dabImageViewArrow.setRotation(-90);
+            }
+        }
+    }
+    
+    @Optional
+    @OnClick(R.id.rl_dabSingleDuct)
+    void onDabSingleDuctOnClick()
+    {
+        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress,
+                                                                    mRoomName,
+                                                                    mFloorName,
+                                                                    ProfileType.DAB,
+                                                                    NodeType.SMART_NODE),
+                           FragmentBLEInstructionScreen.ID
+        );
+    }
+    
+    
+    @Optional
+    @OnClick(R.id.rl_dabDualDuct)
+    void onDabDualDuctOnClick()
+    {
+        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress,
+                                                                    mRoomName,
+                                                                    mFloorName,
+                                                                    ProfileType.DUAL_DUCT,
+                                                                    NodeType.SMART_NODE),
+                           FragmentBLEInstructionScreen.ID
+        );
     }
 
     @Optional

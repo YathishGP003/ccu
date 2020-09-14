@@ -330,18 +330,22 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
         ArrayAdapter<Double> coolingTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
         coolingTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         ahuAnalog1Test.setAdapter(coolingTestAdapter);
+        ahuAnalog1Test.setSelection(0,false);
     
         ArrayAdapter<Double> fanTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
         fanTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         ahuAnalog2Test.setAdapter(fanTestAdapter);
+        ahuAnalog2Test.setSelection(0,false);
     
         ArrayAdapter<Double> heatingTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
         heatingTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         ahuAnalog3Test.setAdapter(heatingTestAdapter);
+        ahuAnalog3Test.setSelection(0,false);
     
         ArrayAdapter<Double> compositeTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
         compositeTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         ahuAnalog4Test.setAdapter(compositeTestAdapter);
+        ahuAnalog4Test.setSelection(0,false);
         
     
         analog1Min.setOnItemSelectedListener(this);

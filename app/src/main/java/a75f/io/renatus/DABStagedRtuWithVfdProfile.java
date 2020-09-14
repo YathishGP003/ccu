@@ -273,8 +273,8 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         }
         ArrayAdapter<Integer> analogAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, analogArray);
         analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        
         analog2TestSpinner.setAdapter(analogAdapter);
+        analog2TestSpinner.setSelection(0,false);
         
         analog2Economizer.setAdapter(analogAdapter);
         analog2Economizer.setSelection((int)systemProfile.getConfigVal("analog2 and economizer"),false);

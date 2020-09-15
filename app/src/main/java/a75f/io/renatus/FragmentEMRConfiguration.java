@@ -1,9 +1,7 @@
 package a75f.io.renatus;
 
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.Gravity;
@@ -120,43 +118,33 @@ public class FragmentEMRConfiguration extends BaseDialogFragment
     
         mEmrProfile = (EmrProfile) L.getProfile(mSmartNodeAddress);
         
-        setButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                if (mEmrProfile != null) {
-                    FragmentEMRConfiguration.this.closeAllBaseDialogFragments();
-                    getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                    return;
-                }
-                
-                new AsyncTask<String, Void, Void>() {
-                    
-                    @Override
-                    protected void onPreExecute() {
-                        setButton.setEnabled(false);
-                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving EMR Configuration");
-                        super.onPreExecute();
-                    }
-                    
-                    @Override
-                    protected Void doInBackground( final String ... params ) {
-                        setupEmrProfile();
-                        L.saveCCUState();
-                        
-                        return null;
-                    }
-                    
-                    @Override
-                    protected void onPostExecute( final Void result ) {
-                        ProgressDialogUtils.hideProgressDialog();
-                        FragmentEMRConfiguration.this.closeAllBaseDialogFragments();
-                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                        LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        setButton.setOnClickListener(view1 -> {
+            if (mEmrProfile != null) {
+                FragmentEMRConfiguration.this.closeAllBaseDialogFragments();
+                getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                return;
             }
+
+            setButton.setEnabled(false);
+            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving EMR Configuration");
+
+            new Thread(() -> {
+
+                setupEmrProfile();
+                L.saveCCUState();
+
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                ProgressDialogUtils.hideProgressDialog();
+                FragmentEMRConfiguration.this.closeAllBaseDialogFragments();
+                getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
+            }).start();
+
         });
         
     }

@@ -2,7 +2,6 @@ package a75f.io.renatus;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -389,45 +388,34 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             errorRangeSp.setSelection(errRangeAdapter.getPosition(2.0), false);
         }
     
-        setButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                if (!analog2DynamicSP.isChecked()
-                    && analog1InSensorSp.getSelectedItem().toString().equals("Not Used")
-                    && th1InSensorSp.getSelectedItem().toString().equals("Not Used")) {
-                    Toast.makeText(getActivity(), "Select an Input Sensor",Toast.LENGTH_LONG).show();
-                    return;
-                }
-                
-                new AsyncTask<String, Void, Void>() {
-
-        
-                    @Override
-                    protected void onPreExecute() {
-                        setButton.setEnabled(false);
-                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving PLC Configuration");
-                        super.onPreExecute();
-                    }
-        
-                    @Override
-                    protected Void doInBackground( final String ... params ) {
-                        setupPlcProfile();
-                        L.saveCCUState();
-            
-                        return null;
-                    }
-        
-                    @Override
-                    protected void onPostExecute( final Void result ) {
-                        ProgressDialogUtils.hideProgressDialog();
-                        FragmentPLCConfiguration.this.closeAllBaseDialogFragments();
-                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                        LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        setButton.setOnClickListener(view1 -> {
+            if (!analog2DynamicSP.isChecked()
+                && analog1InSensorSp.getSelectedItem().toString().equals("Not Used")
+                && th1InSensorSp.getSelectedItem().toString().equals("Not Used")) {
+                Toast.makeText(getActivity(), "Select an Input Sensor",Toast.LENGTH_LONG).show();
+                return;
             }
+            setButton.setEnabled(false);
+            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving PLC Configuration");
+
+            new Thread(() -> {
+
+                setupPlcProfile();
+                L.saveCCUState();
+
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                ProgressDialogUtils.hideProgressDialog();
+                FragmentPLCConfiguration.this.closeAllBaseDialogFragments();
+                getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
+
+            }).start();
+
         });
         
     }

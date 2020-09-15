@@ -1,10 +1,8 @@
 package a75f.io.renatus;
 
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -19,7 +17,6 @@ import android.widget.Spinner;
 
 import java.lang.reflect.Field;
 
-import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
@@ -153,36 +150,27 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
         }else {
             zonePriority.setSelection(2);
         }
-        setButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
+        setButton.setOnClickListener(v -> {
 
-                new AsyncTask<String, Void, Void>() {
+            setButton.setEnabled(false);
+            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving CCU As a Zone Configuration");
 
-                    @Override
-                    protected void onPreExecute() {
-                        setButton.setEnabled(false);
-                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving CCU As a Zone Configuration");
-                        super.onPreExecute();
-                    }
+            new Thread(() -> {
 
-                    @Override
-                    protected Void doInBackground(final String... params) {
-                        setupCcuAsZoneProfile();
-                        L.saveCCUState();
+                setupCcuAsZoneProfile();
+                L.saveCCUState();
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
-                        return null;
-                    }
+                ProgressDialogUtils.hideProgressDialog();
+                FragmentTempInfConfiguration.this.closeAllBaseDialogFragments();
+                getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
 
-                    @Override
-                    protected void onPostExecute( final Void result ) {
-                        ProgressDialogUtils.hideProgressDialog();
-                        FragmentTempInfConfiguration.this.closeAllBaseDialogFragments();
-                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+            }).start();
 
-            }
         });
     }
 

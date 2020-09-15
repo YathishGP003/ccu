@@ -3,7 +3,6 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.SwitchCompat;
@@ -416,37 +415,27 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             }
         }*/
         
-        setButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-    
-                new AsyncTask<String, Void, Void>() {
-    
-                    @Override
-                    protected void onPreExecute() {
-                        setButton.setEnabled(false);
-                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving VAV Configuration");
-                        super.onPreExecute();
-                    }
-    
-                    @Override
-                    protected Void doInBackground( final String ... params ) {
-                        setupVavZoneProfile();
-                        L.saveCCUState();
-            
-                        return null;
-                    }
-        
-                    @Override
-                    protected void onPostExecute( final Void result ) {
-                        ProgressDialogUtils.hideProgressDialog();
-                        FragmentVAVConfiguration.this.closeAllBaseDialogFragments();
-                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                        LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
-                
-            }
+        setButton.setOnClickListener(v -> {
+
+            setButton.setEnabled(false);
+            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving VAV Configuration");
+
+            new Thread(() -> {
+                setupVavZoneProfile();
+                L.saveCCUState();
+
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                ProgressDialogUtils.hideProgressDialog();
+                FragmentVAVConfiguration.this.closeAllBaseDialogFragments();
+                getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
+
+            }).start();
         });
     
     }

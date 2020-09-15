@@ -1,9 +1,7 @@
 package a75f.io.renatus;
 
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.Gravity;
@@ -148,36 +146,28 @@ public class DialogOAOProfile extends BaseDialogFragment
         
         mProfile = L.ccu().oaoProfile;
         
-        setButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-            
-                new AsyncTask<Void, Void, Void>() {
+        setButton.setOnClickListener(v -> {
 
-                    @Override
-                    protected void onPreExecute() {
-                        setButton.setEnabled(false);
-                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving OAO Configuration");
-                        super.onPreExecute();
-                    }
-                
-                    @Override
-                    protected Void doInBackground( final Void ... params ) {
-                        setUpOAOProfile();
-                        L.saveCCUState();
-                    
-                        return null;
-                    }
-                
-                    @Override
-                    protected void onPostExecute( final Void result ) {
-                        ProgressDialogUtils.hideProgressDialog();
-                        DialogOAOProfile.this.closeAllBaseDialogFragments();
-                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            
-            }
+            setButton.setEnabled(false);
+            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving OAO Configuration");
+
+            new Thread(() -> {
+
+                setUpOAOProfile();
+                L.saveCCUState();
+
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                ProgressDialogUtils.hideProgressDialog();
+                DialogOAOProfile.this.closeAllBaseDialogFragments();
+                getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+
+            }).start();
+
         });
     
         ArrayList<Integer> voltsArray = new ArrayList<>();

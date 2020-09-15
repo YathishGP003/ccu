@@ -6,6 +6,10 @@ package a75f.io.logic.tuners;
 
 public class TunerConstants
 {
+    
+    public static final int DEFAULT_VAL_LEVEL = 17;
+    public static final int BUILDING_VAL_LEVEL = 16;
+    
     public static final int TUNER_EQUIP_VAL_LEVEL = 8;
     
     public static final double SYSTEM_ANALOG1_MIN = 0;
@@ -123,5 +127,14 @@ public class TunerConstants
     public static final String TEMPERATURE_LIMIT = "TEMPERATURE";
     public static final String ALERT_TUNER = "ALERT";
     public static final String LCM_TUNER = "LCM";
+    
+    public static final double DEFAULT_COOLING_DB = 2.0; //Default deadband value based on dual temp diff 70 and 74 (// (74-70)/2.0)
+    public static final double DEFAULT_HEATING_DB = 2.0;
+    public static final double DEFAULT_COOLING_DB_MULTPLIER = 0.5;
+    public static final double DEFAULT_HEATING_DB_MULTIPLIER = 0.5;
+    public static final double DEFAULT_PROPORTIONAL_GAIN = 0.5;
+    public static final double DEFAULT_INTEGRAL_GAIN = 0.5;
+    public static final double DEFAULT_PROPORTIONAL_SPREAD = 2;
+    public static final double DEFAULT_INTEGRAL_TIMEOUT = 30;
 
 }

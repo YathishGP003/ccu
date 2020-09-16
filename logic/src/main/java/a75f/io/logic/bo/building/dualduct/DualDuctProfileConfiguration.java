@@ -20,14 +20,14 @@ public class DualDuctProfileConfiguration extends BaseProfileConfiguration {
     private int minCoolingDamperPos;
     private int maxCoolingDamperPos;
     
-    private int analog1OutAtMinDamperHeating;
-    private int analog1OutAtMaxDamperHeating;
-    private int analog1OutAtMinDamperCooling;
-    private int analog1OutAtMaxDamperCooling;
-    private int analog2OutAtMinDamperHeating;
-    private int analog2OutAtMaxDamperHeating;
-    private int analog2OutAtMinDamperCooling;
-    private int analog2OutAtMaxDamperCooling;
+    private double analog1OutAtMinDamperHeating;
+    private double analog1OutAtMaxDamperHeating;
+    private double analog1OutAtMinDamperCooling;
+    private double analog1OutAtMaxDamperCooling;
+    private double analog2OutAtMinDamperHeating;
+    private double analog2OutAtMaxDamperHeating;
+    private double analog2OutAtMinDamperCooling;
+    private double analog2OutAtMaxDamperCooling;
     
     public double getTemperatureOffset() {
         return temperatureOffset;
@@ -102,52 +102,52 @@ public class DualDuctProfileConfiguration extends BaseProfileConfiguration {
         this.maxCoolingDamperPos = maxCoolingDamperPos;
     }
     
-    public int getAnalog1OutAtMinDamperHeating() {
+    public double getAnalog1OutAtMinDamperHeating() {
         return analog1OutAtMinDamperHeating;
     }
-    public void setAnalog1OutAtMinDamperHeating(int analog1OutAtMinDamperHeating) {
+    public void setAnalog1OutAtMinDamperHeating(double analog1OutAtMinDamperHeating) {
         this.analog1OutAtMinDamperHeating = analog1OutAtMinDamperHeating;
     }
-    public int getAnalog1OutAtMaxDamperHeating() {
+    public double getAnalog1OutAtMaxDamperHeating() {
         return analog1OutAtMaxDamperHeating;
     }
-    public void setAnalog1OutAtMaxDamperHeating(int analog1OutAtMaxDamperHeating) {
+    public void setAnalog1OutAtMaxDamperHeating(double analog1OutAtMaxDamperHeating) {
         this.analog1OutAtMaxDamperHeating = analog1OutAtMaxDamperHeating;
     }
-    public int getAnalog1OutAtMinDamperCooling() {
+    public double getAnalog1OutAtMinDamperCooling() {
         return analog1OutAtMinDamperCooling;
     }
-    public void setAnalog1OutAtMinDamperCooling(int analog1OutAtMinDamperCooling) {
+    public void setAnalog1OutAtMinDamperCooling(double analog1OutAtMinDamperCooling) {
         this.analog1OutAtMinDamperCooling = analog1OutAtMinDamperCooling;
     }
-    public int getAnalog1OutAtMaxDamperCooling() {
+    public double getAnalog1OutAtMaxDamperCooling() {
         return analog1OutAtMaxDamperCooling;
     }
-    public void setAnalog1OutAtMaxDamperCooling(int analog1OutAtMaxDamperCooling) {
+    public void setAnalog1OutAtMaxDamperCooling(double analog1OutAtMaxDamperCooling) {
         this.analog1OutAtMaxDamperCooling = analog1OutAtMaxDamperCooling;
     }
-    public int getAnalog2OutAtMinDamperHeating() {
+    public double getAnalog2OutAtMinDamperHeating() {
         return analog2OutAtMinDamperHeating;
     }
-    public void setAnalog2OutAtMinDamperHeating(int analog2OutAtMinDamperHeating) {
+    public void setAnalog2OutAtMinDamperHeating(double analog2OutAtMinDamperHeating) {
         this.analog2OutAtMinDamperHeating = analog2OutAtMinDamperHeating;
     }
-    public int getAnalog2OutAtMaxDamperHeating() {
+    public double getAnalog2OutAtMaxDamperHeating() {
         return analog2OutAtMaxDamperHeating;
     }
-    public void setAnalog2OutAtMaxDamperHeating(int analog2OutAtMaxDamperHeating) {
+    public void setAnalog2OutAtMaxDamperHeating(double analog2OutAtMaxDamperHeating) {
         this.analog2OutAtMaxDamperHeating = analog2OutAtMaxDamperHeating;
     }
-    public int getAnalog2OutAtMinDamperCooling() {
+    public double getAnalog2OutAtMinDamperCooling() {
         return analog2OutAtMinDamperCooling;
     }
-    public void setAnalog2OutAtMinDamperCooling(int analog2OutAtMinDamperCooling) {
+    public void setAnalog2OutAtMinDamperCooling(double analog2OutAtMinDamperCooling) {
         this.analog2OutAtMinDamperCooling = analog2OutAtMinDamperCooling;
     }
-    public int getAnalog2OutAtMaxDamperCooling() {
+    public double getAnalog2OutAtMaxDamperCooling() {
         return analog2OutAtMaxDamperCooling;
     }
-    public void setAnalog2OutAtMaxDamperCooling(int analog2OutAtMaxDamperCooling) {
+    public void setAnalog2OutAtMaxDamperCooling(double analog2OutAtMaxDamperCooling) {
         this.analog2OutAtMaxDamperCooling = analog2OutAtMaxDamperCooling;
     }
 }

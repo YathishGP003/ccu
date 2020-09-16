@@ -807,21 +807,21 @@ class DualDuctEquip {
         config.setMinCoolingDamperPos((int)TemperatureProfileUtil.getDamperLimit(nodeAddr,"cooling","min"));
         config.setMaxCoolingDamperPos((int)TemperatureProfileUtil.getDamperLimit(nodeAddr,"cooling","max"));
         
-        config.setAnalog1OutAtMinDamperHeating((int) getConfigNumVal("analog1 and output and min and damper and " +
+        config.setAnalog1OutAtMinDamperHeating(getConfigNumVal("analog1 and output and min and damper and " +
                                                                     "heating and pos"));
-        config.setAnalog1OutAtMaxDamperHeating((int) getConfigNumVal("analog1 and output and max and damper and " +
+        config.setAnalog1OutAtMaxDamperHeating(getConfigNumVal("analog1 and output and max and damper and " +
                                                                     "heating and pos"));
-        config.setAnalog1OutAtMinDamperCooling((int) getConfigNumVal("analog1 and output and min and damper and " +
+        config.setAnalog1OutAtMinDamperCooling(getConfigNumVal("analog1 and output and min and damper and " +
                                                                      "cooling and pos"));
-        config.setAnalog1OutAtMaxDamperCooling((int) getConfigNumVal("analog1 and output and max and damper and " +
+        config.setAnalog1OutAtMaxDamperCooling(getConfigNumVal("analog1 and output and max and damper and " +
                                                                      "cooling and pos"));
-        config.setAnalog2OutAtMinDamperHeating((int) getConfigNumVal("analog2 and output and min and damper and " +
+        config.setAnalog2OutAtMinDamperHeating(getConfigNumVal("analog2 and output and min and damper and " +
                                                                      "heating and pos"));
-        config.setAnalog2OutAtMaxDamperHeating((int) getConfigNumVal("analog2 and output and max and damper and " +
+        config.setAnalog2OutAtMaxDamperHeating(getConfigNumVal("analog2 and output and max and damper and " +
                                                                      "heating and pos"));
-        config.setAnalog2OutAtMinDamperCooling((int) getConfigNumVal("analog2 and output and min and damper and " +
+        config.setAnalog2OutAtMinDamperCooling(getConfigNumVal("analog2 and output and min and damper and " +
                                                                      "cooling and pos"));
-        config.setAnalog2OutAtMaxDamperCooling((int) getConfigNumVal("analog2 and output and max and damper and " +
+        config.setAnalog2OutAtMaxDamperCooling(getConfigNumVal("analog2 and output and max and damper and " +
                                                                      "cooling and pos"));
         
         config.setEnableOccupancyControl(getConfigNumVal("enable and occupancy") > 0 ? true : false);

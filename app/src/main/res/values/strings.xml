@@ -652,7 +652,7 @@
     <string name="dab_dual_duct_label_thermistor1">Thermistor-1</string>
     <string name="dab_dual_duct_label_thermistor2">Thermistor-2</string>
 
-
+    <string name="dab_dual_duct_label_thermistor1_val">Discharge Airflow Temp</string>
 
     <string name="dab_dual_duct_label_ao1_min_damp_heat_pos">Analog-out1 at Min\n Damper Heating Pos</string>
     <string name="dab_dual_duct_label_ao1_max_damp_heat_pos">Analog-out1 at Max\n Damper Heating Pos</string>
@@ -681,6 +681,7 @@
 
     <string-array name="dab_dual_duct_thermistor2_options">
         <item>  Cooling Supply Air Temp </item>
+        <item>  Heating Supply Air Temp </item>
     </string-array>
 
 

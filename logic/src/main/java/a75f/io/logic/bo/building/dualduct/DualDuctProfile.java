@@ -34,8 +34,12 @@ import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 public class DualDuctProfile extends ZoneProfile {
+    public static final int ANALOG_SCALE = 10;
     
     DualDuctEquip dualDuctEquip;
+    GenericPIController heatingDamperController;
+    GenericPIController coolingDamperController;
+    
     
     public void addDualDuctEquip(short addr, DualDuctProfileConfiguration config, String floorRef, String roomRef) {
         dualDuctEquip = new DualDuctEquip(getProfileType(), addr);
@@ -108,37 +112,19 @@ public class DualDuctProfile extends ZoneProfile {
         double setTempHeating = TemperatureProfileUtil.getDesiredTempHeating(dualDuctEquip.nodeAddr);
         double roomTemp       = dualDuctEquip.getCurrentTemp();
         
-        GenericPIController heatingDamperController = dualDuctEquip.heatingDamperController;
-        GenericPIController coolingDamperController = dualDuctEquip.coolingDamperController;
+        heatingDamperController = dualDuctEquip.heatingDamperController;
+        coolingDamperController = dualDuctEquip.coolingDamperController;
         
         Damper coolingDamper = new Damper();
         Damper heatingDamper = new Damper();
-        SystemMode             systemMode   = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
         
+        SystemMode             systemMode   = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
         if (roomTemp > setTempCooling && systemMode != SystemMode.OFF) {
-            //Zone is in Cooling
-            if (state != COOLING)
-            {
-                state = COOLING;
-                heatingDamperController.reset();
-                coolingDamperController.reset();
-            }
-            coolingDamperController.updateControlVariable(roomTemp, setTempCooling);
+            handleZoneCooling(roomTemp, setTempCooling);
         } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF) {
-            //Zone is in heating
-            if (state != HEATING)
-            {
-                state = HEATING;
-                heatingDamperController.reset();
-                coolingDamperController.reset();
-            }
-            heatingDamperController.updateControlVariable(setTempHeating, roomTemp);
+            handleZoneHeating(setTempHeating, roomTemp);
         } else {
-            if (state != DEADBAND) {
-                state = DEADBAND;
-            }
-            heatingDamperController.reset();
-            coolingDamperController.reset();
+            handleZoneDeadband();
         }
         heatingDamperController.dump();
         coolingDamperController.dump();
@@ -149,23 +135,15 @@ public class DualDuctProfile extends ZoneProfile {
         coolingDamper.iaqCompensatedMinPos = getIAQCompensatedDamperPosition(coolingDamper);
         heatingDamper.iaqCompensatedMinPos = getIAQCompensatedDamperPosition(coolingDamper);
         
-        int coolingDamperPos = (int)(coolingDamper.iaqCompensatedMinPos +
+        coolingDamper.currentPosition = (int)(coolingDamper.iaqCompensatedMinPos +
                                 (coolingDamper.maxPosition - coolingDamper.iaqCompensatedMinPos) *
                                 (coolingDamperController.getControlVariable() / coolingDamperController.getMaxAllowedError()));
     
-        int heatingDamperPos = (int)(heatingDamper.iaqCompensatedMinPos +
+        heatingDamper.currentPosition = (int)(heatingDamper.iaqCompensatedMinPos +
                                      (heatingDamper.maxPosition - heatingDamper.iaqCompensatedMinPos) *
                                      (heatingDamperController.getControlVariable() / heatingDamperController.getMaxAllowedError()));
         
-        if(coolingDamper.currentPosition != coolingDamperPos) {
-            coolingDamper.currentPosition = coolingDamperPos;
-            dualDuctEquip.setDamperPos(coolingDamper.currentPosition, "cooling");
-        }
-    
-        if(heatingDamper.currentPosition != heatingDamperPos) {
-            coolingDamper.currentPosition = heatingDamperPos;
-            dualDuctEquip.setDamperPos(heatingDamper.currentPosition, "heating");
-        }
+        updateDampers(coolingDamper, heatingDamper);
         
         updateZoneStatus();
     
@@ -175,11 +153,41 @@ public class DualDuctProfile extends ZoneProfile {
         CcuLog.d(L.TAG_CCU_ZONE, "CoolingDamper : CV" + coolingDamperController.getControlVariable() + " " +
                                  "currentPosition " +coolingDamper.currentPosition);
     
-        CcuLog.d(L.TAG_CCU_ZONE, "HearingDamper : CV" + heatingDamperController.getControlVariable() + " " +
+        CcuLog.d(L.TAG_CCU_ZONE, "HeatingDamper : CV" + heatingDamperController.getControlVariable() + " " +
                                  "currentPosition " +heatingDamper.currentPosition);
     }
     
+    private void handleZoneCooling(double roomTemp, double setTempCooling) {
+        
+        if (state != COOLING)
+        {
+            state = COOLING;
+            heatingDamperController.reset();
+            coolingDamperController.reset();
+        }
+        coolingDamperController.updateControlVariable(roomTemp, setTempCooling);
+    }
+    
+    private void handleZoneHeating(double setTempHeating, double roomTemp) {
+        if (state != HEATING)
+        {
+            state = HEATING;
+            heatingDamperController.reset();
+            coolingDamperController.reset();
+        }
+        heatingDamperController.updateControlVariable(setTempHeating, roomTemp);
+    }
+    
+    private void handleZoneDeadband() {
+        if (state != DEADBAND) {
+            state = DEADBAND;
+        }
+        heatingDamperController.reset();
+        coolingDamperController.reset();
+    }
+    
     private void updateZoneDead() {
+        
         CcuLog.d(L.TAG_CCU_ZONE, "Zone Temp Dead: " + dualDuctEquip.nodeAddr + " roomTemp : " + dualDuctEquip.getCurrentTemp());
         state = TEMPDEAD;
         String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+dualDuctEquip.nodeAddr+"\"");
@@ -239,11 +247,78 @@ public class DualDuctProfile extends ZoneProfile {
     
     }
     
-    private void updateCompositeDamper(ZoneState state, Damper coolingDamper, Damper heatingDamper) {
-        if (state == COOLING) {
+    private void updateDampers(Damper coolingDamper, Damper heatingDamper) {
         
+        int analog1Config = (int)dualDuctEquip.getConfigNumVal("analog1 and output and type");
+        int analog2Config = (int)dualDuctEquip.getConfigNumVal("analog2 and output and type");
+        
+        if (analog1Config == DualDuctActuator.COOLING.getVal() || analog2Config == DualDuctActuator.COOLING.getVal()) {
+            int currentCoolingDamperPos = (int)dualDuctEquip.getDamperPos("cooling");
+            if (currentCoolingDamperPos != coolingDamper.currentPosition) {
+                dualDuctEquip.setDamperPos(coolingDamper.currentPosition, "cooling");
+            }
+        } else if (analog1Config == DualDuctActuator.HEATING.getVal() || analog2Config == DualDuctActuator.HEATING.getVal()) {
+            
+            int currentCoolingDamperPos = (int)dualDuctEquip.getDamperPos("heating");
+            if (currentCoolingDamperPos != coolingDamper.currentPosition) {
+                dualDuctEquip.setDamperPos(coolingDamper.currentPosition, "heating");
+            }
+            
+        } else if (analog1Config == DualDuctActuator.COMPOSITE.getVal()) {
+            
+            int compositeDamperPos = getCompositeDamperPos("analog1", coolingDamper, heatingDamper);
+            dualDuctEquip.setDamperPos(compositeDamperPos, "composite1");
+            
+        } else if (analog2Config == DualDuctActuator.COMPOSITE.getVal()) {
+            int compositeDamperPos = getCompositeDamperPos("analog2", coolingDamper, heatingDamper);
+            dualDuctEquip.setDamperPos(compositeDamperPos, "composite2");
+    
+        }
+    }
+    
+    private int getCompositeDamperPos(String analog, Damper coolingDamper, Damper heatingDamper) {
+        double analogMin, analogMax;
+        int compositeDamperPos = 0;
+        if (state == COOLING) {
+            analogMin = dualDuctEquip.getConfigNumVal(analog+" and output and min " +
+                                                      "and damper and cooling and pos");
+            analogMax = dualDuctEquip.getConfigNumVal(analog+" and output and max " +
+                                                      "and damper and cooling and pos");
+        
+            compositeDamperPos = getModulatedDamperPos(analogMin, analogMax, coolingDamper.currentPosition);
+        
+        } else if (state == HEATING) {
+            analogMin = dualDuctEquip.getConfigNumVal(analog+" and output and min " +
+                                                      "and damper and heating and pos");
+            analogMax = dualDuctEquip.getConfigNumVal(analog+" and output and max " +
+                                                      "and damper and heating and pos");
+        
+            compositeDamperPos = getModulatedDamperPos(analogMin, analogMax, heatingDamper.currentPosition);
+        
+        } else if (state == DEADBAND) {
+            double analogMinCooling = dualDuctEquip.getConfigNumVal(analog+" and output and min " +
+                                                                    "and damper and cooling and pos");
+            double analogMinHeating = dualDuctEquip.getConfigNumVal(analog+" and output and min " +
+                                                                    "and damper and heating and pos");
+            compositeDamperPos = (int) (ANALOG_SCALE * (analogMinCooling + analogMinHeating)/2);
         
         }
+        return compositeDamperPos;
+    }
+    
+    private int getModulatedDamperPos(double analogMin, double analogMax, int damperPos) {
+        
+        int modulatedDamperPos;
+        if (analogMax > analogMin)
+        {
+            modulatedDamperPos = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (damperPos / 100)));
+        }
+        else
+        {
+            modulatedDamperPos = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (damperPos / 100)));
+        }
+        return modulatedDamperPos;
+        
     }
     
     private void updateZoneStatus() {

@@ -1205,4 +1205,8 @@ class DualDuctEquip {
     {
         CCUHsApi.getInstance().writeHisValByQuery("point and damper and cmd and "+damper+" and group == \""+nodeAddr+"\"", damperPos);
     }
+    public double getDamperPos(String damper)
+    {
+        return CCUHsApi.getInstance().readHisValByQuery("point and damper and cmd and "+damper+" and group == \""+nodeAddr+"\"");
+    }
 }

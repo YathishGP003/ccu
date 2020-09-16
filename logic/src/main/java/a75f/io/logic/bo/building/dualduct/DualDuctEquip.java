@@ -393,7 +393,7 @@ class DualDuctEquip {
                                              .setEquipRef(equipRef)
                                              .setSiteRef(siteRef).setHisInterpolate("cov")
                                              .addMarker("config").addMarker("dualDuct").addMarker("damper").addMarker("min")
-                                             .addMarker("heating").addMarker("pos")
+                                             .addMarker("heating").addMarker("pos").addMarker("limit")
                                              .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
                                              .setKind(DualDuctConstants.KIND_STRING)
                                              .setMinVal(String.valueOf(DualDuctConstants.MIN_DAMPER_POS))
@@ -412,7 +412,7 @@ class DualDuctEquip {
                                             .setEquipRef(equipRef)
                                             .setSiteRef(siteRef).setHisInterpolate("cov")
                                             .addMarker("config").addMarker("dualDuct").addMarker("damper").addMarker("max")
-                                            .addMarker("heating").addMarker("pos")
+                                            .addMarker("heating").addMarker("pos").addMarker("limit")
                                             .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
                                             .setKind(DualDuctConstants.KIND_STRING)
                                             .setMinVal(String.valueOf(DualDuctConstants.MIN_DAMPER_POS))
@@ -431,7 +431,7 @@ class DualDuctEquip {
                                             .setEquipRef(equipRef)
                                             .setSiteRef(siteRef).setHisInterpolate("cov")
                                             .addMarker("config").addMarker("dualDuct").addMarker("damper").addMarker("min")
-                                            .addMarker("cooling").addMarker("pos")
+                                            .addMarker("cooling").addMarker("pos").addMarker("limit")
                                             .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
                                             .setKind(DualDuctConstants.KIND_STRING)
                                             .setMinVal(String.valueOf(DualDuctConstants.MIN_DAMPER_POS))
@@ -450,7 +450,7 @@ class DualDuctEquip {
                                             .setEquipRef(equipRef)
                                             .setSiteRef(siteRef).setHisInterpolate("cov")
                                             .addMarker("config").addMarker("dualDuct").addMarker("damper").addMarker("max")
-                                            .addMarker("cooling").addMarker("pos")
+                                            .addMarker("cooling").addMarker("pos").addMarker("limit")
                                             .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
                                             .setKind(DualDuctConstants.KIND_STRING)
                                             .setMinVal(String.valueOf(DualDuctConstants.MIN_DAMPER_POS))
@@ -1094,8 +1094,8 @@ class DualDuctEquip {
         if (currentThermistor2Config == config.getThermistor2Config()) {
             return;
         }
-        RawPoint analog1PhysicalPoint = SmartNode.getPhysicalPoint(nodeAddr, Port.TH2_IN.toString());
-        CCUHsApi.getInstance().deleteEntityTree(analog1PhysicalPoint.getPointRef());
+        RawPoint th2PhysicalPoint = SmartNode.getPhysicalPoint(nodeAddr, Port.TH2_IN.toString());
+        CCUHsApi.getInstance().deleteEntityTree(th2PhysicalPoint.getPointRef());
         
         HashMap equipMap = hayStack.read("equip and group == \"" + nodeAddr + "\"");
         String siteRef = equipMap.get("siteRef").toString();

@@ -101,7 +101,8 @@ public class TemperatureProfileUtil {
     
     public static double getDamperLimit(int nodeAddr, String coolHeat, String minMax)
     {
-        ArrayList points = CCUHsApi.getInstance().readAll("point and config and damper and pos and "+coolHeat+" and "+minMax+" and group == \""+nodeAddr+"\"");
+        ArrayList points = CCUHsApi.getInstance().readAll("point and config and damper and pos and limit and "+coolHeat+
+                                                          " and "+minMax+" and group == \""+nodeAddr+"\"");
         if (points.size() == 0) {
             return 0;
         }
@@ -115,7 +116,9 @@ public class TemperatureProfileUtil {
     }
     public static void setDamperLimit(int nodeAddr, String coolHeat, String minMax, double val)
     {
-        ArrayList points = CCUHsApi.getInstance().readAll("point and damper and pos and "+coolHeat+" and "+minMax+" and group == \""+nodeAddr+"\"");
+        ArrayList points =
+            CCUHsApi.getInstance().readAll("point and damper and pos and limit and "+coolHeat+" and "+minMax+" and " +
+                                           "group == \""+nodeAddr+"\"");
         String id = ((HashMap)points.get(0)).get("id").toString();
         if (id == null || id == "") {
             throw new IllegalArgumentException();

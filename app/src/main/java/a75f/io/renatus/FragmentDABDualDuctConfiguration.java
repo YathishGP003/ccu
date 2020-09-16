@@ -362,7 +362,8 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         
         analog1OutSpinner.setSelection(mProfileConfig.getAnalogOut1Config(), false);
         analog2OutSpinner.setSelection(mProfileConfig.getAnalogOut2Config(), false);
-
+        thermistor2Spinner.setSelection(mProfileConfig.getThermistor2Config(), false);
+        
         ArrayAdapter<Double> analogOutAdapter = getAnalogOutAdapter();
         ao1MinDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(mProfileConfig.getAnalog1OutAtMinDamperHeating()), false);
         ao1MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(mProfileConfig.getAnalog1OutAtMaxDamperHeating()), false);
@@ -466,6 +467,8 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         dualductConfig.setAnalogOut1Config(analog1OutSpinner.getSelectedItemPosition());
         dualductConfig.setAnalogOut2Config(analog2OutSpinner.getSelectedItemPosition());
     
+        dualductConfig.setThermistor2Config(thermistor2Spinner.getSelectedItemPosition());
+        
         dualductConfig.setNodeType(mNodeType);
         dualductConfig.setNodeAddress(mSmartNodeAddress);
         dualductConfig.setEnableOccupancyControl(enableOccupancyControl.isChecked());

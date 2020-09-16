@@ -39,7 +39,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import a75f.io.api.haystack.sync.AsyncHttpPost;
 import a75f.io.api.haystack.sync.EntityParser;
 import a75f.io.api.haystack.sync.EntitySyncHandler;
 import a75f.io.api.haystack.sync.HisSyncHandler;
@@ -415,8 +414,8 @@ public class CCUHsApi
 
                 HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
                 HDict[] dictArr  = {b.toDict()};
-                AsyncHttpPost asyncHttpPost = new AsyncHttpPost(getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)),CCUHsApi.getInstance().getJwt());
-                asyncHttpPost.execute();
+                String  response = HttpUtil.executePost(getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+                CcuLog.d("CCU_HS", "Response: \n" + response);
             }
         }
     }

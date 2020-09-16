@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -129,21 +130,16 @@ public class FragmentEMRConfiguration extends BaseDialogFragment
             ProgressDialogUtils.showProgressDialog(getActivity(),"Saving EMR Configuration");
 
             new Thread(() -> {
-
                 setupEmrProfile();
                 L.saveCCUState();
+            }).start();
 
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
+            new Handler().postDelayed(() -> {
                 ProgressDialogUtils.hideProgressDialog();
                 FragmentEMRConfiguration.this.closeAllBaseDialogFragments();
                 getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                 LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
-            }).start();
+            }, 12000);
 
         });
         

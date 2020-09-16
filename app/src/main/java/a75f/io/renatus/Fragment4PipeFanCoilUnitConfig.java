@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -234,21 +235,16 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
             ProgressDialogUtils.showProgressDialog(getActivity(), "Saving 4PFCU Configuration");
 
             new Thread(() -> {
-
                 setup4PFCUZoneProfile();
                 L.saveCCUState();
+            }).start();
 
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
+            new Handler().postDelayed(() -> {
                 ProgressDialogUtils.hideProgressDialog();
                 Fragment4PipeFanCoilUnitConfig.this.closeAllBaseDialogFragments();
                 getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                 LSerial.getInstance().sendSeedMessage(true,false, mSmartNodeAddress, roomRef,floorRef);
-            }).start();
+            },12000);
 
         });
         view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {

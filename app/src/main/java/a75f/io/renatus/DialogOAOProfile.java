@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -152,21 +153,15 @@ public class DialogOAOProfile extends BaseDialogFragment
             ProgressDialogUtils.showProgressDialog(getActivity(),"Saving OAO Configuration");
 
             new Thread(() -> {
-
                 setUpOAOProfile();
                 L.saveCCUState();
+            }).start();
 
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
+            new Handler().postDelayed(() -> {
                 ProgressDialogUtils.hideProgressDialog();
                 DialogOAOProfile.this.closeAllBaseDialogFragments();
                 getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-
-            }).start();
+            }, 12000);
 
         });
     

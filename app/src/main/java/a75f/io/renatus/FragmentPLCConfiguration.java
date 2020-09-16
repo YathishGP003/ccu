@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.Gravity;
@@ -399,22 +400,16 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             ProgressDialogUtils.showProgressDialog(getActivity(),"Saving PLC Configuration");
 
             new Thread(() -> {
-
                 setupPlcProfile();
                 L.saveCCUState();
+            }).start();
 
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
+            new Handler().postDelayed(() -> {
                 ProgressDialogUtils.hideProgressDialog();
                 FragmentPLCConfiguration.this.closeAllBaseDialogFragments();
                 getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                 LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
-
-            }).start();
+            }, 12000);
 
         });
         

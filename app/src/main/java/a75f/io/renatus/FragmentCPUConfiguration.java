@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -280,21 +281,16 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
             ProgressDialogUtils.showProgressDialog(getActivity(),"Saving CPU Configuration");
 
             new Thread(() -> {
-
                 setupCPUZoneProfile();
                 L.saveCCUState();
+            }).start();
 
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
+            new Handler().postDelayed(() -> {
                 ProgressDialogUtils.hideProgressDialog();
                 FragmentCPUConfiguration.this.closeAllBaseDialogFragments();
                 getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                 LSerial.getInstance().sendSeedMessage(true,false, mSmartNodeAddress, roomRef,floorRef);
-            }).start();
+            },12000);
 
         });
         view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {

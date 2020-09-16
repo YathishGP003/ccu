@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
@@ -418,30 +419,26 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         setButton.setOnClickListener(v -> {
 
             setButton.setEnabled(false);
-            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving VAV Configuration");
+            ProgressDialogUtils.showProgressDialog(getActivity(), "Saving VAV Configuration");
 
             new Thread(() -> {
                 setupVavZoneProfile();
                 L.saveCCUState();
+            }).start();
 
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
+            new Handler().postDelayed(() -> {
                 ProgressDialogUtils.hideProgressDialog();
                 FragmentVAVConfiguration.this.closeAllBaseDialogFragments();
                 getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
+                LSerial.getInstance().sendSeedMessage(false, false, mSmartNodeAddress, zoneRef, floorRef);
+            }, 12000);
 
-            }).start();
         });
     
     }
     
     private void setupVavZoneProfile() {
-        
+
         VavProfileConfiguration vavConfig = new VavProfileConfiguration();
         vavConfig.damperType = damperTypeSelected.ordinal();
         vavConfig.damperSize = Integer.parseInt(damperSize.getSelectedItem().toString());

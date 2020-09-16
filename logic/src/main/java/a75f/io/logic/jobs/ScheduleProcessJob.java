@@ -720,9 +720,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             }
         }
     }
-
     public static HashMap getDABEquipPoints(String equipID) {
-
         HashMap dabPoints = new HashMap();
         dabPoints.put("Profile","DAB");
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
@@ -742,13 +740,13 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
         if (dischargePoint  != 0)
         {
-
             dabPoints.put("Discharge Airflow",dischargePoint+" \u2109");
         }else{
             dabPoints.put("Discharge Airflow",0+" \u2109");
         }
         return dabPoints;
     }
+    
     public static HashMap getTIEquipPoints(String equipID) {
 
         HashMap tiPoints = new HashMap();

@@ -47,7 +47,7 @@ public class DualDuctProfile extends ZoneProfile {
         dualDuctEquip.init();
     }
     
-    public void addDabEquip(short addr) {
+    public void addDualDuctEquip(short addr) {
         dualDuctEquip = new DualDuctEquip(getProfileType(), addr);
         dualDuctEquip.init();
     }
@@ -59,7 +59,7 @@ public class DualDuctProfile extends ZoneProfile {
     @Override
     public ProfileType getProfileType()
     {
-        return ProfileType.DAB;
+        return ProfileType.DUAL_DUCT;
     }
     
     @Override
@@ -147,13 +147,13 @@ public class DualDuctProfile extends ZoneProfile {
         
         updateZoneStatus();
     
-        Log.d(L.TAG_CCU_ZONE, "DAB : roomTemp" + roomTemp + " setTempCooling:  " + setTempCooling+" " +
+        Log.d(L.TAG_CCU_ZONE, "DUALDUCT: roomTemp" + roomTemp + " setTempCooling:  " + setTempCooling+" " +
                               "setTempHeating: "+setTempHeating+" ZoneState: "+state);
     
-        CcuLog.d(L.TAG_CCU_ZONE, "CoolingDamper : CV" + coolingDamperController.getControlVariable() + " " +
+        CcuLog.d(L.TAG_CCU_ZONE, "DUALDUCT: CoolingDamper : CV" + coolingDamperController.getControlVariable() + " " +
                                  "currentPosition " +coolingDamper.currentPosition);
     
-        CcuLog.d(L.TAG_CCU_ZONE, "HeatingDamper : CV" + heatingDamperController.getControlVariable() + " " +
+        CcuLog.d(L.TAG_CCU_ZONE, "DUALDUCT: HeatingDamper : CV" + heatingDamperController.getControlVariable() + " " +
                                  "currentPosition " +heatingDamper.currentPosition);
     }
     

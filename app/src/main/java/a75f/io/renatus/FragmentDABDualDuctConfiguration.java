@@ -367,11 +367,11 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         ao1MinDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(mProfileConfig.getAnalog1OutAtMinDamperHeating()), false);
         ao1MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(mProfileConfig.getAnalog1OutAtMaxDamperHeating()), false);
         ao1MinDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(mProfileConfig.getAnalog1OutAtMinDamperCooling()), false);
-        ao1MinDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(mProfileConfig.getAnalog1OutAtMinDamperCooling()), false);
+        ao1MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(mProfileConfig.getAnalog1OutAtMaxDamperCooling()), false);
         ao2MinDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(mProfileConfig.getAnalog2OutAtMinDamperHeating()), false);
         ao2MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(mProfileConfig.getAnalog2OutAtMaxDamperHeating()), false);
         ao2MinDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(mProfileConfig.getAnalog2OutAtMinDamperCooling()), false);
-        ao2MinDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(mProfileConfig.getAnalog2OutAtMinDamperCooling()), false);
+        ao2MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(mProfileConfig.getAnalog2OutAtMaxDamperCooling()), false);
     
         enableOccupancyControl.setChecked(mProfileConfig.isEnableOccupancyControl());
         enableCO2Control.setChecked(mProfileConfig.isEnableCO2Control());
@@ -440,7 +440,6 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
                     protected Void doInBackground( final Void ... params ) {
                         setupDualDuctZoneProfile();
                         L.saveCCUState();
-                        LSerial.getInstance().sendSeedMessage(false, false, mSmartNodeAddress, zoneRef, floorRef);
                         return null;
                     }
                     
@@ -449,11 +448,16 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
                         ProgressDialogUtils.hideProgressDialog();
                         FragmentDABDualDuctConfiguration.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                        //sendSeedMessage();
                     }
                 }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 
             }
         });
+    }
+    
+    private void sendSeedMessage() {
+        new Thread(() -> LSerial.getInstance().sendSeedMessage(false, false, mSmartNodeAddress, zoneRef, floorRef)).start();
     }
     
     private void setupDualDuctZoneProfile() {
@@ -468,11 +472,30 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         dualductConfig.setEnableCO2Control(enableCO2Control.isChecked());
         dualductConfig.setEnableIAQControl(enableIAQControl.isChecked());
     
-        dualductConfig.setMinCoolingDamperPos(minCoolingDamperPos.getValue());
-        dualductConfig.setMaxCoolingDamperPos(maxCoolingDamperPos.getValue());
         dualductConfig.setMinHeatingDamperPos(minHeatingDamperPos.getValue());
         dualductConfig.setMaxHeatingDamperPos(maxHeatingDamperPos.getValue());
+        dualductConfig.setMinCoolingDamperPos(minCoolingDamperPos.getValue());
+        dualductConfig.setMaxCoolingDamperPos(maxCoolingDamperPos.getValue());
+        
         dualductConfig.setTemperatureOffset(temperatureOffset.getValue() - TEMP_OFFSET_LIMIT);
+    
+        dualductConfig.setAnalog1OutAtMinDamperHeating(Double.parseDouble
+                                                                  (ao1MinDamperHeatingSpinner.getSelectedItem().toString()));
+        dualductConfig.setAnalog1OutAtMaxDamperHeating(Double.parseDouble
+                                                                  (ao1MaxDamperHeatingSpinner.getSelectedItem().toString()));
+        dualductConfig.setAnalog1OutAtMinDamperCooling(Double.parseDouble
+                                                                  (ao1MinDamperCoolingSpinner.getSelectedItem().toString()));
+        dualductConfig.setAnalog1OutAtMaxDamperCooling(Double.parseDouble
+                                                                  (ao1MaxDamperCoolingSpinner.getSelectedItem().toString()));
+    
+        dualductConfig.setAnalog2OutAtMinDamperHeating(Double.parseDouble
+                                                                  (ao2MinDamperHeatingSpinner.getSelectedItem().toString()));
+        dualductConfig.setAnalog2OutAtMaxDamperHeating(Double.parseDouble
+                                                                  (ao2MaxDamperHeatingSpinner.getSelectedItem().toString()));
+        dualductConfig.setAnalog2OutAtMinDamperCooling(Double.parseDouble
+                                                                  (ao2MinDamperCoolingSpinner.getSelectedItem().toString()));
+        dualductConfig.setAnalog2OutAtMaxDamperCooling(Double.parseDouble
+                                                                  (ao2MaxDamperCoolingSpinner.getSelectedItem().toString()));
         
         Output analog1Op = new Output();
         analog1Op.setAddress(mSmartNodeAddress);

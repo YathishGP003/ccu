@@ -106,6 +106,8 @@ class DualDuctEquip {
         createConfigPoints(siteRef, equipDis, tz, config);
         
         DualDuctTuners.addEquipTuners(siteRef, equipDis, equipRef, roomRef, floorRef, tz);
+    
+        setDefaultValues();
     }
     
     
@@ -273,16 +275,6 @@ class DualDuctEquip {
         device.addSensor(Port.SENSOR_VOC, vocId);
     
         device.addPointsToDb();
-        
-        setCurrentTemp(0);
-        setDamperPos(0, "cooling");
-        setDamperPos(0, "heating");
-        setHumidity(0);
-        setCO2(0);
-        setVOC(0);
-        TemperatureProfileUtil.setDesiredTempCooling(nodeAddr, 74.0);
-        TemperatureProfileUtil.setDesiredTemp(nodeAddr,72.0);
-        TemperatureProfileUtil.setDesiredTempHeating(nodeAddr, 70.0);
     }
     
     private void createUserIntentPoints(String siteRef, String equipDis, String roomRef, String floorRef, String tz) {
@@ -355,7 +347,7 @@ class DualDuctEquip {
                                     .setSiteRef(siteRef)
                                     .setRoomRef(roomRef)
                                     .setFloorRef(floorRef).setHisInterpolate("cov")
-                                    .addMarker("status").addMarker("his").addMarker("dab").addMarker("logical").addMarker("zone")
+                                    .addMarker("status").addMarker("his").addMarker("dualDuct").addMarker("logical").addMarker("zone")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setEnums("deadband,cooling,heating,tempdead")
                                     .setTz(tz)
@@ -792,6 +784,18 @@ class DualDuctEquip {
         CCUHsApi.getInstance().writeHisValById(analog2OutputAtMaxDamperCoolingPosId,
                                                                         (double)config.getAnalog2OutAtMaxDamperCooling());
         
+    }
+    
+    private void setDefaultValues() {
+        setCurrentTemp(0);
+        setDamperPos(0, "cooling");
+        setDamperPos(0, "heating");
+        setHumidity(0);
+        setCO2(0);
+        setVOC(0);
+        TemperatureProfileUtil.setDesiredTempCooling(nodeAddr, 74.0);
+        TemperatureProfileUtil.setDesiredTemp(nodeAddr,72.0);
+        TemperatureProfileUtil.setDesiredTempHeating(nodeAddr, 70.0);
     }
     
     public DualDuctProfileConfiguration getProfileConfiguration() {

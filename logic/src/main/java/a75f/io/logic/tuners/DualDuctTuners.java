@@ -16,7 +16,7 @@ import a75f.io.logic.L;
 
 public class DualDuctTuners {
     
-    public static void addDefaultDualDuctTuners(String siteRef, String equipRef, String equipDis, String tz){
+    public static void addDefaultTuners(String siteRef, String equipRef, String equipDis, String tz){
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap tuner = hayStack.read("point and tuner and default and dualDuct");
         if (tuner != null && tuner.size() > 0) {
@@ -190,7 +190,7 @@ public class DualDuctTuners {
     }
     
     
-    public void addEquipDualDuctTuners(String siteRef, String equipdis, String equipref, String roomRef,
+    public static void addEquipTuners(String siteRef, String equipdis, String equipref, String roomRef,
                                        String floorRef, String tz) {
         
         Log.d("CCU", "addEquipDualDuctTuners for " + equipdis);
@@ -211,7 +211,7 @@ public class DualDuctTuners {
                               .setUnit("\u00B0F")
                               .build();
         String coolingDbId = hayStack.addPoint(coolingDb);
-        HashMap defCdbPoint = hayStack.read("point and tuner and default and dab and cooling and deadband and base");
+        HashMap defCdbPoint = hayStack.read("point and tuner and default and dualDuct and cooling and deadband and base");
         ArrayList<HashMap> cdbDefPointArr = hayStack.readPoint(defCdbPoint.get("id").toString());
         for (HashMap valMap : cdbDefPointArr) {
             if (valMap.get("val") != null)
@@ -234,7 +234,7 @@ public class DualDuctTuners {
                                         .setTz(tz)
                                         .build();
         String coolingDbMultiplierId = hayStack.addPoint(coolingDbMultiplier);
-        HashMap coolingDbMultiplierPoint = hayStack.read("point and tuner and default and dab and cooling and deadband and multiplier");
+        HashMap coolingDbMultiplierPoint = hayStack.read("point and tuner and default and dualDuct and cooling and deadband and multiplier");
         ArrayList<HashMap> coolingDbMultiplierPointArr = hayStack.readPoint(coolingDbMultiplierPoint.get("id").toString());
         for (HashMap valMap : coolingDbMultiplierPointArr) {
             if (valMap.get("val") != null)
@@ -258,7 +258,7 @@ public class DualDuctTuners {
                               .setUnit("\u00B0F")
                               .build();
         String heatingDbId = hayStack.addPoint(heatingDb);
-        HashMap defHdbPoint = hayStack.read("point and tuner and default and dab and heating and deadband and base");
+        HashMap defHdbPoint = hayStack.read("point and tuner and default and dualDuct and heating and deadband and base");
         ArrayList<HashMap> hdbDefPointArr = hayStack.readPoint(defHdbPoint.get("id").toString());
         for (HashMap valMap : hdbDefPointArr) {
             if (valMap.get("val") != null)
@@ -280,7 +280,7 @@ public class DualDuctTuners {
                                         .setTz(tz)
                                         .build();
         String heatingDbMultiplierId = hayStack.addPoint(heatingDbMultiplier);
-        HashMap heatingDbMultiplierPoint = hayStack.read("point and tuner and default and dab and heating and deadband and multiplier");
+        HashMap heatingDbMultiplierPoint = hayStack.read("point and tuner and default and dualDuct and heating and deadband and multiplier");
         ArrayList<HashMap> heatingDbMultiplierPointArr = hayStack.readPoint(heatingDbMultiplierPoint.get("id").toString());
         for (HashMap valMap : heatingDbMultiplierPointArr) {
             if (valMap.get("val") != null)
@@ -302,7 +302,7 @@ public class DualDuctTuners {
                              .setTz(tz)
                              .build();
         String pgainId = hayStack.addPoint(propGain);
-        HashMap defPgainPoint = hayStack.read("point and tuner and default and dab and pgain");
+        HashMap defPgainPoint = hayStack.read("point and tuner and default and dualDuct and pgain");
         ArrayList<HashMap> pgainDefPointArr = hayStack.readPoint(defPgainPoint.get("id").toString());
         for (HashMap valMap : pgainDefPointArr) {
             if (valMap.get("val") != null)
@@ -324,7 +324,7 @@ public class DualDuctTuners {
                                  .setTz(tz)
                                  .build();
         String igainId = hayStack.addPoint(integralGain);
-        HashMap defIgainPoint = hayStack.read("point and tuner and default and dab and igain");
+        HashMap defIgainPoint = hayStack.read("point and tuner and default and dualDuct and igain");
         ArrayList<HashMap> igainDefPointArr = hayStack.readPoint(defIgainPoint.get("id").toString());
         for (HashMap valMap : igainDefPointArr) {
             if (valMap.get("val") != null)
@@ -346,7 +346,7 @@ public class DualDuctTuners {
                                .setTz(tz)
                                .build();
         String pSpreadId = hayStack.addPoint(propSpread);
-        HashMap defPSpreadPoint = hayStack.read("point and tuner and default and dab and pspread");
+        HashMap defPSpreadPoint = hayStack.read("point and tuner and default and dualDuct and pspread");
         ArrayList<HashMap> pspreadDefPointArr = hayStack.readPoint(defPSpreadPoint.get("id").toString());
         for (HashMap valMap : pspreadDefPointArr) {
             if (valMap.get("val") != null)
@@ -369,7 +369,7 @@ public class DualDuctTuners {
                                     .setTz(tz)
                                     .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
-        HashMap defITPoint = hayStack.read("point and tuner and default and dab and itimeout");
+        HashMap defITPoint = hayStack.read("point and tuner and default and dualDuct and itimeout");
         ArrayList<HashMap> iTDefPointArr = hayStack.readPoint(defITPoint.get("id").toString());
         for (HashMap valMap : iTDefPointArr) {
             if (valMap.get("val") != null)
@@ -392,7 +392,7 @@ public class DualDuctTuners {
                                   .setTz(tz)
                                   .build();
         String zoneCO2TargetId = hayStack.addPoint(zoneCO2Target);
-        HashMap zoneCO2TargetPoint = hayStack.read("point and tuner and default and dab and zone and co2 and target");
+        HashMap zoneCO2TargetPoint = hayStack.read("point and tuner and default and dualDuct and zone and co2 and target");
         ArrayList<HashMap> zoneCO2TargetPointArr = hayStack.readPoint(zoneCO2TargetPoint.get("id").toString());
         for (HashMap valMap : zoneCO2TargetPointArr) {
             if (valMap.get("val") != null)
@@ -415,7 +415,7 @@ public class DualDuctTuners {
                                      .setTz(tz)
                                      .build();
         String zoneCO2ThresholdId = hayStack.addPoint(zoneCO2Threshold);
-        HashMap zoneCO2ThresholdPoint = hayStack.read("point and tuner and default and dab and zone and co2 and threshold");
+        HashMap zoneCO2ThresholdPoint = hayStack.read("point and tuner and default and dualDuct and zone and co2 and threshold");
         ArrayList<HashMap> zoneCO2ThresholdPointArr = hayStack.readPoint(zoneCO2ThresholdPoint.get("id").toString());
         for (HashMap valMap : zoneCO2ThresholdPointArr) {
             if (valMap.get("val") != null)
@@ -438,7 +438,7 @@ public class DualDuctTuners {
                                   .setTz(tz)
                                   .build();
         String zoneVOCTargetId = hayStack.addPoint(zoneVOCTarget);
-        HashMap zoneVOCTargetPoint = hayStack.read("point and tuner and default and dab and zone and voc and target");
+        HashMap zoneVOCTargetPoint = hayStack.read("point and tuner and default and dualDuct and zone and voc and target");
         ArrayList<HashMap> zoneVOCTargetPointArr = hayStack.readPoint(zoneVOCTargetPoint.get("id").toString());
         for (HashMap valMap : zoneVOCTargetPointArr) {
             if (valMap.get("val") != null)
@@ -461,7 +461,7 @@ public class DualDuctTuners {
                                      .setTz(tz)
                                      .build();
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
-        HashMap zoneVOCThresholdPoint = hayStack.read("point and tuner and default and dab and zone and voc and threshold");
+        HashMap zoneVOCThresholdPoint = hayStack.read("point and tuner and default and dualDuct and zone and voc and threshold");
         ArrayList<HashMap> zoneVOCThresholdPointArr = hayStack.readPoint(zoneVOCThresholdPoint.get("id").toString());
         for (HashMap valMap : zoneVOCThresholdPointArr) {
             if (valMap.get("val") != null)

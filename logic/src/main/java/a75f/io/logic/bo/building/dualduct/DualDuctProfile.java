@@ -18,10 +18,8 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneProfile;
-import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
-import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.util.TemperatureProfileUtil;
@@ -147,18 +145,16 @@ public class DualDuctProfile extends ZoneProfile {
         
         updateZoneStatus();
     
-        Log.d(L.TAG_CCU_ZONE, "DUALDUCT: roomTemp" + roomTemp + " setTempCooling:  " + setTempCooling+" " +
+        Log.d(L.TAG_CCU_ZONE, "DUALDUCT: roomTemp " + roomTemp + " setTempCooling:  " + setTempCooling+" " +
                               "setTempHeating: "+setTempHeating+" ZoneState: "+state);
     
-        CcuLog.d(L.TAG_CCU_ZONE, "DUALDUCT: CoolingDamper : CV" + coolingDamperController.getControlVariable() + " " +
-                                 "currentPosition " +coolingDamper.currentPosition);
-    
-        CcuLog.d(L.TAG_CCU_ZONE, "DUALDUCT: HeatingDamper : CV" + heatingDamperController.getControlVariable() + " " +
+        CcuLog.d(L.TAG_CCU_ZONE, "DUALDUCT: HeatingDamper CV " + heatingDamperController.getControlVariable() + " " +
                                  "currentPosition " +heatingDamper.currentPosition);
+        CcuLog.d(L.TAG_CCU_ZONE, "DUALDUCT: CoolingDamper CV " + coolingDamperController.getControlVariable() + " " +
+                                 "currentPosition " +coolingDamper.currentPosition);
     }
     
     private void handleZoneCooling(double roomTemp, double setTempCooling) {
-        
         if (state != COOLING)
         {
             state = COOLING;
@@ -252,24 +248,27 @@ public class DualDuctProfile extends ZoneProfile {
         int analog1Config = (int)dualDuctEquip.getConfigNumVal("analog1 and output and type");
         int analog2Config = (int)dualDuctEquip.getConfigNumVal("analog2 and output and type");
         
-        if (analog1Config == DualDuctActuator.COOLING.getVal() || analog2Config == DualDuctActuator.COOLING.getVal()) {
+        if (analog1Config == DualDuctAnalogActuator.COOLING.getVal() || analog2Config == DualDuctAnalogActuator.COOLING.getVal()) {
             int currentCoolingDamperPos = (int)dualDuctEquip.getDamperPos("cooling");
             if (currentCoolingDamperPos != coolingDamper.currentPosition) {
                 dualDuctEquip.setDamperPos(coolingDamper.currentPosition, "cooling");
             }
-        } else if (analog1Config == DualDuctActuator.HEATING.getVal() || analog2Config == DualDuctActuator.HEATING.getVal()) {
+        }
+        if (analog1Config == DualDuctAnalogActuator.HEATING.getVal() || analog2Config == DualDuctAnalogActuator.HEATING.getVal()) {
             
-            int currentCoolingDamperPos = (int)dualDuctEquip.getDamperPos("heating");
-            if (currentCoolingDamperPos != coolingDamper.currentPosition) {
-                dualDuctEquip.setDamperPos(coolingDamper.currentPosition, "heating");
+            int currentHeatingDamperPos = (int)dualDuctEquip.getDamperPos("heating");
+            if (currentHeatingDamperPos != heatingDamper.currentPosition) {
+                dualDuctEquip.setDamperPos(heatingDamper.currentPosition, "heating");
             }
             
-        } else if (analog1Config == DualDuctActuator.COMPOSITE.getVal()) {
+        }
+        if (analog1Config == DualDuctAnalogActuator.COMPOSITE.getVal()) {
             
             int compositeDamperPos = getCompositeDamperPos("analog1", coolingDamper, heatingDamper);
             dualDuctEquip.setDamperPos(compositeDamperPos, "composite1");
             
-        } else if (analog2Config == DualDuctActuator.COMPOSITE.getVal()) {
+        }
+        if (analog2Config == DualDuctAnalogActuator.COMPOSITE.getVal()) {
             int compositeDamperPos = getCompositeDamperPos("analog2", coolingDamper, heatingDamper);
             dualDuctEquip.setDamperPos(compositeDamperPos, "composite2");
     

@@ -10,12 +10,12 @@ public class DualDuctUtil {
         HashMap dualDuctPoints = new HashMap();
     
         dualDuctPoints.put("Profile","DAB Dual Duct");
-        String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \"" + equipID + "\"");
+        String equipStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \"" + equipID + "\"");
         double damperCoolingPos = CCUHsApi.getInstance().readHisValByQuery("point and zone and damper and " +
-                                                                                "cooling and pos and equipRef == \""+equipID+"\"");
+                                                                                "cooling and cmd and equipRef == \""+equipID+"\"");
     
         double damperHeatingPos = CCUHsApi.getInstance().readHisValByQuery("point and zone and damper and " +
-                                                                                "heating and pos and equipRef == \""+equipID+"\"");
+                                                                                "heating and cmd and equipRef == \""+equipID+"\"");
         
         double dischargeAirflow = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge " +
                                                                           "and air and temp and equipRef == \""+equipID+"\"");
@@ -25,35 +25,33 @@ public class DualDuctUtil {
         double analog2Config = CCUHsApi.getInstance().readDefaultVal("point and zone and config and dualDuct and th1 " +
                                                                    "and output and type and equipRef == \""+equipID+"\"");
         
-        double th1Config = CCUHsApi.getInstance().readDefaultVal("point and zone and config and dualDuct and th1 and " +
+        double th2Config = CCUHsApi.getInstance().readDefaultVal("point and zone and config and dualDuct and th2 and " +
                                                            "output and type and equipRef == \""+equipID+"\"");
         
-        if (equipStatusPoint.length() > 0)
+        if (equipStatus.length() > 0)
         {
-            dualDuctPoints.put("Status",equipStatusPoint);
+            dualDuctPoints.put("Status",equipStatus);
         }else{
             dualDuctPoints.put("Status","OFF");
         }
     
-        if (th1Config == 0) {
+        if (th2Config == DualDuctThermistorConfig.COOLING_AIRFLOW_TEMP.getVal()) {
             double coolingSupplyAirflow = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and " +
                                                                                    "cooling and supply and air and " +
-                                                                                   "temp and equipRef == \""+equipID+
-                                                                                   "\"");
+                                                                                   "temp and equipRef == \""+equipID+ "\"");
             dualDuctPoints.put("CoolingSupplyAirflow",coolingSupplyAirflow+" \u2109");
-        } else {
+        } else if (th2Config == DualDuctThermistorConfig.HEATING_AIRFLOW_TEMP.getVal()){
             double heatingSupplyAirflow = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and " +
                                                                                    "heating and supply and air and " +
-                                                                                   "temp and equipRef == \""+equipID+
-                                                                                   "\"");
-            dualDuctPoints.put("CoolingSupplyAirflow",heatingSupplyAirflow+" \u2109");
+                                                                                   "temp and equipRef == \""+equipID+ "\"");
+            dualDuctPoints.put("HeatingSupplyAirflow",heatingSupplyAirflow+" \u2109");
         }
     
         dualDuctPoints.put("DischargeAirflow",dischargeAirflow+" \u2109");
     
         dualDuctPoints.put("CoolingDamper",damperCoolingPos+"% Open");
         
-        dualDuctPoints.put("HeatingDamper",damperCoolingPos+"% Open");
+        dualDuctPoints.put("HeatingDamper",damperHeatingPos+"% Open");
         
         return dualDuctPoints;
     }

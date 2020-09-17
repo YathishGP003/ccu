@@ -1,15 +1,12 @@
 package a75f.io.logic.bo.building.dualduct;
 
-public enum DualDuctActuator {
-    
-    NOT_USED(0),
-    COMPOSITE(1),
-    COOLING(2),
-    HEATING(3);
+public enum DualDuctThermistorConfig {
+    COOLING_AIRFLOW_TEMP(0),
+    HEATING_AIRFLOW_TEMP(1);
     
     private final int val;
     
-    private DualDuctActuator(int val) {
+    private DualDuctThermistorConfig(int val) {
         this.val = val;
     }
     

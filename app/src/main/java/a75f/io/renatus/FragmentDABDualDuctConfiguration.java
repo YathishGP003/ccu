@@ -29,7 +29,7 @@ import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.dualduct.DualDuctActuator;
+import a75f.io.logic.bo.building.dualduct.DualDuctAnalogActuator;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfileConfiguration;
 import a75f.io.renatus.BASE.BaseDialogFragment;
@@ -157,7 +157,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         analog1OutSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                DualDuctActuator actuator = DualDuctActuator.values()[position];
+                DualDuctAnalogActuator actuator = DualDuctAnalogActuator.values()[position];
                 analog1OutSpinner.setSelection(position);
                 handleAnalog1Selection(actuator);
             }
@@ -171,7 +171,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         analog2OutSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                DualDuctActuator actuator = DualDuctActuator.values()[position];
+                DualDuctAnalogActuator actuator = DualDuctAnalogActuator.values()[position];
                 analog2OutSpinner.setSelection(position);
                 handleAnalog2Selection(actuator);
             }
@@ -196,38 +196,38 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         configureSetButton();
     }
     
-    private void handleAnalog1Selection(DualDuctActuator actuator) {
+    private void handleAnalog1Selection(DualDuctAnalogActuator actuator) {
         
-        if (actuator == DualDuctActuator.NOT_USED) {
+        if (actuator == DualDuctAnalogActuator.NOT_USED) {
             updateAO1ConfigVisibility(View.GONE);
-        } else if (actuator == DualDuctActuator.COOLING) {
+        } else if (actuator == DualDuctAnalogActuator.COOLING) {
             updateAO1ConfigVisibility(View.VISIBLE);
             enableAO1CoolingConfig(true);
             enableAO1HeatingConfig(false);
-        } else if (actuator == DualDuctActuator.HEATING) {
+        } else if (actuator == DualDuctAnalogActuator.HEATING) {
             updateAO1ConfigVisibility(View.VISIBLE);
             enableAO1CoolingConfig(false);
             enableAO1HeatingConfig(true);
-        } else if (actuator == DualDuctActuator.COMPOSITE) {
+        } else if (actuator == DualDuctAnalogActuator.COMPOSITE) {
             updateAO1ConfigVisibility(View.VISIBLE);
             enableAO1CoolingConfig(true);
             enableAO1HeatingConfig(true);
         }
     }
     
-    private void handleAnalog2Selection(DualDuctActuator actuator) {
+    private void handleAnalog2Selection(DualDuctAnalogActuator actuator) {
         
-        if (actuator == DualDuctActuator.NOT_USED) {
+        if (actuator == DualDuctAnalogActuator.NOT_USED) {
             updateAO2ConfigVisibility(View.GONE);
-        } else if (actuator == DualDuctActuator.COOLING) {
+        } else if (actuator == DualDuctAnalogActuator.COOLING) {
             updateAO2ConfigVisibility(View.VISIBLE);
             enableAO2CoolingConfig(true);
             enableAO2HeatingConfig(false);
-        } else if (actuator == DualDuctActuator.HEATING) {
+        } else if (actuator == DualDuctAnalogActuator.HEATING) {
             updateAO2ConfigVisibility(View.VISIBLE);
             enableAO2CoolingConfig(false);
             enableAO2HeatingConfig(true);
-        } else if (actuator == DualDuctActuator.COMPOSITE) {
+        } else if (actuator == DualDuctAnalogActuator.COMPOSITE) {
             updateAO2ConfigVisibility(View.VISIBLE);
             enableAO2CoolingConfig(true);
             enableAO2HeatingConfig(true);
@@ -449,7 +449,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
                         ProgressDialogUtils.hideProgressDialog();
                         FragmentDABDualDuctConfiguration.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                        //sendSeedMessage();
+                        sendSeedMessage();
                     }
                 }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 

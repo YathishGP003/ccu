@@ -150,5 +150,43 @@ public class DualDuctProfileConfiguration extends BaseProfileConfiguration {
     public void setAnalog2OutAtMaxDamperCooling(double analog2OutAtMaxDamperCooling) {
         this.analog2OutAtMaxDamperCooling = analog2OutAtMaxDamperCooling;
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        
+        if (obj.getClass() != this.getClass()) {
+            return false;
+        }
+        
+        DualDuctProfileConfiguration config = (DualDuctProfileConfiguration)obj;
+        
+        if (temperatureOffset != config.temperatureOffset ||
+            analogOut1Config != config.analogOut1Config ||
+            analogOut2Config != config.analogOut2Config ||
+            thermistor1Config != config.thermistor1Config||
+            thermistor2Config != config.thermistor2Config ||
+            enableOccupancyControl != config.enableOccupancyControl ||
+            enableCO2Control != config.enableCO2Control ||
+            enableIAQControl != config.enableIAQControl ||
+            minHeatingDamperPos != config.minHeatingDamperPos ||
+            maxHeatingDamperPos != config.maxHeatingDamperPos ||
+            minCoolingDamperPos != config.minCoolingDamperPos ||
+            maxCoolingDamperPos != config.maxCoolingDamperPos ||
+            analog1OutAtMinDamperHeating != config.analog1OutAtMinDamperHeating ||
+            analog1OutAtMaxDamperHeating != config.analog1OutAtMaxDamperHeating ||
+            analog1OutAtMinDamperCooling != config.analog1OutAtMinDamperCooling ||
+            analog1OutAtMaxDamperCooling != config.analog1OutAtMaxDamperCooling ||
+            analog2OutAtMinDamperHeating != config.analog2OutAtMinDamperHeating ||
+            analog2OutAtMaxDamperHeating != config.analog2OutAtMaxDamperHeating ||
+            analog2OutAtMinDamperCooling != config.analog2OutAtMinDamperCooling ||
+            analog2OutAtMaxDamperCooling != config.analog2OutAtMaxDamperCooling) {
+            return false;
+        }
+        
+        return true;
+    }
 }
 

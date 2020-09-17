@@ -44,6 +44,17 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
     
     public static final String ID = FragmentDABDualDuctConfiguration.class.getSimpleName();
     
+    
+    private static final double DEFAULT_ANALOG_MIN = 0;
+    private static final double DEFAULT_ANALOG_MAX = 10.0;
+    private static final double DEFAULT_COMPOSITE_ANALOG_HEATING_MAX = 5.0;
+    private static final double DEFAULT_COMPOSITE_ANALOG_COOLING_MIN = 5.1;
+    private static final double DEFAULT_COMPOSITE_ANALOG_COOLING_MAX = 50.0;
+    
+    private static final int DEFAULT_DAMPER_MIN = 0;
+    private static final int DEFAULT_DAMPER_MAX= 100;
+    private static final int DEFAULT_DAMPER_VAL= 40;
+    
     static final int TEMP_OFFSET_LIMIT = 100;
     
     @BindView(R.id.analog1OutSpinner) Spinner analog1OutSpinner;
@@ -93,6 +104,8 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
     String floorRef;
     String zoneRef;
     
+    ArrayAdapter<Double> analogOutAdapter = null;
+    
     public static FragmentDABDualDuctConfiguration newInstance(short smartNodeAddress, String roomName, NodeType nodeType, String floorName, ProfileType profileType)
     {
         FragmentDABDualDuctConfiguration fragment = new FragmentDABDualDuctConfiguration();
@@ -118,7 +131,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         super.onStart();
         Dialog dialog = getDialog();
         if (dialog != null) {
-            int width = 965;//ViewGroup.LayoutParams.WRAP_CONTENT;
+            int width = 1065;//ViewGroup.LayoutParams.WRAP_CONTENT;
             int height = 672;//ViewGroup.LayoutParams.WRAP_CONTENT;
             dialog.getWindow().setLayout(width, height);
         }
@@ -201,16 +214,16 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
             updateAO1ConfigVisibility(View.GONE);
         } else if (actuator == DualDuctAnalogActuator.COOLING) {
             updateAO1ConfigVisibility(View.VISIBLE);
-            enableAO1CoolingConfig(true);
-            enableAO1HeatingConfig(false);
+            enableAO1CoolingConfig(true, false);
+            enableAO1HeatingConfig(false, false);
         } else if (actuator == DualDuctAnalogActuator.HEATING) {
             updateAO1ConfigVisibility(View.VISIBLE);
-            enableAO1CoolingConfig(false);
-            enableAO1HeatingConfig(true);
+            enableAO1CoolingConfig(false, false);
+            enableAO1HeatingConfig(true, false);
         } else if (actuator == DualDuctAnalogActuator.COMPOSITE) {
             updateAO1ConfigVisibility(View.VISIBLE);
-            enableAO1CoolingConfig(true);
-            enableAO1HeatingConfig(true);
+            enableAO1CoolingConfig(true, true);
+            enableAO1HeatingConfig(true, true);
         }
     }
     
@@ -220,16 +233,16 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
             updateAO2ConfigVisibility(View.GONE);
         } else if (actuator == DualDuctAnalogActuator.COOLING) {
             updateAO2ConfigVisibility(View.VISIBLE);
-            enableAO2CoolingConfig(true);
-            enableAO2HeatingConfig(false);
+            enableAO2CoolingConfig(true, false);
+            enableAO2HeatingConfig(false, false);
         } else if (actuator == DualDuctAnalogActuator.HEATING) {
             updateAO2ConfigVisibility(View.VISIBLE);
-            enableAO2CoolingConfig(false);
-            enableAO2HeatingConfig(true);
+            enableAO2CoolingConfig(false, false);
+            enableAO2HeatingConfig(true, false);
         } else if (actuator == DualDuctAnalogActuator.COMPOSITE) {
             updateAO2ConfigVisibility(View.VISIBLE);
-            enableAO2CoolingConfig(true);
-            enableAO2HeatingConfig(true);
+            enableAO2CoolingConfig(true, true);
+            enableAO2HeatingConfig(true, true);
         }
     }
     
@@ -248,30 +261,30 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         
         setNumberPickerDividerColor(maxCoolingDamperPos);
         maxCoolingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-        maxCoolingDamperPos.setMinValue(0);
-        maxCoolingDamperPos.setMaxValue(100);
-        maxCoolingDamperPos.setValue(100);
+        maxCoolingDamperPos.setMinValue(DEFAULT_DAMPER_MIN);
+        maxCoolingDamperPos.setMaxValue(DEFAULT_DAMPER_MAX);
+        maxCoolingDamperPos.setValue(DEFAULT_DAMPER_MAX);
         maxCoolingDamperPos.setWrapSelectorWheel(false);
         
         setNumberPickerDividerColor(minCoolingDamperPos);
         minCoolingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-        minCoolingDamperPos.setMinValue(0);
-        minCoolingDamperPos.setMaxValue(100);
-        minCoolingDamperPos.setValue(40);
+        minCoolingDamperPos.setMinValue(DEFAULT_DAMPER_MIN);
+        minCoolingDamperPos.setMaxValue(DEFAULT_DAMPER_MAX);
+        minCoolingDamperPos.setValue(DEFAULT_DAMPER_VAL);
         minCoolingDamperPos.setWrapSelectorWheel(false);
         
         setNumberPickerDividerColor(maxHeatingDamperPos);
         maxHeatingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-        maxHeatingDamperPos.setMinValue(0);
-        maxHeatingDamperPos.setMaxValue(100);
-        maxHeatingDamperPos.setValue(100);
+        maxHeatingDamperPos.setMinValue(DEFAULT_DAMPER_MIN);
+        maxHeatingDamperPos.setMaxValue(DEFAULT_DAMPER_MAX);
+        maxHeatingDamperPos.setValue(DEFAULT_DAMPER_MAX);
         maxHeatingDamperPos.setWrapSelectorWheel(false);
         
         setNumberPickerDividerColor(minHeatingDamperPos);
         minHeatingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-        minHeatingDamperPos.setMinValue(0);
-        minHeatingDamperPos.setMaxValue(100);
-        minHeatingDamperPos.setValue(40);
+        minHeatingDamperPos.setMinValue(DEFAULT_DAMPER_MIN);
+        minHeatingDamperPos.setMaxValue(DEFAULT_DAMPER_MAX);
+        minHeatingDamperPos.setValue(DEFAULT_DAMPER_VAL);
         minHeatingDamperPos.setWrapSelectorWheel(false);
     
         setDividerColor(temperatureOffset);
@@ -282,12 +295,16 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
     }
     
     private ArrayAdapter<Double> getAnalogOutAdapter() {
+        
+        if (analogOutAdapter != null) {
+            return analogOutAdapter;
+        }
+        
         ArrayList<Double> voltages = new ArrayList<Double>();
         for (int val = 0; val <= 100; val++) {
             voltages.add((double)val/10);
         }
-        ArrayAdapter<Double> analogOutAdapter = new ArrayAdapter<Double>(getActivity(),
-                                                                         android.R.layout.simple_spinner_item, voltages);
+        analogOutAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, voltages);
         analogOutAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         return analogOutAdapter;
     }
@@ -316,34 +333,63 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         ao1MaxDamperCoolingSpinner.setVisibility(visibility);
     }
     
-    private void enableAO1HeatingConfig(boolean enabled) {
+    private void enableAO1HeatingConfig(boolean enabled, boolean isComposite) {
         ao1MinDamperHeatingTV.setEnabled(enabled);
         ao1MinDamperHeatingSpinner.setEnabled(enabled);
         ao1MaxDamperHeatingTV.setEnabled(enabled);
         ao1MaxDamperHeatingSpinner.setEnabled(enabled);
+        
+        if (enabled && isComposite) {
+            ao1MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
+            ao1MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_HEATING_MAX), false);
+        } else if (enabled) {
+            ao1MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MAX), false);
+            ao1MinDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
+        }
     }
     
     
-    private void enableAO1CoolingConfig(boolean enabled) {
+    private void enableAO1CoolingConfig(boolean enabled, boolean isComposite) {
         ao1MinDamperCoolingTV.setEnabled(enabled);
         ao1MinDamperCoolingSpinner.setEnabled(enabled);
         ao1MaxDamperCoolingTV.setEnabled(enabled);
         ao1MaxDamperCoolingSpinner.setEnabled(enabled);
+        if (enabled && isComposite) {
+            ao1MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_COOLING_MIN), false);
+            ao1MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_COOLING_MAX), false);
+        } else if (enabled) {
+            ao1MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MAX), false);
+            ao1MinDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
+        }
     }
     
-    private void enableAO2HeatingConfig(boolean enabled) {
+    private void enableAO2HeatingConfig(boolean enabled, boolean isComposite) {
         ao2MinDamperHeatingTV.setEnabled(enabled);
         ao2MinDamperHeatingSpinner.setEnabled(enabled);
         ao2MaxDamperHeatingTV.setEnabled(enabled);
         ao2MaxDamperHeatingSpinner.setEnabled(enabled);
+        if (enabled && isComposite) {
+            ao2MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
+            ao2MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_HEATING_MAX), false);
+        } else if (enabled) {
+            ao2MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MAX), false);
+            ao2MinDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
+        }
     }
     
     
-    private void enableAO2CoolingConfig(boolean enabled) {
+    private void enableAO2CoolingConfig(boolean enabled, boolean isComposite) {
         ao2MinDamperCoolingTV.setEnabled(enabled);
         ao2MinDamperCoolingSpinner.setEnabled(enabled);
         ao2MaxDamperCoolingTV.setEnabled(enabled);
         ao2MaxDamperCoolingSpinner.setEnabled(enabled);
+        if (enabled && isComposite) {
+            ao2MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_COOLING_MIN), false);
+            ao2MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_COOLING_MAX), false);
+        } else if (enabled) {
+            ao2MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MAX), false);
+            ao2MinDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
+        }
     }
     
     private void updateAO2ConfigVisibility(int visibility) {
@@ -386,13 +432,26 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
     }
     
     private void initializeViews() {
-        ArrayAdapter<Double> analogOutAdapter = getAnalogOutAdapter();
-        ao1MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(10.0), false);
-        ao1MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(10.0), false);
-    
-        ao2MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(10.0), false);
-        ao2MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(10.0), false);
         
+        analog1OutSpinner.setSelection(DualDuctAnalogActuator.COMPOSITE.getVal());
+        ArrayAdapter<Double> analogOutAdapter = getAnalogOutAdapter();
+        ao2MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MAX), false);
+        ao2MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MAX), false);
+        setDefaultAnalog1CompositeConfig(analogOutAdapter);
+    }
+    
+    private void setDefaultAnalog1CompositeConfig(ArrayAdapter<Double> analogOutAdapter) {
+        ao1MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
+        ao1MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_HEATING_MAX), false);
+        ao1MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_COOLING_MAX), false);
+        ao1MinDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_COOLING_MIN), false);
+    }
+    
+    private void setDefaultAnalog2CompositeConfig(ArrayAdapter<Double> analogOutAdapter) {
+        ao2MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
+        ao2MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_HEATING_MAX), false);
+        ao2MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_COOLING_MAX), false);
+        ao2MinDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_COOLING_MIN), false);
     }
     
     private void setDividerColor(NumberPicker picker) {
@@ -460,14 +519,13 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         new Thread(() -> LSerial.getInstance().sendSeedMessage(false, false, mSmartNodeAddress, zoneRef, floorRef)).start();
     }
     
-    private void setupDualDuctZoneProfile() {
-        
+    private DualDuctProfileConfiguration createDualDuctConfig() {
         DualDuctProfileConfiguration dualductConfig = new DualDuctProfileConfiguration();
         dualductConfig.setAnalogOut1Config(analog1OutSpinner.getSelectedItemPosition());
         dualductConfig.setAnalogOut2Config(analog2OutSpinner.getSelectedItemPosition());
     
         dualductConfig.setThermistor2Config(thermistor2Spinner.getSelectedItemPosition());
-        
+    
         dualductConfig.setNodeType(mNodeType);
         dualductConfig.setNodeAddress(mSmartNodeAddress);
         dualductConfig.setEnableOccupancyControl(enableOccupancyControl.isChecked());
@@ -478,7 +536,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         dualductConfig.setMaxHeatingDamperPos(maxHeatingDamperPos.getValue());
         dualductConfig.setMinCoolingDamperPos(minCoolingDamperPos.getValue());
         dualductConfig.setMaxCoolingDamperPos(maxCoolingDamperPos.getValue());
-        
+    
         dualductConfig.setTemperatureOffset(temperatureOffset.getValue() - TEMP_OFFSET_LIMIT);
     
         dualductConfig.setAnalog1OutAtMinDamperHeating(Double.parseDouble
@@ -498,19 +556,24 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
                                                                   (ao2MinDamperCoolingSpinner.getSelectedItem().toString()));
         dualductConfig.setAnalog2OutAtMaxDamperCooling(Double.parseDouble
                                                                   (ao2MaxDamperCoolingSpinner.getSelectedItem().toString()));
-        
+    
         Output analog1Op = new Output();
         analog1Op.setAddress(mSmartNodeAddress);
         analog1Op.setPort(Port.ANALOG_OUT_ONE);
         analog1Op.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
         dualductConfig.getOutputs().add(analog1Op);
-        
+    
         Output analog2Op = new Output();
         analog2Op.setAddress(mSmartNodeAddress);
         analog2Op.setPort(Port.ANALOG_OUT_TWO);
         analog2Op.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
         dualductConfig.getOutputs().add(analog2Op);
-        
+    
+        return dualductConfig;
+    }
+    
+    private void setupDualDuctZoneProfile() {
+        DualDuctProfileConfiguration dualductConfig = createDualDuctConfig();
         mDualDuctProfile.getProfileConfiguration().put(mSmartNodeAddress, dualductConfig);
         if (mProfileConfig == null) {
             mDualDuctProfile.addDualDuctEquip(mSmartNodeAddress, dualductConfig, floorRef, zoneRef );

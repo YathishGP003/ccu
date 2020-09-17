@@ -251,19 +251,17 @@ public class DualDuctProfile extends ZoneProfile {
         int analog1Config = (int)dualDuctEquip.getConfigNumVal("analog1 and output and type");
         int analog2Config = (int)dualDuctEquip.getConfigNumVal("analog2 and output and type");
         
-        if (analog1Config == DualDuctAnalogActuator.COOLING.getVal() || analog2Config == DualDuctAnalogActuator.COOLING.getVal()) {
+        if (DualDuctUtil.isCoolingDamperEnabled(analog1Config, analog2Config)) {
             int currentCoolingDamperPos = (int)dualDuctEquip.getDamperPos("cooling");
             if (currentCoolingDamperPos != coolingDamper.currentPosition) {
                 dualDuctEquip.setDamperPos(coolingDamper.currentPosition, "cooling");
             }
         }
-        if (analog1Config == DualDuctAnalogActuator.HEATING.getVal() || analog2Config == DualDuctAnalogActuator.HEATING.getVal()) {
-            
+        if (DualDuctUtil.isHeatingDamperEnabled(analog1Config, analog2Config)) {
             int currentHeatingDamperPos = (int)dualDuctEquip.getDamperPos("heating");
             if (currentHeatingDamperPos != heatingDamper.currentPosition) {
                 dualDuctEquip.setDamperPos(heatingDamper.currentPosition, "heating");
             }
-            
         }
         if (analog1Config == DualDuctAnalogActuator.COMPOSITE.getVal()) {
             
@@ -273,7 +271,7 @@ public class DualDuctProfile extends ZoneProfile {
         }
         if (analog2Config == DualDuctAnalogActuator.COMPOSITE.getVal()) {
             int compositeDamperPos = getCompositeDamperPos("analog2", coolingDamper, heatingDamper);
-            dualDuctEquip.setDamperPos(compositeDamperPos, "composite2");
+            dualDuctEquip.setDamperPos(compositeDamperPos, "composite");
     
         }
     }
@@ -287,7 +285,7 @@ public class DualDuctProfile extends ZoneProfile {
             analogMax = dualDuctEquip.getConfigNumVal(analog+" and output and max " +
                                                       "and damper and cooling and pos");
         
-            compositeDamperPos = getModulatedDamperPos(analogMin, analogMax, coolingDamper.currentPosition);
+            compositeDamperPos = coolingDamper.currentPosition;
             if (analog.equals("analog1")) {
                 SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_OUT_ONE.toString(),
                                                   analogMin + "-" + analogMax + "v");
@@ -302,7 +300,7 @@ public class DualDuctProfile extends ZoneProfile {
             analogMax = dualDuctEquip.getConfigNumVal(analog+" and output and max " +
                                                       "and damper and heating and pos");
         
-            compositeDamperPos = getModulatedDamperPos(analogMin, analogMax, heatingDamper.currentPosition);
+            compositeDamperPos = heatingDamper.currentPosition;
             if (analog.equals("analog1")) {
                 SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_OUT_ONE.toString(),
                                                   analogMin + "-" + analogMax + "v");
@@ -320,22 +318,8 @@ public class DualDuctProfile extends ZoneProfile {
             SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_OUT_TWO.toString(),
                                               OutputAnalogActuatorType.ZeroToTenV.displayName);
         }
+        CcuLog.d(L.TAG_CCU_ZONE, "DUALDUCT: "+analog+" compositeDamperPos : "+compositeDamperPos);
         return compositeDamperPos;
-    }
-    
-    private int getModulatedDamperPos(double analogMin, double analogMax, int damperPos) {
-        
-        int modulatedDamperPos;
-        if (analogMax > analogMin)
-        {
-            modulatedDamperPos = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (damperPos / 100)));
-        }
-        else
-        {
-            modulatedDamperPos = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (damperPos / 100)));
-        }
-        return modulatedDamperPos;
-        
     }
     
     private void updateZoneStatus() {

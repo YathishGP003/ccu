@@ -976,7 +976,7 @@ class DualDuctEquip {
             SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_OUT_ONE.toString(), false);
         } else if (config.getAnalogOut1Config() == DualDuctAnalogActuator.COOLING.getVal()) {
             
-            String coolingDamperPosId = createDamperLogicalPoint (siteRef, equipDis, roomRef, floorRef, tz, config, "cooling");
+            String coolingDamperPosId = createAnalog1LogicalPoint (siteRef, equipDis, roomRef, floorRef, tz, config);
             SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_OUT_ONE.toString(),
                                               config.getAnalog1OutAtMinDamperCooling()+"-"+config.getAnalog1OutAtMaxDamperCooling()+"v");
             SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_OUT_ONE.toString(), true);
@@ -984,13 +984,13 @@ class DualDuctEquip {
             
         } else if (config.getAnalogOut1Config() == DualDuctAnalogActuator.HEATING.getVal()) {
             
-            String heatingDamperPosId = createDamperLogicalPoint (siteRef, equipDis, roomRef, floorRef, tz, config, "heating");
+            String heatingDamperPosId = createAnalog1LogicalPoint (siteRef, equipDis, roomRef, floorRef, tz, config);
             SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_OUT_ONE.toString(),
                                               config.getAnalog1OutAtMinDamperHeating()+"-"+config.getAnalog1OutAtMaxDamperHeating()+"v");
             SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_OUT_ONE.toString(), true);
             SmartNode.updatePhysicalPointRef(nodeAddr, Port.ANALOG_OUT_ONE.toString(), heatingDamperPosId);
         } else if (config.getAnalogOut1Config() == DualDuctAnalogActuator.COMPOSITE.getVal()) {
-            String compositeDamperPosId = createDamperLogicalPoint (siteRef, equipDis, roomRef, floorRef, tz, config, "composite");;
+            String compositeDamperPosId = createAnalog1LogicalPoint (siteRef, equipDis, roomRef, floorRef, tz, config);;
             SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_OUT_ONE.toString(),
                                               OutputAnalogActuatorType.ZeroToTenV.displayName);
             SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_OUT_ONE.toString(), true);
@@ -1023,17 +1023,7 @@ class DualDuctEquip {
             SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_OUT_TWO.toString(), false);
         } else if (config.getAnalogOut2Config() == DualDuctAnalogActuator.COOLING.getVal()) {
         
-            String coolingDamperPosId;
-            if (config.getAnalogOut2Config() == DualDuctAnalogActuator.COOLING.getVal()) {
-                HashMap coolingDamperPoint = CCUHsApi.getInstance().read("point and dualDuct and cooling and " +
-                                                                         "damper and pos and cmd and group == \""+nodeAddr+"\"");
-                coolingDamperPosId = coolingDamperPoint.get("id").toString();
-            } else {
-                coolingDamperPosId = createDamperLogicalPoint (siteRef, equipDis, roomRef, floorRef, tz, config,
-                                                                "cooling");
-            }
-            
-            
+            String coolingDamperPosId = createAnalog2LogicalPoint (siteRef, equipDis, roomRef, floorRef, tz, config);
             SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_OUT_TWO.toString(),
                                               config.getAnalog2OutAtMinDamperCooling()+"-"+config.getAnalog2OutAtMaxDamperCooling()+"v");
             SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_OUT_TWO.toString(), true);
@@ -1041,22 +1031,15 @@ class DualDuctEquip {
         
         } else if (config.getAnalogOut2Config() == DualDuctAnalogActuator.HEATING.getVal()) {
     
-            String heatingDamperPosId;
-            if (config.getAnalogOut2Config() == DualDuctAnalogActuator.COOLING.getVal()) {
-                HashMap coolingDamperPoint = CCUHsApi.getInstance().read("point and dualDuct and heating and " +
-                                                                         "damper and pos and cmd and group == \""+nodeAddr+"\"");
-                heatingDamperPosId = coolingDamperPoint.get("id").toString();
-            } else {
-                heatingDamperPosId = createDamperLogicalPoint (siteRef, equipDis, roomRef, floorRef, tz, config,
-                                                               "heating");
-            }
+            String heatingDamperPosId = createAnalog2LogicalPoint (siteRef, equipDis, roomRef, floorRef, tz, config);;
+            
             SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_OUT_TWO.toString(),
                                               config.getAnalog2OutAtMinDamperHeating()+"-"+config.getAnalog2OutAtMaxDamperHeating()+"v");
             SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_OUT_TWO.toString(), true);
             SmartNode.updatePhysicalPointRef(nodeAddr, Port.ANALOG_OUT_TWO.toString(), heatingDamperPosId);
         } else if (config.getAnalogOut2Config() == DualDuctAnalogActuator.COMPOSITE.getVal()) {
         
-            String compositeDamperPosId = createDamperLogicalPoint (siteRef, equipDis, roomRef, floorRef, tz, config, "composite");;
+            String compositeDamperPosId = createAnalog2LogicalPoint (siteRef, equipDis, roomRef, floorRef, tz, config);
             SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_OUT_TWO.toString(),
                                               OutputAnalogActuatorType.ZeroToTenV.displayName);
             SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_OUT_TWO.toString(), true);
@@ -1149,13 +1132,13 @@ class DualDuctEquip {
         HashMap heatingDamperPoint = CCUHsApi.getInstance().read("point and dualDuct and heating and " +
                                                                  "damper and pos and cmd and group == \""+nodeAddr+"\"");
         if (!heatingDamperPoint.isEmpty()) {
-            CCUHsApi.getInstance().deleteWritablePoint(coolingDamperPoint.get("id").toString());
+            CCUHsApi.getInstance().deleteWritablePoint(heatingDamperPoint.get("id").toString());
         }
     
         HashMap compositeDamperPoint = CCUHsApi.getInstance().read("point and dualDuct and composite and " +
                                                                  "damper and pos and cmd and group == \""+nodeAddr+"\"");
         if (!compositeDamperPoint.isEmpty()) {
-            CCUHsApi.getInstance().deleteWritablePoint(coolingDamperPoint.get("id").toString());
+            CCUHsApi.getInstance().deleteWritablePoint(compositeDamperPoint.get("id").toString());
         }
     }
     

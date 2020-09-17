@@ -140,6 +140,14 @@ public class Globals {
         return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                       .getBoolean("test_mode", false);
     }
+    public void setTestMode(boolean isTestMode) {
+        Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                .edit().putBoolean("test_mode", isTestMode).apply();
+    }
+    public boolean isWeatherTest() {
+        return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                .getBoolean("weather_test", false);
+    }
 
 
     public Context getApplicationContext() {
@@ -178,7 +186,7 @@ public class Globals {
     
     
     private void importTunersAndScheduleJobs() {
-        
+
         new Thread()
         {
             @Override
@@ -225,6 +233,9 @@ public class Globals {
             }
         }.start();
         
+        if (isTestMode()) {
+            setTestMode(false);
+        }
     }
     
 
@@ -410,6 +421,7 @@ public class Globals {
         HashMap equip = CCUHsApi.getInstance().read("equip and system");
         boolean isDefaultSystem = false;
         if (equip != null && equip.size() > 0) {
+            BuildingTuners.getInstance().addBuildingTunerEquip();
             Equip eq = new Equip.Builder().setHashMap(equip).build();
             CcuLog.d(L.TAG_CCU, "Load SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
             switch (ProfileType.valueOf(eq.getProfile())) {

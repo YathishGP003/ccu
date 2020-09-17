@@ -61,7 +61,6 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.LOutput;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.jobs.ScheduleProcessJob;
@@ -121,6 +120,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     Equip equipment;
 
     boolean zoneOpen = false;
+    boolean zoneNonTempOpen = false;
     SeekArc seekArcOpen;
     NonTempControl nonTempControlOpen;
     View zonePointsOpen;
@@ -369,7 +369,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
     public void updateSensorValue(short nodeAddress){
         if(getActivity() != null) {
-            if(zoneOpen) {
+            if(zoneNonTempOpen) {
                 if (equipOpen.getProfile().contains("PLC") || equipOpen.getProfile().contains("EMR") || equipOpen.getProfile().contains("monitor")) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -949,6 +949,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             }
 
                             zoneOpen = true;
+                            zoneNonTempOpen = false;
                             seekArcOpen = seekArc;
                             zonePointsOpen = zoneDetails;
                             equipOpen = p;
@@ -988,6 +989,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     }
                 } else {
                     zoneOpen = true;
+                    zoneNonTempOpen = false;
                     seekArcOpen = seekArc;
                     zonePointsOpen = zoneDetails;
                     equipOpen = p;
@@ -1386,7 +1388,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         nonTempControl.setPiInputText(String.format("%.2f", inputValue));
                         nonTempControl.setPiOutputText(String.valueOf(targetValue));
                         nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
-                        nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
+                        if ((boolean) plcPoints.get("Dynamic Setpoint")){
+                            nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());
+                        } else {
+                            nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
+                        }
                     }
                 }
             }
@@ -1531,7 +1537,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                     break;
                                 }
                             }
-                            zoneOpen = true;
+                            zoneOpen = false;
+                            zoneNonTempOpen = true;
                             zonePointsOpen = zoneDetails;
                             equipOpen = nonTempEquip;
                             openZoneMap = zoneMap;
@@ -1568,7 +1575,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         isExpanded = false;
                     }
                 } else {
-                    zoneOpen = true;
+                    zoneOpen = false;
+                    zoneNonTempOpen = true;
                     zonePointsOpen = zoneDetails;
                     equipOpen = nonTempEquip;
                     openZoneMap = zoneMap;
@@ -1633,7 +1641,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             nonTempControl.setPiInputText(String.format("%.2f", inputValue));
                             nonTempControl.setPiOutputText(String.valueOf(targetValue));
                             nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
-                            nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
+                            if ((boolean) plcPoints.get("Dynamic Setpoint")){
+                                nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());
+                            } else {
+                                nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
+                            }
                         }
                     }else{
                         //Non paired devices
@@ -2531,17 +2543,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         textViewStatus.setText(plcPoints.get("Status").toString());
 
         labelInputAir.setText("Input  "+plcPoints.get("Unit Type").toString()+" : ");
-        labelTarget.setText("Target "+plcPoints.get("Unit Type").toString()+" : ");
 
         double processValue = (double)plcPoints.get("Input Value");
-        textViewInputAir.setText(String.format("%.2f",processValue)+plcPoints.get("Unit").toString());
-        textViewTargetAir.setText(plcPoints.get("Target Value").toString()+plcPoints.get("Unit").toString());
+        textViewInputAir.setText(String.format("%.2f",processValue)+" "+plcPoints.get("Unit").toString());
 
         try {
             if((boolean)plcPoints.get("Dynamic Setpoint") == true)
             {
-                    labelOffsetAir.setText("Offset "+plcPoints.get("Unit Type").toString()+" : ");
-                    textViewOffsetAir.setText(plcPoints.get("Offset Value").toString()+plcPoints.get("Unit").toString());
+                    labelTarget.setText("Target "+plcPoints.get("Dynamic Unit Type").toString()+" : ");
+                    textViewTargetAir.setText(plcPoints.get("Target Value").toString()+" "+plcPoints.get("Dynamic Unit").toString());
+                    labelOffsetAir.setText("Offset "+plcPoints.get("Dynamic Unit Type").toString()+" : ");
+                    textViewOffsetAir.setText(plcPoints.get("Offset Value").toString()+" "+plcPoints.get("Dynamic Unit").toString());
                     viewPointRow2.setPadding(0,0,0,40);
                     linearLayoutZonePoints.addView(viewTitle);
                     linearLayoutZonePoints.addView(viewStatus);
@@ -2549,6 +2561,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     linearLayoutZonePoints.addView(viewPointRow2);
 
             }else{
+                    labelTarget.setText("Target "+plcPoints.get("Unit Type").toString()+" : ");
+                    textViewTargetAir.setText(plcPoints.get("Target Value").toString()+" "+plcPoints.get("Unit").toString());
                     viewPointRow1.setPadding(0,0,0,40);
                     linearLayoutZonePoints.addView(viewTitle);
                     linearLayoutZonePoints.addView(viewStatus);

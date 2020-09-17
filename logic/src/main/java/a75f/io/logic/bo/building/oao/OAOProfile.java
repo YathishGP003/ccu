@@ -169,7 +169,7 @@ public class OAOProfile
         
         double externalTemp , externalHumidity;
         try {
-            if (Globals.getInstance().isTestMode()) {
+            if (Globals.getInstance().isWeatherTest()) {
                 externalTemp = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                                       .getInt("outside_temp", 0);
                 externalHumidity = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)

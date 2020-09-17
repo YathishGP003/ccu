@@ -12,6 +12,7 @@ import java.net.URL;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.system.SystemController;
@@ -42,7 +43,9 @@ public class DaikinIE
     
     public static void sendControl() {
         Log.d("DAIKIN_IE"," sendDaikinControl :");
-        
+
+        if(Globals.getInstance().isTestMode())
+            return;
         new Thread()
         {
             @Override
@@ -158,20 +161,20 @@ public class DaikinIE
     }
     
     public static void sendCoolingDATAutoControl(final Double val){
-        sendAsync(String.format(DAIKIN_IE_CLG_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY, fahrenheitToCelsius(val)));
+        send(String.format(DAIKIN_IE_CLG_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY, fahrenheitToCelsius(val)));
     }
     
     
     public static void sendStaticPressure(final Double val) {
-        sendAsync(String.format(DAIKIN_IE_SP_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY, inchToPascal(val)));
+        send(String.format(DAIKIN_IE_SP_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY, inchToPascal(val)));
     }
     
     public static void sendHumidityInput(final Double val) {
-        sendAsync(String.format(DAIKIN_IE_HUMIDITY_IN_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY, val));
+        send(String.format(DAIKIN_IE_HUMIDITY_IN_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY, val));
     }
     
     public static void sendOAMinPos(final Double val) {
-        sendAsync(String.format(DAIKIN_IE_OAMIN_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY, val));
+        send(String.format(DAIKIN_IE_OAMIN_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY, val));
     }
     
     public static void send(final String urlString,final String data) {

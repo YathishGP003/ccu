@@ -40,14 +40,14 @@ public class Sensor
         sensors.add(new Sensor("Generic 0-10","V", 0, 10,0,10,0.1));
         sensors.add(new Sensor("0-2 in. Pressure Sensor","inches wc",0,10,0,2,0.1));
         sensors.add(new Sensor("0-0.25 Differential Pressure Sensor","inches wc",0,10,-0.25,0.25,0.01));
-        sensors.add(new Sensor("Airflow Sensor","%",0,10,0,1000,10.0));
+        sensors.add(new Sensor("Airflow Sensor","CFM",0,10,0,1000,10.0));
         sensors.add(new Sensor("Humidity","%",0,10,0,100,1.0));
         sensors.add(new Sensor("CO2","ppm",0,10,0,2000,10.0));
         sensors.add(new Sensor("CO","ppm",0,10,0,100,1.0));
         sensors.add(new Sensor("NO2","ppm",0,10,0,5,0.1));
-        sensors.add(new Sensor("CT 0-10 Amps","amps",0,10,0,10,0.1));
-        sensors.add(new Sensor("CT 0-20 Amps","amps",0,10,0,20,0.1));
-        sensors.add(new Sensor("CT 0-50 Amps","amps",0,10,0,50,0.1));
+        sensors.add(new Sensor("CT 0-10","amps",0,10,0,10,0.1));
+        sensors.add(new Sensor("CT 0-20","amps",0,10,0,20,0.1));
+        sensors.add(new Sensor("CT 0-50","amps",0,10,0,50,0.1));
         return sensors;
     }
     

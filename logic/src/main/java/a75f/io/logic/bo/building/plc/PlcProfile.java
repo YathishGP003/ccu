@@ -20,10 +20,11 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 public class PlcProfile extends ZoneProfile
 {
     PlcEquip plcEquip;
+    int outputSignal = 0;
     
-    public void addPlcEquip(short addr, PlcProfileConfiguration config, String floorRef, String roomRef) {
+    public void addPlcEquip(short addr, PlcProfileConfiguration config, String floorRef, String roomRef, String processVariable, String dynamicTargetTag) {
         plcEquip = new PlcEquip(getProfileType(), addr);
-        plcEquip.createEntities(config, floorRef, roomRef);
+        plcEquip.createEntities(config, floorRef, roomRef, processVariable, dynamicTargetTag);
         plcEquip.init();
     }
     
@@ -32,8 +33,8 @@ public class PlcProfile extends ZoneProfile
         plcEquip.init();
     }
     
-    public void updatePlcEquip(PlcProfileConfiguration config) {
-        plcEquip.update(config);
+    public void updatePlcEquip(PlcProfileConfiguration config, String floorRef, String zoneRef, String processTag, String dynamicTargetTag) {
+        plcEquip.update(config,floorRef,zoneRef,processTag, dynamicTargetTag);
         plcEquip.init();
     }
     
@@ -73,7 +74,7 @@ public class PlcProfile extends ZoneProfile
         
         if (plcEquip.isEnabledAnalog2InForSp()) {
             Log.d(L.TAG_CCU_ZONE,"Use analog 2 offset "+plcEquip.getSpVariable());
-            tv = plcEquip.getSpVariable() + plcEquip.getSpSensorOffset();
+            tv = plcEquip.getSpVariable();
         }
         
         plcEquip.getPIController().updateControlVariable(tv, pv);
@@ -92,7 +93,10 @@ public class PlcProfile extends ZoneProfile
         int eStatus = (int)(Math.round(100*cv)/100);
         if(plcEquip.getControlVariable() != curCv )
             plcEquip.setControlVariable(curCv);
-        plcEquip.setEquipStatus(eStatus);
+        if (eStatus != outputSignal){
+            plcEquip.setEquipStatus(eStatus);
+        }
+        outputSignal = eStatus;
         plcEquip.getPIController().dump();
         Log.d(L.TAG_CCU_ZONE, "PlcProfile, pv: "+pv+", tv: "+tv+", cv: "+cv);
     }

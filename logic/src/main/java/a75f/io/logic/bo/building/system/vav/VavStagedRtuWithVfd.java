@@ -157,7 +157,11 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
                     }
                 }
             }
-
+            else {
+                //For all other cases analog2-out should be the minimum config value
+                signal = getConfigVal("analog2 and default");
+            }
+            
             if((epidemicState == EpidemicState.PREPURGE) && L.ccu().oaoProfile != null){
                 double smartPrePurgeFanSpeed = TunerUtil.readTunerValByQuery("system and prePurge and fan and speed", L.ccu().oaoProfile.getEquipRef());
                 signal = Math.max(signal,smartPrePurgeFanSpeed/10);
@@ -216,6 +220,18 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
                                             .build();
         String analog2AtRecirculateId = hayStack.addPoint(analog2AtRecirculate);
         hayStack.writeDefaultValById(analog2AtRecirculateId, 4.0 );
+    
+        Point analog2Default = new Point.Builder()
+                                     .setDisplayName(equipDis+"-"+"analog2Default")
+                                     .setSiteRef(siteRef)
+                                     .setEquipRef(equipref)
+                                     .addMarker("system").addMarker("config").addMarker("analog2")
+                                     .addMarker("default").addMarker("writable").addMarker("sp")
+                                     .setUnit("V")
+                                     .setTz(tz)
+                                     .build();
+        String analog2DefaultId = hayStack.addPoint(analog2Default);
+        hayStack.writeDefaultValById(analog2DefaultId, 0.0 );
         
         addConfigPointForStage(siteMap, equipref, "analog2AtCoolStage1", "cooling", "stage1", 7);
         addConfigPointForStage(siteMap, equipref, "analog2AtCoolStage2", "cooling", "stage2", 10);
@@ -253,7 +269,9 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and system and config and "+tags);
-        return hayStack.readPointPriorityVal(cdb.get("id").toString());
+        if((cdb != null) && (cdb.get("id") != null))
+            return hayStack.readPointPriorityVal(cdb.get("id").toString());
+        else return 0;
     }
     
     public void setConfigVal(String tags, double val) {

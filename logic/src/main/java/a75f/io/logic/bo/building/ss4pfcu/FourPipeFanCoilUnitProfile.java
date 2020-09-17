@@ -77,6 +77,9 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
 
     @Override
     public void updateZonePoints() {
+        if (Globals.getInstance().isTestMode()){
+            return;
+        }
 
         if (mInterface != null) {
             mInterface.refreshView();

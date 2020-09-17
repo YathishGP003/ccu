@@ -718,6 +718,11 @@ public class CCUHsApi
         tagsDb.writeArrays.remove(id.replace("@", ""));
     }
 
+    public void deleteWritablePoint(String id) {
+        deleteWritableArray(id);
+        deleteEntity(id);
+    }
+    
     public void deleteEntityTree(String id)
     {
         CcuLog.d("CCU_HS", "deleteEntityTree " + id);

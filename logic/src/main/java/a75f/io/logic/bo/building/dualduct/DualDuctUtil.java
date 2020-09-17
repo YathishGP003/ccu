@@ -20,10 +20,10 @@ public class DualDuctUtil {
         double dischargeAirflow = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge " +
                                                                           "and air and temp and equipRef == \""+equipID+"\"");
     
-        double analog1Config = CCUHsApi.getInstance().readDefaultVal("point and zone and config and dualDuct and th1" +
-                                                                      " and output and type and equipRef == \""+equipID+"\"");
-        double analog2Config = CCUHsApi.getInstance().readDefaultVal("point and zone and config and dualDuct and th1 " +
-                                                                   "and output and type and equipRef == \""+equipID+"\"");
+        double analog1Config = CCUHsApi.getInstance().readDefaultVal("point and zone and config and dualDuct and " +
+                                                                     "analog1 and output and type and equipRef == \""+equipID+"\"");
+        double analog2Config = CCUHsApi.getInstance().readDefaultVal("point and zone and config and dualDuct and " +
+                                                                     "analog2 and output and type and equipRef == \""+equipID+"\"");
         
         double th2Config = CCUHsApi.getInstance().readDefaultVal("point and zone and config and dualDuct and th2 and " +
                                                            "output and type and equipRef == \""+equipID+"\"");

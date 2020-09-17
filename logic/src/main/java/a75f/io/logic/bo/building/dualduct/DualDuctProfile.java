@@ -18,10 +18,13 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
+import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
+import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.TemperatureProfileUtil;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
@@ -50,7 +53,7 @@ public class DualDuctProfile extends ZoneProfile {
         dualDuctEquip.init();
     }
     
-    public void updateDualDuctEquip(DualDuctProfileConfiguration config) {
+    public synchronized void updateDualDuctEquip(DualDuctProfileConfiguration config) {
         dualDuctEquip.updateEquip(config);
     }
     
@@ -99,7 +102,7 @@ public class DualDuctProfile extends ZoneProfile {
     }
     
     @Override
-    public void updateZonePoints()
+    public synchronized void updateZonePoints()
     {
         if (isZoneDead()) {
             updateZoneDead();
@@ -265,7 +268,7 @@ public class DualDuctProfile extends ZoneProfile {
         if (analog1Config == DualDuctAnalogActuator.COMPOSITE.getVal()) {
             
             int compositeDamperPos = getCompositeDamperPos("analog1", coolingDamper, heatingDamper);
-            dualDuctEquip.setDamperPos(compositeDamperPos, "composite1");
+            dualDuctEquip.setDamperPos(compositeDamperPos, "composite");
             
         }
         if (analog2Config == DualDuctAnalogActuator.COMPOSITE.getVal()) {
@@ -285,6 +288,13 @@ public class DualDuctProfile extends ZoneProfile {
                                                       "and damper and cooling and pos");
         
             compositeDamperPos = getModulatedDamperPos(analogMin, analogMax, coolingDamper.currentPosition);
+            if (analog.equals("analog1")) {
+                SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_OUT_ONE.toString(),
+                                                  analogMin + "-" + analogMax + "v");
+            } else if (analog.equals("analog2")) {
+                SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_OUT_TWO.toString(),
+                                                  analogMin + "-" + analogMax + "v");
+            }
         
         } else if (state == HEATING) {
             analogMin = dualDuctEquip.getConfigNumVal(analog+" and output and min " +
@@ -293,6 +303,13 @@ public class DualDuctProfile extends ZoneProfile {
                                                       "and damper and heating and pos");
         
             compositeDamperPos = getModulatedDamperPos(analogMin, analogMax, heatingDamper.currentPosition);
+            if (analog.equals("analog1")) {
+                SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_OUT_ONE.toString(),
+                                                  analogMin + "-" + analogMax + "v");
+            } else if (analog.equals("analog2")) {
+                SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_OUT_TWO.toString(),
+                                                  analogMin + "-" + analogMax + "v");
+            }
         
         } else if (state == DEADBAND) {
             double analogMinCooling = dualDuctEquip.getConfigNumVal(analog+" and output and min " +
@@ -300,7 +317,8 @@ public class DualDuctProfile extends ZoneProfile {
             double analogMinHeating = dualDuctEquip.getConfigNumVal(analog+" and output and min " +
                                                                     "and damper and heating and pos");
             compositeDamperPos = (int) (ANALOG_SCALE * (analogMinCooling + analogMinHeating)/2);
-        
+            SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_OUT_TWO.toString(),
+                                              OutputAnalogActuatorType.ZeroToTenV.displayName);
         }
         return compositeDamperPos;
     }

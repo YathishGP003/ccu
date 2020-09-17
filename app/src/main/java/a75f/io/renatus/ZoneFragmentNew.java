@@ -1827,8 +1827,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         if (dualDuctPoints.containsKey("CoolingDamper")) {
             textViewLabel3.setText("Cooling Damper : ");
             textViewValue3.setText(dualDuctPoints.get("CoolingDamper").toString());
-            textViewLabel4.setText("Heating Damper : ");
-            textViewValue4.setText(dualDuctPoints.get("HeatingDamper").toString());
+            if (dualDuctPoints.containsKey("HeatingDamper")) {
+                textViewLabel4.setText("Heating Damper : ");
+                textViewValue4.setText(dualDuctPoints.get("HeatingDamper").toString());
+            }
         } else if (dualDuctPoints.containsKey("HeatingDamper")) {
             textViewLabel3.setText("Heating Damper : ");
             textViewValue3.setText(dualDuctPoints.get("HeatingDamper").toString());

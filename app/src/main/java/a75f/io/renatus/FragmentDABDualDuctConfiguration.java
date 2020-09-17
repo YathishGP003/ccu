@@ -118,11 +118,10 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         super.onStart();
         Dialog dialog = getDialog();
         if (dialog != null) {
-            int width = 1065;//ViewGroup.LayoutParams.WRAP_CONTENT;
+            int width = 965;//ViewGroup.LayoutParams.WRAP_CONTENT;
             int height = 672;//ViewGroup.LayoutParams.WRAP_CONTENT;
             dialog.getWindow().setLayout(width, height);
         }
-        //setTitle();
     }
     
     @Nullable
@@ -289,7 +288,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         }
         ArrayAdapter<Double> analogOutAdapter = new ArrayAdapter<Double>(getActivity(),
                                                                          android.R.layout.simple_spinner_item, voltages);
-        analogOutAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        analogOutAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         return analogOutAdapter;
     }
     

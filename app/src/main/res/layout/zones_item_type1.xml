@@ -20,14 +20,12 @@
                 android:id="@+id/text_point1label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Damper : "
                 android:textAppearance="@style/title_normal"/>
 
             <TextView
                 android:id="@+id/text_point1value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text=" 40% Open "
                 android:textAppearance="@style/label_grey"/>
         </LinearLayout>
         <LinearLayout
@@ -41,14 +39,12 @@
                 android:id="@+id/text_point2label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Reheat Coil : "
                 android:textAppearance="@style/title_normal"/>
 
             <TextView
                 android:id="@+id/text_point2value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text=" 45% Open "
                 android:textAppearance="@style/label_grey"/>
         </LinearLayout>
 </LinearLayout>

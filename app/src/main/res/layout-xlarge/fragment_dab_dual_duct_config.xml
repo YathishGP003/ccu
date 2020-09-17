@@ -82,10 +82,10 @@
                 <Spinner
                     android:id="@+id/analog1OutSpinner"
                     style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:layout_width="160dp"
+                    android:layout_width="220dp"
                     android:layout_height="42dp"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginStart="80dp"
+                    android:layout_marginStart="40dp"
                     android:layout_toEndOf="@+id/analog1OutTextView"
                     android:entries="@array/dab_dual_duct_actuator_types"
                     tools:listitem="@layout/spinner_dropdown_item" />
@@ -106,6 +106,7 @@
                     android:layout_height="40dp"
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="20dp"
+                    android:layout_marginEnd="36dp"
                     android:layout_alignParentRight="true"
                     android:text="@string/dab_dual_duct_label_thermistor1_val"
                     android:textAppearance="@style/label_values" />
@@ -123,10 +124,10 @@
                 <Spinner
                     android:id="@+id/analog2OutSpinner"
                     style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:layout_width="160dp"
+                    android:layout_width="220dp"
                     android:layout_height="42dp"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginStart="80dp"
+                    android:layout_marginStart="40dp"
                     android:layout_below="@+id/analog1OutSpinner"
                     android:layout_toEndOf="@+id/analog2OutTextView"
                     android:entries="@array/dab_dual_duct_actuator_types"

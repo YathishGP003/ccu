@@ -49,11 +49,37 @@ public class DualDuctUtil {
     
         dualDuctPoints.put("DischargeAirflow",dischargeAirflow+" \u2109");
     
-        dualDuctPoints.put("CoolingDamper",damperCoolingPos+"% Open");
-        
-        dualDuctPoints.put("HeatingDamper",damperHeatingPos+"% Open");
+        if (isCoolingDamperEnabled((int)analog1Config, (int)analog2Config)) {
+            dualDuctPoints.put("CoolingDamper", damperCoolingPos + "% Open");
+        }
+    
+        if (isHeatingDamperEnabled((int)analog1Config, (int)analog2Config)) {
+            dualDuctPoints.put("HeatingDamper", damperHeatingPos + "% Open");
+        }
         
         return dualDuctPoints;
+    }
+    
+    public static boolean isCoolingDamperEnabled(int analog1Config, int analog2Config) {
+        if (analog1Config == DualDuctAnalogActuator.COOLING.getVal() ||
+            analog2Config == DualDuctAnalogActuator.COOLING.getVal() ||
+            analog1Config == DualDuctAnalogActuator.COMPOSITE.getVal() ||
+            analog2Config == DualDuctAnalogActuator.COMPOSITE.getVal()
+        ) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean isHeatingDamperEnabled(int analog1Config, int analog2Config) {
+        if (analog1Config == DualDuctAnalogActuator.HEATING.getVal() ||
+            analog2Config == DualDuctAnalogActuator.HEATING.getVal() ||
+            analog1Config == DualDuctAnalogActuator.COMPOSITE.getVal() ||
+            analog2Config == DualDuctAnalogActuator.COMPOSITE.getVal()
+        ) {
+            return true;
+        }
+        return false;
     }
     
 }

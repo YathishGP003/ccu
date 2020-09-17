@@ -1823,10 +1823,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     
         textViewLabel2.setText("Discharge Airflow : ");
         textViewValue2.setText(dualDuctPoints.get("DischargeAirflow").toString());
-        textViewLabel3.setText("Cooling Damper : ");
-        textViewValue3.setText(dualDuctPoints.get("CoolingDamper").toString());
-        textViewLabel4.setText("Heating Damper : ");
-        textViewValue4.setText(dualDuctPoints.get("HeatingDamper").toString());
+    
+        if (dualDuctPoints.containsKey("CoolingDamper")) {
+            textViewLabel3.setText("Cooling Damper : ");
+            textViewValue3.setText(dualDuctPoints.get("CoolingDamper").toString());
+            textViewLabel4.setText("Heating Damper : ");
+            textViewValue4.setText(dualDuctPoints.get("HeatingDamper").toString());
+        } else if (dualDuctPoints.containsKey("HeatingDamper")) {
+            textViewLabel3.setText("Heating Damper : ");
+            textViewValue3.setText(dualDuctPoints.get("HeatingDamper").toString());
+        }
         
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);

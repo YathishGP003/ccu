@@ -127,7 +127,7 @@ class DualDuctEquip {
                                               .setFloorRef(floorRef)
                                               .setProfile(profileType.name())
                                               .setPriority(ZonePriority.NONE.name())
-                                              .addMarker("equip").addMarker("dualduct").addMarker("zone")
+                                              .addMarker("equip").addMarker("dualDuct").addMarker("zone")
                                               .setAhuRef(ahuRef)
                                               .setTz(tz)
                                               .setGroup(String.valueOf(nodeAddr));

@@ -196,10 +196,10 @@ public class CCUHsApi
     public void updateSite(Site s, String id)
     {
         tagsDb.updateSite(s, id);
-        if (tagsDb.idMap.get(id) != null)
+        /*if (tagsDb.idMap.get(id) != null)
         {
             tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
-        }
+        }*/
     }
 
     public void updateEquip(Equip q, String id)

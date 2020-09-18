@@ -56,7 +56,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
     
     private static final int DEFAULT_DAMPER_MIN = 0;
     private static final int DEFAULT_DAMPER_MAX= 100;
-    private static final int DEFAULT_DAMPER_VAL= 40;
+    private static final int DEFAULT_DAMPER_VAL= 20;
     
     static final int TEMP_OFFSET_LIMIT = 100;
     

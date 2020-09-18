@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.dualduct;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -39,22 +40,22 @@ public class DualDuctUtil {
             double coolingSupplyAirflow = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and " +
                                                                                    "cooling and supply and air and " +
                                                                                    "temp and equipRef == \""+equipID+ "\"");
-            dualDuctPoints.put("CoolingSupplyAirflow",coolingSupplyAirflow+" \u2109");
+            dualDuctPoints.put("CoolingSupplyAirflow", getFormattedDouble(coolingSupplyAirflow) +" \u2109");
         } else if (th2Config == DualDuctThermistorConfig.HEATING_AIRFLOW_TEMP.getVal()){
             double heatingSupplyAirflow = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and " +
                                                                                    "heating and supply and air and " +
                                                                                    "temp and equipRef == \""+equipID+ "\"");
-            dualDuctPoints.put("HeatingSupplyAirflow",heatingSupplyAirflow+" \u2109");
+            dualDuctPoints.put("HeatingSupplyAirflow", getFormattedDouble(heatingSupplyAirflow)+" \u2109");
         }
     
-        dualDuctPoints.put("DischargeAirflow",dischargeAirflow+" \u2109");
+        dualDuctPoints.put("DischargeAirflow",getFormattedDouble(dischargeAirflow)+" \u2109");
     
         if (isCoolingDamperEnabled((int)analog1Config, (int)analog2Config)) {
-            dualDuctPoints.put("CoolingDamper", damperCoolingPos + "% Open");
+            dualDuctPoints.put("CoolingDamper", getFormattedDouble(damperCoolingPos) + "% Open");
         }
     
         if (isHeatingDamperEnabled((int)analog1Config, (int)analog2Config)) {
-            dualDuctPoints.put("HeatingDamper", damperHeatingPos + "% Open");
+            dualDuctPoints.put("HeatingDamper", getFormattedDouble(damperHeatingPos) + "% Open");
         }
         
         return dualDuctPoints;
@@ -72,6 +73,11 @@ public class DualDuctUtil {
                analog2Config == DualDuctAnalogActuator.HEATING.getVal() ||
                analog1Config == DualDuctAnalogActuator.COMPOSITE.getVal() ||
                analog2Config == DualDuctAnalogActuator.COMPOSITE.getVal();
+    }
+    
+    private static String getFormattedDouble(double val) {
+        DecimalFormat df = new DecimalFormat("###.#");
+        return df.format(val);
     }
     
 }

@@ -471,20 +471,10 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         switch (buttonView.getId())
         {
             case R.id.testHpuRelay1:
-                sendRelayActivationTestSignal();
-                break;
             case R.id.testHpuRelay2:
-                sendRelayActivationTestSignal( );
-                break;
             case R.id.testHpuRelay3:
-                sendRelayActivationTestSignal();
-                break;
             case R.id.testHpuRelay4:
-                sendRelayActivationTestSignal();
-                break;
             case R.id.testHpuRelay5:
-                sendRelayActivationTestSignal();
-                break;
             case R.id.testHpuRelay6:
                 sendRelayActivationTestSignal();
                 break;

@@ -262,14 +262,17 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         ArrayAdapter<Double> coolingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, coolingDatArr);
         coolingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         coolingTest.setAdapter(coolingSatTestAdapter);
+        coolingTest.setSelection(0,false);
         
         ArrayAdapter<Double> spTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, spArr);
         spTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spTest.setAdapter(spTestAdapter);
+        spTest.setSelection(0,false);
     
         ArrayAdapter<Double> heatingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, heatingDatArr);
         heatingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         heatingTest.setAdapter(heatingSatTestAdapter);
+        heatingTest.setSelection(0,false);
     
         ArrayList<Double> zoroToHundred = new ArrayList<>();
         for (double i = 0;  i <= 100.0; i++)
@@ -279,10 +282,12 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         ArrayAdapter<Double> humidificationTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
         humidificationTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         humidificationTest.setAdapter(humidificationTestAdapter);
+        humidificationTest.setSelection(0,false);
     
         ArrayAdapter<Double> oaMinTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
         oaMinTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         oaMinTest.setAdapter(oaMinTestAdapter);
+        oaMinTest.setSelection(0,false);
     
     
         coolingDatMin.setOnItemSelectedListener(this);

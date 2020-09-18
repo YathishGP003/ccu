@@ -299,19 +299,23 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		ArrayAdapter<Double> coolingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
 		coolingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog1Test.setAdapter(coolingSatTestAdapter);
+		ahuAnalog1Test.setSelection(0,false);
 		
 		ArrayAdapter<Double> spTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
 		spTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog2Test.setAdapter(spTestAdapter);
+		ahuAnalog2Test.setSelection(0,false);
 		
 		ArrayAdapter<Double> heatingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
 		heatingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog3Test.setAdapter(heatingSatTestAdapter);
+		ahuAnalog3Test.setSelection(0,false);
 		
 		ArrayAdapter<Double> co2TestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
 		co2TestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog4Test.setAdapter(co2TestAdapter);
-		
+		ahuAnalog4Test.setSelection(0,false);
+
 		analog1Min.setOnItemSelectedListener(this);
 		analog1Max.setOnItemSelectedListener(this);
 		analog2Min.setOnItemSelectedListener(this);

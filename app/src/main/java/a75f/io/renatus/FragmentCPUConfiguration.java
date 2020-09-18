@@ -447,21 +447,11 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         switch (buttonView.getId()) {
             case R.id.testCpuRelay1:
-                sendRelayActivationTestSignal();
-                break;
-            case R.id.testCpuRelay2:
-                sendRelayActivationTestSignal();
-                break;
-            case R.id.testCpuRelay3:
-                sendRelayActivationTestSignal();
-                break;
-            case R.id.testCpuRelay4:
-                sendRelayActivationTestSignal();
-                break;
-            case R.id.testCpuRelay5:
-                sendRelayActivationTestSignal();
-                break;
             case R.id.testCpuRelay6:
+            case R.id.testCpuRelay2:
+            case R.id.testCpuRelay3:
+            case R.id.testCpuRelay4:
+            case R.id.testCpuRelay5:
                 sendRelayActivationTestSignal();
                 break;
             case R.id.toggleCpuFanLow:

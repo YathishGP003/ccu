@@ -361,17 +361,9 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
         switch (buttonView.getId())
         {
             case R.id.test2pfcuRelay1:
-                sendRelayActivationTestSignal();
-                break;
             case R.id.test2pfcuRelay2:
-                sendRelayActivationTestSignal();
-                break;
             case R.id.test2pfcuRelay3:
-                sendRelayActivationTestSignal();
-                break;
             case R.id.test2pfcuRelay4:
-                sendRelayActivationTestSignal();
-                break;
             case R.id.test2pfcuRelay6:
                 sendRelayActivationTestSignal();
                 break;

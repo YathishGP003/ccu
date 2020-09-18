@@ -80,7 +80,8 @@ public class DualDuctProfile extends ZoneProfile {
     @Override
     public Equip getEquip()
     {
-        HashMap equip = CCUHsApi.getInstance().read("equip and group == \"" + dualDuctEquip.nodeAddr + "\"");
+        HashMap<Object, Object> equip =
+            CCUHsApi.getInstance().readEntity("equip and group == \"" + dualDuctEquip.nodeAddr+"\"");
         return new Equip.Builder().setHashMap(equip).build();
     }
     
@@ -91,14 +92,8 @@ public class DualDuctProfile extends ZoneProfile {
         double buildingLimitMin =  TunerUtil.readBuildingTunerValByQuery("building and limit and min");
         
         double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
-        
-        if (dualDuctEquip.getCurrentTemp() > (buildingLimitMax + tempDeadLeeway)
-            || dualDuctEquip.getCurrentTemp() < (buildingLimitMin - tempDeadLeeway))
-        {
-            return true;
-        }
-        
-        return false;
+        return dualDuctEquip.getCurrentTemp() > (buildingLimitMax + tempDeadLeeway) ||
+               dualDuctEquip.getCurrentTemp() < (buildingLimitMin - tempDeadLeeway);
     }
     
     @Override
@@ -217,7 +212,7 @@ public class DualDuctProfile extends ZoneProfile {
         boolean  enabledIAQControl = dualDuctEquip.getConfigNumVal("enable and iaq") > 0 ;
         String   zoneId            = HSUtil.getZoneIdFromEquipId(dualDuctEquip.getId());
         Occupied occ               = ScheduleProcessJob.getOccupiedModeCache(zoneId);
-        boolean  occupied          = (occ == null ? false : occ.isOccupied());
+        boolean  occupied          = (occ != null && occ.isOccupied());
     
         double        epidemicMode  = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
@@ -327,8 +322,7 @@ public class DualDuctProfile extends ZoneProfile {
         if(TemperatureProfileUtil.getStatus(dualDuctEquip.nodeAddr) != state.ordinal()) {
             TemperatureProfileUtil.setStatus(dualDuctEquip.nodeAddr, state.ordinal(),
                                              DabSystemController.getInstance().isEmergencyMode() &&
-                                             (state == HEATING ? buildingLimitMinBreached() : state == COOLING ?
-                                                                                                  buildingLimitMaxBreached() : false));
+                                             (state == HEATING ? buildingLimitMinBreached() : state == COOLING ? buildingLimitMaxBreached() : false));
         }
     }
     

@@ -44,12 +44,15 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
     
     public static final String ID = FragmentDABDualDuctConfiguration.class.getSimpleName();
     
+    private static final int DUALDUCT_DIALOG_WIDTH = 1065;
+    private static final int DUALDUCT_DIALOG_HEIGHT = 672;
+    
     
     private static final double DEFAULT_ANALOG_MIN = 0;
     private static final double DEFAULT_ANALOG_MAX = 10.0;
     private static final double DEFAULT_COMPOSITE_ANALOG_HEATING_MAX = 5.0;
     private static final double DEFAULT_COMPOSITE_ANALOG_COOLING_MIN = 5.1;
-    private static final double DEFAULT_COMPOSITE_ANALOG_COOLING_MAX = 50.0;
+    private static final double DEFAULT_COMPOSITE_ANALOG_COOLING_MAX = 10.0;
     
     private static final int DEFAULT_DAMPER_MIN = 0;
     private static final int DEFAULT_DAMPER_MAX= 100;
@@ -131,9 +134,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         super.onStart();
         Dialog dialog = getDialog();
         if (dialog != null) {
-            int width = 1065;//ViewGroup.LayoutParams.WRAP_CONTENT;
-            int height = 672;//ViewGroup.LayoutParams.WRAP_CONTENT;
-            dialog.getWindow().setLayout(width, height);
+            dialog.getWindow().setLayout(DUALDUCT_DIALOG_WIDTH, DUALDUCT_DIALOG_HEIGHT);
         }
     }
     
@@ -147,7 +148,6 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         zoneRef = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         floorRef = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         mNodeType = NodeType.valueOf(getArguments().getString(FragmentCommonBundleArgs.NODE_TYPE));
-        //mProfileType = ProfileType.values()[getArguments().getInt(FragmentCommonBundleArgs.PROFILE_TYPE)];
         ButterKnife.bind(this, view);
         return view;
     }
@@ -158,13 +158,12 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         super.onViewCreated(view, savedInstanceState);
         mDualDuctProfile = (DualDuctProfile) L.getProfile(mSmartNodeAddress);
         if (mDualDuctProfile != null) {
-            CcuLog.d(L.TAG_CCU_UI, "Get PlcConfig: ");
+            CcuLog.d(L.TAG_CCU_UI, "Get DualDuctConfig: ");
             mProfileConfig = (DualDuctProfileConfiguration) mDualDuctProfile.getProfileConfiguration(mSmartNodeAddress);
         } else {
-            CcuLog.d(L.TAG_CCU_UI, "Create Plc Profile: ");
+            CcuLog.d(L.TAG_CCU_UI, "Create DualDuct Profile: ");
             mDualDuctProfile = new DualDuctProfile();
         }
-    
     
         analog1OutSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -173,7 +172,6 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
                 analog1OutSpinner.setSelection(position);
                 handleAnalog1Selection(actuator);
             }
-        
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             
@@ -187,24 +185,20 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
                 analog2OutSpinner.setSelection(position);
                 handleAnalog2Selection(actuator);
             }
-        
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             
             }
         });
-    
-    
+        
         setupAnalogOutSpinners();
-    
-        setUpNumberPickers(view);
+        setUpNumberPickers();
         
         if (mProfileConfig != null) {
             restoreViews();
         } else {
             initializeViews();
         }
-    
         configureSetButton();
     }
     
@@ -246,7 +240,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         }
     }
     
-    private void setUpNumberPickers(View view) {
+    private void setUpNumberPickers() {
         
         setNumberPickerDividerColor(temperatureOffset);
         temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
@@ -300,11 +294,11 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
             return analogOutAdapter;
         }
         
-        ArrayList<Double> voltages = new ArrayList<Double>();
+        ArrayList<Double> voltages = new ArrayList<>();
         for (int val = 0; val <= 100; val++) {
             voltages.add((double)val/10);
         }
-        analogOutAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, voltages);
+        analogOutAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, voltages);
         analogOutAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         return analogOutAdapter;
     }
@@ -340,11 +334,11 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         ao1MaxDamperHeatingSpinner.setEnabled(enabled);
         
         if (enabled && isComposite) {
-            ao1MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
+            ao1MinDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
             ao1MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_HEATING_MAX), false);
         } else if (enabled) {
-            ao1MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MAX), false);
             ao1MinDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
+            ao1MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MAX), false);
         }
     }
     
@@ -355,11 +349,11 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         ao1MaxDamperCoolingTV.setEnabled(enabled);
         ao1MaxDamperCoolingSpinner.setEnabled(enabled);
         if (enabled && isComposite) {
-            ao1MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_COOLING_MIN), false);
+            ao1MinDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_COOLING_MIN), false);
             ao1MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_COOLING_MAX), false);
         } else if (enabled) {
-            ao1MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MAX), false);
             ao1MinDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
+            ao1MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MAX), false);
         }
     }
     
@@ -369,11 +363,11 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         ao2MaxDamperHeatingTV.setEnabled(enabled);
         ao2MaxDamperHeatingSpinner.setEnabled(enabled);
         if (enabled && isComposite) {
-            ao2MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
+            ao2MinDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
             ao2MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_HEATING_MAX), false);
         } else if (enabled) {
-            ao2MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MAX), false);
             ao2MinDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
+            ao2MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MAX), false);
         }
     }
     
@@ -384,11 +378,11 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         ao2MaxDamperCoolingTV.setEnabled(enabled);
         ao2MaxDamperCoolingSpinner.setEnabled(enabled);
         if (enabled && isComposite) {
-            ao2MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_COOLING_MIN), false);
+            ao2MinDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_COOLING_MIN), false);
             ao2MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_COOLING_MAX), false);
         } else if (enabled) {
-            ao2MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MAX), false);
             ao2MinDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
+            ao2MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MAX), false);
         }
     }
     
@@ -447,13 +441,6 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         ao1MinDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_COOLING_MIN), false);
     }
     
-    private void setDefaultAnalog2CompositeConfig(ArrayAdapter<Double> analogOutAdapter) {
-        ao2MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
-        ao2MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_HEATING_MAX), false);
-        ao2MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_COOLING_MAX), false);
-        ao2MinDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_COOLING_MIN), false);
-    }
-    
     private void setDividerColor(NumberPicker picker) {
         Field[] numberPickerFields = NumberPicker.class.getDeclaredFields();
         for (Field field : numberPickerFields) {
@@ -470,7 +457,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
     }
     
     private void setNumberPickerDividerColor(NumberPicker pk) {
-        Class<?> numberPickerClass = null;
+        Class<?> numberPickerClass;
         try {
             numberPickerClass = Class.forName("android.widget.NumberPicker");
             Field selectionDivider = numberPickerClass.getDeclaredField("mSelectionDivider");
@@ -581,7 +568,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
             mDualDuctProfile.updateDualDuctEquip(dualductConfig);
         }
         L.ccu().zoneProfiles.add(mDualDuctProfile);
-        CcuLog.d(L.TAG_CCU_UI, "Set DAB Config: Profiles - "+L.ccu().zoneProfiles.size());
+        CcuLog.d(L.TAG_CCU_UI, "Set DualDuct Config: Profiles - "+L.ccu().zoneProfiles.size());
     }
     
 }

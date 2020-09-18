@@ -6,7 +6,7 @@ public enum DualDuctThermistorConfig {
     
     private final int val;
     
-    private DualDuctThermistorConfig(int val) {
+    DualDuctThermistorConfig(int val) {
         this.val = val;
     }
     

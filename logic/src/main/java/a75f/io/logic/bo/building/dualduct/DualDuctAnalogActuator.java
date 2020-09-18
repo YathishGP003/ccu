@@ -9,7 +9,7 @@ public enum DualDuctAnalogActuator {
     
     private final int val;
     
-    private DualDuctAnalogActuator(int val) {
+    DualDuctAnalogActuator(int val) {
         this.val = val;
     }
     

@@ -7,7 +7,7 @@ import a75f.io.api.haystack.CCUHsApi;
 public class DualDuctUtil {
     
     public static HashMap getEquipPointsForView(String equipID) {
-        HashMap dualDuctPoints = new HashMap();
+        HashMap<Object, Object> dualDuctPoints = new HashMap();
     
         dualDuctPoints.put("Profile","DAB Dual Duct");
         String equipStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \"" + equipID + "\"");
@@ -61,25 +61,17 @@ public class DualDuctUtil {
     }
     
     public static boolean isCoolingDamperEnabled(int analog1Config, int analog2Config) {
-        if (analog1Config == DualDuctAnalogActuator.COOLING.getVal() ||
-            analog2Config == DualDuctAnalogActuator.COOLING.getVal() ||
-            analog1Config == DualDuctAnalogActuator.COMPOSITE.getVal() ||
-            analog2Config == DualDuctAnalogActuator.COMPOSITE.getVal()
-        ) {
-            return true;
-        }
-        return false;
+        return analog1Config == DualDuctAnalogActuator.COOLING.getVal() ||
+               analog2Config == DualDuctAnalogActuator.COOLING.getVal() ||
+               analog1Config == DualDuctAnalogActuator.COMPOSITE.getVal() ||
+               analog2Config == DualDuctAnalogActuator.COMPOSITE.getVal();
     }
     
     public static boolean isHeatingDamperEnabled(int analog1Config, int analog2Config) {
-        if (analog1Config == DualDuctAnalogActuator.HEATING.getVal() ||
-            analog2Config == DualDuctAnalogActuator.HEATING.getVal() ||
-            analog1Config == DualDuctAnalogActuator.COMPOSITE.getVal() ||
-            analog2Config == DualDuctAnalogActuator.COMPOSITE.getVal()
-        ) {
-            return true;
-        }
-        return false;
+        return analog1Config == DualDuctAnalogActuator.HEATING.getVal() ||
+               analog2Config == DualDuctAnalogActuator.HEATING.getVal() ||
+               analog1Config == DualDuctAnalogActuator.COMPOSITE.getVal() ||
+               analog2Config == DualDuctAnalogActuator.COMPOSITE.getVal();
     }
     
 }

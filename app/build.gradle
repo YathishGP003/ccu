@@ -35,8 +35,8 @@ android {
 
     defaultConfig {
         applicationId "a75f.io.renatus"
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion 19 
+        minSdkVersion 24
+        targetSdkVersion 26
         versionCode getVersionCodeTimestamp()
         versionName applicationName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"

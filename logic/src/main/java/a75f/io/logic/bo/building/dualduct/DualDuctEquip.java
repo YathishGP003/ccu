@@ -111,7 +111,7 @@ class DualDuctEquip {
     
         setDefaultValues();
         
-        CCUHsApi.getInstance().syncPointEntityTree();
+        CCUHsApi.getInstance().syncEntityWithPointWrite();
     }
     
     
@@ -561,6 +561,7 @@ class DualDuctEquip {
                                             .addMarker("analog1").addMarker("output").addMarker("type")
                                             .addMarker("sp").addMarker("his")
                                             .setKind(DualDuctConstants.KIND_STRING)
+                                            .setEnums("not_used, composite, cooling, heating")
                                             .setGroup(String.valueOf(nodeAddr))
                                             .setTz(tz)
                                             .build();
@@ -569,7 +570,7 @@ class DualDuctEquip {
         CCUHsApi.getInstance().writeHisValById(analog1OutputConfigId, (double)config.getAnalogOut1Config());
     
         Point analog2OutputConfig = new Point.Builder()
-                                            .setDisplayName(equipDis+"-analog1OutputConfig")
+                                            .setDisplayName(equipDis+"-analog2OutputConfig")
                                             .setEquipRef(equipRef)
                                             .setSiteRef(siteRef).setHisInterpolate("cov")
                                             .addMarker("config").addMarker("dualDuct").addMarker("writable").addMarker("zone")
@@ -607,6 +608,7 @@ class DualDuctEquip {
                                                 .addMarker("th2").addMarker("output").addMarker("type")
                                                 .addMarker("sp").addMarker("his")
                                                 .setKind(DualDuctConstants.KIND_STRING)
+                                                .setEnums("coolingSupplyAirflow, heatingSupplyAirflow")
                                                 .setGroup(String.valueOf(nodeAddr))
                                                 .setTz(tz)
                                                 .build();
@@ -636,6 +638,7 @@ class DualDuctEquip {
                                                        .setMaxVal(String.valueOf(DualDuctConstants.ANALOG_MAX_FOR_DAMPER_POS))
                                                        .setIncrementVal(String.valueOf(DualDuctConstants.ANALOG_FOR_DAMPER_INC))
                                                        .setGroup(String.valueOf(nodeAddr))
+                                                       .setUnit("V")
                                                        .setTz(tz)
                                                        .build();
         String analog1OutputAtMinDamperHeatingPosId = CCUHsApi.getInstance().addPoint(analog1OutputAtMinDamperHeatingPos);
@@ -656,6 +659,7 @@ class DualDuctEquip {
                                                        .setMaxVal(String.valueOf(DualDuctConstants.ANALOG_MAX_FOR_DAMPER_POS))
                                                        .setIncrementVal(String.valueOf(DualDuctConstants.ANALOG_FOR_DAMPER_INC))
                                                        .setGroup(String.valueOf(nodeAddr))
+                                                       .setUnit("V")
                                                        .setTz(tz)
                                                        .build();
         String analog1OutputAtMaxDamperHeatingPosId = CCUHsApi.getInstance().addPoint(analog1OutputAtMaxDamperHeatingPos);
@@ -675,6 +679,7 @@ class DualDuctEquip {
                                                        .setMaxVal(String.valueOf(DualDuctConstants.ANALOG_MAX_FOR_DAMPER_POS))
                                                        .setIncrementVal(String.valueOf(DualDuctConstants.ANALOG_FOR_DAMPER_INC))
                                                        .setGroup(String.valueOf(nodeAddr))
+                                                       .setUnit("V")
                                                        .setTz(tz)
                                                        .build();
         String analog1OutputAtMinDamperCoolingPosId = CCUHsApi.getInstance().addPoint(analog1OutputAtMinDamperCoolingPos);
@@ -695,6 +700,7 @@ class DualDuctEquip {
                                                        .setMaxVal(String.valueOf(DualDuctConstants.ANALOG_MAX_FOR_DAMPER_POS))
                                                        .setIncrementVal(String.valueOf(DualDuctConstants.ANALOG_FOR_DAMPER_INC))
                                                        .setGroup(String.valueOf(nodeAddr))
+                                                       .setUnit("V")
                                                        .setTz(tz)
                                                        .build();
         String analog1OutputAtMaxDamperCoolingPosId = CCUHsApi.getInstance().addPoint(analog1OutputAtMaxDamperCoolingPos);
@@ -721,6 +727,7 @@ class DualDuctEquip {
                                                        .setMaxVal(String.valueOf(DualDuctConstants.ANALOG_MAX_FOR_DAMPER_POS))
                                                        .setIncrementVal(String.valueOf(DualDuctConstants.ANALOG_FOR_DAMPER_INC))
                                                        .setGroup(String.valueOf(nodeAddr))
+                                                       .setUnit("V")
                                                        .setTz(tz)
                                                        .build();
         String analog2OutputAtMinDamperHeatingPosId = CCUHsApi.getInstance().addPoint(analog2OutputAtMinDamperHeatingPos);
@@ -741,6 +748,7 @@ class DualDuctEquip {
                                                        .setMaxVal(String.valueOf(DualDuctConstants.ANALOG_MAX_FOR_DAMPER_POS))
                                                        .setIncrementVal(String.valueOf(DualDuctConstants.ANALOG_FOR_DAMPER_INC))
                                                        .setGroup(String.valueOf(nodeAddr))
+                                                       .setUnit("V")
                                                        .setTz(tz)
                                                        .build();
         String analog2OutputAtMaxDamperHeatingPosId = CCUHsApi.getInstance().addPoint(analog2OutputAtMaxDamperHeatingPos);
@@ -760,6 +768,7 @@ class DualDuctEquip {
                                                        .setMaxVal(String.valueOf(DualDuctConstants.ANALOG_MAX_FOR_DAMPER_POS))
                                                        .setIncrementVal(String.valueOf(DualDuctConstants.ANALOG_FOR_DAMPER_INC))
                                                        .setGroup(String.valueOf(nodeAddr))
+                                                       .setUnit("V")
                                                        .setTz(tz)
                                                        .build();
         String analog2OutputAtMinDamperCoolingPosId = CCUHsApi.getInstance().addPoint(analog2OutputAtMinDamperCoolingPos);
@@ -780,6 +789,7 @@ class DualDuctEquip {
                                                        .setMaxVal(String.valueOf(DualDuctConstants.ANALOG_MAX_FOR_DAMPER_POS))
                                                        .setIncrementVal(String.valueOf(DualDuctConstants.ANALOG_FOR_DAMPER_INC))
                                                        .setGroup(String.valueOf(nodeAddr))
+                                                       .setUnit("V")
                                                        .setTz(tz)
                                                        .build();
         String analog2OutputAtMaxDamperCoolingPosId = CCUHsApi.getInstance().addPoint(analog2OutputAtMaxDamperCoolingPos);
@@ -909,12 +919,12 @@ class DualDuctEquip {
         } else if (config.getAnalogOut2Config() == DualDuctAnalogActuator.HEATING.getVal()) {
         
             String heatingDamperPosId;
-            if (config.getAnalogOut1Config() == DualDuctAnalogActuator.COOLING.getVal() ||
+            if (config.getAnalogOut1Config() == DualDuctAnalogActuator.HEATING.getVal() ||
                 config.getAnalogOut1Config() == DualDuctAnalogActuator.COMPOSITE.getVal()) {
                 
-                HashMap<Object, Object> coolingDamperPoint = CCUHsApi.getInstance().readEntity("point and dualDuct and " +
-                                                                      "heating and damper and pos and cmd and group == \""+nodeAddr+"\"");
-                heatingDamperPosId = coolingDamperPoint.get("id").toString();
+                HashMap<Object, Object> heatingDamperPoint = CCUHsApi.getInstance().readEntity("point and dualDuct " +
+                                                                "and heating and damper and pos and cmd and group == \""+nodeAddr+"\"");
+                heatingDamperPosId = heatingDamperPoint.get("id").toString();
             } else {
                 heatingDamperPosId = createDamperLogicalPoint (siteRef, equipDis, roomRef, floorRef, tz, "heating");
             }
@@ -1134,28 +1144,41 @@ class DualDuctEquip {
         updateThermistorConfig(config);
         
         setConfigNumVal("analog1 and output and type",config.getAnalogOut1Config());
+        setHisVal("analog1 and output and type",config.getAnalogOut1Config());
         setConfigNumVal("analog2 and output and type",config.getAnalogOut2Config());
+        setHisVal("analog2 and output and type",config.getAnalogOut2Config());
         setConfigNumVal("th1 and output and type",config.getThermistor1Config());
+        setHisVal("th1 and output and type",config.getThermistor1Config());
         setConfigNumVal("th2 and output and type",config.getThermistor2Config());
+        setHisVal("th2 and output and type",config.getThermistor2Config());
         
         setConfigNumVal("analog1 and output and min and damper and heating and pos",config.getAnalog1OutAtMinDamperHeating());
+        setHisVal("analog1 and output and min and damper and heating and pos",config.getAnalog1OutAtMinDamperHeating());
         setConfigNumVal("analog1 and output and max and damper and heating and pos", config.getAnalog1OutAtMaxDamperHeating());
+        setHisVal("analog1 and output and max and damper and heating and pos", config.getAnalog1OutAtMaxDamperHeating());
         setConfigNumVal("analog1 and output and min and damper and cooling and pos", config.getAnalog1OutAtMinDamperCooling());
+        setHisVal("analog1 and output and min and damper and cooling and pos", config.getAnalog1OutAtMinDamperCooling());
         setConfigNumVal("analog1 and output and max and damper and cooling and pos", config.getAnalog1OutAtMaxDamperCooling());
-    
+        setHisVal("analog1 and output and max and damper and cooling and pos", config.getAnalog1OutAtMaxDamperCooling());
         setConfigNumVal("analog2 and output and min and damper and heating and pos", config.getAnalog2OutAtMinDamperHeating());
+        setHisVal("analog2 and output and min and damper and heating and pos", config.getAnalog2OutAtMinDamperHeating());
         setConfigNumVal("analog2 and output and max and damper and heating and pos", config.getAnalog2OutAtMaxDamperHeating());
+        setHisVal("analog2 and output and max and damper and heating and pos", config.getAnalog2OutAtMaxDamperHeating());
         setConfigNumVal("analog2 and output and min and damper and cooling and pos", config.getAnalog2OutAtMinDamperCooling());
+        setHisVal("analog2 and output and min and damper and cooling and pos", config.getAnalog2OutAtMinDamperCooling());
         setConfigNumVal("analog2 and output and max and damper and cooling and pos", config.getAnalog2OutAtMaxDamperCooling());
+        setHisVal("analog2 and output and max and damper and cooling and pos", config.getAnalog2OutAtMaxDamperCooling());
         
         setConfigNumVal("enable and occupancy",config.isEnableOccupancyControl() ? 1.0 : 0);
         setHisVal("enable and occupancy",config.isEnableOccupancyControl() ? 1.0 : 0);
         setConfigNumVal("enable and co2",config.isEnableCO2Control() ? 1.0 : 0);
         setHisVal("enable and co2",config.isEnableCO2Control() ? 1.0 : 0);
-        setConfigNumVal("enable and co2",config.isEnableIAQControl() ? 1.0 : 0);
-        setHisVal("enable and co2",config.isEnableIAQControl() ? 1.0 : 0);
+        setConfigNumVal("enable and iaq",config.isEnableIAQControl() ? 1.0 : 0);
+        setHisVal("enable and iaq",config.isEnableIAQControl() ? 1.0 : 0);
         
         setConfigNumVal("temperature and offset",config.getTemperatureOffset());
+        setHisVal("temperature and offset",config.getTemperatureOffset());
+        
         TemperatureProfileUtil.setDamperLimit(nodeAddr,"cooling","min",config.getMinCoolingDamperPos());
         setHisVal("cooling and min and damper and pos",config.getMinCoolingDamperPos());
         TemperatureProfileUtil.setDamperLimit(nodeAddr,"cooling","max",config.getMaxCoolingDamperPos());
@@ -1164,6 +1187,8 @@ class DualDuctEquip {
         setHisVal("heating and min and damper and pos",config.getMinHeatingDamperPos());
         TemperatureProfileUtil.setDamperLimit(nodeAddr, "heating","max",config.getMaxHeatingDamperPos());
         setHisVal("heating and max and damper and pos",config.getMaxHeatingDamperPos());
+        
+        CCUHsApi.getInstance().syncEntityWithPointWrite();
     }
     
     

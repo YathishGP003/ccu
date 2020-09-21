@@ -164,6 +164,16 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
             CcuLog.d(L.TAG_CCU_UI, "Create DualDuct Profile: ");
             mDualDuctProfile = new DualDuctProfile();
         }
+        
+        setupAnalogOutSpinners();
+        setUpNumberPickers();
+        
+        if (mProfileConfig != null) {
+            restoreViews();
+        } else {
+            initializeViews();
+        }
+        configureSetButton();
     
         analog1OutSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -190,20 +200,9 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
             
             }
         });
-        
-        setupAnalogOutSpinners();
-        setUpNumberPickers();
-        
-        if (mProfileConfig != null) {
-            restoreViews();
-        } else {
-            initializeViews();
-        }
-        configureSetButton();
     }
     
     private void handleAnalog1Selection(DualDuctAnalogActuator actuator) {
-        
         if (actuator == DualDuctAnalogActuator.NOT_USED) {
             updateAO1ConfigVisibility(View.GONE);
         } else if (actuator == DualDuctAnalogActuator.COOLING) {
@@ -332,7 +331,6 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         ao1MinDamperHeatingSpinner.setEnabled(enabled);
         ao1MaxDamperHeatingTV.setEnabled(enabled);
         ao1MaxDamperHeatingSpinner.setEnabled(enabled);
-        
         if (enabled && isComposite) {
             ao1MinDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
             ao1MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_HEATING_MAX), false);
@@ -404,6 +402,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         thermistor2Spinner.setSelection(mProfileConfig.getThermistor2Config(), false);
         
         ArrayAdapter<Double> analogOutAdapter = getAnalogOutAdapter();
+        
         ao1MinDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(mProfileConfig.getAnalog1OutAtMinDamperHeating()), false);
         ao1MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(mProfileConfig.getAnalog1OutAtMaxDamperHeating()), false);
         ao1MinDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(mProfileConfig.getAnalog1OutAtMinDamperCooling()), false);
@@ -560,12 +559,12 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
     }
     
     private void setupDualDuctZoneProfile() {
-        DualDuctProfileConfiguration dualductConfig = createDualDuctConfig();
-        mDualDuctProfile.getProfileConfiguration().put(mSmartNodeAddress, dualductConfig);
+        DualDuctProfileConfiguration dualDuctConfig = createDualDuctConfig();
+        mDualDuctProfile.getProfileConfiguration().put(mSmartNodeAddress, dualDuctConfig);
         if (mProfileConfig == null) {
-            mDualDuctProfile.addDualDuctEquip(mSmartNodeAddress, dualductConfig, floorRef, zoneRef );
+            mDualDuctProfile.addDualDuctEquip(mSmartNodeAddress, dualDuctConfig, floorRef, zoneRef );
         } else {
-            mDualDuctProfile.updateDualDuctEquip(dualductConfig);
+            mDualDuctProfile.updateDualDuctEquip(dualDuctConfig);
         }
         L.ccu().zoneProfiles.add(mDualDuctProfile);
         CcuLog.d(L.TAG_CCU_UI, "Set DualDuct Config: Profiles - "+L.ccu().zoneProfiles.size());

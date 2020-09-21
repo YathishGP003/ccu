@@ -129,7 +129,7 @@ public class DualDuctProfile extends ZoneProfile {
         setDamperLimits(heatingDamper, "heating");
         
         coolingDamper.iaqCompensatedMinPos = getIAQCompensatedDamperPosition(coolingDamper);
-        heatingDamper.iaqCompensatedMinPos = getIAQCompensatedDamperPosition(coolingDamper);
+        heatingDamper.iaqCompensatedMinPos = getIAQCompensatedDamperPosition(heatingDamper);
         
         coolingDamper.currentPosition = (int)(coolingDamper.iaqCompensatedMinPos +
                                 (coolingDamper.maxPosition - coolingDamper.iaqCompensatedMinPos) *

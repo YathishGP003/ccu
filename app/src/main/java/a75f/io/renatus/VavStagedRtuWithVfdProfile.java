@@ -22,16 +22,19 @@ import android.widget.Spinner;
 import android.widget.ToggleButton;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
+import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.Prefs;
@@ -76,6 +79,7 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
     @BindView(R.id.analog2HeatStage3) Spinner analog2HeatStage3;
     @BindView(R.id.analog2HeatStage4) Spinner analog2HeatStage4;
     @BindView(R.id.analog2HeatStage5) Spinner analog2HeatStage5;
+    @BindView(R.id.analog2Default) Spinner analog2DefaultSpinner;
 
     @BindView(R.id.relay1Test) ToggleButton relay1Test;
     @BindView(R.id.relay2Test) ToggleButton relay2Test;
@@ -196,6 +200,19 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 imageView.setLayoutParams(lp);
             }
         }
+        view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+
+            @Override
+            public void onViewAttachedToWindow(View view) {
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View view) {
+                if (Globals.getInstance().isTestMode()) {
+                    Globals.getInstance().setTestMode(false);
+                }
+            }
+        });
     }
 
     private void goTonext() {
@@ -260,8 +277,8 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         }
         ArrayAdapter<Integer> analogAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, analogArray);
         analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-
         analog2TestSpinner.setAdapter(analogAdapter);
+        analog2TestSpinner.setSelection(0,false);
 
         analog2Economizer.setAdapter(analogAdapter);
         analog2Economizer.setSelection((int)systemProfile.getConfigVal("analog2 and economizer"));
@@ -288,6 +305,9 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         analog2HeatStage4.setSelection((int)systemProfile.getConfigVal("analog2 and heating and stage4"), false);
         analog2HeatStage5.setAdapter(analogAdapter);
         analog2HeatStage5.setSelection((int)systemProfile.getConfigVal("analog2 and heating and stage5"), false);
+    
+        analog2DefaultSpinner.setAdapter(analogAdapter);
+        analog2DefaultSpinner.setSelection((int)systemProfile.getConfigVal("analog2 and default"));
 
         analog2TestSpinner.setOnItemSelectedListener(this);
         analog2Economizer.setOnItemSelectedListener(this);
@@ -302,7 +322,7 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         analog2HeatStage3.setOnItemSelectedListener(this);
         analog2HeatStage4.setOnItemSelectedListener(this);
         analog2HeatStage5.setOnItemSelectedListener(this);
-
+        analog2DefaultSpinner.setOnItemSelectedListener(this);
         updateAnalogOptions();
     }
 
@@ -322,6 +342,7 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         analog2HeatStage3.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.HEATING_3));
         analog2HeatStage4.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.HEATING_4));
         analog2HeatStage5.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.HEATING_5));
+        analog2DefaultSpinner.setEnabled(analogEnabled);
     }
 
     @Override
@@ -359,6 +380,9 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 break;
             case R.id.toggleAnalog2:
                 setConfigEnabledBackground("analog2",analog2Tb.isChecked() ? 1: 0);
+                if (analog2Tb.isChecked()){
+                    addFanSignal();
+                }
                 break;
             case R.id.relay1Test:
             case R.id.relay2Test:
@@ -468,6 +492,9 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 break;
             case R.id.analog2HeatStage5:
                 setConfigBackground("analog2 and heating and stage5", Double.parseDouble(arg0.getSelectedItem().toString()));
+                break;
+            case R.id.analog2Default:
+                setConfigBackground("analog2 and default", Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
 
         }
@@ -591,5 +618,42 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         msg.analog1.set((short)(10 * Double.parseDouble(analog2TestSpinner.getSelectedItem().toString())));
         msg.relayBitmap.set(relayStatus);
         MeshUtil.sendStructToCM(msg);
+
+        ControlMote.setAnalogOut("analog2",Double.parseDouble(analog2TestSpinner.getSelectedItem().toString()));
+        ControlMote.setRelayState("relay1",relay1Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay2",relay2Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay3",relay3Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay4",relay4Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay5",relay5Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay6",relay6Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay7",relay7Test.isChecked() ? 1 : 0);
+
+        if (relayStatus > 0 || Double.parseDouble(analog2TestSpinner.getSelectedItem().toString()) > 0) {
+            if (!Globals.getInstance().isTestMode()) {
+                Globals.getInstance().setTestMode(true);
+            }
+        } else {
+            if (Globals.getInstance().isTestMode()) {
+                Globals.getInstance().setTestMode(false);
+            }
+        }
+    }
+
+    private void addFanSignal() {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(final Void... params) {
+                HashMap fanSignal = CCUHsApi.getInstance().read("point and system and cmd and fan and modulating");
+                if (systemProfile != null && systemProfile.getSystemEquipRef() != null && (fanSignal == null || fanSignal.get("id") == null)) {
+                    systemProfile.addAnalogCmdPoints(systemProfile.getSystemEquipRef());
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(final Void result) {
+                // continue what you are doing...
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 }

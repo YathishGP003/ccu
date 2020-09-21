@@ -1,7 +1,6 @@
 package a75f.io.renatus;
 
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
@@ -30,6 +29,7 @@ import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartStatConditioningMode_t;
 import a75f.io.device.serial.SmartStatFanSpeed_t;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
@@ -261,6 +261,19 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
 
             }
         });
+        view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+
+            @Override
+            public void onViewAttachedToWindow(View view) {
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View view) {
+                if (Globals.getInstance().isTestMode()) {
+                    Globals.getInstance().setTestMode(false);
+                }
+            }
+        });
     }
 
     private void setup4PFCUZoneProfile() {
@@ -356,17 +369,9 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
         switch (buttonView.getId())
         {
             case R.id.test2pfcuRelay1:
-                sendRelayActivationTestSignal();
-                break;
             case R.id.test2pfcuRelay2:
-                sendRelayActivationTestSignal();
-                break;
             case R.id.test2pfcuRelay3:
-                sendRelayActivationTestSignal();
-                break;
             case R.id.test2pfcuRelay4:
-                sendRelayActivationTestSignal();
-                break;
             case R.id.test2pfcuRelay6:
                 sendRelayActivationTestSignal();
                 break;
@@ -411,6 +416,18 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
         msg.controls.relay4.set((short)(testAuxHeating.isChecked() ? 1 : 0));
         msg.controls.relay6.set((short)(testWaterValve.isChecked() ? 1 : 0));
         MeshUtil.sendStructToCM(msg);
+        updateSmartStatForceTestControls(mSmartNodeAddress);
+
+        if (testFanMediumY1.isChecked() || testFanHighY2.isChecked() || testFanLowG.isChecked()
+                || testAuxHeating.isChecked() || testWaterValve.isChecked()) {
+            if (!Globals.getInstance().isTestMode()) {
+                Globals.getInstance().setTestMode(true);
+            }
+        } else {
+            if (Globals.getInstance().isTestMode()) {
+                Globals.getInstance().setTestMode(false);
+            }
+        }
     }
     public static double getDesiredTemp(short node)
     {
@@ -420,5 +437,15 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
             return 72;
         }
         return CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());
+    }
+
+    public void updateSmartStatForceTestControls(short node) {
+        if (mProfileConfig != null) {
+            fourPfcuProfile.setCmdSignal("fan and low", testFanLowG.isChecked() ? 1 : 0, node);
+            fourPfcuProfile.setCmdSignal("fan and medium", testFanMediumY1.isChecked() ? 1 : 0, node);
+            fourPfcuProfile.setCmdSignal("fan and high", testFanHighY2.isChecked() ? 1 : 0, node);
+            fourPfcuProfile.setCmdSignal("water and valve and cooling", testWaterValve.isChecked() ? 1 : 0, node);
+            fourPfcuProfile.setCmdSignal("water and valve and heating", testAuxHeating.isChecked() ? 1 : 0, node);
+        }
     }
 }

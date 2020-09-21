@@ -667,8 +667,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             container.setLayoutParams(paramsPager);
         }
         if (position == 9) {
-
-
             fragment = new DefaultSystemProfile();
 
             Bundle data = new Bundle();
@@ -688,6 +686,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             textView_title.setText(getText(R.string.title_systemprofile));
             textView_title.setVisibility(View.VISIBLE);
             spinnerSystemProile.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setSelection(0);
             imageView_Goback.setVisibility(View.VISIBLE);
             toggleWifi.setVisibility(View.GONE);
             buttonNext.setVisibility(View.GONE);
@@ -727,6 +726,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             textView_title.setText(getText(R.string.title_systemprofile));
             textView_title.setVisibility(View.VISIBLE);
             spinnerSystemProile.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setSelection(1);
             imageView_Goback.setVisibility(View.VISIBLE);
             toggleWifi.setVisibility(View.GONE);
             buttonNext.setVisibility(View.GONE);
@@ -767,6 +767,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             textView_title.setText(getText(R.string.title_systemprofile));
             textView_title.setVisibility(View.VISIBLE);
             spinnerSystemProile.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setSelection(2);
             imageView_Goback.setVisibility(View.VISIBLE);
             toggleWifi.setVisibility(View.GONE);
             buttonNext.setVisibility(View.GONE);
@@ -802,6 +803,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             textView_title.setText(getText(R.string.title_systemprofile));
             textView_title.setVisibility(View.VISIBLE);
             spinnerSystemProile.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setSelection(3);
             imageView_Goback.setVisibility(View.VISIBLE);
             toggleWifi.setVisibility(View.GONE);
             buttonNext.setVisibility(View.GONE);
@@ -840,6 +842,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             textView_title.setText(getText(R.string.title_systemprofile));
             textView_title.setVisibility(View.VISIBLE);
             spinnerSystemProile.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setSelection(4);
             imageView_Goback.setVisibility(View.VISIBLE);
             toggleWifi.setVisibility(View.GONE);
             buttonNext.setVisibility(View.GONE);
@@ -881,6 +884,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             textView_title.setText(getText(R.string.title_systemprofile));
             textView_title.setVisibility(View.VISIBLE);
             spinnerSystemProile.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setSelection(5);
             imageView_Goback.setVisibility(View.VISIBLE);
             toggleWifi.setVisibility(View.GONE);
             buttonNext.setVisibility(View.GONE);
@@ -919,6 +923,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             textView_title.setText(getText(R.string.title_systemprofile));
             textView_title.setVisibility(View.VISIBLE);
             spinnerSystemProile.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setSelection(6);
             imageView_Goback.setVisibility(View.VISIBLE);
             toggleWifi.setVisibility(View.GONE);
             buttonNext.setVisibility(View.GONE);
@@ -957,6 +962,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             textView_title.setText(getText(R.string.title_systemprofile));
             textView_title.setVisibility(View.VISIBLE);
             spinnerSystemProile.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setSelection(7);
             imageView_Goback.setVisibility(View.VISIBLE);
             toggleWifi.setVisibility(View.GONE);
             buttonNext.setVisibility(View.GONE);
@@ -996,6 +1002,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             textView_title.setText(getText(R.string.title_systemprofile));
             textView_title.setVisibility(View.VISIBLE);
             spinnerSystemProile.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setSelection(8);
             imageView_Goback.setVisibility(View.VISIBLE);
             toggleWifi.setVisibility(View.GONE);
             buttonNext.setVisibility(View.GONE);
@@ -1035,6 +1042,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             textView_title.setText(getText(R.string.title_systemprofile));
             textView_title.setVisibility(View.VISIBLE);
             spinnerSystemProile.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setSelection(9);
             imageView_Goback.setVisibility(View.VISIBLE);
             toggleWifi.setVisibility(View.GONE);
             buttonNext.setVisibility(View.GONE);

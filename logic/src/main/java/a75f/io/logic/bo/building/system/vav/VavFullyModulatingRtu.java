@@ -4,6 +4,8 @@ package a75f.io.logic.bo.building.system.vav;
  * Created by samjithsadasivan on 8/14/18.
  */
 
+import android.content.Intent;
+
 import java.util.HashMap;
 
 import a75.io.algos.vav.VavTRSystem;
@@ -13,6 +15,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.Occupancy;
@@ -28,6 +31,7 @@ import a75f.io.logic.tuners.VavTRTuners;
 
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
+import static a75f.io.logic.jobs.ScheduleProcessJob.ACTION_STATUS_CHANGE;
 
 /**
  * Default System handles PI controlled op
@@ -199,7 +203,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             }else if(VavSystemController.getInstance().getSystemState() == HEATING)
                 systemFanLoopOp = Math.max((int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier),smartPurgeVAVFanLoopOp);
             else
-                systemFanLoopOp = 0;
+                systemFanLoopOp = smartPurgeVAVFanLoopOp;
         }else if ((VavSystemController.getInstance().getSystemState() == COOLING) && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
         {
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
@@ -267,6 +271,9 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                 signal = 1;
             else if((VavSystemController.getInstance().getSystemState() == HEATING) && (systemFanLoopOp > 0))
                 signal = 1;
+            else if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE) && (L.ccu().oaoProfile != null) && (systemFanLoopOp > 0)){
+                signal = 1;
+            }
             if(signal != getCmdSignal("occupancy"))
                 setCmdSignal("occupancy",signal);
         } else {
@@ -327,6 +334,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         if (!CCUHsApi.getInstance().readDefaultStrVal("system and status and message").equals(systemStatus))
         {
             CCUHsApi.getInstance().writeDefaultVal("system and status and message", systemStatus);
+            Globals.getInstance().getApplicationContext().sendBroadcast(new Intent(ACTION_STATUS_CHANGE));
         }
         if (!CCUHsApi.getInstance().readDefaultStrVal("system and scheduleStatus").equals(scheduleStatus))
         {

@@ -28,6 +28,7 @@ import a75f.io.device.mesh.LSerial;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
@@ -312,8 +313,6 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
         switch (buttonView.getId())
         {
             case R.id.sseRelay1ForceTestBtn:
-                sendRelayActivationTestSignal();
-                break;
             case R.id.sseRelay2ForceTestBtn:
                 sendRelayActivationTestSignal();
                 break;
@@ -328,6 +327,16 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
         msg.controls.digitalOut1.set((short)(testCoolHeatRelay1.isChecked() ? 1 : 0));
         msg.controls.digitalOut2.set((short)(testFanRelay2.isChecked() ? 1 : 0));
         MeshUtil.sendStructToCM(msg);
+
+        if (testCoolHeatRelay1.isChecked() || testFanRelay2.isChecked()) {
+            if (!Globals.getInstance().isTestMode()) {
+                Globals.getInstance().setTestMode(true);
+            }
+        } else {
+            if (Globals.getInstance().isTestMode()) {
+                Globals.getInstance().setTestMode(false);
+            }
+        }
     }
     public static double getDesiredTemp(short node)
     {

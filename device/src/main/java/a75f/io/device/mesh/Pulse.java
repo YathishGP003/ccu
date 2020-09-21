@@ -158,18 +158,31 @@ public class Pulse
 						break;
 					case ANALOG_IN_ONE:
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
+						double oldDisAnalogVal = hayStack.readHisValById(logPoint.get("id").toString());
+						double curDisAnalogVal = getAnalogConversion(phyPoint, logPoint, val);
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : analog1In "+getAnalogConversion(phyPoint, logPoint, val));
-						if (currentTempInterface != null) {
-							if(getAnalogConversion(phyPoint, logPoint, val) > 0) currentTempInterface.updateSensorValue(nodeAddr);
+						if (oldDisAnalogVal != curDisAnalogVal) {
+							hayStack.writeHisValById(logPoint.get("id").toString(), curDisAnalogVal);
+							if (currentTempInterface != null) {
+								currentTempInterface.updateSensorValue(nodeAddr);
+							}
 						}
+						CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : analog1In " + curDisAnalogVal +" " +oldDisAnalogVal);
 						break;
 					case ANALOG_IN_TWO:
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput2.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : analog2In "+getAnalogConversion(phyPoint, logPoint, val));
+						double oldDynamicVar = hayStack.readHisValById(logPoint.get("id").toString());
+						double dynamicVar = getAnalogConversion(phyPoint, logPoint, val);
+						if (oldDynamicVar != dynamicVar) {
+							if (logPointInfo.getMarkers().contains("pid")) {
+								hayStack.writeHisValById(logPoint.get("id").toString(), dynamicVar + getPiOffsetValue(nodeAddr));
+								if (currentTempInterface != null) {
+									currentTempInterface.updateSensorValue(nodeAddr);
+								}
+							} else
+								hayStack.writeHisValById(logPoint.get("id").toString(), dynamicVar);
+						}
 						break;
 					case TH1_IN:
 						val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput1.get();
@@ -178,8 +191,12 @@ public class Pulse
 						double curDisTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
 						curDisTempVal = CCUUtils.roundToOneDecimal(curDisTempVal);
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						if(oldDisTempVal != curDisTempVal)
+						if(oldDisTempVal != curDisTempVal) {
 							hayStack.writeHisValById(logPoint.get("id").toString(), curDisTempVal);
+							if (currentTempInterface != null && logPointInfo.getMarkers().contains("pid")) {
+								currentTempInterface.updateSensorValue(nodeAddr);
+							}
+						}
 						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : Thermistor1 "+curDisTempVal+","+oldDisTempVal+","+logPointInfo.getMarkers().toString()+","+logPoint.get("id").toString());
 						break;
 				}
@@ -313,8 +330,9 @@ public class Pulse
 			return analogVal;
 		}
 		Log.d(L.TAG_CCU_DEVICE,"Sensor input : type "+pp.get("analogType").toString()+" val "+analogVal);
-		return analogSensor.minEngineeringValue +
-		                (analogSensor.maxEngineeringValue- analogSensor.minEngineeringValue) * analogVal / (analogSensor.maxVoltage - analogSensor.minVoltage);
+		double analogConversion = analogSensor.minEngineeringValue +
+				(analogSensor.maxEngineeringValue- analogSensor.minEngineeringValue) * analogVal / (analogSensor.maxVoltage - analogSensor.minVoltage);
+		return CCUUtils.roundToTwoDecimal(analogConversion);
 		
 	}
 	
@@ -609,7 +627,7 @@ public class Pulse
 						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
 						break;
 					case ANALOG_IN_TWO:
-						val = smartStatRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
+						val = smartStatRegularUpdateMessage_t.update.externalAnalogVoltageInput2.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint,val));
 						break;
@@ -1110,5 +1128,13 @@ public class Pulse
 				LSerial.getInstance().setNodeSeeding(false);
 				break;
 		}
+	}
+
+	private static double getPiOffsetValue(short nodeAddr){
+		double isAnalog2Enabled = CCUHsApi.getInstance().readDefaultVal("point and pid and config and analog2 and enabled and setpoint and group == \"" + nodeAddr + "\"");
+		if(isAnalog2Enabled > 0)
+			return CCUHsApi.getInstance().readDefaultVal("point and pid and config and setpoint and sensor and offset and group == \"" + nodeAddr + "\"");
+		else
+			return 0;
 	}
 }

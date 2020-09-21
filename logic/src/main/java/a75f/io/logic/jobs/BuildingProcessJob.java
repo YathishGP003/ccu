@@ -76,8 +76,10 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
             }else {
                 CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.OFF.ordinal());
             }
-            
-            L.ccu().systemProfile.doSystemControl();
+
+            if (!Globals.getInstance().isTestMode()){
+                L.ccu().systemProfile.doSystemControl();
+            }
             
             L.saveCCUState();
 

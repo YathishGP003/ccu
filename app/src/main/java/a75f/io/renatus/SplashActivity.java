@@ -53,14 +53,14 @@ public class SplashActivity extends Activity {
                             } else if(prefs.getBoolean("CCU_SETUP") && !prefs.getBoolean("PROFILE_SETUP")) {
                                 Log.i("SplashActivity","No profile synced navigate to create profile");
                                 Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
-                                i.putExtra("viewpager_position", 9);
+                                i.putExtra("viewpager_position", getViewPagerPosition());
                                 startActivity(i);
                                 finish();
                             } else if(prefs.getBoolean("PROFILE_SETUP") && !prefs.getBoolean("REGISTRATION")) {
                                 Log.i("SplashActivity","No floor is Created");
                                 System.out.println("No Floor is Created");
                                 Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
-                                i.putExtra("viewpager_position", 18);
+                                i.putExtra("viewpager_position", getViewPagerPosition());
                                 startActivity(i);
                                 finish();
                             } else if(prefs.getBoolean("REGISTRATION")) {
@@ -105,6 +105,33 @@ public class SplashActivity extends Activity {
             }
         }
         registrationThread.start();
+    }
+
+    private int getViewPagerPosition() {
+        String profileType = prefs.getString("PROFILE");
+        switch (profileType) {
+            case "DEFAULT":
+                return 9;
+            case "VAV_STAGED_RTU":
+                return 10;
+            case "VAV_FULLY_MODULATING":
+                return 11;
+            case "VAV_STAGED_RTU_VFD":
+                return 12;
+            case "VAV_HYBRID_RTU":
+                return 13;
+            case "DAB_STAGED_RTU":
+                return 14;
+            case "DAB_FULLY_MODULATING":
+                return 15;
+            case "DAB_STAGED_RTU_VFD":
+                return 16;
+            case "DAB_HYBRID_RTU":
+                return 17;
+            case "VAV_IE_RTU":
+                return 18;
+        }
+        return 9;
     }
 }
 

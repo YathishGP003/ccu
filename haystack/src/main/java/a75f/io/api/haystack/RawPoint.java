@@ -39,6 +39,10 @@ public class RawPoint extends Entity
     private String roomRef;
     private String floorRef;
     private String kind;
+    private String shortDis;
+    private String minVal;
+    private String maxVal;
+
     public boolean getEnabled()
     {
         return enabled;
@@ -115,6 +119,19 @@ public class RawPoint extends Entity
     public String toString() {
         return displayName;
     }
+
+    public String getShortDis() {
+        return shortDis;
+    }
+
+    public String getMinVal() {
+        return minVal;
+    }
+
+    public String getMaxVal() {
+        return maxVal;
+    }
+
     public static class Builder{
         private String            displayName;
         private ArrayList<String> markers = new ArrayList<>();
@@ -128,6 +145,9 @@ public class RawPoint extends Entity
         private String roomRef;
         private String floorRef;
         private String kind;
+        private String shortDis;
+        private String minVal;
+        private String maxVal;
         public Builder setEnabled(boolean enabled)
         {
             this.enabled = enabled;
@@ -201,6 +221,21 @@ public class RawPoint extends Entity
             this.floorRef = floorRef;
             return this;
         }
+
+        public Builder setShortDis(String shortDis) {
+            this.shortDis = shortDis;
+            return this;
+        }
+
+        public Builder setMinVal(String minVal) {
+            this.minVal = minVal;
+            return this;
+        }
+
+        public Builder setMaxVal(String maxVal) {
+            this.maxVal = maxVal;
+            return this;
+        }
         
         public RawPoint build(){
             RawPoint p = new RawPoint();
@@ -218,6 +253,9 @@ public class RawPoint extends Entity
             p.kind = this.kind;
             p.id = this.id;
             p.enabled = this.enabled;
+            p.shortDis = this.shortDis;
+            p.minVal = this.minVal;
+            p.maxVal = this.maxVal;
             //CCUHsApi.getInstance().addRawPoint(p);
             return p;
         }
@@ -284,6 +322,18 @@ public class RawPoint extends Entity
                 else if (pair.getKey().equals("tz"))
                 {
                     this.tz = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("shortDis"))
+                {
+                    this.shortDis = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("maxVal"))
+                {
+                    this.maxVal = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("minVal"))
+                {
+                    this.minVal = pair.getValue().toString();
                 }
                 //it.remove();
             }

@@ -10,16 +10,14 @@ import java.util.HashMap;
 import a75.io.algos.ControlLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.Floor;
-import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
-import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.dab.DabProfile;
+import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.util.CCUUtils;
@@ -70,8 +68,18 @@ public class DabSystemController extends SystemController
     double averageSystemHumidity = 0;
     double averageSystemTemperature = 0;
     
-    double co2LoopOpWA = 0;
-    double co2WA = 0;
+    double co2LoopOpWeightedAverage = 0;
+    double co2WeightedAverage = 0;
+
+    private SystemMode conditioningMode = SystemMode.OFF;
+    private DabSystemProfile systemProfile = null;
+    double prioritySum = 0;
+    double co2LoopWeightedAverageASum = 0;
+    double co2WeightedAverageSum = 0;
+    int zoneDeadCount = 0;
+    boolean hasTi = false;
+
+
     private DabSystemController()
     {
         piController = new ControlLoop();
@@ -84,73 +92,163 @@ public class DabSystemController extends SystemController
     
     public void runDabSystemControlAlgo() {
         
-        double prioritySum = 0;
-        DabSystemProfile profile = (DabSystemProfile) L.ccu().systemProfile;
-        ciDesired = (int)profile.getUserIntentVal("desired and ci");
-        SystemMode systemMode = SystemMode.values()[(int)profile.getUserIntentVal("conditioning and mode")];
-        CcuLog.d(L.TAG_CCU_SYSTEM, "runDabSystemControlAlgo -> ciDesired: " + ciDesired + " systemMode: " + systemMode);
+        initializeAlgoLoopVariables();
+
+        ArrayList<HashMap<Object, Object>> allEquips = CCUHsApi
+                                                           .getInstance()
+                                                           .readAllEntities("(equip and zone and dab) or " +
+                                                                            "(equip and zone and ti)"
+        );
     
-        weightedAverageCoolingLoadPostML = weightedAverageHeatingLoadPostML = weightedAverageLoadSum = 0;
-        co2LoopOpWA = co2WA = totalCoolingLoad = totalHeatingLoad = zoneCount = 0;
-        updateSystemHumidity();
-        updateSystemTemperature();
-        updateSystemDesiredTemp();
+        updateSystemTempHumidity(allEquips);
         
-        profile.setSystemPoint("average and humidity", averageSystemHumidity);
-        profile.setSystemPoint("average and temp", averageSystemTemperature);
+        processZoneEquips(allEquips);
+        processCCUAsZoneEquip();
         
-        double co2LoopWASum = 0, co2WASum = 0;
-        int zoneDeadCount = 0;
-        boolean hasTi = false;
-        
-        for (Floor f: HSUtil.getFloors())
-        {
-            for(Zone z: HSUtil.getZones(f.getId())) {
-                
-                for (Equip q : HSUtil.getEquips(z.getId()))
-                {
-
-                    //isDab or CCu as zone profile
-                    boolean isDabOrTi = ((q.getMarkers().contains("dab") == false) ? ((q.getMarkers().contains("ti") == false) ? false: true) : true);
-                    hasTi = !hasTi ? q.getMarkers().contains("ti") : true;
-                    if(!isDabOrTi)
-                        continue;
-                    else if( isDabOrTi && isZoneDead(q)){
-
-                        zoneDeadCount++;
-                        continue;
-                    }else if(!hasTemp(q))
-                        continue;
-                    double zoneCurTemp = getEquipCurrentTemp(q.getId());
-                    double desiredTempCooling = HSEquipUtil.getDesiredTempCooling(q.getId());
-                    double desiredTempHeating = HSEquipUtil.getDesiredTempHeating(q.getId());
-                    
-                    double zoneCoolingLoad = zoneCurTemp > desiredTempCooling ? zoneCurTemp - desiredTempCooling : 0;
-                    double zoneHeatingLoad = zoneCurTemp < desiredTempHeating ? desiredTempHeating - zoneCurTemp : 0;
-                    double zoneDynamicPriority = getEquipDynamicPriority(zoneCoolingLoad > 0 ? zoneCoolingLoad : zoneHeatingLoad, q.getId());
-                    totalCoolingLoad += zoneCoolingLoad;
-                    totalHeatingLoad += zoneHeatingLoad;
-                    zoneCount++;
-                    
-                    weightedAverageLoadSum += (zoneCoolingLoad * zoneDynamicPriority) - (zoneHeatingLoad * zoneDynamicPriority);
-                    prioritySum += zoneDynamicPriority;
-                    co2LoopWASum += (getEquipCo2LoopOp(q.getId()) * zoneDynamicPriority);
-                    co2WASum += (getEquipCo2(q.getId()) * zoneDynamicPriority);
-                    CcuLog.d(L.TAG_CCU_SYSTEM, q.getDisplayName() + " zoneDynamicPriority: " + zoneDynamicPriority + " zoneCoolingLoad: " + zoneCoolingLoad + " zoneHeatingLoad: " + zoneHeatingLoad);
-                    CcuLog.d(L.TAG_CCU_SYSTEM, q.getDisplayName() + " weightedAverageLoadSum: "+weightedAverageLoadSum+" co2LoopWASum "+co2LoopWASum+" co2WASum "+co2WASum);
-                }
-            }
-            
+        if (prioritySum == 0 || zoneCount == 0) {
+            CcuLog.d(L.TAG_CCU_SYSTEM, "No valid temperature, Skip DabSystemControlAlgo");
+            systemState = OFF;
+            reset();
+            return;
+        }else if(systemState == OFF) {
+            systemState = COOLING;
+            piController.reset();
         }
-        double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("dead and percent and influence",L.ccu().systemProfile.getSystemEquipRef());
+
+        updateWeightedAverageLoad();
+        
+        if (isEmergencyCoolingRequired()) {
+            handleEmergencyCooling();
+        } else if (isEmergencyHeatingRequired()) {
+            handleEmergencyHeating();
+        } else {
+            handleOperationalChangeOver();
+        }
+
+        systemProfile.setSystemPoint("operating and mode", systemState.ordinal());
+
+        updateLoopOpSignals();
+
+        logAlgoVariables();
+
+        ArrayList<HashMap<Object, Object>> dabEquips = CCUHsApi.getInstance()
+                                                               .readAllEntities("equip and zone and dab");
+
+        HashMap<String, Double> damperPosMap;
+
+        if (isNormalizationRequired()) {
+            HashMap<String, Double> normalizedDamperPosMap = getNormalizedDamperPosMap(dabEquips,
+                                                                                       getBaseDamperPosMap(dabEquips));
+            damperPosMap = getAdjustedDamperPosMap(dabEquips,
+                                                   normalizedDamperPosMap,
+                                                   systemProfile.getSystemEquipRef());
+        } else {
+            damperPosMap = getBaseDamperPosMap(dabEquips);
+        }
+
+        applyLimitsAndSetDamperPosition(dabEquips, damperPosMap);
+    }
+
+    private void initializeAlgoLoopVariables() {
+
+        systemProfile = (DabSystemProfile) L.ccu().systemProfile;
+        ciDesired = (int)systemProfile.getUserIntentVal("desired and ci");
+        conditioningMode = SystemMode.values()[(int)systemProfile.getUserIntentVal("conditioning and mode")];
+        CcuLog.d(L.TAG_CCU_SYSTEM, "runDabSystemControlAlgo -> ciDesired: " + ciDesired + " conditioningMode: "
+                                   + conditioningMode
+        );
+
+        weightedAverageCoolingLoadPostML = 0;
+        weightedAverageHeatingLoadPostML = 0;
+        weightedAverageLoadSum = 0;
+        co2LoopOpWeightedAverage = 0;
+        co2WeightedAverage = 0;
+        totalCoolingLoad = 0;
+        totalHeatingLoad = 0;
+        zoneCount = 0;
+        prioritySum = 0;
+        co2LoopWeightedAverageASum = 0;
+        co2WeightedAverageSum = 0;
+        zoneDeadCount = 0;
+        hasTi = false;
+    }
+
+    private void updateSystemTempHumidity(ArrayList<HashMap<Object, Object>> allEquips) {
+
+        updateSystemHumidity(allEquips);
+        updateSystemTemperature(allEquips);
+        updateSystemDesiredTemp();
+
+        systemProfile.setSystemPoint("average and humidity", averageSystemHumidity);
+        systemProfile.setSystemPoint("average and temp", averageSystemTemperature);
+
+    }
+    
+    private boolean isEmergencyCoolingRequired() {
+        return systemState != HEATING &&
+               buildingLimitMaxBreached("dab") &&
+               conditioningMode != SystemMode.OFF;
+    }
+    
+    private boolean isEmergencyHeatingRequired() {
+        return systemState != COOLING &&
+               buildingLimitMinBreached("dab") &&
+               conditioningMode != SystemMode.OFF;
+    }
+
+    private void processZoneEquips(ArrayList<HashMap<Object, Object>> allEquips) {
+
+        for (HashMap<Object, Object> equipMap : allEquips) {
+
+            Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+            hasTi = hasTi || equip.getMarkers().contains("ti");
+
+            if (isZoneDead(equip)) {
+                zoneDeadCount++;
+            } else if (hasTemp(equip)) {
+                double zoneCurTemp = getEquipCurrentTemp(equip.getId());
+                double desiredTempCooling = HSEquipUtil.getDesiredTempCooling(equip.getId());
+                double desiredTempHeating = HSEquipUtil.getDesiredTempHeating(equip.getId());
+                double zoneCoolingLoad = zoneCurTemp > desiredTempCooling ? zoneCurTemp - desiredTempCooling : 0;
+                double zoneHeatingLoad = zoneCurTemp < desiredTempHeating ? desiredTempHeating - zoneCurTemp : 0;
+                double zoneDynamicPriority = getEquipDynamicPriority(zoneCoolingLoad > 0 ?
+                                                                         zoneCoolingLoad : zoneHeatingLoad, equip.getId());
+                totalCoolingLoad += zoneCoolingLoad;
+                totalHeatingLoad += zoneHeatingLoad;
+                zoneCount++;
+                weightedAverageLoadSum +=
+                    (zoneCoolingLoad * zoneDynamicPriority) - (zoneHeatingLoad * zoneDynamicPriority);
+                prioritySum += zoneDynamicPriority;
+                co2LoopWeightedAverageASum += (getEquipCo2LoopOp(equip.getId()) * zoneDynamicPriority);
+                co2WeightedAverageSum += (getEquipCo2(equip.getId()) * zoneDynamicPriority);
+                CcuLog.d(L.TAG_CCU_SYSTEM, equip.getDisplayName() + " zoneDynamicPriority: " + zoneDynamicPriority +
+                                           " zoneCoolingLoad: " + zoneCoolingLoad + " zoneHeatingLoad: " + zoneHeatingLoad
+                );
+                CcuLog.d(L.TAG_CCU_SYSTEM,
+                         equip.getDisplayName() + " weightedAverageLoadSum: " + weightedAverageLoadSum +
+                         " co2LoopWASum " + co2LoopWeightedAverageASum + " co2WASum " + co2WeightedAverageSum
+                );
+            }
+        }
+
+    }
+
+    private void processCCUAsZoneEquip() {
+
+        double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("dead and percent and influence",
+                                                                               L.ccu().systemProfile.getSystemEquipRef());
         if(zoneDeadCount > 0)
-        CcuLog.d(L.TAG_CCU_SYSTEM, "DabSysController = "+hasTi+","+zoneDeadCount+","+zoneCount+","+cmTempInfForPercentileZonesDead);
-        if( (zoneCount == 0) || (!hasTi && ((zoneDeadCount > 0) && (((zoneDeadCount*100)/(zoneDeadCount + zoneCount)) >= cmTempInfForPercentileZonesDead)))){
+            CcuLog.d(L.TAG_CCU_SYSTEM, "DabSysController = "+hasTi+","+zoneDeadCount+"," +
+                                       ""+zoneCount+","+cmTempInfForPercentileZonesDead
+            );
+
+        if( (zoneCount == 0) || (!hasTi && ((zoneDeadCount > 0)
+                   && (((double)(zoneDeadCount*100)/(zoneDeadCount + zoneCount)) >= cmTempInfForPercentileZonesDead)))){
 
             String sysEquip = L.ccu().systemProfile.getSystemEquipRef();
             if(sysEquip != null) {
                 double cmCurrentTemp = getCMCurrentTemp(sysEquip);
-                if(!isCMTempDead(cmCurrentTemp)) {
+                if(isCMTempDead(cmCurrentTemp)) {
                     double desiredTempCooling = ScheduleProcessJob.getSystemCoolingDesiredTemp();
                     double desiredTempHeating = ScheduleProcessJob.getSystemHeatingDesiredTemp();
 
@@ -163,120 +261,96 @@ public class DabSystemController extends SystemController
 
                     weightedAverageLoadSum += (cmCoolingLoad * zoneDynamicPriority) - (cmHeatingLoad * zoneDynamicPriority);
                     prioritySum += zoneDynamicPriority;
-                    CcuLog.d(L.TAG_CCU_SYSTEM, "CM dab zoneDynamicPriority: " + zoneDynamicPriority + " cmCoolingLoad: " + cmCoolingLoad + " cmHeatingLoad: " + cmHeatingLoad + " weightedAverageLoadSum " + weightedAverageLoadSum + "," + prioritySum + "," + cmCurrentTemp);
+                    CcuLog.d(L.TAG_CCU_SYSTEM, "CM dab zoneDynamicPriority: " + zoneDynamicPriority +
+                                               " cmCoolingLoad: " + cmCoolingLoad +
+                                               " cmHeatingLoad: " + cmHeatingLoad +
+                                               " weightedAverageLoadSum " + weightedAverageLoadSum +
+                                               "," + prioritySum + "," + cmCurrentTemp
+                    );
                 }
             }
         }
+    }
+    
+    private void handleEmergencyCooling() {
         
-        if (prioritySum == 0 || zoneCount == 0) {
-            CcuLog.d(L.TAG_CCU_SYSTEM, "No valid temperature, Skip DabSystemControlAlgo");
-            systemState = OFF;
-            reset();
-            return;
-        }else if(systemState == OFF) {
-            systemState = COOLING;
+        CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency COOLING Active");
+        emergencyMode = true;
+        if (conditioningMode == COOLONLY || conditioningMode == AUTO)
+        {
+            if (systemState != COOLING)
+            {
+                systemState = COOLING;
+                piController.reset();
+            }
+        } else {
+            //systemState = OFF;
+            coolingSignal = 0;
+            heatingSignal = 0;
             piController.reset();
         }
-        
-        weightedAverageLoad = weightedAverageLoadSum / prioritySum;
-        co2LoopOpWA = co2LoopWASum/prioritySum;
-        co2WA = co2WASum/prioritySum;
-        
-        comfortIndex = (int)(totalCoolingLoad + totalHeatingLoad) /zoneCount;
-        
-        profile.setSystemPoint("ci and running", comfortIndex);
-    
-        weightedAverageLoadPostML = weightedAverageLoad ;//+buildingLoadOffsetML
-        weightedAverageLoadPostMLQ.add(weightedAverageLoadPostML);
-        
-        
-        double weightedAverageLoadPostMLQSum = 0;
-        for (double val : weightedAverageLoadPostMLQ) {
-            weightedAverageLoadPostMLQSum += val;
-        }
-        weightedAverageLoadMA = weightedAverageLoadPostMLQSum/weightedAverageLoadPostMLQ.size();
-        
-        if ((systemState != HEATING) && buildingLimitMaxBreached("dab") && (systemMode != SystemMode.OFF)) {
-            CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency COOLING Active");
-            emergencyMode = true;
-            if (systemMode == COOLONLY || systemMode == AUTO)
-            {
-                if (systemState != COOLING)
-                {
-                    systemState = COOLING;
-                    piController.reset();
-                }
-            } else {
-                //systemState = OFF;
+    }
 
-                coolingSignal = 0;
-                heatingSignal = 0;
-                piController.reset();
-            }
-            
-        } else if ((systemState != COOLING) && buildingLimitMinBreached("dab") && (systemMode != SystemMode.OFF)) {
-            CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency HEATING Active");
-            emergencyMode = true;
-            if (systemMode == HEATONLY || systemMode == AUTO)
-            {
-                if (systemState != HEATING)
-                {
-                    systemState = HEATING;
-                    piController.reset();
-                }
-            } else {
-                //systemState = OFF;
-
-                coolingSignal = 0;
-                heatingSignal = 0;
-                piController.reset();
-            }
-        } else
+    private void handleEmergencyHeating() {
+        
+        CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency HEATING Active");
+        emergencyMode = true;
+        if (conditioningMode == HEATONLY || conditioningMode == AUTO)
         {
-            if (emergencyMode) {
-                CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency CONDITIONING Disabled");
+            if (systemState != HEATING)
+            {
+                systemState = HEATING;
                 piController.reset();
-                emergencyMode = false;
             }
-            
-            if ((systemMode == COOLONLY || systemMode == AUTO) && weightedAverageLoadMA > 0)
-            {
-                if (systemState != COOLING)
-                {
-                    systemState = COOLING;
-                    piController.reset();
-                }
-            }
-            else if ((systemMode == HEATONLY || systemMode == AUTO) && weightedAverageLoadMA < 0)
-            {
-                if (systemState != HEATING)
-                {
-                    systemState = HEATING;
-                    piController.reset();
-                }
-            }
-            else
-            {
-                //systemState = OFF;
+        } else {
+            //systemState = OFF;
+            coolingSignal = 0;
+            heatingSignal = 0;
+            piController.reset();
+        }
+    }
 
-                coolingSignal = 0;
-                heatingSignal = 0;
+    private void handleOperationalChangeOver() {
+
+        if (emergencyMode) {
+            CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency CONDITIONING Disabled");
+            piController.reset();
+            emergencyMode = false;
+        }
+
+        if ((conditioningMode == COOLONLY || conditioningMode == AUTO) && weightedAverageLoadMA > 0)
+        {
+            if (systemState != COOLING)
+            {
+                systemState = COOLING;
                 piController.reset();
             }
         }
+        else if ((conditioningMode == HEATONLY || conditioningMode == AUTO) && weightedAverageLoadMA < 0)
+        {
+            if (systemState != HEATING)
+            {
+                systemState = HEATING;
+                piController.reset();
+            }
+        }
+        else
+        {
+            //systemState = OFF;
+
+            coolingSignal = 0;
+            heatingSignal = 0;
+            piController.reset();
+        }
+    }
     
-        CcuLog.d(L.TAG_CCU_SYSTEM, "weightedAverageLoadMA "+weightedAverageLoadMA+" co2LoopOpWA "+co2LoopOpWA+" systemState: "+systemState);
-        profile.setSystemPoint("operating and mode", systemState.ordinal());
-    
-        weightedAverageCoolingLoadPostML = weightedAverageLoadPostML > 0 ? weightedAverageLoadPostML : 0;
-    
-        weightedAverageHeatingLoadPostML = weightedAverageLoadPostML < 0 ? Math.abs(weightedAverageLoadPostML) : 0;
-    
+    private void updateLoopOpSignals() {
+
         piController.dump();
-        if ((systemState == COOLING) && (systemMode == COOLONLY || systemMode == AUTO)){
+        if ((systemState == COOLING) && (conditioningMode == COOLONLY || conditioningMode == AUTO)){
             heatingSignal = 0;
             coolingSignal = (int)piController.getLoopOutput(weightedAverageCoolingLoadPostML, 0);
-        } else if ((systemState == HEATING) && (systemMode == HEATONLY || systemMode == AUTO)){
+        } else if ((systemState == HEATING) && (conditioningMode == HEATONLY || conditioningMode == AUTO)){
             coolingSignal = 0;
             heatingSignal = (int)piController.getLoopOutput(weightedAverageHeatingLoadPostML, 0);
         } else {
@@ -284,32 +358,89 @@ public class DabSystemController extends SystemController
             heatingSignal = 0;
         }
         piController.dump();
-        CcuLog.d(L.TAG_CCU_SYSTEM, "weightedAverageCoolingLoadPostML: "+weightedAverageCoolingLoadPostML+" weightedAverageHeatingLoadPostML: "
-                                   +weightedAverageHeatingLoadPostML+" coolingSignal: "+coolingSignal+" heatingSignal: "+heatingSignal);
-        
-        profile.setSystemPoint("weighted and average and moving and load", CCUUtils.roundToTwoDecimal(weightedAverageLoadMA));
-        profile.setSystemPoint("weighted and average and cooling and load",CCUUtils.roundToTwoDecimal(weightedAverageCoolingLoadPostML));
-        profile.setSystemPoint("weighted and average and heating and load",CCUUtils.roundToTwoDecimal(weightedAverageHeatingLoadPostML));
-        
-        if ((systemState != OFF) && (coolingSignal > 0 || heatingSignal > 0) && (systemMode != SystemMode.OFF))
-        {
-            normalizeAirflow();
-            adjustDamperForCumulativeTarget(profile.getSystemEquipRef());
-        } else {
-            CCUHsApi hayStack = CCUHsApi.getInstance();
-            ArrayList<HashMap> dabEquips = hayStack.readAll("equip and dab and zone");
-            for (HashMap m : dabEquips) {
-                HashMap damper = hayStack.read("point and damper and base and cmd and equipRef == \""+m.get("id").toString()+"\"");
-                double damperPos = hayStack.readHisValById(damper.get("id").toString());
-                HashMap normalizedPrimaryDamper = hayStack.read("point and damper and normalized and primary and cmd and equipRef == \""+m.get("id").toString()+"\"");
-                HashMap normalizedSecondaryamper = hayStack.read("point and damper and normalized and secondary and cmd and equipRef == \""+m.get("id").toString()+"\"");
-                hayStack.writeHisValById(normalizedPrimaryDamper.get("id").toString(), damperPos);
-                hayStack.writeHisValById(normalizedSecondaryamper.get("id").toString(), damperPos);
-            }
+    }
+
+    private void updateWeightedAverageLoad() {
+
+        weightedAverageLoad = weightedAverageLoadSum / prioritySum;
+        co2LoopOpWeightedAverage = co2LoopWeightedAverageASum/prioritySum;
+        co2WeightedAverageSum = co2WeightedAverageSum/prioritySum;
+
+        comfortIndex = (int)(totalCoolingLoad + totalHeatingLoad) /zoneCount;
+
+        systemProfile.setSystemPoint("ci and running", comfortIndex);
+
+        weightedAverageLoadPostML = weightedAverageLoad ;//+buildingLoadOffsetML
+        weightedAverageLoadPostMLQ.add(weightedAverageLoadPostML);
+
+
+        double weightedAverageLoadPostMLQSum = 0;
+        for (double val : weightedAverageLoadPostMLQ) {
+            weightedAverageLoadPostMLQSum += val;
         }
+        weightedAverageLoadMA = weightedAverageLoadPostMLQSum/weightedAverageLoadPostMLQ.size();
+
+        weightedAverageCoolingLoadPostML = weightedAverageLoadPostML > 0 ? weightedAverageLoadPostML : 0;
+
+        weightedAverageHeatingLoadPostML = weightedAverageLoadPostML < 0 ? Math.abs(weightedAverageLoadPostML) : 0;
+
+        systemProfile.setSystemPoint("weighted and average and moving and load",
+                               CCUUtils.roundToTwoDecimal(weightedAverageLoadMA));
+        systemProfile.setSystemPoint("weighted and average and cooling and load",
+                               CCUUtils.roundToTwoDecimal(weightedAverageCoolingLoadPostML));
+        systemProfile.setSystemPoint("weighted and average and heating and load",
+                               CCUUtils.roundToTwoDecimal(weightedAverageHeatingLoadPostML));
+    }
+    
+    private void logAlgoVariables() {
         
-        setDamperLimits();
-        
+        CcuLog.d(L.TAG_CCU_SYSTEM, "weightedAverageLoadMA "+weightedAverageLoadMA+
+                                   " co2LoopOpWA "+co2LoopOpWeightedAverage+" " +
+                                   "systemState: "+systemState
+        );
+
+        CcuLog.d(L.TAG_CCU_SYSTEM, "weightedAverageCoolingLoadPostML: " + weightedAverageCoolingLoadPostML +
+                                   " weightedAverageHeatingLoadPostML: " + weightedAverageHeatingLoadPostML +
+                                   " coolingSignal: " + coolingSignal + " heatingSignal: " + heatingSignal
+        );
+
+    }
+    
+    private boolean isNormalizationRequired() {
+        return (systemState != OFF)
+               && (coolingSignal > 0 || heatingSignal > 0)
+               && (conditioningMode != SystemMode.OFF);
+    }
+    
+    private HashMap<String, Double> getBaseDamperPosMap(ArrayList<HashMap<Object, Object>> dabEquips) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap<String, Double> damperPosMap = new HashMap<>();
+        for (HashMap<Object, Object> dabEquip : dabEquips) {
+            HashMap<Object, Object> primaryDamper = hayStack.readEntity(
+                "point and damper and base and primary and cmd and equipRef == \"" +
+                dabEquip.get("id").toString() + "\""
+            );
+            double primaryDamperPos = hayStack.readHisValById(primaryDamper.get("id").toString());
+    
+            HashMap<Object, Object> secondaryDamper = hayStack.readEntity(
+                "point and damper and base and secondary and cmd and equipRef == \""
+                + dabEquip.get("id").toString() + "\""
+            );
+            double secondaryDamperPos = hayStack.readHisValById(secondaryDamper.get("id").toString());
+            
+            HashMap<Object, Object> normalizedPrimaryDamper = hayStack.readEntity(
+                "point and damper and normalized and primary and cmd and equipRef == \"" +
+                dabEquip.get("id").toString() + "\""
+            );
+            HashMap<Object, Object> normalizedSecondaryDamper = hayStack.readEntity(
+                "point and damper and normalized and secondary and " + "cmd and equipRef == \"" +
+                dabEquip.get("id").toString() + "\""
+            );
+            
+            damperPosMap.put(normalizedPrimaryDamper.get("id").toString(), primaryDamperPos);
+            damperPosMap.put(normalizedSecondaryDamper.get("id").toString(), secondaryDamperPos);
+        }
+        return damperPosMap;
     }
     
     @Override
@@ -342,55 +473,73 @@ public class DabSystemController extends SystemController
     }
     
     public double getEquipCurrentTemp(String equipRef) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \""+equipRef+"\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" +
+                                                        ""+equipRef+"\""
+        );
     }
     public double getCMCurrentTemp(String equipRef) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and system and temp and cm and current and equipRef == \""+equipRef+"\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and system and temp and cm and current and equipRef == \""
+                                                        +equipRef+"\""
+        );
     }
     
     public ZonePriority getEquipPriority(String equipRef) {
-        double priorityVal = CCUHsApi.getInstance().readDefaultVal("point and zone and config and priority and equipRef == \""+equipRef+"\"");
+        double priorityVal = CCUHsApi.getInstance().readDefaultVal("point and zone and config and priority and equipRef == \""
+                                                                   +equipRef+"\""
+        );
         return ZonePriority.values()[(int) priorityVal];
     }
 
-
-
     public double getCMDynamicPriority(double zoneLoad){
         ZonePriority p = ZonePriority.NORMAL;
-        double zonePrioritySpread = TunerUtil.readTunerValByQuery("point and default and tuner and zone and priority and spread and dab");
-        double zonePriorityMultiplier = TunerUtil.readTunerValByQuery("point and default and tuner and zone and priority and multiplier and dab");
+        double zonePrioritySpread = TunerUtil.readTunerValByQuery("point and default and tuner and zone and priority and " +
+                                                                  "spread and dab"
+        );
+        double zonePriorityMultiplier = TunerUtil.readTunerValByQuery("point and default and tuner and zone and priority " +
+                                                                      "and multiplier and dab");
         return p.val * Math.pow(zonePriorityMultiplier, (zoneLoad/zonePrioritySpread) > 10 ? 10 : (zoneLoad/zonePrioritySpread));
     }
+
     public double getEquipDynamicPriority(double zoneLoad, String equipRef) {
         ZonePriority p = getEquipPriority(equipRef);
         if (getEquipCurrentTemp(equipRef) == 0) {
             return p.val;
         }
         
-        double zonePrioritySpread = TunerUtil.readTunerValByQuery("point and tuner and zone and priority and spread and equipRef == \"" + equipRef + "\"");;
-        double zonePriorityMultiplier = TunerUtil.readTunerValByQuery("point and tuner and zone and priority and multiplier and equipRef == \""+equipRef+"\"");
-        double equipDynamicPriority = p.val * Math.pow(zonePriorityMultiplier, (zoneLoad/zonePrioritySpread) > 10 ? 10 : (zoneLoad/zonePrioritySpread));
+        double zonePrioritySpread = TunerUtil.readTunerValByQuery("point and tuner and zone and priority and spread and " +
+                                                                  "equipRef == \"" + equipRef + "\""
+        );
+        double zonePriorityMultiplier = TunerUtil.readTunerValByQuery("point and tuner and zone and priority and multiplier " +
+                                                                      "and equipRef == \""+equipRef+"\""
+        );
+        double equipDynamicPriority = p.val * Math.pow(zonePriorityMultiplier, (zoneLoad/zonePrioritySpread) > 10 ? 10 :
+                                                                                   (zoneLoad/zonePrioritySpread));
         equipDynamicPriority = CCUUtils.roundToTwoDecimal(equipDynamicPriority);
         try {
-            HashMap zdpPoint = CCUHsApi.getInstance().read("point and zone and dynamic and priority and equipRef == \"" + equipRef + "\"");
+            HashMap<Object, Object> zdpPoint =
+                CCUHsApi.getInstance().readEntity("point and zone and dynamic and priority and equipRef == \""
+                                                  + equipRef + "\""
+            );
             double zdpPointValue = CCUHsApi.getInstance().readHisValById(zdpPoint.get("id").toString());
             if (zdpPointValue != equipDynamicPriority)
                 CCUHsApi.getInstance().writeHisValById(zdpPoint.get("id").toString(), equipDynamicPriority);
         }catch (Exception e){
-            
+            e.printStackTrace();
         }
         return equipDynamicPriority;
     }
     
     public double getEquipCo2LoopOp(String equipRef){
-        for (ZoneProfile f : L.ccu().zoneProfiles) {
-            Equip q = f.getEquip();
-            if (q.getMarkers().contains("dab"))
+        for (ZoneProfile profile : L.ccu().zoneProfiles) {
+            Equip equip = profile.getEquip();
+            if (equip.getMarkers().contains("dab"))
             {
-                double enabledCO2Control = CCUHsApi.getInstance().readDefaultVal("point and config and dab and enable and co2 and equipRef == \"" + q.getId() + "\"");
-                if (q.getId().equals(equipRef) && enabledCO2Control > 0)
+                double enabledCO2Control = CCUHsApi.getInstance().readDefaultVal("point and config and dab and enable " +
+                                                                                 "and co2 and equipRef == \"" + equip.getId() + "\""
+                );
+                if (equip.getId().equals(equipRef) && enabledCO2Control > 0)
                 {
-                    DabProfile d = (DabProfile) f;
+                    DabProfile d = (DabProfile) profile;
                     return d.getCo2LoopOp();
                 }
             }
@@ -399,20 +548,21 @@ public class DabSystemController extends SystemController
     }
     
     private double getEquipCo2(String equipRef) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and air and co2 and sensor and current and equipRef == \""+equipRef+"\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and air and co2 and sensor and current and equipRef == \"" +
+                                                        ""+equipRef+"\""
+        );
     }
     
-    public void updateSystemHumidity() {
+    public void updateSystemHumidity(ArrayList<HashMap<Object, Object>> allEquips) {
         //Average across zones or from proxy zone.
         double humiditySum = 0;
         double humidityZones = 0;
         
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        ArrayList<HashMap> dabEquips = hayStack.readAll("equip and zone");
-        
-        for (HashMap q : dabEquips)
+        for (HashMap<Object, Object> equip : allEquips)
         {
-            double humidityVal = hayStack.readHisValByQuery("point and air and humidity and sensor and current and equipRef == \""+q.get("id")+"\"");
+            double humidityVal = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity and sensor and current " +
+                                                                "and equipRef == \""+ equip.get("id")+"\""
+            );
             
             if (humidityVal != 0) {
                 humiditySum += humidityVal;
@@ -433,31 +583,38 @@ public class DabSystemController extends SystemController
 
             double desiredTempCooling = ScheduleProcessJob.getSystemCoolingDesiredTemp();
             double desiredTempHeating = ScheduleProcessJob.getSystemHeatingDesiredTemp();
-            HashMap coolTempPoint = CCUHsApi.getInstance().read("point and system and cm and cooling and desired and temp and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
+            HashMap<Object, Object> coolTempPoint = CCUHsApi.getInstance()
+                                                            .readEntity("point and system and cm and cooling" +
+                                                                    " and desired and temp and equipRef == \"" +
+                                                                    L.ccu().systemProfile.getSystemEquipRef() + "\""
+            );
             CCUHsApi.getInstance().writeHisValById(coolTempPoint.get("id").toString(), desiredTempCooling);
-            HashMap heatTempPoint = CCUHsApi.getInstance().read("point and system and cm and heating and desired and temp and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
+            HashMap<Object, Object> heatTempPoint = CCUHsApi.getInstance()
+                                                            .readEntity("point and system and cm and " +
+                                                                        "heating and desired and temp and equipRef == \"" +
+                                                                        L.ccu().systemProfile.getSystemEquipRef() + "\""
+            );
             CCUHsApi.getInstance().writeHisValById(heatTempPoint.get("id").toString(), desiredTempHeating);
         }catch (Exception e){
-
+            e.printStackTrace();
         }
     }
     
-    public void updateSystemTemperature() {
+    public void updateSystemTemperature(ArrayList<HashMap<Object, Object>> allEquips) {
         //Average across zones or from proxy zone.
         double tempSum = 0;
         double tempZones = 0;
         int totalEquips = 0;
         boolean hasTi = false;
         
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        ArrayList<HashMap> dabEquips = hayStack.readAll("equip and zone");
-        
-        for (HashMap q : dabEquips)
+        for (HashMap<Object, Object> equipMap : allEquips)
         {
-            Equip equip = new Equip.Builder().setHashMap(q).build();
+            Equip equip = new Equip.Builder().setHashMap(equipMap).build();
             if(equip.getMarkers().contains("dab") || equip.getMarkers().contains("ti")) {
-                double tempVal = hayStack.readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + q.get("id") + "\"");
-                hasTi = !hasTi ? equip.getMarkers().contains("ti") : true;
+                double tempVal = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and " +
+                                                             "equipRef == \"" + equipMap.get("id") + "\""
+                );
+                hasTi = hasTi || equip.getMarkers().contains("ti");
                 if (!isZoneDead(equip) && (tempVal > 0)) {
                     tempSum += tempVal;
                     tempZones++;
@@ -465,10 +622,11 @@ public class DabSystemController extends SystemController
                 totalEquips++;
             }
         }
-        double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("dead and percent and influence",L.ccu().systemProfile.getSystemEquipRef());
+        double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("dead and percent and influence",
+                                                                               L.ccu().systemProfile.getSystemEquipRef());
         if( (totalEquips == 0) || (!hasTi && ((((totalEquips -tempZones )*100)/(totalEquips)) >= cmTempInfForPercentileZonesDead))){
             double cmTemp = getCMCurrentTemp(L.ccu().systemProfile.getSystemEquipRef());
-            if(!isCMTempDead(cmTemp)) {
+            if(isCMTempDead(cmTemp)) {
                 tempSum += cmTemp;
                 tempZones++;
             }
@@ -480,7 +638,9 @@ public class DabSystemController extends SystemController
     public boolean isZoneDead(Equip q) {
         try
         {
-            return CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and equipRef == \"" + q.getId() + "\"").equals("Zone Temp Dead");
+            return CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and equipRef " +
+                                                            "== \"" + q.getId() + "\"").equals("Zone Temp Dead"
+                   );
         } catch (Exception e) {
             return false;
         }
@@ -491,19 +651,14 @@ public class DabSystemController extends SystemController
         double buildingLimitMin =  TunerUtil.readBuildingTunerValByQuery("building and limit and min");
 
         double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
-
-        if (cmTemp > (buildingLimitMax + tempDeadLeeway)
-                || cmTemp < (buildingLimitMin - tempDeadLeeway))
-        {
-            return true;
-        }
-
-        return false;
+        return !(cmTemp > (buildingLimitMax + tempDeadLeeway)) && !(cmTemp < (buildingLimitMin - tempDeadLeeway));
     }
+
     public boolean hasTemp(Equip q) {
         try
         {
-            return CCUHsApi.getInstance().readHisValByQuery("point and current and temp and equipRef == \"" + q.getId() + "\"") > 0;
+            return CCUHsApi.getInstance().readHisValByQuery("point and current and temp and equipRef == \"" + q.getId()
+                                                            + "\"") > 0;
         } catch (Exception e) {
             return false;
         }
@@ -515,46 +670,13 @@ public class DabSystemController extends SystemController
     }
     
     public double getWACo2LoopOp() {
-        return co2LoopOpWA;
+        return co2LoopOpWeightedAverage;
     }
     
     @Override
     public double getSystemCO2WA() {
-        return co2WA;
+        return co2WeightedAverage;
     }
-    
-    /*public double getDynamicPriority(double zoneLoad, String zoneRef) {
-        
-        ZonePriority p = getZonePriority(zoneRef);
-        if (getZoneCurrentTemp(zoneRef) == 0) {
-            return p.val;
-        }
-    
-        double zonePrioritySpread = 2;
-        double zonePriorityMultiplier = 1.3;
-    
-        for (ZoneProfile z : L.ccu().zoneProfiles)
-        {
-            Equip q = z.getEquip();
-            if (q.getZoneRef().equals(zoneRef)) {
-                zonePrioritySpread = TunerUtil.readTunerValByQuery("point and tuner and dab and zone and priority and spread and equipRef == \""+q.getId()+"\"");
-                break;
-            }
-        }
-    
-        for (ZoneProfile z : L.ccu().zoneProfiles)
-        {
-            Equip q = z.getEquip();
-            if (q.getZoneRef().equals(zoneRef)) {
-                zonePriorityMultiplier = TunerUtil.readTunerValByQuery("point and tuner and dab and zone and priority and multiplier and equipRef == \""+q.getId()+"\"");
-                break;
-            }
-        }
-        
-        //zoneDynamicPriority = zoneBasePriority*((zonePriorityMultiplier )^(rounddownTo10(zoneCoolingLoad/zonePrioritySpread))
-        
-        return p.val * Math.pow(zonePriorityMultiplier, (zoneLoad/zonePrioritySpread) > 10 ? 10 : (zoneLoad/zonePrioritySpread));
-    }*/
     
     @Override
     public State getSystemState() {
@@ -567,125 +689,290 @@ public class DabSystemController extends SystemController
      * calculated damper positions of 40, 70, 80, 90. Then we increase each by 11% to get rounded values of
      * 44, 78,89, 100% after normalizing.
      * */
-    public void normalizeAirflow() {
+    public HashMap<String, Double> getNormalizedDamperPosMap(ArrayList<HashMap<Object, Object>> dabEquips,
+                                                             HashMap<String, Double> damperPosMap) {
+    
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        ArrayList<HashMap> dabEquips = hayStack.readAll("equip and dab and zone");
+        double maxDamperPos = getMaxDamperPos(dabEquips);
+        
+        //maxDamperPos could be zero when all the zones are dead
+        if (maxDamperPos == 0) {
+            CcuLog.d(L.TAG_CCU_SYSTEM, " Abort normalizeAirflow : maxDamperPos = " + maxDamperPos);
+            return damperPosMap;
+        }
+    
+        HashMap<String, Double> normalizedDamperPosMap = new HashMap<>();
+        double targetPercent = (100 - maxDamperPos) * 100 / maxDamperPos;
+        for (HashMap<Object, Object> dabEquip : dabEquips) {
+            HashMap<Object, Object> normalizedPrimaryDamper = hayStack.readEntity(
+                "point and damper and normalized and primary and cmd and equipRef == \""
+                                                                + dabEquip.get("id").toString() + "\""
+            );
+            HashMap<Object, Object> normalizedSecondaryamper = hayStack.readEntity(
+                "point and damper and normalized and secondary and cmd and equipRef == \""
+                                                                + dabEquip.get("id").toString() + "\""
+            );
+            
+            double primaryDamperPos;
+            double secondaryDamperPos;
+            double normalizedPrimaryDamperPos;
+            double normalizedSecondaryDamperPos;
+    
+            primaryDamperPos = damperPosMap.get(normalizedPrimaryDamper.get("id").toString());
+            secondaryDamperPos = damperPosMap.get(normalizedSecondaryamper.get("id").toString());
+            if (isZoneDead(new Equip.Builder().setHashMap(dabEquip).build())) {
+                Log.d("CCU_SYSTEM", "Skip Normalize, Equip Dead " + dabEquip.toString());
+                normalizedPrimaryDamperPos = primaryDamperPos;
+                normalizedSecondaryDamperPos = secondaryDamperPos;
+            } else {
+                normalizedPrimaryDamperPos = (primaryDamperPos + primaryDamperPos * targetPercent / 100);
+                normalizedSecondaryDamperPos = (secondaryDamperPos + secondaryDamperPos * targetPercent / 100);
+            }
+            
+            normalizedDamperPosMap.put(normalizedPrimaryDamper.get("id").toString(), normalizedPrimaryDamperPos);
+            normalizedDamperPosMap.put(normalizedSecondaryamper.get("id").toString(), normalizedSecondaryDamperPos);
+    
+            CcuLog.d(L.TAG_CCU_SYSTEM,
+                     "normalizeAirflow" + " Equip: " +
+                     dabEquip.get("dis") + " ,damperPos :" + primaryDamperPos
+                     + " targetPercent: " + targetPercent +
+                     " normalizedDamperPos: " + normalizedPrimaryDamperPos
+            );
+    
+        }
+        return normalizedDamperPosMap;
+    }
+    
+    private double getMaxDamperPos(ArrayList<HashMap<Object, Object>> dabEquips) {
         double maxDamperPos = 0;
-        for (HashMap m : dabEquips) {
-            if (isZoneDead(new Equip.Builder().setHashMap(m).build())) {
+        for (HashMap<Object, Object> dabEquip : dabEquips) {
+            if (isZoneDead(new Equip.Builder().setHashMap(dabEquip).build())) {
                 continue;
             }
-            HashMap damper = hayStack.read("point and damper and base and cmd and equipRef == \""+m.get("id").toString()+"\"");
-            double damperPos = hayStack.readHisValById(damper.get("id").toString());
-            if ( damperPos >= maxDamperPos) {
+            HashMap<Object, Object> damper = CCUHsApi.getInstance()
+                                     .readEntity("point and damper and base and primary and cmd and equipRef == \"" +
+                                                 dabEquip.get("id").toString() + "\""
+            );
+            
+            double damperPos = CCUHsApi.getInstance().readHisValById(damper.get("id").toString());
+            if (damperPos >= maxDamperPos) {
+                maxDamperPos = damperPos;
+            }
+    
+            damper = CCUHsApi.getInstance()
+                             .readEntity("point and damper and base and secondary and cmd and equipRef == \"" +
+                                         dabEquip.get("id").toString() + "\""
+            );
+    
+            damperPos = CCUHsApi.getInstance().readHisValById(damper.get("id").toString());
+            if (damperPos >= maxDamperPos) {
                 maxDamperPos = damperPos;
             }
         }
-        
-        if (maxDamperPos == 0) {
-            CcuLog.d(L.TAG_CCU_SYSTEM," Abort normalizeAirflow : maxDamperPos = "+maxDamperPos);
-            return;
-        }
-        
-        double targetPercent = (100 - maxDamperPos) * 100/ maxDamperPos ;
-        
-        
-        for (HashMap m : dabEquips) {
-            if (isZoneDead(new Equip.Builder().setHashMap(m).build())) {
-                Log.d("CCU_SYSTEM","Skip Normalize, Equip Dead "+m.toString());
-                continue;
-            }
-            //Primary and secondary have the same base damper opening now.
-            HashMap damper = hayStack.read("point and damper and base and cmd and equipRef == \""+m.get("id").toString()+"\"");
-            double damperPos = hayStack.readHisValById(damper.get("id").toString());
-            double normalizedDamperPos =  (damperPos + damperPos * targetPercent/100);
-            HashMap normalizedPrimaryDamper = hayStack.read("point and damper and normalized and primary and cmd and equipRef == \""+m.get("id").toString()+"\"");
-            HashMap normalizedSecondaryamper = hayStack.read("point and damper and normalized and secondary and cmd and equipRef == \""+m.get("id").toString()+"\"");
-            CcuLog.d(L.TAG_CCU_SYSTEM,"normalizeAirflow"+" Equip: "+m.get("dis")+" ,damperPos :"+damperPos+" targetPercent: "+targetPercent+" normalizedDamperPos: "+normalizedDamperPos);
-            hayStack.writeHisValById(normalizedPrimaryDamper.get("id").toString(), normalizedDamperPos);
-            hayStack.writeHisValById(normalizedSecondaryamper.get("id").toString(), normalizedDamperPos);
-        }
-        
-        
+        return maxDamperPos;
     }
+    
     /*
      * Take weighted damper opening (where weightedDamperOpening = (zone1_damper_opening*zone1_damper_size +
      * zone2_damper_opening*zone2_damper_size +..)/(zone1_damper_size + zone2_damper_size + .. )
-     * If weighted damper opening is < targetCumulativeDamper  increase the dampers proportionally(each damper
-     * by 1% of its value) till it is at least targetCumulativeDamper
+     * If weighted damper opening is < targetCumulativeDamper  increase the dampers proportionally
+     * so that weighted damper opening is at least targetCumulativeDamper
      **/
-    public void adjustDamperForCumulativeTarget( String systemEquipRef) {
-        
-        double cumulativeDamperTarget = TunerUtil.readTunerValByQuery("target and cumulative and damper", systemEquipRef );
-        double weightedDamperOpening = getWeightedDamperOpening();
-        CcuLog.d(L.TAG_CCU_SYSTEM,"weightedDamperOpening : "+weightedDamperOpening +" cumulativeDamperTarget : "+cumulativeDamperTarget);
-        
-        while(weightedDamperOpening > 0 && weightedDamperOpening < cumulativeDamperTarget) {
-            adjustDamperOpening(1);
-            weightedDamperOpening = getWeightedDamperOpening();
-            CcuLog.d(L.TAG_CCU_SYSTEM,"weightedDamperOpening : "+weightedDamperOpening +" cumulativeDamperTarget : "+cumulativeDamperTarget);
+    public HashMap<String, Double> getAdjustedDamperPosMap (ArrayList<HashMap<Object, Object>> dabEquips,
+                                                HashMap<String, Double> normalizedDamperPosMap,
+                                                String systemEquipRef) {
+    
+        double cumulativeDamperTarget =
+            TunerUtil.readTunerValByQuery("target and cumulative and damper", systemEquipRef);
+        double weightedDamperOpening = getWeightedDamperOpening(dabEquips,normalizedDamperPosMap);
+        CcuLog.d(L.TAG_CCU_SYSTEM, "weightedDamperOpening : " + weightedDamperOpening + " cumulativeDamperTarget : " +
+                                   cumulativeDamperTarget);
+        if (weightedDamperOpening > 0 && weightedDamperOpening < cumulativeDamperTarget) {
+            
+            int damperAdjPercent = getDamperAdjustmentTargetPercent(dabEquips,
+                                                                     normalizedDamperPosMap,
+                                                                     cumulativeDamperTarget);
+    
+            HashMap<String, Double> adjustedDamperPosMap = adjustDamperOpening(dabEquips,
+                                                                               normalizedDamperPosMap,
+                                                                               damperAdjPercent);
+            
+            
+            weightedDamperOpening = getWeightedDamperOpening(dabEquips, normalizedDamperPosMap);
+            CcuLog.d(L.TAG_CCU_SYSTEM, "weightedDamperOpening : " + weightedDamperOpening +
+                                       " cumulativeDamperTarget : " + cumulativeDamperTarget +
+                                        "damperAdjPercent : "+damperAdjPercent);
+            return adjustedDamperPosMap;
         }
+        return normalizedDamperPosMap;
     }
     
-    public double getWeightedDamperOpening() {
+    public int getDamperAdjustmentTargetPercent(ArrayList<HashMap<Object, Object>> dabEquips,
+                                                   HashMap<String, Double> damperPosMap,
+                                                   double damperTargetOpening) {
+        
+        double currentWeightedDamperOpening = getWeightedDamperOpening(dabEquips, damperPosMap);
+        
+        HashMap<String, Double> adjustedDamperPosMap = adjustDamperOpening(dabEquips,
+                                                                           damperPosMap,
+                                                                           SystemConstants.DEFAULT_DAMPER_ADJ_INCREMENT
+        );
+        
+        double adjustedWeightedDamperOpening = getWeightedDamperOpening(dabEquips, adjustedDamperPosMap);
+        
+        double damperChangeFor1Percentage = adjustedWeightedDamperOpening - currentWeightedDamperOpening;
+        
+        double requiredAdjustment = (damperTargetOpening - currentWeightedDamperOpening ) / damperChangeFor1Percentage;
+        
+        return (int)Math.ceil(requiredAdjustment);
+        
+    }
+    
+    public double getWeightedDamperOpening(ArrayList<HashMap<Object, Object>> dabEquips,
+                                           HashMap<String, Double> normalizedDamperPosMap) {
+        
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        ArrayList<HashMap> dabEquips = hayStack.readAll("equip and dab and zone");
         int damperSizeSum = 0;
         int weightedDamperOpeningSum = 0;
-        for (HashMap m : dabEquips) {
-            HashMap damperPos = hayStack.read("point and damper and normalized and cmd and equipRef == \""+m.get("id").toString()+"\"");
-            HashMap damperSize = hayStack.read("point and config and damper and size and equipRef == \""+m.get("id").toString()+"\"");
+        for (HashMap<Object, Object> dabEquip : dabEquips) {
             
-            double damperPosVal = hayStack.readHisValById(damperPos.get("id").toString());
-            double damperSizeVal = hayStack.readDefaultValById(damperSize.get("id").toString());
-            weightedDamperOpeningSum += damperPosVal * damperSizeVal;
+            HashMap<Object, Object> damperPosPrimary = hayStack.readEntity(
+                "point and damper and normalized and primary and cmd and equipRef == \"" + dabEquip.get("id").toString() +
+                "\""
+            );
+            HashMap<Object, Object> damperSizePrimary = hayStack.readEntity(
+                "point and config and damper and primary and size and equipRef == \"" + dabEquip.get("id").toString() + "\""
+            );
+            
+            double damperPosVal = normalizedDamperPosMap.get(damperPosPrimary.get("id").toString());
+            double damperSizeVal = hayStack.readDefaultValById(damperSizePrimary.get("id").toString());
+            
+            weightedDamperOpeningSum += (damperPosVal * damperSizeVal);
             damperSizeSum += damperSizeVal;
+            
+            HashMap<Object, Object> damperPosSecondary = hayStack.readEntity(
+                "point and damper and normalized and secondary and cmd and equipRef == \""
+                                                        + dabEquip.get("id").toString() + "\""
+            );
+            HashMap<Object, Object> damperSizeSecondary = hayStack.readEntity(
+                "point and config and damper and secondary and size and equipRef == \""
+                                                         + dabEquip.get("id").toString() + "\""
+            );
+            
+            damperPosVal = normalizedDamperPosMap.get(damperPosSecondary.get("id").toString());
+            damperSizeVal = hayStack.readDefaultValById(damperSizeSecondary.get("id").toString());
+            
+            weightedDamperOpeningSum += (damperPosVal * damperSizeVal);
+            damperSizeSum += damperSizeVal;
+            
         }
-        return damperSizeSum == 0 ? 0 : weightedDamperOpeningSum / damperSizeSum;
+        return damperSizeSum == 0 ? 0 : (double) weightedDamperOpeningSum / damperSizeSum;
     }
     
-    public void adjustDamperOpening(int percent) {
+    public HashMap<String, Double> adjustDamperOpening(ArrayList<HashMap<Object, Object>> dabEquips,
+                                    HashMap<String, Double> normalizedDamperPosMap,
+                                    int percent) {
+        
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        ArrayList<HashMap> dabEquips = hayStack.readAll("equip and dab and zone");
-        for (HashMap m : dabEquips) {
-            if (isZoneDead(new Equip.Builder().setHashMap(m).build())) {
-                Log.d("CCU_SYSTEM","Skip Cumulative damper adjustment, Equip Dead "+m.toString());
-                continue;
+        HashMap<String, Double> adjustedDamperOpeningMap = new HashMap<>();
+        for (HashMap dabEquip : dabEquips) {
+            
+            HashMap<Object, Object> damperPosPrimary = hayStack.readEntity(
+                "point and damper and normalized and primary and cmd and equipRef == \""
+                                                                            + dabEquip.get("id").toString() + "\""
+             );
+            double primaryDamperVal = normalizedDamperPosMap.get(damperPosPrimary.get("id").toString());
+            double adjustedDamperPos = primaryDamperVal + (primaryDamperVal * percent) / 100;
+            adjustedDamperPos = Math.min(adjustedDamperPos, SystemConstants.DAMPER_POSITION_MAX);
+            
+            if (isZoneDead(new Equip.Builder().setHashMap(dabEquip).build())) {
+                Log.d("CCU_SYSTEM", "Skip Cumulative damper adjustment, Equip Dead " + dabEquip.toString());
+                adjustedDamperOpeningMap.put(damperPosPrimary.get("id").toString(), primaryDamperVal);
+            } else {
+                adjustedDamperOpeningMap.put(damperPosPrimary.get("id").toString(), adjustedDamperPos);
             }
-            HashMap damperPos = hayStack.read("point and damper and normalized and cmd and equipRef == \""+m.get("id").toString()+"\"");
-            double damperPosVal = hayStack.readHisValById(damperPos.get("id").toString());
-            double adjustedDamperPos = damperPosVal + (damperPosVal * percent) /100.0;
-            hayStack.writeHisValById(damperPos.get("id").toString() , adjustedDamperPos);
+            
+            HashMap<Object, Object> damperPosSecondary = hayStack.readEntity(
+                "point and damper and normalized and secondary and cmd and equipRef == \""
+                                                                             + dabEquip.get("id").toString() + "\""
+            );
+            double secondaryDamperVal = normalizedDamperPosMap.get(damperPosSecondary.get("id").toString());
+            adjustedDamperPos = secondaryDamperVal + (secondaryDamperVal * percent) / 100;
+            adjustedDamperPos = Math.min(adjustedDamperPos, SystemConstants.DAMPER_POSITION_MAX);
+            
+            if (isZoneDead(new Equip.Builder().setHashMap(dabEquip).build())) {
+                Log.d("CCU_SYSTEM", "Skip Cumulative damper adjustment, Equip Dead " + dabEquip.toString());
+                adjustedDamperOpeningMap.put(damperPosSecondary.get("id").toString(), secondaryDamperVal);
+            } else {
+                adjustedDamperOpeningMap.put(damperPosSecondary.get("id").toString(), adjustedDamperPos);
+            }
         }
+        return adjustedDamperOpeningMap;
     }
     
-    public void setDamperLimits() {
+    public void applyLimitsAndSetDamperPosition(ArrayList<HashMap<Object, Object>> dabEquips,
+                                                HashMap<String, Double> normalizedDamperPosMap) {
+        
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        ArrayList<HashMap> dabEquips = hayStack.readAll("equip and dab and zone");
-        for (HashMap m : dabEquips) {
-            HashMap primaryDamperPos = hayStack.read("point and damper and normalized and primary and cmd and equipRef == \""+m.get("id").toString()+"\"");
-            double limitedPrimaryDamperPos = hayStack.readHisValById(primaryDamperPos.get("id").toString());
-    
-            HashMap secondoryDamperPos = hayStack.read("point and damper and normalized and secondary and cmd and equipRef == \""+m.get("id").toString()+"\"");
-            double limitedSecondaryDamperPos = hayStack.readHisValById(secondoryDamperPos.get("id").toString());
+        for (HashMap<Object, Object> dabEquip : dabEquips) {
+            
+            HashMap<Object, Object> primaryDamperPosPoint = hayStack.readEntity(
+                                                "point and damper and normalized and primary and cmd "
+                                                + "and equipRef == \"" + dabEquip.get("id").toString() + "\""
+            );
+            
+            double limitedPrimaryDamperPos = normalizedDamperPosMap.get(primaryDamperPosPoint.get("id").toString());
+            
+            HashMap<Object, Object> secondoryDamperPosPoint = hayStack.readEntity(
+                                                "point and damper and normalized and secondary and cmd " +
+                                                "and equipRef == \"" + dabEquip.get("id").toString() + "\""
+            );
+            
+            double limitedSecondaryDamperPos = normalizedDamperPosMap.get(secondoryDamperPosPoint.get("id").toString());
             
             double minLimit = 0, maxLimit = 0;
-            if (getStatus(m.get("group").toString()) == ZoneState.COOLING.ordinal()) {
-                minLimit = hayStack.readDefaultVal("point and min and damper and cooling and equipRef == \""+m.get("id").toString()+"\"");
-                maxLimit = hayStack.readDefaultVal("point and max and damper and cooling and equipRef == \""+m.get("id").toString()+"\"");
-            } else {
-                minLimit = hayStack.readDefaultVal("point and min and damper and heating and equipRef == \""+m.get("id").toString()+"\"");
-                maxLimit = hayStack.readDefaultVal("point and max and damper and heating and equipRef == \""+m.get("id").toString()+"\"");
+            if (getStatus(dabEquip.get("group").toString()) == ZoneState.COOLING.ordinal()) {
+                
+                minLimit = hayStack.readDefaultVal(
+                    "point and min and damper and cooling and equipRef == \"" + dabEquip.get("id").toString() + "\""
+                );
+                maxLimit = hayStack.readDefaultVal(
+                    "point and max and damper and cooling and equipRef == \"" + dabEquip.get("id").toString() + "\""
+                );
+                
+            } else if (getStatus(dabEquip.get("group").toString()) == ZoneState.HEATING.ordinal()
+                       || getStatus(dabEquip.get("group").toString()) == ZoneState.DEADBAND.ordinal()
+                       || getStatus(dabEquip.get("group").toString()) == ZoneState.TEMPDEAD.ordinal()){
+                
+                minLimit = hayStack.readDefaultVal(
+                    "point and min and damper and heating and equipRef == \"" + dabEquip.get("id").toString() + "\""
+                );
+                maxLimit = hayStack.readDefaultVal(
+                    "point and max and damper and heating and equipRef == \"" + dabEquip.get("id").toString() + "\""
+                );
+                
             }
-            CcuLog.d(L.TAG_CCU_SYSTEM,"setDamperLimits : Equip "+m.get("dis")+" minLimit "+minLimit+" maxLimit "+maxLimit);
+            CcuLog.d(L.TAG_CCU_SYSTEM,
+                     "setDamperLimits : Equip " + dabEquip.get("dis") + " minLimit " + minLimit + " maxLimit " + maxLimit);
+            
             limitedPrimaryDamperPos = Math.min(limitedPrimaryDamperPos, maxLimit);
             limitedPrimaryDamperPos = Math.max(limitedPrimaryDamperPos, minLimit);
-    
+            double curPrimaryNormalisedDamper = hayStack.readHisValById(primaryDamperPosPoint.get("id").toString());
+            if (limitedPrimaryDamperPos != curPrimaryNormalisedDamper) {
+                hayStack.writeHisValById(primaryDamperPosPoint.get("id").toString(), limitedPrimaryDamperPos);
+            }
+            
             limitedSecondaryDamperPos = Math.min(limitedSecondaryDamperPos, maxLimit);
             limitedSecondaryDamperPos = Math.max(limitedSecondaryDamperPos, minLimit);
+            double curSecondaryNormalisedDamper = hayStack.readHisValById(secondoryDamperPosPoint.get("id").toString());
+            if (limitedSecondaryDamperPos != curSecondaryNormalisedDamper) {
+                hayStack.writeHisValById(secondoryDamperPosPoint.get("id").toString(), limitedSecondaryDamperPos);
+            }
             
-            hayStack.writeHisValById(primaryDamperPos.get("id").toString() , limitedPrimaryDamperPos);
-            hayStack.writeHisValById(secondoryDamperPos.get("id").toString() , limitedSecondaryDamperPos);
+            CcuLog.d(L.TAG_CCU_SYSTEM,
+                     " limitedPrimaryDamperPos : " + limitedPrimaryDamperPos + ",  " +
+                     "limitedSecondaryDamperPos : " + limitedSecondaryDamperPos
+            );
         }
     }
     

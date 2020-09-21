@@ -409,7 +409,8 @@ public class CCUTagsDb extends HServer {
         if (p.getIncrementVal() != null) b.add("incrementVal",Double.parseDouble(p.getIncrementVal()));
         if (p.getTunerGroup() != null) b.add("tunerGroup",p.getTunerGroup());
         if (p.getHisInterpolate() != null) b.add("hisInterpolate",p.getHisInterpolate());
-        
+        if (p.getShortDis() != null) b.add("shortDis",p.getShortDis());
+
         for (String m : p.getMarkers()) {
             b.add(m);
         }
@@ -433,6 +434,9 @@ public class CCUTagsDb extends HServer {
                 .add("enabled",p.getEnabled() ? "true":"false")
                 .add("tz", p.getTz());
         if (p.getUnit() != null) b.add("unit", p.getUnit());
+        if (p.getShortDis() != null) b.add("shortDis",p.getShortDis());
+        if (p.getMinVal() != null) b.add("minVal",Double.parseDouble(p.getMinVal()));
+        if (p.getMaxVal() != null) b.add("maxVal",Double.parseDouble(p.getMaxVal()));
         
         for (String m : p.getMarkers()) {
             b.add(m);
@@ -457,6 +461,9 @@ public class CCUTagsDb extends HServer {
                 .add("enabled",p.getEnabled() ? "true":"false")
                 .add("tz", p.getTz());
         if (p.getUnit() != null) b.add("unit", p.getUnit());
+        if (p.getShortDis() != null) b.add("shortDis",p.getShortDis());
+        if (p.getMinVal() != null) b.add("minVal",Double.parseDouble(p.getMinVal()));
+        if (p.getMaxVal() != null) b.add("maxVal",Double.parseDouble(p.getMaxVal()));
         for (String m : p.getMarkers()) {
             b.add(m);
         }

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.DaikinIE;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
@@ -152,6 +153,20 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         analog2Cb.setOnCheckedChangeListener(this);
         analog3Cb.setOnCheckedChangeListener(this);
         humidificationCb.setOnCheckedChangeListener(this);
+
+        view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+
+            @Override
+            public void onViewAttachedToWindow(View view) {
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View view) {
+                if (Globals.getInstance().isTestMode()) {
+                    Globals.getInstance().setTestMode(false);
+                }
+            }
+        });
     }
     
     public void setupEquipAddrEditor() {
@@ -247,14 +262,17 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         ArrayAdapter<Double> coolingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, coolingDatArr);
         coolingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         coolingTest.setAdapter(coolingSatTestAdapter);
+        coolingTest.setSelection(0,false);
         
         ArrayAdapter<Double> spTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, spArr);
         spTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spTest.setAdapter(spTestAdapter);
+        spTest.setSelection(0,false);
     
         ArrayAdapter<Double> heatingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, heatingDatArr);
         heatingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         heatingTest.setAdapter(heatingSatTestAdapter);
+        heatingTest.setSelection(0,false);
     
         ArrayList<Double> zoroToHundred = new ArrayList<>();
         for (double i = 0;  i <= 100.0; i++)
@@ -264,10 +282,12 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         ArrayAdapter<Double> humidificationTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
         humidificationTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         humidificationTest.setAdapter(humidificationTestAdapter);
+        humidificationTest.setSelection(0,false);
     
         ArrayAdapter<Double> oaMinTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
         oaMinTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         oaMinTest.setAdapter(oaMinTestAdapter);
+        oaMinTest.setSelection(0,false);
     
     
         coolingDatMin.setOnItemSelectedListener(this);
@@ -330,18 +350,20 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                 setConfigBackground("heating and dat and max", val);
                 break;
             case R.id.analog1RTUTest:
+            case R.id.analog3RTUTest:
+                checkTestMode();
                 DaikinIE.sendCoolingDATAutoControl(val);
                 break;
             case R.id.analog2RTUTest:
+                checkTestMode();
                 DaikinIE.sendStaticPressure(val);
                 break;
-            case R.id.analog3Spinner:
-                DaikinIE.sendCoolingDATAutoControl(val);
-                break;
             case R.id.humidificationTest:
+                checkTestMode();
                 DaikinIE.sendHumidityInput(val);
                 break;
             case R.id.oaMinTest:
+                checkTestMode();
                 DaikinIE.sendOAMinPos(val);
                 break;
         }
@@ -432,6 +454,20 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
             AlertDialog dlg = builder.create();
             dlg.show();
             setUserIntentBackground("conditioning and mode", SystemMode.OFF.ordinal());
+        }
+    }
+
+    private void checkTestMode(){
+        if (Double.parseDouble(coolingTest.getSelectedItem().toString()) > 0 || Double.parseDouble(heatingTest.getSelectedItem().toString()) > 0 ||
+                Double.parseDouble(spTest.getSelectedItem().toString()) > 0 || Double.parseDouble(humidificationTest.getSelectedItem().toString()) > 0 ||
+                Double.parseDouble(oaMinTest.getSelectedItem().toString()) > 0) {
+            if (!Globals.getInstance().isTestMode()) {
+                Globals.getInstance().setTestMode(true);
+            }
+        } else {
+            if (Globals.getInstance().isTestMode()) {
+                Globals.getInstance().setTestMode(false);
+            }
         }
     }
 }

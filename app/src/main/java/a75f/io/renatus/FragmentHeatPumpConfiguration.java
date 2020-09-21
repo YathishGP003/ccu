@@ -1,7 +1,6 @@
 package a75f.io.renatus;
 
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
@@ -18,7 +17,6 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -33,6 +31,7 @@ import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartStatConditioningMode_t;
 import a75f.io.device.serial.SmartStatFanSpeed_t;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
@@ -40,6 +39,8 @@ import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
+import a75f.io.logic.bo.building.definitions.SmartStatHeatPumpChangeOverType;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitConfiguration;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
@@ -331,6 +332,19 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
 
             }
         });
+        view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+
+            @Override
+            public void onViewAttachedToWindow(View view) {
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View view) {
+                if (Globals.getInstance().isTestMode()) {
+                    Globals.getInstance().setTestMode(false);
+                }
+            }
+        });
     }
 
     private void setupHPUZoneProfile() {
@@ -457,20 +471,10 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         switch (buttonView.getId())
         {
             case R.id.testHpuRelay1:
-                sendRelayActivationTestSignal();
-                break;
             case R.id.testHpuRelay2:
-                sendRelayActivationTestSignal( );
-                break;
             case R.id.testHpuRelay3:
-                sendRelayActivationTestSignal();
-                break;
             case R.id.testHpuRelay4:
-                sendRelayActivationTestSignal();
-                break;
             case R.id.testHpuRelay5:
-                sendRelayActivationTestSignal();
-                break;
             case R.id.testHpuRelay6:
                 sendRelayActivationTestSignal();
                 break;
@@ -521,6 +525,18 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         msg.controls.relay6.set((short)(testHeatChangeOver.isChecked() ? 1 : 0));
 
         MeshUtil.sendStructToCM(msg);
+        updateSmartStatForceTestControls(mSmartNodeAddress);
+
+        if (testComY1.isChecked() || testComY2.isChecked() || testFanLowG.isChecked()
+                || testAuxHeating.isChecked() || testFanHighOb.isChecked() || testHeatChangeOver.isChecked()) {
+            if (!Globals.getInstance().isTestMode()) {
+                Globals.getInstance().setTestMode(true);
+            }
+        } else {
+            if (Globals.getInstance().isTestMode()) {
+                Globals.getInstance().setTestMode(false);
+            }
+        }
     }
     public static double getDesiredTemp(short node)
     {
@@ -530,5 +546,30 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
             return 72;
         }
         return CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());
+    }
+
+    public void updateSmartStatForceTestControls(short node) {
+        if (mProfileConfig != null) {
+            int changeoverType = (int) mHPUProfile.getConfigType("relay6", node);
+            int fanStage2Type = (int) mHPUProfile.getConfigType("relay5", node);
+            SmartStatHeatPumpChangeOverType hpChangeOverType = SmartStatHeatPumpChangeOverType.values()[changeoverType];
+
+            mHPUProfile.setCmdSignal("compressor and stage1", testComY1.isChecked() ? 1 : 0, node);
+            mHPUProfile.setCmdSignal("compressor and stage2", testComY2.isChecked() ? 1 : 0, node);
+            mHPUProfile.setCmdSignal("aux and heating", testAuxHeating.isChecked() ? 1 : 0, node);
+            if (hpChangeOverType == SmartStatHeatPumpChangeOverType.ENERGIZE_IN_COOLING) {
+                mHPUProfile.setCmdSignal("changeover and cooling and stage1", testHeatChangeOver.isChecked() ? 1 : 0, node);
+            } else {
+                mHPUProfile.setCmdSignal("changeover and heating and stage1", testHeatChangeOver.isChecked() ? 1 : 0, node);
+                mHPUProfile.setCmdSignal("fan and stage1", testFanLowG.isChecked() ? 1 : 0, node);
+            }
+            if (fanStage2Type == SmartStatFanRelayType.FAN_STAGE2.ordinal()) {
+                mHPUProfile.setCmdSignal("fan and stage2", testFanHighOb.isChecked() ? 1 : 0, node);
+            } else if (fanStage2Type == SmartStatFanRelayType.HUMIDIFIER.ordinal()) {
+                mHPUProfile.setCmdSignal("humidifier", testFanHighOb.isChecked() ? 1 : 0, node);
+            } else if (fanStage2Type == SmartStatFanRelayType.DE_HUMIDIFIER.ordinal()) {
+                mHPUProfile.setCmdSignal("dehumidifier", testFanHighOb.isChecked() ? 1 : 0, node);
+            }
+        }
     }
 }

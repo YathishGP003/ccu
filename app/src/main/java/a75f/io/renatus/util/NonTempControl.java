@@ -1,4 +1,5 @@
 package a75f.io.renatus.util;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -188,8 +189,13 @@ public class NonTempControl extends RelativeLayout {
 
     public void setPiOutputText(String piOutputText) {
         this.piOutputText = piOutputText;
-        if(piOutputText != null && piOutput != null){
+        if (piOutputText != null && piOutput != null) {
             piOutput.setText(piOutputText);
+            if (piOutputText.length() > 4 && piOutputText.length() < 7) {
+                piOutput.setTextSize(14);
+            } else if (piOutputText.length() >= 7) {
+                piOutput.setTextSize(11);
+            }
         }
     }
 

@@ -78,28 +78,34 @@ public class SmartNode
     private void createPoints() {
         analog1In = new RawPoint.Builder()
                                 .setDisplayName("Analog1In-"+smartNodeAddress)
+                                .setShortDis("Analog1-In Physical Sensor")
                                 .setDeviceRef(deviceRef)
                                 .setSiteRef(siteRef)
                                 .setPort(Port.ANALOG_IN_ONE.toString())
-                                .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
+                                .setType(String.valueOf(OutputAnalogActuatorType.ZeroToTenV.ordinal()))
                                 .setRoomRef(roomRef)
                                 .setFloorRef(floorRef)
                                 .addMarker("sensor").addMarker("his")
                                 .setUnit("mV")
+                                .setMinVal("0")
+                                .setMaxVal("1000")
                                 .setTz(tz)
                                 .build();
     
         
         analog2In = new RawPoint.Builder()
                             .setDisplayName("Analog2In-"+smartNodeAddress)
+                            .setShortDis("Analog2-In Physical Sensor")
                             .setDeviceRef(deviceRef)
                             .setSiteRef(siteRef)
                             .setPort(Port.ANALOG_IN_TWO.toString())
-                            .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
+                            .setType(String.valueOf(OutputAnalogActuatorType.ZeroToTenV.ordinal()))
                             .setRoomRef(roomRef)
                             .setFloorRef(floorRef)
                             .addMarker("sensor").addMarker("his")
                             .setUnit("mV")
+                            .setMinVal("0")
+                            .setMaxVal("1000")
                             .setTz(tz)
                             .build();
     
@@ -131,6 +137,7 @@ public class SmartNode
     
         analog1Out = new RawPoint.Builder()
                             .setDisplayName("Analog1Out-"+smartNodeAddress)
+                            .setShortDis("Analog1-Out")
                             .setDeviceRef(deviceRef)
                             .setSiteRef(siteRef)
                             .setPort(Port.ANALOG_OUT_ONE.toString())
@@ -139,11 +146,14 @@ public class SmartNode
                             .setFloorRef(floorRef)
                             .addMarker("cmd").addMarker("his")
                             .setUnit("dV")
+                            .setMinVal("0")
+                            .setMaxVal("100")
                             .setTz(tz)
                             .build();
     
         analog2Out = new RawPoint.Builder()
                              .setDisplayName("Analog2Out-"+smartNodeAddress)
+                             .setShortDis("Analog2-Out")
                              .setDeviceRef(deviceRef)
                              .setSiteRef(siteRef)
                              .setPort(Port.ANALOG_OUT_TWO.toString())
@@ -152,6 +162,8 @@ public class SmartNode
                              .setFloorRef(floorRef)
                              .addMarker("cmd").addMarker("his")
                              .setUnit("dV")
+                             .setMinVal("0")
+                             .setMaxVal("100")
                              .setTz(tz)
                              .build();
     

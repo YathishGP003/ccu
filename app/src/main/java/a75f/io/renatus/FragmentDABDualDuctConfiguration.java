@@ -398,7 +398,13 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
     private void restoreViews() {
         
         analog1OutSpinner.setSelection(mProfileConfig.getAnalogOut1Config(), false);
+        DualDuctAnalogActuator analog1Selection = DualDuctAnalogActuator.values()[mProfileConfig.getAnalogOut1Config()];
+        handleAnalog1Selection(analog1Selection);
+        
         analog2OutSpinner.setSelection(mProfileConfig.getAnalogOut2Config(), false);
+        DualDuctAnalogActuator analog2Selection = DualDuctAnalogActuator.values()[mProfileConfig.getAnalogOut2Config()];
+        handleAnalog2Selection(analog2Selection);
+        
         thermistor2Spinner.setSelection(mProfileConfig.getThermistor2Config(), false);
         
         ArrayAdapter<Double> analogOutAdapter = getAnalogOutAdapter();

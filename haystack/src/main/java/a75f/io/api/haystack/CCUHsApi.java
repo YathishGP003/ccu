@@ -1125,11 +1125,17 @@ public class CCUHsApi
         for (Equip q : equips) {
             if (q.getMarkers().contains("tuner"))
             {
-                q.setSiteRef(hsApi.getSiteId().toString());
-                q.setFloorRef("@SYSTEM");
-                q.setRoomRef("@SYSTEM");
-                String equipLuid = hsApi.addEquip(q);
-                hsApi.putUIDMap(equipLuid, q.getId());
+                String equipLuid;
+                HashMap tunerEquip = read("tuner and equip");
+                if (!tunerEquip.isEmpty()) {
+                    equipLuid = tunerEquip.get("id").toString();
+                } else {
+                    q.setSiteRef(hsApi.getSiteId().toString());
+                    q.setFloorRef("@SYSTEM");
+                    q.setRoomRef("@SYSTEM");
+                    equipLuid = hsApi.addEquip(q);
+                    hsApi.putUIDMap(equipLuid, q.getId());
+                }
                 //Points
                 for (Point p : points)
                 {
@@ -1823,4 +1829,18 @@ public class CCUHsApi
         }
         return map;
     }
+    
+    //The CCU that creates Site is considered primaryCCU.
+    public boolean isPrimaryCcu() {
+        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return spDefaultPrefs.getBoolean("isPrimaryCcu", false);
+    }
+    
+    public void setPrimaryCcu(boolean isPrimary) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("isPrimaryCcu", isPrimary);
+        editor.commit();
+    }
+    
 }

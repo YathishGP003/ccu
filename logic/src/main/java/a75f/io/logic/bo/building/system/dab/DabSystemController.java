@@ -17,6 +17,7 @@ import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.dab.DabProfile;
+import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
@@ -533,15 +534,20 @@ public class DabSystemController extends SystemController
     public double getEquipCo2LoopOp(String equipRef){
         for (ZoneProfile profile : L.ccu().zoneProfiles) {
             Equip equip = profile.getEquip();
-            if (equip.getMarkers().contains("dab"))
+            if (equip.getMarkers().contains("dab") || equip.getMarkers().contains("dualDuct"))
             {
                 double enabledCO2Control = CCUHsApi.getInstance().readDefaultVal("point and config and dab and enable " +
                                                                                  "and co2 and equipRef == \"" + equip.getId() + "\""
                 );
                 if (equip.getId().equals(equipRef) && enabledCO2Control > 0)
                 {
-                    DabProfile d = (DabProfile) profile;
-                    return d.getCo2LoopOp();
+                    if (profile instanceof DabProfile) {
+                        DabProfile dabProfile = (DabProfile) profile;
+                        return dabProfile.getCo2LoopOp();
+                    } else if (profile instanceof DualDuctProfile) {
+                        DualDuctProfile dualDuctProfile = (DualDuctProfile) profile;
+                        return dualDuctProfile.getCo2LoopOp();
+                    }
                 }
             }
         }
@@ -611,7 +617,8 @@ public class DabSystemController extends SystemController
         for (HashMap<Object, Object> equipMap : allEquips)
         {
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-            if(equip.getMarkers().contains("dab") || equip.getMarkers().contains("ti")) {
+            if(equip.getMarkers().contains("dab") || equip.getMarkers().contains("dualDuct") ||
+                                                                    equip.getMarkers().contains("ti")) {
                 double tempVal = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and " +
                                                              "equipRef == \"" + equipMap.get("id") + "\""
                 );
@@ -634,6 +641,9 @@ public class DabSystemController extends SystemController
         }
         averageSystemTemperature = tempZones == 0 ? 0 : tempSum/tempZones;
         averageSystemTemperature =CCUUtils.roundToOneDecimal(averageSystemTemperature);
+        
+        CcuLog.d(L.TAG_CCU_SYSTEM, "averageSystemTemperature "+averageSystemTemperature+" tempZone "+tempZones
+                                                                +" tempSum "+tempSum);
     }
     
     public boolean isZoneDead(Equip q) {

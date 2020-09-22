@@ -196,7 +196,9 @@ public class Globals {
                 //If site already exists , import building tuners from backend before initializing building tuner equip.
                 HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                 if (!site.isEmpty()) {
-                    CCUHsApi.getInstance().importBuildingTuners();
+                    if (!CCUHsApi.getInstance().isPrimaryCcu()) {
+                        CCUHsApi.getInstance().importBuildingTuners();
+                    }
                     BuildingTuners.getInstance().updateBuildingTuners();
                 }
             

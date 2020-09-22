@@ -538,8 +538,8 @@ class DualDuctEquip {
                                  .setTz(tz)
                                  .build();
         String zonePriorityId = CCUHsApi.getInstance().addPoint(zonePriority);
-        CCUHsApi.getInstance().writeDefaultValById(zonePriorityId, (double)ZonePriority.NONE.ordinal());
-        CCUHsApi.getInstance().writeHisValById(zonePriorityId, (double)ZonePriority.NONE.ordinal());
+        CCUHsApi.getInstance().writeDefaultValById(zonePriorityId, (double)ZonePriority.NORMAL.ordinal());
+        CCUHsApi.getInstance().writeHisValById(zonePriorityId, (double)ZonePriority.NORMAL.ordinal());
         
         Point temperatureOffset = new Point.Builder()
                                          .setDisplayName(equipDis+"-temperatureOffset")
@@ -872,7 +872,7 @@ class DualDuctEquip {
                                            String tz,
                                            String type) {
     
-        Point coolingDamperPos = new Point.Builder()
+        Point damperPos = new Point.Builder()
                                      .setDisplayName(equipDis+"-"+type+"DamperPos")
                                      .setEquipRef(equipRef)
                                      .setSiteRef(siteRef)
@@ -885,8 +885,9 @@ class DualDuctEquip {
                                      .setUnit("%")
                                      .setTz(tz)
                                      .build();
-        return CCUHsApi.getInstance().addPoint(coolingDamperPos);
-        
+        String damperPosId = CCUHsApi.getInstance().addPoint(damperPos);
+        CCUHsApi.getInstance().writeHisValById(damperPosId, 0.0);
+        return damperPosId;
     }
     
     private String createAnalog1LogicalPoint(String siteRef,
@@ -1085,7 +1086,9 @@ class DualDuctEquip {
                                            .setUnit("\u00B0F")
                                            .setTz(tz)
                                            .build();
-            return CCUHsApi.getInstance().addPoint(coolingAirflowTemp);
+            String coolingAirflowTempId = CCUHsApi.getInstance().addPoint(coolingAirflowTemp);
+            CCUHsApi.getInstance().writeHisValById(coolingAirflowTempId, 0.0);
+            return coolingAirflowTempId;
         } else if (config.getThermistor2Config() == DualDuctThermistorConfig.HEATING_AIRFLOW_TEMP.getVal()){
             Point heatingAirflowTemp = new Point.Builder()
                                            .setDisplayName(equipDis+"-heatingSupplyAirTemp")
@@ -1101,7 +1104,9 @@ class DualDuctEquip {
                                            .setUnit("\u00B0F")
                                            .setTz(tz)
                                            .build();
-            return CCUHsApi.getInstance().addPoint(heatingAirflowTemp);
+            String heatingAirflowTempId = CCUHsApi.getInstance().addPoint(heatingAirflowTemp);
+            CCUHsApi.getInstance().writeHisValById(heatingAirflowTempId, 0.0);
+            return heatingAirflowTempId;
         }
         return null;
     }
@@ -1153,9 +1158,13 @@ class DualDuctEquip {
             return;
         }
         
-        deleteLogicalPoints();
-        updateAnalog1Config(config);
-        updateAnalog2Config(config);
+        if (currentConfig.getAnalogOut1Config() != config.getAnalogOut1Config() ||
+                        currentConfig.getAnalogOut2Config() != config.getAnalogOut2Config()) {
+            deleteLogicalPoints();
+            updateAnalog1Config(config);
+            updateAnalog2Config(config);
+        }
+        
         updateThermistorConfig(config);
         
         setConfigNumVal("analog1 and output and type",config.getAnalogOut1Config());

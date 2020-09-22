@@ -310,8 +310,14 @@ public class DualDuctProfile extends ZoneProfile {
             double analogMinHeating = dualDuctEquip.getConfigNumVal(analog+" and output and min " +
                                                                     "and damper and heating and pos");
             compositeDamperPos = (int) (ANALOG_SCALE * (analogMinCooling + analogMinHeating)/2);
-            SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_OUT_TWO.toString(),
-                                              OutputAnalogActuatorType.ZeroToTenV.displayName);
+    
+            if (analog.equals("analog1")) {
+                SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_OUT_ONE.toString(),
+                                                  OutputAnalogActuatorType.ZeroToTenV.displayName);
+            } else if (analog.equals("analog2")) {
+                SmartNode.updatePhysicalPointType(dualDuctEquip.nodeAddr, Port.ANALOG_OUT_TWO.toString(),
+                                                  OutputAnalogActuatorType.ZeroToTenV.displayName);
+            }
         }
         CcuLog.d(L.TAG_CCU_ZONE, "DUALDUCT: "+analog+" compositeDamperPos : "+compositeDamperPos);
         return compositeDamperPos;
@@ -330,6 +336,10 @@ public class DualDuctProfile extends ZoneProfile {
         d.minPosition = (int)TemperatureProfileUtil.getDamperLimit(dualDuctEquip.nodeAddr, heatCool, "min");
         d.maxPosition = (int)TemperatureProfileUtil.getDamperLimit(dualDuctEquip.nodeAddr, heatCool, "max");
         d.iaqCompensatedMinPos = d.minPosition;
+    }
+    
+    public double getCo2LoopOp() {
+        return dualDuctEquip.getCo2Loop().getLoopOutput();
     }
     
     @Override

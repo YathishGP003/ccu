@@ -97,6 +97,7 @@ public class DabSystemController extends SystemController
         ArrayList<HashMap<Object, Object>> allEquips = CCUHsApi
                                                            .getInstance()
                                                            .readAllEntities("(equip and zone and dab) or " +
+                                                                            "(equip and zone and dualDuct) or " +
                                                                             "(equip and zone and ti)"
         );
     
@@ -186,13 +187,13 @@ public class DabSystemController extends SystemController
     
     private boolean isEmergencyCoolingRequired() {
         return systemState != HEATING &&
-               buildingLimitMaxBreached("dab") &&
+               (buildingLimitMaxBreached("dab") || buildingLimitMaxBreached("dualDuct")) &&
                conditioningMode != SystemMode.OFF;
     }
     
     private boolean isEmergencyHeatingRequired() {
         return systemState != COOLING &&
-               buildingLimitMinBreached("dab") &&
+               (buildingLimitMinBreached("dab") || buildingLimitMinBreached("dualDuct")) &&
                conditioningMode != SystemMode.OFF;
     }
 

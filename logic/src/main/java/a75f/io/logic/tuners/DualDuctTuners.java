@@ -24,6 +24,32 @@ public class DualDuctTuners {
             return;
         }
         CcuLog.d(L.TAG_CCU_SYSTEM,"Default DualDuct Tuner does not exist. Create Now");
+    
+        Point zonePrioritySpread = new Point.Builder()
+                                       .setDisplayName(equipDis+"-DualDuct-"+"zonePrioritySpread")
+                                       .setSiteRef(siteRef)
+                                       .setEquipRef(equipRef).setHisInterpolate("cov")
+                                       .addMarker("tuner").addMarker("default").addMarker("dualDuct").addMarker("writable").addMarker("his")
+                                       .addMarker("zone").addMarker("priority").addMarker("spread").addMarker("sp")
+                                       .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
+                                       .setTz(tz)
+                                       .build();
+        String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
+        hayStack.writePoint(zonePrioritySpreadId, TunerConstants.DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_PRIORITY_SPREAD, 0);
+        hayStack.writeHisValById(zonePrioritySpreadId, TunerConstants.ZONE_PRIORITY_SPREAD);
+    
+        Point zonePriorityMultiplier = new Point.Builder()
+                                           .setDisplayName(equipDis+"-DualDuct-"+"zonePriorityMultiplier")
+                                           .setSiteRef(siteRef)
+                                           .setEquipRef(equipRef).setHisInterpolate("cov")
+                                           .addMarker("tuner").addMarker("default").addMarker("dualDuct").addMarker("writable").addMarker("his")
+                                           .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
+                                           .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
+                                           .setTz(tz)
+                                           .build();
+        String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
+        hayStack.writePoint(zonePriorityMultiplierId, TunerConstants.DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_PRIORITY_MULTIPLIER, 0);
+        hayStack.writeHisValById(zonePriorityMultiplierId, TunerConstants.ZONE_PRIORITY_MULTIPLIER);
         
         Point coolingDb = new Point.Builder()
                               .setDisplayName(equipDis+"-DualDuct-"+"coolingDeadband")
@@ -31,7 +57,7 @@ public class DualDuctTuners {
                               .setEquipRef(equipRef).setHisInterpolate("cov")
                               .addMarker("tuner").addMarker("default").addMarker("dualDuct").addMarker("writable").addMarker("his")
                               .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
-                              .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                              .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                               .setUnit("\u00B0F")
                               .setTz(tz)
                               .build();
@@ -45,7 +71,7 @@ public class DualDuctTuners {
                                         .setEquipRef(equipRef).setHisInterpolate("cov")
                                         .addMarker("tuner").addMarker("default").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                         .addMarker("cooling").addMarker("deadband").addMarker("multiplier").addMarker("sp")
-                                        .setMinVal("0").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                        .setMinVal("0").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                                         .setTz(tz)
                                         .build();
         String coolingDbMultiplierId = hayStack.addPoint(coolingDbMultiplier);
@@ -58,7 +84,7 @@ public class DualDuctTuners {
                               .setEquipRef(equipRef).setHisInterpolate("cov")
                               .addMarker("tuner").addMarker("default").addMarker("dualDuct").addMarker("writable").addMarker("his")
                               .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
-                              .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                              .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                               .setUnit("\u00B0F")
                               .setTz(tz)
                               .build();
@@ -72,7 +98,7 @@ public class DualDuctTuners {
                                         .setEquipRef(equipRef).setHisInterpolate("cov")
                                         .addMarker("tuner").addMarker("default").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                         .addMarker("heating").addMarker("deadband").addMarker("multiplier").addMarker("sp")
-                                        .setMinVal("0").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                        .setMinVal("0").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                                         .setTz(tz)
                                         .build();
         String heatingDbMultiplierId = hayStack.addPoint(heatingDbMultiplier);
@@ -85,7 +111,7 @@ public class DualDuctTuners {
                              .setEquipRef(equipRef).setHisInterpolate("cov")
                              .addMarker("tuner").addMarker("default").addMarker("dualDuct").addMarker("writable").addMarker("his")
                              .addMarker("pgain").addMarker("sp")
-                             .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                             .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                              .setTz(tz)
                              .build();
         String pgainId = hayStack.addPoint(propGain);
@@ -98,7 +124,7 @@ public class DualDuctTuners {
                                  .setEquipRef(equipRef).setHisInterpolate("cov")
                                  .addMarker("tuner").addMarker("default").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                  .addMarker("igain").addMarker("sp")
-                                 .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                 .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                                  .setTz(tz)
                                  .build();
         String igainId = hayStack.addPoint(integralGain);
@@ -111,7 +137,7 @@ public class DualDuctTuners {
                                .setEquipRef(equipRef).setHisInterpolate("cov")
                                .addMarker("tuner").addMarker("default").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                .addMarker("pspread").addMarker("sp")
-                               .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                               .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                                .setTz(tz)
                                .build();
         String pSpreadId = hayStack.addPoint(propSpread);
@@ -125,7 +151,7 @@ public class DualDuctTuners {
                                     .addMarker("tuner").addMarker("default").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                     .addMarker("itimeout").addMarker("sp")
                                     .setUnit("m")
-                                    .setMinVal("1").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                    .setMinVal("1").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                                     .setTz(tz)
                                     .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
@@ -139,7 +165,7 @@ public class DualDuctTuners {
                                    .addMarker("tuner").addMarker("default").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                    .addMarker("zone").addMarker("co2").addMarker("target").addMarker("sp")
                                    .setUnit("ppm")
-                                   .setMinVal("0").setMaxVal("2000").setIncrementVal("10").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                   .setMinVal("0").setMaxVal("2000").setIncrementVal("10").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                                    .setTz(tz)
                                    .build();
         String zoneCO2TargetId = hayStack.addPoint(zoneCO2Target);
@@ -153,7 +179,7 @@ public class DualDuctTuners {
                                       .addMarker("tuner").addMarker("default").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                       .addMarker("zone").addMarker("co2").addMarker("threshold").addMarker("sp")
                                       .setUnit("ppm")
-                                      .setMinVal("0").setMaxVal("2000").setIncrementVal("10").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                      .setMinVal("0").setMaxVal("2000").setIncrementVal("10").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                                       .setTz(tz)
                                       .build();
         String zoneCO2ThresholdId = hayStack.addPoint(zoneCO2Threshold);
@@ -167,7 +193,7 @@ public class DualDuctTuners {
                                    .addMarker("tuner").addMarker("default").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                    .addMarker("zone").addMarker("voc").addMarker("target").addMarker("sp")
                                    .setUnit("ppb")
-                                   .setMinVal("0").setMaxVal("1000").setIncrementVal("10").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                   .setMinVal("0").setMaxVal("1000").setIncrementVal("10").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                                    .setTz(tz)
                                    .build();
         String zoneVOCTargetId = hayStack.addPoint(zoneVOCTarget);
@@ -181,7 +207,7 @@ public class DualDuctTuners {
                                       .addMarker("tuner").addMarker("default").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                       .addMarker("zone").addMarker("voc").addMarker("threshold").addMarker("sp")
                                       .setUnit("ppb")
-                                      .setMinVal("0").setMaxVal("1000").setIncrementVal("10").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                      .setMinVal("0").setMaxVal("1000").setIncrementVal("10").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                                       .setTz(tz)
                                       .build();
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
@@ -197,6 +223,55 @@ public class DualDuctTuners {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         
         ZoneTuners.addZoneTunersForEquip(siteRef, equipdis, equipref, roomRef, floorRef, tz);
+    
+        Point zonePrioritySpread = new Point.Builder()
+                                       .setDisplayName(equipdis+"-"+"zonePrioritySpread")
+                                       .setSiteRef(siteRef)
+                                       .setEquipRef(equipref)
+                                       .setRoomRef(roomRef)
+                                       .setFloorRef(floorRef).setHisInterpolate("cov")
+                                       .addMarker("tuner").addMarker("dualDuct").addMarker("writable").addMarker("his")
+                                       .addMarker("zone").addMarker("priority").addMarker("spread").addMarker("sp")
+                                       .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
+                                       .setTz(tz)
+                                       .build();
+        String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
+        HashMap zonePrioritySpreadPoint = hayStack.read("point and tuner and default and dualDuct and zone and priority and" +
+                                                        " spread");
+        ArrayList<HashMap> zonePrioritySpreadPointArr = hayStack.readPoint(zonePrioritySpreadPoint.get("id").toString());
+        for (HashMap valMap : zonePrioritySpreadPointArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(zonePrioritySpreadId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(zonePrioritySpreadId, HSUtil.getPriorityVal(zonePrioritySpreadId));
+    
+        Point zonePriorityMultiplier = new Point.Builder()
+                                           .setDisplayName(equipdis+"-"+"zonePriorityMultiplier")
+                                           .setSiteRef(siteRef)
+                                           .setEquipRef(equipref)
+                                           .setRoomRef(roomRef)
+                                           .setFloorRef(floorRef).setHisInterpolate("cov")
+                                           .addMarker("tuner").addMarker("dualDuct").addMarker("writable").addMarker("his")
+                                           .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
+                                           .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
+                                           .setTz(tz)
+                                           .build();
+        String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
+        HashMap zonePriorityMultiplierPoint = hayStack.read("point and tuner and default and dualDuct and zone and priority " +
+                                                            "and multiplier");
+        ArrayList<HashMap> zonePrioritySpreadMultiplierArr = hayStack.readPoint(zonePriorityMultiplierPoint.get("id").toString());
+        for (HashMap valMap : zonePrioritySpreadMultiplierArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(zonePriorityMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(zonePriorityMultiplierId, HSUtil.getPriorityVal(zonePriorityMultiplierId));
+    
         
         Point coolingDb = new Point.Builder()
                               .setDisplayName(equipdis+"-"+"coolingDeadband")
@@ -206,7 +281,7 @@ public class DualDuctTuners {
                               .setFloorRef(floorRef).setHisInterpolate("cov")
                               .addMarker("tuner").addMarker("dualDuct").addMarker("writable").addMarker("his")
                               .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
-                              .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                              .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                               .setTz(tz)
                               .setUnit("\u00B0F")
                               .build();
@@ -230,7 +305,7 @@ public class DualDuctTuners {
                                         .setFloorRef(floorRef).setHisInterpolate("cov")
                                         .addMarker("tuner").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                         .addMarker("cooling").addMarker("deadband").addMarker("multiplier").addMarker("sp")
-                                        .setMinVal("0").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                        .setMinVal("0").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                                         .setTz(tz)
                                         .build();
         String coolingDbMultiplierId = hayStack.addPoint(coolingDbMultiplier);
@@ -253,7 +328,7 @@ public class DualDuctTuners {
                               .setFloorRef(floorRef).setHisInterpolate("cov")
                               .addMarker("tuner").addMarker("dualDuct").addMarker("writable").addMarker("his")
                               .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
-                              .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                              .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                               .setTz(tz)
                               .setUnit("\u00B0F")
                               .build();
@@ -276,7 +351,7 @@ public class DualDuctTuners {
                                         .setFloorRef(floorRef).setHisInterpolate("cov")
                                         .addMarker("tuner").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                         .addMarker("heating").addMarker("deadband").addMarker("multiplier").addMarker("sp")
-                                        .setMinVal("0").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                        .setMinVal("0").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                                         .setTz(tz)
                                         .build();
         String heatingDbMultiplierId = hayStack.addPoint(heatingDbMultiplier);
@@ -298,7 +373,7 @@ public class DualDuctTuners {
                              .setFloorRef(floorRef).setHisInterpolate("cov")
                              .addMarker("tuner").addMarker("dualDuct").addMarker("writable").addMarker("his")
                              .addMarker("pgain").addMarker("sp")
-                             .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                             .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                              .setTz(tz)
                              .build();
         String pgainId = hayStack.addPoint(propGain);
@@ -320,7 +395,7 @@ public class DualDuctTuners {
                                  .setFloorRef(floorRef).setHisInterpolate("cov")
                                  .addMarker("tuner").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                  .addMarker("igain").addMarker("sp")
-                                 .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                 .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                                  .setTz(tz)
                                  .build();
         String igainId = hayStack.addPoint(integralGain);
@@ -342,7 +417,7 @@ public class DualDuctTuners {
                                .setFloorRef(floorRef).setHisInterpolate("cov")
                                .addMarker("tuner").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                .addMarker("pspread").addMarker("sp")
-                               .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                               .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                                .setTz(tz)
                                .build();
         String pSpreadId = hayStack.addPoint(propSpread);
@@ -365,7 +440,7 @@ public class DualDuctTuners {
                                     .addMarker("tuner").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                     .addMarker("itimeout").addMarker("sp")
                                     .setUnit("m")
-                                    .setMinVal("1").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                    .setMinVal("1").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                                     .setTz(tz)
                                     .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
@@ -388,7 +463,7 @@ public class DualDuctTuners {
                                   .addMarker("tuner").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                   .addMarker("zone").addMarker("co2").addMarker("target").addMarker("sp")
                                   .setUnit("ppm")
-                                  .setMinVal("0").setMaxVal("2000").setIncrementVal("10").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                  .setMinVal("0").setMaxVal("2000").setIncrementVal("10").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                                   .setTz(tz)
                                   .build();
         String zoneCO2TargetId = hayStack.addPoint(zoneCO2Target);
@@ -411,7 +486,7 @@ public class DualDuctTuners {
                                      .addMarker("tuner").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                      .addMarker("zone").addMarker("co2").addMarker("threshold").addMarker("sp")
                                      .setUnit("ppm")
-                                     .setMinVal("0").setMaxVal("2000").setIncrementVal("10").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                     .setMinVal("0").setMaxVal("2000").setIncrementVal("10").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                                      .setTz(tz)
                                      .build();
         String zoneCO2ThresholdId = hayStack.addPoint(zoneCO2Threshold);
@@ -434,7 +509,7 @@ public class DualDuctTuners {
                                   .addMarker("tuner").addMarker("dualDuct").addMarker("writable").addMarker("his").addMarker("sp")
                                   .addMarker("zone").addMarker("voc").addMarker("target")
                                   .setUnit("ppb")
-                                  .setMinVal("0").setMaxVal("1000").setIncrementVal("10").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                  .setMinVal("0").setMaxVal("1000").setIncrementVal("10").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                                   .setTz(tz)
                                   .build();
         String zoneVOCTargetId = hayStack.addPoint(zoneVOCTarget);
@@ -457,7 +532,7 @@ public class DualDuctTuners {
                                      .addMarker("tuner").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                      .addMarker("zone").addMarker("voc").addMarker("threshold").addMarker("sp")
                                      .setUnit("ppb")
-                                     .setMinVal("0").setMaxVal("1000").setIncrementVal("10").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                     .setMinVal("0").setMaxVal("1000").setIncrementVal("10").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                                      .setTz(tz)
                                      .build();
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);

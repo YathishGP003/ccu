@@ -527,6 +527,20 @@ class DualDuctEquip {
         CCUHsApi.getInstance().writeDefaultValById(enableIAQControlId, config.isEnableIAQControl() ? 1.0 :0);
         CCUHsApi.getInstance().writeHisValById(enableIAQControlId, config.isEnableIAQControl() ? 1.0 :0);
     
+        Point zonePriority = new Point.Builder()
+                                 .setDisplayName(equipDis+"-zonePriority")
+                                 .setEquipRef(equipRef)
+                                 .setSiteRef(siteRef).setHisInterpolate("cov")
+                                 .addMarker("config").addMarker("dualDuct").addMarker("writable").addMarker("zone")
+                                 .addMarker("priority").addMarker("sp").addMarker("his")
+                                 .setGroup(String.valueOf(nodeAddr))
+                                 .setEnums("none,low,normal,high")
+                                 .setTz(tz)
+                                 .build();
+        String zonePriorityId = CCUHsApi.getInstance().addPoint(zonePriority);
+        CCUHsApi.getInstance().writeDefaultValById(zonePriorityId, (double)ZonePriority.NONE.ordinal());
+        CCUHsApi.getInstance().writeHisValById(zonePriorityId, (double)ZonePriority.NONE.ordinal());
+        
         Point temperatureOffset = new Point.Builder()
                                          .setDisplayName(equipDis+"-temperatureOffset")
                                          .setEquipRef(equipRef)
@@ -577,6 +591,7 @@ class DualDuctEquip {
                                             .addMarker("analog2").addMarker("output").addMarker("type")
                                             .addMarker("sp").addMarker("his")
                                             .setKind(DualDuctConstants.KIND_STRING)
+                                            .setEnums("not_used, composite, cooling, heating")
                                             .setGroup(String.valueOf(nodeAddr))
                                             .setTz(tz)
                                             .build();

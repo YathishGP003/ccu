@@ -1,37 +1,21 @@
 package a75f.io.renatus;
 
 import android.app.Dialog;
-import android.app.ProgressDialog;
-import android.content.Intent;
 import android.content.res.Resources;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.NumberPicker;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 
-import a75f.io.logger.CcuLog;
-import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
-import a75f.io.logic.bo.building.Sensor;
-import a75f.io.logic.bo.building.Thermistor;
-import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.plc.PlcProfile;
 import a75f.io.logic.bo.building.plc.PlcProfileConfiguration;

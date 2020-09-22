@@ -120,10 +120,10 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
             }
         }
         if(isCazExists){
-            removeDialogFragment(ID);
+            closeAllBaseDialogFragments();
             Toast.makeText(getContext(),"CCU As Zone temperature influence is already enabled",Toast.LENGTH_LONG).show();
         }else if(misPaired){
-            removeDialogFragment(ID);
+            closeAllBaseDialogFragments();
             Toast.makeText(getContext(),"Temperature Influence profile cannot be paired with already paired modules",Toast.LENGTH_LONG).show();
 
         }

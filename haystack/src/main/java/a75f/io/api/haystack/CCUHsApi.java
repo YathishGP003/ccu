@@ -413,6 +413,7 @@ public class CCUHsApi
                 if (dur.unit == null) {
                     dur = HNum.make(dur.val ,"ms");
                 }
+
                 HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
                 HDict[] dictArr  = {b.toDict()};
                 String  response = HttpUtil.executePost(getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));

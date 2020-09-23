@@ -77,6 +77,12 @@ class DualDuctEquip {
             co2Threshold = (int) TunerUtil.readTunerValByQuery("zone and dualDuct and co2 and threshold and equipRef == \""+equipRef+"\"");
             vocTarget = (int) TunerUtil.readTunerValByQuery("zone and dualDuct and voc and target and equipRef == \""+equipRef+"\"");
             vocThreshold = (int) TunerUtil.readTunerValByQuery("zone and dualDuct and voc and threshold and equipRef == \""+equipRef+"\"");
+            
+            co2Loop.setCo2Target(co2Target);
+            co2Loop.setCo2Threshold(co2Threshold);
+    
+            vocLoop.setVOCTarget(vocTarget);
+            vocLoop.setVOCThreshold(vocThreshold);
         }
         
     }

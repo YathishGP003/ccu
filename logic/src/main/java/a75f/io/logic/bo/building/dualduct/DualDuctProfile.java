@@ -229,7 +229,7 @@ public class DualDuctProfile extends ZoneProfile {
             damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * Math.min(50, co2Loop.getLoopOutput()) / 50;
             CcuLog.d(L.TAG_CCU_ZONE, "CO2LoopOp :" + co2Loop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
         }
-    
+        CcuLog.d(L.TAG_CCU_ZONE, "enabledIAQControl "+enabledCO2Control+" occupied "+occupied+" "+vocLoop.getLoopOutput());
         //VOC loop output from 0-50% modulates damper min position.
         if (enabledIAQControl && occupied && vocLoop.getLoopOutput(voc) > 0)
         {

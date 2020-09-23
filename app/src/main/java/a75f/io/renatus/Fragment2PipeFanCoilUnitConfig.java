@@ -3,8 +3,8 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -221,37 +221,23 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
             switchFanMediumY1.setEnabled(false);
             switchFanHighY2.setEnabled(false);
         }
-        setButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        setButton.setOnClickListener(v -> {
 
-                new AsyncTask<String, Void, Void>() {
+            setButton.setEnabled(false);
+            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving 2PFCU Configuration");
 
-                    @Override
-                    protected void onPreExecute() {
-                        setButton.setEnabled(false);
-                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving 2PFCU Configuration");
-                        super.onPreExecute();
-                    }
+            new Thread(() -> {
+                setup2PFCUZoneProfile();
+                L.saveCCUState();
+            }).start();
 
-                    @Override
-                    protected Void doInBackground(final String... params) {
-                        setup2PFCUZoneProfile();
-                        L.saveCCUState();
+            new Handler().postDelayed(() -> {
+                ProgressDialogUtils.hideProgressDialog();
+                Fragment2PipeFanCoilUnitConfig.this.closeAllBaseDialogFragments();
+                getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                LSerial.getInstance().sendSeedMessage(true,false, mSmartNodeAddress, roomRef,floorRef);
+            },12000);
 
-                        return null;
-                    }
-
-                    @Override
-                    protected void onPostExecute(final Void result) {
-                        ProgressDialogUtils.hideProgressDialog();
-                        Fragment2PipeFanCoilUnitConfig.this.closeAllBaseDialogFragments();
-                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                        LSerial.getInstance().sendSeedMessage(true,false, mSmartNodeAddress, roomRef,floorRef);
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
-
-            }
         });
         view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
 

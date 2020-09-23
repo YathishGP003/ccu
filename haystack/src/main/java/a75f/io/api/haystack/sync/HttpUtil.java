@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -31,7 +32,7 @@ public class HttpUtil
         return executePost(targetURL, urlParameters, CCUHsApi.getInstance().getJwt()); // TODO Matt Rudd - I hate this hack, but the executePost needs a complete rewrite
     }
 
-    public static synchronized String executePost(String targetURL, String urlParameters, String bearerToken)
+    public static String executePost(String targetURL, String urlParameters, String bearerToken)
     {
         CcuLog.i("CCU_HS","Client Token: " + bearerToken);
 
@@ -57,10 +58,7 @@ public class HttpUtil
                     Log.d("CCU_HS", urlParameters.substring(i, Math.min(urlParameters.length(), i + chunkSize)));
                 }
 
-                //System.out.println(targetURL);
-                //System.out.println(urlParameters);
-                connection.setRequestProperty("Content-Length", "" +
-                                                                Integer.toString(urlParameters.getBytes("UTF-8").length));
+                connection.setRequestProperty("Content-Length", "" + urlParameters.getBytes(StandardCharsets.UTF_8).length);
                 connection.setRequestProperty("Content-Language", "en-US");
                 connection.setRequestProperty("Authorization", " Bearer " + bearerToken);
                 connection.setUseCaches (false);
@@ -69,24 +67,20 @@ public class HttpUtil
 
                 //Send request
                 DataOutputStream wr = new DataOutputStream (connection.getOutputStream());
-                wr.write (urlParameters.getBytes("UTF-8"));
+                wr.write (urlParameters.getBytes(StandardCharsets.UTF_8));
                 wr.flush ();
-                wr.close ();
 
                 int responseCode = connection.getResponseCode();
                 CcuLog.i("CCU_HS","HttpResponse: responseCode "+responseCode);
 
                 //Get Response
-                InputStream is = connection.getInputStream();
-                BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+                BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String line;
                 StringBuffer response = new StringBuffer();
                 while((line = rd.readLine()) != null) {
                     response.append(line);
                     response.append('\n');
                 }
-                rd.close();
-                is.close();
 
                 return responseCode == 200 ? response.toString() : null;
 
@@ -108,7 +102,7 @@ public class HttpUtil
     }
 
     // TODO Matt Rudd - This method is a hot mess; refactor
-    public static synchronized String executeJson(String targetUrl, String urlParameters, String token, boolean tokenIsApiKey, String httpMethod) {
+    public static String executeJson(String targetUrl, String urlParameters, String token, boolean tokenIsApiKey, String httpMethod) {
         URL url;
         HttpURLConnection connection = null;
         if (StringUtils.isNotBlank(token)) {
@@ -145,29 +139,25 @@ public class HttpUtil
                 else {
                     connection.setDoOutput(true);
                     connection.setRequestProperty(
-                            "Content-Length", "" + Integer.toString(urlParameters.getBytes("UTF-8").length)
+                            "Content-Length", "" + urlParameters.getBytes(StandardCharsets.UTF_8).length
                     );
                     //Send request
                     DataOutputStream wr = new DataOutputStream (connection.getOutputStream());
-                    wr.write (urlParameters.getBytes("UTF-8"));
+                    wr.write (urlParameters.getBytes(StandardCharsets.UTF_8));
                     wr.flush();
-                    wr.close();
                 }
 
                 int responseCode = connection.getResponseCode();
                 CcuLog.i("CCU_HS","HttpResponse: responseCode "+responseCode);
 
                 //Get Response
-                InputStream is = connection.getInputStream();
-                BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+                BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String line;
                 StringBuffer response = new StringBuffer();
                 while((line = rd.readLine()) != null) {
                     response.append(line);
                     response.append('\n');
                 }
-                rd.close();
-                is.close();
 
                 return responseCode == 200 ? response.toString() : null;
 

@@ -282,10 +282,10 @@ class DualDuctEquip {
                         String logicalPointId = createAnalog2LogicalPoint(siteRef, equipDis, roomRef, floorRef, tz, config);
     
                         if (config.getAnalogOut2Config() == DualDuctAnalogActuator.COOLING.getVal()) {
-                            device.analog1Out.setType(config.getAnalog2OutAtMinDamperCooling()+"-"+
+                            device.analog2Out.setType(config.getAnalog2OutAtMinDamperCooling()+"-"+
                                                                     config.getAnalog2OutAtMaxDamperCooling()+"v");
                         } else if (config.getAnalogOut2Config() == DualDuctAnalogActuator.HEATING.getVal()) {
-                            device.analog1Out.setType(config.getAnalog2OutAtMinDamperHeating()+"-"+
+                            device.analog2Out.setType(config.getAnalog2OutAtMinDamperHeating()+"-"+
                                                                     config.getAnalog2OutAtMaxDamperHeating()+"v");
                         }
                         device.analog2Out.setPointRef(logicalPointId);
@@ -1156,6 +1156,24 @@ class DualDuctEquip {
         }
     }
     
+    public boolean needsRecreatingLogicalPoints(DualDuctProfileConfiguration curConfig,
+                                              DualDuctProfileConfiguration newConfig) {
+    
+        if (curConfig.getAnalogOut1Config() != newConfig.getAnalogOut1Config() ||
+            curConfig.getAnalogOut2Config() != newConfig.getAnalogOut2Config() ||
+            curConfig.getAnalog1OutAtMinDamperHeating() != newConfig.getAnalog1OutAtMinDamperHeating() ||
+            curConfig.getAnalog1OutAtMaxDamperHeating() != newConfig.getAnalog1OutAtMaxDamperHeating() ||
+            curConfig.getAnalog1OutAtMinDamperCooling() != newConfig.getAnalog1OutAtMinDamperCooling() ||
+            curConfig.getAnalog1OutAtMaxDamperCooling() != newConfig.getAnalog1OutAtMaxDamperCooling() ||
+            curConfig.getAnalog2OutAtMinDamperHeating() != newConfig.getAnalog2OutAtMinDamperHeating() ||
+            curConfig.getAnalog2OutAtMaxDamperHeating() != newConfig.getAnalog2OutAtMaxDamperHeating() ||
+            curConfig.getAnalog2OutAtMinDamperCooling() != newConfig.getAnalog2OutAtMinDamperCooling() ||
+            curConfig.getAnalog2OutAtMaxDamperCooling() != newConfig.getAnalog2OutAtMaxDamperCooling()) {
+            return true;
+        }
+        return false;
+    }
+    
     public void updateEquip(DualDuctProfileConfiguration config) {
     
         DualDuctProfileConfiguration currentConfig = getProfileConfiguration();
@@ -1164,8 +1182,7 @@ class DualDuctEquip {
             return;
         }
         
-        if (currentConfig.getAnalogOut1Config() != config.getAnalogOut1Config() ||
-                        currentConfig.getAnalogOut2Config() != config.getAnalogOut2Config()) {
+        if (needsRecreatingLogicalPoints(currentConfig, config)) {
             deleteLogicalPoints();
             updateAnalog1Config(config);
             updateAnalog2Config(config);

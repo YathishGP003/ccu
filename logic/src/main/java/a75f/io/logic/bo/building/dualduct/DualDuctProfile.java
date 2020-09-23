@@ -188,16 +188,18 @@ public class DualDuctProfile extends ZoneProfile {
         if (!curStatus.equals("Zone Temp Dead"))
         {
             CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + dualDuctEquip.nodeAddr + "\"", "Zone Temp Dead");
-            double damperMin = TemperatureProfileUtil.getDamperLimit(dualDuctEquip.nodeAddr, "heating", "min");
-            double damperMax = TemperatureProfileUtil.getDamperLimit(dualDuctEquip.nodeAddr, "heating", "max");
+            double damperHeatingMin = TemperatureProfileUtil.getDamperLimit(dualDuctEquip.nodeAddr, "heating", "min");
+            double damperHeatingMax = TemperatureProfileUtil.getDamperLimit(dualDuctEquip.nodeAddr, "heating", "max");
         
-            dualDuctEquip.setDamperPos((damperMin + damperMax)/2 , "heating");
+            dualDuctEquip.setDamperPos((damperHeatingMin + damperHeatingMax)/2 , "heating");
         
-            damperMin = TemperatureProfileUtil.getDamperLimit(dualDuctEquip.nodeAddr, "cooling", "min");
-            damperMax = TemperatureProfileUtil.getDamperLimit(dualDuctEquip.nodeAddr, "cooling", "max");
+            double damperCoolingMin = TemperatureProfileUtil.getDamperLimit(dualDuctEquip.nodeAddr, "cooling", "min");
+            double damperCoolingMax = TemperatureProfileUtil.getDamperLimit(dualDuctEquip.nodeAddr, "cooling", "max");
         
-            dualDuctEquip.setDamperPos((damperMin + damperMax)/2 , "cooling");
+            dualDuctEquip.setDamperPos((damperCoolingMin + damperCoolingMax)/2 , "cooling");
             CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + dualDuctEquip.nodeAddr + "\"", (double) TEMPDEAD.ordinal());
+            
+            dualDuctEquip.setDamperPos((damperCoolingMin + damperHeatingMin )/2, "composite");
         }
     }
     
@@ -226,14 +228,15 @@ public class DualDuctProfile extends ZoneProfile {
         //CO2 loop output from 0-50% modulates damper min position.
         if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0)
         {
-            damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * Math.min(50, co2Loop.getLoopOutput()) / 50;
+            damper.iaqCompensatedMinPos =
+                damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * co2Loop.getLoopOutput() / 100;
             CcuLog.d(L.TAG_CCU_ZONE, "CO2LoopOp :" + co2Loop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
         }
-        CcuLog.d(L.TAG_CCU_ZONE, "enabledIAQControl "+enabledCO2Control+" occupied "+occupied+" "+vocLoop.getLoopOutput());
         //VOC loop output from 0-50% modulates damper min position.
         if (enabledIAQControl && occupied && vocLoop.getLoopOutput(voc) > 0)
         {
-            damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * Math.min(50, vocLoop.getLoopOutput()) / 50;
+            damper.iaqCompensatedMinPos =
+                damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * vocLoop.getLoopOutput() / 100;
             CcuLog.d(L.TAG_CCU_ZONE,"VOCLoopOp :"+vocLoop.getLoopOutput()+", adjusted minposition "+damper.iaqCompensatedMinPos+" damper.minPosition "+damper.minPosition);
         }
         

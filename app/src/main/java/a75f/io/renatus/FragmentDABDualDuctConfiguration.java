@@ -50,7 +50,9 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
     
     private static final double DEFAULT_ANALOG_MIN = 0;
     private static final double DEFAULT_ANALOG_MAX = 10.0;
-    private static final double DEFAULT_COMPOSITE_ANALOG_HEATING_MAX = 5.0;
+    
+    private static final double DEFAULT_COMPOSITE_ANALOG_HEATING_MIN = 5.0;
+    private static final double DEFAULT_COMPOSITE_ANALOG_HEATING_MAX = 0;
     private static final double DEFAULT_COMPOSITE_ANALOG_COOLING_MIN = 5.1;
     private static final double DEFAULT_COMPOSITE_ANALOG_COOLING_MAX = 10.0;
     
@@ -332,7 +334,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         ao1MaxDamperHeatingTV.setEnabled(enabled);
         ao1MaxDamperHeatingSpinner.setEnabled(enabled);
         if (enabled && isComposite) {
-            ao1MinDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
+            ao1MinDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_HEATING_MIN), false);
             ao1MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_HEATING_MAX), false);
         } else if (enabled) {
             ao1MinDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
@@ -361,7 +363,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         ao2MaxDamperHeatingTV.setEnabled(enabled);
         ao2MaxDamperHeatingSpinner.setEnabled(enabled);
         if (enabled && isComposite) {
-            ao2MinDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
+            ao2MinDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_HEATING_MIN), false);
             ao2MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_HEATING_MAX), false);
         } else if (enabled) {
             ao2MinDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
@@ -440,7 +442,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
     }
     
     private void setDefaultAnalog1CompositeConfig(ArrayAdapter<Double> analogOutAdapter) {
-        ao1MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_ANALOG_MIN), false);
+        ao1MinDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_HEATING_MIN), false);
         ao1MaxDamperHeatingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_HEATING_MAX), false);
         ao1MaxDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_COOLING_MAX), false);
         ao1MinDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_COOLING_MIN), false);

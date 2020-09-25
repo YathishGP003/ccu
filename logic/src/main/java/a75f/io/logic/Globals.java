@@ -38,6 +38,7 @@ import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.ccu.CazProfile;
 import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.erm.EmrProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
@@ -195,7 +196,9 @@ public class Globals {
                 //If site already exists , import building tuners from backend before initializing building tuner equip.
                 HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                 if (!site.isEmpty()) {
-                    CCUHsApi.getInstance().importBuildingTuners();
+                    if (!CCUHsApi.getInstance().isPrimaryCcu()) {
+                        CCUHsApi.getInstance().importBuildingTuners();
+                    }
                     BuildingTuners.getInstance().updateBuildingTuners();
                 }
             
@@ -493,6 +496,11 @@ public class Globals {
                             DabProfile dab = new DabProfile();
                             dab.addDabEquip(Short.valueOf(eq.getGroup()));
                             L.ccu().zoneProfiles.add(dab);
+                            break;
+                        case DUAL_DUCT:
+                            DualDuctProfile dualDuct = new DualDuctProfile();
+                            dualDuct.addDualDuctEquip(Short.valueOf(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(dualDuct);
                             break;
                         case PLC:
                             PlcProfile plc = new PlcProfile();

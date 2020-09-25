@@ -265,10 +265,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     }
 
     private static void writePointsForEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
-        if((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab") || equip.getMarkers().contains("ti")) && !equip.getMarkers().contains("system"))
-        {
+        if((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab") || equip.getMarkers().contains("dualDuct")
+            || equip.getMarkers().contains("ti")) && !equip.getMarkers().contains("system")) {
+            
             VAVScheduler.processEquip(equip, equipSchedule, vacation, systemOccupancy);
-        }else if (equip.getMarkers().contains("pid")) {
+        } else if (equip.getMarkers().contains("pid")) {
             Occupied occ = equipSchedule.getCurrentValues();
             if (occ != null) {
                 putOccupiedModeCache(equip.getRoomRef(), occ);
@@ -720,9 +721,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             }
         }
     }
-
     public static HashMap getDABEquipPoints(String equipID) {
-
         HashMap dabPoints = new HashMap();
         dabPoints.put("Profile","DAB");
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
@@ -742,13 +741,13 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
         if (dischargePoint  != 0)
         {
-
             dabPoints.put("Discharge Airflow",dischargePoint+" \u2109");
         }else{
             dabPoints.put("Discharge Airflow",0+" \u2109");
         }
         return dabPoints;
     }
+    
     public static HashMap getTIEquipPoints(String equipID) {
 
         HashMap tiPoints = new HashMap();
@@ -1567,7 +1566,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             for (Zone z : HSUtil.getZones(f.getId()))
             {
                 Equip q = HSUtil.getEquipFromZone(z.getId());
-                if(q.getMarkers().contains("dab") || q.getMarkers().contains("vav" ) || q.getMarkers().contains("ti")) {
+                if(q.getMarkers().contains("dab") || q.getMarkers().contains("dualDuct")
+                                        || q.getMarkers().contains("vav" ) || q.getMarkers().contains("ti")) {
                     if (getTemporaryHoldExpiry(q) > thExpiry) {
                         thExpiry = getTemporaryHoldExpiry(q);
                     }

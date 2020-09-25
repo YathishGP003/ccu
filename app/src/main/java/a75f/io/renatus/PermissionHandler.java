@@ -64,10 +64,15 @@ class PermissionHandler {
         if (permission != PackageManager.PERMISSION_GRANTED) {
             listPermissionsNeeded.add(android.Manifest.permission.CAMERA);
         }
-        permission = ContextCompat.checkSelfPermission(activityContext, Manifest.permission.RECORD_AUDIO);
+        
+        //TODO : Current field installations are 1.533 which uses "pm install" command for OTA. (AppInstaller.java)
+        // It will pop up the BLOCKING permission dialog after upgrade if RECORD_AUDIO is included.
+        // As of 1.540 "pm install -g" will be used for OTA , which will silently grant permissions.
+        // This can be uncommented once all devices in field are upgraded beyond 1.540.
+        /*permission = ContextCompat.checkSelfPermission(activityContext, Manifest.permission.RECORD_AUDIO);
         if (permission != PackageManager.PERMISSION_GRANTED) {
             listPermissionsNeeded.add(android.Manifest.permission.RECORD_AUDIO);
-        }
+        }*/
         return listPermissionsNeeded;
     }
 }

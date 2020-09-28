@@ -527,6 +527,8 @@
 
     <!--VAV REHEAT - NO FAN Screen-->
     <string name="title_vavnofan">VAV REHEAT - NO FAN</string>
+    <string name="title_vav_seriesfan">VAV Reheat - Series</string>
+    <string name="title_vav_parallelfan">VAV Reheat - Parallel</string>
     <string name="label_damper1type">Damper1 Type</string>
     <string name="label_damper1size">Size</string>
     <string name="label_damper1shape">Shape</string>

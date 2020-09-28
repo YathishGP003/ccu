@@ -270,7 +270,13 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     void onVAVSeriesFanOnClick()
     {
         //Not Yet Done
-        //showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.VAV_SERIES_FAN, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress,
+                                                                    mRoomName,
+                                                                    mFloorName,
+                                                                    ProfileType.VAV_SERIES_FAN,
+                                                                    NodeType.SMART_NODE),
+                           FragmentBLEInstructionScreen.ID
+        );
     }
 
     @Optional

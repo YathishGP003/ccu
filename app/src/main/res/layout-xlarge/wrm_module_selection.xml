@@ -191,8 +191,7 @@
                             android:id="@+id/rl_vavSeriesFan"
                             android:layout_width="match_parent"
                             android:layout_height="92dp"
-                            android:layout_marginStart="180dp"
-                            android:visibility="gone">
+                            android:layout_marginStart="180dp">
 
                             <LinearLayout
                                 android:layout_width="wrap_content"

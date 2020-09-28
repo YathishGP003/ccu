@@ -50,6 +50,7 @@ import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -106,6 +107,8 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     
     String floorRef;
     String zoneRef;
+    
+    @BindView(R.id.textTitleFragment) TextView configTitle;
     
     public FragmentVAVConfiguration()
     {
@@ -339,6 +342,10 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         for (ReheatType actuator : ReheatType.values()) {
             reheatTypes.add(actuator.displayName);
         }
+        
+        if (mProfileType != ProfileType.VAV_REHEAT) {
+            reheatTypes.remove(ReheatType.TwoStage.displayName);
+        }
         reheatTypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, reheatTypes);
         reheatTypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
     
@@ -367,6 +374,8 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             
             }
         });
+    
+        initProfileConfig();
         
         if (mProfileConfig != null) {
             damperType.setSelection(damperTypesAdapter.getPosition(DamperType.values()[mProfileConfig.damperType].displayName), false);
@@ -435,6 +444,23 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
 
         });
     
+    }
+    
+    private void initProfileConfig() {
+        
+        if (mProfileType == ProfileType.VAV_REHEAT) {
+            
+            configTitle.setText(R.string.title_vavnofan);
+            
+        } else if (mProfileType == ProfileType.VAV_SERIES_FAN) {
+            
+            configTitle.setText(R.string.title_vav_seriesfan);
+            
+        } else if (mProfileType == ProfileType.VAV_PARALLEL_FAN) {
+            
+            configTitle.setText(R.string.title_vav_parallelfan);
+            
+        }
     }
     
     private void setupVavZoneProfile() {

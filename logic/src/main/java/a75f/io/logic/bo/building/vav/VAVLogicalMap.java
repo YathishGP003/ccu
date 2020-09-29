@@ -15,6 +15,7 @@ import a75.io.algos.VOCLoop;
 import a75.io.algos.tr.TrimResponseRequest;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
@@ -571,6 +572,7 @@ public class VAVLogicalMap
                 .build();
         String zoneDynamicPriorityPointID = CCUHsApi.getInstance().addPoint(zoneDynamicPriorityPoint);
         CCUHsApi.getInstance().writeHisValById(zoneDynamicPriorityPointID, 10.0);
+        
         //Create Physical points and map
         SmartNode device = new SmartNode(nodeAddr, siteRef, floor, room, equipRef);
         device.th1In.setPointRef(datID);
@@ -581,7 +583,15 @@ public class VAVLogicalMap
         //device.analog1Out.setEnabled(true);
         device.analog2Out.setPointRef(rhID);
         device.relay1.setPointRef(rhID);
-        device.relay2.setPointRef(rhID);
+        
+        if (profileType != ProfileType.VAV_REHEAT) {
+            createFanTuner(siteDis, equipRef, siteRef, floor, room, tz);
+            String fanType = profileType == ProfileType.VAV_SERIES_FAN ? "series" : "parallel";
+            String fanPointId = createFanOutPoint(siteDis, equipRef, siteRef, floor, room, tz, fanType);
+            device.relay2.setPointRef(fanPointId);
+        } else {
+            device.relay2.setPointRef(rhID);
+        }
         //device.analog2Out.setEnabled(true);
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
@@ -629,6 +639,56 @@ public class VAVLogicalMap
         setScheduleStatus("");
     
         CCUHsApi.getInstance().syncEntityTree();
+    }
+    
+    private String createFanOutPoint(String siteDis,
+                                   String equipRef,
+                                   String siteRef,
+                                   String floorRef,
+                                   String roomRef,
+                                   String tz,
+                                   String fanType
+    ) {
+        Point fan = new Point.Builder()
+                              .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-"+fanType+"Fan")
+                              .setEquipRef(equipRef)
+                              .setSiteRef(siteRef)
+                              .setRoomRef(roomRef)
+                              .setFloorRef(floorRef).setHisInterpolate("cov")
+                              .addMarker("vav").addMarker("logical").addMarker("zone").addMarker("his")
+                              .addMarker(fanType).addMarker("fan").addMarker("cmd").addMarker("his")
+                              .setGroup(String.valueOf(nodeAddr))
+                              .setUnit("%")
+                              .setTz(tz)
+                              .build();
+        String fanId = CCUHsApi.getInstance().addPoint(fan);
+        CCUHsApi.getInstance().writeHisValById(fanId, 0.0);
+        return fanId;
+    }
+    
+    private void createFanTuner(String siteDis,
+                                   String equipRef,
+                                   String siteRef,
+                                   String floorRef,
+                                   String roomRef,
+                                   String tz
+    ) {
+        Point fanControlOnFixedTimeDelay  = new Point.Builder()
+                                                .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-"+"fanControlOnFixedTimeDelay ")
+                                                .setSiteRef(siteRef)
+                                                .setEquipRef(equipRef)
+                                                .setRoomRef(roomRef)
+                                                .setFloorRef(floorRef).setHisInterpolate("cov")
+                                                .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                                .addMarker("fan").addMarker("control").addMarker("time").addMarker("delay").addMarker("sp")
+                                                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                                .setUnit("m")
+                                                .setTz(tz)
+                                                .build();
+        String fanControlOnFixedTimeDelayId = CCUHsApi.getInstance().addPoint(fanControlOnFixedTimeDelay);
+        CCUHsApi.getInstance().writeDefaultValById(fanControlOnFixedTimeDelayId, 1.0);
+        CCUHsApi.getInstance().writeHisValById(fanControlOnFixedTimeDelayId, 1.0);
+    
     }
     
     public void createVavConfigPoints(VavProfileConfiguration config, String equipRef, String floor, String room) {
@@ -1181,6 +1241,17 @@ public class VAVLogicalMap
         this.vavUnit.reheatValve.currentPosition = (int)reheatPos;
     }
     
+    public boolean isFanOn(String type)
+    {
+        double fanState = CCUHsApi.getInstance().readHisValByQuery(type+" and point and " +
+                                                                    "fan and cmd and group == \""+nodeAddr+ "\"");
+        return fanState > 0;
+    }
+    public void setFanOn(String type, boolean state)
+    {
+        CCUHsApi.getInstance().writeHisValByQuery(type+" and point and fan and cmd and group == \""+nodeAddr+"\"",
+                                                  state ? 1.0 : 0);
+    }
     
     public double getDischargeSp()
     {

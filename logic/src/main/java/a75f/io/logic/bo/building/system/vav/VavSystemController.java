@@ -6,18 +6,22 @@ import com.google.common.collect.EvictingQueue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 import a75.io.algos.ControlLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZonePriority;
+import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.building.vav.VavProfile;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.HSEquipUtil;
 import a75f.io.logic.jobs.ScheduleProcessJob;
@@ -136,7 +140,11 @@ public class VavSystemController extends SystemController
         logAlgoLoopVariables();
 
         ArrayList<HashMap<Object, Object>> vavEquips = CCUHsApi.getInstance()
-                                                               .readAllEntities("equip and zone and vav");
+                                                               .readAllEntities("equip and zone and vav")
+                                                               .stream()
+                                                               .filter(equip -> isDamperOverrideActive(equip))
+                                                               .collect(Collectors.toCollection(ArrayList::new));
+                                                               
         HashMap<String, Double> damperPosMap;
 
         if (systemState == HEATING && conditioningMode != SystemMode.OFF)
@@ -858,6 +866,15 @@ public class VavSystemController extends SystemController
     
     public double getStatus(String nodeAddr) {
         return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
+    }
+    
+    private boolean isDamperOverrideActive(HashMap<Object, Object> equipMap) {
+        
+        Short nodeAddr = Short.parseShort(equipMap.get("group").toString());
+        ZoneProfile profile = L.getProfile(nodeAddr);
+        CcuLog.d(L.TAG_CCU_SYSTEM,
+                 " isDamperOverrideActive "+equipMap.get("dis")+" : "+profile.isDamperOverrideActive());
+        return profile.isDamperOverrideActive();
     }
     
     @Override

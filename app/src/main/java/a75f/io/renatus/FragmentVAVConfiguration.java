@@ -109,6 +109,8 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     String zoneRef;
     
     @BindView(R.id.textTitleFragment) TextView configTitle;
+    @BindView(R.id.relay1TextView) TextView relay1TextView;
+    @BindView(R.id.relay1TextVal) TextView relay1TextVal;
     
     public FragmentVAVConfiguration()
     {
@@ -214,21 +216,13 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             }
             
         }
-        
-        //fillDamperDetails();
-        
-        //damper1layout  = (LinearLayout)view.findViewById(R.id.damper1layout);
-        //damperType.setSelection(mFSVData.getDamperType());
-        //if(mFSVData.getDamperType() != 4)
-        //damper1layout.setVisibility(View.VISIBLE);
     
         damperSize = view.findViewById(R.id.damperSize);
         ArrayAdapter<CharSequence> damperSizeAdapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.damper_size, R.layout.spinner_dropdown_item);
         damperSizeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         damperSize.setAdapter(damperSizeAdapter);
-        //damperSize.setSelection((mFSVData.getDamperSize()-4)/2);
-        
+       
         ArrayList<String> damperShapes = new ArrayList<>();
         for (DamperShape shape : DamperShape.values()) {
             damperShapes.add(shape.displayName);
@@ -237,29 +231,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         damperShapeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         damperShape = view.findViewById(R.id.damperShape);
         damperShape.setAdapter(damperShapeAdapter);
-    
-        /*// Add second damper details
-        damper2Type = (Spinner) view.findViewById(R.id.damperType2);
-        ArrayAdapter<Damper.Parameters> damper2TypeAdapter = new ArrayAdapter<Damper.Parameters>(getActivity(), R.layout.spinner_dropdown_item, mDampers);
-        damper2TypeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        damper2Type.setAdapter(damper2TypeAdapter);
-        damper2Type.setOnItemSelectedListener(this);
-        //damper2Type.setSelection(mFSVData.getDamper2Type());
-        damper2layout = (LinearLayout)view.findViewById(R.id.damper2layout);
-        final Spinner damper2Size = (Spinner) view.findViewById(R.id.damperSize2);
-        //if(mFSVData.getDamper2Type() != 4)
-            damper2layout.setVisibility(View.VISIBLE);
-    
-        ArrayAdapter<CharSequence> damper2SizeAdapter = ArrayAdapter.createFromResource(getActivity(),
-                R.array.damper_size, R.layout.spinner_dropdown_item);
-        damper2SizeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        damper2Size.setAdapter(damper2SizeAdapter);
-        //damper2Size.setSelection((mFSVData.getDamper2Size() - 4) / 2);
-    
-        final Spinner damper2Shape = (Spinner) view.findViewById(R.id.damperShape2);
-        damper2Shape.setAdapter(damperShapeAdapter);*/
-        //damperShape.setSelection(mFSVData.getDamperShape());
-        //damper2Shape.setSelection(mFSVData.getDamper2Shape());
+        
         temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
         setNumberPickerDividerColor(temperatureOffset);
         temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
@@ -318,16 +290,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                 R.array.zone_priority, R.layout.spinner_dropdown_item);
         zonePriorityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         zonePriority.setAdapter(zonePriorityAdapter);
-       
-        final SwitchCompat useOccupancyDetection = (SwitchCompat) view.findViewById(R.id.useOccupancyDetection);
-        //useOccupancyDetection.setChecked(mFSVData.getUseOccupancyDetection());
-    
-        final SwitchCompat ignoreSetpoint = (SwitchCompat) view.findViewById(R.id.ignoreSetpoint);
-        //ignoreSetpoint.setChecked(mFSVData.getIgnoreSetpointChange());
-    
-        LinearLayout zonePriorityLayout = (LinearLayout) view.findViewById(R.id.zonePriorityLayout);
-        //zonePriorityLayout.setVisibility((SystemSettingsData.getTier().ordinal() <= CCU_TIER.EXPERT.ordinal()) ? View.VISIBLE : View.GONE);
-    
+        
         damperType = view.findViewById(R.id.damperType);
     
         ArrayList<String> damperTypes = new ArrayList<>();
@@ -367,6 +330,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 reheatTypeSelected = ReheatType.values()[position];
+                setReheatTypeText(reheatTypeSelected);
             }
         
             @Override
@@ -392,38 +356,11 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             maxCoolingDamperPos.setValue(mProfileConfig.maxDamperCooling);
             minHeatingDamperPos.setValue(mProfileConfig.minDamperHeating);
             maxHeatingDamperPos.setValue(mProfileConfig.maxDamperHeating);
-            
+            setReheatTypeText(ReheatType.values()[reheatType.getSelectedItemPosition()]);
             
         } else {
             zonePriority.setSelection(2);//NORMAL
         }
-    
-        
-    
-        /*if (mProfileConfig != null) {
-            for (Output op : mProfileConfig.getOutputs()) {
-                Log.d("VAVConfig", " Config Outputs: "+op.getPort());
-                if (op.getPort() == Port.ANALOG_OUT_ONE) {
-                    damperType.setSelection(damperTypesAdapter.getPosition(op.getAnalogActuatorType()), false);
-                    damperTypeSelected = DamperType.getEnum(op.getAnalogActuatorType());
-                } else if (op.getPort() == Port.ANALOG_OUT_TWO) {
-                    reheatTypeSelected = ReheatType.getEnum(op.getAnalogActuatorType());
-                    reheatType.setSelection(2, false);
-                    reheatType.setAdapter(reheatTypesAdapter);
-                    reheatType.setSelection(reheatTypesAdapter.getPosition(op.getAnalogActuatorType()), false);
-                } else if (op.getPort() == Port.RELAY_ONE) {
-                    reheatTypeSelected = OneStage;
-                    reheatType.setSelection(0, false);
-                    reheatType.setAdapter(reheatTypesAdapter);
-                    reheatType.setSelection(reheatTypesAdapter.getPosition(op.getRelayActuatorType()), false);
-                } else if (op.getPort() == Port.RELAY_TWO) {
-                    reheatTypeSelected = TwoStage;
-                    reheatType.setSelection(1, false);
-                    reheatType.setAdapter(reheatTypesAdapter);
-                    reheatType.setSelection(reheatTypesAdapter.getPosition(op.getRelayActuatorType()), false);
-                }
-            }
-        }*/
         
         setButton.setOnClickListener(v -> {
 
@@ -460,6 +397,19 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             
             configTitle.setText(R.string.title_vav_parallelfan);
             
+        }
+    }
+    
+    private void setReheatTypeText(ReheatType reheatType) {
+        if (reheatType == ReheatType.ZeroToTenV ||
+            reheatType == ReheatType.TenToZeroV ||
+            reheatType == ReheatType.TwoToTenV ||
+            reheatType == ReheatType.TenToTwov) {
+            relay1TextView.setText(R.string.vav_label_analog_out_1);
+            relay1TextVal.setText(R.string.vav_label_modulating_reheat);
+        } else {
+            relay1TextView.setText(R.string.vav_label_relay1);
+            relay1TextVal.setText(R.string.vav_label_staged_heater);
         }
     }
     
@@ -500,13 +450,13 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                 analog2Op.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(reheatTypeSelected.displayName);
                 vavConfig.getOutputs().add(analog2Op);
                 break;
-            case OneStage:
+            case TwoStage:
                 Output relay2Op = new Output();
                 relay2Op.setAddress(mSmartNodeAddress);
                 relay2Op.setPort(Port.RELAY_TWO);
                 relay2Op.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
                 vavConfig.getOutputs().add(relay2Op);
-            case TwoStage:
+            case OneStage:
                 Output relay1Op = new Output();
                 relay1Op.setAddress(mSmartNodeAddress);
                 relay1Op.setPort(Port.RELAY_ONE);
@@ -515,6 +465,15 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                 break;
                 
         }
+        
+        if (mProfileType != ProfileType.VAV_REHEAT) {
+            Output relay2Op = new Output();
+            relay2Op.setAddress(mSmartNodeAddress);
+            relay2Op.setPort(Port.RELAY_TWO);
+            relay2Op.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
+            vavConfig.getOutputs().add(relay2Op);
+        }
+        
         mVavProfile.getProfileConfiguration().put(mSmartNodeAddress, vavConfig);
         if (mProfileConfig == null) {
             mVavProfile.addLogicalMapAndPoints(mSmartNodeAddress, vavConfig, floorRef, zoneRef);
@@ -609,34 +568,4 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                 reheatOptionLayout.invalidate();*/
         }
     }
-    
-    
-    public void fillDamperDetails() {
-        mDampers.add(Damper.TYPE.GENERIC_0To10V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_0To10V.ordinal(),
-                                                                                        Damper.TYPE.GENERIC_0To10V.toString(),
-                                                                                        0, 0, 0, 0, 0));
-        mDampers.add(Damper.TYPE.GENERIC_2TO10V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_2TO10V.ordinal(),
-                                                                                        Damper.TYPE.GENERIC_2TO10V.toString(),
-                                                                                        0, 0, 0, 0, 0));
-        mDampers.add(Damper.TYPE.GENERIC_10To0V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_10To0V.ordinal(),
-                                                                                        Damper.TYPE.GENERIC_10To0V.toString(),
-                                                                                        0, 0, 0, 0, 0));
-        mDampers.add(Damper.TYPE.GENERIC_10To2V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_10To2V.ordinal(),
-                                                                                        Damper.TYPE.GENERIC_10To2V.toString(),
-                                                                                        0, 0, 0, 0, 0));
-        mDampers.add(Damper.TYPE.MAT_RADIAL1.ordinal(), new Damper.Parameters(Damper.TYPE.MAT_RADIAL1.ordinal(),
-                                                                                     Damper.TYPE.MAT_RADIAL1.toString(),
-                                                                                     Damper.TYPE.MAT_RADIAL1.getDefaultMotorRPM(),
-                                                                                     Damper.TYPE.MAT_RADIAL1.getDefaultOperatingCurrent(),
-                                                                                     Damper.TYPE.MAT_RADIAL1.getDefaultStallCurrent(),
-                                                                                     Damper.TYPE.MAT_RADIAL1.getDefaultForwardBacklash(),
-                                                                                     Damper.TYPE.MAT_RADIAL1.getDefaultReverseBacklash()));
-    }
-    
-    
-    
-    
-    
-    
-    
 }

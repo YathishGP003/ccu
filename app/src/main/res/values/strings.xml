@@ -687,6 +687,20 @@
     </string-array>
 
 
+    <string name="vav_label_thermistor1">Thermistor-1</string>
+    <string name="vav_label_thermistor2">Thermistor-2</string>
+
+    <string name="vav_label_thermistor1_val">Discharge Airflow</string>
+    <string name="vav_label_thermistor2_val">Supply Airflow</string>
+
+    <string name="vav_label_relay1">Relay 1</string>
+    <string name="vav_label_relay2">Relay 2</string>
+
+    <string name="vav_label_series_fan">Series Fan </string>
+    <string name="vav_label_parallel_fan">Parallel Fan</string>
+    <string name="vav_label_staged_heater">Staged Electric Heater </string>
+    <string name="vav_label_modulating_reheat">Modulating Reheat</string>
+    <string name="vav_label_analog_out_1">Analog Out 1</string>
     <!--BACnet Option-->
     <string name="enable_bacnet">Use BACnet</string>
     <string name="hint_deviceIP">Device IP Address</string>

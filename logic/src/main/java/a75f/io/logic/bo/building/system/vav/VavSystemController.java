@@ -6,6 +6,7 @@ import com.google.common.collect.EvictingQueue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.stream.Collectors;
 
 import a75.io.algos.ControlLoop;
@@ -140,11 +141,19 @@ public class VavSystemController extends SystemController
         logAlgoLoopVariables();
 
         ArrayList<HashMap<Object, Object>> vavEquips = CCUHsApi.getInstance()
-                                                               .readAllEntities("equip and zone and vav")
-                                                               .stream()
-                                                               .filter(equip -> isDamperOverrideActive(equip))
-                                                               .collect(Collectors.toCollection(ArrayList::new));
+                                                               .readAllEntities("equip and zone and vav");
                                                                
+        ArrayList<HashMap<Object, Object>> overriddenZoneEquips = new ArrayList<>();
+    
+        Iterator<HashMap<Object, Object>> equipIterator = vavEquips.iterator();
+        while (equipIterator.hasNext()) {
+            HashMap equipMap = equipIterator.next();
+            if (isDamperOverrideActive(equipMap)) {
+                overriddenZoneEquips.add(equipMap);
+                equipIterator.remove();
+            }
+        }
+        
         HashMap<String, Double> damperPosMap;
 
         if (systemState == HEATING && conditioningMode != SystemMode.OFF)
@@ -158,7 +167,9 @@ public class VavSystemController extends SystemController
         }
 
         applyLimitsAndSetDamperPosition(vavEquips, damperPosMap);
-    
+        if (!overriddenZoneEquips.isEmpty()) {
+            applyOverriddenDampers(overriddenZoneEquips);
+        }
     }
 
     private void initializeAlgoLoopVariables() {
@@ -862,6 +873,22 @@ public class VavSystemController extends SystemController
             );
     
         }
+    }
+    
+    private void applyOverriddenDampers(ArrayList<HashMap<Object, Object>> equips) {
+       
+        for (HashMap<Object, Object> equip : equips) {
+            CcuLog.d(L.TAG_CCU_SYSTEM, " applyOverriddenDampers "+equip.get("dis"));
+            HashMap<Object, Object> normalizedDamper = CCUHsApi.getInstance().readEntity(
+                "point and damper and normalized and cmd and equipRef == \"" + equip.get("id").toString() + "\""
+            );
+    
+            double curDamperPos = CCUHsApi.getInstance().readHisValById(normalizedDamper.get("id").toString());
+            if (curDamperPos > 0) {
+                CCUHsApi.getInstance().writeHisValById(normalizedDamper.get("id").toString() , 0.0);
+            }
+        }
+        
     }
     
     public double getStatus(String nodeAddr) {

@@ -280,8 +280,18 @@ public class LSmartNode
                     short mappedVal = 0;
                     if (isEquipType("vav", node))
                     {
-                        //In case of vav , relay-2 maps to stage-2
-                        mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), p.getPort().equals(RELAY_TWO) ? logicalVal > 50 : logicalVal > 0));
+                        //In case of vav - series/paralle fan, relay-2 maps to fan
+                        if (isEquipType("series", node) || isEquipType("parallel", node)) {
+                            mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) :
+                                                                 mapDigitalOut(p.getType(), logicalVal > 0)
+                            );
+                        } else {
+                            //In case of vav - no fan, relay-2 maps to stage-2
+                            mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) :
+                                                                 mapDigitalOut(p.getType(), p.getPort().equals(RELAY_TWO) ?
+                                                                                            logicalVal > 50 : logicalVal > 0)
+                            );
+                        }
                     }else if (isEquipType("sse", node))
                     {
                         //In case of sse , relay actuator maps to normally open by default

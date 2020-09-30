@@ -260,16 +260,21 @@ public class VavSeriesFanProfile extends VavProfile
     }
     
     private void updateZoneDead(short node) {
-        CcuLog.d(L.TAG_CCU_ZONE,"Zone Temp Dead : "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
+    
+        CcuLog.d(L.TAG_CCU_ZONE,"Zone Temp Dead "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
         state = TEMPDEAD;
         String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+node+"\"");
         if (!curStatus.equals("Zone Temp Dead"))
         {
             CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
-            vavDevice = vavDeviceMap.get(node);
+            VAVLogicalMap vavDevice = vavDeviceMap.get(node);
+            SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
             double damperMin = vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "min");
             double damperMax = vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "max");
-            double damperPos = (L.ccu().systemProfile.getSystemController().getSystemState() == SystemController.State.OFF) ? damperMin : (damperMax+damperMin)/2;
+            double damperPos = (damperMax+damperMin)/2;
+            if(systemMode == SystemMode.OFF) {
+                damperPos = vavDevice.getDamperPos() > 0 ? vavDevice.getDamperPos() : damperMin;
+            }
             vavDevice.setDamperPos(damperPos);
             vavDevice.setNormalizedDamperPos(damperPos);
             vavDevice.setReheatPos(0);
@@ -281,7 +286,8 @@ public class VavSeriesFanProfile extends VavProfile
         if (occupied || L.ccu().systemProfile.systemFanLoopOp > 0) {
             //Prior to starting the fan, the damper is first driven fully closed to ensure that the fan is not rotating backwards.
             //Once the fan is proven on for a fixed time delay (15 seconds), the damper override is released
-        
+            CcuLog.d(L.TAG_CCU_ZONE,
+                     "updateFanStatus fanOnDelayCounter: "+fanOnDelayCounter+" fanOn: "+vavDevice.isFanOn("series"));
             if (!vavDevice.isFanOn("series")) {
                 double fanOnDelay = TunerUtil.readTunerValByQuery("vav and fan and control and delay " +
                                                                   "and equipRef == \""+equipId+"\"");
@@ -296,6 +302,7 @@ public class VavSeriesFanProfile extends VavProfile
             }
         
         } else {
+            CcuLog.d(L.TAG_CCU_ZONE, "updateFanStatus false");
             if (vavDevice.isFanOn("series")) {
                 vavDevice.setFanOn("series", false);
             }

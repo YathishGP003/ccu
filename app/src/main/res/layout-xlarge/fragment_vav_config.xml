@@ -247,7 +247,8 @@
                     android:layout_marginTop="34dp"
                     android:layout_marginEnd="82dp"
                     android:text="@string/vav_label_relay1"
-                    android:textAppearance="@style/title_normal" />
+                    android:textAppearance="@style/title_normal"
+                    android:visibility="gone"/>
 
                 <TextView
                     android:id="@+id/relay1TextVal"
@@ -259,7 +260,8 @@
                     android:layout_marginTop="34dp"
                     android:layout_toEndOf="@+id/relay1TextView"
                     android:text="@string/vav_label_staged_heater"
-                    android:textAppearance="@style/label_values" />
+                    android:textAppearance="@style/label_values"
+                    android:visibility="gone"/>
 
 
                 <TextView
@@ -272,7 +274,8 @@
                     android:layout_toStartOf="@+id/relay2TextVal"
                     android:layout_alignStart="@+id/thermistor2TextView"
                     android:text="@string/vav_label_relay2"
-                    android:textAppearance="@style/title_normal" />
+                    android:textAppearance="@style/title_normal"
+                    android:visibility="gone"/>
 
                 <TextView
                     android:id="@+id/relay2TextVal"
@@ -283,7 +286,8 @@
                     android:layout_marginTop="34dp"
                     android:layout_alignParentRight="true"
                     android:text="@string/vav_label_series_fan"
-                    android:textAppearance="@style/label_values" />
+                    android:textAppearance="@style/label_values"
+                    android:visibility="gone"/>
 
 
                 <TextView

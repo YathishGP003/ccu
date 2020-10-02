@@ -95,10 +95,8 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     private ArrayList<Damper.Parameters> mDampers = new ArrayList<Damper.Parameters>();
     ArrayAdapter<String> damperTypesAdapter;
     ArrayAdapter<String> reheatTypesAdapter;
-    
-    //ArrayAdapter<String> damperActuatorAdapter;
-    //ArrayAdapter<String> relayActuatorAdapter;
-    //ArrayAdapter<String> reheatPortAdapter;
+    ArrayAdapter<CharSequence> damperSizeAdapter;
+    ArrayAdapter<String> damperShapeAdapter;
     
     DamperType damperTypeSelected;
     //int damperActuatorSelection;
@@ -111,6 +109,8 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     @BindView(R.id.textTitleFragment) TextView configTitle;
     @BindView(R.id.relay1TextView) TextView relay1TextView;
     @BindView(R.id.relay1TextVal) TextView relay1TextVal;
+    @BindView(R.id.relay2TextView) TextView relay2TextView;
+    @BindView(R.id.relay2TextVal) TextView relay2TextVal;
     
     public FragmentVAVConfiguration()
     {
@@ -182,7 +182,6 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         zoneRef = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         floorRef = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         mNodeType = NodeType.valueOf(getArguments().getString(FragmentCommonBundleArgs.NODE_TYPE));
-        //mZone = L.findZoneByName(mFloorName, mRoomName);
         mProfileType = ProfileType.values()[getArguments().getInt(FragmentCommonBundleArgs.PROFILE_TYPE)];
         ButterKnife.bind(this, view);
         return view;
@@ -217,21 +216,96 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             
         }
     
+        initializeAdapters(view);
+        
+        initializeNumberPickers(view);
+
+        enableOccupancyControl = view.findViewById(R.id.enableOccupancyControl);
+        enableCO2Control = view.findViewById(R.id.enableCO2Control);
+        enableIAQControl = view.findViewById(R.id.enableIAQControl);
+        
+    
+        
+    
+        damperType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                damperTypeSelected = DamperType.values()[position];
+            }
+        
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            
+            }
+        });
+    
+        reheatType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                reheatTypeSelected = ReheatType.values()[position];
+                setReheatTypeText(reheatTypeSelected);
+            }
+        
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            
+            }
+        });
+    
+        initProfileConfig();
+        
+        configureSetButton();
+        
+        initializeViews();
+    
+    }
+    
+    private void initializeAdapters(View view) {
         damperSize = view.findViewById(R.id.damperSize);
-        ArrayAdapter<CharSequence> damperSizeAdapter = ArrayAdapter.createFromResource(getActivity(),
-                R.array.damper_size, R.layout.spinner_dropdown_item);
+        damperSizeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.damper_size, R.layout.spinner_dropdown_item);
         damperSizeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         damperSize.setAdapter(damperSizeAdapter);
-       
+    
         ArrayList<String> damperShapes = new ArrayList<>();
         for (DamperShape shape : DamperShape.values()) {
             damperShapes.add(shape.displayName);
         }
-        ArrayAdapter<String> damperShapeAdapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_dropdown_item, damperShapes);
+        damperShapeAdapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_dropdown_item, damperShapes);
         damperShapeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         damperShape = view.findViewById(R.id.damperShape);
         damperShape.setAdapter(damperShapeAdapter);
+    
+        ArrayList<String> damperTypes = new ArrayList<>();
+        for (DamperType damper : DamperType.values()) {
+            damperTypes.add(damper.displayName);
+        }
+        damperTypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, damperTypes);
+        damperTypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        damperType = view.findViewById(R.id.damperType);
+        damperType.setAdapter(damperTypesAdapter);
+    
+        ArrayList<String> reheatTypes = new ArrayList<>();
+        for (ReheatType actuator : ReheatType.values()) {
+            reheatTypes.add(actuator.displayName);
+        }
+    
+        if (mProfileType != ProfileType.VAV_REHEAT) {
+            reheatTypes.remove(ReheatType.TwoStage.displayName);
+        }
+        reheatTypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, reheatTypes);
+        reheatTypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+    
+        reheatType.setAdapter(reheatTypesAdapter);
+    
+        zonePriority = view.findViewById(R.id.zonePriority);
+        ArrayAdapter<CharSequence> zonePriorityAdapter = ArrayAdapter.createFromResource(getActivity(),
+                                                                                         R.array.zone_priority, R.layout.spinner_dropdown_item);
+        zonePriorityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        zonePriority.setAdapter(zonePriorityAdapter);
         
+    }
+    
+    private void initializeNumberPickers(View view) {
         temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
         setNumberPickerDividerColor(temperatureOffset);
         temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
@@ -275,72 +349,15 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         minHeatingDamperPos.setMaxValue(100);
         minHeatingDamperPos.setValue(40);
         minHeatingDamperPos.setWrapSelectorWheel(false);
-
+    
         setDividerColor(temperatureOffset);
         setDividerColor(maxCoolingDamperPos);
         setDividerColor(minCoolingDamperPos);
         setDividerColor(maxHeatingDamperPos);
         setDividerColor(minHeatingDamperPos);
-
-        enableOccupancyControl = view.findViewById(R.id.enableOccupancyControl);
-        enableCO2Control = view.findViewById(R.id.enableCO2Control);
-        enableIAQControl = view.findViewById(R.id.enableIAQControl);
-        zonePriority = view.findViewById(R.id.zonePriority);
-        ArrayAdapter<CharSequence> zonePriorityAdapter = ArrayAdapter.createFromResource(getActivity(),
-                R.array.zone_priority, R.layout.spinner_dropdown_item);
-        zonePriorityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        zonePriority.setAdapter(zonePriorityAdapter);
-        
-        damperType = view.findViewById(R.id.damperType);
+    }
     
-        ArrayList<String> damperTypes = new ArrayList<>();
-        for (DamperType damper : DamperType.values()) {
-            damperTypes.add(damper.displayName);
-        }
-        damperTypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, damperTypes);
-        damperTypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        damperType.setAdapter(damperTypesAdapter);
-    
-        ArrayList<String> reheatTypes = new ArrayList<>();
-        for (ReheatType actuator : ReheatType.values()) {
-            reheatTypes.add(actuator.displayName);
-        }
-        
-        if (mProfileType != ProfileType.VAV_REHEAT) {
-            reheatTypes.remove(ReheatType.TwoStage.displayName);
-        }
-        reheatTypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, reheatTypes);
-        reheatTypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-    
-        reheatType.setAdapter(reheatTypesAdapter);
-    
-        damperType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                damperTypeSelected = DamperType.values()[position];
-            }
-        
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            
-            }
-        });
-    
-        reheatType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                reheatTypeSelected = ReheatType.values()[position];
-                setReheatTypeText(reheatTypeSelected);
-            }
-        
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            
-            }
-        });
-    
-        initProfileConfig();
-        
+    private void initializeViews() {
         if (mProfileConfig != null) {
             damperType.setSelection(damperTypesAdapter.getPosition(DamperType.values()[mProfileConfig.damperType].displayName), false);
             damperSize.setSelection(damperSizeAdapter.getPosition(String.valueOf(mProfileConfig.damperSize)), false);
@@ -357,30 +374,38 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             minHeatingDamperPos.setValue(mProfileConfig.minDamperHeating);
             maxHeatingDamperPos.setValue(mProfileConfig.maxDamperHeating);
             setReheatTypeText(ReheatType.values()[reheatType.getSelectedItemPosition()]);
-            
+        
         } else {
             zonePriority.setSelection(2);//NORMAL
         }
-        
+    }
+    
+    private void configureSetButton() {
         setButton.setOnClickListener(v -> {
-
+        
             setButton.setEnabled(false);
             ProgressDialogUtils.showProgressDialog(getActivity(), "Saving VAV Configuration");
-
+        
             new Thread(() -> {
                 setupVavZoneProfile();
                 L.saveCCUState();
             }).start();
-
+        
             new Handler().postDelayed(() -> {
                 ProgressDialogUtils.hideProgressDialog();
                 FragmentVAVConfiguration.this.closeAllBaseDialogFragments();
                 getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                 LSerial.getInstance().sendSeedMessage(false, false, mSmartNodeAddress, zoneRef, floorRef);
             }, 12000);
-
+        
         });
+    }
     
+    private void updateRelayMappingVisibility(int visibility) {
+        relay1TextView.setVisibility(visibility);
+        relay1TextVal.setVisibility(visibility);
+        relay2TextView.setVisibility(visibility);
+        relay2TextVal.setVisibility(visibility);
     }
     
     private void initProfileConfig() {
@@ -388,15 +413,19 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         if (mProfileType == ProfileType.VAV_REHEAT) {
             
             configTitle.setText(R.string.title_vavnofan);
+            updateRelayMappingVisibility(View.GONE);
             
         } else if (mProfileType == ProfileType.VAV_SERIES_FAN) {
             
             configTitle.setText(R.string.title_vav_seriesfan);
+            updateRelayMappingVisibility(View.VISIBLE);
+            relay2TextVal.setText(R.string.vav_label_series_fan);
             
         } else if (mProfileType == ProfileType.VAV_PARALLEL_FAN) {
             
             configTitle.setText(R.string.title_vav_parallelfan);
-            
+            updateRelayMappingVisibility(View.VISIBLE);
+            relay2TextVal.setText(R.string.vav_label_parallel_fan);
         }
     }
     

@@ -196,6 +196,7 @@ public class VavSeriesFanProfile extends VavProfile
     
     private void handleDeadband() {
     
+        state = DEADBAND;
         valve.currentPosition = 0;
         heatingLoop.setDisabled();
         coolingLoop.setDisabled();
@@ -219,20 +220,17 @@ public class VavSeriesFanProfile extends VavProfile
         double maxHeatingPos = vavDevice.getDamperLimit("heating", "max");
         double minHeatingPos = vavDevice.getDamperLimit("heating", "min");
         double valveStart = minHeatingPos + (maxHeatingPos - minHeatingPos) * valveStartDamperPercent / 100;
-        if (damper.currentPosition > valveStart)
-        {
+        if (damper.currentPosition > valveStart) {
             valve.currentPosition = (int) ((damper.currentPosition - valveStart) * 100 / (maxHeatingPos - valveStart));
-        }
-        else
-        {
+        } else {
             valve.currentPosition = 0;
         }
     }
     
     private boolean getZoneOccupancy(String equipId) {
-        String zoneId = HSUtil.getZoneIdFromEquipId(equipId);;
+        String zoneId = HSUtil.getZoneIdFromEquipId(equipId);
         Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
-        return occ == null ? false : occ.isOccupied();
+        return occ != null && occ.isOccupied();
     }
     
     private void updateIaqCompensatedMinDamperPos(boolean occupied, short node) {
@@ -244,15 +242,13 @@ public class VavSeriesFanProfile extends VavProfile
         boolean  enabledIAQControl = vavDevice.getConfigNumVal("enable and iaq") > 0 ;
         
         //CO2 loop output from 0-50% modulates damper min position.
-        if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0)
-        {
+        if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0) {
             damper.iaqCompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * Math.min(50, co2Loop.getLoopOutput()) / 50;
             CcuLog.d(L.TAG_CCU_ZONE, "CO2LoopOp :" + co2Loop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
         }
     
         //VOC loop output from 0-50% modulates damper min position.
-        if (enabledIAQControl && occupied && vocLoop.getLoopOutput(voc) > 0)
-        {
+        if (enabledIAQControl && occupied && vocLoop.getLoopOutput(voc) > 0) {
             damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * Math.min(50, vocLoop.getLoopOutput()) / 50;
             CcuLog.d(L.TAG_CCU_ZONE, "VOCLoopOp :" + vocLoop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
         }
@@ -264,8 +260,7 @@ public class VavSeriesFanProfile extends VavProfile
         CcuLog.d(L.TAG_CCU_ZONE,"Zone Temp Dead "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
         state = TEMPDEAD;
         String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+node+"\"");
-        if (!curStatus.equals("Zone Temp Dead"))
-        {
+        if (!curStatus.equals("Zone Temp Dead")) {
             CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
             VAVLogicalMap vavDevice = vavDeviceMap.get(node);
             SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];

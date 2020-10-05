@@ -331,7 +331,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         minCoolingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         minCoolingDamperPos.setMinValue(0);
         minCoolingDamperPos.setMaxValue(100);
-        minCoolingDamperPos.setValue(40);
+        minCoolingDamperPos.setValue(20);
         minCoolingDamperPos.setWrapSelectorWheel(false);
     
         maxHeatingDamperPos = view.findViewById(R.id.maxHeatingDamperPos);
@@ -347,7 +347,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         minHeatingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         minHeatingDamperPos.setMinValue(0);
         minHeatingDamperPos.setMaxValue(100);
-        minHeatingDamperPos.setValue(40);
+        minHeatingDamperPos.setValue(20);
         minHeatingDamperPos.setWrapSelectorWheel(false);
     
         setDividerColor(temperatureOffset);

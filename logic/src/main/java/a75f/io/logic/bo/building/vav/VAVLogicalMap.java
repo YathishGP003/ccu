@@ -658,7 +658,6 @@ public class VAVLogicalMap
                               .addMarker("vav").addMarker("logical").addMarker("zone").addMarker("his")
                               .addMarker(fanType).addMarker("fan").addMarker("cmd").addMarker("his")
                               .setGroup(String.valueOf(nodeAddr))
-                              .setUnit("%")
                               .setTz(tz)
                               .build();
         String fanId = CCUHsApi.getInstance().addPoint(fan);

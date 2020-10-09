@@ -275,7 +275,9 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and system and config and "+tags);
-        return hayStack.readPointPriorityVal(cdb.get("id").toString());
+        if((cdb != null) && (cdb.get("id") != null))
+            return hayStack.readPointPriorityVal(cdb.get("id").toString());
+        else return 0;
     }
     
     public void setConfigVal(String tags, double val) {

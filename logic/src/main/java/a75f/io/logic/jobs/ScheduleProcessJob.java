@@ -73,7 +73,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 {
 
     private static final String TAG = "ScheduleProcessJob";
-    public static final String ACTION_OCCUPANCY_CHANGE = "occupancy_change";
+    public static final String ACTION_STATUS_CHANGE = "status_change";
 
     static HashMap<String, Occupied> occupiedHashMap = new HashMap<String, Occupied>();
 
@@ -265,10 +265,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     }
 
     private static void writePointsForEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
-        if((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab") || equip.getMarkers().contains("ti")) && !equip.getMarkers().contains("system"))
-        {
+        if((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab") || equip.getMarkers().contains("dualDuct")
+            || equip.getMarkers().contains("ti")) && !equip.getMarkers().contains("system")) {
+            
             VAVScheduler.processEquip(equip, equipSchedule, vacation, systemOccupancy);
-        }else if (equip.getMarkers().contains("pid")) {
+        } else if (equip.getMarkers().contains("pid")) {
             Occupied occ = equipSchedule.getCurrentValues();
             if (occ != null) {
                 putOccupiedModeCache(equip.getRoomRef(), occ);
@@ -616,7 +617,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
         double systemOccupancyValue = CCUHsApi.getInstance().readHisValByQuery("point and system and his and occupancy and mode");
         if (systemOccupancyValue != systemOccupancy.ordinal()){
-            Globals.getInstance().getApplicationContext().sendBroadcast(new Intent(ACTION_OCCUPANCY_CHANGE));
+            Globals.getInstance().getApplicationContext().sendBroadcast(new Intent(ACTION_STATUS_CHANGE));
         }
 
         CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and mode",(double)systemOccupancy.ordinal());
@@ -720,9 +721,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             }
         }
     }
-
     public static HashMap getDABEquipPoints(String equipID) {
-
         HashMap dabPoints = new HashMap();
         dabPoints.put("Profile","DAB");
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
@@ -742,13 +741,13 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
         if (dischargePoint  != 0)
         {
-
             dabPoints.put("Discharge Airflow",dischargePoint+" \u2109");
         }else{
             dabPoints.put("Discharge Airflow",0+" \u2109");
         }
         return dabPoints;
     }
+    
     public static HashMap getTIEquipPoints(String equipID) {
 
         HashMap tiPoints = new HashMap();
@@ -1141,7 +1140,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     break;
                 case 3:
                     plcPoints.put("Dynamic Unit Type", "Airflow");
-                    plcPoints.put("Dynamic Unit", "%");
+                    plcPoints.put("Dynamic Unit", "CFM");
                     break;
                 case 4:
                     plcPoints.put("Dynamic Unit Type", "Humidity");
@@ -1163,7 +1162,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 case 9:
                 case 10:
                     plcPoints.put("Dynamic Unit Type", "Current");
-                    plcPoints.put("Dynamic Unit", "AMPS");
+                    plcPoints.put("Dynamic Unit", "A");
                     break;
             }
         }
@@ -1181,7 +1180,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 break;
             case 4:
                 plcPoints.put("Unit Type", "Airflow");
-                plcPoints.put("Unit", "%");
+                plcPoints.put("Unit", "CFM");
                 break;
             case 5:
                 plcPoints.put("Unit Type", "Humidity");
@@ -1203,7 +1202,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             case 10:
             case 11:
                 plcPoints.put("Unit Type", "Current");
-                plcPoints.put("Unit", "AMPS");
+                plcPoints.put("Unit", "A");
                 break;
         }
 
@@ -1567,7 +1566,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             for (Zone z : HSUtil.getZones(f.getId()))
             {
                 Equip q = HSUtil.getEquipFromZone(z.getId());
-                if(q.getMarkers().contains("dab") || q.getMarkers().contains("vav" ) || q.getMarkers().contains("ti")) {
+                if(q.getMarkers().contains("dab") || q.getMarkers().contains("dualDuct")
+                                        || q.getMarkers().contains("vav" ) || q.getMarkers().contains("ti")) {
                     if (getTemporaryHoldExpiry(q) > thExpiry) {
                         thExpiry = getTemporaryHoldExpiry(q);
                     }

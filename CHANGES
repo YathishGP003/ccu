@@ -1,6 +1,43 @@
- - Merge branch 'bug/mahesh/2688-CCU_Pi_loop_fix' into 'master'
- - Refactor: Update minor version to 536
- - fix for analog1 max select
- - Merge branch 'bug/mahesh/2546-dynamic-target-both-points-added' into 'master'
- - add unit to control variable
- - fixed the issue
+ - Merged PR 88: DAB Dual duct Profile Implementation
+ - Remove RECORD_AUDIO permissions to avoid permission pop-ups at ota sites
+ - Analog mapping issues
+ - Merge branch 'master' into story/samjith/3118_dab_dual_duct_implementation
+ - VOC tuner value update
+ - Fix QE reported issues
+ - Dualduct zone inclusion in System Algo
+ - Merged PR 55: 2560-CCU: Slow Config Loading Screens When Saving Changes
+ - Merge master
+ - FIX issues reported by QE - Crash when analog2 is heating - UI shows default value for some of the config params - Set enum tag on analog/thermistor config points.
+ - Merged PR 77: 1201 : CCU Upgrade
+ - Merge branch 'master' into story/samjith/1201-CCU_Upgrade_Android_API_to_24_Objectbox_upgrade
+ - Refine UI, fix alignments
+ - Merged PR 63: bug/mahesh/3156_CCU_weatherRef_deletion_site_sync
+ - 2560: dismiss all last dialog fragments
+ - Merged PR 45: 2983-CCU: CM Relays reset to 0 when navigate to system profile
+ - Fix Compiler warnings and UI issues
+ - UI updates
+ - Multimodule checks
+ - Merge master
+ - Composite point update
+ - Merged PR 69: Bug/2477/ Duplicate building tuners
+ - Merge master
+ - Update schedule status for dualduct and UserIntent tweak
+ - Tweaks and refactors
+ - update damper limit tags
+ - Zone view updates
+ - UI integration
+ - Update composite damper algo
+ - 3156: remove site update from update entities, since we already updating it in site sync adapter
+ - 2560: save data on thread
+ - Dualduct algo implementation
+ - Add tuners for dualduct
+ - run on thread remove async background calls when updating modules
+ - Create equip and points
+ - Dual duct pairing support
+ - fixes spinners on item selection
+ - dual duct screen xml resource
+ - Correct the message displayed during permission denial
+ - Fix NPE during first time install of non-primary CCU. New Tuner creation is moved out of buildingtuner equip constructor to avoid it getting invoked unncessarily.
+ - BUG : 2477 New building tuners create duplicate entries on server
+ - Merge branch 'master' into story/samjith/1201-CCU_Upgrade_Android_API_to_24_Objectbox_upgrade
+ - Story/1201-CCU:Upgrade Android API version to 24, Remove Unnecessary Permissions, Add Granting of Necessary Runtime Permission, and Upgrade ObjectBox to 2.6

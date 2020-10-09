@@ -24,10 +24,12 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
+import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.Prefs;
@@ -170,6 +172,19 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			lp.setMargins(0, 22, 0, 0);
 			imageView.setLayoutParams(lp);
 		}
+		view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+
+			@Override
+			public void onViewAttachedToWindow(View view) {
+			}
+
+			@Override
+			public void onViewDetachedFromWindow(View view) {
+				if (Globals.getInstance().isTestMode()) {
+					Globals.getInstance().setTestMode(false);
+				}
+			}
+		});
 	}
 
 	private void goTonext() {
@@ -284,19 +299,23 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		ArrayAdapter<Double> coolingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
 		coolingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog1Test.setAdapter(coolingSatTestAdapter);
+		ahuAnalog1Test.setSelection(0,false);
 		
 		ArrayAdapter<Double> spTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
 		spTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog2Test.setAdapter(spTestAdapter);
+		ahuAnalog2Test.setSelection(0,false);
 		
 		ArrayAdapter<Double> heatingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
 		heatingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog3Test.setAdapter(heatingSatTestAdapter);
+		ahuAnalog3Test.setSelection(0,false);
 		
 		ArrayAdapter<Double> co2TestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
 		co2TestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog4Test.setAdapter(co2TestAdapter);
-		
+		ahuAnalog4Test.setSelection(0,false);
+
 		analog1Min.setOnItemSelectedListener(this);
 		analog1Max.setOnItemSelectedListener(this);
 		analog2Min.setOnItemSelectedListener(this);
@@ -535,8 +554,25 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		
 		short relayStatus = (short) ((relay3Test.isChecked() ? 1 << 2 : 0) | (relay7Test.isChecked() ? 1 << 6 : 0));
 		msg.relayBitmap.set(relayStatus);
-		
 		MeshUtil.sendStructToCM(msg);
+
+		ControlMote.setAnalogOut("analog1",Double.parseDouble(ahuAnalog1Test.getSelectedItem().toString()));
+		ControlMote.setAnalogOut("analog2",Double.parseDouble(ahuAnalog2Test.getSelectedItem().toString()));
+		ControlMote.setAnalogOut("analog3",Double.parseDouble(ahuAnalog3Test.getSelectedItem().toString()));
+		ControlMote.setAnalogOut("analog4",Double.parseDouble(ahuAnalog4Test.getSelectedItem().toString()));
+		ControlMote.setRelayState("relay3",relay3Test.isChecked() ? 1 : 0);
+		ControlMote.setRelayState("relay7",relay7Test.isChecked() ? 1 : 0);
+
+		if (relayStatus > 0 || Double.parseDouble(ahuAnalog1Test.getSelectedItem().toString()) > 0 || Double.parseDouble(ahuAnalog2Test.getSelectedItem().toString()) > 0 ||
+				Double.parseDouble(ahuAnalog3Test.getSelectedItem().toString()) > 0 || Double.parseDouble(ahuAnalog4Test.getSelectedItem().toString()) > 0) {
+			if (!Globals.getInstance().isTestMode()) {
+				Globals.getInstance().setTestMode(true);
+			}
+		} else {
+			if (Globals.getInstance().isTestMode()) {
+				Globals.getInstance().setTestMode(false);
+			}
+		}
 	}
 	
 	

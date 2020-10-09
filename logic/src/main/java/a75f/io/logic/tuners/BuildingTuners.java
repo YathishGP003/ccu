@@ -15,6 +15,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.dualduct.DualDuctConstants;
 
 /**
  * Created by samjithsadasivan on 10/5/18.
@@ -50,7 +51,6 @@ public class BuildingTuners
             HashMap siteMap = hayStack.read(Tags.SITE);
             siteRef = siteMap.get(Tags.ID).toString();
             tz = siteMap.get("tz").toString();
-            OAOTuners.updateNewTuners(siteRef,equipRef, equipDis,tz,false);
             CcuLog.d(L.TAG_CCU_SYSTEM,"BuildingTuner equip already present");
             return;
         }
@@ -75,7 +75,13 @@ public class BuildingTuners
         addDefaultStandaloneTuners();
         addDefaultDabTuners();
         OAOTuners.addDefaultTuners(equipDis, siteRef, equipRef, tz);
+        DualDuctTuners.addDefaultTuners(siteRef, equipRef, equipDis, tz);
         CCUHsApi.getInstance().syncEntityTree();
+    }
+    
+    public void updateBuildingTuners() {
+        DualDuctTuners.addDefaultTuners(siteRef, equipRef, equipDis, tz);
+        OAOTuners.updateNewTuners(siteRef,equipRef, equipDis,tz,false);
     }
     
     public void addDefaultBuildingTuners() {

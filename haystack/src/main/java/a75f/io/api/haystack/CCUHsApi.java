@@ -49,6 +49,8 @@ import a75f.io.logger.CcuLog;
 
 public class CCUHsApi
 {
+    
+    public static final String TAG = CCUHsApi.class.getSimpleName();
 
     public static boolean CACHED_HIS_QUERY = false ;
     private static CCUHsApi instance;
@@ -194,10 +196,10 @@ public class CCUHsApi
     public void updateSite(Site s, String id)
     {
         tagsDb.updateSite(s, id);
-        if (tagsDb.idMap.get(id) != null)
+        /*if (tagsDb.idMap.get(id) != null)
         {
             tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
-        }
+        }*/
     }
 
     public void updateEquip(Equip q, String id)
@@ -411,6 +413,7 @@ public class CCUHsApi
                 if (dur.unit == null) {
                     dur = HNum.make(dur.val ,"ms");
                 }
+
                 HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
                 HDict[] dictArr  = {b.toDict()};
                 String  response = HttpUtil.executePost(getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
@@ -718,6 +721,11 @@ public class CCUHsApi
         tagsDb.writeArrays.remove(id.replace("@", ""));
     }
 
+    public void deleteWritablePoint(String id) {
+        deleteWritableArray(id);
+        deleteEntity(id);
+    }
+    
     public void deleteEntityTree(String id)
     {
         CcuLog.d("CCU_HS", "deleteEntityTree " + id);
@@ -1048,7 +1056,6 @@ public class CCUHsApi
 
             HGrid responseGrid = hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(hDictList.toArray(new HDict[hDictList.size()])));
         }
-
         return true;
     }
 
@@ -1082,7 +1089,7 @@ public class CCUHsApi
     }
 
     private void importBuildingTuners(String siteId, HClient hClient) {
-
+        CcuLog.i(TAG, " importBuildingTuners");
         ArrayList<Equip> equips = new ArrayList<>();
         ArrayList<Point> points = new ArrayList<>();
         try {
@@ -1091,7 +1098,7 @@ public class CCUHsApi
             if (tunerGrid == null) {
                 return;
             }
-
+            
             Iterator it = tunerGrid.iterator();
             while (it.hasNext())
             {
@@ -1119,26 +1126,49 @@ public class CCUHsApi
         for (Equip q : equips) {
             if (q.getMarkers().contains("tuner"))
             {
-                q.setSiteRef(hsApi.getSiteId().toString());
-                q.setFloorRef("@SYSTEM");
-                q.setRoomRef("@SYSTEM");
-                String equipLuid = hsApi.addEquip(q);
-                hsApi.putUIDMap(equipLuid, q.getId());
+                String equipLuid;
+                HashMap tunerEquip = read("tuner and equip");
+                if (!tunerEquip.isEmpty()) {
+                    equipLuid = tunerEquip.get("id").toString();
+                } else {
+                    q.setSiteRef(hsApi.getSiteId().toString());
+                    q.setFloorRef("@SYSTEM");
+                    q.setRoomRef("@SYSTEM");
+                    equipLuid = hsApi.addEquip(q);
+                    hsApi.putUIDMap(equipLuid, q.getId());
+                }
                 //Points
                 for (Point p : points)
                 {
                     if (p.getEquipRef().equals(q.getId()))
                     {
-                        p.setSiteRef(hsApi.getSiteId().toString());
-                        p.setFloorRef("@SYSTEM");
-                        p.setRoomRef("@SYSTEM");
-                        p.setEquipRef(equipLuid);
-                        hsApi.putUIDMap(hsApi.addPoint(p), p.getId());
+                        String guidKey = StringUtils.prependIfMissing(p.getId(), "@");
+                        if (getLUID(guidKey) == null) {
+                            p.setSiteRef(hsApi.getSiteId().toString());
+                            p.setFloorRef("@SYSTEM");
+                            p.setRoomRef("@SYSTEM");
+                            p.setEquipRef(equipLuid);
+                            hsApi.putUIDMap(hsApi.addPoint(p), p.getId());
+                        } else {
+                            CcuLog.i(TAG, "Point already imported "+p.getId());
+                        }
+                        
                     }
                 }
             }
         }
-
+        CcuLog.i(TAG," importBuildingTuners Completed");
+    }
+    
+    public void importBuildingTuners() {
+        String siteId = getSiteGuid();
+        
+        if (StringUtils.isBlank(siteId)) {
+            CcuLog.e(TAG, " Site ID Invalid : Skip Importing building tuner.");
+            return;
+        }
+        HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        importBuildingTuners(siteId, hClient);
     }
 
     public HGrid getRemoteSiteDetails(String siteId)
@@ -1491,6 +1521,15 @@ public class CCUHsApi
                     }
                 }
             }
+        } else {
+            HGrid hisGrid = hClient.hisRead(tempWeatherRef, "current");
+            if (hisGrid != null && hisGrid.numRows() > 0) {
+                hisGrid.dump();
+                HRow r = hisGrid.row(hisGrid.numRows() - 1);
+                return Double.parseDouble(r.get("val").toString());
+            } else {
+                return CCUHsApi.getInstance().readHisValByQuery("system and outside and temp");
+            }
         }
         return 0;
     }
@@ -1522,6 +1561,16 @@ public class CCUHsApi
 
                     }
                 }
+            }
+        } else {
+            HGrid hisGrid = hClient.hisRead(humidityWeatherRef, "current");
+            if (hisGrid != null && hisGrid.numRows() > 0) {
+                hisGrid.dump();
+                HRow r = hisGrid.row(hisGrid.numRows() - 1);
+                double humidityVal = Double.parseDouble(r.get("val").toString());
+                return 100 * humidityVal;
+            } else {
+                return CCUHsApi.getInstance().readHisValByQuery("system and outside and humidity");
             }
         }
         return 0;
@@ -1781,5 +1830,18 @@ public class CCUHsApi
         }
         return map;
     }
-
+    
+    //The CCU that creates Site is considered primaryCCU.
+    public boolean isPrimaryCcu() {
+        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return spDefaultPrefs.getBoolean("isPrimaryCcu", false);
+    }
+    
+    public void setPrimaryCcu(boolean isPrimary) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("isPrimaryCcu", isPrimary);
+        editor.commit();
+    }
+    
 }

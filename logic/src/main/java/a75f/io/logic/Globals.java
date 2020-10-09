@@ -38,6 +38,7 @@ import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.ccu.CazProfile;
 import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.erm.EmrProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
@@ -86,7 +87,9 @@ public class Globals {
     private static final int      NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES = 10;
     private static final int TASK_SEPARATION = 15;
     private static final TimeUnit TASK_SEPARATION_TIMEUNIT = TimeUnit.SECONDS;
-
+    
+    private static final int DEFAULT_HEARTBEAT_INTERVAL = 60;
+    
     private static Globals globals;
     BuildingProcessJob mProcessJob = new BuildingProcessJob();
     ScheduleProcessJob mScheduleProcessJob = new ScheduleProcessJob();
@@ -138,6 +141,14 @@ public class Globals {
         return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                       .getBoolean("test_mode", false);
     }
+    public void setTestMode(boolean isTestMode) {
+        Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                .edit().putBoolean("test_mode", isTestMode).apply();
+    }
+    public boolean isWeatherTest() {
+        return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                .getBoolean("weather_test", false);
+    }
 
 
     public Context getApplicationContext() {
@@ -159,9 +170,7 @@ public class Globals {
         populate();
         //mHeartBeatJob = new HeartBeatJob();
         //5 seconds after application initializes start heart beat
-
-        int DEFAULT_HEARTBEAT_INTERVAL = 60;
-    
+        
         Log.d(L.TAG_CCU_JOB, " Create Process Jobs");
         
         isSimulation = getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
@@ -169,42 +178,69 @@ public class Globals {
         testHarness = getApplicationContext().getResources().getBoolean(R.bool.test_harness);
 
 
-        new CCUHsApi(this.mApplicationContext);
-        CCUHsApi.getInstance().testHarnessEnabled = testHarness;
-        loadEquipProfiles();
-
-        String addrBand = getSmartNodeBand();
-        L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
-    
-        if (!isPubnubSubscribed())
-        {
-            HashMap site = CCUHsApi.getInstance().read("site");
-            if (site.size() > 0) {
-                String siteLUID = site.get("id").toString();
-                String siteGUID = CCUHsApi.getInstance().getGUID(siteLUID);
-                if (siteGUID != null && siteGUID != "") {
-                    Globals.getInstance().registerSiteToPubNub(siteGUID);
-                }
-            }
-        }
+        CCUHsApi ccuHsApi = new CCUHsApi(this.mApplicationContext);
+        ccuHsApi.testHarnessEnabled = testHarness;
         
-        mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
-                TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
-    
-        mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
-                TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);
-    
-        mAlertProcessJob = new AlertProcessJob(mApplicationContext);
-        getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
-    
-        Watchdog.getInstance().addMonitor(mProcessJob);
-        Watchdog.getInstance().addMonitor(mScheduleProcessJob);
-        Watchdog.getInstance().start();
+        importTunersAndScheduleJobs();
         
-        CCUHsApi.getInstance().syncEntityWithPointWrite();
-        
-    
     }
+    
+    
+    private void importTunersAndScheduleJobs() {
+
+        new Thread()
+        {
+            @Override
+            public void run()
+            {
+                //If site already exists , import building tuners from backend before initializing building tuner equip.
+                HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
+                if (!site.isEmpty()) {
+                    if (!CCUHsApi.getInstance().isPrimaryCcu()) {
+                        CCUHsApi.getInstance().importBuildingTuners();
+                    }
+                    BuildingTuners.getInstance().updateBuildingTuners();
+                }
+            
+                loadEquipProfiles();
+            
+                String addrBand = getSmartNodeBand();
+                L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
+            
+                if (!isPubnubSubscribed())
+                {
+                    if (!site.isEmpty()) {
+                        String siteLUID = site.get("id").toString();
+                        String siteGUID = CCUHsApi.getInstance().getGUID(siteLUID);
+                        if (siteGUID != null && siteGUID != "") {
+                            Globals.getInstance().registerSiteToPubNub(siteGUID);
+                        }
+                    }
+                }
+            
+                mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
+                                        TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
+            
+                mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
+                                                TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);
+            
+                mAlertProcessJob = new AlertProcessJob(mApplicationContext);
+                getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
+            
+                Watchdog.getInstance().addMonitor(mProcessJob);
+                Watchdog.getInstance().addMonitor(mScheduleProcessJob);
+                Watchdog.getInstance().start();
+            
+                CCUHsApi.getInstance().syncEntityWithPointWrite();
+            
+            }
+        }.start();
+        
+        if (isTestMode()) {
+            setTestMode(false);
+        }
+    }
+    
 
     private void populate() {
         //TODO: get this from kinvey.
@@ -460,6 +496,11 @@ public class Globals {
                             DabProfile dab = new DabProfile();
                             dab.addDabEquip(Short.valueOf(eq.getGroup()));
                             L.ccu().zoneProfiles.add(dab);
+                            break;
+                        case DUAL_DUCT:
+                            DualDuctProfile dualDuct = new DualDuctProfile();
+                            dualDuct.addDualDuctEquip(Short.valueOf(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(dualDuct);
                             break;
                         case PLC:
                             PlcProfile plc = new PlcProfile();

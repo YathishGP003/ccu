@@ -40,6 +40,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.sync.HttpUtil;
@@ -577,7 +578,7 @@ public class HClient extends HProj
           c.connect();
 
           // post expression
-          Writer cout = new OutputStreamWriter(c.getOutputStream(), "UTF-8");
+          Writer cout = new OutputStreamWriter(c.getOutputStream(), StandardCharsets.UTF_8);
           cout.write(req);
           cout.close();
 
@@ -585,7 +586,7 @@ public class HClient extends HProj
 
           // read response into string
           StringBuffer s = new StringBuffer(1024);
-          Reader r = new BufferedReader(new InputStreamReader(c.getInputStream(), "UTF-8"));
+          Reader r = new BufferedReader(new InputStreamReader(c.getInputStream(), StandardCharsets.UTF_8));
           int n;
           while ((n = r.read()) > 0) s.append((char)n);
           return s.toString();

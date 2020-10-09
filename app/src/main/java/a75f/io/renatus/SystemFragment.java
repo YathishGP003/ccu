@@ -43,7 +43,7 @@ import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.views.OaoArc;
 
-import static a75f.io.logic.jobs.ScheduleProcessJob.ACTION_OCCUPANCY_CHANGE;
+import static a75f.io.logic.jobs.ScheduleProcessJob.ACTION_STATUS_CHANGE;
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
@@ -393,7 +393,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				}
 			}
 		});
-		getActivity().registerReceiver(occupancyReceiver, new IntentFilter(ACTION_OCCUPANCY_CHANGE));
+		getActivity().registerReceiver(occupancyReceiver, new IntentFilter(ACTION_STATUS_CHANGE));
 
 	}
 

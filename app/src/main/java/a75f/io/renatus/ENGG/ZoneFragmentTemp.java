@@ -154,7 +154,7 @@ public class ZoneFragmentTemp extends Fragment
                 tunerList.add(t.get("dis").toString());
                 tunerMap.put(t.get("dis").toString(), t.get("id").toString());
             }
-            expandableListDetail.put(m.get("dis").toString(), tunerList);
+            expandableListDetail.put(m.get("dis").toString()+" "+ m.get("id"), tunerList);
         }
     
         ArrayList<HashMap> devices = CCUHsApi.getInstance().readAll("device");

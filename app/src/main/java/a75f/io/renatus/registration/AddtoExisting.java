@@ -418,6 +418,7 @@ public class AddtoExisting extends Fragment {
                 if (StringUtils.isNotBlank(siteId)) {
                     retVal = CCUHsApi.getInstance().syncExistingSite(siteId);
                     Globals.getInstance().setSiteAlreadyCreated(true);
+                    CCUHsApi.getInstance().setPrimaryCcu(false);
                     L.ccu().systemProfile = new DefaultSystem();
                 }
                 return retVal;

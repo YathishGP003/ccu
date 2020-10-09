@@ -63,6 +63,7 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
+import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.pubnub.UpdatePointHandler;
@@ -120,6 +121,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     Equip equipment;
 
     boolean zoneOpen = false;
+    boolean zoneNonTempOpen = false;
     SeekArc seekArcOpen;
     NonTempControl nonTempControlOpen;
     View zonePointsOpen;
@@ -368,7 +370,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
     public void updateSensorValue(short nodeAddress){
         if(getActivity() != null) {
-            if(zoneOpen) {
+            if(zoneNonTempOpen) {
                 if (equipOpen.getProfile().contains("PLC") || equipOpen.getProfile().contains("EMR") || equipOpen.getProfile().contains("monitor")) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -518,14 +520,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                              String profilePLC = "PLC";
                              String profileTempMonitor = "TEMP_MONITOR";
                              String profileTempInfluence = "TEMP_INFLUENCE";
-
+                             String profileDualDuct = "DUAL_DUCT";
                              //Log.e("RoomData","ProfileType:"+profileType);
                              boolean tempModule = false;
                              boolean nontempModule = false;
                              for (HashMap equipTypes : equipZones) {
                                  profileType = equipTypes.get("profile").toString();
                                  Log.e("RoomData", "ProfileType:" + profileType);
-                                 if (profileType.contains(profileVAV) || profileType.contains(profileDAB) || profileType.contains(profileSSE) || profileType.contains(profileSmartStat) || profileType.contains(profileTempInfluence)) {
+                                 if (profileType.contains(profileVAV) ||
+                                     profileType.contains(profileDAB) ||
+                                     profileType.contains(profileSSE) ||
+                                     profileType.contains(profileSmartStat) ||
+                                     profileType.contains(profileTempInfluence) ||
+                                     profileType.contains(profileDualDuct)) {
                                      tempModule = true;
                                      Log.e("RoomData", "Load SmartNode ProfileType:" + profileType);
                                  }
@@ -948,6 +955,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             }
 
                             zoneOpen = true;
+                            zoneNonTempOpen = false;
                             seekArcOpen = seekArc;
                             zonePointsOpen = zoneDetails;
                             equipOpen = p;
@@ -987,6 +995,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     }
                 } else {
                     zoneOpen = true;
+                    zoneNonTempOpen = false;
                     seekArcOpen = seekArc;
                     zonePointsOpen = zoneDetails;
                     equipOpen = p;
@@ -1084,6 +1093,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                 Log.i("PointsValue", "HPU Points:" + hpuEquipPoints.toString());
                                 loadSSHPUPointsUI(hpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId, false, p.getGroup(),false);
                                 isHPUloaded = true;
+                            }
+                            if (p.getProfile().startsWith("DUAL_DUCT")) {
+                                HashMap dualDuctPoints = DualDuctUtil.getEquipPointsForView(p.getId());
+                                Log.i("PointsValue", "DualDuct Points:" + dualDuctPoints.toString());
+                                loadDualDuctPointsUI(dualDuctPoints, inflater, linearLayoutZonePoints, p.getGroup());
                             }
                         }
                     }
@@ -1340,6 +1354,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 loadSSHPUPointsUI(hpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), true, updatedEquip.getGroup(),false);
                 //isHPUloaded = true;
             }
+            if (updatedEquip.getProfile().startsWith("DUAL_DUCT")) {
+                HashMap dualDuctPoints = DualDuctUtil.getEquipPointsForView(updatedEquip.getId());
+                Log.i("PointsValue", "DUAL_DUCT Points:" + dualDuctPoints.toString());
+                loadDualDuctPointsUI(dualDuctPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
+            }
         }
     }
 
@@ -1534,7 +1553,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                     break;
                                 }
                             }
-                            zoneOpen = true;
+                            zoneOpen = false;
+                            zoneNonTempOpen = true;
                             zonePointsOpen = zoneDetails;
                             equipOpen = nonTempEquip;
                             openZoneMap = zoneMap;
@@ -1571,7 +1591,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         isExpanded = false;
                     }
                 } else {
-                    zoneOpen = true;
+                    zoneOpen = false;
+                    zoneNonTempOpen = true;
                     zonePointsOpen = zoneDetails;
                     equipOpen = nonTempEquip;
                     openZoneMap = zoneMap;
@@ -1766,6 +1787,60 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         linearLayoutZonePoints.addView(viewStatus);
         viewPointRow1.setPadding(0,0,0,40);
         linearLayoutZonePoints.addView(viewPointRow1);
+    }
+    
+    public void loadDualDuctPointsUI(HashMap dualDuctPoints, LayoutInflater inflater,
+                                     LinearLayout linearLayoutZonePoints,
+                              String nodeAddress)
+    {
+        View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
+        View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
+        View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
+        View viewPointRow2 = inflater.inflate(R.layout.zones_item_type1, null);
+        
+        TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
+        TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        
+        TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
+        TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
+        TextView textViewLabel3 = viewPointRow2.findViewById(R.id.text_point1label);
+        TextView textViewLabel4 = viewPointRow2.findViewById(R.id.text_point2label);
+        
+        TextView textViewValue1 = viewPointRow1.findViewById(R.id.text_point1value);
+        TextView textViewValue2 = viewPointRow1.findViewById(R.id.text_point2value);
+        TextView textViewValue3 = viewPointRow2.findViewById(R.id.text_point1value);
+        TextView textViewValue4 = viewPointRow2.findViewById(R.id.text_point2value);
+        
+        textViewTitle.setText(dualDuctPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewStatus.setText(dualDuctPoints.get("Status").toString());
+        if (dualDuctPoints.containsKey("CoolingSupplyAirflow") ) {
+            textViewLabel1.setText("Cooling Supply Airflow : ");
+            textViewValue1.setText(dualDuctPoints.get("CoolingSupplyAirflow").toString());
+        } else if (dualDuctPoints.containsKey("HeatingSupplyAirflow") ) {
+            textViewLabel1.setText("Heating Supply Airflow : ");
+            textViewValue1.setText(dualDuctPoints.get("HeatingSupplyAirflow").toString());
+        }
+    
+        textViewLabel2.setText("Discharge Airflow : ");
+        textViewValue2.setText(dualDuctPoints.get("DischargeAirflow").toString());
+    
+        if (dualDuctPoints.containsKey("CoolingDamper")) {
+            textViewLabel3.setText("Cooling Damper : ");
+            textViewValue3.setText(dualDuctPoints.get("CoolingDamper").toString());
+            if (dualDuctPoints.containsKey("HeatingDamper")) {
+                textViewLabel4.setText("Heating Damper : ");
+                textViewValue4.setText(dualDuctPoints.get("HeatingDamper").toString());
+            }
+        } else if (dualDuctPoints.containsKey("HeatingDamper")) {
+            textViewLabel3.setText("Heating Damper : ");
+            textViewValue3.setText(dualDuctPoints.get("HeatingDamper").toString());
+        }
+        
+        linearLayoutZonePoints.addView(viewTitle);
+        linearLayoutZonePoints.addView(viewStatus);
+        linearLayoutZonePoints.addView(viewPointRow1);
+        viewPointRow2.setPadding(0,0,0,40);
+        linearLayoutZonePoints.addView(viewPointRow2);
     }
 
     public void loadSSCPUPointsUI(HashMap cpuEquipPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String equipId, boolean isPubNub, String nodeAddress, boolean isLoaded)

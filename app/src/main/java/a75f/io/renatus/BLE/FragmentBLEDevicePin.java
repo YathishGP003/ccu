@@ -28,6 +28,7 @@ import a75f.io.renatus.Fragment2PipeFanCoilUnitConfig;
 import a75f.io.renatus.Fragment4PipeFanCoilUnitConfig;
 import a75f.io.renatus.FragmentCPUConfiguration;
 import a75f.io.renatus.FragmentDABConfiguration;
+import a75f.io.renatus.FragmentDABDualDuctConfiguration;
 import a75f.io.renatus.FragmentEMRConfiguration;
 import a75f.io.renatus.FragmentHeatPumpConfiguration;
 import a75f.io.renatus.FragmentPLCConfiguration;
@@ -398,6 +399,11 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                     case DAB:
                         showDialogFragment(FragmentDABConfiguration
                                                    .newInstance(mPairingAddress, mName, mNodeType, mFloorName, mProfileType), FragmentDABConfiguration.ID);
+                        break;
+                    case DUAL_DUCT:
+                        showDialogFragment(FragmentDABDualDuctConfiguration
+                                               .newInstance(mPairingAddress, mName, mNodeType, mFloorName,
+                                                            mProfileType), FragmentDABDualDuctConfiguration.ID);
                         break;
                     case OAO:
                         showDialogFragment(DialogOAOProfile.newInstance(mPairingAddress,mName,mFloorName),DialogOAOProfile.ID);

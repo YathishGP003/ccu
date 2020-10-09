@@ -1158,6 +1158,12 @@ public class FloorPlanFragment extends Fragment
 					showDialogFragment(FragmentDABConfiguration
 											   .newInstance(Short.parseShort(nodeAddr),zone.getId(), NodeType.SMART_NODE, floor.getId(), profile.getProfileType()), FragmentDABConfiguration.ID);
 					break;
+				case DUAL_DUCT:
+					showDialogFragment(FragmentDABDualDuctConfiguration
+						                   .newInstance(Short.parseShort(nodeAddr),zone.getId(), NodeType.SMART_NODE,
+						                                floor.getId(),profile.getProfileType()), FragmentDABDualDuctConfiguration.ID
+					);
+					break;
 				case EMR:
 					showDialogFragment(FragmentEMRConfiguration
 							                   .newInstance(Short.parseShort(nodeAddr),zone.getId(), NodeType.SMART_NODE, floor.getId()), FragmentEMRConfiguration.ID);
@@ -1186,6 +1192,7 @@ public class FloorPlanFragment extends Fragment
 					showDialogFragment(FragmentSSEConfiguration
 							.newInstance(Short.parseShort(nodeAddr),zone.getId(), NodeType.SMART_NODE, floor.getId(),profile.getProfileType()), FragmentSSEConfiguration.ID);
 					break;
+				
 
 			}
 		}else

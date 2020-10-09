@@ -28,7 +28,6 @@ public class GenericPIController
     
     public void updateControlVariable(double setPoint, double controlPoint) {
         error = setPoint - controlPoint;
-        
         applyErrorLimits();
         calculateProportionalError();
         calculateIntegralError();

@@ -27,11 +27,13 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd;
+import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.Prefs;
@@ -194,6 +196,19 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 imageView.setLayoutParams(lp);
             }
         }
+        view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+
+            @Override
+            public void onViewAttachedToWindow(View view) {
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View view) {
+                if (Globals.getInstance().isTestMode()) {
+                    Globals.getInstance().setTestMode(false);
+                }
+            }
+        });
     }
 
     private void goTonext() {
@@ -258,8 +273,8 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         }
         ArrayAdapter<Integer> analogAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, analogArray);
         analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        
         analog2TestSpinner.setAdapter(analogAdapter);
+        analog2TestSpinner.setSelection(0,false);
         
         analog2Economizer.setAdapter(analogAdapter);
         analog2Economizer.setSelection((int)systemProfile.getConfigVal("analog2 and economizer"),false);
@@ -364,8 +379,6 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 setConfigEnabledBackground("analog2",analog2Tb.isChecked() ? 1: 0);
                 if (analog2Tb.isChecked()){
                     addFanSignal();
-                } else {
-                    deleteFanSignalExists();
                 }
                 break;
             case R.id.relay1Test:
@@ -600,6 +613,25 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         msg.relayBitmap.set(relayStatus);
         msg.analog1.set((short)(10 * Double.parseDouble(analog2TestSpinner.getSelectedItem().toString())));
         MeshUtil.sendStructToCM(msg);
+
+        ControlMote.setAnalogOut("analog2",Double.parseDouble(analog2TestSpinner.getSelectedItem().toString()));
+        ControlMote.setRelayState("relay1",relay1Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay2",relay2Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay3",relay3Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay4",relay4Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay5",relay5Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay6",relay6Test.isChecked() ? 1 : 0);
+        ControlMote.setRelayState("relay7",relay7Test.isChecked() ? 1 : 0);
+
+        if (relayStatus > 0 || Double.parseDouble(analog2TestSpinner.getSelectedItem().toString()) > 0) {
+            if (!Globals.getInstance().isTestMode()) {
+                Globals.getInstance().setTestMode(true);
+            }
+        } else {
+            if (Globals.getInstance().isTestMode()) {
+                Globals.getInstance().setTestMode(false);
+            }
+        }
     }
 
     private void addFanSignal() {
@@ -618,13 +650,5 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 // continue what you are doing...
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-    private void deleteFanSignalExists() {
-        HashMap fanSignal = CCUHsApi.getInstance().read("point and system and cmd and fan and modulating");
-        if ((fanSignal != null && fanSignal.get("id") != null)) {
-            CCUHsApi.getInstance().deleteEntity(fanSignal.get("id").toString());
-            CCUHsApi.getInstance().syncEntityTree();
-        }
     }
 }

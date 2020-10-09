@@ -14,11 +14,11 @@ public class VOCLoop
     {
         this.vocTarget = vocTarget;
     }
-    double vocThreshold = 800;
-    double vocTarget = 1000;
+    double vocThreshold = 400;
+    double vocTarget = 500;
     
     public static final double PROPORTIONAL_GAIN = 1;
-    public static final int PROPORTIONAL_SPREAD = 200;
+    public static final int PROPORTIONAL_SPREAD = 100;
     
     PControlLoop controlLoop;
     

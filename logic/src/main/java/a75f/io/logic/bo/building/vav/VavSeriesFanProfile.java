@@ -10,6 +10,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
@@ -129,7 +130,8 @@ public class VavSeriesFanProfile extends VavProfile
     
     private int getLoopOp(SystemController.State conditioning, double roomTemp) {
         int loopOp = 0;
-        if (roomTemp > setTempCooling) {
+        SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
+        if (roomTemp > setTempCooling && systemMode != SystemMode.OFF) {
             //Zone is in Cooling
             if (state != COOLING) {
                 handleCoolingChangeOver();
@@ -137,7 +139,7 @@ public class VavSeriesFanProfile extends VavProfile
             if (conditioning == SystemController.State.COOLING ) {
                 loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
             }
-        } else if (roomTemp < setTempHeating) {
+        } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF) {
             //Zone is in heating
             if (state != HEATING) {
                 handleHeatingChangeOver();
@@ -240,7 +242,15 @@ public class VavSeriesFanProfile extends VavProfile
     
         boolean  enabledCO2Control = vavDevice.getConfigNumVal("enable and co2") > 0 ;
         boolean  enabledIAQControl = vavDevice.getConfigNumVal("enable and iaq") > 0 ;
-        
+    
+        double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");
+        EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
+        if(epidemicState != EpidemicState.OFF && L.ccu().oaoProfile != null) {
+            double smartPurgeDABDamperMinOpenMultiplier = TunerUtil.readTunerValByQuery("purge and system and vav and damper and pos and min and multiplier", L.ccu().oaoProfile.getEquipRef());
+            damper.iaqCompensatedMinPos = (int)(damper.minPosition * smartPurgeDABDamperMinOpenMultiplier);
+        }else {
+            damper.iaqCompensatedMinPos = damper.minPosition;
+        }
         //CO2 loop output from 0-50% modulates damper min position.
         if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0) {
             damper.iaqCompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * Math.min(50, co2Loop.getLoopOutput()) / 50;

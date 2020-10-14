@@ -367,6 +367,7 @@ public class InstallerOptions extends Fragment {
                             editSubnet.setText(ethConfig[3]);
                         }
                     }else{
+                        Log.i("CCU_UTILITYAPP", "checkNetworkConnected:textNetworkError:" +utilityApplication.checkNetworkConnected());
                         textNetworkError.setVisibility(View.VISIBLE);
                     }
                 }
@@ -461,8 +462,10 @@ public class InstallerOptions extends Fragment {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            prefs.setBoolean("BACnetLAN",true);
         } else {
             localDevice = utilityApplication.enableBACnetWifi();
+            prefs.setBoolean("BACnetLAN",false);
         }
         if (localDevice != null) {
             utilityApplication.setLocalDevice(localDevice,true);
@@ -661,6 +664,7 @@ public class InstallerOptions extends Fragment {
     public class NetworkChangeReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.i("CCU_UTILITYAPP", "NetworkChangeReceiver:" +utilityApplication.checkNetworkConnected());
             if(utilityApplication.checkNetworkConnected()) {
                 textNetworkError.setVisibility(View.GONE);
                 getBACnetConfig();

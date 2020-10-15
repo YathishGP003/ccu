@@ -665,6 +665,7 @@ public class VAVLogicalMap
                               .addMarker("vav").addMarker("logical").addMarker("zone").addMarker("his")
                               .addMarker(fanType).addMarker("fan").addMarker("cmd").addMarker("his")
                               .setGroup(String.valueOf(nodeAddr))
+                              .setEnums("false, true")
                               .setTz(tz)
                               .build();
         String fanId = CCUHsApi.getInstance().addPoint(fan);
@@ -754,7 +755,7 @@ public class VAVLogicalMap
         String damperShapeId = CCUHsApi.getInstance().addPoint(damperShape);
         CCUHsApi.getInstance().writeDefaultValById(damperShapeId, (double)config.damperShape);
     
-        Point reheatType = new Point.Builder()
+        Point.Builder reheatTypeBuilder = new Point.Builder()
                                    .setDisplayName(equipDis+"-reheatType")
                                    .setEquipRef(equipRef)
                                    .setSiteRef(siteRef)
@@ -763,10 +764,13 @@ public class VAVLogicalMap
                                    .addMarker("config").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("zone")
                                    .addMarker("reheat").addMarker("type").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
-                                   .setEnums("ZeroToTenV,TwoToTenV,TenToTwov,TenToZeroV,Pulse,OneStage,TwoStage")
-                                   .setTz(tz)
-                                   .build();
-        String reheatTypeId = CCUHsApi.getInstance().addPoint(reheatType);
+                                   .setTz(tz);
+        if (profileType == ProfileType.VAV_REHEAT) {
+            reheatTypeBuilder.setEnums("ZeroToTenV,TwoToTenV,TenToTwoV,TenToZeroV,Pulse,OneStage,TwoStage");
+        } else {
+            reheatTypeBuilder.setEnums("0-10V, 2-10V, 10-2V, 10-0V , PulsedElectric, StagedElectric");
+        }
+        String reheatTypeId = CCUHsApi.getInstance().addPoint(reheatTypeBuilder.build());
         CCUHsApi.getInstance().writeDefaultValById(reheatTypeId, (double)config.reheatType);
     
         Point enableOccupancyControl = new Point.Builder()

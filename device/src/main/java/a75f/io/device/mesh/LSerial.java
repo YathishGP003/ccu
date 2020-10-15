@@ -11,9 +11,8 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import a75f.io.device.alerts.AlertGenerateHandler;
+import a75f.io.device.modbus.ModbusPulse;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
-import a75f.io.device.serial.CmToCcuOverUsbErrorReportMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwarePacketRequest_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwareUpdateAckMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t;
@@ -30,7 +29,6 @@ import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
 
-import static a75f.io.device.alerts.AlertGenerateHandler.CM_ERROR_REPORT;
 import static a75f.io.device.mesh.DLog.LogdStructAsJson;
 
 /**
@@ -46,10 +44,10 @@ public class LSerial
 
     /***
      * D
-    * Node 1001 -
-    * 	"CcuToCmOverUsbSnControlsMessage_t", 12345
-    * 	"CcuToCmOverUsbDatabaseSeedSnMessage_t", 12333
-    * Where 12345 & 12333 are Arrays.hashCode(byte[])
+     * Node 1001 -
+     * 	"CcuToCmOverUsbSnControlsMessage_t", 12345
+     * 	"CcuToCmOverUsbDatabaseSeedSnMessage_t", 12333
+     * Where 12345 & 12333 are Arrays.hashCode(byte[])
      */
     private HashMap<Short, HashMap<String, Integer>> structs =
             new HashMap<Short, HashMap<String, Integer>>();
@@ -98,7 +96,7 @@ public class LSerial
 
     public static void handleSerialEvent(Context context, SerialEvent event)
     {
-        DLog.LogdSerial("Event Type: " + event.getSerialAction().name());
+        DLog.LogdSerial("Serial Event Type: " + event.getSerialAction().name());
         if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_PORT)
         {
             byte[] data = event.getBytes();
@@ -153,6 +151,10 @@ public class LSerial
 
             context.sendBroadcast(eventIntent);
             //context.startService(eventIntent);
+        }else if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_MODBUS) {
+            byte[] data = event.getBytes();
+            MessageType messageType = MessageType.values()[(event.getBytes()[0] & 0xff)];
+            ModbusPulse.handleModbusPulseData(data, messageType.ordinal());
         }
     }
 
@@ -244,7 +246,7 @@ public class LSerial
 
         Integer structHash = Arrays.hashCode(struct.getOrderedBuffer());
         if (checkDuplicate(Short.valueOf(smartNodeAddress), struct.getClass()
-                                                                  .getSimpleName(), structHash))
+                .getSimpleName(), structHash))
         {
             //DLog.LogdStructAsJson(struct);
             DLog.Logd("Struct " + struct.getClass().getSimpleName() + " was already sent, returning");
@@ -339,7 +341,18 @@ public class LSerial
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }
+    public synchronized boolean sendSerialToModbus(byte[] data)
+    {
 
+        if (mUsbService == null)
+        {
+            DLog.logUSBServiceNotInitialized();
+            return false;
+        }
+
+        mUsbService.modbusWrite(data);
+        return true;
+    }
 
     /***
      *  This method maintains the hash, if it returns false, proceed without needing to add extra
@@ -350,7 +363,7 @@ public class LSerial
      * @return if it is a duplicate
      */
     private boolean checkDuplicate(Short smartNodeAddress, String simpleName, Integer
-                                                                                          structHash)
+            structHash)
     {
         if (structs.containsKey(smartNodeAddress))
         {

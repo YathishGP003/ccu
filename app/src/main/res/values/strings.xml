@@ -739,4 +739,38 @@
 
     <string name="toast_msg_permission_denial">"All the required permissions are not granted. CCU may not work as
         expected.\nYou may grant missing permissions to Renatus app from System Settings"</string>
+
+    <!--Modbus Option-->
+    <string name="title_mb">MB</string>
+    <string name="title_modbus">MODBUS</string>
+    <string name="title_equipment_type">Equipment Type</string>
+    <string name="title_start_address">Slave Id</string>
+    <string name="title_param">PARAMETER</string>
+    <string name="title_display">DISPLAY IN UI</string>
+    <string name="title_unit_status">Unit status</string>
+    <string name="title_return_air_temperature">Return Air Temperature</string>
+    <string name="title_compressor_1_status">Compressor 1 status</string>
+    <string name="title_return_air_humidity">Return Air Humidity</string>
+    <string name="title_fan_running_status">Fan running status</string>
+    <string name="title_temperature_setpoint">Temperature Setpoint</string>
+    <string name="title_heater_on_off_status">Heater ON/OFF status</string>
+    <string name="title_humidity_setpoint">Humidity Setpoint</string>
+
+    <string-array name="equipment_type">
+        <item>Company PAC model 1</item>
+        <item>Schneider UPS model 1</item>
+        <item>Company WLD model 2</item>
+        <item>Company VESDA model 1</item>
+        <item>Company UPS model 1</item>
+        <item>Company UPS model 2</item>
+    </string-array>
+
+    <string-array name="address_setting">
+        <item>0xYYYYYYY</item>
+        <item>0xXXXXXXX</item>
+        <item>0x1010111</item>
+        <item>0x1111000</item>
+        <item>0x2233112</item>
+        <item>0x0000000</item>
+    </string-array>
 </resources>

@@ -18,6 +18,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.bacnet.BACnetUtils;
 import a75f.io.logic.L;
+import a75f.io.modbusbox.EquipsManager;
 
 public class FloorListActionMenuListener implements MultiChoiceModeListener
 {
@@ -111,6 +112,7 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 			CCUHsApi.getInstance().deleteEntityTree(floor.getId());
 			CCUHsApi.getInstance().saveTagsData();
 			floorPlanActivity.refreshScreen();
+			EquipsManager.getInstance().deleteEquipsByFloor(floor.getId());
 		}
 		new AsyncTask<String, Void, Void>() {
 			@Override

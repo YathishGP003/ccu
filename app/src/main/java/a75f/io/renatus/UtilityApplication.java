@@ -84,6 +84,7 @@ import a75f.io.device.mesh.LSerial;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.watchdog.Watchdog;
+import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.registration.InstallerOptions;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.usbserial.SerialEvent;
@@ -175,6 +176,10 @@ public abstract class UtilityApplication extends Application
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         Globals.getInstance().setApplicationContext(this);
         AlertManager.getInstance(this).setApplicationContext(this);
+
+        //Modbus EquipmendManager
+        EquipsManager.getInstance(this).setApplicationContext(this);
+
         setUsbFilters();  // Start listening notifications from UsbService
         startService(new Intent(this, OTAUpdateHandlerService.class));  // Start OTA update event + timer handler service
         startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it

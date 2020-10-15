@@ -1,2 +1,4 @@
+include ':modbusbox'
+include ':modbus4j'
 include ':app', ':logic', ':device', ':usbserial', ':alerts', ':algos', ':haystack', ':BACnet4J'
 

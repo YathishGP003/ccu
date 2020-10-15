@@ -31,7 +31,11 @@ public interface UsbSerialInterface
     // Common Usb Serial Operations (I/O Asynchronous)
     boolean open();
     void write(byte[] buffer);
+    void writeModbus(byte[] buffer);
     int read(UsbReadCallback mCallback);
+
+    int readModbus(UsbReadCallback mCallback);
+
     void close();
 
     // Common Usb Serial Operations (I/O Synchronous)

@@ -15,6 +15,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Zone;
@@ -23,6 +26,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.modbus.FragmentModbusConfiguration;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -37,7 +41,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
     Zone         mZone;
     LightProfile mLightProfile;
     short        mNodeAddress;
-    
+
     String       mRoomName;
     String       mFloorName;
     Boolean      misPaired;
@@ -53,7 +57,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         f.setArguments(bundle);
         return f;
     }
-    
+
     @BindView(R.id.default_text_view)  TextView    defaultTextView;
     @BindView(R.id.deviceTypeSelection)RadioGroup  deviceTypeSelection;
     @BindView(R.id.smartNode)          RadioButton smartNode;
@@ -76,9 +80,9 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
     public void onCreate(Bundle savedInstanceState) {
         // TODO Auto-generated method stub
         super.onCreate(savedInstanceState);
-        
+
         //setStyle(DialogFragment.STY, R.style.NewDialogStyle);
-        
+
     }
 
     @Override
@@ -94,23 +98,34 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
     }
 
     @OnClick(R.id.rl_smartnode) void onSmartNodeClick() {
+        if (isModbusPaired()) {
+            return;
+        }
         DialogSmartNodeProfiling wrmProfiling = DialogSmartNodeProfiling.newInstance(mNodeAddress, mRoomName, mFloorName, misPaired);
         showDialogFragment(wrmProfiling, DialogSmartNodeProfiling.ID);
     }
 
-
     @OnClick(R.id.rl_smartstat) void onSmartStatClick() {
+        if (isModbusPaired()) {
+            return;
+        }
         DialogSmartStatProfiling smartStatProfiling = DialogSmartStatProfiling.newInstance(mNodeAddress, mRoomName, mFloorName);
         showDialogFragment(smartStatProfiling, DialogSmartStatProfiling.ID);
     }
 
 
     @OnClick(R.id.rl_wirelesstemp) void onWTMClick() {
+        if (isModbusPaired()) {
+            return;
+        }
         DialogWTMProfiling wtmProfiling = DialogWTMProfiling.newInstance(mNodeAddress, mRoomName, mFloorName);
         showDialogFragment(wtmProfiling, DialogWTMProfiling.ID);
     }
 
     @OnClick(R.id.rl_ccu) void oCCUClick() {
+        if (isModbusPaired()) {
+            return;
+        }
         boolean isCazExists = false;
 
         for(ZoneProfile zp :L.ccu().zoneProfiles) {
@@ -135,16 +150,24 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         }
     }
 
+    @OnClick(R.id.rlModbus) void onModBusClick(){
+        if (isNotModbus()){
+            return;
+        }
+        FragmentModbusConfiguration modBusConfiguration = FragmentModbusConfiguration.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_UPS);
+        showDialogFragment(modBusConfiguration, FragmentModbusConfiguration.ID);
+    }
+
     @OnClick(R.id.first_button) void onFirstButtonClick() {
         removeDialogFragment(ID);
     }
-    
-    
+
+
     @OnClick(R.id.second_button) void onSecondButtonClick() {
         OpenModuleSelectionDialog();
     }
-    
-   
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
@@ -157,19 +180,19 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         misPaired = getArguments().getBoolean(FragmentCommonBundleArgs.ALREADY_PAIRED);
         //mZone = L.findZoneByName(mFloorName, mRoomName);
         //mLightProfile = (LightProfile) mZone.findProfile(ProfileType.LIGHT);
-        
+
         return view;
     }
 
-    
+
     private void OpenModuleSelectionDialog()
     {
-        
+
         if (smartNode.isChecked())
         {
             DialogSmartNodeProfiling wrmProfiling = DialogSmartNodeProfiling.newInstance(mNodeAddress, mRoomName, mFloorName, misPaired);
             showDialogFragment(wrmProfiling, DialogSmartNodeProfiling.ID);
-            
+
         }
         else if (smartstat.isChecked())
         {
@@ -177,7 +200,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
             showDialogFragment(smartStatProfiling, DialogSmartStatProfiling.ID);
         }
     }
-    
+
     @Override
     public void onStart()
     {
@@ -191,10 +214,10 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         }
         //setTitle();
     }
-    
+
     private void setTitle() {
         Dialog dialog = getDialog();
-        
+
         if (dialog == null) {
             return;
         }
@@ -206,18 +229,42 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
             titleView.setTextColor(getResources().getColor(R.color.progress_color_orange));
         }
         int titleDividerId = getContext().getResources()
-                                         .getIdentifier("titleDivider", "id", "android");
-    
+                .getIdentifier("titleDivider", "id", "android");
+
         View titleDivider = dialog.findViewById(titleDividerId);
         if (titleDivider != null) {
             titleDivider.setBackgroundColor(getContext().getResources()
-                                                        .getColor(R.color.transparent));
+                    .getColor(R.color.transparent));
         }
     }
-    
+
     @Override
     public String getIdString()
     {
         return ID;
+    }
+
+    private boolean isModbusPaired() {
+        ArrayList<Equip> zoneEquips  = HSUtil.getEquips(mRoomName);
+        for (Equip equip: zoneEquips) {
+            if (equip.getProfile().contains("MODBUS")) {
+                Toast.makeText(getActivity(), "Unpair all Modbus Modules and try", Toast.LENGTH_LONG).show();
+                dismiss();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isNotModbus() {
+        ArrayList<Equip> zoneEquips  = HSUtil.getEquips(mRoomName);
+        for (Equip equip: zoneEquips) {
+            if (!equip.getProfile().contains("MODBUS")) {
+                Toast.makeText(getActivity(), "Unpair all Modules and try", Toast.LENGTH_LONG).show();
+                dismiss();
+                return true;
+            }
+        }
+        return false;
     }
 }

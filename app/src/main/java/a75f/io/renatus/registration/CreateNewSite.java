@@ -37,7 +37,9 @@ import org.projecthaystack.HRow;
 import org.projecthaystack.io.HZincReader;
 import org.projecthaystack.io.HZincWriter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TimeZone;
 
@@ -562,17 +564,30 @@ public class CreateNewSite extends Fragment {
 
 
     private void populateAndUpdateTimeZone() {
-
-        String[] tzIds = TimeZone.getAvailableIDs();
-        Log.i("timeZones", "time:" + tzIds.toString());
-
-        timeZoneAdapter = new ArrayAdapter<String>(mContext, R.layout.spinner_item, tzIds);
+        
+        timeZoneAdapter = new ArrayAdapter<String>(mContext, R.layout.spinner_item, getSupportedTimeZones());
         timeZoneAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         mTimeZoneSelector.setAdapter(timeZoneAdapter);
         mTimeZoneSelector.setSelection(timeZoneAdapter.getPosition(TimeZone.getDefault().getID()));
         mTextTimeZone.setText(getString(R.string.input_timezone));
         mTextTimeZone.setTextColor(getResources().getColor(R.color.hint_color));
 
+    }
+    
+    private ArrayList<String> getSupportedTimeZones() {
+        String[] tzIds = TimeZone.getAvailableIDs();
+        ArrayList<String> supportedTimeZones = new ArrayList<>();
+        HashSet<String> regions = CCUHsApi.getInstance().getSupportedRegions();
+        
+        for (String tz : tzIds) {
+            String[] parts = tz.split("/");
+            String region = parts[0];
+            if (regions.contains(region)) {
+                supportedTimeZones.add(tz);
+            }
+        }
+        
+        return supportedTimeZones;
     }
 
     private class EditTextWatcher implements TextWatcher {

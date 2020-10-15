@@ -32,6 +32,7 @@ import org.projecthaystack.server.HStdOps;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -1844,4 +1845,19 @@ public class CCUHsApi
         editor.commit();
     }
     
+    public HashSet<String> getSupportedRegions() {
+        HashSet<String> regions = new HashSet();
+        regions.add("Africa");
+        regions.add("America");
+        regions.add("Antarctica");
+        regions.add("Asia");
+        regions.add("Atlantic");
+        regions.add("Australia");
+        regions.add("Etc");
+        regions.add("Europe");
+        regions.add("Indian");
+        regions.add("Pacific");
+        
+        return regions;
+    }
 }

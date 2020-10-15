@@ -101,7 +101,7 @@ public class VavSeriesFanProfile extends VavProfile
                 damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
             }
     
-            updateFanStatus(occupied, vavEquip.getId());
+            updateFanStatus(occupied, vavEquip.getId(), systemMode);
             //When in the system is in heating, REHEAT control does not follow RP-1455.
             if (conditioning == SystemController.State.HEATING && state == HEATING) {
                 updateReheatDuringSystemHeating(vavEquip.getId());
@@ -253,7 +253,7 @@ public class VavSeriesFanProfile extends VavProfile
         }
         //CO2 loop output from 0-50% modulates damper min position.
         if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0) {
-            damper.iaqCompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * Math.min(50, co2Loop.getLoopOutput()) / 50;
+            damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.minPosition) * Math.min(50, co2Loop.getLoopOutput()) / 50;
             CcuLog.d(L.TAG_CCU_ZONE, "CO2LoopOp :" + co2Loop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
         }
     
@@ -287,8 +287,8 @@ public class VavSeriesFanProfile extends VavProfile
         }
     }
     
-    private void updateFanStatus (boolean occupied, String equipId) {
-        if (occupied || L.ccu().systemProfile.systemFanLoopOp > 0) {
+    private void updateFanStatus (boolean occupied, String equipId, SystemMode mode) {
+        if ((occupied || L.ccu().systemProfile.systemFanLoopOp > 0) && mode != SystemMode.OFF) {
             //Prior to starting the fan, the damper is first driven fully closed to ensure that the fan is not rotating backwards.
             //Once the fan is proven on for a fixed time delay (15 seconds), the damper override is released
             CcuLog.d(L.TAG_CCU_ZONE,

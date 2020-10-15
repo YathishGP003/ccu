@@ -246,7 +246,7 @@ public class VavParallelFanProfile extends VavProfile
         
         //CO2 loop output from 0-50% modulates damper min position.
         if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0) {
-            damper.iaqCompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * Math.min(50, co2Loop.getLoopOutput()) / 50;
+            damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.minPosition) * Math.min(50, co2Loop.getLoopOutput()) / 50;
             CcuLog.d(L.TAG_CCU_ZONE, "CO2LoopOp :" + co2Loop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
         }
         

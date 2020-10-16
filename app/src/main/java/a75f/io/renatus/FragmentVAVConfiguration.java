@@ -434,7 +434,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             reheatType == ReheatType.TenToZeroV ||
             reheatType == ReheatType.TwoToTenV ||
             reheatType == ReheatType.TenToTwov) {
-            relay1TextView.setText(R.string.vav_label_analog_out_1);
+            relay1TextView.setText(R.string.vav_label_analog_out_2);
             relay1TextVal.setText(R.string.vav_label_modulating_reheat);
         } else {
             relay1TextView.setText(R.string.vav_label_relay1);

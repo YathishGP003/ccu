@@ -283,6 +283,7 @@ public class VavSeriesFanProfile extends VavProfile
             vavDevice.setDamperPos(damperPos);
             vavDevice.setNormalizedDamperPos(damperPos);
             vavDevice.setReheatPos(0);
+            vavDevice.setFanOn("series", false);
             CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
         }
     }

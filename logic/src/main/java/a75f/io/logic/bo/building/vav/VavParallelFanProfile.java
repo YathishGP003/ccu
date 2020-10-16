@@ -276,6 +276,7 @@ public class VavParallelFanProfile extends VavProfile
             vavDevice.setDamperPos(damperPos);
             vavDevice.setNormalizedDamperPos(damperPos);
             vavDevice.setReheatPos(0);
+            vavDevice.setFanOn("parallel", false);
             CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
         }
     }

@@ -101,7 +101,8 @@
                     "endBit": 15,
                     "conditions": [
                         {
-                            "name": "Room temperature in C"
+                            "name": "Room temperature in C",
+                            "bitValues": 0
                         }
                     ],
                     "logicalPointTags": [
@@ -171,7 +172,8 @@
                     "endBit": 15,
                     "conditions": [
                         {
-                            "name": "Supply Air Temp"
+                            "name": "Supply Air Temp",
+                            "bitValues": 0
                         }
                     ],
                     "logicalPointTags": [
@@ -274,12 +276,6 @@
                     "name": "Set Temperature",
                     "startBit": 0,
                     "endBit": 15,
-                    "commands": [
-                        {
-                            "name": "Set Temperature In C",
-                            "bitValues": 23
-                        }
-                    ],
                     "logicalPointTags": [
                         {
                             "tagName": "desired"
@@ -371,12 +367,6 @@
                     "name": "Humidity Setpoint",
                     "startBit": 0,
                     "endBit": 15,
-                    "commands": [
-                        {
-                            "name": "Humidity setpoint in 0-100%",
-                            "bitValues": 45
-                        }
-                    ],
                     "logicalPointTags": [
                         {
                             "tagName": "humidity"
@@ -542,7 +532,8 @@
                     "endBit": 15,
                     "conditions": [
                         {
-                            "name": "filter status"
+                            "name": "filter status",
+                            "bitValues": 0
                         }
                     ],
                     "logicalPointTags": [
@@ -779,7 +770,8 @@
                     "endBit": 15,
                     "conditions": [
                         {
-                            "name": "Indoor fan status"
+                            "name": "Indoor fan status",
+                            "bitValues": 0
                         }
                     ],
                     "logicalPointTags": [

@@ -15,7 +15,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -53,7 +52,6 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.bacnet.BACnetUtils;
-import a75f.io.device.mesh.LSerial;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
@@ -61,7 +59,6 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
-import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -719,13 +716,22 @@ public class FloorPlanFragment extends Fragment
 						AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
 						adb.setMessage("Floor name already exists in this site,would you like to continue?");
 						adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
-							hsFloor.setId(CCUHsApi.getInstance().addFloor(hsFloor));
-							CCUHsApi.getInstance().putUIDMap(hsFloor.getId(), floor.getId());
-							floorList.add(hsFloor);
-							floorList.add(floorToRename);
-							Collections.sort(floorList, new FloorComparator());
-							updateFloors();
-							selectFloor(floorList.size() - 1);
+							if (CCUHsApi.getInstance().getLUID(floor.getId()) == null) {
+								hsFloor.setId(CCUHsApi.getInstance().addFloor(hsFloor));
+								CCUHsApi.getInstance().putUIDMap(hsFloor.getId(), floor.getId());
+							}
+
+							for (Zone zone : HSUtil.getZones(floorToRename.getId())) {
+								zone.setFloorRef(CCUHsApi.getInstance().getLUID(floor.getId()));
+								CCUHsApi.getInstance().updateZone(zone, zone.getId());
+								for (Equip q : HSUtil.getEquips(zone.getId())) {
+									q.setFloorRef(CCUHsApi.getInstance().getLUID(floor.getId()));
+									CCUHsApi.getInstance().updateEquip(q, q.getId());
+								}
+							}
+
+							CCUHsApi.getInstance().deleteEntityTree(floorToRename.getId());
+							refreshScreen();
 
 							InputMethodManager mgr = (InputMethodManager) getActivity()
 									.getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -778,12 +784,11 @@ public class FloorPlanFragment extends Fragment
 						AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
 						adb.setMessage("Floor name already exists in this site,would you like to continue?");
 						adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
-							hsFloor.setId(CCUHsApi.getInstance().addFloor(hsFloor));
-							CCUHsApi.getInstance().putUIDMap(hsFloor.getId(), floor.getId());
-							floorList.add(hsFloor);
-							Collections.sort(floorList, new FloorComparator());
-							updateFloors();
-							selectFloor(HSUtil.getFloors().size() - 1);
+							if (CCUHsApi.getInstance().getLUID(floor.getId()) == null) {
+								hsFloor.setId(CCUHsApi.getInstance().addFloor(hsFloor));
+								CCUHsApi.getInstance().putUIDMap(hsFloor.getId(), floor.getId());
+							}
+							refreshScreen();
 
 							InputMethodManager mgr = (InputMethodManager) getActivity()
 									.getSystemService(Context.INPUT_METHOD_SERVICE);

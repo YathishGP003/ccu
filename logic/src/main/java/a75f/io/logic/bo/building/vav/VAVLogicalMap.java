@@ -665,7 +665,7 @@ public class VAVLogicalMap
                               .addMarker("vav").addMarker("logical").addMarker("zone").addMarker("his")
                               .addMarker(fanType).addMarker("fan").addMarker("cmd").addMarker("his")
                               .setGroup(String.valueOf(nodeAddr))
-                              .setEnums("false, true")
+                              .setEnums("Off, On")
                               .setTz(tz)
                               .build();
         String fanId = CCUHsApi.getInstance().addPoint(fan);

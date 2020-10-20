@@ -1197,6 +1197,7 @@ public class FloorPlanFragment extends Fragment
 				case MODBUS_PAC:
 				case MODBUS_RRS:
 				case MODBUS_WLD:
+				case MODBUS_EM:
 					showDialogFragment(FragmentModbusConfiguration
 							.newInstance(Short.parseShort(nodeAddr),zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusConfiguration.ID);
 					break;

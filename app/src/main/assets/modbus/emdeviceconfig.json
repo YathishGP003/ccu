@@ -412,7 +412,7 @@
             },
             {
               "tagName": "unit",
-              "tagValue": "kWh"
+              "value": "kWh"
             },
             {
               "tagName": "kind",

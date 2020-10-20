@@ -95,6 +95,21 @@ public class CCUHsApi
         entitySyncHandler = new EntitySyncHandler();
         hisSyncHandler = new HisSyncHandler(this);
     }
+    
+    //For Unit test
+    public CCUHsApi()
+    {
+        if (instance != null)
+        {
+            throw new IllegalStateException("Api instance already created , use getInstance()");
+        }
+        hsClient = new AndroidHSClient();
+        tagsDb = (CCUTagsDb) hsClient.db();
+        tagsDb.init();
+        instance = this;
+        entitySyncHandler = new EntitySyncHandler();
+        hisSyncHandler = new HisSyncHandler(this);
+    }
 
     public HClient getHSClient()
     {
@@ -211,7 +226,16 @@ public class CCUHsApi
             tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
         }
     }
-
+    
+    public void updatePoint(Point p, String id)
+    {
+        tagsDb.updatePoint(p, id);
+        if (tagsDb.idMap.get(id) != null)
+        {
+            tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+        }
+    }
+    
     public void updatePoint(RawPoint r, String id)
     {
         tagsDb.updatePoint(r, id);
@@ -1859,5 +1883,25 @@ public class CCUHsApi
         regions.add("Pacific");
         
         return regions;
+    }
+    
+    public void updateTimeZone(String newTz) {
+        ArrayList<HashMap<Object, Object>> allPoints = readAllEntities("point");
+        for (HashMap<Object, Object> point : allPoints ) {
+            if (point.containsKey("physical")) {
+                RawPoint updatedPoint = new RawPoint.Builder().setHashMap(point).setTz(newTz).build();
+                updatePoint(updatedPoint, updatedPoint.getId());
+            } else {
+                Point updatedPoint = new Point.Builder().setHashMap(point).setTz(newTz).build();
+                updatePoint(updatedPoint, updatedPoint.getId());
+            }
+            
+        }
+    
+        ArrayList<HashMap<Object, Object>> allEquips = readAllEntities("equip");
+        for(HashMap<Object, Object> equip : allEquips) {
+            Equip updatedEquip = new Equip.Builder().setHashMap(equip).setTz(newTz).build();
+            updateEquip(updatedEquip, updatedEquip.getId());
+        }
     }
 }

@@ -777,7 +777,10 @@ public class CreateNewSite extends Fragment {
         String tzID = mTimeZoneSelector.getSelectedItem().toString();
         AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         am.setTimeZone(tzID);
-
+    
+        HashMap site = CCUHsApi.getInstance().read("site");
+        String curTz = site.get("tz").toString();
+        
         Site s75f = new Site.Builder()
                 .setDisplayName(siteName)
                 .addMarker("site")
@@ -794,6 +797,10 @@ public class CreateNewSite extends Fragment {
 
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         ccuHsApi.updateSite(s75f, siteId);
+        CcuLog.d(TAG, "Update Site curTz "+curTz+" newTz "+s75f.getTz());
+        if (!curTz.equals(s75f.getTz())) {
+            CCUHsApi.getInstance().updateTimeZone(s75f.getTz());
+        }
         BuildingTuners.getInstance();
         ccuHsApi.log();
       //  L.ccu().systemProfile = new DefaultSystem();

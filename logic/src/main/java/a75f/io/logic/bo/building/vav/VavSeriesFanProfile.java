@@ -131,7 +131,7 @@ public class VavSeriesFanProfile extends VavProfile
     private int getLoopOp(SystemController.State conditioning, double roomTemp) {
         int loopOp = 0;
         SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
-        if (roomTemp > setTempCooling && systemMode != SystemMode.OFF) {
+        if (roomTemp > setTempCooling && systemMode != SystemMode.OFF && systemMode != SystemMode.HEATONLY) {
             //Zone is in Cooling
             if (state != COOLING) {
                 handleCoolingChangeOver();
@@ -139,7 +139,7 @@ public class VavSeriesFanProfile extends VavProfile
             if (conditioning == SystemController.State.COOLING ) {
                 loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
             }
-        } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF) {
+        } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF && systemMode != SystemMode.COOLONLY) {
             //Zone is in heating
             if (state != HEATING) {
                 handleHeatingChangeOver();

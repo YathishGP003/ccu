@@ -123,7 +123,6 @@ public abstract class UtilityApplication extends Application {
                     Toast.makeText(context, "USB disconnected", Toast.LENGTH_SHORT).show();
                     break;
                 case UsbService.ACTION_USB_NOT_SUPPORTED: // USB NOT SUPPORTED
-
                     NotificationHandler.setCMConnectionStatus(false);
                     Toast.makeText(context, "USB device not supported", Toast.LENGTH_SHORT).show();
                     break;
@@ -670,9 +669,11 @@ public abstract class UtilityApplication extends Application {
             Log.i(LOG_PREFIX, "isBACnetEnabled:" +isBACnetEnabled());
             Log.i(LOG_PREFIX, "checkNetworkConnected:" +checkNetworkConnected());
             if (isBACnetEnabled() && checkNetworkConnected()) {
-                if(CheckWifi()) {
-                    Log.i(LOG_PREFIX, "getIPRoute:" +CheckWifi());
-                    getIPRoute();
+                if(CheckEthernet()) {
+                    if (CheckWifi()) {
+                        Log.i(LOG_PREFIX, "getIPRoute:" + CheckWifi());
+                        getIPRoute();
+                    }
                 }
                 if (localDevice == null)
                     InitialiseBACnet();
@@ -720,10 +721,10 @@ public abstract class UtilityApplication extends Application {
             networkConfig = networkConfig.split("kernel")[0];
             String addIPRoute = "ip route add "+networkConfig+" static scope link table wlan0";
             Log.i(LOG_PREFIX, "getIPRoute:addIPRoute:" +addIPRoute);
-            rootCommand("");
-            String responseRoute = ShellExecuter(addIPRoute);
+            rootCommand("su 0 setenforce 0");
+            rootCommand(addIPRoute);
             String responseRouteShow = ShellExecuter("ip route show");
-            Log.i(LOG_PREFIX, "responseRoute:" +responseRoute);
+            //Log.i(LOG_PREFIX, "responseRoute:" +responseRoute);
             Log.i(LOG_PREFIX, "responseRouteShow:" +responseRouteShow);
             return networkConfig;
         } catch (Exception e) {

@@ -17,6 +17,8 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.dualduct.DualDuctConstants;
 
+import static a75f.io.logic.tuners.TunerConstants.DEFAULT_MODE_CHANGEOVER_HYSTERESIS;
+
 /**
  * Created by samjithsadasivan on 10/5/18.
  */
@@ -834,7 +836,19 @@ public class BuildingTuners
         String rebalanceHoldTimeId = hayStack.addPoint(rebalanceHoldTime);
         hayStack.writePoint(rebalanceHoldTimeId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", 20.0, 0);
         hayStack.writeHisValById(rebalanceHoldTimeId, 20.0);
-
+    
+        Point modeChangeoverHysteresis = new Point.Builder()
+                                      .setDisplayName(equipDis+"-"+"modeChangeoverHysteresis")
+                                      .setSiteRef(siteRef)
+                                      .setEquipRef(equipRef).setHisInterpolate("cov")
+                                      .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
+                                      .addMarker("mode").addMarker("changeover").addMarker("hysteresis").addMarker("sp")
+                                      .setMinVal("0").setMaxVal("5").setIncrementVal("0.5").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                      .setTz(tz)
+                                      .build();
+        String modeChangeoverHysteresisId = hayStack.addPoint(modeChangeoverHysteresis);
+        hayStack.writePoint(modeChangeoverHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", DEFAULT_MODE_CHANGEOVER_HYSTERESIS, 0);
+        hayStack.writeHisValById(modeChangeoverHysteresisId, DEFAULT_MODE_CHANGEOVER_HYSTERESIS);
         CCUHsApi.getInstance().syncEntityTree();
     }
     public void addDefaultVavTuners() {

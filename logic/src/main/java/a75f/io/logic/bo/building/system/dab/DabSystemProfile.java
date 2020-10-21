@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.system.dab;
 
+import org.greenrobot.essentials.StringUtils;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -13,6 +14,9 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.logic.bo.building.system.SystemState;
 import a75f.io.logic.tuners.TunerConstants;
+
+import static a75f.io.logic.tuners.TunerConstants.DEFAULT_MODE_CHANGEOVER_HYSTERESIS;
+import static a75f.io.logic.tuners.TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL;
 
 public abstract class DabSystemProfile extends SystemProfile
 {
@@ -147,6 +151,36 @@ public abstract class DabSystemProfile extends SystemProfile
             }
         }
         hayStack.writeHisValById(rebalanceHoldTimeId, HSUtil.getPriorityVal(rebalanceHoldTimeId));
+    
+        Point modeChangeoverHysteresis = new Point.Builder()
+                                      .setDisplayName(HSUtil.getDis(equipref)+"-DAB-"+"modeChangeoverHysteresis")
+                                      .setSiteRef(siteRef)
+                                      .setEquipRef(equipref).setHisInterpolate("cov")
+                                      .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
+                                      .addMarker("mode").addMarker("changeover").addMarker("hysteresis").addMarker("sp").addMarker("system")
+                                      .setMinVal("0").setMaxVal("5").setIncrementVal("0.5").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                      .setTz(tz)
+                                      .build();
+        String modeChangeoverHysteresisId = hayStack.addPoint(modeChangeoverHysteresis);
+    
+        HashMap modeChangeoverHysteresisPoint = hayStack.read("point and tuner and default and mode and changeover " +
+                                                              "and hysteresis");
+        
+        if (modeChangeoverHysteresisPoint.isEmpty()) {
+            hayStack.pointWrite(HRef.copy(rebalanceHoldTimeId), SYSTEM_DEFAULT_VAL_LEVEL, "ccu",
+                                                    HNum.make(DEFAULT_MODE_CHANGEOVER_HYSTERESIS), HNum.make(0));
+        } else {
+            ArrayList<HashMap> modeChangeoverHysteresisArr =
+                hayStack.readPoint(rebalanceHoldTimePoint.get("id").toString());
+            for (HashMap valMap : modeChangeoverHysteresisArr) {
+                if (valMap.get("val") != null) {
+                    hayStack.pointWrite(HRef.copy(modeChangeoverHysteresisId), (int) Double.parseDouble(valMap.get("level").toString()),
+                                        valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                }
+            }
+        }
+        hayStack.writeHisValById(modeChangeoverHysteresisId, HSUtil.getPriorityVal(modeChangeoverHysteresisId));
+        
     }
     
     protected void addUserIntentPoints(String equipref)
@@ -211,7 +245,7 @@ public abstract class DabSystemProfile extends SystemProfile
         {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", val, 0);
+        hayStack.writePoint(id, SYSTEM_DEFAULT_VAL_LEVEL, "ccu", val, 0);
     }
     
     @Override

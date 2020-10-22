@@ -238,7 +238,8 @@ public class DabSystemController extends SystemController
                 CcuLog.d(L.TAG_CCU_SYSTEM,
                          equip.getDisplayName() + " weightedAverageLoadSum: " + weightedAverageLoadSum +
                          " co2LoopWASum " + co2LoopWeightedAverageASum + " co2WASum " + co2WeightedAverageSum+
-                         " weightedAverageChangeoverLoadSum "+weightedAverageChangeoverLoadSum
+                         " weightedAverageChangeoverLoadSum "+weightedAverageChangeoverLoadSum+
+                         " prioritySum "+prioritySum
                 );
             }
         }
@@ -328,7 +329,7 @@ public class DabSystemController extends SystemController
     }
 
     private void handleOperationalChangeOver() {
-
+        
         if (emergencyMode) {
             CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency CONDITIONING Disabled");
             piController.reset();
@@ -336,8 +337,9 @@ public class DabSystemController extends SystemController
         }
 
         double modeChangeoverHysteresis = TunerUtil.readTunerValByQuery("system and mode and changeover and " +
-                                                                        "hysteresis and equipRef == "+
+                                                                        "hysteresis and equipRef == \""+
                                                                         L.ccu().systemProfile.getSystemEquipRef()+"\"");
+        CcuLog.d(L.TAG_CCU_SYSTEM," handleOperationalChangeOver : modeChangeoverHysteresis "+modeChangeoverHysteresis);
         if ((conditioningMode == COOLONLY || conditioningMode == AUTO) && weightedAverageLoadMA > modeChangeoverHysteresis) {
             if (systemState != COOLING) {
                 systemState = COOLING;

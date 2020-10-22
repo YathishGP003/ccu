@@ -23,7 +23,9 @@ import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SnRebootIndicationMessage_t;
 import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
+import a75f.io.logic.L;
 import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
@@ -253,10 +255,7 @@ public class LSerial
             DLog.logUSBServiceNotInitialized();
             return false;
         }
-
-        //Only if the struct was wrote to serial should it be logged.
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
-            LogdStructAsJson(struct);
+        LogdStructAsJson(struct);
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }
@@ -275,20 +274,14 @@ public class LSerial
 
     public synchronized boolean compareStructSendingToNode(short smartNodeAddress, Struct struct)
     {
-
+        
         Integer structHash = Arrays.hashCode(struct.getOrderedBuffer());
         if (checkDuplicate(Short.valueOf(smartNodeAddress), struct.getClass()
                 .getSimpleName(), structHash))
         {
-            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
-                LogdStructAsJson(struct);
             DLog.Logd("Struct " + struct.getClass().getSimpleName() + " was already sent, returning");
             return true;
         }
-
-        //Only if the struct was wrote to serial should it be logged.
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
-            LogdStructAsJson(struct);
         return false;
     }
     /***
@@ -314,9 +307,7 @@ public class LSerial
             DLog.logUSBServiceNotInitialized();
             return false;
         }
-        //Only if the struct was wrote to serial should it be logged.
-        /*if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
-            DLog.LogdStructAsJson(struct);*/
+        LogdStructAsJson(struct);
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }
@@ -343,11 +334,7 @@ public class LSerial
             DLog.logUSBServiceNotInitialized();
             return false;
         }
-
-        //Only if the struct was wrote to serial should it be logged.
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
-            LogdStructAsJson(struct);
-
+        LogdStructAsJson(struct);
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }

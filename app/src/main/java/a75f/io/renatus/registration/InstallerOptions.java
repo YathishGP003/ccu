@@ -653,16 +653,6 @@ public class InstallerOptions extends Fragment {
                     Integer.parseInt(manualIp[2]) < 255 & Integer.parseInt(manualIp[2]) >= 0 &
                     Integer.parseInt(manualIp[3]) < 255 & Integer.parseInt(manualIp[3]) > 0;
         }
-        /*if (!matcher.matches()) {
-            return false;
-        } else {
-            String[] manualIp = (manualIPAddress).split("\\.");
-                return Integer.parseInt(manualIp[0]) < 255 & Integer.parseInt(manualIp[0]) > 0 &
-                        Integer.parseInt(manualIp[1]) < 255 & Integer.parseInt(manualIp[1]) > 0 &
-                        Integer.parseInt(manualIp[2]) < 255 & Integer.parseInt(manualIp[2]) > 0 &
-                        Integer.parseInt(manualIp[3]) < 255 & Integer.parseInt(manualIp[3]) > 0;
-        }*/
-
     }
 
     public class NetworkChangeReceiver extends BroadcastReceiver {

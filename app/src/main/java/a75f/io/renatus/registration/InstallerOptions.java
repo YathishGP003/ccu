@@ -14,6 +14,7 @@ import android.os.CountDownTimer;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -643,14 +644,16 @@ public class InstallerOptions extends Fragment {
     }
 
     public boolean validateIPAddress(String manualIPAddress) {
-        String IPADDRESS_PATTERN =
-                "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
-                        "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
-                        "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
-                        "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
-        Pattern pattern = Pattern.compile(IPADDRESS_PATTERN);
-        Matcher matcher = pattern.matcher(manualIPAddress);
-        if (!matcher.matches()) {
+        if(!Patterns.IP_ADDRESS.matcher(manualIPAddress).matches()){
+            return false;
+        }else{
+            String[] manualIp = (manualIPAddress).split("\\.");
+            return  Integer.parseInt(manualIp[0]) < 255 & Integer.parseInt(manualIp[0]) > 0 &
+                    Integer.parseInt(manualIp[1]) < 255 & Integer.parseInt(manualIp[1]) > 0 &
+                    Integer.parseInt(manualIp[2]) < 255 & Integer.parseInt(manualIp[2]) >= 0 &
+                    Integer.parseInt(manualIp[3]) < 255 & Integer.parseInt(manualIp[3]) > 0;
+        }
+        /*if (!matcher.matches()) {
             return false;
         } else {
             String[] manualIp = (manualIPAddress).split("\\.");
@@ -658,7 +661,8 @@ public class InstallerOptions extends Fragment {
                         Integer.parseInt(manualIp[1]) < 255 & Integer.parseInt(manualIp[1]) > 0 &
                         Integer.parseInt(manualIp[2]) < 255 & Integer.parseInt(manualIp[2]) > 0 &
                         Integer.parseInt(manualIp[3]) < 255 & Integer.parseInt(manualIp[3]) > 0;
-        }
+        }*/
+
     }
 
     public class NetworkChangeReceiver extends BroadcastReceiver {

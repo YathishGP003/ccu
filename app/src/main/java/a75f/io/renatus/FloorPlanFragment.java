@@ -721,6 +721,7 @@ public class FloorPlanFragment extends Fragment
 								CCUHsApi.getInstance().putUIDMap(hsFloor.getId(), floor.getId());
 							}
 
+							//move zones and modules under new floor
 							for (Zone zone : HSUtil.getZones(floorToRename.getId())) {
 								zone.setFloorRef(CCUHsApi.getInstance().getLUID(floor.getId()));
 								CCUHsApi.getInstance().updateZone(zone, zone.getId());
@@ -730,8 +731,7 @@ public class FloorPlanFragment extends Fragment
 								}
 							}
 
-							CCUHsApi.getInstance().deleteEntityTree(floorToRename.getId());
-							refreshScreen();
+							checkZonesAttachedToCCU(floorToRename.getId());
 
 							InputMethodManager mgr = (InputMethodManager) getActivity()
 									.getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -833,7 +833,67 @@ public class FloorPlanFragment extends Fragment
 		}
 		return false;
 	}
-	
+
+	@SuppressLint("StaticFieldLeak")
+	private void checkZonesAttachedToCCU(String floorId) {
+
+		new AsyncTask<String, Void, Boolean>() {
+
+			@Override
+			protected Boolean doInBackground(String... strings) {
+				if (!HTTPUtils.isNetworkConnected()) {
+					return null;
+				}
+				boolean isZonesAttached = false;
+				HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+				HashMap site = CCUHsApi.getInstance().read("site");
+				String siteLUID = site.get("id").toString();
+				String siteGUID = CCUHsApi.getInstance().getGUID(siteLUID);
+
+				if (siteGUID == null) {
+					return null;
+				}
+				//for zones
+				HDict zDict = new HDictBuilder().add("filter", "room and not oao and siteRef == " + siteGUID).toDict();
+
+				try {
+					HGrid zonePoint = hClient.call("read", HGridBuilder.dictToGrid(zDict));
+					if (zonePoint == null) {
+						return null;
+					}
+					Iterator zit = zonePoint.iterator();
+
+					while (zit.hasNext()) {
+						HRow zr = (HRow) zit.next();
+
+						if (zr.getRef("floorRef") != null) {
+							if (CCUHsApi.getInstance().getGUID(floorId).equals(zr.getRef("floorRef").toString())) {
+								isZonesAttached = true;
+								break;
+							}
+						}
+					}
+
+				} catch (CallException e) {
+					Log.d(L.TAG_CCU_UI, "Failed to fetch room data " + e.getMessage());
+					e.printStackTrace();
+				}
+
+				return isZonesAttached;
+			}
+
+			@Override
+			protected void onPostExecute(Boolean isZonesAttached) {
+				if (isZonesAttached) {
+					CCUHsApi.getInstance().deleteEntityLocally(floorId);
+				} else {
+					CCUHsApi.getInstance().deleteEntityTree(floorId);
+				}
+				refreshScreen();
+			}
+		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+	}
+
 	@OnFocusChange(R.id.addFloorEdit)
 	public void handleFloorFocus(View v, boolean hasFocus)
 	{

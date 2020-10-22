@@ -300,27 +300,27 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
         analog1Min.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog1 and cooling and min")), false);
         analog1Max.setAdapter(analogAdapter);
         double analogVal = systemProfile.getConfigVal("analog1 and cooling and max");
-        analog1Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int) analogVal) : analogArray.size() - 1 , false);
+        analog1Max.setSelection(analogAdapter.getPosition((int) analogVal) , false);
         analog2Min.setAdapter(analogAdapter);
         analog2Min.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog2 and fan and min")), false);
         analog2Max.setAdapter(analogAdapter);
         analogVal = systemProfile.getConfigVal("analog2 and fan and max");
-        analog2Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int) analogVal) : analogArray.size() - 1);
+        analog2Max.setSelection(analogAdapter.getPosition((int) analogVal));
         analog3Min.setAdapter(analogAdapter);
         analog3Min.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog3 and heating and min")), false);
         analog3Max.setAdapter(analogAdapter);
         analogVal = systemProfile.getConfigVal("analog3 and heating and max");
-        analog3Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int) analogVal) : analogArray.size() - 1);
+        analog3Max.setSelection( analogAdapter.getPosition((int) analogVal));
         analog4MinCooling.setAdapter(analogAdapter);
         analog4MinCooling.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog4 and cooling and min")), false);
         analog4MaxCooling.setAdapter(analogAdapter);
         analogVal = systemProfile.getConfigVal("analog4 and cooling and max");
-        analog4MaxCooling.setSelection(analogVal != 0 ? analogAdapter.getPosition((int) analogVal) : analogArray.size() - 1, false);
+        analog4MaxCooling.setSelection(analogAdapter.getPosition((int) analogVal), false);
         analog4MinHeating.setAdapter(analogAdapter);
         analog4MinHeating.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog4 and heating and min")), false);
         analog4MaxHeating.setAdapter(analogAdapter);
         analogVal = systemProfile.getConfigVal("analog4 and heating and max");
-        analog4MaxHeating.setSelection(analogVal != 0 ? analogAdapter.getPosition((int) analogVal) : analogArray.size() - 1, false);
+        analog4MaxHeating.setSelection(analogAdapter.getPosition((int) analogVal) , false);
     
         ArrayList<Double> zoroToHundred = new ArrayList<>();
         for (double val = 0;  val <= 100.0; val++)

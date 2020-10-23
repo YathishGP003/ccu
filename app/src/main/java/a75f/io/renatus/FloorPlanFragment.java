@@ -714,7 +714,7 @@ public class FloorPlanFragment extends Fragment
 				for (Floor floor : siteFloorList) {
 					if (floor.getDisplayName().equals(addFloorEdit.getText().toString())) {
 						AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
-						adb.setMessage("Floor name already exists in this site,would you like to move all the zones associate to this floor to existing floor?");
+						adb.setMessage("Floor name already exists in this site,would you like to move all the zones associated to this floor to existing floor?");
 						adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
 							if (CCUHsApi.getInstance().getLUID(floor.getId()) == null) {
 								hsFloor.setId(CCUHsApi.getInstance().addFloor(hsFloor));
@@ -785,7 +785,7 @@ public class FloorPlanFragment extends Fragment
 				for (Floor floor : siteFloorList) {
 					if (floor.getDisplayName().equals(addFloorEdit.getText().toString())) {
 						AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
-						adb.setMessage("Floor name already exists in this site,would you like to move all the zones associate to this floor to existing floor?");
+						adb.setMessage("Floor name already exists in this site,would you like to move all the zones associated to this floor to existing floor?");
 						adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
 							if (CCUHsApi.getInstance().getLUID(floor.getId()) == null) {
 								hsFloor.setId(CCUHsApi.getInstance().addFloor(hsFloor));

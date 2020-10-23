@@ -636,14 +636,14 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
                 Double.parseDouble(ahuAnalog3Test.getSelectedItem().toString())));
     
         msg.analog3.set((short)(Double.parseDouble(ahuAnalog4Test.getSelectedItem().toString())));
-        
-        short relayStatus = (short) ((relay1Test.isChecked() ? 1 : 0)
-                                     | (relay2Test.isChecked() ? 1 << 1 : 0)
-                                     | (relay3Test.isChecked() ? 1 << 2 : 0)
-                                     | (relay4Test.isChecked() ? 1 << 3 : 0)
-                                     | (relay5Test.isChecked() ? 1 << 4 : 0)
-                                     | (relay6Test.isChecked() ? 1 << 5 : 0)
-                                     | (relay7Test.isChecked() ? 1 << 6 : 0));
+    
+        short relayStatus = (short) ((relay1Test.isChecked() ? 1 << MeshUtil.getRelayMapping(1) : 0)
+                                     | (relay2Test.isChecked() ? 1 << MeshUtil.getRelayMapping(2) : 0)
+                                     | (relay3Test.isChecked() ? 1 << MeshUtil.getRelayMapping(3) : 0)
+                                     | (relay4Test.isChecked() ? 1 << MeshUtil.getRelayMapping(4) : 0)
+                                     | (relay5Test.isChecked() ? 1 << MeshUtil.getRelayMapping(5) : 0)
+                                     | (relay6Test.isChecked() ? 1 << MeshUtil.getRelayMapping(6) : 0)
+                                     | (relay7Test.isChecked() ? 1 << MeshUtil.getRelayMapping(7) : 0));
     
         msg.relayBitmap.set(relayStatus);
         MeshUtil.sendStructToCM(msg);

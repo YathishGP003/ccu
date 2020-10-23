@@ -334,6 +334,7 @@ public class LSerial
             DLog.logUSBServiceNotInitialized();
             return false;
         }
+
         LogdStructAsJson(struct);
         mUsbService.write(struct.getOrderedBuffer());
         return true;

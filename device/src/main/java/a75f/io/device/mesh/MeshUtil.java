@@ -27,6 +27,16 @@ public class MeshUtil
     public static final int WATCHDOG_RESET = 0x20;
     public static final int SOFTWARE_RESET = 0x40;
     public static final int BACKUP_RESET = 0x80;
+    
+    public static final int RELAY_BITMAP_POS_Y1 = 0;
+    public static final int RELAY_BITMAP_POS_Y2 = 1;
+    public static final int RELAY_BITMAP_POS_G1 = 2;
+    public static final int RELAY_BITMAP_POS_G2 = 3;
+    public static final int RELAY_BITMAP_POS_W1 = 4;
+    public static final int RELAY_BITMAP_POS_W2 = 5;
+    public static final int RELAY_BITMAP_POS_AUX = 6;
+    
+    
     public static boolean sendHeartbeat(short temperatureOffset)
     {
         CcuToCmOverUsbCcuHeartbeatMessage_t heartbeatMessage_t = new CcuToCmOverUsbCcuHeartbeatMessage_t();
@@ -105,5 +115,31 @@ public class MeshUtil
         {
             e.printStackTrace();
         }
+    }
+    
+    /**
+     * Relays on CM are not mapped in logical order.
+     * HardCode mapping position according label on CM
+     *   ->  Y1, Y2 , G1, W1, W2, G2  <-
+     *
+     */
+    public static int getRelayMapping(int relayPos) {
+        switch (relayPos) {
+            case 1:
+                return RELAY_BITMAP_POS_Y1;
+            case 2:
+                return RELAY_BITMAP_POS_Y2;
+            case 3:
+                return RELAY_BITMAP_POS_G1;
+            case 4:
+                return RELAY_BITMAP_POS_W1;
+            case 5:
+                return RELAY_BITMAP_POS_W2;
+            case 6:
+                return RELAY_BITMAP_POS_G2;
+            case 7:
+                return RELAY_BITMAP_POS_AUX;
+        }
+        return relayPos;
     }
 }

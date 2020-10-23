@@ -706,6 +706,13 @@ public class CCUHsApi
             tagsDb.idMap.remove(id);
         }
     }
+
+    public void deleteEntityLocally(String id) {
+        tagsDb.tagsMap.remove(id.replace("@", ""));
+        if (tagsDb.idMap.get(id) != null) {
+            tagsDb.idMap.remove(id);
+        }
+    }
     
     //Removes entity , but the operation is not synced to backend
     public void removeEntity(String id) {

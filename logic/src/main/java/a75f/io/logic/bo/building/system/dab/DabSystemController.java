@@ -46,7 +46,7 @@ public class DabSystemController extends SystemController
     int coolingSignal;
     int heatingSignal;
     
-    EvictingQueue<Double> weightedAverageLoadPostMLQ = EvictingQueue.create(15);
+    EvictingQueue<Double> weightedAverageChangeOverLoadQueue = EvictingQueue.create(15);
     
     
     int ciDesired;
@@ -59,8 +59,8 @@ public class DabSystemController extends SystemController
     
     double weightedAverageLoadSum;
     
-    double weightedAverageLoad;
-    double weightedAverageLoadPostML;
+    double weightedAverageConditioningLoad;
+    double weightedAverageConditioningLoadPostML;
     
     double weightedAverageLoadMA;
     double weightedAverageCoolingLoadPostML ;
@@ -79,7 +79,10 @@ public class DabSystemController extends SystemController
     double co2WeightedAverageSum = 0;
     int zoneDeadCount = 0;
     boolean hasTi = false;
-
+    
+    double weightedAverageChangeoverLoadSum = 0;
+    double weightedAverageChangeoverLoad = 0;
+    
 
     private DabSystemController()
     {
@@ -173,6 +176,8 @@ public class DabSystemController extends SystemController
         co2WeightedAverageSum = 0;
         zoneDeadCount = 0;
         hasTi = false;
+        weightedAverageChangeoverLoadSum = 0;
+        weightedAverageChangeoverLoad = 0;
     }
 
     private void updateSystemTempHumidity(ArrayList<HashMap<Object, Object>> allEquips) {
@@ -223,12 +228,18 @@ public class DabSystemController extends SystemController
                 prioritySum += zoneDynamicPriority;
                 co2LoopWeightedAverageASum += (getEquipCo2LoopOp(equip.getId()) * zoneDynamicPriority);
                 co2WeightedAverageSum += (getEquipCo2(equip.getId()) * zoneDynamicPriority);
+    
+                double tempMidPoint = (desiredTempCooling + desiredTempHeating)/2;
+                weightedAverageChangeoverLoadSum += (zoneCurTemp - tempMidPoint) * zoneDynamicPriority;
+                
                 CcuLog.d(L.TAG_CCU_SYSTEM, equip.getDisplayName() + " zoneDynamicPriority: " + zoneDynamicPriority +
                                            " zoneCoolingLoad: " + zoneCoolingLoad + " zoneHeatingLoad: " + zoneHeatingLoad
                 );
                 CcuLog.d(L.TAG_CCU_SYSTEM,
                          equip.getDisplayName() + " weightedAverageLoadSum: " + weightedAverageLoadSum +
-                         " co2LoopWASum " + co2LoopWeightedAverageASum + " co2WASum " + co2WeightedAverageSum
+                         " co2LoopWASum " + co2LoopWeightedAverageASum + " co2WASum " + co2WeightedAverageSum+
+                         " weightedAverageChangeoverLoadSum "+weightedAverageChangeoverLoadSum+
+                         " prioritySum "+prioritySum
                 );
             }
         }
@@ -263,11 +274,16 @@ public class DabSystemController extends SystemController
 
                     weightedAverageLoadSum += (cmCoolingLoad * zoneDynamicPriority) - (cmHeatingLoad * zoneDynamicPriority);
                     prioritySum += zoneDynamicPriority;
+    
+                    double tempMidPoint = (desiredTempCooling + desiredTempHeating)/2;
+                    weightedAverageChangeoverLoadSum += (cmCurrentTemp - tempMidPoint) * zoneDynamicPriority;
+                    
                     CcuLog.d(L.TAG_CCU_SYSTEM, "CM dab zoneDynamicPriority: " + zoneDynamicPriority +
                                                " cmCoolingLoad: " + cmCoolingLoad +
                                                " cmHeatingLoad: " + cmHeatingLoad +
                                                " weightedAverageLoadSum " + weightedAverageLoadSum +
-                                               "," + prioritySum + "," + cmCurrentTemp
+                                               "," + prioritySum + "," + cmCurrentTemp+
+                                               " weightedAverageChangeoverLoadSum "+weightedAverageChangeoverLoadSum
                     );
                 }
             }
@@ -313,31 +329,28 @@ public class DabSystemController extends SystemController
     }
 
     private void handleOperationalChangeOver() {
-
+        
         if (emergencyMode) {
             CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency CONDITIONING Disabled");
             piController.reset();
             emergencyMode = false;
         }
 
-        if ((conditioningMode == COOLONLY || conditioningMode == AUTO) && weightedAverageLoadMA > 0)
-        {
-            if (systemState != COOLING)
-            {
+        double modeChangeoverHysteresis = TunerUtil.readTunerValByQuery("system and mode and changeover and " +
+                                                                        "hysteresis and equipRef == \""+
+                                                                        L.ccu().systemProfile.getSystemEquipRef()+"\"");
+        CcuLog.d(L.TAG_CCU_SYSTEM," handleOperationalChangeOver : modeChangeoverHysteresis "+modeChangeoverHysteresis);
+        if ((conditioningMode == COOLONLY || conditioningMode == AUTO) && weightedAverageLoadMA > modeChangeoverHysteresis) {
+            if (systemState != COOLING) {
                 systemState = COOLING;
                 piController.reset();
             }
-        }
-        else if ((conditioningMode == HEATONLY || conditioningMode == AUTO) && weightedAverageLoadMA < 0)
-        {
-            if (systemState != HEATING)
-            {
+        } else if ((conditioningMode == HEATONLY || conditioningMode == AUTO) && weightedAverageLoadMA < (-1 * modeChangeoverHysteresis)) {
+            if (systemState != HEATING) {
                 systemState = HEATING;
                 piController.reset();
             }
-        }
-        else
-        {
+        } else {
             //systemState = OFF;
 
             coolingSignal = 0;
@@ -364,28 +377,34 @@ public class DabSystemController extends SystemController
 
     private void updateWeightedAverageLoad() {
 
-        weightedAverageLoad = weightedAverageLoadSum / prioritySum;
+        weightedAverageConditioningLoad = weightedAverageLoadSum / prioritySum;
         co2LoopOpWeightedAverage = co2LoopWeightedAverageASum/prioritySum;
         co2WeightedAverageSum = co2WeightedAverageSum/prioritySum;
 
         comfortIndex = (int)(totalCoolingLoad + totalHeatingLoad) /zoneCount;
 
         systemProfile.setSystemPoint("ci and running", comfortIndex);
+    
+        weightedAverageConditioningLoadPostML = weightedAverageConditioningLoad ;//+buildingLoadOffsetML
+        
+        weightedAverageChangeoverLoad = weightedAverageChangeoverLoadSum/prioritySum;
+    
+        weightedAverageChangeOverLoadQueue.add(weightedAverageChangeoverLoad);
 
-        weightedAverageLoadPostML = weightedAverageLoad ;//+buildingLoadOffsetML
-        weightedAverageLoadPostMLQ.add(weightedAverageLoadPostML);
 
-
-        double weightedAverageLoadPostMLQSum = 0;
-        for (double val : weightedAverageLoadPostMLQ) {
-            weightedAverageLoadPostMLQSum += val;
+        double weightedAverageChangeOverLoadQueueSum = 0;
+        for (double val : weightedAverageChangeOverLoadQueue) {
+            weightedAverageChangeOverLoadQueueSum += val;
         }
-        weightedAverageLoadMA = weightedAverageLoadPostMLQSum/weightedAverageLoadPostMLQ.size();
+        weightedAverageLoadMA = weightedAverageChangeOverLoadQueueSum/weightedAverageChangeOverLoadQueue.size();
 
-        weightedAverageCoolingLoadPostML = weightedAverageLoadPostML > 0 ? weightedAverageLoadPostML : 0;
-
-        weightedAverageHeatingLoadPostML = weightedAverageLoadPostML < 0 ? Math.abs(weightedAverageLoadPostML) : 0;
-
+        if (weightedAverageLoadMA > 0) {
+            weightedAverageCoolingLoadPostML = weightedAverageConditioningLoadPostML > 0 ? weightedAverageConditioningLoadPostML : 0;
+            weightedAverageHeatingLoadPostML = 0;
+        } else {
+            weightedAverageCoolingLoadPostML = 0;
+            weightedAverageHeatingLoadPostML = Math.abs(weightedAverageConditioningLoadPostML);
+        }
         systemProfile.setSystemPoint("weighted and average and moving and load",
                                CCUUtils.roundToTwoDecimal(weightedAverageLoadMA));
         systemProfile.setSystemPoint("weighted and average and cooling and load",
@@ -401,7 +420,8 @@ public class DabSystemController extends SystemController
                                    "systemState: "+systemState
         );
 
-        CcuLog.d(L.TAG_CCU_SYSTEM, "weightedAverageCoolingLoadPostML: " + weightedAverageCoolingLoadPostML +
+        CcuLog.d(L.TAG_CCU_SYSTEM, "weightedAverageConditioningLoadPostML "+weightedAverageConditioningLoadPostML+
+                                   " weightedAverageCoolingLoadPostML: " + weightedAverageCoolingLoadPostML +
                                    " weightedAverageHeatingLoadPostML: " + weightedAverageHeatingLoadPostML +
                                    " coolingSignal: " + coolingSignal + " heatingSignal: " + heatingSignal
         );
@@ -993,7 +1013,7 @@ public class DabSystemController extends SystemController
     
     @Override
     public void reset(){
-        weightedAverageLoadPostMLQ.clear();
+        weightedAverageChangeOverLoadQueue.clear();
         piController.reset();
         heatingSignal = 0;
         coolingSignal = 0;

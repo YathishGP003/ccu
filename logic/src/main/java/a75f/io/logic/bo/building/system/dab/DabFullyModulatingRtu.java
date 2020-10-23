@@ -107,8 +107,9 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemCoolingLoopOp/100)));
             }
 
-            if(signal != getCmdSignal("cooling"))
-                setCmdSignal("cooling",signal);
+            if (systemCoolingLoopOp != getCmdSignal("cooling")) {
+                setCmdSignal("cooling", systemCoolingLoopOp);
+            }
         } else {
             signal = 0;
         }
@@ -137,8 +138,9 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             {
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemHeatingLoopOp / 100)));
             }
-            if(signal != getCmdSignal("heating"))
-                setCmdSignal("heating", signal);
+            if (systemHeatingLoopOp != getCmdSignal("heating")) {
+                setCmdSignal("heating", systemHeatingLoopOp);
+            }
         } else {
             signal = 0;
         }
@@ -195,8 +197,9 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemFanLoopOp/100)));
             }
 
-            if(signal != getCmdSignal("fan"))
-                setCmdSignal("fan", signal);
+            if (systemFanLoopOp != getCmdSignal("fan")) {
+                setCmdSignal("fan", systemFanLoopOp);
+            }
         } else {
             signal = 0;
         }
@@ -302,6 +305,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                 hayStack.deleteEntityTree(equip.get("id").toString());
             } else {
                 addNewSystemUserIntentPoints(equip.get("id").toString());
+                addNewTunerPoints(equip.get("id").toString());
                 return;
             }
         }

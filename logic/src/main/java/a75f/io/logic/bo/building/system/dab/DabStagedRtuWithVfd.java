@@ -21,6 +21,8 @@ import static a75f.io.logic.bo.building.hvac.Stage.FAN_1;
 
 public class DabStagedRtuWithVfd extends DabStagedRtu
 {
+    private static final int ANALOG_SCALE = 10;
+    private static final int MAX_RELAY_COUNT = 8;
     
     public String getProfileName() {
         return "DAB Staged RTU with VFD Fan";
@@ -45,6 +47,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
                 hayStack.deleteEntityTree(equip.get("id").toString());
             } else {
                 addNewSystemUserIntentPoints(equip.get("id").toString());
+                addNewTunerPoints(equip.get("id").toString());
                 updateStagesSelected();
                 return;
             }
@@ -89,11 +92,11 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         {
             if (isCoolingActive())
             {
-                for (int i = 1; i < 8; i++)
+                for (int relayCount = 1; relayCount <  MAX_RELAY_COUNT; relayCount++)
                 {
-                    if (getConfigEnabled("relay" + i) > 0)
+                    if (getConfigEnabled("relay" + relayCount) > 0)
                     {
-                        int val = (int) getConfigAssociation("relay" + i);
+                        int val = (int) getConfigAssociation("relay" + relayCount);
                         if (val <= Stage.COOLING_5.ordinal())
                         {
                             if(getCmdSignal("cooling and stage" +(Stage.values()[val].ordinal()+1)) > 0)
@@ -104,11 +107,11 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
             }
             else if (isHeatingActive())
             {
-                for (int i = 1; i < 8; i++)
+                for (int relayCount = 1; relayCount < MAX_RELAY_COUNT; relayCount++)
                 {
-                    if (getConfigEnabled("relay" + i) > 0 )
+                    if (getConfigEnabled("relay" + relayCount) > 0 )
                     {
-                        int val = (int) getConfigAssociation("relay" + i);
+                        int val = (int) getConfigAssociation("relay" + relayCount);
                         if (val >= Stage.HEATING_1.ordinal() && val <= Stage.HEATING_5.ordinal())
                         {
                             if(getCmdSignal("heating and stage" + (Stage.values()[val].ordinal() - COOLING_5.ordinal())) > 0)
@@ -121,11 +124,11 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
             }
             else if (stageStatus[FAN_1.ordinal()] > 0)
             {
-                for (int i = 1; i < 8; i++)
+                for (int relayCount = 1; relayCount < MAX_RELAY_COUNT; relayCount++)
                 {
-                    if (getConfigEnabled("relay" + i) > 0 && getCmdSignal("fan and stage1") > 0)
+                    if (getConfigEnabled("relay" + relayCount) > 0 && getCmdSignal("fan and stage1") > 0)
                     {
-                        int val = (int) getConfigAssociation("relay" + i);
+                        int val = (int) getConfigAssociation("relay" + relayCount);
                         if (val == Stage.FAN_1.ordinal())
                         {
                             signal = getConfigVal("analog2 and recirculate");
@@ -139,16 +142,22 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
             }
             if((epidemicState == EpidemicState.PREPURGE) && L.ccu().oaoProfile != null){
                 double smartPrePurgeFanSpeed = TunerUtil.readTunerValByQuery("system and prePurge and fan and speed", L.ccu().oaoProfile.getEquipRef());
-                signal = Math.max(signal,smartPrePurgeFanSpeed/10);
+                signal = Math.max(signal,smartPrePurgeFanSpeed / ANALOG_SCALE);
             }else if((epidemicState == EpidemicState.POSTPURGE) && L.ccu().oaoProfile != null){
                 double smartPurgeFanLoopOp = TunerUtil.readTunerValByQuery("system and postPurge and fan and speed", L.ccu().oaoProfile.getEquipRef());
-                signal = Math.max(signal,smartPurgeFanLoopOp/10);
+                signal = Math.max(signal,smartPurgeFanLoopOp / ANALOG_SCALE);
             }
+    
+            signal = ANALOG_SCALE * signal;
+            
+            if (signal != getCmdSignal("fan and modulating")) {
+                setCmdSignal("fan and modulating", signal);
+            }
+            
         }
-        if(signal != getCmdSignal("fan and modulating"))
-            setCmdSignal("fan and modulating",10*signal);
-        ControlMote.setAnalogOut("analog2", 10 * signal);
-        CcuLog.d(L.TAG_CCU_SYSTEM, " analog2 Signal : "+10 * signal);
+        
+        ControlMote.setAnalogOut("analog2", signal);
+        CcuLog.d(L.TAG_CCU_SYSTEM, " analog2 Signal : "+signal);
     }
     
     @Override

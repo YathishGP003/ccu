@@ -195,7 +195,7 @@ public class MeshNetwork extends DeviceNetwork
         {
             if (ControlMote.getRelayState("relay" + i) > 0)
             {
-                relayBitmap |= 1 << (i - 1);
+                relayBitmap |= 1 << MeshUtil.getRelayMapping(i);
             }
         }
         msg.relayBitmap.set((short) relayBitmap);

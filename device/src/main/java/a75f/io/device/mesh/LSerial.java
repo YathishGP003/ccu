@@ -345,9 +345,10 @@ public class LSerial
         }
 
         //Only if the struct was wrote to serial should it be logged.
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
+        //if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
             LogdStructAsJson(struct);
-
+  
+        
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }

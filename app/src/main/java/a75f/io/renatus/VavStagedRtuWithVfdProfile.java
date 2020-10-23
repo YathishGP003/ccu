@@ -607,13 +607,13 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
     public void sendRelayActivationTestSignal() {
         CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
         msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
-        short relayStatus = (short) ((relay1Test.isChecked() ? 1 : 0)
-                                     | (relay2Test.isChecked() ? 1 << 1 : 0)
-                                     | (relay3Test.isChecked() ? 1 << 2 : 0)
-                                     | (relay4Test.isChecked() ? 1 << 3 : 0)
-                                     | (relay5Test.isChecked() ? 1 << 4 : 0)
-                                     | (relay6Test.isChecked() ? 1 << 5 : 0)
-                                     | (relay7Test.isChecked() ? 1 << 6 : 0));
+        short relayStatus = (short) ((relay1Test.isChecked() ? 1 << MeshUtil.getRelayMapping(1) : 0)
+                                     | (relay2Test.isChecked() ? 1 << MeshUtil.getRelayMapping(2) : 0)
+                                     | (relay3Test.isChecked() ? 1 << MeshUtil.getRelayMapping(3) : 0)
+                                     | (relay4Test.isChecked() ? 1 << MeshUtil.getRelayMapping(4) : 0)
+                                     | (relay5Test.isChecked() ? 1 << MeshUtil.getRelayMapping(5) : 0)
+                                     | (relay6Test.isChecked() ? 1 << MeshUtil.getRelayMapping(6) : 0)
+                                     | (relay7Test.isChecked() ? 1 << MeshUtil.getRelayMapping(7) : 0));
     
         msg.analog1.set((short)(10 * Double.parseDouble(analog2TestSpinner.getSelectedItem().toString())));
         msg.relayBitmap.set(relayStatus);

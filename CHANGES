@@ -1,3 +1,18 @@
- - Merged PR 141: Invalid logical value/unit on system parameter
- - Merge branch 'master' into Bug/samjith/2051_signal_logical_val_incorrect
- - BUG 2151 : Signal points on System equip should have logical value and % unit
+ - Merged PR 161: bug/mahesh/3894-change_pidIntegraltime_min_max
+ - Merged PR 165: mahesh/3888-CCU_multiple_ccu_floors_rename_issue
+ - Merged PR 174: Dab algo change for faster changeover
+ - Merge master
+ - Merged PR 188: Relay mapping change
+ - fix error message
+ - fix the error message
+ - hide keyboard and refresh screen
+ - update warning message
+ - remove floor deletion when renaming floor
+ - BUG : 3947 Relay mismatch
+ - fix for deleting floor while merging zones
+ - DAB refactor
+ - Add hysteresis tuner and update algo
+ - WIP-debug enabled
+ - WIP: dab algo
+ - while renaming check if floor is already exists and if not then add new entity
+ - update pidIntegralTime min and max values

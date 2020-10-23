@@ -744,6 +744,12 @@ public class FloorPlanFragment extends Fragment
 							dialog.dismiss();
 						});
 						adb.setNegativeButton(getResources().getString(R.string.cancel), (dialog, which) -> {
+							InputMethodManager mgr = (InputMethodManager) getActivity()
+									.getSystemService(Context.INPUT_METHOD_SERVICE);
+							mgr.hideSoftInputFromWindow(addFloorEdit.getWindowToken(), 0);
+
+							refreshScreen();
+
 							dialog.dismiss();
 						});
 						adb.show();
@@ -800,6 +806,12 @@ public class FloorPlanFragment extends Fragment
 							dialog.dismiss();
 						});
 						adb.setNegativeButton(getResources().getString(R.string.cancel), (dialog, which) -> {
+							InputMethodManager mgr = (InputMethodManager) getActivity()
+									.getSystemService(Context.INPUT_METHOD_SERVICE);
+							mgr.hideSoftInputFromWindow(addFloorEdit.getWindowToken(), 0);
+
+							refreshScreen();
+
 							dialog.dismiss();
 						});
 						adb.show();

@@ -200,6 +200,7 @@ public class Globals {
                         CCUHsApi.getInstance().importBuildingTuners();
                     }
                     BuildingTuners.getInstance().updateBuildingTuners();
+                    CCUHsApi.getInstance().syncEntityTree();
                 }
             
                 loadEquipProfiles();

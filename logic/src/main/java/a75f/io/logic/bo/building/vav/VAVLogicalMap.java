@@ -693,9 +693,25 @@ public class VAVLogicalMap
                                                 .setTz(tz)
                                                 .build();
         String fanControlOnFixedTimeDelayId = CCUHsApi.getInstance().addPoint(fanControlOnFixedTimeDelay);
+    
+        HashMap<Object, Object> fanControlOnFixedTimeDelayPoint = CCUHsApi.getInstance()
+                                                                          .read("tuner and default and fan and " +
+                                                                                "control and time and delay");
+        ArrayList<HashMap> fanControlOnFixedTimeDelayPointArr =
+            CCUHsApi.getInstance().readPoint(fanControlOnFixedTimeDelayPoint.get("id").toString());
+        for (HashMap valMap : fanControlOnFixedTimeDelayPointArr) {
+            if (valMap.get("val") != null) {
+                CCUHsApi.getInstance().pointWrite(HRef.copy(fanControlOnFixedTimeDelayId),
+                             (int) Double.parseDouble(valMap.get("level").toString()),
+                                                       valMap.get("who").toString(),
+                                                       HNum.make(Double.parseDouble(valMap.get("val").toString())),
+                                                       HNum.make(0));
+            }
+        }
+        
         CCUHsApi.getInstance().writeDefaultValById(fanControlOnFixedTimeDelayId, 1.0);
         CCUHsApi.getInstance().writeHisValById(fanControlOnFixedTimeDelayId, 1.0);
-    
+        CCUHsApi.getInstance().writeHisValById(fanControlOnFixedTimeDelayId, HSUtil.getPriorityVal(fanControlOnFixedTimeDelayId));
     }
     
     public void createVavConfigPoints(VavProfileConfiguration config, String equipRef, String floor, String room) {

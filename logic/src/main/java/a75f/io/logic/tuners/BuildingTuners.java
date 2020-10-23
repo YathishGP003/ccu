@@ -82,34 +82,15 @@ public class BuildingTuners
         CCUHsApi.getInstance().syncEntityTree();
     }
     
+    /**
+     * All the new tuners with are being added here.
+     * This should be done neatly.
+     */
     public void updateBuildingTuners() {
         DualDuctTuners.addDefaultTuners(siteRef, equipRef, equipDis, tz);
         OAOTuners.updateNewTuners(siteRef,equipRef, equipDis,tz,false);
-    
-    
-        HashMap<Object, Object> modeChangeoverHysteresisPoint = CCUHsApi.getInstance()
-                                                                        .readEntity("tuner and default and mode and " +
-                                                                                             "changeover and hysteresis");
-        if (modeChangeoverHysteresisPoint.isEmpty()) {
-            Point modeChangeoverHysteresis = new Point.Builder().setDisplayName(equipDis + "-" + "modeChangeoverHysteresis")
-                                                                .setSiteRef(siteRef)
-                                                                .setEquipRef(equipRef)
-                                                                .setHisInterpolate("cov")
-                                                                .addMarker("tuner")
-                                                                .addMarker("default").addMarker("writable").addMarker("his")
-                                                                .addMarker("his").addMarker("mode").addMarker("changeover")
-                                                                .addMarker("hysteresis").addMarker("sp")
-                                                                .setMinVal("0")
-                                                                .setMaxVal("5")
-                                                                .setIncrementVal("0.5")
-                                                                .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
-                                                                .setTz(tz)
-                                                                .build();
-            String modeChangeoverHysteresisId = hayStack.addPoint(modeChangeoverHysteresis);
-            hayStack.writePoint(modeChangeoverHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu",
-                                DEFAULT_MODE_CHANGEOVER_HYSTERESIS, 0);
-            hayStack.writeHisValById(modeChangeoverHysteresisId, DEFAULT_MODE_CHANGEOVER_HYSTERESIS);
-        }
+        updateDabBuildingTuners();
+        updateVavBuildingTuners();
     }
     
     public void addDefaultBuildingTuners() {
@@ -3780,6 +3761,58 @@ public class BuildingTuners
 
         CCUHsApi.getInstance().syncEntityTree();
     }
-
-
+    
+    private void updateDabBuildingTuners() {
+        HashMap<Object, Object> modeChangeoverHysteresisPoint = CCUHsApi.getInstance()
+                                                                        .readEntity("tuner and default and mode and " +
+                                                                                    "changeover and hysteresis");
+        if (modeChangeoverHysteresisPoint.isEmpty()) {
+            Point modeChangeoverHysteresis = new Point.Builder().setDisplayName(equipDis + "-DAB-" +
+                                                                                "modeChangeoverHysteresis")
+                                                                .setSiteRef(siteRef)
+                                                                .setEquipRef(equipRef)
+                                                                .setHisInterpolate("cov")
+                                                                .addMarker("tuner")
+                                                                .addMarker("default").addMarker("writable").addMarker("his")
+                                                                .addMarker("his").addMarker("mode").addMarker("changeover")
+                                                                .addMarker("hysteresis").addMarker("sp")
+                                                                .setMinVal("0")
+                                                                .setMaxVal("5")
+                                                                .setIncrementVal("0.5")
+                                                                .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                                                .setTz(tz)
+                                                                .build();
+            String modeChangeoverHysteresisId = hayStack.addPoint(modeChangeoverHysteresis);
+            hayStack.writePoint(modeChangeoverHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu",
+                                DEFAULT_MODE_CHANGEOVER_HYSTERESIS, 0);
+            hayStack.writeHisValById(modeChangeoverHysteresisId, DEFAULT_MODE_CHANGEOVER_HYSTERESIS);
+        }
+    }
+    
+    private void updateVavBuildingTuners() {
+        
+        HashMap<Object, Object> fanControlOnFixedTimeDelayPoint = CCUHsApi.getInstance()
+                                                                          .read("tuner and default and fan and " +
+                                                                                "control and time and delay");
+        
+        if (fanControlOnFixedTimeDelayPoint.isEmpty()) {
+            Point fanControlOnFixedTimeDelay  = new Point.Builder()
+                                                    .setDisplayName(equipDis + "-VAV-"+"fanControlOnFixedTimeDelay ")
+                                                    .setSiteRef(siteRef)
+                                                    .setEquipRef(equipRef)
+                                                    .setHisInterpolate("cov")
+                                                    .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his")
+                                                    .addMarker("fan").addMarker("control").addMarker("time").addMarker("delay").addMarker("sp")
+                                                    .setMinVal("0")
+                                                    .setMaxVal("10")
+                                                    .setIncrementVal("1")
+                                                    .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                                    .setUnit("m")
+                                                    .setTz(tz)
+                                                    .build();
+            String fanControlOnFixedTimeDelayId = CCUHsApi.getInstance().addPoint(fanControlOnFixedTimeDelay);
+            CCUHsApi.getInstance().writeDefaultValById(fanControlOnFixedTimeDelayId, 1.0);
+            CCUHsApi.getInstance().writeHisValById(fanControlOnFixedTimeDelayId, 1.0);
+        }
+    }
 }

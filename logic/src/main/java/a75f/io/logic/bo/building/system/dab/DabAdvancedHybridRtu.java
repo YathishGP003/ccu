@@ -48,6 +48,7 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
                 hayStack.deleteEntityTree(equip.get("id").toString());
             } else {
                 addNewSystemUserIntentPoints(equip.get("id").toString());
+                addNewTunerPoints(equip.get("id").toString());
                 updateStagesSelected();
                 return;
             }

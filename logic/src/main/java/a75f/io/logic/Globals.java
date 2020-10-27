@@ -40,6 +40,7 @@ import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.erm.EmrProfile;
+import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
 import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile;
@@ -541,6 +542,15 @@ public class Globals {
                             FourPipeFanCoilUnitProfile fourPfcu = new FourPipeFanCoilUnitProfile();
                             fourPfcu.addLogicalMap(Short.valueOf(eq.getGroup()), z.getId());
                             L.ccu().zoneProfiles.add(fourPfcu);
+                            break;
+                        case MODBUS_PAC:
+                        case MODBUS_RRS:
+                        case MODBUS_UPS:
+                        case MODBUS_WLD:
+                        case MODBUS_EM:
+                            ModbusProfile mbProfile = new ModbusProfile();
+                            mbProfile.addMbEquip(Short.valueOf(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
+                            L.ccu().zoneProfiles.add(mbProfile);
                             break;
                             
                     }

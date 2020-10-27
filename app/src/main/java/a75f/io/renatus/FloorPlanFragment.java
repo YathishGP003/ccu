@@ -1204,7 +1204,7 @@ public class FloorPlanFragment extends Fragment
 
 			}
 		}else
-			Toast.makeText(getActivity(),"Zone profile is empty, recheck your DB",Toast.LENGTH_LONG);
+			Toast.makeText(getActivity(),"Zone profile is empty, recheck your DB",Toast.LENGTH_LONG).show();
 		
 		
 	}

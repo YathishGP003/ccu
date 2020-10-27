@@ -16,10 +16,10 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.modbus.Command;
 import a75f.io.api.haystack.modbus.Condition;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
-import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.api.haystack.modbus.LogicalPointTags;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.UserIntentPointTags;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 
 public class ModbusEquip {
     ProfileType profileType;
@@ -110,8 +110,9 @@ public class ModbusEquip {
                     .setEndBit(String.valueOf(configParam.getEndBit())).setRegisterNumber(configParam.getRegisterNumber())
                     .setSiteRef(siteRef).addMarker("register").addMarker("modbus")
                     .setTz(tz);
-            if(configParam.isDisplayInUI())
+            if(configParam.isDisplayInUI()){
                 logicalParamPoint.addMarker("displayInUi");
+            }
             for(LogicalPointTags marker : configParam.getLogicalPointTags()) {
                 if(Objects.nonNull(marker.getTagValue())){
                     if(marker.getTagName().contains("unit")) {
@@ -207,29 +208,38 @@ public class ModbusEquip {
         CCUHsApi.getInstance().syncEntityTree();
     }
 
-    public void updateHaystackPoints(String equipRef, String zoneRef, EquipmentDevice equipmentDevice, List<Parameter> configuredParams){
-        for(Parameter configParams: configuredParams){
+    public void updateHaystackPoints(String equipRef, String zoneRef, EquipmentDevice equipmentDevice, List<Parameter> configuredParams) {
+        for (Parameter configParams : configuredParams) {
             //Read all points for this markers
-            String tags = "";
-            for(LogicalPointTags marker : configParams.getLogicalPointTags()) {
-                if(!Objects.nonNull(marker.getTagValue()))
-                    tags = tags+" and "+marker.getTagName();
+            StringBuilder tags = new StringBuilder();
+            for (LogicalPointTags marker : configParams.getLogicalPointTags()) {
+                if (!Objects.nonNull(marker.getTagValue())) {
+                    tags.append(" and ").append(marker.getTagName());
+                }
             }
-            if(!tags.isEmpty()) {
-                Log.d("Modbus","updateMbPoints = "+tags+","+equipRef);
-                HashMap pointRead = hayStack.read("point and logical and modbus and zone"+tags+" and equipRef == \""+equipRef+"\"");
+
+            if (tags.length() > 0) {
+                HashMap pointRead = CCUHsApi.getInstance().read("point and logical and modbus and zone" + tags + " and equipRef == \"" + equipRef + "\"");
                 Point logicalPoint = new Point.Builder().setHashMap(pointRead).build();
-                if(configParams.isDisplayInUI()){
-                    if(!logicalPoint.getMarkers().contains("displayInUi"))
+
+                if (configParams.isDisplayInUI()) {
+                    if (!logicalPoint.getMarkers().contains("displayInUi")) {
                         logicalPoint.getMarkers().add("displayInUi");
-                }else if(logicalPoint.getMarkers().contains("displayInUi")){
+                        if (logicalPoint.getId() != null) {
+                            CCUHsApi.getInstance().updatePoint(logicalPoint, logicalPoint.getId());
+                        }
+                    }
+                } else if (logicalPoint.getMarkers().contains("displayInUi")) {
                     logicalPoint.getMarkers().remove("displayInUi");
+                    if (logicalPoint.getId() != null) {
+                        CCUHsApi.getInstance().updatePoint(logicalPoint, logicalPoint.getId());
+                    }
                 }
             }
         }
         CCUHsApi.getInstance().syncEntityTree();
-
     }
+
     public List<Parameter> getProfileConfiguration(short slaveId){
         if(configuredParams != null && (configuredParams.size() > 0))
             return configuredParams;

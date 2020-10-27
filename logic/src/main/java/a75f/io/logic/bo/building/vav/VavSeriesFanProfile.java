@@ -88,7 +88,7 @@ public class VavSeriesFanProfile extends VavProfile
             int loopOp = getLoopOp(conditioning, roomTemp);
             
             SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
-            if (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.OFF|| valveController.getControlVariable() == 0) {
+            if (systemMode == SystemMode.OFF|| valveController.getControlVariable() == 0) {
                 valve.currentPosition = 0;
             }
             
@@ -131,7 +131,7 @@ public class VavSeriesFanProfile extends VavProfile
     private int getLoopOp(SystemController.State conditioning, double roomTemp) {
         int loopOp = 0;
         SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
-        if (roomTemp > setTempCooling && systemMode != SystemMode.OFF && systemMode != SystemMode.HEATONLY) {
+        if (roomTemp > setTempCooling && systemMode != SystemMode.OFF) {
             //Zone is in Cooling
             if (state != COOLING) {
                 handleCoolingChangeOver();
@@ -139,7 +139,7 @@ public class VavSeriesFanProfile extends VavProfile
             if (conditioning == SystemController.State.COOLING ) {
                 loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
             }
-        } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF && systemMode != SystemMode.COOLONLY) {
+        } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF) {
             //Zone is in heating
             if (state != HEATING) {
                 handleHeatingChangeOver();
@@ -213,7 +213,7 @@ public class VavSeriesFanProfile extends VavProfile
         vavDevice.setDischargeSp(dischargeSp);
         valveController.updateControlVariable(dischargeSp, dischargeTemp);
         valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
-    
+        CcuLog.d(L.TAG_CCU_ZONE, " dischargeTemp "+dischargeTemp+" dischargeSp "+dischargeSp+" supplyAirTemp "+supplyAirTemp);
     }
     
     private void updateReheatDuringSystemHeating(String equipId) {
@@ -262,7 +262,6 @@ public class VavSeriesFanProfile extends VavProfile
             damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * Math.min(50, vocLoop.getLoopOutput()) / 50;
             CcuLog.d(L.TAG_CCU_ZONE, "VOCLoopOp :" + vocLoop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
         }
-    
     }
     
     private void updateZoneDead(short node) {

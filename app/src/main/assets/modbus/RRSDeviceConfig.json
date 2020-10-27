@@ -303,7 +303,7 @@
                             "tagName": "frequency"
                         },
                         {
-                            "tagName": "start"
+                            "tagName": "end"
                         },
                         {
                             "tagName": "unit",

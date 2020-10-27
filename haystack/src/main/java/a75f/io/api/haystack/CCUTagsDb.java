@@ -418,7 +418,7 @@ public class CCUTagsDb extends HServer {
         tagsMap.put(id.toVal(), b.toDict());
         return id.toCode();
     }
-    
+
     public void updatePoint(Point p, String i) {
         HDictBuilder b = new HDictBuilder()
                              .add("id", HRef.copy(i))
@@ -439,15 +439,15 @@ public class CCUTagsDb extends HServer {
         if (p.getTunerGroup() != null) b.add("tunerGroup",p.getTunerGroup());
         if (p.getHisInterpolate() != null) b.add("hisInterpolate",p.getHisInterpolate());
         if (p.getShortDis() != null) b.add("shortDis",p.getShortDis());
-        
+
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-        
+
         HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
     }
-    
+
     public String addPoint(RawPoint p) {
         HDictBuilder b = new HDictBuilder()
                 .add("id", HRef.make(UUID.randomUUID().toString()))
@@ -512,7 +512,7 @@ public class CCUTagsDb extends HServer {
                                  .add("kind", p.getKind() == null ? "Number" : p.getKind());
                 
         if (p.getUnit() != null) b.add("unit", p.getUnit());
-        
+
         for (String m : p.getMarkers()) {
             b.add(m);
         }

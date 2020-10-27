@@ -29,7 +29,7 @@ public class ModbusProfile extends ZoneProfile {
     }
 
     public void updateMbEquip(short slaveId,String floorRef, String zoneRef, EquipmentDevice equipmentDevice, List<Parameter> configParams) {
-        modBusEquip.updateHaystackPoints(floorRef,zoneRef,equipmentDevice,configParams);
+        modBusEquip.updateHaystackPoints(getEquip().getId(),zoneRef,equipmentDevice,configParams);
         modBusEquip.init(slaveId);
     }
     @Override

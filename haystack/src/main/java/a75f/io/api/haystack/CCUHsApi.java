@@ -232,18 +232,18 @@ public class CCUHsApi
         }
     }
     
-    public void updatePoint(Point p, String id)
+    public void updatePoint(RawPoint r, String id)
     {
-        tagsDb.updatePoint(p, id);
+        tagsDb.updatePoint(r, id);
         if (tagsDb.idMap.get(id) != null)
         {
             tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
         }
     }
-    
-    public void updatePoint(RawPoint r, String id)
+
+    public void updatePoint(Point point, String id)
     {
-        tagsDb.updatePoint(r, id);
+        tagsDb.updatePoint(point, id);
         if (tagsDb.idMap.get(id) != null)
         {
             tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));

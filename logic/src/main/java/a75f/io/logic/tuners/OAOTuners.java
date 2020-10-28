@@ -13,7 +13,7 @@ import a75f.io.api.haystack.Point;
 public class OAOTuners
 {
     
-    public static void addDefaultTuners(String equipDis, String siteRef, String equipRef, String tz) {
+    public static void addDefaultTuners(String siteRef, String equipRef, String equipDis, String tz) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         Point co2DamperOpeningRate = new Point.Builder()
                                              .setDisplayName(equipDis+"-OAO-"+"co2DamperOpeningRate")

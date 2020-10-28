@@ -4,6 +4,22 @@ import android.content.Context;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.pubnub.api.PNConfiguration;
+import com.pubnub.api.PubNub;
+import com.pubnub.api.callbacks.PNCallback;
+import com.pubnub.api.callbacks.SubscribeCallback;
+import com.pubnub.api.enums.PNStatusCategory;
+import com.pubnub.api.models.consumer.PNPublishResult;
+import com.pubnub.api.models.consumer.PNStatus;
+import com.pubnub.api.models.consumer.history.PNHistoryItemResult;
+import com.pubnub.api.models.consumer.history.PNHistoryResult;
+import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
+import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -88,9 +104,10 @@ public class Globals {
     private CCUApplication mCCUApplication;
     private boolean isSimulation = false;
     private boolean testHarness = true;
-    
+
     private boolean _siteAlreadyCreated;
-    
+
+    private Long curPubNubMsgTimeToken;
     private Globals() {
     }
 
@@ -151,7 +168,7 @@ public class Globals {
     public void initilize() {
         
         taskExecutor = Executors.newScheduledThreadPool(NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES);
-        
+
         //mHeartBeatJob = new HeartBeatJob();
         //5 seconds after application initializes start heart beat
         
@@ -172,7 +189,7 @@ public class Globals {
         //set SN address band
         String addrBand = getSmartNodeBand();
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
-        
+
         importTunersAndScheduleJobs();
     }
     
@@ -211,9 +228,9 @@ public class Globals {
             
                 mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
                                                 TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);
-                
+
                 BearerTokenManager.getInstance().scheduleJob();
-            
+
                 mAlertProcessJob = new AlertProcessJob(mApplicationContext);
                 getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
             
@@ -384,7 +401,7 @@ public class Globals {
                             mbProfile.addMbEquip(Short.valueOf(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
                             L.ccu().zoneProfiles.add(mbProfile);
                             break;
-                            
+
                     }
                 }
             }

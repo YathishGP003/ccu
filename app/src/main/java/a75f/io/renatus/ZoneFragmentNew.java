@@ -39,6 +39,8 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.renovo.bacnet4j.type.constructed.LogData;
+
 import org.joda.time.Interval;
 
 import java.math.BigDecimal;
@@ -1682,7 +1684,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
         View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
         View viewPointRow2 = inflater.inflate(R.layout.zones_item_type1, null);
-
+        View viewPointRow3 = inflater.inflate(R.layout.zones_item_type1, null);
+        
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
 
@@ -1690,12 +1693,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
         TextView textViewLabel3 = viewPointRow2.findViewById(R.id.text_point1label);
         TextView textViewLabel4 = viewPointRow2.findViewById(R.id.text_point2label);
-
+        TextView textViewLabel5 = viewPointRow3.findViewById(R.id.text_point1label);
+        
         TextView textViewValue1 = viewPointRow1.findViewById(R.id.text_point1value);
         TextView textViewValue2 = viewPointRow1.findViewById(R.id.text_point2value);
         TextView textViewValue3 = viewPointRow2.findViewById(R.id.text_point1value);
         TextView textViewValue4 = viewPointRow2.findViewById(R.id.text_point2value);
-
+        TextView textViewValue5 = viewPointRow3.findViewById(R.id.text_point1value);
+        
         textViewTitle.setText(vavPoints.get("Profile").toString()+" ("+nodeAddress+")");
         textViewStatus.setText(vavPoints.get("Status").toString());
         textViewLabel1.setText("Damper : ");
@@ -1706,12 +1711,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         textViewValue3.setText(vavPoints.get("Discharge Airflow").toString());
         textViewLabel4.setText("Supply Airflow : ");
         textViewValue4.setText(vavPoints.get("Entering Airflow").toString());
-
+        
+        if (vavPoints.containsKey("FanStatus")) {
+            textViewLabel5.setText("Fan Status : ");
+            double fanStatus = (double)vavPoints.get("FanStatus");
+            textViewValue5.setText(fanStatus > 0 ? "ON" :"OFF");
+        }
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
         linearLayoutZonePoints.addView(viewPointRow1);
-        viewPointRow2.setPadding(0,0,0,40);
+        //viewPointRow2.setPadding(0,0,0,40);
         linearLayoutZonePoints.addView(viewPointRow2);
+        viewPointRow3.setPadding(0,0,0,40);
+        linearLayoutZonePoints.addView(viewPointRow3);
     }
     public void loadSSEPointsUI(HashMap ssePoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress)
     {

@@ -82,34 +82,15 @@ public class BuildingTuners
         CCUHsApi.getInstance().syncEntityTree();
     }
     
+    /**
+     * All the new tuners with are being added here.
+     * This should be done neatly.
+     */
     public void updateBuildingTuners() {
         DualDuctTuners.addDefaultTuners(siteRef, equipRef, equipDis, tz);
         OAOTuners.updateNewTuners(siteRef,equipRef, equipDis,tz,false);
-    
-    
-        HashMap<Object, Object> modeChangeoverHysteresisPoint = CCUHsApi.getInstance()
-                                                                        .readEntity("tuner and default and mode and " +
-                                                                                             "changeover and hysteresis");
-        if (modeChangeoverHysteresisPoint.isEmpty()) {
-            Point modeChangeoverHysteresis = new Point.Builder().setDisplayName(equipDis + "-" + "modeChangeoverHysteresis")
-                                                                .setSiteRef(siteRef)
-                                                                .setEquipRef(equipRef)
-                                                                .setHisInterpolate("cov")
-                                                                .addMarker("tuner")
-                                                                .addMarker("default").addMarker("writable").addMarker("his")
-                                                                .addMarker("his").addMarker("mode").addMarker("changeover")
-                                                                .addMarker("hysteresis").addMarker("sp")
-                                                                .setMinVal("0")
-                                                                .setMaxVal("5")
-                                                                .setIncrementVal("0.5")
-                                                                .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
-                                                                .setTz(tz)
-                                                                .build();
-            String modeChangeoverHysteresisId = hayStack.addPoint(modeChangeoverHysteresis);
-            hayStack.writePoint(modeChangeoverHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu",
-                                DEFAULT_MODE_CHANGEOVER_HYSTERESIS, 0);
-            hayStack.writeHisValById(modeChangeoverHysteresisId, DEFAULT_MODE_CHANGEOVER_HYSTERESIS);
-        }
+        updateDabBuildingTuners();
+        updateVavBuildingTuners();
     }
     
     public void addDefaultBuildingTuners() {
@@ -1805,7 +1786,7 @@ public class BuildingTuners
         */
     }
     
-    public void addVavEquipTuners(String equipdis, String equipref, String roomRef, String floorRef) {
+    public void addVavEquipTuners(String equipdis, String equipref, String roomRef, String floorRef, String fanMarker) {
     
         Log.d("CCU","addVavEquipTuners for "+equipdis);
     
@@ -1817,7 +1798,7 @@ public class BuildingTuners
                                   .setEquipRef(equipref)
                                   .setRoomRef(roomRef)
                                   .setFloorRef(floorRef).setHisInterpolate("cov")
-                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                  .addMarker("tuner").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("his")
                                   .addMarker("zone").addMarker("priority").addMarker("spread").addMarker("sp")
                                   .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                   .setTz(tz)
@@ -1840,7 +1821,7 @@ public class BuildingTuners
                                            .setEquipRef(equipref)
                                            .setRoomRef(roomRef)
                                            .setFloorRef(floorRef).setHisInterpolate("cov")
-                                           .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                           .addMarker("tuner").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("his")
                                            .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
                                            .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                            .setTz(tz)
@@ -1863,7 +1844,7 @@ public class BuildingTuners
                                   .setEquipRef(equipref)
                                   .setRoomRef(roomRef)
                                   .setFloorRef(floorRef).setHisInterpolate("cov")
-                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                  .addMarker("tuner").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("his")
                                   .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
                                   .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                   .setTz(tz)
@@ -1887,7 +1868,7 @@ public class BuildingTuners
                                   .setEquipRef(equipref)
                                   .setRoomRef(roomRef)
                                   .setFloorRef(floorRef).setHisInterpolate("cov")
-                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                  .addMarker("tuner").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("his")
                                   .addMarker("cooling").addMarker("deadband").addMarker("multiplier").addMarker("sp")
                                   .setMinVal("0").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                   .setTz(tz)
@@ -1910,7 +1891,7 @@ public class BuildingTuners
                                   .setEquipRef(equipref)
                                   .setRoomRef(roomRef)
                                   .setFloorRef(floorRef).setHisInterpolate("cov")
-                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                  .addMarker("tuner").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("his")
                                   .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
                                   .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                   .setTz(tz)
@@ -1933,7 +1914,7 @@ public class BuildingTuners
                                   .setEquipRef(equipref)
                                   .setRoomRef(roomRef)
                                   .setFloorRef(floorRef).setHisInterpolate("cov")
-                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                  .addMarker("tuner").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("his")
                                   .addMarker("heating").addMarker("deadband").addMarker("multiplier").addMarker("sp")
                                   .setMinVal("0").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                   .setTz(tz)
@@ -1955,7 +1936,7 @@ public class BuildingTuners
                                  .setEquipRef(equipref)
                                  .setRoomRef(roomRef)
                                  .setFloorRef(floorRef).setHisInterpolate("cov")
-                                 .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                 .addMarker("tuner").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("his")
                                  .addMarker("pgain").addMarker("sp")
                                  .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                  .setTz(tz)
@@ -1977,7 +1958,7 @@ public class BuildingTuners
                                      .setEquipRef(equipref)
                                      .setRoomRef(roomRef)
                                      .setFloorRef(floorRef).setHisInterpolate("cov")
-                                     .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                     .addMarker("tuner").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("his")
                                      .addMarker("igain").addMarker("sp")
                                      .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                      .setTz(tz)
@@ -1999,7 +1980,7 @@ public class BuildingTuners
                                    .setEquipRef(equipref)
                                    .setRoomRef(roomRef)
                                    .setFloorRef(floorRef).setHisInterpolate("cov")
-                                   .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                   .addMarker("tuner").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("his")
                                    .addMarker("pspread").addMarker("sp")
                                    .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                    .setTz(tz)
@@ -2021,7 +2002,7 @@ public class BuildingTuners
                                         .setEquipRef(equipref)
                                         .setRoomRef(roomRef)
                                         .setFloorRef(floorRef).setHisInterpolate("cov")
-                                        .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                        .addMarker("tuner").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("his")
                                         .addMarker("itimeout").addMarker("sp")
                                         .setMinVal("1").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                         .setUnit("m")
@@ -2044,7 +2025,7 @@ public class BuildingTuners
                                         .setEquipRef(equipref)
                                         .setRoomRef(roomRef)
                                         .setFloorRef(floorRef).setHisInterpolate("cov")
-                                        .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                        .addMarker("tuner").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("his")
                                         .addMarker("valve").addMarker("start").addMarker("damper").addMarker("sp")
                                         .setMinVal("0").setMaxVal("100").setIncrementVal("5").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                         .setUnit("%")
@@ -2067,7 +2048,7 @@ public class BuildingTuners
                                       .setEquipRef(equipref)
                                       .setRoomRef(roomRef)
                                       .setFloorRef(floorRef).setHisInterpolate("cov")
-                                      .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                      .addMarker("tuner").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("his")
                                       .addMarker("zone").addMarker("co2").addMarker("target").addMarker("sp")
                                       .setMinVal("0").setMaxVal("2000").setIncrementVal("10").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                       .setUnit("ppm")
@@ -2090,7 +2071,7 @@ public class BuildingTuners
                                          .setEquipRef(equipref)
                                          .setRoomRef(roomRef)
                                          .setFloorRef(floorRef).setHisInterpolate("cov")
-                                         .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                         .addMarker("tuner").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("his")
                                          .addMarker("zone").addMarker("co2").addMarker("threshold").addMarker("sp")
                                          .setMinVal("0").setMaxVal("2000").setIncrementVal("10").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                          .setUnit("ppm")
@@ -2113,7 +2094,7 @@ public class BuildingTuners
                                          .setEquipRef(equipref)
                                          .setRoomRef(roomRef)
                                          .setFloorRef(floorRef).setHisInterpolate("cov")
-                                         .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("sp")
+                                         .addMarker("tuner").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("his").addMarker("sp")
                                          .addMarker("zone").addMarker("voc").addMarker("target")
                                          .setUnit("ppb")
                                          .setMinVal("0").setMaxVal("1000").setIncrementVal("10").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
@@ -2136,7 +2117,7 @@ public class BuildingTuners
                                         .setEquipRef(equipref)
                                         .setRoomRef(roomRef)
                                         .setFloorRef(floorRef).setHisInterpolate("cov")
-                                        .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                        .addMarker("tuner").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("his")
                                         .addMarker("zone").addMarker("voc").addMarker("threshold").addMarker("sp")
                                         .setMinVal("0").setMaxVal("1000").setIncrementVal("10").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                         .setUnit("ppb")
@@ -3780,6 +3761,58 @@ public class BuildingTuners
 
         CCUHsApi.getInstance().syncEntityTree();
     }
-
-
+    
+    private void updateDabBuildingTuners() {
+        HashMap<Object, Object> modeChangeoverHysteresisPoint = CCUHsApi.getInstance()
+                                                                        .readEntity("tuner and default and mode and " +
+                                                                                    "changeover and hysteresis");
+        if (modeChangeoverHysteresisPoint.isEmpty()) {
+            Point modeChangeoverHysteresis = new Point.Builder().setDisplayName(equipDis + "-DAB-" +
+                                                                                "modeChangeoverHysteresis")
+                                                                .setSiteRef(siteRef)
+                                                                .setEquipRef(equipRef)
+                                                                .setHisInterpolate("cov")
+                                                                .addMarker("tuner")
+                                                                .addMarker("default").addMarker("writable").addMarker("his")
+                                                                .addMarker("his").addMarker("mode").addMarker("changeover")
+                                                                .addMarker("hysteresis").addMarker("sp")
+                                                                .setMinVal("0")
+                                                                .setMaxVal("5")
+                                                                .setIncrementVal("0.5")
+                                                                .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                                                .setTz(tz)
+                                                                .build();
+            String modeChangeoverHysteresisId = hayStack.addPoint(modeChangeoverHysteresis);
+            hayStack.writePoint(modeChangeoverHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu",
+                                DEFAULT_MODE_CHANGEOVER_HYSTERESIS, 0);
+            hayStack.writeHisValById(modeChangeoverHysteresisId, DEFAULT_MODE_CHANGEOVER_HYSTERESIS);
+        }
+    }
+    
+    private void updateVavBuildingTuners() {
+        
+        HashMap<Object, Object> fanControlOnFixedTimeDelayPoint = CCUHsApi.getInstance()
+                                                                          .read("tuner and default and fan and " +
+                                                                                "control and time and delay");
+        
+        if (fanControlOnFixedTimeDelayPoint.isEmpty()) {
+            Point fanControlOnFixedTimeDelay  = new Point.Builder()
+                                                    .setDisplayName(equipDis + "-VAV-"+"fanControlOnFixedTimeDelay ")
+                                                    .setSiteRef(siteRef)
+                                                    .setEquipRef(equipRef)
+                                                    .setHisInterpolate("cov")
+                                                    .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his")
+                                                    .addMarker("fan").addMarker("control").addMarker("time").addMarker("delay").addMarker("sp")
+                                                    .setMinVal("0")
+                                                    .setMaxVal("10")
+                                                    .setIncrementVal("1")
+                                                    .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                                    .setUnit("m")
+                                                    .setTz(tz)
+                                                    .build();
+            String fanControlOnFixedTimeDelayId = CCUHsApi.getInstance().addPoint(fanControlOnFixedTimeDelay);
+            CCUHsApi.getInstance().writeDefaultValById(fanControlOnFixedTimeDelayId, 1.0);
+            CCUHsApi.getInstance().writeHisValById(fanControlOnFixedTimeDelayId, 1.0);
+        }
+    }
 }

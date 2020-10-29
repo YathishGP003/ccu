@@ -11,6 +11,8 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.logic.L;
 
+import static a75f.io.api.haystack.HayStackConstants.DEFAULT_INIT_VAL_LEVEL;
+
 /**
  * Created by samjithsadasivan on 1/16/19.
  */
@@ -157,6 +159,7 @@ public class TunerUtil
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList<Equip> zoneEquips  = HSUtil.getEquips(roomRef);
         double maxDb = 0;
+        boolean isDefault = true;
         for (Equip q : zoneEquips){
             HashMap cdb = hayStack.read("point and tuner and deadband and cooling and not adr and not multiplier and equipRef == \""+q.getId()+"\"");
 
@@ -166,8 +169,16 @@ public class TunerUtil
                 for (int l = 1; l <= values.size() ; l++ ) {
                     HashMap valMap = ((HashMap) values.get(l-1));
                     if (valMap.get("val") != null) {
-                        if (maxDb < Double.parseDouble(valMap.get("val").toString())){
-                            maxDb = Double.parseDouble(valMap.get("val").toString());
+                        String val = valMap.get("val").toString();
+                        if (Integer.parseInt(valMap.get("level").toString()) < DEFAULT_INIT_VAL_LEVEL) {
+                            if (maxDb < Double.parseDouble(val)) {
+                                maxDb = Double.parseDouble(val);
+                                isDefault = false;
+                            }
+                        } else if (isDefault){
+                            if (maxDb < Double.parseDouble(val)) {
+                                maxDb = Double.parseDouble(val);
+                            }
                         }
                     }
                 }
@@ -181,17 +192,27 @@ public class TunerUtil
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList<Equip> zoneEquips  = HSUtil.getEquips(roomRef);
         double maxDb = 0;
+        boolean isDefault = true;
         for (Equip q : zoneEquips){
-            HashMap cdb = hayStack.read("point and tuner and deadband and heating and not adr and not multiplier and equipRef == \""+q.getId()+"\"");
+            HashMap hdb = hayStack.read("point and tuner and deadband and heating and not adr and not multiplier and equipRef == \""+q.getId()+"\"");
 
-            ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+            ArrayList values = hayStack.readPoint(hdb.get("id").toString());
             if (values != null && values.size() > 0)
             {
                 for (int l = 1; l <= values.size() ; l++ ) {
                     HashMap valMap = ((HashMap) values.get(l-1));
                     if (valMap.get("val") != null) {
-                        if (maxDb < Double.parseDouble(valMap.get("val").toString())){
-                            maxDb = Double.parseDouble(valMap.get("val").toString());
+                        String val = valMap.get("val").toString();
+                        if (Integer.parseInt(valMap.get("level").toString()) < DEFAULT_INIT_VAL_LEVEL){
+                            if (maxDb < Double.parseDouble(val)){
+                                maxDb = Double.parseDouble(val);
+                            }
+                            isDefault = false;
+
+                        } else if (isDefault){
+                            if (maxDb < Double.parseDouble(val)) {
+                                maxDb = Double.parseDouble(val);
+                            }
                         }
                     }
                 }
@@ -227,9 +248,9 @@ public class TunerUtil
             systemProfile = "";
         }
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and deadband "+systemProfile+" and heating and not adr and not multiplier and equipRef == \""+equipRef+"\"");
+        HashMap hdb = hayStack.read("point and tuner and deadband "+systemProfile+" and heating and not adr and not multiplier and equipRef == \""+equipRef+"\"");
 
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+        ArrayList values = hayStack.readPoint(hdb.get("id").toString());
         if (values != null && values.size() > 0)
         {
             for (int l = 1; l <= values.size() ; l++ ) {

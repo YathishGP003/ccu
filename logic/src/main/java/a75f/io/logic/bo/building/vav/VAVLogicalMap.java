@@ -1357,12 +1357,23 @@ public class VAVLogicalMap
                 message = (status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" : "Warming Space");
             }
         }
-    
+        
+        message += getFanStatusMessage();
+        
         String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+nodeAddr+"\"");
         if (!curStatus.equals(message))
         {
             CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + nodeAddr + "\"", message);
         }
+    }
+    
+    public String getFanStatusMessage() {
+        if (profileType == ProfileType.VAV_SERIES_FAN) {
+            return isFanOn("series") ? ", Fan ON" : ", Fan OFF";
+        } else if (profileType == ProfileType.VAV_PARALLEL_FAN) {
+            return isFanOn("parallel") ? ", Fan ON" : ", Fan OFF";
+        }
+        return "";
     }
     
     public void setScheduleStatus(String status)

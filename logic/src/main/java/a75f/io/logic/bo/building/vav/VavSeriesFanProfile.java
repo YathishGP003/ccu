@@ -268,9 +268,8 @@ public class VavSeriesFanProfile extends VavProfile
     
         CcuLog.d(L.TAG_CCU_ZONE,"Zone Temp Dead "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
         state = TEMPDEAD;
-        String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+node+"\"");
-        if (!curStatus.equals("Zone Temp Dead")) {
-            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
+        double zoneStatus = vavDevice.getStatus();
+        if (zoneStatus != state.ordinal()) {
             VAVLogicalMap vavDevice = vavDeviceMap.get(node);
             SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
             double damperMin = vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "min");
@@ -284,6 +283,9 @@ public class VavSeriesFanProfile extends VavProfile
             vavDevice.setReheatPos(0);
             vavDevice.setFanOn("series", false);
             CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
+            
+            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"",
+                                                   "Zone Temp Dead"+vavDevice.getFanStatusMessage());
         }
     }
     

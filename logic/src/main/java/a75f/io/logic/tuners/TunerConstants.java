@@ -139,5 +139,7 @@ public class TunerConstants
     public static final double DEFAULT_INTEGRAL_TIMEOUT = 30;
     
     public static final double DEFAULT_MODE_CHANGEOVER_HYSTERESIS = 0.5;
+    public static final double DEFAULT_STAGE_UP_TIMER_COUNTER = 2;
+    public static final double DEFAULT_STAGE_DOWN_TIMER_COUNTER = 2;
 
 }

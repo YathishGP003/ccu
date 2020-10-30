@@ -15,7 +15,9 @@ import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
+import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.building.system.SystemState;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
@@ -50,6 +52,11 @@ public class DabStagedRtu extends DabSystemProfile
     public int heatingStages = 0;
     public int coolingStages = 0;
     public int fanStages = 0;
+    
+    private int stageUpTimerCounter = 0;
+    private int stageDownTimerCounter = 0;
+    private boolean changeOverStageDownTimerOverrideActive = false;
+    SystemController.State currentConditioning = COOLING;
     
     int[] stageStatus = new int[17];
     
@@ -110,14 +117,18 @@ public class DabStagedRtu extends DabSystemProfile
         updateOutsideWeatherParams();
         
         stageStatus = new int[17];
-        if (getSystemController().getSystemState() == COOLING)
+        if (currentConditioning != getSystemController().getSystemState()) {
+            currentConditioning = getSystemController().getSystemState();
+            changeOverStageDownTimerOverrideActive = true;
+        }
+        if (currentConditioning == COOLING)
         {
             systemCoolingLoopOp = getSystemController().getCoolingSignal();
         } else {
             systemCoolingLoopOp = 0;
         }
         
-        if (getSystemController().getSystemState() == HEATING)
+        if (currentConditioning == HEATING)
         {
             systemHeatingLoopOp = getSystemController().getHeatingSignal();
         } else {
@@ -132,16 +143,16 @@ public class DabStagedRtu extends DabSystemProfile
                 double economizingToMainCoolingLoopMap = TunerUtil.readTunerValByQuery("oao and economizing and main and cooling and loop and map",
                         L.ccu().oaoProfile.getEquipRef());
                 systemFanLoopOp = Math.max(Math.max(systemCoolingLoopOp * 100 / economizingToMainCoolingLoopMap, systemHeatingLoopOp), smartPurgeDabFanLoopOp);
-            }else if(getSystemController().getSystemState() == COOLING){
+            } else if(currentConditioning == COOLING) {
                 systemFanLoopOp = Math.max(systemCoolingLoopOp * analogFanSpeedMultiplier, smartPurgeDabFanLoopOp);
-            }else if(getSystemController().getSystemState() == HEATING)
+            } else if(currentConditioning == HEATING) {
                 systemFanLoopOp = Math.max(systemHeatingLoopOp * analogFanSpeedMultiplier, smartPurgeDabFanLoopOp);
-            else
+            } else {
                 systemFanLoopOp = smartPurgeDabFanLoopOp;
-        } else if (getSystemController().getSystemState() == COOLING)
-        {
+            }
+        } else if (currentConditioning == COOLING) {
             systemFanLoopOp = (int) (systemCoolingLoopOp * analogFanSpeedMultiplier);
-        } else if (getSystemController().getSystemState() == HEATING){
+        } else if (currentConditioning == HEATING) {
             systemFanLoopOp = (int) (systemHeatingLoopOp * analogFanSpeedMultiplier);
         } else {
             systemFanLoopOp = 0;
@@ -159,164 +170,39 @@ public class DabStagedRtu extends DabSystemProfile
         CcuLog.d(L.TAG_CCU_SYSTEM, "systemCoolingLoopOp: "+systemCoolingLoopOp + " systemHeatingLoopOp: " + systemHeatingLoopOp+" systemFanLoopOp: "+systemFanLoopOp);
         CcuLog.d(L.TAG_CCU_SYSTEM, "coolingStages: "+coolingStages + " heatingStages: "+heatingStages+" fanStages: "+fanStages);
         SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
-        for (int i = 1; i <=7 ;i++)
-        {
-            double relayState = 0;
-            double currState = 0;
-            double stageThreshold = 0;
-            Stage stage = Stage.values()[(int) getConfigAssociation("relay" + i)];
-            if (getConfigEnabled("relay"+i) == 0) {
-                relayState = 0;
-            } else
-            {
-                switch (stage)
-                {
-                    case COOLING_1:
-                    case COOLING_2:
-                    case COOLING_3:
-                    case COOLING_4:
-                    case COOLING_5:
-                        currState = getCmdSignal("cooling and stage" + (stage.ordinal()+1));
-                        if (L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
-                            stageThreshold = 100 * (stage.ordinal() +1) / (coolingStages + 1);
-                        } else
-                        {
-                            stageThreshold = 100 * stage.ordinal() / coolingStages;
-                        }
-                        if (currState == 0)
-                        {
-                            relayState = systemCoolingLoopOp > stageThreshold ? 1 : 0;
-                        }
-                        else
-                        {
-                            relayState = systemCoolingLoopOp > Math.max(stageThreshold - relayDeactHysteresis ,0 ) ? 1 :0;
-                        }
-                        if(currState != relayState)
-                            setCmdSignal("cooling and stage"+(stage.ordinal()+1), relayState);
-                        break;
-                    case HEATING_1:
-                    case HEATING_2:
-                    case HEATING_3:
-                    case HEATING_4:
-                    case HEATING_5:
-                        currState = getCmdSignal("heating and stage" + (stage.ordinal() - COOLING_5.ordinal()));
-                        stageThreshold = 100 * (stage.ordinal() - HEATING_1.ordinal()) / heatingStages;
-                        if (currState == 0)
-                        {
-                            relayState = systemHeatingLoopOp > stageThreshold ? 1 : 0;
-                        }
-                        else
-                        {
-                            relayState = systemHeatingLoopOp > Math.max(stageThreshold - relayDeactHysteresis, 0) ? 1: 0;
-                            
-                        }
-                        if(currState != relayState)
-                            setCmdSignal("heating and stage"+ (stage.ordinal() - COOLING_5.ordinal()), relayState);
-                        break;
-                    case FAN_1:
-                        if ((systemMode != SystemMode.OFF && (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
-                                && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)) || ((L.ccu().systemProfile.getProfileType() != ProfileType.SYSTEM_DAB_STAGED_VFD_RTU) &&(systemFanLoopOp > 0))) {
-                                relayState = 1;
-                        }else if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU) {
-                            if(epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE)
-                                relayState = systemFanLoopOp > 0 ? 1 : 0;
-                            else
-                                relayState =  (systemCoolingLoopOp > 0 || systemHeatingLoopOp > 0) ? 1 :0;
-                        } else {
-                            relayState = 0;
-                        }
-                        if(relayState != getCmdSignal("fan and stage1"))
-                            setCmdSignal("fan and stage1", relayState);
-                        break;
-                    case FAN_2:
-                        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU) {
-                            relayState =  (systemCoolingLoopOp > 0 || systemHeatingLoopOp > 0) ? 1 :0;
-                        }
-                        else
-                        {
-                            relayState = systemFanLoopOp > 0 ? 1 : 0;
-                        }
-                        if(relayState != getCmdSignal("fan and stage2"))
-                            setCmdSignal("fan and stage2", relayState);
-                        break;
-                    case FAN_3:
-                    case FAN_4:
-                    case FAN_5:
-                        currState = getCmdSignal("fan and stage" + (stage.ordinal() - HEATING_5.ordinal()));
-                        stageThreshold = 100 * (stage.ordinal() - FAN_2.ordinal()) / (fanStages - 1);
-                        if (currState == 0)
-                        {
-                            relayState = systemFanLoopOp >= stageThreshold ? 1: 0;
-                        }
-                        else
-                        {
-                            relayState = systemFanLoopOp > (stageThreshold - relayDeactHysteresis) ? 1 : 0;
-                        }
-                        if(currState != relayState)
-                            setCmdSignal("fan and stage"+(stage.ordinal() - HEATING_5.ordinal()), relayState);
-                        break;
-                    case HUMIDIFIER:
-                    case DEHUMIDIFIER:
-                        if (systemMode == SystemMode.OFF || ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED
-                                                             || ScheduleProcessJob.getSystemOccupancy() == Occupancy.VACATION) {
-                            relayState = 0;
-                            if(stage == HUMIDIFIER)
-                                setCmdSignal("humidifier", relayState);
-                            else if(stage == DEHUMIDIFIER)
-                                setCmdSignal("dehumidifier", relayState);
-                        } else
-                        {
-                            double humidity = getSystemController().getAverageSystemHumidity();
-                            double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");
-                            double targetMaxHumidity = TunerUtil.readSystemUserIntentVal("target and max and inside and humidity");
-                            double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis", getSystemEquipRef());
-                            if (stage == HUMIDIFIER)
-                            {
-                                currState = getCmdSignal("humidifier");
-                                //Humidification
-                                if (humidity < targetMinHumidity)
-                                {
-                                    relayState = 1;
-                                }
-                                else if (humidity > (targetMinHumidity + humidityHysteresis))
-                                {
-                                    relayState = 0;
-                                }
-                                else
-                                {
-                                    relayState = currState;
-                                }
-                                if(currState != relayState)
-                                    setCmdSignal("humidifier", relayState);
-                            }
-                            else
-                            {
-                                currState = getCmdSignal("dehumidifier");
-                                //Dehumidification
-                                if (humidity > targetMaxHumidity)
-                                {
-                                    relayState = 1;
-                                }
-                                else if (humidity < (targetMaxHumidity - humidityHysteresis))
-                                {
-                                    relayState = 0;
-                                }
-                                else
-                                {
-                                    relayState = currState;
-                                }
-                                if(currState != relayState)
-                                    setCmdSignal("dehumidifier", relayState);
-                            }
-                            CcuLog.d(L.TAG_CCU_SYSTEM, "humidity :" + humidity + " targetMinHumidity: " + targetMinHumidity + " humidityHysteresis: " + humidityHysteresis + " targetMaxHumidity: " + targetMaxHumidity);
-                        }
-                        break;
+        
+        if (stageUpTimerCounter > 0) {
+            stageUpTimerCounter--;
+        }
+        if (stageDownTimerCounter > 0) {
+            stageDownTimerCounter--;
+        }
+        if (stageDownTimerCounter == 0 && stageDownTimerCounter == 0) {
+            
+            for (int relayCount = 1; relayCount <= 7; relayCount++) {
+                Stage stage = Stage.values()[(int) getConfigAssociation("relay" + relayCount)];
+                double relayState = getNewRelayState(relayCount, epidemicState, relayDeactHysteresis, systemMode, stage);
+                if (stageStatus[stage.ordinal()] == 0 && relayState > 0) {
+                    stageUpTimerCounter = (int)getStageUpTimeMinutes();
+                    stageStatus[stage.ordinal()] = (int) relayState;
+                    ControlMote.setRelayState("relay" + relayCount, relayState);
+                    break;
+                } else if (stageStatus[stage.ordinal()] > 0 && relayState == 0) {
+                    if (!changeOverStageDownTimerOverrideActive) {
+                        stageDownTimerCounter = (int)getStageDownTimeMinutes();
+                    }
+                    stageStatus[stage.ordinal()] = (int) relayState;
+                    ControlMote.setRelayState("relay" + relayCount, relayState);
+                    break;
+                } else {
+                    stageStatus[stage.ordinal()] = (int) relayState;
+                    ControlMote.setRelayState("relay" + relayCount, relayState);
                 }
             }
-            stageStatus[stage.ordinal()] = (int)relayState;
-            ControlMote.setRelayState("relay"+i, relayState);
-            CcuLog.d(L.TAG_CCU_SYSTEM, stage+ " Set Relay"+i+", threshold: "+stageThreshold+", state : "+relayState);
         }
+        CcuLog.d(L.TAG_CCU_SYSTEM, "stageUpTimerCounter "+stageUpTimerCounter+
+                                   " stageDownTimerCounter"+ stageDownTimerCounter+" " +
+                                   "changeOverStageDownTimerOverrideActive "+changeOverStageDownTimerOverrideActive);
         
         setSystemPoint("operating and mode", getSystemController().systemState.ordinal());
         String systemStatus = getStatusMessage();
@@ -333,6 +219,151 @@ public class DabStagedRtu extends DabSystemProfile
             CCUHsApi.getInstance().writeDefaultVal("system and scheduleStatus", scheduleStatus);
         }
         
+    }
+    
+    public double getNewRelayState(int relayNum, EpidemicState epidemicState, double relayDeactHysteresis,
+                                   SystemMode systemMode, Stage stage) {
+        double relayState = 0;
+        double currState = 0;
+        double stageThreshold = 0;
+        if (getConfigEnabled("relay" + relayNum) == 0) {
+            relayState = 0;
+        } else {
+            switch (stage) {
+                case COOLING_1:
+                case COOLING_2:
+                case COOLING_3:
+                case COOLING_4:
+                case COOLING_5:
+                    currState = getCmdSignal("cooling and stage" + (stage.ordinal() + 1));
+                    if (L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
+                        stageThreshold = 100 * (stage.ordinal() + 1) / (coolingStages + 1);
+                    } else {
+                        stageThreshold = 100 * stage.ordinal() / coolingStages;
+                    }
+                    if (currState == 0) {
+                        relayState = systemCoolingLoopOp > stageThreshold ? 1 : 0;
+                    } else {
+                        relayState = systemCoolingLoopOp > Math.max(stageThreshold - relayDeactHysteresis, 0) ? 1 : 0;
+                    }
+                    if (currState != relayState)
+                        setCmdSignal("cooling and stage" + (stage.ordinal() + 1), relayState);
+                    break;
+                case HEATING_1:
+                case HEATING_2:
+                case HEATING_3:
+                case HEATING_4:
+                case HEATING_5:
+                    currState = getCmdSignal("heating and stage" + (stage.ordinal() - COOLING_5.ordinal()));
+                    stageThreshold = 100 * (stage.ordinal() - HEATING_1.ordinal()) / heatingStages;
+                    if (currState == 0) {
+                        relayState = systemHeatingLoopOp > stageThreshold ? 1 : 0;
+                    } else {
+                        relayState = systemHeatingLoopOp > Math.max(stageThreshold - relayDeactHysteresis, 0) ? 1 : 0;
+                    }
+                    if (currState != relayState)
+                        setCmdSignal("heating and stage" + (stage.ordinal() - COOLING_5.ordinal()), relayState);
+                    break;
+                case FAN_1:
+                    if ((systemMode != SystemMode.OFF &&
+                         (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED &&
+                          ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)) ||
+                        ((L.ccu().systemProfile.getProfileType() != ProfileType.SYSTEM_DAB_STAGED_VFD_RTU) &&
+                         (systemFanLoopOp > 0))) {
+                        relayState = 1;
+                    } else if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU) {
+                        if (epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE)
+                            relayState = systemFanLoopOp > 0 ? 1 : 0;
+                        else
+                            relayState = (systemCoolingLoopOp > 0 || systemHeatingLoopOp > 0) ? 1 : 0;
+                    } else {
+                        relayState = 0;
+                    }
+                    if (relayState != getCmdSignal("fan and stage1"))
+                        setCmdSignal("fan and stage1", relayState);
+                    break;
+                case FAN_2:
+                    if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU) {
+                        relayState = (systemCoolingLoopOp > 0 || systemHeatingLoopOp > 0) ? 1 : 0;
+                    } else {
+                        relayState = systemFanLoopOp > 0 ? 1 : 0;
+                    }
+                    if (relayState != getCmdSignal("fan and stage2"))
+                        setCmdSignal("fan and stage2", relayState);
+                    break;
+                case FAN_3:
+                case FAN_4:
+                case FAN_5:
+                    currState = getCmdSignal("fan and stage" + (stage.ordinal() - HEATING_5.ordinal()));
+                    stageThreshold = 100 * (stage.ordinal() - FAN_2.ordinal()) / (fanStages - 1);
+                    if (currState == 0) {
+                        relayState = systemFanLoopOp >= stageThreshold ? 1 : 0;
+                    } else {
+                        relayState = systemFanLoopOp > (stageThreshold - relayDeactHysteresis) ? 1 : 0;
+                    }
+                    if (currState != relayState)
+                        setCmdSignal("fan and stage" + (stage.ordinal() - HEATING_5.ordinal()), relayState);
+                    break;
+                case HUMIDIFIER:
+                case DEHUMIDIFIER:
+                    if (systemMode == SystemMode.OFF ||
+                        ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED ||
+                        ScheduleProcessJob.getSystemOccupancy() == Occupancy.VACATION) {
+                        relayState = 0;
+                        if (stage == HUMIDIFIER)
+                            setCmdSignal("humidifier", relayState);
+                        else if (stage == DEHUMIDIFIER)
+                            setCmdSignal("dehumidifier", relayState);
+                    } else {
+                        double humidity = getSystemController().getAverageSystemHumidity();
+                        double targetMinHumidity = TunerUtil.readSystemUserIntentVal(
+                            "target and min and inside and humidity");
+                        double targetMaxHumidity = TunerUtil.readSystemUserIntentVal(
+                            "target and max and inside and humidity");
+                        double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis",
+                                                                                  getSystemEquipRef());
+                        if (stage == HUMIDIFIER) {
+                            currState = getCmdSignal("humidifier");
+                            //Humidification
+                            if (humidity < targetMinHumidity) {
+                                relayState = 1;
+                            } else if (humidity > (targetMinHumidity + humidityHysteresis)) {
+                                relayState = 0;
+                            } else {
+                                relayState = currState;
+                            }
+                            if (currState != relayState)
+                                setCmdSignal("humidifier", relayState);
+                        } else {
+                            currState = getCmdSignal("dehumidifier");
+                            //Dehumidification
+                            if (humidity > targetMaxHumidity) {
+                                relayState = 1;
+                            } else if (humidity < (targetMaxHumidity - humidityHysteresis)) {
+                                relayState = 0;
+                            } else {
+                                relayState = currState;
+                            }
+                            if (currState != relayState)
+                                setCmdSignal("dehumidifier", relayState);
+                        }
+                        CcuLog.d(L.TAG_CCU_SYSTEM, "humidity :" + humidity + " targetMinHumidity: " + targetMinHumidity +
+                                                   " humidityHysteresis: " + humidityHysteresis + " targetMaxHumidity: " +
+                                                   targetMaxHumidity);
+                    }
+                    break;
+            }
+        }
+        CcuLog.d(L.TAG_CCU_SYSTEM, stage+ " Set Relay: "+relayNum+", threshold: "+stageThreshold+", state : "+relayState);
+        return relayState;
+    }
+    
+    private double getStageUpTimeMinutes() {
+        return TunerUtil.readTunerValByQuery("stage and up and timer and counter", getSystemEquipRef());
+    }
+    
+    private double getStageDownTimeMinutes() {
+        return TunerUtil.readTunerValByQuery("stage and down and timer and counter", getSystemEquipRef());
     }
     
     @Override

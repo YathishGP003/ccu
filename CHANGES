@@ -1,18 +1,25 @@
- - Merged PR 161: bug/mahesh/3894-change_pidIntegraltime_min_max
- - Merged PR 165: mahesh/3888-CCU_multiple_ccu_floors_rename_issue
- - Merged PR 174: Dab algo change for faster changeover
- - Merge master
- - Merged PR 188: Relay mapping change
- - fix error message
- - fix the error message
- - hide keyboard and refresh screen
- - update warning message
- - remove floor deletion when renaming floor
- - BUG : 3947 Relay mismatch
- - fix for deleting floor while merging zones
- - DAB refactor
- - Add hysteresis tuner and update algo
- - WIP-debug enabled
- - WIP: dab algo
- - while renaming check if floor is already exists and if not then add new entity
- - update pidIntegralTime min and max values
+ - Merged PR 208: Make fanStatus part of ZoneStatus message
+ - Merged PR 189: BUG : 3623, analog max resets when selected 0
+ - Make fanStatus part of ZoneStatus message
+ - Merged PR 114: Story/samjith/VAV Reheat Series Fan and Parallel Fan
+ - Merged PR 80: 3296-CCU_zone_arc_not_considering_db_lessthan_default_value
+ -  VAV Zones should do reheat if the system is CoolOnly and zone requires heating
+ - Update fanControlDealy tuner default value
+ - Merge branch 'master' into story/samjith/3462_vav_series_fan
+ - 3296: check for priority level and consider db
+ - BUG : 3623, analog max resets when selected 0
+ - Disable zone cooling/heating when system config does not allow it
+ - change fanstatus enum
+ - Update fan status when zone is dead
+ - BUG : 3893 Incorrect Analog name displayed
+ - Add enums to fan point
+ - Fix for QE observations
+ - VAV series/parallel tags to all points
+ - Epidemic mode support
+ - Remove fan point unit
+ - Change default min damper pos to 20
+ - VAV parallel fan algo
+ - Vav parallel fan UI changes
+ - Update system logic and fix misc issues
+ - VAV series fan : points and algo
+ - VAV Series Fan UI changes

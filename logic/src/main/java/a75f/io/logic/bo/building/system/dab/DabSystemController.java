@@ -13,6 +13,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
@@ -88,6 +89,7 @@ public class DabSystemController extends SystemController
     double weightedAverageChangeoverLoadSum = 0;
     double weightedAverageChangeoverLoad = 0;
     
+    private Occupancy currSystemOccupancy = Occupancy.UNOCCUPIED;
 
     private DabSystemController()
     {
@@ -184,6 +186,19 @@ public class DabSystemController extends SystemController
         hasTi = false;
         weightedAverageChangeoverLoadSum = 0;
         weightedAverageChangeoverLoad = 0;
+    
+        Occupancy occupancy = ScheduleProcessJob.getSystemOccupancy();
+        if (currSystemOccupancy == Occupancy.UNOCCUPIED) {
+            
+            if (occupancy == Occupancy.OCCUPIED ||
+                occupancy == Occupancy.PRECONDITIONING ||
+                occupancy == Occupancy.FORCEDOCCUPIED ||
+                occupancy == Occupancy.OCCUPANCYSENSING) {
+                CcuLog.d(L.TAG_CCU_SYSTEM, "Reset Loop : Occupancy changed from "+currSystemOccupancy+" to "+occupancy);
+                resetLoop();
+            }
+        }
+        currSystemOccupancy = occupancy;
     }
 
     private void updateSystemTempHumidity(ArrayList<HashMap<Object, Object>> allEquips) {
@@ -396,8 +411,7 @@ public class DabSystemController extends SystemController
         weightedAverageChangeoverLoad = weightedAverageChangeoverLoadSum/prioritySum;
     
         weightedAverageChangeOverLoadQueue.add(weightedAverageChangeoverLoad);
-
-
+        
         double weightedAverageChangeOverLoadQueueSum = 0;
         for (double val : weightedAverageChangeOverLoadQueue) {
             weightedAverageChangeOverLoadQueueSum += val;

@@ -420,8 +420,7 @@ public class DabSystemController extends SystemController
         weightedAverageLoadMA = weightedAverageChangeOverLoadQueueSum/weightedAverageChangeOverLoadQueue.size();
     
         weightedAverageCoolingLoadPostML = weightedAverageLoadMA > 0 ? weightedAverageConditioningLoadPostML : 0;
-        weightedAverageHeatingLoadPostML = weightedAverageLoadMA < 0 ?
-                                               Math.abs(weightedAverageConditioningLoadPostML) : 0;
+        weightedAverageHeatingLoadPostML = weightedAverageLoadMA < 0 ? -1 * weightedAverageConditioningLoadPostML : 0;
         
         systemProfile.setSystemPoint("weighted and average and moving and load",
                                CCUUtils.roundToTwoDecimal(weightedAverageLoadMA));

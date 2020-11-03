@@ -1,798 +1,945 @@
 {
-    "modbusEquipId (_id)": "5f1f30ad18bcbf4f1d9a1da1",
-    "name": "PAC Flaktwood",
-    "description": "This document contains the configuration necessary to manage a Flaktwood PAC system ",
-    "manufacturer": "Flaktwood",
-    "equipType": "PAC",
-    "modelNumbers": [
+    "modbusEquipId (_id)":"5f1f30ad18bcbf4f1d9a1da1",
+    "name":"PAC Flaktwood",
+    "description":"This document contains the configuration necessary to manage a Flaktwood PAC system ",
+    "manufacturer":"Flaktwood",
+    "equipType":"PAC",
+    "modelNumbers":[
         "Flaktwood"
     ],
-    "registers": [
+    "registers":[
         {
-            "registerAddress": 280,
-            "registerNumber": "400281",
-            "registerType": "holdingRegister",
-            "parameterDefinitionType": "binary",
-            "parameters": [
+            "registerAddress":280,
+            "registerNumber":"40281",
+            "registerType":"holdingRegister",
+            "parameterDefinitionType":"binary",
+            "parameters":[
                 {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1da3",
-                    "name": "Operation Mode Status",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "conditions": [
+                    "parameterId":"5f1f30ad18bcbf4f1d9a1da3",
+                    "name":"Operation Mode Status",
+                    "startBit":0,
+                    "endBit":15,
+                    "conditions":[
                         {
-                            "name": "unitOn",
-                            "bitValues": 0
+                            "name":"unitOn",
+                            "bitValues":0
                         },
                         {
-                            "name": "offByAlarms",
-                            "bitValues": 1
+                            "name":"offByAlarms",
+                            "bitValues":1
                         },
                         {
-                            "name": "offByBms",
-                            "bitValues": 2
+                            "name":"offByBms",
+                            "bitValues":2
                         },
                         {
-                            "name": "offByTimeZones",
-                            "bitValues": 3
+                            "name":"offByTimeZones",
+                            "bitValues":3
                         },
                         {
-                            "name": "offByTI",
-                            "bitValues": 4
+                            "name":"offByDI",
+                            "bitValues":4
                         },
                         {
-                            "name": "offByKeyBoard",
-                            "bitValues": 5
+                            "name":"offByKeyBoard",
+                            "bitValues":5
                         },
                         {
-                            "name": "offByHoaMode",
-                            "bitValues": 6
+                            "name":"onHoaMode",
+                            "bitValues":6
                         },
                         {
-                            "name": "standby",
-                            "bitValues": 7
+                            "name":"standby",
+                            "bitValues":7
                         },
                         {
-                            "name": "onByGeneratorMode",
-                            "bitValues": 8
+                            "name":"onGeneratorMode",
+                            "bitValues":8
                         },
                         {
-                            "name": "nightPurgeMode",
-                            "bitValues": 9
+                            "name":"nightPurgeMode",
+                            "bitValues":9
                         },
                         {
-                            "name": "defrostMode",
-                            "bitValues": 10
+                            "name":"defrostMode",
+                            "bitValues":10
                         }
                     ],
-                    "logicalPointTags": [
+                    "logicalPointTags":[
                         {
-                            "tagName": "pac"
+                            "tagName":"pac"
                         },
                         {
-                            "tagName": "operation"
+                            "tagName":"operation"
                         },
                         {
-                            "tagName": "mode"
+                            "tagName":"mode"
                         },
                         {
-                            "tagName": "status"
+                            "tagName":"status"
                         },
                         {
-                            "tagName": "his"
+                            "tagName":"his"
                         },
                         {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
                         }
                     ]
                 }
             ]
         },
         {
-            "registerAddress": 3,
-            "registerNumber": "400004",
-            "registerType": "holdingRegister",
-            "parameters": [
+            "registerAddress":3,
+            "registerNumber":"40004",
+            "registerType":"holdingRegister",
+            "parameters":[
                 {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1da4",
-                    "name": "Room Temperature",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "conditions": [
+                    "parameterId":"5f1f30ad18bcbf4f1d9a1da4",
+                    "name":"Room Temperature",
+                    "startBit":0,
+                    "endBit":15,
+                    "logicalPointTags":[
                         {
-                            "name": "Room temperature in C",
-                            "bitValues": 0
+                            "tagName":"current"
+                        },
+                        {
+                            "tagName":"pac"
+                        },
+                        {
+                            "tagName":"temp"
+                        },
+                        {
+                            "tagName":"his"
+                        },
+                        {
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "registerAddress":4,
+            "registerNumber":"40005",
+            "registerType":"holdingRegister",
+            "parameters":[
+                {
+                    "name":"Return Air humidity",
+                    "parameterId":"5f1f30ad18bcbf4f1d9a1dab",
+                    "startBit":0,
+                    "endBit":15,
+                    "logicalPointTags":[
+                        {
+                            "tagName":"return"
+                        },
+                        {
+                            "tagName":"pac"
+                        },
+                        {
+                            "tagName":"air"
+                        },
+                        {
+                            "tagName":"humidity"
+                        },
+                        {
+                            "tagName":"his"
+                        },
+                        {
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "registerAddress":10,
+            "registerNumber":"40011",
+            "registerType":"holdingRegister",
+            "parameters":[
+                {
+                    "parameterId":"5f1f30ad18bcbf4f1d9a1da9",
+                    "name":"Supply Air Temperature",
+                    "startBit":0,
+                    "endBit":15,
+                    "logicalPointTags":[
+                        {
+                            "tagName":"supply"
+                        },
+                        {
+                            "tagName":"pac"
+                        },
+                        {
+                            "tagName":"air"
+                        },
+                        {
+                            "tagName":"temp"
+                        },
+                        {
+                            "tagName":"his"
+                        },
+                        {
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "registerAddress":11,
+            "registerNumber":"40012",
+            "registerType":"holdingRegister",
+            "parameters":[
+                {
+                    "parameterId":"5f1f30ad18bcbf4f1d9a1daa",
+                    "name":"Supply Air Humidity",
+                    "startBit":0,
+                    "endBit":15,
+                    "logicalPointTags":[
+                        {
+                            "tagName":"supply"
+                        },
+                        {
+                            "tagName":"pac"
+                        },
+                        {
+                            "tagName":"air"
+                        },
+                        {
+                            "tagName":"humidity"
+                        },
+                        {
+                            "tagName":"his"
+                        },
+                        {
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "registerAddress":13,
+            "registerNumber":"40014",
+            "registerType":"holdingRegister",
+            "parameters":[
+                {
+                    "parameterId":"5f1f30ad18bcbf4f1d9a1db3",
+                    "startBit":0,
+                    "endBit":15,
+                    "name":"Condenser Pressure",
+                    "logicalPointTags":[
+                        {
+                            "tagName":"condenser"
+                        },
+                        {
+                            "tagName":"pac"
+                        },
+                        {
+                            "tagName":"pressure"
+                        },
+                        {
+                            "tagName":"his"
+                        },
+                        {
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "registerAddress":15,
+            "registerNumber":"40016",
+            "registerType":"holdingRegister",
+            "parameterDefinitionType":"range",
+            "parameters":[
+                {
+                    "parameterId":"5f1f30ad18bcbf4f1d9a1da5",
+                    "name":"Set Temperature",
+                    "startBit":0,
+                    "endBit":15,
+                    "logicalPointTags":[
+                        {
+                            "tagName":"desired"
+                        },
+                        {
+                            "tagName":"pac"
+                        },
+                        {
+                            "tagName":"temp"
+                        },
+                        {
+                            "tagName":"minVal",
+                            "value":0
+                        },
+                        {
+                            "tagName":"maxVal",
+                            "value":60
+                        },
+                        {
+                            "tagName":"incrementVal",
+                            "value":1
+                        },
+                        {
+                            "tagName":"sp"
+                        },
+                        {
+                            "tagName":"his"
+                        },
+                        {
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
                         }
                     ],
-                    "logicalPointTags": [
+                    "userIntentPointTags":[
                         {
-                            "tagName": "current"
+                            "tagName":"pac"
                         },
                         {
-                            "tagName": "pac"
+                            "tagName":"desired"
                         },
                         {
-                            "tagName": "temp"
+                            "tagName":"temp"
                         },
                         {
-                            "tagName": "his"
+                            "tagName":"minVal",
+                            "value":0
                         },
                         {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
+                            "tagName":"maxVal",
+                            "value":60
+                        },
+                        {
+                            "tagName":"incrementVal",
+                            "value":1
+                        },
+                        {
+                            "tagName":"unit",
+                            "value":"C"
+                        },
+                        {
+                            "tagName":"kind",
+                            "value":"Number"
+                        },
+                        {
+                            "tagName":"his"
+                        },
+                        {
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
+                        },
+                        {
+                            "tagName":"writable"
+                        },
+                        {
+                            "tagName":"sp"
                         }
                     ]
                 }
             ]
         },
         {
-            "registerAddress": 4,
-            "registerNumber": "400005",
-            "registerType": "holdingRegister",
-            "parameters": [
+            "registerAddress":16,
+            "registerNumber":"40017",
+            "registerType":"holdingRegister",
+            "parameterDefinitionType":"range",
+            "parameters":[
                 {
-                    "name": "Return Air humidity",
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1dab",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "logicalPointTags": [
+                    "parameterId":"5f1f30ad18bcbf4f1d9a1da6",
+                    "name":"Humidity Setpoint",
+                    "startBit":0,
+                    "endBit":15,
+                    "logicalPointTags":[
                         {
-                            "tagName": "return"
+                            "tagName":"humidity"
                         },
                         {
-                            "tagName": "pac"
+                            "tagName":"pac"
                         },
                         {
-                            "tagName": "air"
+                            "tagName":"sp"
                         },
                         {
-                            "tagName": "humidity"
+                            "tagName":"minVal",
+                            "value":0
                         },
                         {
-                            "tagName": "his"
+                            "tagName":"maxVal",
+                            "value":100
                         },
                         {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "registerAddress": 10,
-            "registerNumber": "400011",
-            "registerType": "holdingRegister",
-            "parameters": [
-                {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1da9",
-                    "name": "Supply Air Temperature",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "conditions": [
+                            "tagName":"incrementVal",
+                            "value":1
+                        },
                         {
-                            "name": "Supply Air Temp",
-                            "bitValues": 0
+                            "tagName":"his"
+                        },
+                        {
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
                         }
                     ],
-                    "logicalPointTags": [
+                    "userIntentPointTags":[
                         {
-                            "tagName": "supply"
+                            "tagName":"pac"
                         },
                         {
-                            "tagName": "pac"
+                            "tagName":"humidity"
                         },
                         {
-                            "tagName": "air"
+                            "tagName":"sp"
                         },
                         {
-                            "tagName": "temp"
+                            "tagName":"minVal",
+                            "value":0
                         },
                         {
-                            "tagName": "his"
+                            "tagName":"maxVal",
+                            "value":100
                         },
                         {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
+                            "tagName":"incrementVal",
+                            "value":1
+                        },
+                        {
+                            "tagName":"unit",
+                            "value":"%"
+                        },
+                        {
+                            "tagName":"kind",
+                            "value":"Number"
+                        },
+                        {
+                            "tagName":"his"
+                        },
+                        {
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
+                        },
+                        {
+                            "tagName":"writable"
+                        },
+                        {
+                            "tagName":"sp"
                         }
                     ]
                 }
             ]
         },
         {
-            "registerAddress": 11,
-            "registerNumber": "400012",
-            "registerType": "holdingRegister",
-            "parameters": [
+            "registerAddress":1,
+            "registerNumber":"10002",
+            "registerType":"discreteInput",
+            "parameterDefinitionType":"decimal",
+            "parameters":[
                 {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1daa",
-                    "name": "Supply Air Humidity",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "logicalPointTags": [
+                    "parameterId":"5f1f30ad18bcbf4f1d9a1da2",
+                    "name":"Standby Unit Status",
+                    "startBit":0,
+                    "endBit":15,
+                    "commands":[
                         {
-                            "tagName": "supply"
+                            "name":"Off",
+                            "bitValues":0
                         },
                         {
-                            "tagName": "pac"
-                        },
-                        {
-                            "tagName": "air"
-                        },
-                        {
-                            "tagName": "humidity"
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "registerAddress": 13,
-            "registerNumber": "400014",
-            "registerType": "holdingRegister",
-            "parameters": [
-                {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1db3",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "name": "Condensor Pressure",
-                    "logicalPointTags": [
-                        {
-                            "tagName": "condensor"
-                        },
-                        {
-                            "tagName": "pac"
-                        },
-                        {
-                            "tagName": "pressure"
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "registerAddress": 15,
-            "registerNumber": "400016",
-            "registerType": "holdingRegister",
-            "parameterDefinitionType": "range",
-            "parameters": [
-                {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1da5",
-                    "name": "Set Temperature",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "logicalPointTags": [
-                        {
-                            "tagName": "desired"
-                        },
-                        {
-                            "tagName": "pac"
-                        },
-                        {
-                            "tagName": "temp"
-                        },
-                        {
-                            "tagName": "minVal",
-                            "value": 0
-                        },
-                        {
-                            "tagName": "maxVal",
-                            "value": 60
-                        },
-                        {
-                            "tagName": "incrementVal",
-                            "value": 1
-                        },
-                        {
-                            "tagName": "sp"
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
+                            "name":"On",
+                            "bitValues":1
                         }
                     ],
-                    "userIntentPointTags": [
+                    "logicalPointTags":[
                         {
-                            "tagName": "pac"
+                            "tagName":"status"
                         },
                         {
-                            "tagName": "desired"
+                            "tagName":"standby"
                         },
                         {
-                            "tagName": "temp"
+                            "tagName":"pac"
                         },
                         {
-                            "tagName": "minVal",
-                            "value": 0
+                            "tagName":"his"
                         },
                         {
-                            "tagName": "maxVal",
-                            "value": 60
-                        },
-                        {
-                            "tagName": "incrementVal",
-                            "value": 1
-                        },
-                        {
-                            "tagName": "unit",
-                            "value": "C"
-                        },
-                        {
-                            "tagName": "kind",
-                            "value": "Number"
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
-                        },
-                        {
-                            "tagName": "writable"
-                        },
-                        {
-                            "tagName": "sp"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "registerAddress": 16,
-            "registerNumber": "400017",
-            "registerType": "holdingRegister",
-            "parameterDefinitionType": "range",
-            "parameters": [
-                {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1da6",
-                    "name": "Humidity Setpoint",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "logicalPointTags": [
-                        {
-                            "tagName": "humidity"
-                        },
-                        {
-                            "tagName": "pac"
-                        },
-                        {
-                            "tagName": "sp"
-                        },
-                        {
-                            "tagName": "minVal",
-                            "value": 0
-                        },
-                        {
-                            "tagName": "maxVal",
-                            "value": 100
-                        },
-                        {
-                            "tagName": "incrementVal",
-                            "value": 1
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
                         }
                     ],
-                    "userIntentPointTags": [
+                    "userIntentPointTags":[
                         {
-                            "tagName": "pac"
+                            "tagName":"pac"
                         },
                         {
-                            "tagName": "humidity"
+                            "tagName":"status"
                         },
                         {
-                            "tagName": "sp"
+                            "tagName":"standby"
                         },
                         {
-                            "tagName": "minVal",
-                            "value": 0
+                            "tagName":"minVal",
+                            "value":0
                         },
                         {
-                            "tagName": "maxVal",
-                            "value": 100
+                            "tagName":"maxVal",
+                            "value":1
                         },
                         {
-                            "tagName": "incrementVal",
-                            "value": 1
+                            "tagName":"incrementVal",
+                            "value":1
                         },
                         {
-                            "tagName": "unit",
-                            "value": "%"
+                            "tagName":"kind",
+                            "value":"Number"
                         },
                         {
-                            "tagName": "kind",
-                            "value": "Number"
+                            "tagName":"his"
                         },
                         {
-                            "tagName": "his"
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
                         },
                         {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
+                            "tagName":"writable"
                         },
                         {
-                            "tagName": "writable"
-                        },
-                        {
-                            "tagName": "sp"
+                            "tagName":"sp"
                         }
                     ]
                 }
             ]
         },
         {
-            "registerAddress": 1,
-            "registerNumber": "100002",
-            "registerType": "discreteInput",
-            "parameterDefinitionType": "decimal",
-            "parameters": [
+            "registerAddress":13,
+            "registerNumber":"10014",
+            "registerType":"discreteInput",
+            "parameters":[
                 {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1da2",
-                    "name": "Unit Status",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "commands": [
+                    "parameterId":"5f1f30ad18bcbf4f1d9a1da7",
+                    "name":"Filter Status",
+                    "startBit":0,
+                    "endBit":15,
+                    "conditions":[
                         {
-                            "name": "Off",
-                            "bitValues": 0
+                            "name":"Off",
+                            "bitValues":0
                         },
                         {
-                            "name": "On",
-                            "bitValues": 1
+                            "name":"On",
+                            "bitValues":1
                         }
                     ],
-                    "logicalPointTags": [
+                    "logicalPointTags":[
                         {
-                            "tagName": "status"
+                            "tagName":"status"
                         },
                         {
-                            "tagName": "pac"
+                            "tagName":"pac"
                         },
                         {
-                            "tagName": "his"
+                            "tagName":"filter"
                         },
                         {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
+                            "tagName":"his"
+                        },
+                        {
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "registerAddress":16,
+            "registerNumber":"10017",
+            "registerType":"discreteInput",
+            "parameters":[
+                {
+                    "parameterId":"5f1f30ad18bcbf4f1d9a1dac",
+                    "startBit":0,
+                    "endBit":15,
+                    "name":"High Temperature Alarm",
+                    "conditions":[
+                        {
+                            "name":"Off",
+                            "bitValues":0
+                        },
+                        {
+                            "name":"On",
+                            "bitValues":1
                         }
                     ],
-                    "userIntentPointTags": [
+                    "logicalPointTags":[
                         {
-                            "tagName": "pac"
+                            "tagName":"high"
                         },
                         {
-                            "tagName": "status"
+                            "tagName":"pac"
                         },
                         {
-                            "tagName": "minVal",
-                            "value": 0
+                            "tagName":"temp"
                         },
                         {
-                            "tagName": "maxVal",
-                            "value": 1
+                            "tagName":"alarm"
                         },
                         {
-                            "tagName": "incrementVal",
-                            "value": 1
+                            "tagName":"his"
                         },
                         {
-                            "tagName": "kind",
-                            "value": "Number"
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
-                        },
-                        {
-                            "tagName": "writable"
-                        },
-                        {
-                            "tagName": "sp"
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
                         }
                     ]
                 }
             ]
         },
         {
-            "registerAddress": 13,
-            "registerNumber": "100014",
-            "registerType": "discreteInput",
-            "parameters": [
+            "registerAddress":17,
+            "registerNumber":"10018",
+            "registerType":"discreteInput",
+            "parameters":[
                 {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1da7",
-                    "name": "Filter Status",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "conditions": [
+                    "parameterId":"5f1f30ad18bcbf4f1d9a1dad",
+                    "startBit":0,
+                    "endBit":15,
+                    "name":"Low Temperature Alarm",
+                    "conditions":[
                         {
-                            "name": "filter status",
-                            "bitValues": 0
+                            "name":"Off",
+                            "bitValues":0
+                        },
+                        {
+                            "name":"On",
+                            "bitValues":1
                         }
                     ],
-                    "logicalPointTags": [
+                    "logicalPointTags":[
                         {
-                            "tagName": "status"
+                            "tagName":"low"
                         },
                         {
-                            "tagName": "pac"
+                            "tagName":"pac"
                         },
                         {
-                            "tagName": "filter"
+                            "tagName":"temp"
                         },
                         {
-                            "tagName": "his"
+                            "tagName":"alarm"
                         },
                         {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
+                            "tagName":"his"
+                        },
+                        {
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
                         }
                     ]
                 }
             ]
         },
         {
-            "registerAddress": 16,
-            "registerNumber": "100017",
-            "registerType": "discreteInput",
-            "parameters": [
+            "registerAddress":18,
+            "registerNumber":"10019",
+            "registerType":"discreteInput",
+            "parameters":[
                 {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1dac",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "name": "High Temperature Alarm C",
-                    "logicalPointTags": [
+                    "parameterId":"5f1f30ad18bcbf4f1d9a1dae",
+                    "startBit":0,
+                    "endBit":15,
+                    "name":"High Humidity Alarm",
+                    "conditions":[
                         {
-                            "tagName": "high"
+                            "name":"Off",
+                            "bitValues":0
                         },
                         {
-                            "tagName": "pac"
-                        },
-                        {
-                            "tagName": "temp"
-                        },
-                        {
-                            "tagName": "alarm"
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "registerAddress": 17,
-            "registerNumber": "100018",
-            "registerType": "discreteInput",
-            "parameters": [
-                {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1dad",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "name": "Low Temperature Alarm",
-                    "logicalPointTags": [
-                        {
-                            "tagName": "low"
-                        },
-                        {
-                            "tagName": "pac"
-                        },
-                        {
-                            "tagName": "temp"
-                        },
-                        {
-                            "tagName": "alarm"
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "registerAddress": 18,
-            "registerNumber": "100019",
-            "registerType": "discreteInput",
-            "parameters": [
-                {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1dae",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "name": "High Humidity Alarm",
-                    "logicalPointTags": [
-                        {
-                            "tagName": "high"
-                        },
-                        {
-                            "tagName": "pac"
-                        },
-                        {
-                            "tagName": "humidity"
-                        },
-                        {
-                            "tagName": "alarm"
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "registerAddress": 19,
-            "registerNumber": "100020",
-            "registerType": "discreteInput",
-            "parameters": [
-                {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1daf",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "name": "Low Humidity Alarm",
-                    "logicalPointTags": [
-                        {
-                            "tagName": "low"
-                        },
-                        {
-                            "tagName": "pac"
-                        },
-                        {
-                            "tagName": "humidity"
-                        },
-                        {
-                            "tagName": "alarm"
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "registerAddress": 68,
-            "registerNumber": "100068",
-            "registerType": "discreteInput",
-            "parameters": [
-                {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1db1",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "name": "Humidifier Fault",
-                    "logicalPointTags": [
-                        {
-                            "tagName": "humidifier"
-                        },
-                        {
-                            "tagName": "pac"
-                        },
-                        {
-                            "tagName": "fault"
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "registerAddress": 85,
-            "registerNumber": "100086",
-            "registerType": "discreteInput",
-            "parameters": [
-                {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1db2",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "name": "Leak Detection Alarm",
-                    "logicalPointTags": [
-                        {
-                            "tagName": "leak"
-                        },
-                        {
-                            "tagName": "pac"
-                        },
-                        {
-                            "tagName": "detection"
-                        },
-                        {
-                            "tagName": "alarm"
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "registerAddress": 87,
-            "registerNumber": "100088",
-            "registerType": "discreteInput",
-            "parameters": [
-                {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1da8",
-                    "name": "Indoor Unit Fan Status",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "conditions": [
-                        {
-                            "name": "Indoor fan status",
-                            "bitValues": 0
+                            "name":"On",
+                            "bitValues":1
                         }
                     ],
-                    "logicalPointTags": [
+                    "logicalPointTags":[
                         {
-                            "tagName": "status"
+                            "tagName":"high"
                         },
                         {
-                            "tagName": "pac"
+                            "tagName":"pac"
                         },
                         {
-                            "tagName": "indoor"
+                            "tagName":"humidity"
                         },
                         {
-                            "tagName": "fan"
+                            "tagName":"alarm"
                         },
                         {
-                            "tagName": "his"
+                            "tagName":"his"
                         },
                         {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "registerAddress":19,
+            "registerNumber":"10020",
+            "registerType":"discreteInput",
+            "parameters":[
+                {
+                    "parameterId":"5f1f30ad18bcbf4f1d9a1daf",
+                    "startBit":0,
+                    "endBit":15,
+                    "name":"Low Humidity Alarm",
+                    "conditions":[
+                        {
+                            "name":"Off",
+                            "bitValues":0
+                        },
+                        {
+                            "name":"On",
+                            "bitValues":1
+                        }
+                    ],
+                    "logicalPointTags":[
+                        {
+                            "tagName":"low"
+                        },
+                        {
+                            "tagName":"pac"
+                        },
+                        {
+                            "tagName":"humidity"
+                        },
+                        {
+                            "tagName":"alarm"
+                        },
+                        {
+                            "tagName":"his"
+                        },
+                        {
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "registerAddress":67,
+            "registerNumber":"10068",
+            "registerType":"discreteInput",
+            "parameters":[
+                {
+                    "parameterId":"5f1f30ad18bcbf4f1d9a1db1",
+                    "startBit":0,
+                    "endBit":15,
+                    "name":"Humidifier Fault",
+                    "conditions":[
+                        {
+                            "name":"Off",
+                            "bitValues":0
+                        },
+                        {
+                            "name":"On",
+                            "bitValues":1
+                        }
+                    ],
+                    "logicalPointTags":[
+                        {
+                            "tagName":"humidifier"
+                        },
+                        {
+                            "tagName":"pac"
+                        },
+                        {
+                            "tagName":"fault"
+                        },
+                        {
+                            "tagName":"his"
+                        },
+                        {
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "registerAddress":85,
+            "registerNumber":"10086",
+            "registerType":"discreteInput",
+            "parameters":[
+                {
+                    "parameterId":"5f1f30ad18bcbf4f1d9a1db2",
+                    "startBit":0,
+                    "endBit":15,
+                    "name":"Leak Detection Alarm",
+                    "conditions":[
+                        {
+                            "name":"Off",
+                            "bitValues":0
+                        },
+                        {
+                            "name":"On",
+                            "bitValues":1
+                        }
+                    ],
+                    "logicalPointTags":[
+                        {
+                            "tagName":"leak"
+                        },
+                        {
+                            "tagName":"pac"
+                        },
+                        {
+                            "tagName":"detection"
+                        },
+                        {
+                            "tagName":"alarm"
+                        },
+                        {
+                            "tagName":"his"
+                        },
+                        {
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "registerAddress":87,
+            "registerNumber":"10088",
+            "registerType":"discreteInput",
+            "parameters":[
+                {
+                    "parameterId":"5f1f30ad18bcbf4f1d9a1da8",
+                    "name":"Indoor Unit Fan Status",
+                    "startBit":0,
+                    "endBit":15,
+                    "conditions":[
+                        {
+                            "name":"Off",
+                            "bitValues":0
+                        },
+                        {
+                            "name":"On",
+                            "bitValues":1
+                        }
+                    ],
+                    "logicalPointTags":[
+                        {
+                            "tagName":"status"
+                        },
+                        {
+                            "tagName":"pac"
+                        },
+                        {
+                            "tagName":"indoor"
+                        },
+                        {
+                            "tagName":"fan"
+                        },
+                        {
+                            "tagName":"his"
+                        },
+                        {
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "registerAddress":73,
+            "registerNumber":"10074",
+            "registerType":"discreteInput",
+            "parameters":[
+                {
+                    "parameterId":"5f1f30ad18bcbf4f1d9a1dc7",
+                    "startBit":0,
+                    "endBit":15,
+                    "name":"Compressor Status",
+                    "conditions":[
+                        {
+                            "name":"Off",
+                            "bitValues":0
+                        },
+                        {
+                            "name":"On",
+                            "bitValues":1
+                        }
+                    ],
+                    "logicalPointTags":[
+                        {
+                            "tagName":"compressor"
+                        },
+                        {
+                            "tagName":"pac"
+                        },
+                        {
+                            "tagName":"status"
+                        },
+                        {
+                            "tagName":"his"
+                        },
+                        {
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "registerAddress":79,
+            "registerNumber":"10080",
+            "registerType":"discreteInput",
+            "parameters":[
+                {
+                    "parameterId":"5f1f30ad18bcbf4f1d9a1dc8",
+                    "startBit":0,
+                    "endBit":15,
+                    "name":"Condenser Fan Status",
+                    "conditions":[
+                        {
+                            "name":"Off",
+                            "bitValues":0
+                        },
+                        {
+                            "name":"On",
+                            "bitValues":1
+                        }
+                    ],
+                    "logicalPointTags":[
+                        {
+                            "tagName":"condenser"
+                        },
+                        {
+                            "tagName":"fan"
+                        },
+                        {
+                            "tagName":"pac"
+                        },
+                        {
+                            "tagName":"status"
+                        },
+                        {
+                            "tagName":"his"
+                        },
+                        {
+                            "tagName":"hisInterpolate",
+                            "value":"cov"
                         }
                     ]
                 }

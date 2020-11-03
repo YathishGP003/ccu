@@ -1,0 +1,474 @@
+{
+  "modbusEquipId (_id)": "5f1f30ad18bcbf4f1d9a1de3",
+  "name": "Daikin IDU",
+  "description": "This document contains the configuration necessary to manage a Daikin IDU.",
+  "equipType": "VRF",
+  "manufacturer": "Intesis",
+  "modelNumbers": [
+    "ASCO"
+  ],
+  "registers": [
+    {
+      "registerAddress": 0,
+      "registerNumber": "40000",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a1de4",
+          "name": "Unit Status",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+            {
+              "tagName": "vrf"
+            },
+            {
+              "tagName": "unit"
+            },
+            {
+              "tagName": "status"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ],
+          "userIntentPointTags": [
+            {
+              "tagName": "vrf"
+            },
+            {
+              "tagName": "unit"
+            },
+            {
+              "tagName": "status"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 2
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 1
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "writable"
+            },
+            {
+              "tagName": "sp"
+            }
+          ],
+          "commands": [
+            {
+              "name": "off",
+              "bitValues": "0"
+            },
+            {
+              "name": "on",
+              "bitValues": "1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 1,
+      "registerNumber": "40001",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a1de5",
+          "name": "Operation Mode",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+            {
+              "tagName": "vrf"
+            },
+            {
+              "tagName": "operation"
+            },
+            {
+              "tagName": "mode"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ],
+          "userIntentPointTags": [
+            {
+              "tagName": "vrf"
+            },
+            {
+              "tagName": "operation"
+            },
+            {
+              "tagName": "mode"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 4
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 1
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "writable"
+            },
+            {
+              "tagName": "sp"
+            }
+          ],
+          "commands": [
+            {
+              "name": "Auto",
+              "bitValues": "0"
+            },
+            {
+              "name": "Heat",
+              "bitValues": "1"
+            },
+            {
+              "name": "Dry",
+              "bitValues": "2"
+            },
+            {
+              "name": "Fan",
+              "bitValues": "3"
+            },
+            {
+              "name": "Cool",
+              "bitValues": "4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 3,
+      "registerNumber": "40004",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a1de6",
+          "name": "Set Temperature",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+            {
+              "tagName": "vrf"
+            },
+            {
+              "tagName": "set"
+            },
+            {
+              "tagName": "temp"
+            },
+            {
+              "tagName": "unit",
+              "value": "KHz"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ],
+          "userIntentPointTags": [
+            {
+              "tagName": "vrf"
+            },
+            {
+              "tagName": "set"
+            },
+            {
+              "tagName": "temp"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "writable"
+            },
+            {
+              "tagName": "sp"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 3,
+      "registerNumber": "40003",
+      "registerType": "holdingRegister",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a1de7",
+          "name": "Air direction/Vane",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "vrf"
+            },
+            {
+              "tagName": "air"
+            },
+            {
+              "tagName": "direction"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ],
+          "userIntentPointTags": [
+            {
+              "tagName": "vrf"
+            },
+            {
+              "tagName": "air"
+            },
+            {
+              "tagName": "direction"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "writable"
+            },
+            {
+              "tagName": "sp"
+            }
+          ],
+          "commands": [
+            {
+              "name": "Off",
+              "bitValues": "0"
+            },
+            {
+              "name": "Swing",
+              "bitValues": "10"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 4,
+      "registerNumber": "40005",
+      "registerType": "holdingRegister",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a1de8",
+          "name": "Room Temperature (Return Air Temperature)",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "vrf"
+            },
+            {
+              "tagName": "room"
+            },
+            {
+              "tagName": "temp"
+            },
+            {
+              "tagName": "unit",
+              "value": "C"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 1,
+      "registerNumber": "40002",
+      "registerType": "holdingRegister",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a1de7",
+          "name": "Indoor Unit Fan status",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "vrf"
+            },
+            {
+              "tagName": "indoor"
+            },
+            {
+              "tagName": "fan"
+            },
+            {
+              "tagName": "status"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ],
+          "userIntentPointTags": [
+            {
+              "tagName": "vrf"
+            },
+            {
+              "tagName": "indoor"
+            },
+            {
+              "tagName": "fan"
+            },
+            {
+              "tagName": "status"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "writable"
+            },
+            {
+              "tagName": "sp"
+            }
+          ]
+        }
+      ],
+      "commands": [
+        {
+          "name": "Auto",
+          "bitValues": "0"
+        },
+        {
+          "name": "Low",
+          "bitValues": "1"
+        },
+        {
+          "name": "Mid-1",
+          "bitValues": "2"
+        },
+        {
+          "name": "Mid-2",
+          "bitValues": "3"
+        },
+        {
+          "name": "Mid-3",
+          "bitValues": "4"
+        },
+        {
+          "name": "High",
+          "bitValues": "5"
+        }
+      ]
+    }
+  ]
+}

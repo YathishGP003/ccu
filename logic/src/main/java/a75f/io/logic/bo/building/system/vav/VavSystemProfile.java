@@ -187,6 +187,89 @@ public abstract class VavSystemProfile extends SystemProfile
         CCUHsApi.getInstance().writeHisValById(demandResponseModeId, 0.0);
     }
     
+    public void addNewTunerPoints(String equipRef) {
+        addStageUpTimerCounterTuner(equipRef);
+        addStageDownTimerCounterTuner(equipRef);
+    }
+    
+    private void addStageUpTimerCounterTuner(String equipRef) {
+        HashMap<Object, Object> stageUpTimerCounterPoint = CCUHsApi.getInstance()
+                                                                   .readEntity("tuner and system and vav and " +
+                                                                               "stage and up and timer and counter");
+        
+        if (stageUpTimerCounterPoint.isEmpty()) {
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            HashMap siteMap = hayStack.read(Tags.SITE);
+            String siteRef = (String) siteMap.get(Tags.ID);
+            String tz = siteMap.get("tz").toString();
+            Point stageUpTimerCounter = new Point.Builder()
+                                            .setDisplayName(HSUtil.getDis(equipRef)+"-stageUpTimerCounter")
+                                            .setSiteRef(siteRef)
+                                            .setEquipRef(equipRef)
+                                            .setHisInterpolate("cov")
+                                            .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                            .addMarker("stage").addMarker("up").addMarker("timer").addMarker("counter")
+                                            .addMarker("sp").addMarker("system")
+                                            .setMinVal("0").setMaxVal("5").setIncrementVal("1")
+                                            .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                            .setTz(tz)
+                                            .build();
+            String stageUpTimerCounterId = hayStack.addPoint(stageUpTimerCounter);
+            
+            HashMap defaultStageUpTimerCounterPoint = hayStack.read("point and tuner and default and stage and " +
+                                                                    "up and timer and counter");
+            
+            ArrayList<HashMap> defaultStageUpTimerCounterPointArr =
+                hayStack.readPoint(defaultStageUpTimerCounterPoint.get("id").toString());
+            for (HashMap valMap : defaultStageUpTimerCounterPointArr) {
+                if (valMap.get("val") != null) {
+                    hayStack.pointWrite(HRef.copy(stageUpTimerCounterId), (int) Double.parseDouble(valMap.get("level").toString()),
+                                        valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                }
+            }
+            hayStack.writeHisValById(stageUpTimerCounterId, HSUtil.getPriorityVal(stageUpTimerCounterId));
+        }
+    }
+    
+    private void addStageDownTimerCounterTuner(String equipRef) {
+        HashMap<Object, Object> stageDownTimerCounterPoint = CCUHsApi.getInstance()
+                                                                     .readEntity("tuner and system and vav and " +
+                                                                                 "stage and down and timer and counter");
+        
+        if (stageDownTimerCounterPoint.isEmpty()) {
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            HashMap siteMap = hayStack.read(Tags.SITE);
+            String siteRef = (String) siteMap.get(Tags.ID);
+            String tz = siteMap.get("tz").toString();
+            Point stageDownTimerCounter = new Point.Builder()
+                                              .setDisplayName(HSUtil.getDis(equipRef)+"-stageDownTimerCounter")
+                                              .setSiteRef(siteRef)
+                                              .setEquipRef(equipRef)
+                                              .setHisInterpolate("cov")
+                                              .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                              .addMarker("stage").addMarker("down").addMarker("timer").addMarker("counter")
+                                              .addMarker("sp").addMarker("system")
+                                              .setMinVal("0").setMaxVal("5").setIncrementVal("1")
+                                              .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                              .setTz(tz)
+                                              .build();
+            String stageDownTimerCounterId = hayStack.addPoint(stageDownTimerCounter);
+            
+            HashMap defaultStageUpTimerCounterPoint = hayStack.read("point and tuner and default and stage and " +
+                                                                    "down and timer and counter");
+            
+            ArrayList<HashMap> defaultStageDownTimerCounterPointArr =
+                hayStack.readPoint(defaultStageUpTimerCounterPoint.get("id").toString());
+            for (HashMap valMap : defaultStageDownTimerCounterPointArr) {
+                if (valMap.get("val") != null) {
+                    hayStack.pointWrite(HRef.copy(stageDownTimerCounterId), (int) Double.parseDouble(valMap.get("level").toString()),
+                                        valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                }
+            }
+            hayStack.writeHisValById(stageDownTimerCounterId, HSUtil.getPriorityVal(stageDownTimerCounterId));
+        }
+    }
+    
     public double getUserIntentVal(String tags)
     {
         CCUHsApi hayStack = CCUHsApi.getInstance();

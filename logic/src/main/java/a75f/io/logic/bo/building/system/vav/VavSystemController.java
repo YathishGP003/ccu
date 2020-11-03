@@ -16,12 +16,14 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.building.system.SystemPILoopController;
 import a75f.io.logic.bo.building.vav.VavProfile;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.HSEquipUtil;
@@ -44,9 +46,14 @@ import static a75f.io.logic.bo.building.system.SystemMode.HEATONLY;
  */
 public class VavSystemController extends SystemController
 {
+    int    integralMaxTimeout = 15;
+    int proportionalSpread = 2;
+    double proportionalGain = 0.5;
+    double integralGain = 0.5;
+    
     private static VavSystemController instance = new VavSystemController();
     
-    ControlLoop piController;
+    SystemPILoopController piController;
     
     int coolingSignal;
     int heatingSignal;
@@ -90,10 +97,15 @@ public class VavSystemController extends SystemController
     int zoneDeadCount = 0;
     boolean hasTi = false;
     
+    private Occupancy currSystemOccupancy = Occupancy.UNOCCUPIED;
+    
     private VavSystemController()
     {
-        piController = new ControlLoop();
-        piController.setProportionalSpread(2);
+        piController = new SystemPILoopController();
+        piController.setIntegralGain(integralGain);
+        piController.setProportionalGain(proportionalGain);
+        piController.setMaxAllowedError(proportionalSpread);
+        piController.setIntegralMaxTimeout(integralMaxTimeout);
     }
     
     public static VavSystemController getInstance() {
@@ -193,6 +205,20 @@ public class VavSystemController extends SystemController
         co2WeightedAverageSum = 0;
         zoneDeadCount = 0;
         hasTi = false;
+        
+        Occupancy occupancy = ScheduleProcessJob.getSystemOccupancy();
+        if (currSystemOccupancy == Occupancy.OCCUPIED ||
+            currSystemOccupancy == Occupancy.PRECONDITIONING ||
+            currSystemOccupancy == Occupancy.FORCEDOCCUPIED ||
+            currSystemOccupancy == Occupancy.OCCUPANCYSENSING) {
+        
+            if (occupancy == Occupancy.UNOCCUPIED ||
+                occupancy == Occupancy.VACATION) {
+                CcuLog.d(L.TAG_CCU_SYSTEM, "Reset Loop : Occupancy changed from "+currSystemOccupancy+" to "+occupancy);
+                resetLoop();
+            }
+        }
+        currSystemOccupancy = occupancy;
     }
 
     private void updateSystemTempHumidity(ArrayList<HashMap<Object, Object>> allEquips) {
@@ -908,6 +934,12 @@ public class VavSystemController extends SystemController
     public void reset(){
         weightedAverageCoolingOnlyLoadMAQueue.clear();
         weightedAverageHeatingOnlyLoadMAQueue.clear();
+        piController.reset();
+        heatingSignal = 0;
+        coolingSignal = 0;
+    }
+    
+    public void resetLoop() {
         piController.reset();
         heatingSignal = 0;
         coolingSignal = 0;

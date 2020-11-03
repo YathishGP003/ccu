@@ -562,9 +562,15 @@ public class Globals {
     }
 
     public String getSmartNodeBand() {
-        HashMap band = CCUHsApi.getInstance().read("point and snband");
-        if (band != null && band.size() > 0) {
-            return band.get("val").toString();
+        HashMap device = CCUHsApi.getInstance().read("device and addr");
+        if (device != null && device.size() > 0) {
+            String nodeAdd = device.get("addr").toString();
+            return nodeAdd.substring(0, 2).concat("00");
+        } else {
+            HashMap band = CCUHsApi.getInstance().read("point and snband");
+            if (band != null && band.size() > 0) {
+                return band.get("val").toString();
+            }
         }
         return null;
     }

@@ -44,6 +44,7 @@ import static a75f.io.logic.bo.building.hvac.Stage.HEATING_5;
 import static a75f.io.logic.bo.building.hvac.Stage.HUMIDIFIER;
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
+import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 import static a75f.io.logic.jobs.ScheduleProcessJob.ACTION_STATUS_CHANGE;
 
 /**
@@ -59,7 +60,7 @@ public class DabStagedRtu extends DabSystemProfile
     private int stageUpTimerCounter = 0;
     private int stageDownTimerCounter = 0;
     private boolean changeOverStageDownTimerOverrideActive = false;
-    SystemController.State currentConditioning = COOLING;
+    SystemController.State currentConditioning = OFF;
     
     int[] stageStatus = new int[17];
     
@@ -120,10 +121,16 @@ public class DabStagedRtu extends DabSystemProfile
         updateOutsideWeatherParams();
         
         stageStatus = new int[17];
-        if (currentConditioning != getSystemController().getSystemState()) {
+        if (currentConditioning == OFF) {
+            currentConditioning = getSystemController().getSystemState();
+            changeOverStageDownTimerOverrideActive = false;
+        } else if (currentConditioning != getSystemController().getSystemState()) {
             currentConditioning = getSystemController().getSystemState();
             changeOverStageDownTimerOverrideActive = true;
+        } else {
+            changeOverStageDownTimerOverrideActive = false;
         }
+        
         if (currentConditioning == COOLING)
         {
             systemCoolingLoopOp = getSystemController().getCoolingSignal();
@@ -175,7 +182,7 @@ public class DabStagedRtu extends DabSystemProfile
         updateRelayStatus(epidemicState);
         
         CcuLog.d(L.TAG_CCU_SYSTEM, "stageUpTimerCounter "+stageUpTimerCounter+
-                                   " stageDownTimerCounter"+ stageDownTimerCounter+" " +
+                                   " stageDownTimerCounter "+ stageDownTimerCounter+" " +
                                    "changeOverStageDownTimerOverrideActive "+changeOverStageDownTimerOverrideActive);
     
         CcuLog.d(L.TAG_CCU_SYSTEM, "Relays Status: " + Arrays.toString(stageStatus));

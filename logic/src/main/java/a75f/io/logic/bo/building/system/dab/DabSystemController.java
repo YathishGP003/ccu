@@ -7,7 +7,6 @@ import com.google.common.collect.EvictingQueue;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import a75.io.algos.ControlLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Occupied;
@@ -22,6 +21,7 @@ import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.building.system.SystemPILoopController;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.HSEquipUtil;
 import a75f.io.logic.jobs.ScheduleProcessJob;
@@ -47,7 +47,7 @@ public class DabSystemController extends SystemController
     
     private static DabSystemController instance = new DabSystemController();
     
-    DabPILoopController piController;
+    SystemPILoopController piController;
     
     int coolingSignal;
     int heatingSignal;
@@ -95,7 +95,7 @@ public class DabSystemController extends SystemController
     {
         //Read tuners to initialize PI variables
         
-        piController = new DabPILoopController();
+        piController = new SystemPILoopController();
         piController.setIntegralGain(integralGain);
         piController.setProportionalGain(proportionalGain);
         piController.setMaxAllowedError(proportionalSpread);

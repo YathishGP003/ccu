@@ -1,9 +1,9 @@
-package a75f.io.logic.bo.building.system.dab;
+package a75f.io.logic.bo.building.system;
 
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 
-class DabPILoopController {
+public class SystemPILoopController {
     
     private double proportionalGain;
     private double integralGain;

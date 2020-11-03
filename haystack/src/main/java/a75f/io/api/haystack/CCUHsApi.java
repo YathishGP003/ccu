@@ -171,6 +171,11 @@ public class CCUHsApi
         return tagsDb.addPoint(p);
     }
 
+    public String updateSettingPoint(SettingPoint p, String id)
+    {
+        return tagsDb.updateSettingPoint(p,id);
+    }
+
     public String addDevice(Device d)
     {
         return tagsDb.addDevice(d);

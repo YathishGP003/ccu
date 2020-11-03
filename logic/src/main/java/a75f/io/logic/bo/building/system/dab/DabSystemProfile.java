@@ -233,8 +233,8 @@ public abstract class DabSystemProfile extends SystemProfile
                                                  .build();
             String stageUpTimerCounterId = hayStack.addPoint(stageUpTimerCounter);
             
-            HashMap defaultStageUpTimerCounterPoint = hayStack.read("point and tuner and default and stage and " +
-                                                                         "up and timer and counter");
+            HashMap defaultStageUpTimerCounterPoint = hayStack.read("point and tuner and dab and default and stage " +
+                                                                    "and up and timer and counter");
     
             ArrayList<HashMap> defaultStageUpTimerCounterPointArr =
                 hayStack.readPoint(defaultStageUpTimerCounterPoint.get("id").toString());
@@ -272,8 +272,8 @@ public abstract class DabSystemProfile extends SystemProfile
                                             .build();
             String stageDownTimerCounterId = hayStack.addPoint(stageDownTimerCounter);
             
-            HashMap defaultStageUpTimerCounterPoint = hayStack.read("point and tuner and default and stage and " +
-                                                                    "down and timer and counter");
+            HashMap defaultStageUpTimerCounterPoint = hayStack.read("point and tuner and dab and default and stage " +
+                                                                    "and down and timer and counter");
     
             ArrayList<HashMap> defaultStageDownTimerCounterPointArr =
                 hayStack.readPoint(defaultStageUpTimerCounterPoint.get("id").toString());

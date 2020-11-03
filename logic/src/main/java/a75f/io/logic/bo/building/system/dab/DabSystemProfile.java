@@ -177,7 +177,7 @@ public abstract class DabSystemProfile extends SystemProfile
             String siteRef = (String) siteMap.get(Tags.ID);
             String tz = siteMap.get("tz").toString();
             Point modeChangeoverHysteresis = new Point.Builder()
-                                                 .setDisplayName(HSUtil.getDis(equipRef)+"modeChangeoverHysteresis")
+                                                 .setDisplayName(HSUtil.getDis(equipRef)+"-modeChangeoverHysteresis")
                                                  .setSiteRef(siteRef)
                                                  .setEquipRef(equipRef)
                                                  .setHisInterpolate("cov")
@@ -220,7 +220,7 @@ public abstract class DabSystemProfile extends SystemProfile
             String siteRef = (String) siteMap.get(Tags.ID);
             String tz = siteMap.get("tz").toString();
             Point stageUpTimerCounter = new Point.Builder()
-                                                 .setDisplayName(HSUtil.getDis(equipRef)+"stageUpTimerCounter")
+                                                 .setDisplayName(HSUtil.getDis(equipRef)+"-stageUpTimerCounter")
                                                  .setSiteRef(siteRef)
                                                  .setEquipRef(equipRef)
                                                  .setHisInterpolate("cov")
@@ -259,7 +259,7 @@ public abstract class DabSystemProfile extends SystemProfile
             String siteRef = (String) siteMap.get(Tags.ID);
             String tz = siteMap.get("tz").toString();
             Point stageDownTimerCounter = new Point.Builder()
-                                            .setDisplayName(HSUtil.getDis(equipRef)+"stageDownTimerCounter")
+                                            .setDisplayName(HSUtil.getDis(equipRef)+"-stageDownTimerCounter")
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipRef)
                                             .setHisInterpolate("cov")

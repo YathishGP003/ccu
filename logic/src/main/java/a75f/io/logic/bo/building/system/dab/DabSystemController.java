@@ -41,7 +41,7 @@ import static a75f.io.logic.bo.building.system.SystemMode.HEATONLY;
 public class DabSystemController extends SystemController
 {
     int    integralMaxTimeout = 15;
-    int proportionalSpread = 3;
+    int proportionalSpread = 2;
     double proportionalGain = 0.5;
     double integralGain = 0.5;
     
@@ -188,12 +188,13 @@ public class DabSystemController extends SystemController
         weightedAverageChangeoverLoad = 0;
     
         Occupancy occupancy = ScheduleProcessJob.getSystemOccupancy();
-        if (currSystemOccupancy == Occupancy.UNOCCUPIED) {
+        if (currSystemOccupancy == Occupancy.OCCUPIED ||
+            currSystemOccupancy == Occupancy.PRECONDITIONING ||
+            currSystemOccupancy == Occupancy.FORCEDOCCUPIED ||
+            currSystemOccupancy == Occupancy.OCCUPANCYSENSING) {
             
-            if (occupancy == Occupancy.OCCUPIED ||
-                occupancy == Occupancy.PRECONDITIONING ||
-                occupancy == Occupancy.FORCEDOCCUPIED ||
-                occupancy == Occupancy.OCCUPANCYSENSING) {
+            if (occupancy == Occupancy.UNOCCUPIED ||
+                occupancy == Occupancy.VACATION) {
                 CcuLog.d(L.TAG_CCU_SYSTEM, "Reset Loop : Occupancy changed from "+currSystemOccupancy+" to "+occupancy);
                 resetLoop();
             }

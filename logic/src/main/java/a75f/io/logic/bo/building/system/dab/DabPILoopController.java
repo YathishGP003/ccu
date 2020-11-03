@@ -131,11 +131,11 @@ class DabPILoopController {
     
     public double getLoopOutput(double sp, double cp) {
         updateControlVariable(sp, cp);
-        return getControlVariable() * 100 / maxAllowedError;
+        return Math.max(getControlVariable() * 100 / maxAllowedError, 0);
     }
     
     public double getLoopOutput() {
-        return getControlVariable() * 100 / maxAllowedError;
+        return Math.max(getControlVariable() * 100 / maxAllowedError, 0);
     }
     
     public void dump() {

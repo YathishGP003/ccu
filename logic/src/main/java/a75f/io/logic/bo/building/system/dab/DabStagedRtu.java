@@ -2,7 +2,10 @@ package a75f.io.logic.bo.building.system.dab;
 
 import android.content.Intent;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -163,46 +166,19 @@ public class DabStagedRtu extends DabSystemProfile
         setSystemLoopOp("heating", systemHeatingLoopOp);
         setSystemLoopOp("fan", systemFanLoopOp);
         
-        
         updateStagesSelected();
-        
-        double relayDeactHysteresis = TunerUtil.readTunerValByQuery("relay and deactivation and hysteresis", getSystemEquipRef());
+    
         CcuLog.d(L.TAG_CCU_SYSTEM, "systemCoolingLoopOp: "+systemCoolingLoopOp + " systemHeatingLoopOp: " + systemHeatingLoopOp+" systemFanLoopOp: "+systemFanLoopOp);
         CcuLog.d(L.TAG_CCU_SYSTEM, "coolingStages: "+coolingStages + " heatingStages: "+heatingStages+" fanStages: "+fanStages);
-        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
+    
+    
+        updateRelayStatus(epidemicState);
         
-        if (stageUpTimerCounter > 0) {
-            stageUpTimerCounter--;
-        }
-        if (stageDownTimerCounter > 0) {
-            stageDownTimerCounter--;
-        }
-        if (stageDownTimerCounter == 0 && stageDownTimerCounter == 0) {
-            
-            for (int relayCount = 1; relayCount <= 7; relayCount++) {
-                Stage stage = Stage.values()[(int) getConfigAssociation("relay" + relayCount)];
-                double relayState = getNewRelayState(relayCount, epidemicState, relayDeactHysteresis, systemMode, stage);
-                if (stageStatus[stage.ordinal()] == 0 && relayState > 0) {
-                    stageUpTimerCounter = (int)getStageUpTimeMinutes();
-                    stageStatus[stage.ordinal()] = (int) relayState;
-                    ControlMote.setRelayState("relay" + relayCount, relayState);
-                    break;
-                } else if (stageStatus[stage.ordinal()] > 0 && relayState == 0) {
-                    if (!changeOverStageDownTimerOverrideActive) {
-                        stageDownTimerCounter = (int)getStageDownTimeMinutes();
-                    }
-                    stageStatus[stage.ordinal()] = (int) relayState;
-                    ControlMote.setRelayState("relay" + relayCount, relayState);
-                    break;
-                } else {
-                    stageStatus[stage.ordinal()] = (int) relayState;
-                    ControlMote.setRelayState("relay" + relayCount, relayState);
-                }
-            }
-        }
         CcuLog.d(L.TAG_CCU_SYSTEM, "stageUpTimerCounter "+stageUpTimerCounter+
                                    " stageDownTimerCounter"+ stageDownTimerCounter+" " +
                                    "changeOverStageDownTimerOverrideActive "+changeOverStageDownTimerOverrideActive);
+    
+        CcuLog.d(L.TAG_CCU_SYSTEM, "Relays Status: " + Arrays.toString(stageStatus));
         
         setSystemPoint("operating and mode", getSystemController().systemState.ordinal());
         String systemStatus = getStatusMessage();
@@ -219,6 +195,98 @@ public class DabStagedRtu extends DabSystemProfile
             CCUHsApi.getInstance().writeDefaultVal("system and scheduleStatus", scheduleStatus);
         }
         
+    }
+    
+    private void updateRelayStatus(EpidemicState epidemicState) {
+        
+        double relayDeactHysteresis = TunerUtil.readTunerValByQuery("relay and deactivation and hysteresis", getSystemEquipRef());
+        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
+    
+        int[] tempStatus = new int[17];
+        
+        if (stageUpTimerCounter > 0) {
+            stageUpTimerCounter--;
+        }
+        if (stageDownTimerCounter > 0) {
+            stageDownTimerCounter--;
+        }
+    
+        for (int relayCount = 1; relayCount <= 7; relayCount++) {
+            Stage stage = Stage.values()[(int) getConfigAssociation("relay" + relayCount)];
+            tempStatus[stage.ordinal()] = (int)getNewRelayState(relayCount, epidemicState, relayDeactHysteresis,
+                                                                systemMode, stage);;
+        }
+    
+        //Handle stage down transitions
+        for (int stageIndex = HEATING_5.ordinal(); stageIndex >= COOLING_1.ordinal(); stageIndex-- ) {
+            Stage stage = Stage.values()[stageIndex];
+            HashSet<Integer> relaySet = getRelayMappingForStage(stage);
+            CcuLog.d(L.TAG_CCU_SYSTEM, "Relays mapped to stage "+stage+" "+relaySet.toString());
+            for (Integer relay : relaySet) {
+                double curRelayState = ControlMote.getRelayState("relay" + relay);
+                stageStatus[stage.ordinal()] = (int) curRelayState;
+                if (stageUpTimerCounter == 0 && stageDownTimerCounter == 0) {
+                    double relayState = tempStatus[stage.ordinal()];
+                    if (curRelayState > 0 && relayState == 0) {
+                        if (!changeOverStageDownTimerOverrideActive) {
+                            stageDownTimerCounter = (int) getStageDownTimeMinutes();
+                        }
+                        stageStatus[stage.ordinal()] = (int) relayState;
+                        setStageStatus(stage, relayState);
+                        ControlMote.setRelayState("relay" + relay, relayState);
+                        CcuLog.d(L.TAG_CCU_SYSTEM, "Stage Down : "+stage);
+                    }
+                }
+            }
+        }
+    
+        //Handle stage up transitions
+        for (int stageIndex = COOLING_1.ordinal(); stageIndex <= HEATING_5.ordinal(); stageIndex++ ) {
+            Stage stage = Stage.values()[stageIndex];
+            HashSet<Integer> relaySet = getRelayMappingForStage(stage);
+            CcuLog.d(L.TAG_CCU_SYSTEM, "Relays mapped to stage "+stage+" "+relaySet.toString());
+            for (Integer relay : relaySet) {
+                if (stageUpTimerCounter == 0 && stageDownTimerCounter == 0) {
+                    double relayState = tempStatus[stage.ordinal()];
+                    if (stageStatus[stage.ordinal()] == 0 && relayState > 0) {
+                        stageUpTimerCounter = (int) getStageUpTimeMinutes();
+                        stageStatus[stage.ordinal()] = (int) relayState;
+                        setStageStatus(stage, relayState);
+                        ControlMote.setRelayState("relay" + relay, relayState);
+                        CcuLog.d(L.TAG_CCU_SYSTEM, "Stage Up "+stage);
+                    }
+                }
+            }
+        }
+    
+        for (int stageIndex = FAN_1.ordinal(); stageIndex < DEHUMIDIFIER.ordinal(); stageIndex++) {
+            stageStatus[stageIndex] = tempStatus[stageIndex];
+        }
+    }
+    
+    
+    private void setStageStatus(Stage stage, double relayState) {
+        if (stage.getValue() <= COOLING_5.getValue()) {
+            double currState = getCmdSignal("cooling and stage" + (stage.ordinal() + 1));
+            if (currState != relayState) {
+                setCmdSignal("cooling and stage" + (stage.ordinal() + 1), relayState);
+            }
+        } else if (stage.getValue() >= HEATING_1.getValue() && stage.getValue() <= HEATING_5.getValue()) {
+            double currState = getCmdSignal("heating and stage" + (stage.ordinal() - COOLING_5.ordinal()));
+            if (currState != relayState) {
+                setCmdSignal("heating and stage" + (stage.ordinal() - COOLING_5.ordinal()), relayState);
+            }
+        }
+    }
+    
+    private HashSet<Integer> getRelayMappingForStage(Stage stage) {
+        HashSet<Integer> relaySet= new HashSet<>();
+        for (int relayCount = 1; relayCount <= 7; relayCount++) {
+            if (stage.ordinal() == getConfigAssociation("relay" + relayCount)) {
+                relaySet.add(relayCount);
+            }
+        }
+        return relaySet;
     }
     
     public double getNewRelayState(int relayNum, EpidemicState epidemicState, double relayDeactHysteresis,
@@ -246,8 +314,7 @@ public class DabStagedRtu extends DabSystemProfile
                     } else {
                         relayState = systemCoolingLoopOp > Math.max(stageThreshold - relayDeactHysteresis, 0) ? 1 : 0;
                     }
-                    if (currState != relayState)
-                        setCmdSignal("cooling and stage" + (stage.ordinal() + 1), relayState);
+                    
                     break;
                 case HEATING_1:
                 case HEATING_2:
@@ -261,8 +328,6 @@ public class DabStagedRtu extends DabSystemProfile
                     } else {
                         relayState = systemHeatingLoopOp > Math.max(stageThreshold - relayDeactHysteresis, 0) ? 1 : 0;
                     }
-                    if (currState != relayState)
-                        setCmdSignal("heating and stage" + (stage.ordinal() - COOLING_5.ordinal()), relayState);
                     break;
                 case FAN_1:
                     if ((systemMode != SystemMode.OFF &&
@@ -354,7 +419,7 @@ public class DabStagedRtu extends DabSystemProfile
                     break;
             }
         }
-        CcuLog.d(L.TAG_CCU_SYSTEM, stage+ " Set Relay: "+relayNum+", threshold: "+stageThreshold+", state : "+relayState);
+        CcuLog.d(L.TAG_CCU_SYSTEM, stage+ " Relay: "+relayNum+", threshold: "+stageThreshold+", state : "+relayState);
         return relayState;
     }
     
@@ -380,8 +445,12 @@ public class DabStagedRtu extends DabSystemProfile
             status.insert(0, "Fan Stage ");
             status.append(" ON ");
         }
-        if (systemCoolingLoopOp > 0)
-        {
+        if (stageStatus[COOLING_1.ordinal()] > 0 ||
+            stageStatus[COOLING_2.ordinal()] > 0 ||
+            stageStatus[COOLING_3.ordinal()] > 0 ||
+            stageStatus[COOLING_4.ordinal()] > 0 ||
+            stageStatus[COOLING_5.ordinal()] > 0) {
+            
             status.append("| Cooling Stage " + ((stageStatus[COOLING_1.ordinal()] > 0) ? "1" : ""));
             status.append((stageStatus[COOLING_2.ordinal()] > 0) ? ",2" : "");
             status.append((stageStatus[COOLING_3.ordinal()] > 0) ? ",3" : "");
@@ -389,7 +458,12 @@ public class DabStagedRtu extends DabSystemProfile
             status.append((stageStatus[COOLING_5.ordinal()] > 0) ? ",5 ON " : " ON ");
         }
         
-        if (systemHeatingLoopOp > 0) {
+        if (stageStatus[HEATING_1.ordinal()] > 0 ||
+            stageStatus[HEATING_1.ordinal()] > 0 ||
+            stageStatus[HEATING_1.ordinal()] > 0 ||
+            stageStatus[HEATING_1.ordinal()] > 0 ||
+            stageStatus[HEATING_1.ordinal()] > 0) {
+            
             status.append("| Heating Stage " + ((stageStatus[HEATING_1.ordinal()] > 0) ? "1" : ""));
             status.append((stageStatus[HEATING_2.ordinal()] > 0) ? ",2" : "");
             status.append((stageStatus[HEATING_3.ordinal()] > 0) ? ",3" : "");

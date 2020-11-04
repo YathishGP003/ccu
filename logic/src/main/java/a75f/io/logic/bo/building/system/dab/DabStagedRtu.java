@@ -271,7 +271,6 @@ public class DabStagedRtu extends DabSystemProfile
         }
     }
     
-    
     private void setStageStatus(Stage stage, double relayState) {
         if (stage.getValue() <= COOLING_5.getValue()) {
             double currState = getCmdSignal("cooling and stage" + (stage.ordinal() + 1));
@@ -452,12 +451,7 @@ public class DabStagedRtu extends DabSystemProfile
             status.insert(0, "Fan Stage ");
             status.append(" ON ");
         }
-        if (stageStatus[COOLING_1.ordinal()] > 0 ||
-            stageStatus[COOLING_2.ordinal()] > 0 ||
-            stageStatus[COOLING_3.ordinal()] > 0 ||
-            stageStatus[COOLING_4.ordinal()] > 0 ||
-            stageStatus[COOLING_5.ordinal()] > 0) {
-            
+        if (isCoolingActive()) {
             status.append("| Cooling Stage " + ((stageStatus[COOLING_1.ordinal()] > 0) ? "1" : ""));
             status.append((stageStatus[COOLING_2.ordinal()] > 0) ? ",2" : "");
             status.append((stageStatus[COOLING_3.ordinal()] > 0) ? ",3" : "");
@@ -465,12 +459,7 @@ public class DabStagedRtu extends DabSystemProfile
             status.append((stageStatus[COOLING_5.ordinal()] > 0) ? ",5 ON " : " ON ");
         }
         
-        if (stageStatus[HEATING_1.ordinal()] > 0 ||
-            stageStatus[HEATING_1.ordinal()] > 0 ||
-            stageStatus[HEATING_1.ordinal()] > 0 ||
-            stageStatus[HEATING_1.ordinal()] > 0 ||
-            stageStatus[HEATING_1.ordinal()] > 0) {
-            
+        if (isHeatingActive()) {
             status.append("| Heating Stage " + ((stageStatus[HEATING_1.ordinal()] > 0) ? "1" : ""));
             status.append((stageStatus[HEATING_2.ordinal()] > 0) ? ",2" : "");
             status.append((stageStatus[HEATING_3.ordinal()] > 0) ? ",3" : "");

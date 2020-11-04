@@ -456,24 +456,31 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
                                                  .setEquipRef(equipref).setHisInterpolate("cov")
                                                  .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("his")
                                                  .setUnit("%").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(coolingSignal);
+        String coolingSignalId = CCUHsApi.getInstance().addPoint(coolingSignal);
+        CCUHsApi.getInstance().writeHisValById(coolingSignalId, 0.0);
+        
         Point heatingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "heatingSignal")
                                                  .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov")
                                                  .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("modulating").addMarker("his")
                                                  .setUnit("%").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(heatingSignal);
+        String heatingSignalId = CCUHsApi.getInstance().addPoint(heatingSignal);
+        CCUHsApi.getInstance().writeHisValById(heatingSignalId, 0.0);
+        
         Point fanSignal = new Point.Builder().setDisplayName(equipDis + "-" + "fanSignal")
                                              .setSiteRef(siteRef)
                                              .setEquipRef(equipref).setHisInterpolate("cov")
                                              .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his").addMarker("modulating")
                                              .setUnit("%")
                                              .setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(fanSignal);
+        String fanSignalId = CCUHsApi.getInstance().addPoint(fanSignal);
+        CCUHsApi.getInstance().writeHisValById(fanSignalId, 0.0);
+        
         Point compositeSignal = new Point.Builder().setDisplayName(equipDis + "-" + "CompositeSignal")
                                                    .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov")
                                                    .addMarker("system").addMarker("cmd").addMarker("composite").addMarker("modulating").addMarker("his")
                                                    .setUnit("%").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(compositeSignal);
+        String compositeSignalId = CCUHsApi.getInstance().addPoint(compositeSignal);
+        CCUHsApi.getInstance().writeHisValById(compositeSignalId, 0.0);
     }
     
     public double getCmdSignal(String cmd) {

@@ -25,6 +25,7 @@ import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.logic.Globals;
 import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
+import a75f.io.usbserial.UsbModbusService;
 import a75f.io.usbserial.UsbService;
 
 import static a75f.io.device.mesh.DLog.LogdStructAsJson;
@@ -37,6 +38,7 @@ public class LSerial
 {
     private static LSerial    mLSerial;
     private        UsbService mUsbService;
+    private UsbModbusService  mUsbModbusService;
     private static boolean mSendSeedMsgs;
     private static boolean isNodeSeeding;
 
@@ -200,6 +202,14 @@ public class LSerial
         }
         return mUsbService.isConnected();
     }
+    public boolean isModbusConnected()
+    {
+        if (mUsbModbusService == null)
+        {
+            return false;
+        }
+        return mUsbModbusService.isConnected();
+    }
 
 
     /***
@@ -218,6 +228,11 @@ public class LSerial
     {
         structs.clear();
         mUsbService = usbService;
+    }
+    public void setModbusUSBService(UsbModbusService modbusUSBService)
+    {
+        structs.clear();
+        mUsbModbusService = modbusUSBService;
     }
 
 
@@ -356,13 +371,13 @@ public class LSerial
     public synchronized boolean sendSerialToModbus(byte[] data)
     {
 
-        if (mUsbService == null)
+        if (mUsbModbusService == null)
         {
             DLog.logUSBServiceNotInitialized();
             return false;
         }
 
-        mUsbService.modbusWrite(data);
+        mUsbModbusService.modbusWrite(data);
         return true;
     }
 

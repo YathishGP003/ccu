@@ -6,7 +6,6 @@ import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
-import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.DeviceNetwork;
 import a75f.io.device.mesh.LSerial;

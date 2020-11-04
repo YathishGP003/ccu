@@ -180,6 +180,10 @@ public class Globals {
 
         CCUHsApi ccuHsApi = new CCUHsApi(this.mApplicationContext);
         ccuHsApi.testHarnessEnabled = testHarness;
+
+        //set SN address band
+        String addrBand = getSmartNodeBand();
+        L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
         
         importTunersAndScheduleJobs();
         
@@ -204,9 +208,6 @@ public class Globals {
                 }
             
                 loadEquipProfiles();
-            
-                String addrBand = getSmartNodeBand();
-                L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
             
                 if (!isPubnubSubscribed())
                 {

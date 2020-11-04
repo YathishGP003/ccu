@@ -373,6 +373,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             } else {
                 initTRSystem();
                 addNewSystemUserIntentPoints(equip.get("id").toString());
+                addNewTunerPoints(equip.get("id").toString());
                 return;
             }
         }

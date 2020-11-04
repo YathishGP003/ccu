@@ -12,6 +12,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.logic.bo.building.system.SystemState;
@@ -188,6 +189,7 @@ public abstract class VavSystemProfile extends SystemProfile
     }
     
     public void addNewTunerPoints(String equipRef) {
+        CcuLog.d(L.TAG_CCU_SYSTEM, "VAV : addNewTunerPoints");
         addStageUpTimerCounterTuner(equipRef);
         addStageDownTimerCounterTuner(equipRef);
     }

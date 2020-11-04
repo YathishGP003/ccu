@@ -122,6 +122,7 @@ public class VavStagedRtu extends VavSystemProfile
             } else {
                 initTRSystem();
                 addNewSystemUserIntentPoints(equip.get("id").toString());
+                addNewTunerPoints(equip.get("id").toString());
                 updateStagesSelected();
                 return;
             }
@@ -180,6 +181,17 @@ public class VavStagedRtu extends VavSystemProfile
         updateOutsideWeatherParams();
         SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
         stageStatus = new int[17];
+    
+        if (currentConditioning == OFF) {
+            currentConditioning = getSystemController().getSystemState();
+            changeOverStageDownTimerOverrideActive = false;
+        } else if (currentConditioning != getSystemController().getSystemState()) {
+            currentConditioning = getSystemController().getSystemState();
+            changeOverStageDownTimerOverrideActive = true;
+        } else {
+            changeOverStageDownTimerOverrideActive = false;
+        }
+    
         if ((VavSystemController.getInstance().getSystemState() == COOLING)
                     && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO)) {
             double satSpMax = VavTRTuners.getSatTRTunerVal("spmax");

@@ -47,6 +47,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
             } else {
                 initTRSystem();
                 addNewSystemUserIntentPoints(equip.get("id").toString());
+                addNewTunerPoints(equip.get("id").toString());
                 updateStagesSelected();
                 return;
             }

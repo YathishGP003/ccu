@@ -88,6 +88,7 @@ import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.registration.InstallerOptions;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.usbserial.SerialEvent;
+import a75f.io.usbserial.UsbModbusService;
 import a75f.io.usbserial.UsbService;
 
 
@@ -132,6 +133,7 @@ public abstract class UtilityApplication extends Application {
     };
 
     private UsbService usbService;
+    private UsbModbusService usbModbusService;
 
     private DeviceUpdateJob deviceUpdateJob;
     private static BACnetUpdateJob baCnetUpdateJob;
@@ -149,6 +151,11 @@ public abstract class UtilityApplication extends Application {
 
                     //TODO: research what cts and dsr changes are.  For now no handler will be used, because I'm uncertain if the information is relevant.
                     usbService.setHandler(null);
+
+                    //Todo : modbus USB Serial to tested with real device
+                    usbModbusService = ((UsbModbusService.UsbBinder) arg1).getService();
+                    LSerial.getInstance().setModbusUSBService(usbModbusService);
+                    usbModbusService.setHandler(null);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -158,6 +165,7 @@ public abstract class UtilityApplication extends Application {
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             usbService = null;
+            usbModbusService = null;
         }
     };
 

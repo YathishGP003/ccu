@@ -239,7 +239,7 @@ public class InstallerOptions extends Fragment {
             for (String addBand : addressBand) {
                 String addB = String.valueOf(L.ccu().getSmartNodeAddressBand());
                 if (addBand.equals(addB)) {
-                    mAddressBandSpinner.setSelection(analogAdapter.getPosition(addBand));
+                    mAddressBandSpinner.setSelection(analogAdapter.getPosition(addBand),false);
                     break;
                 }
             }

@@ -17,7 +17,6 @@ import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
-import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
@@ -95,6 +94,7 @@ public class CazProfile extends ZoneProfile {
         double setTempCooling = cazEquip.getDesiredTempCooling();
         double setTempHeating = cazEquip.getDesiredTempHeating();
         double roomTemp = cazEquip.getCurrentTemp();
+        double systemDefaultTemp = 72.0;
 
 
         if (roomTemp > setTempCooling) {
@@ -108,9 +108,21 @@ public class CazProfile extends ZoneProfile {
                 state = HEATING;
             }
         } else {
-            if (state != DEADBAND) {
-                state = DEADBAND;
+            //off -0, auto -1, cool -2, heat -3
+            int systemMode = (int) TunerUtil.readSystemUserIntentVal("conditioning and mode");
+            CcuLog.d(L.TAG_CCU_ZONE, " cazEquip : systemMode-" + systemMode + " roomTemp:" + roomTemp);
+            if (systemMode == 1 || systemMode == 2 && roomTemp > systemDefaultTemp) {
+                state = COOLING;
             }
+            if (systemMode == 3 && roomTemp < systemDefaultTemp) {
+                state = HEATING;
+            }
+            if (systemMode == 3 && roomTemp > systemDefaultTemp) {
+                state = COOLING;
+            }
+           /* if (state != DEADBAND) {
+                state = DEADBAND;
+            }*/
         }
         cazEquip.setStatus(state.ordinal(), (DabSystemController.getInstance().isEmergencyMode() || VavSystemController.getInstance().isEmergencyMode()) && (state == HEATING ? buildingLimitMinBreached()
                 : state == COOLING ? buildingLimitMaxBreached() : false));

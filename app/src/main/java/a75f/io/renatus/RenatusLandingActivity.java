@@ -6,6 +6,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.TabItem;
@@ -59,6 +61,7 @@ import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.CloudConnetionStatusThread;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.util.Receiver.ConnectionChangeReceiver;
 
 public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface {
 
@@ -71,6 +74,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     ImageView menuToggle;
     ImageView floorMenu;
     static CloudConnetionStatusThread mCloudConnectionStatus = null;
+    private BroadcastReceiver mConnectionChangeReceiver;
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -94,6 +98,13 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         prefs = new Prefs(this);
+
+        mConnectionChangeReceiver = new ConnectionChangeReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+
+        this.registerReceiver(mConnectionChangeReceiver, intentFilter);
 
         if (!isFinishing()) {
             setContentView(R.layout.activity_renatus_landing);
@@ -314,6 +325,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     public void onPause() {
         super.onPause();
         RemoteCommandUpdateHandler.setRemoteCommandInterface(null);
+        this.unregisterReceiver(mConnectionChangeReceiver);
     }
 
     @Override

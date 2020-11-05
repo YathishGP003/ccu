@@ -212,7 +212,7 @@ public abstract class DabSystemProfile extends SystemProfile
     private void addStageUpTimerCounterTuner(String equipRef) {
         HashMap<Object, Object> stageUpTimerCounterPoint = CCUHsApi.getInstance()
                                                                         .readEntity("tuner and system and dab and " +
-                                                                                    "stage and up and timer and counter");
+                                                                                    "stageUp and timer and counter");
         
         if (stageUpTimerCounterPoint.isEmpty()) {
             CCUHsApi hayStack = CCUHsApi.getInstance();
@@ -225,7 +225,7 @@ public abstract class DabSystemProfile extends SystemProfile
                                                  .setEquipRef(equipRef)
                                                  .setHisInterpolate("cov")
                                                  .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
-                                                 .addMarker("stage").addMarker("up").addMarker("timer").addMarker("counter")
+                                                 .addMarker("stageUp").addMarker("timer").addMarker("counter")
                                                  .addMarker("sp").addMarker("system")
                                                  .setMinVal("0").setMaxVal("5").setIncrementVal("1")
                                                  .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
@@ -233,8 +233,8 @@ public abstract class DabSystemProfile extends SystemProfile
                                                  .build();
             String stageUpTimerCounterId = hayStack.addPoint(stageUpTimerCounter);
             
-            HashMap defaultStageUpTimerCounterPoint = hayStack.read("point and tuner and dab and default and stage " +
-                                                                    "and up and timer and counter");
+            HashMap defaultStageUpTimerCounterPoint = hayStack.read("point and tuner and dab and default and " +
+                                                                    "stageUp and timer and counter");
     
             ArrayList<HashMap> defaultStageUpTimerCounterPointArr =
                 hayStack.readPoint(defaultStageUpTimerCounterPoint.get("id").toString());
@@ -251,7 +251,7 @@ public abstract class DabSystemProfile extends SystemProfile
     private void addStageDownTimerCounterTuner(String equipRef) {
         HashMap<Object, Object> stageDownTimerCounterPoint = CCUHsApi.getInstance()
                                                                    .readEntity("tuner and system and dab and " +
-                                                                               "stage and down and timer and counter");
+                                                                               "stageDown and timer and counter");
         
         if (stageDownTimerCounterPoint.isEmpty()) {
             CCUHsApi hayStack = CCUHsApi.getInstance();
@@ -264,7 +264,7 @@ public abstract class DabSystemProfile extends SystemProfile
                                             .setEquipRef(equipRef)
                                             .setHisInterpolate("cov")
                                             .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
-                                            .addMarker("stage").addMarker("down").addMarker("timer").addMarker("counter")
+                                            .addMarker("stageDown").addMarker("timer").addMarker("counter")
                                             .addMarker("sp").addMarker("system")
                                             .setMinVal("0").setMaxVal("5").setIncrementVal("1")
                                             .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
@@ -272,8 +272,8 @@ public abstract class DabSystemProfile extends SystemProfile
                                             .build();
             String stageDownTimerCounterId = hayStack.addPoint(stageDownTimerCounter);
             
-            HashMap defaultStageUpTimerCounterPoint = hayStack.read("point and tuner and dab and default and stage " +
-                                                                    "and down and timer and counter");
+            HashMap defaultStageUpTimerCounterPoint = hayStack.read("point and tuner and dab and default and " +
+                                                                    "stageDown and timer and counter");
     
             ArrayList<HashMap> defaultStageDownTimerCounterPointArr =
                 hayStack.readPoint(defaultStageUpTimerCounterPoint.get("id").toString());

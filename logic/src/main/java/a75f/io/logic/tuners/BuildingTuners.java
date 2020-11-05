@@ -3792,7 +3792,7 @@ public class BuildingTuners
         
         HashMap<Object, Object> stageUpTimerCounterPoint = CCUHsApi.getInstance()
                                                                         .readEntity("tuner and default and dab and " +
-                                                                                    "stage and up and timer and counter");
+                                                                                    "stageUp and timer and counter");
         if (stageUpTimerCounterPoint.isEmpty()) {
             Point stageUpTimerCounter = new Point.Builder().setDisplayName(equipDis + "-DAB-" + "stageUpTimerCounter")
                                                                 .setSiteRef(siteRef)
@@ -3800,7 +3800,7 @@ public class BuildingTuners
                                                                 .setHisInterpolate("cov")
                                                                 .addMarker("tuner").addMarker("dab")
                                                                 .addMarker("default").addMarker("writable").addMarker("his")
-                                                                .addMarker("stage").addMarker("up")
+                                                                .addMarker("stageUp")
                                                                 .addMarker("timer").addMarker("counter").addMarker("sp")
                                                                 .setMinVal("0")
                                                                 .setMaxVal("5")
@@ -3816,8 +3816,8 @@ public class BuildingTuners
         }
     
         HashMap<Object, Object> stageDownTimerCounterPoint = CCUHsApi.getInstance()
-                                                                   .readEntity("tuner and dab and default and stage " +
-                                                                               "and down and timer and counter");
+                                                                   .readEntity("tuner and dab and default and " +
+                                                                               "stageDown and timer and counter");
         if (stageDownTimerCounterPoint.isEmpty()) {
             Point stageDownTimerCounter = new Point.Builder().setDisplayName(equipDis + "-DAB-" +
                                                                              "stageDownTimerCounter")
@@ -3826,7 +3826,7 @@ public class BuildingTuners
                                                            .setHisInterpolate("cov")
                                                            .addMarker("tuner").addMarker("dab")
                                                            .addMarker("default").addMarker("writable").addMarker("his")
-                                                           .addMarker("stage").addMarker("down")
+                                                           .addMarker("stageDown")
                                                            .addMarker("timer").addMarker("counter").addMarker("sp")
                                                            .setMinVal("0")
                                                            .setMaxVal("5")

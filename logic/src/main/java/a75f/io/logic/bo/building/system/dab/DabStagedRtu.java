@@ -430,11 +430,11 @@ public class DabStagedRtu extends DabSystemProfile
     }
     
     private double getStageUpTimeMinutes() {
-        return TunerUtil.readTunerValByQuery("stage and up and timer and counter", getSystemEquipRef());
+        return TunerUtil.readTunerValByQuery("stageUp and timer and counter", getSystemEquipRef());
     }
     
     private double getStageDownTimeMinutes() {
-        return TunerUtil.readTunerValByQuery("stage and down and timer and counter", getSystemEquipRef());
+        return TunerUtil.readTunerValByQuery("stageDown and timer and counter", getSystemEquipRef());
     }
     
     @Override

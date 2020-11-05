@@ -101,7 +101,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
         mConnectionChangeReceiver = new ConnectionChangeReceiver();
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
 
         this.registerReceiver(mConnectionChangeReceiver, intentFilter);

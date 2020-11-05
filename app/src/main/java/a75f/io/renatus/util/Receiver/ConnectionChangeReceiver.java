@@ -5,7 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Handler;
 import android.util.Log;
+
+import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 
@@ -22,7 +25,7 @@ public class ConnectionChangeReceiver extends BroadcastReceiver {
         NetworkInfo info = cm.getActiveNetworkInfo();
         if (info != null) {
             if (info.isConnected()) {
-                CCUHsApi.getInstance().syncEntityWithPointWrite();
+                new Handler().postDelayed(() -> CCUHsApi.getInstance().syncEntityWithPointWrite(),60000);
             }
         }
     }

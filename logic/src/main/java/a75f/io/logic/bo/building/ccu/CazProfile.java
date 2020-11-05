@@ -12,6 +12,8 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.system.SystemController;
+import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.tuners.TunerUtil;
@@ -108,16 +110,15 @@ public class CazProfile extends ZoneProfile {
                 state = HEATING;
             }
         } else {
-            //off -0, auto -1, cool -2, heat -3
-            int systemMode = (int) TunerUtil.readSystemUserIntentVal("conditioning and mode");
+            SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
             CcuLog.d(L.TAG_CCU_ZONE, " cazEquip : systemMode-" + systemMode + " roomTemp:" + roomTemp);
-            if (systemMode == 1 || systemMode == 2 && roomTemp > systemDefaultTemp) {
+            if (systemMode == SystemMode.AUTO || systemMode == SystemMode.COOLONLY  && roomTemp > systemDefaultTemp) {
                 state = COOLING;
             }
-            if (systemMode == 3 && roomTemp < systemDefaultTemp) {
+            if (systemMode == SystemMode.HEATONLY && roomTemp < systemDefaultTemp) {
                 state = HEATING;
             }
-            if (systemMode == 3 && roomTemp > systemDefaultTemp) {
+            if (systemMode == SystemMode.HEATONLY && roomTemp > systemDefaultTemp) {
                 state = COOLING;
             }
            /* if (state != DEADBAND) {

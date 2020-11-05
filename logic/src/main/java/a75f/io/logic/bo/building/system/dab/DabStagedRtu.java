@@ -268,6 +268,10 @@ public class DabStagedRtu extends DabSystemProfile
     
         for (int stageIndex = FAN_1.ordinal(); stageIndex < DEHUMIDIFIER.ordinal(); stageIndex++) {
             stageStatus[stageIndex] = tempStatus[stageIndex];
+            HashSet<Integer> relaySet = getRelayMappingForStage(Stage.values()[stageIndex]);
+            for (Integer relay : relaySet) {
+                ControlMote.setRelayState("relay" + relay, stageStatus[stageIndex]);
+            }
         }
     }
     

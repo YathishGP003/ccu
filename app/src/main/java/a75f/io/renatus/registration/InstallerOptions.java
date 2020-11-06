@@ -14,6 +14,7 @@ import android.os.CountDownTimer;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -367,6 +368,7 @@ public class InstallerOptions extends Fragment {
                             editSubnet.setText(ethConfig[3]);
                         }
                     }else{
+                        Log.i("CCU_UTILITYAPP", "checkNetworkConnected:textNetworkError:" +utilityApplication.checkNetworkConnected());
                         textNetworkError.setVisibility(View.VISIBLE);
                     }
                 }
@@ -461,8 +463,10 @@ public class InstallerOptions extends Fragment {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            prefs.setBoolean("BACnetLAN",true);
         } else {
             localDevice = utilityApplication.enableBACnetWifi();
+            prefs.setBoolean("BACnetLAN",false);
         }
         if (localDevice != null) {
             utilityApplication.setLocalDevice(localDevice,true);
@@ -640,27 +644,21 @@ public class InstallerOptions extends Fragment {
     }
 
     public boolean validateIPAddress(String manualIPAddress) {
-        String IPADDRESS_PATTERN =
-                "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
-                        "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
-                        "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
-                        "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
-        Pattern pattern = Pattern.compile(IPADDRESS_PATTERN);
-        Matcher matcher = pattern.matcher(manualIPAddress);
-        if (!matcher.matches()) {
+        if(!Patterns.IP_ADDRESS.matcher(manualIPAddress).matches()){
             return false;
-        } else {
+        }else{
             String[] manualIp = (manualIPAddress).split("\\.");
-                return Integer.parseInt(manualIp[0]) < 255 & Integer.parseInt(manualIp[0]) > 0 &
-                        Integer.parseInt(manualIp[1]) < 255 & Integer.parseInt(manualIp[1]) > 0 &
-                        Integer.parseInt(manualIp[2]) < 255 & Integer.parseInt(manualIp[2]) > 0 &
-                        Integer.parseInt(manualIp[3]) < 255 & Integer.parseInt(manualIp[3]) > 0;
+            return  Integer.parseInt(manualIp[0]) < 255 & Integer.parseInt(manualIp[0]) > 0 &
+                    Integer.parseInt(manualIp[1]) < 255 & Integer.parseInt(manualIp[1]) > 0 &
+                    Integer.parseInt(manualIp[2]) < 255 & Integer.parseInt(manualIp[2]) >= 0 &
+                    Integer.parseInt(manualIp[3]) < 255 & Integer.parseInt(manualIp[3]) > 0;
         }
     }
 
     public class NetworkChangeReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.i("CCU_UTILITYAPP", "NetworkChangeReceiver:" +utilityApplication.checkNetworkConnected());
             if(utilityApplication.checkNetworkConnected()) {
                 textNetworkError.setVisibility(View.GONE);
                 getBACnetConfig();

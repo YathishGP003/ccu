@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.TabItem;
@@ -324,7 +323,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     public void onPause() {
         super.onPause();
         RemoteCommandUpdateHandler.setRemoteCommandInterface(null);
-        this.unregisterReceiver(mConnectionChangeReceiver);
     }
 
     @Override
@@ -333,6 +331,13 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         mCloudConnectionStatus.stopThread();
         L.saveCCUState();
         AlertManager.getInstance().clearAlertsWhenAppClose();
+        try {
+            if (mConnectionChangeReceiver != null) {
+                this.unregisterReceiver(mConnectionChangeReceiver);
+            }
+        } catch (Exception e) {
+            // already unregistered
+        }
     }
 
     @Override

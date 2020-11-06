@@ -1,0 +1,336 @@
+{
+    "modbusEquipId (_id)": "5f1f30ad18bcbf4f1d9a1de3",
+    "name": "Rodent Repellent System-C Systems ",
+    "description": "This document contains the configuration necessary to manage a C Systems Rodent Repellent System.",
+    "equipType": "RRS",
+    "manufacturer": "C Systems",
+    "modelNumbers": [
+        "URRS12T",
+        "URRS24T"
+    ],
+    "registers": [
+        {
+            "registerAddress": 0,
+            "registerNumber": "400000",
+            "registerType": "holdingRegister",
+            "parameterDefinitionType": "decimal",
+            "parameters": [
+                {
+                    "parameterId": "5f1f30ad18bcbf4f1d9a1de4",
+                    "name": "Mode",
+                    "description": "Configurable mode of the rodent repellant system, either test mode or ultrasound mode.",
+                    "startBit": 0,
+                    "endBit": 15,
+                    "displayInUiDefault": false,
+                    "logicalPointTags": [
+                        {
+                            "tagName": "rrs"
+                        },
+                        {
+                            "tagName": "mode"
+                        },
+                        {
+                            "tagName": "kind",
+                            "value": "Number"
+                        },
+                        {
+                            "tagName": "his"
+                        },
+                        {
+                            "tagName": "hisInterpolate",
+                            "value": "cov"
+                        }
+                    ],
+                    "userIntentPointTags": [
+                        {
+                            "tagName": "rrs"
+                        },
+                        {
+                            "tagName": "mode"
+                        },
+                        {
+                            "tagName": "kind",
+                            "value": "Number"
+                        },
+                        {
+                            "tagName": "minVal",
+                            "value": 1
+                        },
+                        {
+                            "tagName": "maxVal",
+                            "value": 2
+                        },
+                        {
+                            "tagName": "incrementVal",
+                            "value": 1
+                        },
+                        {
+                            "tagName": "his"
+                        },
+                        {
+                            "tagName": "hisInterpolate",
+                            "value": "cov"
+                        },
+                        {
+                            "tagName": "writable"
+                        },
+                        {
+                            "tagName": "sp"
+                        }
+                    ],
+                    "commands": [
+                        {
+                            "name": "ultrasonicMode",
+                            "bitValues": "1"
+                        },
+                        {
+                            "name": "testSoundMode",
+                            "bitValues": "2"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "registerAddress": 1,
+            "registerNumber": "400001",
+            "registerType": "holdingRegister",
+            "parameterDefinitionType": "range",
+            "parameters": [
+                {
+                    "parameterId": "5f1f30ad18bcbf4f1d9a1de5",
+                    "name": "Sweep Time",
+                    "description": "Contains the amount of time in seconds the RRS should sweep its perimeter.",
+                    "startBit": 0,
+                    "endBit": 15,
+                    "displayInUiDefault": false,
+                    "logicalPointTags": [
+                        {
+                            "tagName": "rrs"
+                        },
+                        {
+                            "tagName": "sweep"
+                        },
+                        {
+                            "tagName": "time"
+                        },
+                        {
+                            "tagName": "minVal",
+                            "value": 1
+                        },
+                        {
+                            "tagName": "maxVal",
+                            "value": 10
+                        },
+                        {
+                            "tagName": "incrementVal",
+                            "value": 1
+                        },
+                        {
+                            "tagName": "unit",
+                            "value": "second"
+                        },
+                        {
+                            "tagName": "kind",
+                            "value": "Number"
+                        },
+                        {
+                            "tagName": "his"
+                        },
+                        {
+                            "tagName": "hisInterpolate",
+                            "value": "cov"
+                        }
+                    ],
+                    "userIntentPointTags": [
+                        {
+                            "tagName": "rrs"
+                        },
+                        {
+                            "tagName": "sweep"
+                        },
+                        {
+                            "tagName": "time"
+                        },
+                        {
+                            "tagName": "minVal",
+                            "value": 1
+                        },
+                        {
+                            "tagName": "maxVal",
+                            "value": 10
+                        },
+                        {
+                            "tagName": "incrementVal",
+                            "value": 1
+                        },
+                        {
+                            "tagName": "unit",
+                            "value": "second"
+                        },
+                        {
+                            "tagName": "kind",
+                            "value": "Number"
+                        },
+                        {
+                            "tagName": "his"
+                        },
+                        {
+                            "tagName": "hisInterpolate",
+                            "value": "cov"
+                        },
+                        {
+                            "tagName": "writable"
+                        },
+                        {
+                            "tagName": "sp"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "registerAddress": 2,
+            "registerNumber": "400002",
+            "registerType": "holdingRegister",
+            "parameterDefinitionType": "decimal",
+            "parameters": [
+                {
+                    "parameterId": "5f1f30ad18bcbf4f1d9a1de6",
+                    "name": "Current Frequency",
+                    "startBit": 0,
+                    "endBit": 15,
+                    "displayInUiDefault": false,
+                    "logicalPointTags": [
+                        {
+                            "tagName": "rrs"
+                        },
+                        {
+                            "tagName": "cur"
+                        },
+                        {
+                            "tagName": "frequency"
+                        },
+                        {
+                            "tagName": "unit",
+                            "value": "KHz"
+                        },
+                        {
+                            "tagName": "minVal",
+                            "value": 20
+                        },
+                        {
+                            "tagName": "maxVal",
+                            "value": 50
+                        },
+                        {
+                            "tagName": "kind",
+                            "value": "Number"
+                        },
+                        {
+                            "tagName": "his"
+                        },
+                        {
+                            "tagName": "hisInterpolate",
+                            "value": "cov"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "registerAddress": 3,
+            "registerNumber": "400003",
+            "registerType": "holdingRegister",
+            "parameters": [
+                {
+                    "parameterId": "5f1f30ad18bcbf4f1d9a1de7",
+                    "name": "Start Frequency",
+                    "startBit": 0,
+                    "endBit": 15,
+                    "logicalPointTags": [
+                        {
+                            "tagName": "rrs"
+                        },
+                        {
+                            "tagName": "frequency"
+                        },
+                        {
+                            "tagName": "start"
+                        },
+                        {
+                            "tagName": "unit",
+                            "value": "KHz"
+                        },
+                        {
+                            "tagName": "minVal",
+                            "value": 20
+                        },
+                        {
+                            "tagName": "maxVal",
+                            "value": 50
+                        },
+                        {
+                            "tagName": "kind",
+                            "value": "Number"
+                        },
+                        {
+                            "tagName": "his"
+                        },
+                        {
+                            "tagName": "hisInterpolate",
+                            "value": "cov"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "registerAddress": 4,
+            "registerNumber": "400004",
+            "registerType": "holdingRegister",
+            "parameters": [
+                {
+                    "parameterId": "5f1f30ad18bcbf4f1d9a1de8",
+                    "name": "End Frequency",
+                    "startBit": 0,
+                    "endBit": 15,
+                    "logicalPointTags": [
+                        {
+                            "tagName": "rrs"
+                        },
+                        {
+                            "tagName": "frequency"
+                        },
+                        {
+                            "tagName": "end"
+                        },
+                        {
+                            "tagName": "unit",
+                            "value": "KHz"
+                        },
+                        {
+                            "tagName": "minVal",
+                            "value": 20
+                        },
+                        {
+                            "tagName": "maxVal",
+                            "value": 50
+                        },
+                        {
+                            "tagName": "kind",
+                            "value": "Number"
+                        },
+                        {
+                            "tagName": "his"
+                        },
+                        {
+                            "tagName": "hisInterpolate",
+                            "value": "cov"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

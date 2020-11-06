@@ -84,9 +84,11 @@ import a75f.io.device.mesh.LSerial;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.watchdog.Watchdog;
+import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.registration.InstallerOptions;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.usbserial.SerialEvent;
+import a75f.io.usbserial.UsbModbusService;
 import a75f.io.usbserial.UsbService;
 
 
@@ -94,20 +96,16 @@ import a75f.io.usbserial.UsbService;
  * Created by rmatt isOn 7/19/2017.
  */
 
-public abstract class UtilityApplication extends Application
-{
+public abstract class UtilityApplication extends Application {
     public static LocalDevice localDevice = null;
     public static IpNetwork network;
     public static DhcpInfo dhcpInfo;
     public static WifiManager wifiManager;
     public static Context context = null;
-    private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver()
-    {
+    private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent)
-        {
-            switch (intent.getAction())
-            {
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
                 case UsbService.ACTION_USB_PERMISSION_GRANTED: // USB PERMISSION GRANTED
 
                     NotificationHandler.setCMConnectionStatus(true);
@@ -135,18 +133,17 @@ public abstract class UtilityApplication extends Application
         }
     };
 
-    private UsbService               usbService;
+    private UsbService usbService;
+    private UsbModbusService usbModbusService;
 
-    private DeviceUpdateJob          deviceUpdateJob;
-    private static BACnetUpdateJob   baCnetUpdateJob;
-    private static Prefs             prefs;
+    private DeviceUpdateJob deviceUpdateJob;
+    private static BACnetUpdateJob baCnetUpdateJob;
+    private static Prefs prefs;
     private static final String LOG_PREFIX = "CCU_UTILITYAPP";
     private BroadcastReceiver mNetworkReceiver;
-    private final ServiceConnection usbConnection = new ServiceConnection()
-    {
+    private final ServiceConnection usbConnection = new ServiceConnection() {
         @Override
-        public void onServiceConnected(ComponentName arg0, IBinder arg1)
-        {
+        public void onServiceConnected(ComponentName arg0, IBinder arg1) {
             try {
                 Log.d(LOG_PREFIX, "utility Application -" + arg1.isBinderAlive() + "," + arg1.toString() + "," + arg0.getClassName() + "," + arg1.getInterfaceDescriptor());
                 if (arg1.isBinderAlive()) {
@@ -155,26 +152,35 @@ public abstract class UtilityApplication extends Application
 
                     //TODO: research what cts and dsr changes are.  For now no handler will be used, because I'm uncertain if the information is relevant.
                     usbService.setHandler(null);
+
+                    //Todo : modbus USB Serial to tested with real device
+                    usbModbusService = ((UsbModbusService.UsbBinder) arg1).getService();
+                    LSerial.getInstance().setModbusUSBService(usbModbusService);
+                    usbModbusService.setHandler(null);
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+
         @Override
-        public void onServiceDisconnected(ComponentName arg0)
-        {
+        public void onServiceDisconnected(ComponentName arg0) {
             usbService = null;
+            usbModbusService = null;
         }
     };
 
 
     @Override
-    public void onCreate()
-    {
+    public void onCreate() {
         super.onCreate();
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         Globals.getInstance().setApplicationContext(this);
         AlertManager.getInstance(this).setApplicationContext(this);
+
+        //Modbus EquipmendManager
+        EquipsManager.getInstance(this).setApplicationContext(this);
+
         setUsbFilters();  // Start listening notifications from UsbService
         startService(new Intent(this, OTAUpdateHandlerService.class));  // Start OTA update event + timer handler service
         startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it
@@ -193,8 +199,7 @@ public abstract class UtilityApplication extends Application
         InitialiseBACnet();
     }
 
-    private void setUsbFilters()
-    {
+    private void setUsbFilters() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(UsbService.ACTION_USB_PERMISSION_GRANTED);
         filter.addAction(UsbService.ACTION_NO_USB);
@@ -205,16 +210,12 @@ public abstract class UtilityApplication extends Application
     }
 
 
-    private void startService(Class<?> service, ServiceConnection serviceConnection, Bundle extras)
-    {
-        if (!UsbService.SERVICE_CONNECTED)
-        {
+    private void startService(Class<?> service, ServiceConnection serviceConnection, Bundle extras) {
+        if (!UsbService.SERVICE_CONNECTED) {
             Intent startService = new Intent(this, service);
-            if (extras != null && !extras.isEmpty())
-            {
+            if (extras != null && !extras.isEmpty()) {
                 Set<String> keys = extras.keySet();
-                for (String key : keys)
-                {
+                for (String key : keys) {
                     String extra = extras.getString(key);
                     startService.putExtra(key, extra);
                 }
@@ -227,8 +228,7 @@ public abstract class UtilityApplication extends Application
 
 
     @Override
-    public void onTerminate()
-    {
+    public void onTerminate() {
         EventBus.getDefault().unregister(this);
         unregisterReceiver(mUsbReceiver);
         unbindService(usbConnection);
@@ -238,8 +238,7 @@ public abstract class UtilityApplication extends Application
 
     // Called in a separate thread
     @Subscribe(threadMode = ThreadMode.ASYNC)
-    public void onSerialEvent(SerialEvent event)
-    {
+    public void onSerialEvent(SerialEvent event) {
         LSerial.handleSerialEvent(this, event);
     }
 
@@ -249,36 +248,37 @@ public abstract class UtilityApplication extends Application
         }
 
         public void iAmReceived(RemoteDevice d) {
-            Log.i(LOG_PREFIX, "DiscoveryTest Whois Received from "+d.getName()+" Ip:"+d.getAddress());
+            Log.i(LOG_PREFIX, "DiscoveryTest Whois Received from " + d.getName() + " Ip:" + d.getAddress());
         }
+
         public void requestReceived(final Address from, final Service service) {
 
-            Log.i(LOG_PREFIX, "DiscoveryTest Service Request Recieved "+from.getMacAddress()+" Choice ID:"+service.getChoiceId()+" Service:"+service.toString()+" Service Data:"+service.getNetworkPriority());
-            if(((int) service.getChoiceId()==WhoIsRequest.TYPE_ID)){
-                Log.i(LOG_PREFIX,"WhoIS Service from :"+from.getNetworkNumber());
-                localDevice.send(from,new IAmRequest(new ObjectIdentifier(ObjectType.device,localDevice.getInstanceNumber()), localDevice.get(PropertyIdentifier.maxApduLengthAccepted), Segmentation.noSegmentation,localDevice.get(PropertyIdentifier.vendorIdentifier)));
+            Log.i(LOG_PREFIX, "DiscoveryTest Service Request Recieved " + from.getMacAddress() + " Choice ID:" + service.getChoiceId() + " Service:" + service.toString() + " Service Data:" + service.getNetworkPriority());
+            if (((int) service.getChoiceId() == WhoIsRequest.TYPE_ID)) {
+                Log.i(LOG_PREFIX, "WhoIS Service from :" + from.getNetworkNumber());
+                localDevice.send(from, new IAmRequest(new ObjectIdentifier(ObjectType.device, localDevice.getInstanceNumber()), localDevice.get(PropertyIdentifier.maxApduLengthAccepted), Segmentation.noSegmentation, localDevice.get(PropertyIdentifier.vendorIdentifier)));
             }
-            if(((int)service.getChoiceId()== WritePropertyRequest.TYPE_ID)){
-                WritePropertyRequest writePropertyRequest = (WritePropertyRequest)service;
-                if(writePropertyRequest.getPropertyIdentifier().equals(PropertyIdentifier.utcOffset)){
-                    Log.i(LOG_PREFIX,"UTC Value:"+writePropertyRequest.getPropertyValue());
+            if (((int) service.getChoiceId() == WritePropertyRequest.TYPE_ID)) {
+                WritePropertyRequest writePropertyRequest = (WritePropertyRequest) service;
+                if (writePropertyRequest.getPropertyIdentifier().equals(PropertyIdentifier.utcOffset)) {
+                    Log.i(LOG_PREFIX, "UTC Value:" + writePropertyRequest.getPropertyValue());
                     TimeZone timeZone = checkTimeZone(writePropertyRequest.getPropertyValue().toString());
-                    if(timeZone == null){
-                        Log.i(LOG_PREFIX,"Invalid Time Zone UTC");
-                    }else {
-                        Log.i(LOG_PREFIX,"Valid Time Zone:"+timeZone);
+                    if (timeZone == null) {
+                        Log.i(LOG_PREFIX, "Invalid Time Zone UTC");
+                    } else {
+                        Log.i(LOG_PREFIX, "Valid Time Zone:" + timeZone);
                     }
                 }
             }
-            if(((int)service.getChoiceId() == ReinitializeDeviceRequest.TYPE_ID)){
+            if (((int) service.getChoiceId() == ReinitializeDeviceRequest.TYPE_ID)) {
                 try {
-                    Log.i(LOG_PREFIX,"ReInitialze Device Service:"+service);
-                    ReinitializeDeviceRequest reinitializeDeviceRequest = (ReinitializeDeviceRequest)service;
-                    ReinitializeDeviceRequest.ReinitializedStateOfDevice reinitializedStateOfDevice =  reinitializeDeviceRequest.getReinitializedStateOfDevice();
+                    Log.i(LOG_PREFIX, "ReInitialze Device Service:" + service);
+                    ReinitializeDeviceRequest reinitializeDeviceRequest = (ReinitializeDeviceRequest) service;
+                    ReinitializeDeviceRequest.ReinitializedStateOfDevice reinitializedStateOfDevice = reinitializeDeviceRequest.getReinitializedStateOfDevice();
                     String devicePassword = reinitializeDeviceRequest.getPasswordRecieved();
-                    Log.i(LOG_PREFIX,"ReInitialze Device Service State:"+reinitializedStateOfDevice+" Password:"+devicePassword);
+                    Log.i(LOG_PREFIX, "ReInitialze Device Service State:" + reinitializedStateOfDevice + " Password:" + devicePassword);
                     if (localDevice.isInitialized()) {
-                        Log.i(LOG_PREFIX,"ReInitialze Device Service State isIntialized:"+localDevice.isInitialized());
+                        Log.i(LOG_PREFIX, "ReInitialze Device Service State isIntialized:" + localDevice.isInitialized());
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -287,38 +287,40 @@ public abstract class UtilityApplication extends Application
             }
 
         }
+
         public void propertyWritten(final Address from, final BACnetObject obj, final PropertyValue pv) {
             // Override as required
             try {
-                Log.i(LOG_PREFIX, "Object Type:"+obj.getObjectName()+" "+obj.readProperty(PropertyIdentifier.objectType)+" PID:"+pv.getPropertyIdentifier().toString());
-                if(obj.readProperty(PropertyIdentifier.objectType) == ObjectType.schedule){
-                    if(pv.getPropertyIdentifier().equals(PropertyIdentifier.weeklySchedule)){
-                        BACnetUtils.updateBacnetChanges(from, obj, pv,prefs.getBoolean(context.getString(R.string.USE_SAME_TEMP_ALL_DAYS)),true);
+                Log.i(LOG_PREFIX, "Object Type:" + obj.getObjectName() + " " + obj.readProperty(PropertyIdentifier.objectType) + " PID:" + pv.getPropertyIdentifier().toString());
+                if (obj.readProperty(PropertyIdentifier.objectType) == ObjectType.schedule) {
+                    if (pv.getPropertyIdentifier().equals(PropertyIdentifier.weeklySchedule)) {
+                        BACnetUtils.updateBacnetChanges(from, obj, pv, prefs.getBoolean(context.getString(R.string.USE_SAME_TEMP_ALL_DAYS)), true);
                     }
-                    if(pv.getPropertyIdentifier().equals(PropertyIdentifier.exceptionSchedule)){
-                        Log.i(LOG_PREFIX,"Schedule Object Value:"+obj.toString()+" Effective Period:"+pv);
+                    if (pv.getPropertyIdentifier().equals(PropertyIdentifier.exceptionSchedule)) {
+                        Log.i(LOG_PREFIX, "Schedule Object Value:" + obj.toString() + " Effective Period:" + pv);
                         BACnetScheduler.addNewVacations(pv);
                     }
-                }if(obj.readProperty(PropertyIdentifier.objectType) == ObjectType.calendar){
-                    if(pv.getPropertyIdentifier().equals(PropertyIdentifier.dateList)){
-                        Log.i(LOG_PREFIX,"Calendar Object Value:"+obj.toString()+" Value:"+pv);
-                        BACnetUtils.updateBacnetChanges(from, obj, pv,prefs.getBoolean(context.getString(R.string.USE_SAME_TEMP_ALL_DAYS)),false);
+                }
+                if (obj.readProperty(PropertyIdentifier.objectType) == ObjectType.calendar) {
+                    if (pv.getPropertyIdentifier().equals(PropertyIdentifier.dateList)) {
+                        Log.i(LOG_PREFIX, "Calendar Object Value:" + obj.toString() + " Value:" + pv);
+                        BACnetUtils.updateBacnetChanges(from, obj, pv, prefs.getBoolean(context.getString(R.string.USE_SAME_TEMP_ALL_DAYS)), false);
                     }
                 }
             } catch (BACnetServiceException e) {
                 e.printStackTrace();
             }
-            BACnetUtils.updateBacnetChanges(from, obj, pv,prefs.getBoolean(context.getString(R.string.USE_SAME_TEMP_ALL_DAYS)),false);
+            BACnetUtils.updateBacnetChanges(from, obj, pv, prefs.getBoolean(context.getString(R.string.USE_SAME_TEMP_ALL_DAYS)), false);
         }
 
         @Override
         public void synchronizeTime(final Address from, final DateTime dateTime, final boolean utc) {
-            Log.i(LOG_PREFIX, "Address "+from.getDescription()+" "+from.getMacAddress()+" DateTime:"+dateTime.toString()+ " UTC:"+utc+" Support Sync:"+localDevice.getServicesSupported().isTimeSynchronization()+" SyncDate:"+BACnetUtils.convertDateTime(dateTime));
+            Log.i(LOG_PREFIX, "Address " + from.getDescription() + " " + from.getMacAddress() + " DateTime:" + dateTime.toString() + " UTC:" + utc + " Support Sync:" + localDevice.getServicesSupported().isTimeSynchronization() + " SyncDate:" + BACnetUtils.convertDateTime(dateTime));
             synchronized (dateTime) {
-                if(utc){
+                if (utc) {
                     String convertedTime = BACnetUtils.convertUTCtime(dateTime, BACnetUtils.getUtcOffset());
                     setTime(convertedTime);
-                }else {
+                } else {
                     setTime(BACnetUtils.convertDateTime(dateTime));
                     dateTime.notify();
                 }
@@ -336,12 +338,13 @@ public abstract class UtilityApplication extends Application
 
         @Override
         public void eventNotificationReceived(UnsignedInteger processIdentifier, ObjectIdentifier initiatingDeviceIdentifier, ObjectIdentifier eventObjectIdentifier, TimeStamp timeStamp, UnsignedInteger notificationClass, UnsignedInteger priority, EventType eventType, CharacterString messageText, NotifyType notifyType, Boolean ackRequired, EventState fromState, EventState toState, NotificationParameters eventValues) {
-            Log.i(LOG_PREFIX, "processIdentifier:"+processIdentifier+" initiatingDeviceIdentifier:"+initiatingDeviceIdentifier+" eventObjectIdentifier:"+eventObjectIdentifier+" timeStamp:"+timeStamp+" notificationClass:"+notificationClass+" priority:"+priority+" eventType:"+eventType+" messageText:"+messageText+" notifyType:"+notifyType+" ackRequired:"+ackRequired+" fromState:"+fromState+" toState:"+toState+" eventValues:"+eventValues);
+            Log.i(LOG_PREFIX, "processIdentifier:" + processIdentifier + " initiatingDeviceIdentifier:" + initiatingDeviceIdentifier + " eventObjectIdentifier:" + eventObjectIdentifier + " timeStamp:" + timeStamp + " notificationClass:" + notificationClass + " priority:" + priority + " eventType:" + eventType + " messageText:" + messageText + " notifyType:" + notifyType + " ackRequired:" + ackRequired + " fromState:" + fromState + " toState:" + toState + " eventValues:" + eventValues);
             super.eventNotificationReceived(processIdentifier, initiatingDeviceIdentifier, eventObjectIdentifier, timeStamp, notificationClass, priority, eventType, messageText, notifyType, ackRequired, fromState, toState, eventValues);
         }
     }
+
     public static String ShellExecuter(String command) {
-        Log.i(LOG_PREFIX,"Shell Command:"+command);
+        Log.i(LOG_PREFIX, "Shell Command:" + command);
         StringBuffer output = new StringBuffer();
         Process p;
         try {
@@ -350,7 +353,7 @@ public abstract class UtilityApplication extends Application
             BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
             String line = "";
-            while ((line = reader.readLine())!= null) {
+            while ((line = reader.readLine()) != null) {
                 output.append(line + "\n");
             }
 
@@ -361,13 +364,13 @@ public abstract class UtilityApplication extends Application
         return response;
     }
 
-    public static void rootCommand(String command){
+    public static void rootCommand(String command) {
         Process su = null;
         try {
             su = Runtime.getRuntime().exec("su");
             DataOutputStream outputStream = new DataOutputStream(su.getOutputStream());
-            outputStream.writeBytes(command+"\n");
-            Log.i(LOG_PREFIX,"Root Command:"+command);
+            outputStream.writeBytes(command + "\n");
+            Log.i(LOG_PREFIX, "Root Command:" + command);
             outputStream.flush();
             outputStream.writeBytes("exit\n");
             outputStream.flush();
@@ -379,6 +382,7 @@ public abstract class UtilityApplication extends Application
         }
 
     }
+
     public static String ReadIp(String command) {
 
         StringBuffer output = new StringBuffer();
@@ -389,7 +393,7 @@ public abstract class UtilityApplication extends Application
             p.waitFor();
             BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
             String line = "";
-            while ((line = reader.readLine())!= null) {
+            while ((line = reader.readLine()) != null) {
                 ipLines.add(line);
             }
         } catch (Exception e) {
@@ -399,24 +403,24 @@ public abstract class UtilityApplication extends Application
         return response;
     }
 
-    public static boolean CheckEthernet(){
+    public static boolean CheckEthernet() {
         boolean isEthernetConnected = false;
         String checkEthernetConnected = ShellExecuter("cat /sys/class/net/eth0/operstate");
-        if(checkEthernetConnected.contains("up")) {
+        if (checkEthernetConnected.contains("up")) {
             isEthernetConnected = true;
-        }else if(checkEthernetConnected.contains("down")) {
+        } else if (checkEthernetConnected.contains("down")) {
             isEthernetConnected = false;
         }
         return isEthernetConnected;
     }
 
-    public static String getIPConfig(){
+    public static String getIPConfig() {
         //Get Network Configuration of Ethernet and format for usage
         try {
             String networkConfig = ReadIp("ifconfig eth0");
-            networkConfig = networkConfig.replaceAll("\\s",""); // Remove Space
-            networkConfig = networkConfig.replaceAll("Bcast","");
-            networkConfig = networkConfig.replaceAll("Mask","");
+            networkConfig = networkConfig.replaceAll("\\s", ""); // Remove Space
+            networkConfig = networkConfig.replaceAll("Bcast", "");
+            networkConfig = networkConfig.replaceAll("Mask", "");
             return networkConfig;
         } catch (Exception e) {
             e.printStackTrace();
@@ -424,13 +428,13 @@ public abstract class UtilityApplication extends Application
         }
     }
 
-    public static String getWiFiConfig(){
+    public static String getWiFiConfig() {
         //Get Network Configuration of Wifi and format for usage
         try {
             String networkConfig = ReadIp("ifconfig wlan0");
-            networkConfig = networkConfig.replaceAll("\\s",""); // Remove Space
-            networkConfig = networkConfig.replaceAll("Bcast","");
-            networkConfig = networkConfig.replaceAll("Mask","");
+            networkConfig = networkConfig.replaceAll("\\s", ""); // Remove Space
+            networkConfig = networkConfig.replaceAll("Bcast", "");
+            networkConfig = networkConfig.replaceAll("Mask", "");
             return networkConfig;
         } catch (Exception e) {
             e.printStackTrace();
@@ -438,7 +442,7 @@ public abstract class UtilityApplication extends Application
         }
     }
 
-    public static LocalDevice enableBACnet(String networkConfig){
+    public static LocalDevice enableBACnet(String networkConfig) {
         try {
             String[] ethConfig = networkConfig.split(":");
 
@@ -469,7 +473,7 @@ public abstract class UtilityApplication extends Application
             localDevice.getEventHandler().addListener(new Listener());
             localDevice.withPassword(BACnetUtils.PASSWORD);
 
-            Log.i(LOG_PREFIX, "Device Number:" + localDevice.getInstanceNumber() + " Device Name:" + localDevice.getDeviceObject().getObjectName()+" IP:"+localDevice.getNetwork().getAllLocalAddresses()[0]+" IP2:"+localDevice.getNetwork().getAllLocalAddresses()[1]+" IP3:"+localDevice.getNetwork().getAllLocalAddresses()[2]);
+            Log.i(LOG_PREFIX, "Device Number:" + localDevice.getInstanceNumber() + " Device Name:" + localDevice.getDeviceObject().getObjectName() + " IP:" + localDevice.getNetwork().getAllLocalAddresses()[0] + " IP2:" + localDevice.getNetwork().getAllLocalAddresses()[1] + " IP3:" + localDevice.getNetwork().getAllLocalAddresses()[2]);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -477,7 +481,7 @@ public abstract class UtilityApplication extends Application
         return localDevice;
     }
 
-    public static LocalDevice enableBACnetWifi(){
+    public static LocalDevice enableBACnetWifi() {
         try {
             dhcpInfo = wifiManager.getDhcpInfo();
             String subNetmask = Formatter.formatIpAddress(dhcpInfo.gateway);
@@ -513,94 +517,97 @@ public abstract class UtilityApplication extends Application
         return localDevice;
     }
 
-    public void sendWhoIs(final LocalDevice localDevice){
-            if(localDevice!= null) {
-                final Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
+    public void sendWhoIs(final LocalDevice localDevice) {
+        if (localDevice != null) {
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
                         localDevice.initialize();
                         localDevice.sendLocalBroadcast(new WhoIsRequest());
-                        localDevice.sendLocalBroadcast(new IAmRequest(new ObjectIdentifier(ObjectType.device,localDevice.getInstanceNumber()), localDevice.get(PropertyIdentifier.maxApduLengthAccepted),
-                                Segmentation.noSegmentation,localDevice.get(PropertyIdentifier.vendorIdentifier)));
+                        localDevice.sendLocalBroadcast(new IAmRequest(new ObjectIdentifier(ObjectType.device, localDevice.getInstanceNumber()), localDevice.get(PropertyIdentifier.maxApduLengthAccepted),
+                                Segmentation.noSegmentation, localDevice.get(PropertyIdentifier.vendorIdentifier)));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
-                    }catch (Exception e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 
-                    }
-                }, 1000);
-            }
+                }
+            }, 1000);
+        }
     }
 
-    public static void setNetwork(String ipAddress, String broadcast, String subNet, boolean isEthernet){
+    public static void setNetwork(String ipAddress, String broadcast, String subNet, boolean isEthernet) {
         try {
             //Shell Commands to setup network manually
             String lanType = "";
-            if(isEthernet){
-                lanType="eth0";
-            }else{
-                lanType="wlan0";
+            if (isEthernet) {
+                lanType = "eth0";
+            } else {
+                lanType = "wlan0";
             }
-            rootCommand("ip addr add "+ipAddress+" broadcast " +broadcast+" dev "+lanType);
-            rootCommand("ifconfig "+lanType+" "+ipAddress+" netmask " +subNet+" up ");
+            rootCommand("ip addr add " + ipAddress + " broadcast " + broadcast + " dev " + lanType);
+            rootCommand("ifconfig " + lanType + " " + ipAddress + " netmask " + subNet + " up ");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void setLocalDevice(LocalDevice localDev, boolean bacnetMode){
+    public void setLocalDevice(LocalDevice localDev, boolean bacnetMode) {
         localDevice = localDev;
         baCnetUpdateJob = new BACnetUpdateJob(localDevice);
         setBacnetObject(baCnetUpdateJob);
         baCnetUpdateJob.scheduleJob("BACnetUpdateJob", 60,
                 15, TimeUnit.SECONDS);
         Watchdog.getInstance().addMonitor(baCnetUpdateJob);
-        prefs.setBoolean("UseBACnet",true);
-        prefs.setBoolean("UseBACnetAuto",bacnetMode);
+        prefs.setBoolean("UseBACnet", true);
+        prefs.setBoolean("UseBACnetAuto", bacnetMode);
     }
 
-    public LocalDevice getLocalDevice(){
+    public LocalDevice getLocalDevice() {
         return baCnetUpdateJob.getBacnetDevice();
     }
 
-    public boolean isBACnetEnabled(){
+    public boolean isBACnetEnabled() {
         return prefs.getBoolean("UseBACnet");
     }
-    public boolean isAutoMode(){
+
+    public boolean isAutoMode() {
         return prefs.getBoolean("UseBACnetAuto");
     }
 
-    public void setBacnetObject(BACnetUpdateJob bacnetObject){
+    public void setBacnetObject(BACnetUpdateJob bacnetObject) {
         this.baCnetUpdateJob = bacnetObject;
     }
-    public BACnetUpdateJob getBacnetObject(){
+
+    public BACnetUpdateJob getBacnetObject() {
         return baCnetUpdateJob;
     }
-    public boolean terminateBACnet(){
-        prefs.setBoolean("UseBACnet",false);
+
+    public boolean terminateBACnet() {
+        prefs.setBoolean("UseBACnet", false);
         return getBacnetObject().terminateBACnet();
     }
 
-    public static void setTime(String convertedTime){
+    public static void setTime(String convertedTime) {
         rootCommand("date " + convertedTime);
         rootCommand("am broadcast -a android.intent.action.TIME_SET");
         String currentDate = ShellExecuter("date");
-        Log.i(LOG_PREFIX, "Time:" + localDevice.get(PropertyIdentifier.localTime).toString() +" Date:" + currentDate);
+        Log.i(LOG_PREFIX, "Time:" + localDevice.get(PropertyIdentifier.localTime).toString() + " Date:" + currentDate);
     }
 
-    public static TimeZone checkTimeZone(String timezoneSet){
+    public static TimeZone checkTimeZone(String timezoneSet) {
         TimeZone timeZone = null;
-        int inSeconds = (int)TimeUnit.MINUTES.toSeconds(Integer.parseInt(timezoneSet));
+        int inSeconds = (int) TimeUnit.MINUTES.toSeconds(Integer.parseInt(timezoneSet));
         ZoneOffset zoneOffSet = org.threeten.bp.ZoneOffset.ofTotalSeconds(inSeconds);
         String[] ids = TimeZone.getAvailableIDs();
         for (String id : ids) {
-            Log.i(LOG_PREFIX, "Offset :"+zoneOffSet.toString()+" Timezone:"+displayTimeZone(TimeZone.getTimeZone(id)));
-            if(displayTimeZone(TimeZone.getTimeZone(id)).contains(zoneOffSet.toString())){
+            Log.i(LOG_PREFIX, "Offset :" + zoneOffSet.toString() + " Timezone:" + displayTimeZone(TimeZone.getTimeZone(id)));
+            if (displayTimeZone(TimeZone.getTimeZone(id)).contains(zoneOffSet.toString())) {
                 timeZone = TimeZone.getTimeZone(id);
-                Log.i(LOG_PREFIX, "timeZone :"+timeZone.getDisplayName());
+                Log.i(LOG_PREFIX, "timeZone :" + timeZone.getDisplayName());
             }
         }
         return timeZone;
@@ -622,7 +629,7 @@ public abstract class UtilityApplication extends Application
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public void setWifiasDefault(){
+    public void setWifiasDefault() {
         final ConnectivityManager connMgr = (ConnectivityManager) Globals.getInstance().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkRequest.Builder request = new NetworkRequest.Builder();
         request.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
@@ -632,16 +639,17 @@ public abstract class UtilityApplication extends Application
             @Override
             public void onAvailable(Network network) {
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                    Log.d(LOG_PREFIX, "Current Network:"+ConnectivityManager.getProcessDefaultNetwork());
+                    Log.d(LOG_PREFIX, "Current Network:" + ConnectivityManager.getProcessDefaultNetwork());
                     ConnectivityManager.setProcessDefaultNetwork(network);
                 } else {
-                    Log.d(LOG_PREFIX, "Current Network:"+connMgr.getBoundNetworkForProcess());
+                    Log.d(LOG_PREFIX, "Current Network:" + connMgr.getBoundNetworkForProcess());
                     connMgr.bindProcessToNetwork(network);
                 }
-                Log.d(LOG_PREFIX, "Network Changed:"+network);
+                Log.d(LOG_PREFIX, "Network Changed:" + network);
             }
         });
     }
+
     public boolean checkNetworkConnected() {
         if (!prefs.getBoolean("BACnetLAN")) {
             ConnectivityManager connManager = (ConnectivityManager) Globals.getInstance().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -655,10 +663,10 @@ public abstract class UtilityApplication extends Application
     public class NetworkChangeReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(isBACnetEnabled() && checkNetworkConnected()){
-                if(localDevice == null)
+            if (isBACnetEnabled() && checkNetworkConnected()) {
+                if (localDevice == null)
                     InitialiseBACnet();
-                if(localDevice!= null && localDevice.isInitialized()) {
+                if (localDevice != null && localDevice.isInitialized()) {
                     localDevice.sendLocalBroadcast(new IAmRequest(new ObjectIdentifier(ObjectType.device, localDevice.getInstanceNumber()),
                             localDevice.get(PropertyIdentifier.maxApduLengthAccepted),
                             Segmentation.noSegmentation, localDevice.get(PropertyIdentifier.vendorIdentifier)));

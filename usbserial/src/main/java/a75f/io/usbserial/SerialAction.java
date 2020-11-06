@@ -6,5 +6,6 @@ package a75f.io.usbserial;
 
 public enum SerialAction
 {
-    MESSAGE_FROM_SERIAL_PORT
+    MESSAGE_FROM_SERIAL_PORT,
+    MESSAGE_FROM_SERIAL_MODBUS
 }

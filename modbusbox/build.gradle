@@ -1,0 +1,93 @@
+apply plugin: 'com.android.library'
+
+android {
+    def Properties properties = new Properties()
+    if (project.rootProject.file("local.properties").exists()) {
+        properties.load(project.rootProject.file("local.properties").newDataInputStream())
+    }
+
+    compileSdkVersion 28
+
+    defaultConfig {
+        minSdkVersion 24
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'com/fasterxml/jackson/core/json/VERSION.txt'
+        exclude 'com/fasterxml/jackson/core/Base64Variant'
+        exclude 'com/google/api/client/http/AbstractHttpContent.class'
+
+    }
+
+    buildTypes {
+        local {
+            minifyEnabled false
+            buildConfigField "String", 'ALERTS_API_BASE', properties.getProperty("alerts.api.base", "")
+            buildConfigField "String", 'ALERTS_API_KEY', properties.getProperty("alerts.api.key", "")
+        }
+        dev {
+            minifyEnabled false
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts-75f-service-dev.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_KEY', '\"ccu-45fca166-29d8-4d94-a758-eb187fcbd819\"'
+        }
+        prod {
+            minifyEnabled false
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts-75f-service.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_KEY', '\"ccu-43a7691a-554d-4a71-844f-1a08b7afc12e\"'
+        }
+        qa {
+            minifyEnabled false
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts-75f-service-qa.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_KEY', '\"ccu-6ce0475b-1937-4345-b9b4-d1d6b871f96a\"'
+        }
+        staging {
+            minifyEnabled false
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts-75f-service-staging.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_KEY', '\"ccu-445de537-c8a3-4d8a-bac4-528fa193562a\"'
+        }
+    }
+
+    android.variantFilter { variant ->
+        if(variant.buildType.name.endsWith('release') || variant.buildType.name.endsWith('debug')) {
+            variant.setIgnore(true);
+        }
+    }
+
+    sourceSets {
+        main {
+            assets.srcDirs = ['src/main/assets','src/androidTest/assets']
+            java {
+                srcDirs = ['src/main/java', 'build/generated/source']
+            }
+        }
+    }
+
+}
+
+dependencies {
+
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+
+    implementation 'com.udojava:EvalEx:2.0'
+
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.8.6'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.8.6'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.8.6'
+    implementation 'org.apache.commons:commons-lang3:3.6'
+
+    implementation project(':haystack')
+    implementation 'info.guardianproject.netcipher:netcipher:1.2'
+}

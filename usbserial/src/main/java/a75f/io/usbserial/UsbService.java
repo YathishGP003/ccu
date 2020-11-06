@@ -74,7 +74,7 @@ public class UsbService extends Service
 	SerialState curState = SerialState.PARSE_INIT;
 	int         nCRC     = 0;
 	int nCurIndex;
-    //NOTE: reduced buffer size to 256
+	//NOTE: reduced buffer size to 256
 	byte[] inDataBuffer = new byte[256];
 	int    nDataLength  = 0;
 	private IBinder binder = new UsbBinder();
@@ -144,8 +144,8 @@ public class UsbService extends Service
 	private       UsbSerialInterface.UsbReadCallback mCallback   =
 			new UsbSerialInterface.UsbReadCallback()
 			{
-        @Override
-        public void onReceivedData(byte[] data, int mLength) {
+				@Override
+				public void onReceivedData(byte[] data, int mLength) {
 					if (data.length > 0)
 					{
 						int nMsg;
@@ -153,8 +153,8 @@ public class UsbService extends Service
 							nMsg = (data[0] & 0xff);
 						} catch (ArrayIndexOutOfBoundsException e) {
 							Log.d("SERIAL_DEBUG",
-										"Bad message type received: " + String.valueOf(data[0] & 0xff) +
-												e.getMessage());
+									"Bad message type received: " + String.valueOf(data[0] & 0xff) +
+											e.getMessage());
 							return;
 						}
 						if (data.length < 3) {
@@ -589,12 +589,12 @@ public class UsbService extends Service
 		this.mHandler = mHandler;
 	}
 
-    public boolean isConnected() {
-        return serialPortConnected;
-    }
+	public boolean isConnected() {
+		return serialPortConnected;
+	}
 
 
-    private enum SerialState
+	private enum SerialState
 	{
 		PARSE_INIT, ESC_BYTE_RCVD, SOF_BYTE_RCVD, LEN_BYTE_RCVD, ESC_BYTE_IN_DATA_RCVD, CRC_RCVD,
 		ESC_BYTE_AS_END_OF_PACKET_RCVD, BAD_PACKET, DATA_AVAILABLE
@@ -623,7 +623,7 @@ public class UsbService extends Service
 			{
 				if (serialPort.open())
 				{
-                    setDebug(false);
+					setDebug(false);
 					serialPortConnected = true;
 					serialPort.setBaudRate(BAUD_RATE);
 					serialPort.setDataBits(UsbSerialInterface.DATA_BITS_8);
@@ -642,11 +642,11 @@ public class UsbService extends Service
 					//
 					// Some Arduinos would need some sleep because firmware wait some time to know whether a new sketch is going
 					// to be uploaded or not
-                    try {
-                        sleep(2000); // sleep some. YMMV with different chips.
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+					try {
+						sleep(2000); // sleep some. YMMV with different chips.
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 					// Everything went as expected. Send an intent to MainActivity
 					Intent intent = new Intent(ACTION_USB_READY);
 					context.sendBroadcast(intent);

@@ -50,6 +50,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -58,6 +59,9 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
+import a75f.io.api.haystack.modbus.EquipmentDevice;
+import a75f.io.api.haystack.modbus.Parameter;
+import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.mesh.Pulse;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
@@ -71,10 +75,13 @@ import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.modbusbox.EquipsManager;
+import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.GridItem;
 import a75f.io.renatus.util.NonTempControl;
+import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.SeekArc;
 
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
@@ -141,6 +148,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     double currentTempSensor = 0;
     int noTempSensor = 0;
     HashMap<String, Integer> mScheduleTypeMap = new HashMap<>();
+    Prefs prefs;
+    HashMap<String, EquipmentDevice> modbusZones = new HashMap<>();
+    String MODBUS_ZONE = "MODBUS_CONFIG";
     public ZoneFragmentNew()
     {
     }
@@ -191,6 +201,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         inleft.setDuration(400);
 
         //recyclerView.setHasFixedSize(true);
+        prefs = new Prefs(getContext().getApplicationContext());
         expandableListDetail = new HashMap<>();
 
         floorList = HSUtil.getFloors();
@@ -494,73 +505,75 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     String zoneTitle = "";
                     LayoutInflater inflater = LayoutInflater.from(getContext());
 
-                     zoneTitle = roomMap.get(m).get("dis").toString();
-                     ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\""+ roomMap.get(m).get("id").toString()+"\" and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
-                     if(equips.size() > 0) {// zones has devices paired
-                         HashMap<String, ArrayList<HashMap>> zoneData = new HashMap<String, ArrayList<HashMap>>();
-                         for (HashMap zoneModel : equips) {
-                             if (zoneData.containsKey(zoneModel.get("roomRef").toString())) {
-                                 ArrayList<HashMap> exisiting = zoneData.get(zoneModel.get("roomRef").toString());
-                                 exisiting.add(zoneModel);
-                                 zoneData.put(zoneModel.get("roomRef").toString(), exisiting);
-                             } else {
-                                 ArrayList<HashMap> newData = new ArrayList<HashMap>();
-                                 newData.add(zoneModel);
-                                 zoneData.put(zoneModel.get("roomRef").toString(), newData);
-                             }
-                         }
-                         Log.i("ZonesMap", "Size:" + zoneData.size() + " Data:" + zoneData);
-                         for (ArrayList<HashMap> equipZones : zoneData.values()) {
+                    zoneTitle = roomMap.get(m).get("dis").toString();
+                    ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\""+ roomMap.get(m).get("id").toString()+"\" and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
+                    if(equips.size() > 0) {// zones has devices paired
+                        HashMap<String, ArrayList<HashMap>> zoneData = new HashMap<String, ArrayList<HashMap>>();
+                        for (HashMap zoneModel : equips) {
+                            if (zoneData.containsKey(zoneModel.get("roomRef").toString())) {
+                                ArrayList<HashMap> exisiting = zoneData.get(zoneModel.get("roomRef").toString());
+                                exisiting.add(zoneModel);
+                                zoneData.put(zoneModel.get("roomRef").toString(), exisiting);
+                            } else {
+                                ArrayList<HashMap> newData = new ArrayList<HashMap>();
+                                newData.add(zoneModel);
+                                zoneData.put(zoneModel.get("roomRef").toString(), newData);
+                            }
+                        }
+                        Log.i("ZonesMap", "Size:" + zoneData.size() + " Data:" + zoneData);
+                        for (ArrayList<HashMap> equipZones : zoneData.values()) {
 
-                             String profileType = "";
+                            String profileType = "";
 
-                             String profileVAV = "VAV";
-                             String profileDAB = "DAB";
-                             String profileSSE = "SSE";
-                             String profileSmartStat = "SMARTSTAT";
-                             String profileEM = "EMR";
-                             String profilePLC = "PLC";
-                             String profileTempMonitor = "TEMP_MONITOR";
-                             String profileTempInfluence = "TEMP_INFLUENCE";
-                             String profileDualDuct = "DUAL_DUCT";
-                             //Log.e("RoomData","ProfileType:"+profileType);
-                             boolean tempModule = false;
-                             boolean nontempModule = false;
-                             for (HashMap equipTypes : equipZones) {
-                                 profileType = equipTypes.get("profile").toString();
-                                 Log.e("RoomData", "ProfileType:" + profileType);
+                            String profileVAV = "VAV";
+                            String profileDAB = "DAB";
+                            String profileSSE = "SSE";
+                            String profileSmartStat = "SMARTSTAT";
+                            String profileEM = "EMR";
+                            String profilePLC = "PLC";
+                            String profileTempMonitor = "TEMP_MONITOR";
+                            String profileTempInfluence = "TEMP_INFLUENCE";
+                            String profileDualDuct = "DUAL_DUCT";
+                            String profileModBus = "MODBUS";
+
+                            //Log.e("RoomData","ProfileType:"+profileType);
+                            boolean tempModule = false;
+                            boolean nontempModule = false;
+                            for (HashMap equipTypes : equipZones) {
+                                profileType = equipTypes.get("profile").toString();
+                                Log.e("RoomData", "ProfileType:" + profileType);
                                  if (profileType.contains(profileVAV) ||
                                      profileType.contains(profileDAB) ||
                                      profileType.contains(profileSSE) ||
                                      profileType.contains(profileSmartStat) ||
                                      profileType.contains(profileTempInfluence) ||
                                      profileType.contains(profileDualDuct)) {
-                                     tempModule = true;
-                                     Log.e("RoomData", "Load SmartNode ProfileType:" + profileType);
-                                 }
-                                 if (profileType.contains(profileEM) || profileType.contains(profilePLC) || profileType.contains(profileTempMonitor) || profileType.contains(profileTempInfluence)) {
-                                     nontempModule = true;
-                                     Log.e("RoomData", "Load SmartStat ProfileType:" + profileType);
-                                 }
-                             }
+                                    tempModule = true;
+                                    Log.e("RoomData", "Load SmartNode ProfileType:" + profileType);
+                                }
+                                if (profileType.contains(profileEM) || profileType.contains(profilePLC) || profileType.contains(profileTempMonitor) || profileType.contains(profileTempInfluence) || profileType.contains(profileModBus)) {
+                                    nontempModule = true;
+                                    Log.e("RoomData", "Load SmartStat ProfileType:" + profileType);
+                                }
+                            }
 
-                             if (tempModule) {
-                                 Log.e("RoomData", "Load Temperature Based View");
-                                 viewTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout);
-                             }
-                             if (!tempModule && nontempModule) {
-                                 Log.e("RoomData", "Load Non Temperature Based View");
-                                 viewNonTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout);
-                                 //arcViewParent = inflater.inflate(R.layout.zones_item_smartstat, (ViewGroup) rootView, false);
-                             }
-                             i++;
-                         }
-                     }else{
-                         //No devices paired
-                         Log.e("RoomData", "Load No device paired Based View");
-                         viewNonTemperatureBasedZone(inflater, rootView, new ArrayList<HashMap>(), zoneTitle, i, tablerowLayout);
-                         i++;
-                     }
+                            if (tempModule) {
+                                Log.e("RoomData", "Load Temperature Based View");
+                                viewTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout);
+                            }
+                            if (!tempModule && nontempModule) {
+                                Log.e("RoomData", "Load Non Temperature Based View");
+                                viewNonTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout);
+                                //arcViewParent = inflater.inflate(R.layout.zones_item_smartstat, (ViewGroup) rootView, false);
+                            }
+                            i++;
+                        }
+                    }else{
+                        //No devices paired
+                        Log.e("RoomData", "Load No device paired Based View");
+                        viewNonTemperatureBasedZone(inflater, rootView, new ArrayList<HashMap>(), zoneTitle, i, tablerowLayout);
+                        i++;
+                    }
                 }
 
             }
@@ -1488,9 +1501,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 nonTempControl.setImage(R.drawable.ic_zone_em);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_em_max);
             }
+            if ((zoneEquips.get("profile").toString()).contains("MODBUS")) {
+                nonTempControl.setEquipType(2);
+                nonTempControl.setImage(R.drawable.ic_zone_modbus);
+                nonTempControl.setImageViewExpanded(R.drawable.ic_zone_modbus_mx);
+            }
         }else{
             //No devices paired zone
-
             nonTempControl.setEquipType(2);
             nonTempControl.setImage(R.drawable.ic_no_device_paired_icon);
             nonTempControl.setImageViewExpanded(R.drawable.ic_no_device_paired_expanded_icon);
@@ -1663,6 +1680,46 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                 nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());
                             } else {
                                 nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
+                            }
+                        }
+                        if (nonTempEquip.getProfile().startsWith("MODBUS")) {
+
+                            LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
+                            LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                            ll_status.setVisibility(View.GONE);
+                            ll_schedule.setVisibility(View.GONE);
+
+                            List<EquipmentDevice> modbusDevices = EquipsManager.getInstance().getAllMbEquips(nonTempEquip.getRoomRef());
+
+                            Log.i("MODBUS_UI","ZoneData:"+modbusDevices);
+
+                            for (int i = 0; i < modbusDevices.size(); i++) {
+                                List<Parameter> parameterList = new ArrayList<>();
+                                if (Objects.nonNull(modbusDevices.get(i).getRegisters())) {
+                                    for (Register registerTemp : modbusDevices.get(i).getRegisters()) {
+                                        if (registerTemp.getParameters() != null) {
+                                            for (Parameter p : registerTemp.getParameters()) {
+                                                if (p.isDisplayInUI()){
+                                                    p.setParameterDefinitionType(registerTemp.getParameterDefinitionType());
+                                                    parameterList.add(p);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                View zoneDetails = inflater.inflate(R.layout.item_modbus_detail_view, null);
+
+                                RecyclerView modbusParams = zoneDetails.findViewById(R.id.recyclerParams);
+                                TextView tvEquipmentType = zoneDetails.findViewById(R.id.tvEquipmentType);
+                                tvEquipmentType.setText(modbusDevices.get(i).getName()+ "-" +modbusDevices.get(i).getSlaveId());
+                                GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(),2);
+                                modbusParams.setLayoutManager(gridLayoutManager);
+
+                                ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getActivity(),modbusDevices.get(i).getEquipRef(),parameterList);
+                                modbusParams.setAdapter(zoneRecyclerModbusParamAdapter);
+                                modbusParams.invalidate();
+                                linearLayoutZonePoints.addView(zoneDetails);
+                                linearLayoutZonePoints.setPadding(0,0,0,20);
                             }
                         }
                     }else{

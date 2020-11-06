@@ -220,6 +220,15 @@ public class CCUHsApi
         }
     }
 
+    public void updatePoint(Point point, String id)
+    {
+        tagsDb.updatePoint(point, id);
+        if (tagsDb.idMap.get(id) != null)
+        {
+            tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+        }
+    }
+
     public void updateFloor(Floor r, String id)
     {
         tagsDb.updateFloor(r, id);

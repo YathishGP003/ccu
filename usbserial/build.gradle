@@ -47,6 +47,7 @@ android {
 }
 
 dependencies {
+    implementation project(path: ':modbus4j')
     testImplementation 'junit:junit:4.12'
     implementation 'org.greenrobot:eventbus:3.0.0'
 

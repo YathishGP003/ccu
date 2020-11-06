@@ -266,6 +266,16 @@ public class DabStagedRtu extends DabSystemProfile
             }
         }
     
+        //Stage down timer might delay stage-turn off. Make sure the fan is ON during that time
+        // even if the loopOp is 0
+        if (stageStatus[COOLING_1.ordinal()] > 0 || stageStatus[HEATING_1.ordinal()] > 0) {
+            int fanStatus = isStageEnabled(FAN_1) ? 1 : 0;
+            tempStatus[FAN_1.ordinal()] = fanStatus;
+            if (fanStatus != getCmdSignal("fan and stage1")) {
+                setCmdSignal("fan and stage1", fanStatus);
+            }
+        }
+    
         for (int stageIndex = FAN_1.ordinal(); stageIndex < DEHUMIDIFIER.ordinal(); stageIndex++) {
             stageStatus[stageIndex] = tempStatus[stageIndex];
             HashSet<Integer> relaySet = getRelayMappingForStage(Stage.values()[stageIndex]);

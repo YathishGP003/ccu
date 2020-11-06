@@ -250,6 +250,10 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         systemCo2LoopOp = VavSystemController.getInstance().getSystemState() == SystemController.State.OFF
                                          ? 0 :(SystemConstants.CO2_CONFIG_MAX - getSystemCO2()) * 100 / 200 ;
         setSystemLoopOp("co2", systemCo2LoopOp);
+    
+        CcuLog.d(L.TAG_CCU_SYSTEM, "systemCoolingLoopOp "+systemCoolingLoopOp+ " systemHeatingLoopOp "+ systemHeatingLoopOp
+                                   + "systemFanLoopOp "+systemFanLoopOp+" systemCo2LoopOp "+systemCo2LoopOp);
+        
         if (getConfigVal("analog4 and output and enabled") > 0)
         {
             analogMin = getConfigVal("analog4 and co2 and min");

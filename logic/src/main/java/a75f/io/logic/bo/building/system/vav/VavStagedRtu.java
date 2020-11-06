@@ -254,6 +254,9 @@ public class VavStagedRtu extends VavSystemProfile
         setSystemLoopOp("heating", systemHeatingLoopOp);
         setSystemLoopOp("fan", systemFanLoopOp);
         setSystemLoopOp("co2", systemCo2LoopOp);
+    
+        CcuLog.d(L.TAG_CCU_SYSTEM, "systemCoolingLoopOp "+systemCoolingLoopOp+
+                                   " systemHeatingLoopOp "+ systemHeatingLoopOp+" " + "systemFanLoopOp "+systemFanLoopOp);
         
         updateStagesSelected();
     
@@ -339,6 +342,16 @@ public class VavStagedRtu extends VavSystemProfile
                         CcuLog.d(L.TAG_CCU_SYSTEM, "Stage Up "+stage);
                     }
                 }
+            }
+        }
+    
+        //Stage down timer might delay stage-turn off. Make sure the fan is ON during that time
+        // even if the loopOp is 0
+        if (stageStatus[COOLING_1.ordinal()] > 0 || stageStatus[HEATING_1.ordinal()] > 0) {
+            int fanStatus = isStageEnabled(FAN_1) ? 1 : 0;
+            tempStatus[FAN_1.ordinal()] = fanStatus;
+            if (fanStatus != getCmdSignal("fan and stage1")) {
+                setCmdSignal("fan and stage1", fanStatus);
             }
         }
         

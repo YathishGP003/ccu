@@ -59,6 +59,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.renatus.R;
 import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
+import a75f.io.usbserial.UsbModbusService;
 import a75f.io.usbserial.UsbService;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -143,7 +144,7 @@ public class SerialMessageFragment extends Fragment {
     public void onResume() {
         super.onResume();
         setFilters();  // Start listening notifications from UsbService
-        startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it
+        startService(UsbModbusService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it
     }
 
     @Override
@@ -249,9 +250,10 @@ public class SerialMessageFragment extends Fragment {
                     rtuMessageRequest = new RtuMessageRequest(request);
                     usbService.modbusWrite(rtuMessageRequest.getMessageData());
                     updateSendMsg(rtuMessageRequest.getMessageData());
-                    CcuLog.i("EnggUI", "SerialMessage: modbus readHoldingRegister " + rtuMessageRequest.getMessageData());
+                    CcuLog.i("Modbus",
+                             "SerialMessage: modbus readHoldingRegister " + rtuMessageRequest.getMessageData().toString());
                     //ReadHoldingRegistersResponse response = (ReadHoldingRegistersResponse) master.send(request);
-                    Log.d("SERIAL", "send msg prep=" + msgClass.getName() + "," + request.toString());
+                    Log.d("Modbus", "send msg prep=" + msgClass.getName() + "," + request.toString());
                     break;
                 case 2:
                     request = new ReadCoilsRequest(2, 0, 1);
@@ -445,12 +447,12 @@ public class SerialMessageFragment extends Fragment {
             }
         }
     };
-    private UsbService usbService;
+    private UsbModbusService usbService;
 
     private final ServiceConnection usbConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName arg0, IBinder arg1) {
-            usbService = ((UsbService.UsbBinder) arg1).getService();
+            usbService = ((UsbModbusService.UsbBinder) arg1).getService();
             usbService.setHandler(null);
         }
 

@@ -40,6 +40,7 @@
         <service android:name=".OTAUpdateHandlerService"/>
         <service android:name=".OTAUpdateService"/>
         <service android:name="a75f.io.usbserial.UsbService" android:enabled="true"></service>
+        <service android:name="a75f.io.usbserial.UsbModbusService" android:enabled="true"></service>
         <!-- TODO we don't want this and shouldn't need it, we should monitor the USB connection, not kick the application whenever it restarts -->
 
         <activity

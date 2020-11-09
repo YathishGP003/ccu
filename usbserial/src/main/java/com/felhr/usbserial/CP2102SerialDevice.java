@@ -105,15 +105,14 @@ public class CP2102SerialDevice extends UsbSerialDevice
             requestIN.initialize(connection, inEndpoint);
 
             // Restart the working thread if it has been killed before and  get and claim interface
-            restartMbWorkingThread();
-            restartMbWriteThread();
+            restartWorkingThread();
+            restartWriteThread();
 
             // Create Flow control thread but it will only be started if necessary
             createFlowControlThread();
 
             // Pass references to the threads
-            //setThreadsParams(requestIN, outEndpoint);
-            setMbThreadsParams(requestIN, outEndpoint);
+            setThreadsParams(requestIN, outEndpoint);
 
             asyncMode = true;
 

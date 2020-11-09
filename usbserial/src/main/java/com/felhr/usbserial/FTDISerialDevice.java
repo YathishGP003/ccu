@@ -125,12 +125,11 @@ public class FTDISerialDevice extends UsbSerialDevice
             requestIN.initialize(connection, inEndpoint);
 
             // Restart the working thread if it has been killed before and  get and claim interface
-            restartMbWorkingThread();
-            restartMbWriteThread();
+            restartWorkingThread();
+            restartWriteThread();
 
             // Pass references to the threads
-            //setThreadsParams(requestIN, outEndpoint);
-            setMbThreadsParams(requestIN, outEndpoint);
+            setThreadsParams(requestIN, outEndpoint);
 
             asyncMode = true;
 

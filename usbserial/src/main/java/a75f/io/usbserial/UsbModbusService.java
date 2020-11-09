@@ -36,6 +36,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class UsbModbusService extends Service {
 
+    public static final String TAG = UsbModbusService.class.getSimpleName();
     public static final byte ESC_BYTE = (byte) 0xD9;
     public static final byte SOF_BYTE = 0x00;
     public static final byte EOF_BYTE = 0x03;
@@ -65,8 +66,6 @@ public class UsbModbusService extends Service {
             "com.android.example.USB_PERMISSION";
     private static final int BAUD_RATE = 38400;
     // BaudRate. Change this value if you need
-    private static final String TAG =
-            UsbModbusService.class.getSimpleName();
     private static final boolean PARSE_DEBUG = false;
     public static boolean SERVICE_CONNECTED = false;
     SerialState curState = SerialState.PARSE_INIT;
@@ -96,10 +95,10 @@ public class UsbModbusService extends Service {
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context arg0, Intent arg1) {
-            Log.d("UsbService.java", "OnReceive == " + arg1.getAction() + "," + serialPortConnected);
-            Log.d("UsbService.java", "OnReceive == " + arg0.toString() + " arg1:" + arg1.getData());
+            Log.d(TAG, "OnReceive == " + arg1.getAction() + "," + serialPortConnected);
+            Log.d(TAG, "OnReceive == " + arg0.toString() + " arg1:" + arg1.getData());
             if (arg1.getAction().equals(ACTION_USB_PERMISSION)) {
-                Log.d("UsbService.java", "OnReceive == " + arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED));
+                Log.d(TAG, "OnReceive == " + arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED));
                 boolean granted = arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED);
                 if (granted) // User accepted our USB connection. Try to open the device as a serial port
                 {
@@ -109,7 +108,7 @@ public class UsbModbusService extends Service {
                     //new ConnectionThread().start();
                 } else // User not accepted our USB connection. Send an Intent to the Main Activity
                 {
-                    Log.d("UsbService.java", "USB PERMISSION NOT GRANTED == " + arg1.getAction());
+                    Log.d(TAG, "USB PERMISSION NOT GRANTED == " + arg1.getAction());
                     Intent intent = new Intent(ACTION_USB_PERMISSION_NOT_GRANTED);
                     arg0.sendBroadcast(intent);
                 }
@@ -147,34 +146,12 @@ public class UsbModbusService extends Service {
      *  In this particular example. byte stream is converted to String and send to UI thread to
      *  be treated there.
      */
-    private UsbSerialInterface.UsbReadCallback mCallback =
-            new UsbSerialInterface.UsbReadCallback() {
-                @Override
-                public void onReceivedData(byte[] data, int mLength) {
-                    if (data.length > 0) {
-                        int nMsg;
-                        try {
-                            nMsg = (data[0] & 0xff);
-                        } catch (ArrayIndexOutOfBoundsException e) {
-                            Log.d("SERIAL_DEBUG",
-                                    "Bad message type received: " + String.valueOf(data[0] & 0xff) +
-                                            e.getMessage());
-                            return;
-                        }
-                        if (data.length < 3) {
-                            return; //We need minimum bytes atleast 3 with msg and fsv address causing crash for WRM Pairing
-                        }
-
-                        Log.d("SERIAL_DEBUG", " message type received: " + data.length + "," + String.valueOf(data[0] & 0xff) + "," + String.valueOf(data[1] & 0xff));
-                        messageToClients(Arrays.copyOfRange(data, 0, mLength), false);
-                    }
-                }
-            };
 
     private UsbSerialInterface.UsbReadCallback modbusCallback =
             new UsbSerialInterface.UsbReadCallback() {
                 @Override
                 public void onReceivedData(byte[] data, int mLength) {
+                    Log.d(TAG," onReceivedData ");
                     if (data.length > 0) {
                         int nMsg;
                         try {
@@ -388,16 +365,16 @@ public class UsbModbusService extends Service {
     private void findModbuSerialPortDevice() {
 
         HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
-        Log.d("USB", "findMBSerialPortDevice=" + usbDevices.size());
+        Log.d(TAG, "findMBSerialPortDevice=" + usbDevices.size());
         if (!usbDevices.isEmpty()) {
             boolean keep = true;
             for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
                 device = entry.getValue();
                 int deviceVID = device.getVendorId();
                 int devicePID = device.getProductId();
-                Log.i("CCU_SERIAL", "Modbus USB Device VID: " + deviceVID);
-                Log.i("CCU_SERIAL", "Modbus USB Device PID: " + devicePID);
-                if (deviceVID == 4292) {
+                Log.i(TAG, "Modbus USB Device VID: " + deviceVID);
+                Log.i(TAG, "Modbus USB Device PID: " + devicePID);
+                if (deviceVID == 4292 || deviceVID == 1027) {
                     //if (deviceVID == 4292) {
                     boolean success = grantRootPermissionToUSBDevice(device);
                     connection = usbManager.openDevice(device);
@@ -412,6 +389,7 @@ public class UsbModbusService extends Service {
                         UsbModbusService.this.getApplicationContext().sendBroadcast(intent);
                         keep = false;
                     }
+                    Log.d(TAG, "Successfully Opened device instance "+deviceVID);
                 } else {
                     connection = null;
                     device = null;
@@ -474,6 +452,7 @@ public class UsbModbusService extends Service {
     Thread runningList = new Thread() {
         @Override
         public void run() {
+            Log.d(TAG," runningList :run ");
             super.run();
             byte[] data;
 
@@ -483,12 +462,13 @@ public class UsbModbusService extends Service {
                         Log.i(TAG, "Serial Port is not connected sleeping");
                         sleep(2000);
                         continue;
-                    } /*else {
+                    } else {
                         Log.i(TAG, "USB Serial Port is connected");
-                    }*/
+                    }
                     //TODO ignoring for now, until we complete modbus test
                     data = messageQueue.take();
-                    //Log.i("CCU_SERIAL_MB", "USB Serial Port is connected = " + data.length + "," + messageQueue.size() + "," + modbusQueue.size());
+                    Log.i(TAG, "USB Serial Port is connected = " + data.length + "," + messageQueue.size() + ","
+                                                                                                    + modbusQueue.size());
                     for (Map.Entry<UsbDevice, UsbSerialDevice> usbEntry : serialPortList.entrySet()) {
                         if (usbEntry.getKey().getDeviceId() == 0x0403 || usbEntry.getKey().getDeviceId() == 0x1027 || usbEntry.getKey().getDeviceId() == 1003) {
                             Log.i(TAG, "USB Serial Port is connected = " + data.length + "," + messageQueue.size() + "," + modbusQueue.size());
@@ -524,8 +504,10 @@ public class UsbModbusService extends Service {
                                     for (int n = 0; n < data.length; n++)
                                         dp = dp + " " + String.valueOf((int) (data[n] & 0xff));
                                     Calendar curDate = GregorianCalendar.getInstance();
-                                    Log.d("SERIAL_OUT", "[" + (data.length) + "]-[" + curDate.get(Calendar.HOUR_OF_DAY) + ":" + curDate.get(Calendar.MINUTE) + "] :" + dp);
-                                    Log.d("CCU_SERIAL_MB", "[" + (data.length) + "]-[" + curDate.get(Calendar.HOUR_OF_DAY) + ":" + curDate.get(Calendar.MINUTE) + "] :" + dp);
+                                    Log.d(TAG, "[" + (data.length) + "]-[" + curDate.get(Calendar.HOUR_OF_DAY) + ":"
+                                                                                + curDate.get(Calendar.MINUTE) + "] :" + dp);
+                                    Log.d(TAG, "[" + (data.length) + "]-[" + curDate.get(Calendar.HOUR_OF_DAY) + ":"
+                                                                                + curDate.get(Calendar.MINUTE) + "] :" + dp);
                                 }
                                 serialPort.write(Arrays.copyOfRange(buffer, 0, len + nOffset));
                                 try {
@@ -566,7 +548,7 @@ public class UsbModbusService extends Service {
                     if (serialPort != null && (modbusQueue.size() > 0)) {
                         data = modbusQueue.take();
 
-                        serialPort.writeModbus(Arrays.copyOfRange(data, 0, data.length));
+                        serialPort.write(Arrays.copyOfRange(data, 0, data.length));
                         try {
                             Thread.sleep(300);
                         } catch (InterruptedException e) {
@@ -647,9 +629,9 @@ public class UsbModbusService extends Service {
 
         public void run() {
             serialPortMB = UsbSerialDevice.createUsbSerialDevice(usbDeviceMB, usbCnnection);
+            Log.d(TAG," ModbusRunnable : run serialPortMB "+serialPortMB);
             if (serialPortMB != null) {
                 if (serialPortMB.open()) {
-
                     serialPortConnected = true;
                     serialPortMB.setBaudRate(9600);
                     serialPortMB.setDataBits(UsbSerialInterface.DATA_BITS_8);
@@ -662,7 +644,7 @@ public class UsbModbusService extends Service {
                      * UsbSerialInterface.FLOW_CONTROL_DSR_DTR only for CP2102 and FT232
                      */
                     serialPortMB.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
-                    serialPortMB.readModbus(modbusCallback);
+                    serialPortMB.read(modbusCallback);
                     serialPortMB.getCTS(ctsCallback);
                     serialPortMB.getDSR(dsrCallback);
 

@@ -397,7 +397,7 @@ public class UsbService extends Service
 	{
 		// This snippet will try to open the first encountered usb device connected, excluding usb root hubs
 		HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
-		Log.d("USB","findSerialPortDevce="+usbDevices.size());
+		Log.d(TAG,"findSerialPortDevce="+usbDevices.size());
 		if (!usbDevices.isEmpty())
 		{
 			boolean keep = true;
@@ -406,9 +406,9 @@ public class UsbService extends Service
 				device = entry.getValue();
 				int deviceVID = device.getVendorId();
 				int devicePID = device.getProductId();
-				Log.i("CCU_SERIAL", "USB Device VID: " + deviceVID);
-				Log.i("CCU_SERIAL", "USB Device PID: " + devicePID);
-				if (deviceVID == 0x0403 || deviceVID == 0x1027 || deviceVID == 1003)
+				Log.i(TAG, "USB Device VID: " + deviceVID);
+				Log.i(TAG, "USB Device PID: " + devicePID);
+				if (deviceVID == 0x0403 || deviceVID == 1003)
 				{
 					boolean success = grantRootPermissionToUSBDevice(device);
 					connection = usbManager.openDevice(device);
@@ -456,7 +456,7 @@ public class UsbService extends Service
 	{
 		IBinder b = ServiceManager.getService(Context.USB_SERVICE);
 		IUsbManager service = IUsbManager.Stub.asInterface(b);
-		Log.i("CCU_SERIAL", "Try connecting!");
+		Log.i(TAG, "Try connecting!");
 		// There is a device connected to our Android device. Try to open it as a Serial Port.
 		try
 		{

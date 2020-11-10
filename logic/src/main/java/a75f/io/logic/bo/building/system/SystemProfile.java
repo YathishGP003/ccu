@@ -163,7 +163,7 @@ public abstract class SystemProfile
 
         for (HashMap m : equips) {
             Equip q = new Equip.Builder().setHashMap(m).build();
-            if (q.getMarkers().contains("dab") || q.getMarkers().contains("vav") || q.getMarkers().contains("ti") || q.getMarkers().contains("oao") || q.getMarkers().contains("sse")) {
+            if (q.getMarkers().contains("dab") || q.getMarkers().contains("dualDuct") || q.getMarkers().contains("vav") || q.getMarkers().contains("ti") || q.getMarkers().contains("oao") || q.getMarkers().contains("sse")) {
                 q.setAhuRef(systemEquipId);
             } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid")) {
                 q.setGatewayRef(systemEquipId);

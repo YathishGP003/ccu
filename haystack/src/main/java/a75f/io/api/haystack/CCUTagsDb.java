@@ -491,6 +491,27 @@ public class CCUTagsDb extends HServer {
         tagsMap.put(id.toVal(), b.toDict());
         return id.toCode();
     }
+
+    public String updateSettingPoint(SettingPoint p, String i) {
+        HDictBuilder b = new HDictBuilder()
+                .add("id", HRef.copy(i))
+                .add("dis", p.getDisplayName())
+                .add("point", HMarker.VAL)
+                .add("setting", HMarker.VAL)
+                .add("deviceRef", p.getDeviceRef())
+                .add("siteRef", p.getSiteRef())
+                .add("val", p.getVal())
+                .add("kind", p.getKind() == null ? "Number" : p.getKind());
+
+        if (p.getUnit() != null) b.add("unit", p.getUnit());
+
+        for (String m : p.getMarkers()) {
+            b.add(m);
+        }
+        HRef id = (HRef) b.get("id");
+        tagsMap.put(id.toVal(), b.toDict());
+        return id.toCode();
+    }
     
     public String addDevice(Device d) {
         HDictBuilder b = new HDictBuilder()

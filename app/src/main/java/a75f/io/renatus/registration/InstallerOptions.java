@@ -239,7 +239,7 @@ public class InstallerOptions extends Fragment {
             for (String addBand : addressBand) {
                 String addB = String.valueOf(L.ccu().getSmartNodeAddressBand());
                 if (addBand.equals(addB)) {
-                    mAddressBandSpinner.setSelection(analogAdapter.getPosition(addBand));
+                    mAddressBandSpinner.setSelection(analogAdapter.getPosition(addBand),false);
                     break;
                 }
             }
@@ -254,6 +254,14 @@ public class InstallerOptions extends Fragment {
                 if (i > 0) {
                     addressBandSelected = mAddressBandSpinner.getSelectedItem().toString();
                     L.ccu().setSmartNodeAddressBand(Short.parseShort(addressBandSelected));
+                    if (!isFreshRegister){
+                        HashMap band = CCUHsApi.getInstance().read("point and snband");
+                        SettingPoint.Builder sp = new SettingPoint.Builder().setHashMap(band);
+                        sp.setVal(addressBandSelected);
+                        SettingPoint snBand = sp.build();
+
+                        CCUHsApi.getInstance().updateSettingPoint(snBand, snBand.getId());
+                    }
                 }
 
             }

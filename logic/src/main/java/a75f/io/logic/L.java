@@ -40,6 +40,7 @@ public class L
     public static final String TAG_CCU_SCHEDULER = "CCU_SCHEDULER";
     public static final String TAG_CCU_PUBNUB = "CCU_PUBNUB";
     public static final String TAG_CCU_WARN = "CCU_WARN";
+    public static final String TAG_CCU_MODBUS = "CCU_MODBUS";
 
     public static Context app()
     {

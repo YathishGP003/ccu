@@ -36,7 +36,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class UsbModbusService extends Service {
 
-    public static final String TAG = UsbModbusService.class.getSimpleName();
+    public static final String TAG = "CCU_MODBUS";
     public static final byte ESC_BYTE = (byte) 0xD9;
     public static final byte SOF_BYTE = 0x00;
     public static final byte EOF_BYTE = 0x03;
@@ -82,11 +82,7 @@ public class UsbModbusService extends Service {
     private UsbDeviceConnection connection;
     private UsbSerialDevice serialPort;
     private boolean serialPortConnected;
-
-    //private HashMap<String, UsbDevice> deviceList;
-    private HashMap<UsbDevice, UsbDeviceConnection> connectionList;
-    private HashMap<UsbDevice, UsbSerialDevice> serialPortList;
-
+    
     ;
     /*
      * Different notifications from OS will be received here (USB attached, detached, permission responses...)
@@ -118,26 +114,15 @@ public class UsbModbusService extends Service {
                 }
             } else if (arg1.getAction().equals(ACTION_USB_DETACHED)) {
                 // Usb device was disconnected. send an intent to the Main Activity
+    
+                // Usb device was disconnected. send an intent to the Main Activity
                 Intent intent = new Intent(ACTION_USB_DISCONNECTED);
                 arg0.sendBroadcast(intent);
-                if (serialPortConnected) {
+                if (serialPortConnected)
+                {
                     serialPort.close();
                 }
-                if (serialPortList.size() > 0) {
-                    for (Map.Entry<UsbDevice, UsbSerialDevice> usbEntry : serialPortList.entrySet()) {
-                        {
-                            if (usbEntry.getKey().getVendorId() == 0x0403 || usbEntry.getKey().getVendorId() == 0x1027 ||
-                                    usbEntry.getKey().getVendorId() == 1003 || usbEntry.getKey().getVendorId() == 4292) {
-                                if (!usbEntry.getValue().open()) {
-                                    usbEntry.getValue().close();
-                                    serialPortConnected = false;
-                                }
-
-                            }
-
-                        }
-                    }
-                }
+                serialPortConnected = false;
             }
         }
     };
@@ -168,7 +153,8 @@ public class UsbModbusService extends Service {
                             return; //We need minimum bytes atleast 3 with msg and fsv address causing crash for WRM Pairing
                         }
 
-                        Log.d("CCU_SERIAL_MB", "Modbus message type received: " + data.length + "," + String.valueOf(data[0] & 0xff) + "," + String.valueOf(data[1] & 0xff));
+                        Log.d(TAG,
+                              "Modbus message type received: " + data.length + "," + String.valueOf(data[0] & 0xff) + "," + String.valueOf(data[1] & 0xff));
                         messageToClients(Arrays.copyOfRange(data, 0, mLength), true);
                     }
                 }
@@ -319,14 +305,11 @@ public class UsbModbusService extends Service {
         UsbModbusService.SERVICE_CONNECTED = true;
         setFilter();
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-        connectionList = new HashMap<>();
-        serialPortList = new HashMap<>();
         findModbuSerialPortDevice();
         /*if (connectionList.size() > 0) {
             startUsbThread();
         }*/
         running.start();
-        runningList.start();
     }
 
 
@@ -446,85 +429,8 @@ public class UsbModbusService extends Service {
     }
 
     /************************************************************************************************************************/
-
-    private final LinkedBlockingQueue<byte[]> messageQueue = new LinkedBlockingQueue<byte[]>();
+    
     private final LinkedBlockingQueue<byte[]> modbusQueue = new LinkedBlockingQueue<byte[]>();
-    Thread runningList = new Thread() {
-        @Override
-        public void run() {
-            Log.d(TAG," runningList :run ");
-            super.run();
-            byte[] data;
-
-            while (true) {
-                try {
-                    if (!serialPortConnected) {
-                        Log.i(TAG, "Serial Port is not connected sleeping");
-                        sleep(2000);
-                        continue;
-                    } else {
-                        Log.i(TAG, "USB Serial Port is connected");
-                    }
-                    //TODO ignoring for now, until we complete modbus test
-                    data = messageQueue.take();
-                    Log.i(TAG, "USB Serial Port is connected = " + data.length + "," + messageQueue.size() + ","
-                                                                                                    + modbusQueue.size());
-                    for (Map.Entry<UsbDevice, UsbSerialDevice> usbEntry : serialPortList.entrySet()) {
-                        if (usbEntry.getKey().getDeviceId() == 0x0403 || usbEntry.getKey().getDeviceId() == 0x1027 || usbEntry.getKey().getDeviceId() == 1003) {
-                            Log.i(TAG, "USB Serial Port is connected = " + data.length + "," + messageQueue.size() + "," + modbusQueue.size());
-                            UsbSerialDevice serialPort = usbEntry.getValue();
-                            if (serialPort != null && (messageQueue.size() > 0)) {
-                                byte buffer[] = new byte[128];
-                                byte crc = 0;
-                                byte nOffset = 0;
-                                int len = data.length;
-                                if (len >= 128)
-                                    buffer = new byte[160]; //For OTA Updates
-                                buffer[nOffset++] = (byte) (ESC_BYTE & 0xff);
-                                buffer[nOffset++] = (byte) (SOF_BYTE & 0xff);
-                                buffer[nOffset++] = (byte) (len & 0xff);
-                                for (int i = 0; i < len; i++) {
-                                    buffer[i + nOffset] = data[i]; // add payload to the tx buffer
-                                    crc ^= data[i];             // calculate the new crc
-                                    if (data[i] == (byte) (ESC_BYTE &
-                                            0xff)) // if the data is equal to ESC byte then add another instance of that
-                                    {
-                                        nOffset++;
-                                        buffer[i + nOffset] = data[i];
-                                    }
-                                }
-                                buffer[nOffset + len] = (byte) (crc & 0xff);
-                                nOffset++;
-                                buffer[nOffset + len] = (byte) (ESC_BYTE & 0xff);
-                                nOffset++;
-                                buffer[nOffset + len] = (byte) (EOF_BYTE & 0xff);
-                                nOffset++;
-                                {
-                                    String dp = "";
-                                    for (int n = 0; n < data.length; n++)
-                                        dp = dp + " " + String.valueOf((int) (data[n] & 0xff));
-                                    Calendar curDate = GregorianCalendar.getInstance();
-                                    Log.d(TAG, "[" + (data.length) + "]-[" + curDate.get(Calendar.HOUR_OF_DAY) + ":"
-                                                                                + curDate.get(Calendar.MINUTE) + "] :" + dp);
-                                    Log.d(TAG, "[" + (data.length) + "]-[" + curDate.get(Calendar.HOUR_OF_DAY) + ":"
-                                                                                + curDate.get(Calendar.MINUTE) + "] :" + dp);
-                                }
-                                serialPort.write(Arrays.copyOfRange(buffer, 0, len + nOffset));
-                                try {
-                                    Thread.sleep(300);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                    }
-                } catch (Exception exception) {
-                    exception.printStackTrace();
-                }
-            }
-        }
-    };
-
 
     Thread running = new Thread() {
         @Override
@@ -539,20 +445,18 @@ public class UsbModbusService extends Service {
                         sleep(2000);
                         continue;
                     }
-                    UsbSerialDevice serialPort = null;
-                    for (Map.Entry<UsbDevice, UsbSerialDevice> usbEntry : serialPortList.entrySet()) {
-                        if (usbEntry.getKey().getVendorId() == 4292 || usbEntry.getKey().getVendorId() == 1027) {
-                            serialPort = usbEntry.getValue();
-                        }
-                    }
-                    if (serialPort != null && (modbusQueue.size() > 0)) {
+                    
+                    if (serialPort != null ) {
                         data = modbusQueue.take();
-
-                        serialPort.write(Arrays.copyOfRange(data, 0, data.length));
-                        try {
-                            Thread.sleep(300);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                        if (data.length > 0) {
+                            Log.i(TAG, "Write MB data : " + Arrays.toString(data));
+                            serialPort.write(Arrays.copyOfRange(data, 0, data.length));
+                            try {
+                                Thread.sleep(300);
+                            }
+                            catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                 } catch (Exception exception) {
@@ -563,26 +467,27 @@ public class UsbModbusService extends Service {
         }
 
     };
-
+    
     /*
      * This function will be called from MainActivity to write data through Serial Port
      */
     public void write(byte[] data) {
-
-        if (isConnected()) {
+        Log.i(TAG, " write TODO");
+        /*if (isConnected()) {
             messageQueue.add(data);
         } else {
             messageQueue.clear();
             Log.i(TAG, "Serial is disconnected, message discarded");
-        }
+        }*/
     }
 
     /*
      * This function will be called from MainActivity to write data through Serial Port
      */
     public void modbusWrite(byte[] data) {
-
+        
         if (isConnected()) {
+            Log.i(TAG, " modbusWrite "+Arrays.toString(data)+" Queue "+modbusQueue.size());
             modbusQueue.add(data);
 
         } else {
@@ -617,36 +522,32 @@ public class UsbModbusService extends Service {
      */
 
     public class ModbusRunnable implements Runnable {
-
-        UsbDevice usbDeviceMB;
-        UsbDeviceConnection usbCnnection;
-        UsbSerialDevice serialPortMB;
-
+        
         public ModbusRunnable(UsbDevice usbDevice, UsbDeviceConnection usbDeviceConnection) {
-            usbDeviceMB = usbDevice;
-            usbCnnection = usbDeviceConnection;
+            device = usbDevice;
+            connection = usbDeviceConnection;
         }
 
         public void run() {
-            serialPortMB = UsbSerialDevice.createUsbSerialDevice(usbDeviceMB, usbCnnection);
-            Log.d(TAG," ModbusRunnable : run serialPortMB "+serialPortMB);
-            if (serialPortMB != null) {
-                if (serialPortMB.open()) {
+            serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
+            Log.d(TAG," ModbusRunnable : run serialPortMB "+serialPort);
+            if (serialPort != null) {
+                if (serialPort.open()) {
                     serialPortConnected = true;
-                    serialPortMB.setBaudRate(9600);
-                    serialPortMB.setDataBits(UsbSerialInterface.DATA_BITS_8);
-                    serialPortMB.setStopBits(UsbSerialInterface.STOP_BITS_1);
-                    serialPortMB.setParity(UsbSerialInterface.PARITY_NONE);
+                    serialPort.setBaudRate(9600);
+                    serialPort.setDataBits(UsbSerialInterface.DATA_BITS_8);
+                    serialPort.setStopBits(UsbSerialInterface.STOP_BITS_1);
+                    serialPort.setParity(UsbSerialInterface.PARITY_NONE);
                     /**
                      * Current flow control Options:
                      * UsbSerialInterface.FLOW_CONTROL_OFF
                      * UsbSerialInterface.FLOW_CONTROL_RTS_CTS only for CP2102 and FT232
                      * UsbSerialInterface.FLOW_CONTROL_DSR_DTR only for CP2102 and FT232
                      */
-                    serialPortMB.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
-                    serialPortMB.read(modbusCallback);
-                    serialPortMB.getCTS(ctsCallback);
-                    serialPortMB.getDSR(dsrCallback);
+                    serialPort.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
+                    serialPort.read(modbusCallback);
+                    serialPort.getCTS(ctsCallback);
+                    serialPort.getDSR(dsrCallback);
 
                     try {
                         //sleep(2000); // sleep some. YMMV with different chips.
@@ -655,8 +556,6 @@ public class UsbModbusService extends Service {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-
-                    serialPortList.put(usbDeviceMB, serialPortMB);
                     // Everything went as expected. Send an intent to MainActivity
                     Intent intent = new Intent(ACTION_USB_READY);
                     context.sendBroadcast(intent);

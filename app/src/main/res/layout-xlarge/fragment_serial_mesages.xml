@@ -30,7 +30,7 @@
             android:id="@+id/selectChannel"
             android:layout_width="wrap_content"
             android:layout_height="30dp"
-            android:text="Select Channel"/>
+            android:text="Select Slave Id"/>
         <Spinner
             android:id="@+id/channelSpinner"
             android:layout_width="wrap_content"

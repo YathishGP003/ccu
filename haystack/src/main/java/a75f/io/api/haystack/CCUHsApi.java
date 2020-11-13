@@ -32,6 +32,7 @@ import org.projecthaystack.server.HStdOps;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -90,6 +91,21 @@ public class CCUHsApi
         hsClient = new AndroidHSClient();
         tagsDb = (CCUTagsDb) hsClient.db();
         tagsDb.init(context);
+        instance = this;
+        entitySyncHandler = new EntitySyncHandler();
+        hisSyncHandler = new HisSyncHandler(this);
+    }
+    
+    //For Unit test
+    public CCUHsApi()
+    {
+        if (instance != null)
+        {
+            throw new IllegalStateException("Api instance already created , use getInstance()");
+        }
+        hsClient = new AndroidHSClient();
+        tagsDb = (CCUTagsDb) hsClient.db();
+        tagsDb.init();
         instance = this;
         entitySyncHandler = new EntitySyncHandler();
         hisSyncHandler = new HisSyncHandler(this);
@@ -215,7 +231,16 @@ public class CCUHsApi
             tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
         }
     }
-
+    
+    public void updatePoint(Point p, String id)
+    {
+        tagsDb.updatePoint(p, id);
+        if (tagsDb.idMap.get(id) != null)
+        {
+            tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+        }
+    }
+    
     public void updatePoint(RawPoint r, String id)
     {
         tagsDb.updatePoint(r, id);
@@ -1856,4 +1881,39 @@ public class CCUHsApi
         editor.commit();
     }
     
+    public HashSet<String> getSupportedRegions() {
+        HashSet<String> regions = new HashSet();
+        regions.add("Africa");
+        regions.add("America");
+        regions.add("Antarctica");
+        regions.add("Asia");
+        regions.add("Atlantic");
+        regions.add("Australia");
+        regions.add("Etc");
+        regions.add("Europe");
+        regions.add("Indian");
+        regions.add("Pacific");
+        
+        return regions;
+    }
+    
+    public void updateTimeZone(String newTz) {
+        ArrayList<HashMap<Object, Object>> allPoints = readAllEntities("point");
+        for (HashMap<Object, Object> point : allPoints ) {
+            if (point.containsKey("physical")) {
+                RawPoint updatedPoint = new RawPoint.Builder().setHashMap(point).setTz(newTz).build();
+                updatePoint(updatedPoint, updatedPoint.getId());
+            } else {
+                Point updatedPoint = new Point.Builder().setHashMap(point).setTz(newTz).build();
+                updatePoint(updatedPoint, updatedPoint.getId());
+            }
+            
+        }
+    
+        ArrayList<HashMap<Object, Object>> allEquips = readAllEntities("equip");
+        for(HashMap<Object, Object> equip : allEquips) {
+            Equip updatedEquip = new Equip.Builder().setHashMap(equip).setTz(newTz).build();
+            updateEquip(updatedEquip, updatedEquip.getId());
+        }
+    }
 }

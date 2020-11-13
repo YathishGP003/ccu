@@ -214,6 +214,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                             .addMarker("stageUp").addMarker("timer").addMarker("counter")
                                             .addMarker("sp").addMarker("system")
                                             .setMinVal("0").setMaxVal("5").setIncrementVal("1")
+                                            .setUnit("m")
                                             .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                             .setTz(tz)
                                             .build();
@@ -253,6 +254,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                               .addMarker("stageDown").addMarker("timer").addMarker("counter")
                                               .addMarker("sp").addMarker("system")
                                               .setMinVal("0").setMaxVal("5").setIncrementVal("1")
+                                              .setUnit("m")
                                               .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                               .setTz(tz)
                                               .build();

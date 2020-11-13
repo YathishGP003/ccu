@@ -41,7 +41,11 @@
         <service android:name=".OTAUpdateService"/>
         <service android:name="a75f.io.usbserial.UsbService" android:enabled="true"></service>
         <!-- TODO we don't want this and shouldn't need it, we should monitor the USB connection, not kick the application whenever it restarts -->
-
+        <receiver android:name=".util.Receiver.ConnectionChangeReceiver">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
         <activity
                 android:name=".SplashActivity"
                 android:launchMode="singleTask"

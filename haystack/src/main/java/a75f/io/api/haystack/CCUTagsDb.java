@@ -418,7 +418,36 @@ public class CCUTagsDb extends HServer {
         tagsMap.put(id.toVal(), b.toDict());
         return id.toCode();
     }
-
+    
+    public void updatePoint(Point p, String i) {
+        HDictBuilder b = new HDictBuilder()
+                             .add("id", HRef.copy(i))
+                             .add("dis", p.getDisplayName())
+                             .add("point", HMarker.VAL)
+                             .add("siteRef", p.getSiteRef())
+                             .add("equipRef", p.getEquipRef())
+                             .add("roomRef", p.getRoomRef() != null ? p.getRoomRef() : "SYSTEM")
+                             .add("floorRef", p.getFloorRef() != null ? p.getFloorRef() : "SYSTEM")
+                             .add("group", p.getGroup())
+                             .add("kind", p.getKind() == null ? "Number" : p.getKind())
+                             .add("tz", p.getTz());
+        if (p.getUnit() != null) b.add("unit", p.getUnit());
+        if (p.getEnums() != null) b.add("enum", p.getEnums());
+        if (p.getMinVal() != null) b.add("minVal",Double.parseDouble(p.getMinVal()));
+        if (p.getMaxVal() != null) b.add("maxVal",Double.parseDouble(p.getMaxVal()));
+        if (p.getIncrementVal() != null) b.add("incrementVal",Double.parseDouble(p.getIncrementVal()));
+        if (p.getTunerGroup() != null) b.add("tunerGroup",p.getTunerGroup());
+        if (p.getHisInterpolate() != null) b.add("hisInterpolate",p.getHisInterpolate());
+        if (p.getShortDis() != null) b.add("shortDis",p.getShortDis());
+        
+        for (String m : p.getMarkers()) {
+            b.add(m);
+        }
+        
+        HRef id = (HRef) b.get("id");
+        tagsMap.put(id.toVal(), b.toDict());
+    }
+    
     public String addPoint(RawPoint p) {
         HDictBuilder b = new HDictBuilder()
                 .add("id", HRef.make(UUID.randomUUID().toString()))
@@ -484,6 +513,27 @@ public class CCUTagsDb extends HServer {
                 
         if (p.getUnit() != null) b.add("unit", p.getUnit());
         
+        for (String m : p.getMarkers()) {
+            b.add(m);
+        }
+        HRef id = (HRef) b.get("id");
+        tagsMap.put(id.toVal(), b.toDict());
+        return id.toCode();
+    }
+
+    public String updateSettingPoint(SettingPoint p, String i) {
+        HDictBuilder b = new HDictBuilder()
+                .add("id", HRef.copy(i))
+                .add("dis", p.getDisplayName())
+                .add("point", HMarker.VAL)
+                .add("setting", HMarker.VAL)
+                .add("deviceRef", p.getDeviceRef())
+                .add("siteRef", p.getSiteRef())
+                .add("val", p.getVal())
+                .add("kind", p.getKind() == null ? "Number" : p.getKind());
+
+        if (p.getUnit() != null) b.add("unit", p.getUnit());
+
         for (String m : p.getMarkers()) {
             b.add(m);
         }

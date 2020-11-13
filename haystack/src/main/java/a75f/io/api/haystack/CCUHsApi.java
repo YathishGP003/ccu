@@ -187,6 +187,11 @@ public class CCUHsApi
         return tagsDb.addPoint(p);
     }
 
+    public String updateSettingPoint(SettingPoint p, String id)
+    {
+        return tagsDb.updateSettingPoint(p,id);
+    }
+
     public String addDevice(Device d)
     {
         return tagsDb.addDevice(d);
@@ -728,6 +733,13 @@ public class CCUHsApi
             if (guid != null) {
                 tagsDb.removeIdMap.put(id, guid);
             }
+            tagsDb.idMap.remove(id);
+        }
+    }
+
+    public void deleteEntityLocally(String id) {
+        tagsDb.tagsMap.remove(id.replace("@", ""));
+        if (tagsDb.idMap.get(id) != null) {
             tagsDb.idMap.remove(id);
         }
     }

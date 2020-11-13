@@ -326,28 +326,27 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
         analog1Min.setAdapter(analogAdapter);
         analog1Min.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog1 and cooling and min")), false);
         analog1Max.setAdapter(analogAdapter);
-        double analogVal = systemProfile.getConfigVal("analog1 and cooling and max");
-        analog1Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int) analogVal) : analogArray.size() - 1 , false);
+        analog1Max.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog1 and cooling and max")), false);
+        
         analog2Min.setAdapter(analogAdapter);
         analog2Min.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog2 and fan and min")), false);
         analog2Max.setAdapter(analogAdapter);
-        analogVal = systemProfile.getConfigVal("analog2 and fan and max");
-        analog2Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int) analogVal) : analogArray.size() - 1);
+        analog2Max.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog2 and fan and max")));
+        
         analog3Min.setAdapter(analogAdapter);
         analog3Min.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog3 and heating and min")), false);
         analog3Max.setAdapter(analogAdapter);
-        analogVal = systemProfile.getConfigVal("analog3 and heating and max");
-        analog3Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int) analogVal) : analogArray.size() - 1);
+        analog3Max.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog3 and heating and max")));
+        
         analog4MinCooling.setAdapter(analogAdapter);
         analog4MinCooling.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog4 and cooling and min")), false);
         analog4MaxCooling.setAdapter(analogAdapter);
-        analogVal = systemProfile.getConfigVal("analog4 and cooling and max");
-        analog4MaxCooling.setSelection(analogVal != 0 ? analogAdapter.getPosition((int) analogVal) : analogArray.size() - 1, false);
+        analog4MaxCooling.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog4 and cooling and max")) , false);
+        
         analog4MinHeating.setAdapter(analogAdapter);
         analog4MinHeating.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog4 and heating and min")), false);
         analog4MaxHeating.setAdapter(analogAdapter);
-        analogVal = systemProfile.getConfigVal("analog4 and heating and max");
-        analog4MaxHeating.setSelection(analogVal != 0 ? analogAdapter.getPosition((int) analogVal) : analogArray.size() - 1, false);
+        analog4MaxHeating.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog4 and heating and max")), false);
         
         ArrayList<Double> zoroToHundred = new ArrayList<>();
         for (double val = 0;  val <= 100.0; val++)
@@ -665,13 +664,13 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
         msg.analog3.set((short)(Double.parseDouble(ahuAnalog4Test.getSelectedItem().toString())));
     
     
-        short relayStatus = (short) ((relay1Test.isChecked() ? 1 : 0)
-                                     | (relay2Test.isChecked() ? 1 << 1 : 0)
-                                     | (relay3Test.isChecked() ? 1 << 2 : 0)
-                                     | (relay4Test.isChecked() ? 1 << 3 : 0)
-                                     | (relay5Test.isChecked() ? 1 << 4 : 0)
-                                     | (relay6Test.isChecked() ? 1 << 5 : 0)
-                                     | (relay7Test.isChecked() ? 1 << 6 : 0));
+        short relayStatus = (short) ((relay1Test.isChecked() ? 1 << MeshUtil.getRelayMapping(1) : 0)
+                                     | (relay2Test.isChecked() ? 1 << MeshUtil.getRelayMapping(2) : 0)
+                                     | (relay3Test.isChecked() ? 1 << MeshUtil.getRelayMapping(3) : 0)
+                                     | (relay4Test.isChecked() ? 1 << MeshUtil.getRelayMapping(4) : 0)
+                                     | (relay5Test.isChecked() ? 1 << MeshUtil.getRelayMapping(5) : 0)
+                                     | (relay6Test.isChecked() ? 1 << MeshUtil.getRelayMapping(6) : 0)
+                                     | (relay7Test.isChecked() ? 1 << MeshUtil.getRelayMapping(7) : 0));
         
         msg.relayBitmap.set(relayStatus);
         MeshUtil.sendStructToCM(msg);

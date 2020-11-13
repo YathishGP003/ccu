@@ -180,6 +180,10 @@ public class Globals {
 
         CCUHsApi ccuHsApi = new CCUHsApi(this.mApplicationContext);
         ccuHsApi.testHarnessEnabled = testHarness;
+
+        //set SN address band
+        String addrBand = getSmartNodeBand();
+        L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
         
         importTunersAndScheduleJobs();
         
@@ -200,12 +204,10 @@ public class Globals {
                         CCUHsApi.getInstance().importBuildingTuners();
                     }
                     BuildingTuners.getInstance().updateBuildingTuners();
+                    CCUHsApi.getInstance().syncEntityTree();
                 }
             
                 loadEquipProfiles();
-            
-                String addrBand = getSmartNodeBand();
-                L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
             
                 if (!isPubnubSubscribed())
                 {
@@ -561,9 +563,15 @@ public class Globals {
     }
 
     public String getSmartNodeBand() {
-        HashMap band = CCUHsApi.getInstance().read("point and snband");
-        if (band != null && band.size() > 0) {
-            return band.get("val") != null ? band.get("val").toString() : null;
+        HashMap device = CCUHsApi.getInstance().read("device and addr");
+        if (device != null && device.size() > 0) {
+            String nodeAdd = device.get("addr").toString();
+            return nodeAdd.substring(0, 2).concat("00");
+        } else {
+            HashMap band = CCUHsApi.getInstance().read("point and snband");
+            if (band != null && band.size() > 0) {
+                return band.get("val").toString();
+            }
         }
         return null;
     }

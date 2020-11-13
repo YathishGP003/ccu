@@ -206,22 +206,17 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         analog1Min.setAdapter(analogAdapter);
         analog1Min.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("cooling and min")), false);
         analog1Max.setAdapter(analogAdapter);
-        double analogVal = systemProfile.getConfigVal("cooling and max");
-        analog1Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int)analogVal) : analogArray.size() -1 , false);
+        analog1Max.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("cooling and max")), false);
         
         analog2Min.setAdapter(analogAdapter);
         analog2Min.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("fan and min")), false);
-        
         analog2Max.setAdapter(analogAdapter);
-        analogVal = systemProfile.getConfigVal("fan and max");
-        analog2Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int)analogVal) : analogArray.size() -1, false);
+        analog2Max.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("fan and max")), false);
         
         analog3Min.setAdapter(analogAdapter);
         analog3Min.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("heating and min")), false);
-        
         analog3Max.setAdapter(analogAdapter);
-        analogVal = systemProfile.getConfigVal("heating and max");
-        analog3Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int)analogVal) : analogArray.size() -1, false);
+        analog3Max.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("heating and max")), false);
         
         ArrayList<String> humidifierOptions = new ArrayList<>();
         humidifierOptions.add("Humidifier");

@@ -30,12 +30,36 @@
                     android:layout_centerVertical="true"
                     android:fontFamily="@font/lato_bold"
                     android:text="@string/title_vavnofan"
-                    android:textAllCaps="true"
                     android:textColor="@color/orange_75f"
                     android:textSize="33.5sp"
                     android:textStyle="bold" />
 
             </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginTop="20dp"
+                android:layout_gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textTempOffset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:text="@string/label_tempoffset"
+                    android:textAppearance="@style/label_values" />
+
+                <NumberPicker
+                    android:id="@+id/temperatureOffset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:textColor="#202020"
+                    android:textSize="30sp" />
+            </LinearLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -111,33 +135,6 @@
                     tools:listitem="@layout/spinner_dropdown_item" />
 
                 <TextView
-                    android:id="@+id/textEnableOccupancy"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/textDamperType"
-                    android:layout_alignStart="@id/textDamperType"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginTop="32dp"
-                    android:text="@string/label_enableoccupance"
-                    android:textAppearance="@style/title_normal"
-                    android:visibility="gone" />
-
-                <ToggleButton
-                    android:id="@+id/enableOccupancyControl"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
-                    android:layout_below="@+id/textDamperType"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="65dp"
-                    android:layout_marginTop="35dp"
-                    android:layout_toEndOf="@+id/textEnableOccupancy"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn=""
-                    android:visibility="gone" />
-
-                <TextView
                     android:id="@+id/textReheatType"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -164,39 +161,13 @@
                     tools:listitem="@layout/spinner_dropdown_item" />
 
                 <TextView
-                    android:id="@+id/textEnableIAQ"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/vavReheatType"
-                    android:layout_alignStart="@+id/textEnableOccupancy"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginTop="32dp"
-                    android:text="@string/label_enableIAQ"
-                    android:textAppearance="@style/title_normal"
-                    android:visibility="gone" />
-
-                <ToggleButton
-                    android:id="@+id/enableIAQControl"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
-                    android:layout_below="@+id/vavReheatType"
-                    android:layout_alignStart="@id/enableOccupancyControl"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginTop="35dp"
-                    android:layout_toEndOf="@+id/textEnableIAQ"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn=""
-                    android:visibility="gone" />
-
-                <TextView
                     android:id="@+id/textZonePriority"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/textDamperSize"
-                    android:layout_alignStart="@+id/textDamperSize"
+                    android:layout_toEndOf="@+id/vavReheatType"
                     android:layout_gravity="center"
+                    android:layout_marginStart="200dp"
                     android:layout_marginTop="34dp"
                     android:text="@string/label_zonepriority"
                     android:textAppearance="@style/title_normal" />
@@ -210,36 +181,191 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="46dp"
                     android:layout_marginTop="34dp"
+                    android:layout_alignParentRight="true"
                     android:layout_toEndOf="@+id/textZonePriority"
                     android:entries="@array/hvac_stage_selector"
-                    android:minWidth="76dp"
+                    android:minWidth="36dp"
                     tools:listitem="@layout/spinner_dropdown_item" />
+
+                <TextView
+                    android:id="@+id/thermistor1TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textReheatType"
+                    android:layout_alignStart="@+id/textReheatType"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="34dp"
+                    android:layout_marginEnd="82dp"
+                    android:text="@string/vav_label_thermistor1"
+                    android:textAppearance="@style/title_normal" />
+
+                <TextView
+                    android:id="@+id/thermistor1TextVal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textReheatType"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="34dp"
+                    android:layout_toEndOf="@+id/thermistor1TextView"
+                    android:text="@string/vav_label_thermistor1_val"
+                    android:textAppearance="@style/label_values" />
+
+
+                <TextView
+                    android:id="@+id/thermistor2TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textReheatType"
+                    android:layout_alignStart="@+id/textZonePriority"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="34dp"
+                    android:text="@string/vav_label_thermistor2"
+                    android:textAppearance="@style/title_normal" />
+
+                <TextView
+                    android:id="@+id/thermistor2TextVal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textReheatType"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="80dp"
+                    android:layout_marginTop="34dp"
+                    android:layout_alignParentRight="true"
+                    android:text="@string/vav_label_thermistor2_val"
+                    android:textAppearance="@style/label_values" />
+
+
+
+                <TextView
+                    android:id="@+id/relay1TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/thermistor1TextView"
+                    android:layout_alignStart="@+id/thermistor1TextView"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="34dp"
+                    android:layout_marginEnd="82dp"
+                    android:text="@string/vav_label_relay1"
+                    android:textAppearance="@style/title_normal"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/relay1TextVal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/thermistor1TextView"
+                    android:layout_gravity="center"
+                    android:layout_alignStart="@+id/thermistor1TextVal"
+                    android:layout_marginTop="34dp"
+                    android:layout_toEndOf="@+id/relay1TextView"
+                    android:text="@string/vav_label_staged_heater"
+                    android:textAppearance="@style/label_values"
+                    android:visibility="gone"/>
+
+
+                <TextView
+                    android:id="@+id/relay2TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/thermistor1TextView"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="34dp"
+                    android:layout_toStartOf="@+id/relay2TextVal"
+                    android:layout_alignStart="@+id/thermistor2TextView"
+                    android:text="@string/vav_label_relay2"
+                    android:textAppearance="@style/title_normal"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/relay2TextVal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/thermistor1TextView"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="34dp"
+                    android:layout_alignParentRight="true"
+                    android:text="@string/vav_label_series_fan"
+                    android:textAppearance="@style/label_values"
+                    android:visibility="gone"/>
+
+
+                <TextView
+                    android:id="@+id/textEnableOccupancy"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/relay1TextView"
+                    android:layout_alignStart="@id/relay1TextView"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="32dp"
+                    android:text="@string/label_enableoccupance"
+                    android:textAppearance="@style/title_normal" />
+
+                <ToggleButton
+                    android:id="@+id/enableOccupancyControl"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_below="@+id/relay1TextView"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="65dp"
+                    android:layout_marginTop="35dp"
+                    android:layout_toEndOf="@+id/textEnableOccupancy"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
 
                 <TextView
                     android:id="@+id/textEnableCO2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/zonePriority"
-                    android:layout_alignStart="@+id/textEnableIAQ"
+                    android:layout_below="@+id/relay1TextView"
+                    android:layout_toStartOf="@+id/enableCO2Control"
+                    android:layout_alignStart="@+id/relay2TextView"
                     android:layout_gravity="center_vertical"
                     android:layout_marginTop="32dp"
                     android:text="@string/label_enableCO2"
-                    android:textAppearance="@style/title_normal"
-                    android:visibility="gone" />
+                    android:textAppearance="@style/title_normal" />
 
                 <ToggleButton
                     android:id="@+id/enableCO2Control"
                     android:layout_width="46.12dp"
                     android:layout_height="27.42dp"
-                    android:layout_below="@+id/zonePriority"
-                    android:layout_alignStart="@+id/enableIAQControl"
+                    android:layout_below="@+id/relay1TextView"
+                    android:layout_alignParentRight="true"
                     android:layout_gravity="center_vertical"
                     android:layout_marginTop="35dp"
+                    android:layout_marginStart="115dp"
                     android:background="@drawable/toggle_selector"
                     android:checked="false"
                     android:textOff=""
-                    android:textOn=""
-                    android:visibility="gone" />
+                    android:textOn="" />
+
+                <TextView
+                    android:id="@+id/textEnableIAQ"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textEnableOccupancy"
+                    android:layout_alignStart="@+id/textEnableOccupancy"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="32dp"
+                    android:text="@string/label_enableIAQ"
+                    android:textAppearance="@style/title_normal" />
+
+                <ToggleButton
+                    android:id="@+id/enableIAQControl"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_below="@+id/textEnableOccupancy"
+                    android:layout_alignStart="@id/enableOccupancyControl"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="35dp"
+                    android:layout_toEndOf="@+id/textEnableIAQ"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
 
             </RelativeLayout>
 
@@ -251,29 +377,6 @@
                 android:layout_marginTop="42dp"
                 android:layout_marginRight="10dp"
                 android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/textTempOffset"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:gravity="center_vertical|center_horizontal"
-                        android:text="@string/label_tempoffset"
-                        android:textAppearance="@style/label_values" />
-
-                    <NumberPicker
-                        android:id="@+id/temperatureOffset"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:textColor="#202020"
-                        android:textSize="30sp" />
-                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"

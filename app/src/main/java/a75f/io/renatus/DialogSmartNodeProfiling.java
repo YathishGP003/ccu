@@ -269,16 +269,26 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @OnClick(R.id.rl_vavSeriesFan)
     void onVAVSeriesFanOnClick()
     {
-        //Not Yet Done
-        //showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.VAV_SERIES_FAN, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress,
+                                                                    mRoomName,
+                                                                    mFloorName,
+                                                                    ProfileType.VAV_SERIES_FAN,
+                                                                    NodeType.SMART_NODE),
+                           FragmentBLEInstructionScreen.ID
+        );
     }
 
     @Optional
     @OnClick(R.id.rl_vavParallelFan)
     void onVAVParallelFanOnClick()
     {
-        //Not Yet Done
-        //showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.VAV_PARALLEL_FAN, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress,
+                                                                    mRoomName,
+                                                                    mFloorName,
+                                                                    ProfileType.VAV_PARALLEL_FAN,
+                                                                    NodeType.SMART_NODE),
+                           FragmentBLEInstructionScreen.ID
+        );
     }
 
     /*@OnClick(R.id.first_button)
@@ -313,46 +323,6 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         return view;
     }
     
-   /* private void openBLEPairingInstructions()
-    {
-        if (lcmModuleTypeRB.isChecked())
-        {
-            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.LIGHT, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
-            
-        }
-        else if (sseModuleTypeRB.isChecked())
-        {
-            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.SSE, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
-        }
-        else if (hwpModuleTypeRB.isChecked())
-        {
-            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.HMP, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
-        }
-        else if (vavModuleTypeRB.isChecked())
-        {
-            ProfileType profile = null;
-            switch (vavUnitSelector.getCheckedRadioButtonId()) {
-                case R.id.vavReheat:
-                    profile = ProfileType.VAV_REHEAT;
-                    break;
-                case R.id.vavSeriesFan:
-                    profile = ProfileType.VAV_SERIES_FAN;
-                    break;
-                case R.id.vavParallelFan:
-                    profile = ProfileType.VAV_PARALLEL_FAN;
-                    break;
-                    
-            }
-            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, profile, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
-        } else if (piLoopModuleTypeRB.isChecked()) {
-            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.PLC, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
-        }  else if (dabModuleTypeRB.isChecked()) {
-            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.DAB, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
-        } else if (emrModuleTypeRB.isChecked()) {
-            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.EMR, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
-        }
-    }
-    */
     @Override
     public void onStart()
     {

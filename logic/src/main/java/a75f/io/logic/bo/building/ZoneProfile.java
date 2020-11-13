@@ -166,5 +166,13 @@ public abstract class ZoneProfile extends Schedulable
     
     public void reset(){
     }
+    
+    /**
+     * When a Zone has damperOverride active , System does not normazlize or adjust the damper further.
+     * @return
+     */
+    public boolean isDamperOverrideActive() {
+        return false;
+    }
 }
 

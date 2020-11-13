@@ -137,5 +137,7 @@ public class TunerConstants
     public static final double DEFAULT_INTEGRAL_GAIN = 0.5;
     public static final double DEFAULT_PROPORTIONAL_SPREAD = 2;
     public static final double DEFAULT_INTEGRAL_TIMEOUT = 30;
+    
+    public static final double DEFAULT_MODE_CHANGEOVER_HYSTERESIS = 0.5;
 
 }

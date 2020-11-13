@@ -25,8 +25,14 @@ public class DLog
     public static final String UPDATED_STRUCT     = "UPDATED_STRUCT";
     
     
-    public static <T extends Struct>  void LogdStructAsJson(T struct)
+    public static <T extends Struct>  void
+    
+    
+    
+    
+    LogdStructAsJson(T struct)
 	{
+		CcuLog.d(L.TAG_CCU_SERIAL, "MSG: "+struct.toString());
 		//if (BuildConfig.DEBUG)
 		//{
 			String structString = null;

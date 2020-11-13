@@ -1,5 +1,7 @@
 package a75f.io.api.haystack;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -192,7 +194,9 @@ public class Point extends Entity
         }
         public Builder addMarker(String marker)
         {
-            this.markers.add(marker);
+            if (!StringUtils.isEmpty(marker)) {
+                this.markers.add(marker);
+            }
             return this;
         }
         public Builder removeMarker(String marker)

@@ -152,6 +152,7 @@ public abstract class VavSystemProfile extends SystemProfile
             }
         }
         hayStack.writeHisValById(humidityCompensationOffsetId, HSUtil.getPriorityVal(humidityCompensationOffsetId));*/
+        addNewTunerPoints(equipref);
     }
     
     protected void addUserIntentPoints(String equipref)

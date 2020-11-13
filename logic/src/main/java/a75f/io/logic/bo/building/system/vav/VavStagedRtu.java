@@ -535,11 +535,11 @@ public class VavStagedRtu extends VavSystemProfile
     }
     
     private double getStageUpTimeMinutes() {
-        return TunerUtil.readTunerValByQuery("vav and stage and up and timer and counter", getSystemEquipRef());
+        return TunerUtil.readTunerValByQuery("vav and stageUp and timer and counter", getSystemEquipRef());
     }
     
     private double getStageDownTimeMinutes() {
-        return TunerUtil.readTunerValByQuery("vav and stage and down and timer and counter", getSystemEquipRef());
+        return TunerUtil.readTunerValByQuery("vav and stageDown and timer and counter", getSystemEquipRef());
     }
     
     @Override

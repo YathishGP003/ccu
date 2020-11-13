@@ -708,7 +708,7 @@ public class SeekArc extends View
     {
 
         System.out.println("Heating Angle: " + mCoolingTemp);
-        if ((mCoolingTemp - (mHeatingDeadBand + mCoolingDeadBand)) < getHeatingDesiredTemp())
+        if ((mCoolingTemp - (mHeatingDeadBand + mCoolingDeadBand)) < getHeatingDesiredTemp() && (mCoolingTemp - (mHeatingDeadBand + mCoolingDeadBand)) >= mHeatingLowerLimit)
         {
             //setHeatingDesiredTemp(roundToHalf(mCoolingTemp) - (mHeatingDeadBand + mCoolingDeadBand));
             setHeatingDesiredTemp(mCoolingTemp - (mHeatingDeadBand + mCoolingDeadBand),false);
@@ -741,7 +741,7 @@ public class SeekArc extends View
 
     private void checkCoolingModeTemperature(float mHeatingTemp)
     {
-        if ((mHeatingTemp + (mHeatingDeadBand + mCoolingDeadBand)) > getCoolingDesiredTemp())
+        if ((mHeatingTemp + (mHeatingDeadBand + mCoolingDeadBand)) >= getCoolingDesiredTemp() && (mHeatingTemp + (mHeatingDeadBand + mCoolingDeadBand)) <= mCoolingUpperLimit)
         {
             //setCoolingDesiredTemp(roundToHalf(mHeatingTemp) + (mHeatingDeadBand + mCoolingDeadBand));
             setCoolingDesiredTemp(mHeatingTemp + (mHeatingDeadBand + mCoolingDeadBand),false);
@@ -1390,6 +1390,11 @@ public class SeekArc extends View
     {
         if (mCoolingDesiredTemp == coolingDesiredTemp)
             return;
+
+        if (getHeatingDesiredTemp() == mHeatingLowerLimit && ((coolingDesiredTemp - getHeatingDesiredTemp()) < (mHeatingDeadBand + mCoolingDeadBand))){
+            coolingDesiredTemp = coolingDesiredTemp + ((mHeatingDeadBand + mCoolingDeadBand) - (coolingDesiredTemp - getHeatingDesiredTemp()));
+        }
+
         this.mCoolingDesiredTemp = coolingDesiredTemp;
         mOnTemperatureChangeListener.onTemperatureChange(this, getCoolingDesiredTemp(), getHeatingDesiredTemp(),syncToHaystack);
         invalidate();
@@ -1405,6 +1410,10 @@ public class SeekArc extends View
     {
         if (mHeatingDesiredTemp == heatingDesiredTemp)
             return;
+
+        if (getCoolingDesiredTemp() == mCoolingUpperLimit && ((getCoolingDesiredTemp() - heatingDesiredTemp) < (mHeatingDeadBand + mCoolingDeadBand))){
+            heatingDesiredTemp =  heatingDesiredTemp - ((mHeatingDeadBand + mCoolingDeadBand) - (getCoolingDesiredTemp() - heatingDesiredTemp));
+        }
 
         this.mHeatingDesiredTemp = heatingDesiredTemp;
         mOnTemperatureChangeListener.onTemperatureChange(this, getCoolingDesiredTemp(), getHeatingDesiredTemp(),syncToHaystack);

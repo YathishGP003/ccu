@@ -16,6 +16,8 @@ import com.felhr.deviceids.PL2303Ids;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class UsbSerialDevice implements UsbSerialInterface
@@ -48,6 +50,8 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 	private UsbEndpoint outEndpoint;
 	
 	protected boolean asyncMode;
+	
+	public boolean isModbusDevice = false;
 	
 	// Get Android version if version < 4.3 It is not going to be asynchronous read operations
 	static
@@ -95,6 +99,10 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 			return new CDCSerialDevice(device, connection, iface);
 		else
 			return null;
+	}
+	
+	public void setModbusDevice(boolean modbusDevice) {
+		isModbusDevice = modbusDevice;
 	}
 	
 	public static boolean isSupported(UsbDevice device)
@@ -239,7 +247,9 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 	private int nCurIndex = 0;
 	private int nCRC = 0;
 	private byte inDataBuffer[] = new byte[1024];
-
+	
+	
+	private ModbusState modbusState = ModbusState.PARSE_INIT;
 	/*
 	 * WorkerThread waits for request notifications from IN endpoint
 	 */
@@ -274,82 +284,172 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 						if (isFTDIDevice())
 							nCount = 2;
 						
-
 						for (; nCount < nRet; nCount++) {
 							byte inData =  inReg[nCount];
-							int intData = inData & 0xff;
-							switch (curState) {
-								case PARSE_INIT:
-                                    if (intData == ESC_BYTE)
-										curState = SerialState.ESC_BYTE_RCVD;
-									break;
-								case ESC_BYTE_RCVD:
-									if (intData == SOF_BYTE)
-										curState = SerialState.SOF_BYTE_RCVD;
-									else
-										curState = SerialState.BAD_PACKET;
-
-									break;
-								case SOF_BYTE_RCVD:
-									nDataLength = inData;
-									curState = SerialState.LEN_BYTE_RCVD;
-									break;
-								case LEN_BYTE_RCVD:
-									if (nCurIndex == nDataLength) {
-										int nIncomingCRC = inData;
-										if (nIncomingCRC == nCRC)
-											curState = SerialState.CRC_RCVD;
-										else {
-											Log.d("SERIAL_RAW", "CRC Mismatch: Incoming: " + nIncomingCRC + "Calculated: " + nCRC);
-											curState = SerialState.BAD_PACKET;
-										}
-									} else if (nCurIndex < nDataLength) {
-										inDataBuffer[nCurIndex] = inData;
-										nCRC ^= inData;
-										nCurIndex++;
-										if (intData == ESC_BYTE)
-											curState = SerialState.ESC_BYTE_IN_DATA_RCVD;
-									} else
-										curState = SerialState.BAD_PACKET;
-									break;
-								case ESC_BYTE_IN_DATA_RCVD:
-									if (intData == ESC_BYTE)
-										curState = SerialState.LEN_BYTE_RCVD;
-									else
-										curState = SerialState.BAD_PACKET;
-									break;
-								case CRC_RCVD:
-									if (intData == ESC_BYTE)
-										curState = SerialState.ESC_BYTE_AS_END_OF_PACKET_RCVD;
-									else
-										curState = SerialState.BAD_PACKET;
-									break;
-								case ESC_BYTE_AS_END_OF_PACKET_RCVD:
-									if (intData == EOF_BYTE)
-										curState = SerialState.DATA_AVAILABLE;
-									else
-										curState = SerialState.BAD_PACKET;
-									break;
-
-							}
-							if (curState == SerialState.DATA_AVAILABLE) {
-								onReceivedData(inDataBuffer, nCurIndex);
-								nCurIndex = 0;
-								nCRC = 0;
-								curState = SerialState.PARSE_INIT;
-							}
-
-							if (curState == SerialState.BAD_PACKET) {
-									Log.d("SERIAL_RAW", "*******BAD PACKET RECEIVED*****");
-								nCurIndex = 0;
-								nCRC = 0;
-								curState = SerialState.PARSE_INIT;
+							if (isModbusDevice) {
+								//byte[] data = {inData};
+								//onReceivedData(data, 1);
+								handleIncomigModbusData(inData);
+							} else {
+								handleIncomingSerialByte(inData);
 							}
 						}
 					}
 					// Queue a new request
 					requestIN.queue(serialBuffer.getReadBuffer(), SerialBuffer.DEFAULT_READ_BUFFER_SIZE);
 				}
+			}
+		}
+  
+		private void handleIncomingSerialByte(byte inData) {
+			
+			int intData = inData & 0xff;
+			switch (curState) {
+				case PARSE_INIT:
+					if (intData == ESC_BYTE)
+						curState = SerialState.ESC_BYTE_RCVD;
+					break;
+				case ESC_BYTE_RCVD:
+					if (intData == SOF_BYTE)
+						curState = SerialState.SOF_BYTE_RCVD;
+					else
+						curState = SerialState.BAD_PACKET;
+					
+					break;
+				case SOF_BYTE_RCVD:
+					nDataLength = inData;
+					curState = SerialState.LEN_BYTE_RCVD;
+					break;
+				case LEN_BYTE_RCVD:
+					if (nCurIndex == nDataLength) {
+						int nIncomingCRC = inData;
+						if (nIncomingCRC == nCRC)
+							curState = SerialState.CRC_RCVD;
+						else {
+							Log.d("SERIAL_RAW", "CRC Mismatch: Incoming: " + nIncomingCRC + "Calculated: " + nCRC);
+							curState = SerialState.BAD_PACKET;
+						}
+					} else if (nCurIndex < nDataLength) {
+						inDataBuffer[nCurIndex] = inData;
+						nCRC ^= inData;
+						nCurIndex++;
+						if (intData == ESC_BYTE)
+							curState = SerialState.ESC_BYTE_IN_DATA_RCVD;
+					} else
+						curState = SerialState.BAD_PACKET;
+					break;
+				case ESC_BYTE_IN_DATA_RCVD:
+					if (intData == ESC_BYTE)
+						curState = SerialState.LEN_BYTE_RCVD;
+					else
+						curState = SerialState.BAD_PACKET;
+					break;
+				case CRC_RCVD:
+					if (intData == ESC_BYTE)
+						curState = SerialState.ESC_BYTE_AS_END_OF_PACKET_RCVD;
+					else
+						curState = SerialState.BAD_PACKET;
+					break;
+				case ESC_BYTE_AS_END_OF_PACKET_RCVD:
+					if (intData == EOF_BYTE)
+						curState = SerialState.DATA_AVAILABLE;
+					else
+						curState = SerialState.BAD_PACKET;
+					break;
+				
+			}
+			if (curState == SerialState.DATA_AVAILABLE) {
+				onReceivedData(inDataBuffer, nCurIndex);
+				nCurIndex = 0;
+				nCRC = 0;
+				curState = SerialState.PARSE_INIT;
+			}
+			
+			if (curState == SerialState.BAD_PACKET) {
+				Log.d("SERIAL_RAW", "*******BAD PACKET RECEIVED*****");
+				nCurIndex = 0;
+				nCRC = 0;
+				curState = SerialState.PARSE_INIT;
+			}
+		}
+		
+		long startTimeLog;
+		private void handleIncomigModbusData(byte inData) {
+			
+			switch (modbusState) {
+				case PARSE_INIT:
+					startTimeLog = System.currentTimeMillis();
+					modbusState = ModbusState.ADDR_BYTE_RCVD;
+					inDataBuffer[nCurIndex++] = inData;
+					resetTimer();
+					break;
+				case ADDR_BYTE_RCVD:
+					modbusState = ModbusState.FUNC_BYTE_RCVD;
+					inDataBuffer[nCurIndex++] = inData;
+					resetTimer();
+					break;
+				case FUNC_BYTE_RCVD:
+					modbusState = ModbusState.LEN_BYTE_RCVD;
+					inDataBuffer[nCurIndex++] = inData;
+					nDataLength = inData & 0xff;
+					resetTimer();
+					break;
+				case LEN_BYTE_RCVD:
+				case DATA_BYTE_RCVD:
+					modbusState = ModbusState.DATA_BYTE_RCVD;
+					//Log.d("CCU_MODBUS", "nCurIndex "+nCurIndex+" nDataLength "+nDataLength);
+					if (nDataLength == 0 ) {
+						modbusState = ModbusState.CRC_BYTE_RCVD;
+						inDataBuffer[nCurIndex++] = inData;
+					} else if (nDataLength > 0){
+						inDataBuffer[nCurIndex++] = inData;
+						nDataLength--;
+					}
+					resetTimer();
+					break;
+				case CRC_BYTE_RCVD:
+					modbusState = ModbusState.DATA_AVAILABLE;
+					inDataBuffer[nCurIndex] = inData;
+					resetTimer();
+					break;
+			}
+			//Log.d("CCU_MODBUS", " handleIncomigModbusData "+inData+" modbusState "+modbusState);
+			if (modbusState == ModbusState.DATA_AVAILABLE) {
+				Log.d("CCU_MODBUS", "USB SERIAL: Length "+(nCurIndex+1)+ " DATA: "+Arrays.toString(inDataBuffer));
+				Log.d("CCU_MODBUS"," Packet Xfer Time "+(System.currentTimeMillis() - startTimeLog)+"ms");
+				onReceivedData(inDataBuffer, nCurIndex+1);
+				nCurIndex = 0;
+				modbusState = ModbusState.PARSE_INIT;
+				cancelTimer();
+			}
+			
+			if (modbusState == ModbusState.BAD_PACKET) {
+				Log.d("SERIAL_RAW", "*******BAD PACKET RECEIVED*****");
+				nCurIndex = 0;
+				modbusState = ModbusState.PARSE_INIT;
+				cancelTimer();
+			}
+		}
+		
+		Timer mSyncTimer     = new Timer();
+		TimerTask mSyncTimerTask = null;
+		
+		private void resetTimer() {
+			cancelTimer();
+			mSyncTimerTask = new TimerTask() {
+				public void run() {
+					mSyncTimerTask = null;
+					nCurIndex = 0;
+					modbusState = ModbusState.PARSE_INIT;
+				}
+			};
+			mSyncTimer.schedule(mSyncTimerTask, 300);
+		}
+		
+		private void cancelTimer() {
+			if (mSyncTimerTask != null) {
+				mSyncTimerTask.cancel();
+				mSyncTimerTask = null;
 			}
 		}
 		
@@ -447,6 +547,7 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 				
 				if(numberBytes > 0)
 				{
+					Log.d("CCU_MODBUS", " USB DATA READ "+numberBytes);
 					dataReceived = serialBuffer.getDataReceivedCompatible(numberBytes);
 					
 					// FTDI devices reserve two first bytes of an IN endpoint with info about
@@ -562,5 +663,11 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 	{
 		PARSE_INIT, ESC_BYTE_RCVD, SOF_BYTE_RCVD, LEN_BYTE_RCVD, ESC_BYTE_IN_DATA_RCVD, CRC_RCVD,
 		ESC_BYTE_AS_END_OF_PACKET_RCVD, BAD_PACKET, DATA_AVAILABLE
+	}
+	
+	private enum ModbusState
+	{
+		PARSE_INIT, ADDR_BYTE_RCVD, FUNC_BYTE_RCVD, LEN_BYTE_RCVD,
+		DATA_BYTE_RCVD, CRC_BYTE_RCVD, BAD_PACKET, DATA_AVAILABLE
 	}
 }

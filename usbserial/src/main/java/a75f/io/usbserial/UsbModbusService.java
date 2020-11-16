@@ -24,8 +24,6 @@ import com.felhr.usbserial.UsbSerialInterface;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -83,6 +81,7 @@ public class UsbModbusService extends Service {
     private UsbSerialDevice serialPort;
     private boolean serialPortConnected;
     
+    public SerialInputStream serialInputStream;
     ;
     /*
      * Different notifications from OS will be received here (USB attached, detached, permission responses...)
@@ -142,19 +141,17 @@ public class UsbModbusService extends Service {
                         try {
                             nMsg = (data[0] & 0xff);
                             Log.d(TAG,
-                                    "Modbus message type received: " + nMsg);
+                                    "Modbus message received from Slave: " + nMsg);
                         } catch (ArrayIndexOutOfBoundsException e) {
                             Log.d(TAG,
                                     "Modbus Bad message type received: " + String.valueOf(data[0] & 0xff) +
                                             e.getMessage());
                             return;
                         }
-                        if (data.length < 3) {
+                        /*if (data.length < 3) {
                             return; //We need minimum bytes atleast 3 with msg and fsv address causing crash for WRM Pairing
-                        }
-
-                        Log.d(TAG,
-                              "Modbus message type received: " + data.length + "," + String.valueOf(data[0] & 0xff) + "," + String.valueOf(data[1] & 0xff));
+                        }*/
+                        
                         messageToClients(Arrays.copyOfRange(data, 0, mLength), true);
                     }
                 }
@@ -184,113 +181,21 @@ public class UsbModbusService extends Service {
                 }
             };
 
-
-    private void parseBytes(byte[] inReg) {
-        for (int nCount = 0; nCount < inReg.length; nCount++) {
-            byte inData = inReg[nCount];
-            switch (curState) {
-                case PARSE_INIT:
-                    if (PARSE_DEBUG) {
-                        Log.i(TAG, "Parse INIT");
-                    }
-                    if (inData == ESC_BYTE) {
-                        curState = SerialState.ESC_BYTE_RCVD;
-                    }
-                    break;
-                case ESC_BYTE_RCVD:
-                    if (PARSE_DEBUG) {
-                        Log.i(TAG, "ESC_BYTE_RCVD");
-                    }
-                    if (inData == SOF_BYTE) {
-                        curState = SerialState.SOF_BYTE_RCVD;
-                    } else {
-                        curState = SerialState.BAD_PACKET;
-                    }
-                    break;
-                case SOF_BYTE_RCVD:
-                    if (PARSE_DEBUG) {
-                        Log.i(TAG, "SOF_BYTE_RCVD");
-                    }
-                    nDataLength = inData;
-                    Log.i(TAG, "Data Len: " + nDataLength);
-                    curState = SerialState.LEN_BYTE_RCVD;
-                    break;
-                case LEN_BYTE_RCVD:
-                    if (PARSE_DEBUG) {
-                        Log.i(TAG, "LEN_BYTE_RCVD");
-                    }
-                    if (nCurIndex == nDataLength) {
-                        int nIncomingCRC = inData;
-                        if (nIncomingCRC == nCRC) {
-                            curState = SerialState.CRC_RCVD;
-                        }
-                    } else if (nCurIndex < nDataLength) {
-                        inDataBuffer[nCurIndex] = inData;
-                        nCRC ^= inData;
-                        nCurIndex++;
-                        if (inData == ESC_BYTE) {
-                            curState = SerialState.ESC_BYTE_IN_DATA_RCVD;
-                        }
-                    } else {
-                        curState = SerialState.BAD_PACKET;
-                    }
-                    break;
-                case ESC_BYTE_IN_DATA_RCVD:
-                    if (PARSE_DEBUG) {
-                        Log.i(TAG, "END ESC_BYTE_IN_DATA_RCVD");
-                    }
-                    if (inData == ESC_BYTE) {
-                        curState = SerialState.LEN_BYTE_RCVD;
-                    } else {
-                        curState = SerialState.BAD_PACKET;
-                    }
-                    break;
-                case CRC_RCVD:
-                    if (PARSE_DEBUG) {
-                        Log.i(TAG, "END CRC RCVD");
-                    }
-                    if (inData == ESC_BYTE) {
-                        curState = SerialState.ESC_BYTE_AS_END_OF_PACKET_RCVD;
-                    } else {
-                        curState = SerialState.BAD_PACKET;
-                    }
-                    break;
-                case ESC_BYTE_AS_END_OF_PACKET_RCVD:
-                    if (PARSE_DEBUG) {
-                        Log.i(TAG, "case ESC_BYTE_AS_END_OF_PACKET_RCVD:");
-                    }
-                    if (inData == EOF_BYTE) {
-                        curState = SerialState.DATA_AVAILABLE;
-                    } else {
-                        curState = SerialState.BAD_PACKET;
-                    }
-                    break;
-            }
-            if (curState == SerialState.DATA_AVAILABLE) {
-                if (PARSE_DEBUG) {
-                    Log.i(TAG, "DataAvailable sneding");
-                }
-                messageToClients(Arrays.copyOfRange(inDataBuffer, 0, nCurIndex), false);
-                nCurIndex = 0;
-                nCRC = 0;
-                curState = SerialState.PARSE_INIT;
-            }
-            if (curState == SerialState.BAD_PACKET) {
-                Log.d("SERIAL_RAW", "*******BAD PACKET RECEIVED*****");
-                nCurIndex = 0;
-                nCRC = 0;
-                curState = SerialState.PARSE_INIT;
-            }
-        }
+    public void setSerialInputStream(SerialInputStream is) {
+        serialInputStream = is;
     }
-
-
+    
     private void messageToClients(byte[] data, boolean isModbusData) {
         SerialAction serialAction = SerialAction.MESSAGE_FROM_SERIAL_PORT;
         if (isModbusData)
             serialAction = SerialAction.MESSAGE_FROM_SERIAL_MODBUS;
         SerialEvent serialEvent = new SerialEvent(serialAction, data);
         EventBus.getDefault().post(serialEvent);
+        
+        if (serialInputStream != null) {
+            Log.d(TAG, " Read data from MB : ");
+            serialInputStream.feedSerialData(data);
+        }
     }
 
 
@@ -449,6 +354,7 @@ public class UsbModbusService extends Service {
                     if (serialPort != null ) {
                         data = modbusQueue.take();
                         if (data.length > 0) {
+                            //Log.i(TAG, "Write MB data : " + String.format("%02X ", data[0]));
                             Log.i(TAG, "Write MB data : " + Arrays.toString(data));
                             serialPort.write(Arrays.copyOfRange(data, 0, data.length));
                             try {
@@ -533,10 +439,11 @@ public class UsbModbusService extends Service {
             if (serialPort != null) {
                 if (serialPort.open()) {
                     serialPortConnected = true;
-                    serialPort.setBaudRate(9600);
+                    serialPort.setBaudRate(19200);
+                    serialPort.setModbusDevice(true);
                     serialPort.setDataBits(UsbSerialInterface.DATA_BITS_8);
                     serialPort.setStopBits(UsbSerialInterface.STOP_BITS_1);
-                    serialPort.setParity(UsbSerialInterface.PARITY_NONE);
+                    serialPort.setParity(UsbSerialInterface.PARITY_EVEN);
                     /**
                      * Current flow control Options:
                      * UsbSerialInterface.FLOW_CONTROL_OFF

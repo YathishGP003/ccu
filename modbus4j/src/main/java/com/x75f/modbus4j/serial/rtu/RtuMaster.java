@@ -74,27 +74,27 @@ public class RtuMaster extends SerialMaster {
     /** {@inheritDoc} */
     @Override
     public void init() throws ModbusInitException {
-        /*try {
+        try {
             openConnection(null);
         }
         catch (Exception e) {
             throw new ModbusInitException(e);
-        }*/
+        }
         initialized = true;
     }
 
     /** {@inheritDoc} */
     @Override
     protected void openConnection(MessageControl toClose) throws Exception {
-        /*super.openConnection(toClose);
+        super.openConnection(toClose);
 
-        System.out.println("RtuMaster serial open  connection =="+transport.toString()+","+getePoll());
+        System.out.println("CCU_MODBUS RtuMaster serial open  connection =="+transport.toString()+","+getePoll());
         RtuMessageParser rtuMessageParser = new RtuMessageParser(true);
         this.conn = getMessageControl();
         this.conn.start(transport, rtuMessageParser, null, new SerialWaitingRoomKeyFactory());
         if (getePoll() == null) {
             ((StreamTransport) transport).start("Modbus RTU master");
-        }*/
+        }
     }
 
     /** {@inheritDoc} */
@@ -109,10 +109,12 @@ public class RtuMaster extends SerialMaster {
     @Override
     public ModbusResponse sendImpl(ModbusRequest request) throws ModbusTransportException {
         // Wrap the modbus request in an rtu request.
+        
         RtuMessageRequest rtuRequest = new RtuMessageRequest(request);
-        return null;
+        //return null;
+        
         // Send the request to get the response.
-        /*RtuMessageResponse rtuResponse;
+        RtuMessageResponse rtuResponse;
         try {
             rtuResponse = (RtuMessageResponse) conn.send(rtuRequest);
             if (rtuResponse == null)
@@ -120,8 +122,9 @@ public class RtuMaster extends SerialMaster {
             return rtuResponse.getModbusResponse();
         }
         catch (Exception e) {
-            try {
-                System.out.println("Connection may have been reset. Attempting to re-open.");
+            System.out.println("CCU_MODBUS: Exception sendImpl "+e.getMessage());
+            /*try {
+                System.out.println("CCU_MODBUS: Connection may have been reset. Attempting to re-open.");
                 openConnection(conn);
                 rtuResponse = (RtuMessageResponse) conn.send(rtuRequest);
                 if (rtuResponse == null)
@@ -129,10 +132,11 @@ public class RtuMaster extends SerialMaster {
                 return rtuResponse.getModbusResponse();
             }catch(Exception e2) {
                 closeConnection(conn);
-                System.out.println("Failed to re-connect"+e.getMessage());
+                System.out.println("CCU_MODBUS: Failed to re-connect"+e.getMessage());
                 throw new ModbusTransportException(e2, request.getSlaveId());
-            }
-        }*/
+            }*/
+            throw new ModbusTransportException(e, request.getSlaveId());
+        }
     }
 
     /**

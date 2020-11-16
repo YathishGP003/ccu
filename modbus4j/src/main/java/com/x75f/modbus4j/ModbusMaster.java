@@ -295,6 +295,7 @@ abstract public class ModbusMaster extends Modbus {
             send(new ReadHoldingRegistersRequest(node, 0, 1));
         }
         catch (ModbusTransportException e) {
+            System.out.println("CCU_MODBUS Slave does not exist "+node+" "+e.getMessage());
             // If there was a transport exception, there's no node there.
             return false;
         }

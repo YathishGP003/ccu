@@ -198,7 +198,8 @@ public abstract class UtilityApplication extends Application {
 
         setUsbFilters();  // Start listening notifications from UsbService
         startService(new Intent(this, OTAUpdateHandlerService.class));  // Start OTA update event + timer handler service
-        startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it
+        startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and
+        // Bind it
     
         startUsbModbusService(UsbModbusService.class, usbModbusConnection, null); // Start UsbService(if it was not
         // started before)

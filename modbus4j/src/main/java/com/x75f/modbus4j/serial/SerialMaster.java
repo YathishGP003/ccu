@@ -70,12 +70,12 @@ abstract public class SerialMaster extends ModbusMaster {
     /** {@inheritDoc} */
     @Override
     public void init() throws ModbusInitException {
-        /*try {
+        try {
             this.openConnection(null);
         }
         catch (Exception e) {
             throw new ModbusInitException(e);
-        }*/
+        }
     }
 
     /**
@@ -87,7 +87,7 @@ abstract public class SerialMaster extends ModbusMaster {
      */
     protected void openConnection(MessageControl toClose) throws Exception {
         // Make sure any existing connection is closed.
-        /*closeConnection(toClose);
+        closeConnection(toClose);
 
         // Try 'retries' times to get the socket open.
         int retries = getRetries();
@@ -103,11 +103,11 @@ abstract public class SerialMaster extends ModbusMaster {
                 }else {
                     transport = new StreamTransport(wrapper.getInputStream(),
                             wrapper.getOutputStream());
-                    System.out.println("CCU_SERIAL_MB"+" SerialMaster transport: " + transport.toString());
+                    System.out.println("CCU_MODBUS"+" SerialMaster transport: " + transport.toString());
                 }
                 break;
             }catch(Exception e) {
-                System.out.println("CCU_SERIAL_MB :"+" Exception:"+e.getMessage());
+                System.out.println("CCU_MODBUS :"+" Exception:"+e.getMessage());
                 //Ensure port is closed before we try to reopen or bail out
                 close();
 
@@ -121,14 +121,14 @@ abstract public class SerialMaster extends ModbusMaster {
                     Thread.sleep(retryPause);
                 }
                 catch (InterruptedException e1) {
-                    System.out.println("CCU_SERIAL_MB :"+" InterruptedException:"+e1.getMessage());
+                    System.out.println("CCU_MODBUS :"+" InterruptedException:"+e1.getMessage());
                     // ignore
                 }
                 retryPause *= 2;
                 if (retryPause > RETRY_PAUSE_MAX)
                     retryPause = RETRY_PAUSE_MAX;
             }
-        }*/
+        }
     }
 
     /**
@@ -136,7 +136,7 @@ abstract public class SerialMaster extends ModbusMaster {
      * @param conn
      */
     protected void closeConnection(MessageControl conn) {
-        /*closeMessageControl(conn);
+        closeMessageControl(conn);
         try {
             if(serialPortOpen) {
                 wrapper.close();
@@ -145,7 +145,7 @@ abstract public class SerialMaster extends ModbusMaster {
         }
         catch (Exception e) {
             getExceptionHandler().receivedException(e);
-        }*/
+        }
 
         transport = null;
     }

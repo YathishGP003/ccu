@@ -101,7 +101,7 @@ public class InputStreamListener implements Runnable {
 
                     readcount = in.read(buf);
 
-                    System.out.println("Serial InputStreamListener run thread-consumerdata len="+readcount);
+                    System.out.println("CCU_MODBUS Serial InputStreamListener run thread-consumerdata len="+readcount);
                     consumer.data(buf, readcount);
                 }
                 catch (IOException e) {

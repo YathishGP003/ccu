@@ -141,10 +141,10 @@ public class UsbModbusService extends Service {
                         int nMsg;
                         try {
                             nMsg = (data[0] & 0xff);
-                            Log.d("CCU_SERIAL_MB",
+                            Log.d(TAG,
                                     "Modbus message type received: " + nMsg);
                         } catch (ArrayIndexOutOfBoundsException e) {
-                            Log.d("CCU_SERIAL_MB",
+                            Log.d(TAG,
                                     "Modbus Bad message type received: " + String.valueOf(data[0] & 0xff) +
                                             e.getMessage());
                             return;
@@ -487,7 +487,6 @@ public class UsbModbusService extends Service {
     public void modbusWrite(byte[] data) {
         
         if (isConnected()) {
-            Log.i(TAG, " modbusWrite "+Arrays.toString(data)+" Queue "+modbusQueue.size());
             modbusQueue.add(data);
 
         } else {

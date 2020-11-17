@@ -19,6 +19,8 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.dualduct.DualDuctConstants;
 
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_MODE_CHANGEOVER_HYSTERESIS;
+import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_DOWN_TIMER_COUNTER;
+import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_UP_TIMER_COUNTER;
 
 /**
  * Created by samjithsadasivan on 10/5/18.
@@ -3772,7 +3774,7 @@ public class BuildingTuners
                                                                 .setSiteRef(siteRef)
                                                                 .setEquipRef(equipRef)
                                                                 .setHisInterpolate("cov")
-                                                                .addMarker("tuner")
+                                                                .addMarker("tuner").addMarker("dab")
                                                                 .addMarker("default").addMarker("writable").addMarker("his")
                                                                 .addMarker("his").addMarker("mode").addMarker("changeover")
                                                                 .addMarker("hysteresis").addMarker("sp")
@@ -3786,6 +3788,57 @@ public class BuildingTuners
             hayStack.writePoint(modeChangeoverHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu",
                                 DEFAULT_MODE_CHANGEOVER_HYSTERESIS, 0);
             hayStack.writeHisValById(modeChangeoverHysteresisId, DEFAULT_MODE_CHANGEOVER_HYSTERESIS);
+        }
+        
+        HashMap<Object, Object> stageUpTimerCounterPoint = CCUHsApi.getInstance()
+                                                                        .readEntity("tuner and default and dab and " +
+                                                                                    "stageUp and timer and counter");
+        if (stageUpTimerCounterPoint.isEmpty()) {
+            Point stageUpTimerCounter = new Point.Builder().setDisplayName(equipDis + "-DAB-" + "stageUpTimerCounter")
+                                                                .setSiteRef(siteRef)
+                                                                .setEquipRef(equipRef)
+                                                                .setHisInterpolate("cov")
+                                                                .addMarker("tuner").addMarker("dab")
+                                                                .addMarker("default").addMarker("writable").addMarker("his")
+                                                                .addMarker("stageUp")
+                                                                .addMarker("timer").addMarker("counter").addMarker("sp")
+                                                                .setMinVal("0")
+                                                                .setMaxVal("30")
+                                                                .setIncrementVal("1")
+                                                                .setUnit("m")
+                                                                .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                                                .setTz(tz)
+                                                                .build();
+            String stageUpTimerCounterId = hayStack.addPoint(stageUpTimerCounter);
+            hayStack.writePoint(stageUpTimerCounterId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu",
+                                DEFAULT_STAGE_UP_TIMER_COUNTER, 0);
+            hayStack.writeHisValById(stageUpTimerCounterId, DEFAULT_STAGE_UP_TIMER_COUNTER);
+        }
+    
+        HashMap<Object, Object> stageDownTimerCounterPoint = CCUHsApi.getInstance()
+                                                                   .readEntity("tuner and dab and default and " +
+                                                                               "stageDown and timer and counter");
+        if (stageDownTimerCounterPoint.isEmpty()) {
+            Point stageDownTimerCounter = new Point.Builder().setDisplayName(equipDis + "-DAB-" +
+                                                                             "stageDownTimerCounter")
+                                                           .setSiteRef(siteRef)
+                                                           .setEquipRef(equipRef)
+                                                           .setHisInterpolate("cov")
+                                                           .addMarker("tuner").addMarker("dab")
+                                                           .addMarker("default").addMarker("writable").addMarker("his")
+                                                           .addMarker("stageDown")
+                                                           .addMarker("timer").addMarker("counter").addMarker("sp")
+                                                           .setMinVal("0")
+                                                           .setMaxVal("30")
+                                                           .setIncrementVal("1")
+                                                           .setUnit("m")
+                                                           .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                                           .setTz(tz)
+                                                           .build();
+            String stageDownTimerCounterId = hayStack.addPoint(stageDownTimerCounter);
+            hayStack.writePoint(stageDownTimerCounterId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu",
+                                DEFAULT_STAGE_DOWN_TIMER_COUNTER, 0);
+            hayStack.writeHisValById(stageDownTimerCounterId, DEFAULT_STAGE_DOWN_TIMER_COUNTER);
         }
     }
     

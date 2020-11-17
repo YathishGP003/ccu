@@ -1,25 +1,62 @@
- - Merged PR 208: Make fanStatus part of ZoneStatus message
- - Merged PR 189: BUG : 3623, analog max resets when selected 0
- - Make fanStatus part of ZoneStatus message
- - Merged PR 114: Story/samjith/VAV Reheat Series Fan and Parallel Fan
- - Merged PR 80: 3296-CCU_zone_arc_not_considering_db_lessthan_default_value
- -  VAV Zones should do reheat if the system is CoolOnly and zone requires heating
- - Update fanControlDealy tuner default value
- - Merge branch 'master' into story/samjith/3462_vav_series_fan
- - 3296: check for priority level and consider db
- - BUG : 3623, analog max resets when selected 0
- - Disable zone cooling/heating when system config does not allow it
- - change fanstatus enum
- - Update fan status when zone is dead
- - BUG : 3893 Incorrect Analog name displayed
- - Add enums to fan point
- - Fix for QE observations
- - VAV series/parallel tags to all points
- - Epidemic mode support
- - Remove fan point unit
- - Change default min damper pos to 20
- - VAV parallel fan algo
- - Vav parallel fan UI changes
- - Update system logic and fix misc issues
- - VAV series fan : points and algo
- - VAV Series Fan UI changes
+ - Merged PR 246: Vav System Refactor
+ - Merged PR 227: story/samjith/4178_dab_refactor
+ - Stage up/down tuner tag change and maxVal update
+ - update unit for system tuner
+ - add new system tuners
+ - Merge branch 'story/samjith/4178_dab_refactor' into story/samjith/4266_vav_system_refactor
+ - Merge branch 'master' into story/samjith/4178_dab_refactor
+ - Merged PR 235: story/mahesh/3635-CCU_dual_temp_slider_within_user_limit
+ - Merged PR 158: BUG 3815 : CCU Crashes when certain timezones selected
+ - Merge master
+ - Merged PR 236: 4303:CCU crashing on system profile switching due to DAB dualDuct is not verified
+ - DAB Changeover algo update
+ - Merged PR 214: 3892-When Normalized damper position for VAV is mapped to the voltage not sho...
+ - Merged PR 217: update setting point whenever updating node address
+ - disable spinner on auto select
+ - update SN band first
+ - consider device address if already SN paird
+ - update setting point whenever updating node address
+ - Merged PR 226: bug/mahesh/4158-CCU_local_change_not_sync_after_reconnect
+ - Vav stage up/down timer tuner max val update
+ - Merge branch 'story/samjith/4178_dab_refactor' into story/samjith/4266_vav_system_refactor
+ - DAB stage up/down timer limit change
+ - 4303:CCU crashing on system profile switching due to DAB dualDuct is not verified in system profile.
+ - check for the heating/cooling user limit and update
+ - turn ON fan when stagedown timer delays stage-off
+ - Merge branch 'story/samjith/4178_dab_refactor' into story/samjith/4266_vav_system_refactor
+ - Keep fan On when any stage is active
+ - unregister in ondestroy
+ - Merged PR 223: TI equipStatus is setting as Zone temp dead when starting temp is seeded in between desired temp i.e 70-74
+ - Merged PR 224: BACnet packets are being sent over WiFi but not Ethernet when both WiFi and Ethernet are connected.
+ - vav heating loop update
+ - Merge branch 'story/samjith/4178_dab_refactor' into story/samjith/4266_vav_system_refactor
+ - Relay issue fix
+ - Tuner change
+ - add 1 min delay after re connection
+ - receive network connection status and update points whever reconnect
+ - SystemMode EUMS Used.
+ - Merge branch 'story/samjith/4178_dab_refactor' into story/samjith/4266_vav_system_refactor
+ - Stage up/down tuner tag change
+ - Stagedown override and tuner corrections
+ - HybridRTU points initialize
+ - Stage up/timer implementation for Vav
+ - 3849-EquipStatus for 72 temp and based on System mode.
+ - Merge branch 'story/samjith/4178_dab_refactor' into story/samjith/4266_vav_system_refactor
+ - Vav algo refactor and tuner definition
+ - Stage up/down tuner tags update
+ - Changeover override correction
+ - Move custom PI controller to system package
+ - Heating load adjustment
+ - Merge branch 'master' into story/samjith/4178_dab_refactor
+ - Update stage transition logic
+ - reset PI loop when schedule changes to occupied
+ - 3892-When Normalized damper position for VAV is mapped to the voltage not showing the point in UI creates confusion. Added for VAV Series fan.
+ - Stage up/down timer implementation
+ - algo and Loop changes
+ - 3849-TI_equipStatus made deadband for room tem 70-74.
+ - 1266 - Removed Old IP Validation
+ - 1266-IP Validation for Manual IP Configuration
+ - 1266-SetEnforce Added for IP Routing
+ - Propage time zone change to points
+ - BUG 3815 : CCU Crashes when certain timezones selected
+ - Bug-1266-AddRoutingToEthernet

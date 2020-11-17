@@ -228,6 +228,7 @@ public abstract class DabSystemProfile extends SystemProfile
                                                  .addMarker("stageUp").addMarker("timer").addMarker("counter")
                                                  .addMarker("sp").addMarker("system")
                                                  .setMinVal("0").setMaxVal("5").setIncrementVal("1")
+                                                 .setUnit("m")
                                                  .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                                  .setTz(tz)
                                                  .build();
@@ -267,6 +268,7 @@ public abstract class DabSystemProfile extends SystemProfile
                                             .addMarker("stageDown").addMarker("timer").addMarker("counter")
                                             .addMarker("sp").addMarker("system")
                                             .setMinVal("0").setMaxVal("5").setIncrementVal("1")
+                                            .setUnit("m")
                                             .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                             .setTz(tz)
                                             .build();

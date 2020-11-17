@@ -3867,5 +3867,55 @@ public class BuildingTuners
             CCUHsApi.getInstance().writeDefaultValById(fanControlOnFixedTimeDelayId, 1.0);
             CCUHsApi.getInstance().writeHisValById(fanControlOnFixedTimeDelayId, 1.0);
         }
+    
+        HashMap<Object, Object> stageUpTimerCounterPoint = CCUHsApi.getInstance()
+                                                                   .readEntity("tuner and vav and default and stageUp" +
+                                                                               " and timer and counter");
+        if (stageUpTimerCounterPoint.isEmpty()) {
+            Point stageUpTimerCounter = new Point.Builder().setDisplayName(equipDis + "-VAV-" + "stageUpTimerCounter")
+                                                           .setSiteRef(siteRef)
+                                                           .setEquipRef(equipRef)
+                                                           .setHisInterpolate("cov")
+                                                           .addMarker("tuner").addMarker("vav")
+                                                           .addMarker("default").addMarker("writable").addMarker("his")
+                                                           .addMarker("stageUp")
+                                                           .addMarker("timer").addMarker("counter").addMarker("sp")
+                                                           .setMinVal("0")
+                                                           .setMaxVal("30")
+                                                           .setIncrementVal("1")
+                                                           .setUnit("m")
+                                                           .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                                           .setTz(tz)
+                                                           .build();
+            String stageUpTimerCounterId = hayStack.addPoint(stageUpTimerCounter);
+            hayStack.writePoint(stageUpTimerCounterId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu",
+                                DEFAULT_STAGE_UP_TIMER_COUNTER, 0);
+            hayStack.writeHisValById(stageUpTimerCounterId, DEFAULT_STAGE_UP_TIMER_COUNTER);
+        }
+    
+        HashMap<Object, Object> stageDownTimerCounterPoint = CCUHsApi.getInstance()
+                                                                 .readEntity("tuner and vav and default and stageDown" +
+                                                                             " and timer and counter");
+        if (stageDownTimerCounterPoint.isEmpty()) {
+            Point stageDownTimerCounter = new Point.Builder().setDisplayName(equipDis + "-VAV-" + "stageDownTimerCounter")
+                                                             .setSiteRef(siteRef)
+                                                             .setEquipRef(equipRef)
+                                                             .setHisInterpolate("cov")
+                                                             .addMarker("tuner").addMarker("vav")
+                                                             .addMarker("default").addMarker("writable").addMarker("his")
+                                                             .addMarker("stageDown")
+                                                             .addMarker("timer").addMarker("counter").addMarker("sp")
+                                                             .setMinVal("0")
+                                                             .setMaxVal("30")
+                                                             .setIncrementVal("1")
+                                                             .setUnit("m")
+                                                             .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                                             .setTz(tz)
+                                                             .build();
+            String stageDownTimerCounterId = hayStack.addPoint(stageDownTimerCounter);
+            hayStack.writePoint(stageDownTimerCounterId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu",
+                                DEFAULT_STAGE_DOWN_TIMER_COUNTER, 0);
+            hayStack.writeHisValById(stageDownTimerCounterId, DEFAULT_STAGE_DOWN_TIMER_COUNTER);
+        }
     }
 }

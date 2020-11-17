@@ -334,7 +334,6 @@ public class DabStagedRtu extends DabSystemProfile
                     } else {
                         relayState = systemCoolingLoopOp > Math.max(stageThreshold - relayDeactHysteresis, 0) ? 1 : 0;
                     }
-                    
                     break;
                 case HEATING_1:
                 case HEATING_2:

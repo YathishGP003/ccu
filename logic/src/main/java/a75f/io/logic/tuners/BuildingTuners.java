@@ -94,6 +94,7 @@ public class BuildingTuners
         OAOTuners.updateNewTuners(siteRef,equipRef, equipDis,tz,false);
         updateDabBuildingTuners();
         updateVavBuildingTuners();
+        addDefaultTiTuners();
     }
     
     public void addDefaultBuildingTuners() {

@@ -923,7 +923,7 @@ public class CCUHsApi
             @Override
             public void run()
             {
-                if (!testHarnessEnabled)
+                if (!testHarnessEnabled && !entitySyncHandler.isSyncProgress())
                 {
                     entitySyncHandler.doSyncWithWrite();
                 } else

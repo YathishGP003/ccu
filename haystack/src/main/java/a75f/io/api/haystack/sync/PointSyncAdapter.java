@@ -29,7 +29,7 @@ import a75f.io.logger.CcuLog;
 public class PointSyncAdapter extends EntitySyncAdapter
 {
     @Override
-    public boolean onSync() {
+    public synchronized boolean onSync() {
         CcuLog.i("CCU_HS_SYNC", "onSync Points");
 
         String siteRef = CCUHsApi.getInstance().getSiteGuid();

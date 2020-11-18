@@ -90,11 +90,11 @@ public class BuildingTuners
      * This should be done neatly.
      */
     public void updateBuildingTuners() {
+        addDefaultTiTuners();
         DualDuctTuners.addDefaultTuners(siteRef, equipRef, equipDis, tz);
         OAOTuners.updateNewTuners(siteRef,equipRef, equipDis,tz,false);
         updateDabBuildingTuners();
         updateVavBuildingTuners();
-        addDefaultTiTuners();
     }
     
     public void addDefaultBuildingTuners() {

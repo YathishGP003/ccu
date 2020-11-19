@@ -1,2 +1,5 @@
- - Merged PR 247: bug/mahesh/4440-CCU_TI_add_default_tuners
- - add default ti tuners and update
+ - Merged PR 248: 4440: CCU_update_default_ti_tuner_when_upgrading
+ - remove duplicate cm current temp tuner
+ - fix the duplicate points creation
+ - points are duplicated
+ - update default tuner when upgrading

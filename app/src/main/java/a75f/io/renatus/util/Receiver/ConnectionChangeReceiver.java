@@ -17,6 +17,7 @@ import a75f.io.api.haystack.CCUHsApi;
  */
 public class ConnectionChangeReceiver extends BroadcastReceiver {
 
+    Boolean isConnected = null;
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("Connection_Info", "Result Action: " + intent.getAction());
@@ -24,9 +25,10 @@ public class ConnectionChangeReceiver extends BroadcastReceiver {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = cm.getActiveNetworkInfo();
         if (info != null) {
-            if (info.isConnected()) {
+            if (isConnected != null && info.isConnected()) {
                 new Handler().postDelayed(() -> CCUHsApi.getInstance().syncEntityWithPointWrite(),60000);
             }
+            isConnected = info.isConnected();
         }
     }
 }

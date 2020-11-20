@@ -1,21 +1,21 @@
 {
   "modbusEquipId (_id)": "5f1f30ad18bcbf4f1d9a2fe3",
-  "name": "Energy Meters APM",
+  "name": "Energy Meter El Measure",
   "description": "This document contains the configuration necessary to manage Energy meters",
   "equipType": "EM",
-  "manufacturer": "APM",
+  "manufacturer": "El Measure",
   "modelNumbers": [
-    "APM"
+    "Multi Function Meters"
   ],
   "registers": [
     {
       "registerAddress": 140,
-      "registerNumber": "400141",
+      "registerNumber": "40141",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "float",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a2fe4",
+          "parameterId": "5f1f30ad18bcbf4f1d9a2f14",
           "name": "Line Voltage (Avg)",
           "startBit": 0,
           "endBit": 15,
@@ -34,6 +34,10 @@
               "tagName": "average"
             },
             {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
               "tagName": "kind",
               "value": "Number"
             },
@@ -50,12 +54,12 @@
     },
     {
       "registerAddress": 142,
-      "registerNumber": "400143",
+      "registerNumber": "40143",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "float",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a2fe5",
+          "parameterId": "5f1f30ad18bcbf4f1d9a2f15",
           "name": "Line Voltage (R Phase)",
           "startBit": 0,
           "endBit": 15,
@@ -74,6 +78,10 @@
               "tagName": "rPhase"
             },
             {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
               "tagName": "kind",
               "value": "Number"
             },
@@ -90,12 +98,12 @@
     },
     {
       "registerAddress": 144,
-      "registerNumber": "400145",
+      "registerNumber": "40145",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "float",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a2fe6",
+          "parameterId": "5f1f30ad18bcbf4f1d9a2f16",
           "name": "Line Voltage (Y Phase)",
           "startBit": 0,
           "endBit": 15,
@@ -114,6 +122,10 @@
               "tagName": "yPhase"
             },
             {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
               "tagName": "kind",
               "value": "Number"
             },
@@ -130,12 +142,12 @@
     },
     {
       "registerAddress": 146,
-      "registerNumber": "400147",
+      "registerNumber": "40147",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "float",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a2fe7",
+          "parameterId": "5f1f30ad18bcbf4f1d9a2f17",
           "name": "Line Voltage (B Phase)",
           "startBit": 0,
           "endBit": 15,
@@ -151,6 +163,10 @@
             },
             {
               "tagName": "bPhase"
+            },
+            {
+              "tagName": "unit",
+              "value": "V"
             },
             {
               "tagName": "kind",
@@ -169,12 +185,12 @@
     },
     {
       "registerAddress": 148,
-      "registerNumber": "400149",
+      "registerNumber": "40149",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "float",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a2fe8",
+          "parameterId": "5f1f30ad18bcbf4f1d9a2f18",
           "name": "Phase Current (Avg)",
           "startBit": 0,
           "endBit": 15,
@@ -183,13 +199,14 @@
               "tagName": "em"
             },
             {
-              "tagName": "phase"
-            },
-            {
-              "tagName": "cur"
+              "tagName": "phaseCur"
             },
             {
               "tagName": "average"
+            },
+            {
+              "tagName": "unit",
+              "value": "A"
             },
             {
               "tagName": "kind",
@@ -208,12 +225,12 @@
     },
     {
       "registerAddress": 150,
-      "registerNumber": "400151",
+      "registerNumber": "40151",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "float",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a2fe9",
+          "parameterId": "5f1f30ad18bcbf4f1d9a2f19",
           "name": "Phase Current (R)",
           "startBit": 0,
           "endBit": 15,
@@ -222,13 +239,14 @@
               "tagName": "em"
             },
             {
-              "tagName": "phase"
-            },
-            {
-              "tagName": "cur"
+              "tagName": "phaseCur"
             },
             {
               "tagName": "rPhase"
+            },
+            {
+              "tagName": "unit",
+              "value": "A"
             },
             {
               "tagName": "kind",
@@ -247,7 +265,7 @@
     },
     {
       "registerAddress": 152,
-      "registerNumber": "400153",
+      "registerNumber": "40153",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "float",
       "parameters": [
@@ -261,13 +279,14 @@
               "tagName": "em"
             },
             {
-              "tagName": "phase"
-            },
-            {
-              "tagName": "cur"
+              "tagName": "phaseCur"
             },
             {
               "tagName": "yPhase"
+            },
+            {
+              "tagName": "unit",
+              "value": "A"
             },
             {
               "tagName": "kind",
@@ -286,7 +305,7 @@
     },
     {
       "registerAddress": 154,
-      "registerNumber": "400155",
+      "registerNumber": "40155",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "float",
       "parameters": [
@@ -300,13 +319,14 @@
               "tagName": "em"
             },
             {
-              "tagName": "phase"
-            },
-            {
-              "tagName": "cur"
+              "tagName": "phaseCur"
             },
             {
               "tagName": "bPhase"
+            },
+            {
+              "tagName": "unit",
+              "value": "A"
             },
             {
               "tagName": "kind",
@@ -325,7 +345,7 @@
     },
     {
       "registerAddress": 156,
-      "registerNumber": "400157",
+      "registerNumber": "40157",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "float",
       "parameters": [
@@ -340,6 +360,10 @@
             },
             {
               "tagName": "frequency"
+            },
+            {
+              "tagName": "unit",
+              "value": "Hz"
             },
             {
               "tagName": "kind",
@@ -358,7 +382,7 @@
     },
     {
       "registerAddress": 116,
-      "registerNumber": "400117",
+      "registerNumber": "40117",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "float",
       "parameters": [
@@ -394,7 +418,7 @@
     },
     {
       "registerAddress": 216,
-      "registerNumber": "400217",
+      "registerNumber": "40217",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "long",
       "parameters": [

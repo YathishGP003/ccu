@@ -203,6 +203,8 @@ public class ModbusEquip {
             String physicalParamId = CCUHsApi.getInstance().addPoint(physicalParamPoint.setPointRef(logicalParamId).build());
             CCUHsApi.getInstance().writeHisValById(logicalParamId, 0.0);
             CCUHsApi.getInstance().writeHisValById(physicalParamId,0.0);
+            CCUHsApi.getInstance().writeDefaultValById(logicalParamId,0.0);
+            CCUHsApi.getInstance().writeDefaultValById(physicalParamId,0.0);
 
         }
         CCUHsApi.getInstance().syncEntityTree();

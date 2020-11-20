@@ -386,13 +386,11 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 				case ADDR_BYTE_RCVD:
 					modbusState = ModbusState.FUNC_BYTE_RCVD;
 					inDataBuffer[nCurIndex++] = inData;
-					resetTimer();
 					break;
 				case FUNC_BYTE_RCVD:
 					modbusState = ModbusState.LEN_BYTE_RCVD;
 					inDataBuffer[nCurIndex++] = inData;
 					nDataLength = inData & 0xff;
-					resetTimer();
 					break;
 				case LEN_BYTE_RCVD:
 				case DATA_BYTE_RCVD:
@@ -405,12 +403,11 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 						inDataBuffer[nCurIndex++] = inData;
 						nDataLength--;
 					}
-					resetTimer();
 					break;
 				case CRC_BYTE_RCVD:
 					modbusState = ModbusState.DATA_AVAILABLE;
 					inDataBuffer[nCurIndex] = inData;
-					resetTimer();
+					cancelTimer();
 					break;
 			}
 			//Log.d("CCU_MODBUS", " handleIncomigModbusData "+inData+" modbusState "+modbusState);
@@ -420,36 +417,34 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 				onReceivedData(inDataBuffer, nCurIndex+1);
 				nCurIndex = 0;
 				modbusState = ModbusState.PARSE_INIT;
-				cancelTimer();
 			}
 			
 			if (modbusState == ModbusState.BAD_PACKET) {
 				Log.d("SERIAL_RAW", "*******BAD PACKET RECEIVED*****");
 				nCurIndex = 0;
 				modbusState = ModbusState.PARSE_INIT;
-				cancelTimer();
 			}
 		}
 		
-		Timer mSyncTimer     = new Timer();
-		TimerTask mSyncTimerTask = null;
+		Timer mRcvTimer     = new Timer();
+		TimerTask mRcvTimerTask = null;
 		
 		private void resetTimer() {
 			cancelTimer();
-			mSyncTimerTask = new TimerTask() {
+			mRcvTimerTask = new TimerTask() {
 				public void run() {
-					mSyncTimerTask = null;
+					mRcvTimerTask = null;
 					nCurIndex = 0;
 					modbusState = ModbusState.PARSE_INIT;
 				}
 			};
-			mSyncTimer.schedule(mSyncTimerTask, 300);
+			mRcvTimer.schedule(mRcvTimerTask, 300);
 		}
 		
 		private void cancelTimer() {
-			if (mSyncTimerTask != null) {
-				mSyncTimerTask.cancel();
-				mSyncTimerTask = null;
+			if (mRcvTimerTask != null) {
+				mRcvTimerTask.cancel();
+				mRcvTimerTask = null;
 			}
 		}
 		

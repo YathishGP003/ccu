@@ -1,9 +1,7 @@
 package a75f.io.logic.bo.building.modbus;
 
-import a75f.io.logic.bo.building.definitions.DamperType;
-
 public enum ModbusEquipTypes {
-    UPS("Uninterrupted Power Supply"),PAC ("Precision Air Conditioning"),RRS ("Rodent Repellant Systems"),WLD ("Water Leak Detection"),VRF ("Variable Frequency"),EM ("Energy Meters"),ATS ("Automatic Transfer Switch");
+    UPS30K("Uninterrupted Power Supply-30k"), UPS400K("Uninterrupted Power Supply-400k"), UPS80K("Uninterrupted Power Supply-80k"), PAC("Precision Air Conditioning"), RRS("Rodent Repellant Systems"), WLD("Water Leak Detection"), VRF("Variable Frequency"), EM("Energy Meter El Measure"), EMS("Energy Meter Schnieder"), ATS("Automatic Transfer Switch");
     public String displayName;
 
     ModbusEquipTypes(String str) {
@@ -11,8 +9,8 @@ public enum ModbusEquipTypes {
     }
 
     public static ModbusEquipTypes getEnum(String value) {
-        for(ModbusEquipTypes v : values())
-            if(v.displayName.equalsIgnoreCase(value)) return v;
+        for (ModbusEquipTypes v : values())
+            if (v.displayName.equalsIgnoreCase(value)) return v;
         throw new IllegalArgumentException();
     }
 }

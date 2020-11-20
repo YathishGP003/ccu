@@ -34,6 +34,10 @@
               "tagName": "average"
             },
             {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
               "tagName": "kind",
               "value": "Number"
             },
@@ -72,6 +76,10 @@
             },
             {
               "tagName": "rPhase"
+            },
+            {
+              "tagName": "unit",
+              "value": "V"
             },
             {
               "tagName": "kind",
@@ -114,6 +122,10 @@
               "tagName": "yPhase"
             },
             {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
               "tagName": "kind",
               "value": "Number"
             },
@@ -153,6 +165,10 @@
               "tagName": "bPhase"
             },
             {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
               "tagName": "kind",
               "value": "Number"
             },
@@ -183,13 +199,14 @@
               "tagName": "em"
             },
             {
-              "tagName": "phase"
-            },
-            {
-              "tagName": "cur"
+              "tagName": "phaseCur"
             },
             {
               "tagName": "average"
+            },
+            {
+              "tagName": "unit",
+              "value": "A"
             },
             {
               "tagName": "kind",
@@ -222,13 +239,14 @@
               "tagName": "em"
             },
             {
-              "tagName": "phase"
-            },
-            {
-              "tagName": "cur"
+              "tagName": "phaseCur"
             },
             {
               "tagName": "rPhase"
+            },
+            {
+              "tagName": "unit",
+              "value": "A"
             },
             {
               "tagName": "kind",
@@ -261,13 +279,14 @@
               "tagName": "em"
             },
             {
-              "tagName": "phase"
-            },
-            {
-              "tagName": "cur"
+              "tagName": "phaseCur"
             },
             {
               "tagName": "yPhase"
+            },
+            {
+              "tagName": "unit",
+              "value": "A"
             },
             {
               "tagName": "kind",
@@ -300,13 +319,14 @@
               "tagName": "em"
             },
             {
-              "tagName": "phase"
-            },
-            {
-              "tagName": "cur"
+              "tagName": "phaseCur"
             },
             {
               "tagName": "bPhase"
+            },
+            {
+              "tagName": "unit",
+              "value": "A"
             },
             {
               "tagName": "kind",
@@ -340,6 +360,10 @@
             },
             {
               "tagName": "frequency"
+            },
+            {
+              "tagName": "unit",
+              "value": "Hz"
             },
             {
               "tagName": "kind",
@@ -412,7 +436,7 @@
             },
             {
               "tagName": "unit",
-              "value": "Wh"
+              "value": "kWh"
             },
             {
               "tagName": "kind",

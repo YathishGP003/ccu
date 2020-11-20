@@ -1,5 +1,5 @@
 {
-  "modbusEquipId (_id)": "5f1f30ad18bcbf4f1d9a1de3",
+  "modbusEquipId (_id)": "5f1f30ad18bcbf4f1d9a1890",
   "name": "Daikin IDU",
   "description": "This document contains the configuration necessary to manage a Daikin IDU.",
   "equipType": "VRF",
@@ -12,10 +12,10 @@
       "registerAddress": 0,
       "registerNumber": "40000",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "binary",
+      "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a1de4",
+          "parameterId": "5f1f30ad18bcbf4f1d11a1de4",
           "name": "Unit Status",
           "startBit": 0,
           "endBit": 15,
@@ -25,10 +25,7 @@
               "tagName": "vrf"
             },
             {
-              "tagName": "unit"
-            },
-            {
-              "tagName": "status"
+              "tagName": "unitStatus"
             },
             {
               "tagName": "kind",
@@ -47,10 +44,7 @@
               "tagName": "vrf"
             },
             {
-              "tagName": "unit"
-            },
-            {
-              "tagName": "status"
+              "tagName": "unitStatus"
             },
             {
               "tagName": "kind",
@@ -62,7 +56,7 @@
             },
             {
               "tagName": "maxVal",
-              "value": 2
+              "value": 1
             },
             {
               "tagName": "incrementVal",
@@ -84,11 +78,11 @@
           ],
           "commands": [
             {
-              "name": "off",
+              "name": "Off",
               "bitValues": "0"
             },
             {
-              "name": "on",
+              "name": "On",
               "bitValues": "1"
             }
           ]
@@ -99,10 +93,10 @@
       "registerAddress": 1,
       "registerNumber": "40001",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "float",
+      "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a1de5",
+          "parameterId": "5f1f30ad18bcbf4f1d9a1deo",
           "name": "Operation Mode",
           "startBit": 0,
           "endBit": 15,
@@ -195,13 +189,13 @@
       ]
     },
     {
-      "registerAddress": 3,
+      "registerAddress": 4,
       "registerNumber": "40004",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "decimal",
+      "parameterDefinitionType": "range",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a1de6",
+          "parameterId": "5f1f30ad18bcbf4f1d9a1dff",
           "name": "Set Temperature",
           "startBit": 0,
           "endBit": 15,
@@ -211,14 +205,22 @@
               "tagName": "vrf"
             },
             {
-              "tagName": "set"
+              "tagName": "desired"
             },
             {
               "tagName": "temp"
             },
             {
-              "tagName": "unit",
-              "value": "KHz"
+              "tagName": "minVal",
+              "value": 16
+            },
+            {
+              "tagName": "maxVal",
+              "value": 32
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 1
             },
             {
               "tagName": "kind",
@@ -237,10 +239,26 @@
               "tagName": "vrf"
             },
             {
-              "tagName": "set"
+              "tagName": "desired"
             },
             {
               "tagName": "temp"
+            },
+            {
+              "tagName": "minVal",
+              "value": 16
+            },
+            {
+              "tagName": "maxVal",
+              "value": 32
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 1
+            },
+            {
+              "tagName": "unit",
+              "value": "C"
             },
             {
               "tagName": "kind",
@@ -267,9 +285,10 @@
       "registerAddress": 3,
       "registerNumber": "40003",
       "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a1de7",
+          "parameterId": "5f1f30ad18bcbf4f1d9a1d99",
           "name": "Air direction/Vane",
           "startBit": 0,
           "endBit": 15,
@@ -337,13 +356,14 @@
       ]
     },
     {
-      "registerAddress": 4,
-      "registerNumber": "40005",
-      "registerType": "holdingRegister",
+      "registerAddress": 5,
+      "registerNumber": "30005",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a1de8",
-          "name": "Room Temperature (Return Air Temperature)",
+          "parameterId": "5f1f30ad18123bf4f1d9a1df5",
+          "name": "Room Temperature (Return Air Temp)",
           "startBit": 0,
           "endBit": 15,
           "logicalPointTags": [
@@ -351,10 +371,7 @@
               "tagName": "vrf"
             },
             {
-              "tagName": "room"
-            },
-            {
-              "tagName": "temp"
+              "tagName": "roomTemp"
             },
             {
               "tagName": "unit",
@@ -376,12 +393,13 @@
       ]
     },
     {
-      "registerAddress": 1,
+      "registerAddress": 2,
       "registerNumber": "40002",
       "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a1de7",
+          "parameterId": "5f1f30ad18bcbf4f1d9a1dk9",
           "name": "Indoor Unit Fan status",
           "startBit": 0,
           "endBit": 15,
@@ -422,6 +440,18 @@
             },
             {
               "tagName": "status"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 5
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 1
             },
             {
               "tagName": "kind",

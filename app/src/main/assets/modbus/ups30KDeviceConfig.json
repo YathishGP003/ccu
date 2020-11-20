@@ -2,35 +2,36 @@
   "modbusEquipId (_id)": "5f1f30ad18beef4f1d9a222",
   "name": "UPS -30kVA",
   "description": "This document contains the configuration necessary to ups-30kva",
-  "equipType": "UPS",
+  "equipType": "UPS30K",
   "manufacturer": "Vertiv",
   "modelNumbers": [
     "ITA2"
   ],
   "registers": [
     {
-      "registerAddress": 79,
-      "registerNumber": "1080",
+      "registerAddress": 1080,
+      "registerNumber": "41081",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "boolean",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a2112",
+          "parameterId": "5f1f30ad18bcbf4f1d9a21a19",
           "name": "UPS status",
           "startBit": 0,
           "endBit": 15,
+          "bitParamRange": "0-1",
           "conditions": [
             {
               "name": "No Power Supply",
-              "bitValues": 0
+              "bitValues": "00"
             },
             {
               "name": "Internal Bypass Supply",
-              "bitValues": 1
+              "bitValues": "01"
             },
             {
               "name": "UPS Intervention Supply",
-              "bitValues": 10
+              "bitValues": "10"
             }
           ],
           "logicalPointTags": [
@@ -56,20 +57,20 @@
       ]
     },
     {
-      "registerAddress": 76,
-      "registerNumber": "1177",
+      "registerAddress": 1177,
+      "registerNumber": "41178",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "Analogue",
+      "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18beef4f1d9a2102",
-          "name": "Battery voltage (Positive Voltage - Charging)",
+          "parameterId": "5f1f30ad18beef4f1d9a2a02",
+          "name": "Battery voltage (pos Voltage - Charging)",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
           "logicalPointTags": [
             {
-              "tagName": "ats"
+              "tagName": "ups"
             },
             {
               "tagName": "battery"
@@ -88,6 +89,10 @@
               "value": "Number"
             },
             {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
               "tagName": "his"
             },
             {
@@ -99,20 +104,20 @@
       ]
     },
     {
-      "registerAddress": 79,
-      "registerNumber": "1180",
+      "registerAddress": 1180,
+      "registerNumber": "41181",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "Analogue",
+      "parameterDefinitionType": "decimal",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2102",
-          "name": "Battery Voltage (Negative Voltage - Discharging)",
+          "name": "Battery Voltage (neg Voltage - Discharging)",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
           "logicalPointTags": [
             {
-              "tagName": "ats"
+              "tagName": "ups"
             },
             {
               "tagName": "battery"
@@ -131,41 +136,8 @@
               "value": "Number"
             },
             {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 78,
-      "registerNumber": "1179",
-      "registerType": "holdingRegister",
-      "parameterDefinitionType": "Analogue",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a2103",
-          "name": "DC voltage",
-          "startBit": 0,
-          "endBit": 15,
-          "displayInUiDefault": false,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "dc"
-            },
-            {
-              "tagName": "voltage"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
+              "tagName": "unit",
+              "value": "V"
             },
             {
               "tagName": "his"
@@ -179,49 +151,10 @@
       ]
     },
     {
-      "registerAddress": 74,
-      "registerNumber": "1175",
+      "registerAddress": 1202,
+      "registerNumber": "41203",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "Analogue",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18beef4f1d9a2104",
-          "name": "Battery charging/discharging status",
-          "startBit": 0,
-          "endBit": 15,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "charging"
-            },
-            {
-              "tagName": "status"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 1,
-      "registerNumber": "1202",
-      "registerType": "holdingRegister",
-      "parameterDefinitionType": "Analogue",
+      "parameterDefinitionType": "decimal",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2105",
@@ -264,10 +197,10 @@
       ]
     },
     {
-      "registerAddress": 77,
-      "registerNumber": "1178",
+      "registerAddress": 1178,
+      "registerNumber": "41179",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "Analogue",
+      "parameterDefinitionType": "decimal",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2105",
@@ -292,6 +225,10 @@
               "value": "Number"
             },
             {
+              "tagName": "unit",
+              "value": "A"
+            },
+            {
               "tagName": "his"
             },
             {
@@ -303,10 +240,10 @@
       ]
     },
     {
-      "registerAddress": 80,
-      "registerNumber": "1181",
+      "registerAddress": 1181,
+      "registerNumber": "41182",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "Analogue",
+      "parameterDefinitionType": "decimal",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2106",
@@ -331,43 +268,8 @@
               "value": "Number"
             },
             {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 44,
-      "registerNumber": "40045",
-      "registerType": "holdingRegister",
-      "parameterDefinitionType": "float",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18beef4f1d9a2107",
-          "name": "Load on bypass",
-          "startBit": 0,
-          "endBit": 15,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "load"
-            },
-            {
-              "tagName": "on"
-            },
-            {
-              "tagName": "bypass"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
+              "tagName": "unit",
+              "value": "A"
             },
             {
               "tagName": "his"
@@ -381,16 +283,17 @@
       ]
     },
     {
-      "registerAddress": 31,
-      "registerNumber": "1032",
+      "registerAddress": 1032,
+      "registerNumber": "41033",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "Digital",
+      "parameterDefinitionType": "decimal",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2108",
           "name": "UPS in maintenance",
           "startBit": 32,
           "endBit": 47,
+          "bitParam": 44,
           "conditions": [
             {
               "name": "Normal",
@@ -424,16 +327,17 @@
       ]
     },
     {
-      "registerAddress": 29,
-      "registerNumber": "1030",
+      "registerAddress": 1030,
+      "registerNumber": "41031",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "Digital",
+      "parameterDefinitionType": "decimal",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2109",
           "name": "Rectifier failure alarm",
-          "startBit": 16,
-          "endBit": 31,
+          "startBit": 0,
+          "endBit": 15,
+          "bitParam": 15,
           "conditions": [
             {
               "name": "Normal",
@@ -473,8 +377,8 @@
       ]
     },
     {
-      "registerAddress": 30,
-      "registerNumber": "1031",
+      "registerAddress": 1031,
+      "registerNumber": "41032",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "Digital",
       "parameters": [
@@ -483,6 +387,7 @@
           "name": "Inverter failure alarm",
           "startBit": 16,
           "endBit": 31,
+          "bitParam": 17,
           "conditions": [
             {
               "name": "Normal",
@@ -522,16 +427,17 @@
       ]
     },
     {
-      "registerAddress": 32,
-      "registerNumber": "1033",
+      "registerAddress": 1033,
+      "registerNumber": "41034",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "Digital",
+      "parameterDefinitionType": "decimal",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2121",
           "name": "Battery discharge alarm",
           "startBit": 48,
           "endBit": 63,
+          "bitParam": 52,
           "conditions": [
             {
               "name": "Normal",
@@ -571,16 +477,17 @@
       ]
     },
     {
-      "registerAddress": 30,
-      "registerNumber": "1031",
+      "registerAddress": 1031,
+      "registerNumber": "41032",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "Digital",
+      "parameterDefinitionType": "decimal",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2122",
           "name": "Low battery warning alarm",
           "startBit": 16,
           "endBit": 31,
+          "bitParam": 27,
           "conditions": [
             {
               "name": "Normal",
@@ -623,68 +530,17 @@
       ]
     },
     {
-      "registerAddress": 32,
-      "registerNumber": "1033",
+      "registerAddress": 1031,
+      "registerNumber": "41032",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "Digital",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18beef4f1d9a2123",
-          "name": "Low battery shutdown alarm",
-          "startBit": 48,
-          "endBit": 63,
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "abnormal",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "low"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "shutdown"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 33,
-      "registerNumber": "1034",
-      "registerType": "holdingRegister",
-      "parameterDefinitionType": "Digital",
+      "parameterDefinitionType": "decimal",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2124",
           "name": "Battery disconnected alarm",
           "startBit": 16,
           "endBit": 31,
+          "bitParam": 16,
           "conditions": [
             {
               "name": "Normal",
@@ -724,62 +580,17 @@
       ]
     },
     {
-      "registerAddress": 34,
-      "registerNumber": "1035",
+      "registerAddress": 1032,
+      "registerNumber": "41033",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "Digital",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18beef4f1d9a2125",
-          "name": "Overload alarm",
-          "startBit": 16,
-          "endBit": 31,
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "abnormal",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "overload"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 35,
-      "registerNumber": "1036",
-      "registerType": "holdingRegister",
-      "parameterDefinitionType": "Digital",
+      "parameterDefinitionType": "decimal",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2126",
           "name": "Fan failure alarm",
           "startBit": 32,
           "endBit": 47,
+          "bitParam": 34,
           "conditions": [
             {
               "name": "Normal",
@@ -819,112 +630,29 @@
       ]
     },
     {
-      "registerAddress": 35,
-      "registerNumber": "1036",
+      "registerAddress": 1080,
+      "registerNumber": "41081",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "Digital",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18beef4f1d9a2127",
-          "name": "Power fuse failure alarm",
-          "startBit": 0,
-          "endBit": 15,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "power"
-            },
-            {
-              "tagName": "fuse"
-            },
-            {
-              "tagName": "failure"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 35,
-      "registerNumber": "1036",
-      "registerType": "holdingRegister",
-      "parameterDefinitionType": "Digital",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18beef4f1d9a2128",
-          "name": "Output over/under frequency alarm",
-          "startBit": 0,
-          "endBit": 15,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "output"
-            },
-            {
-              "tagName": "over"
-            },
-            {
-              "tagName": "frequency"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 79,
-      "registerNumber": "1080",
-      "registerType": "holdingRegister",
-      "parameterDefinitionType": "Digital",
+      "parameterDefinitionType": "decimal",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2129",
           "name": "Static switch unable alarm",
           "startBit": 0,
           "endBit": 15,
+          "bitParamRange": "14-15",
           "conditions": [
             {
               "name": "Shutdown",
-              "bitValues": 0
+              "bitValues": "00"
             },
             {
               "name": "Open",
-              "bitValues": 1
+              "bitValues": "01"
             },
             {
               "name": "Invalid",
-              "bitValues": 10
+              "bitValues": "10"
             }
           ],
           "logicalPointTags": [
@@ -959,65 +687,24 @@
       ]
     },
     {
-      "registerAddress": 80,
-      "registerNumber": "1081",
+      "registerAddress": 1030,
+      "registerNumber": "41031",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "Digital",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18beef4f1d9a2140",
-          "name": "Bypass not available alarm",
-          "startBit": 0,
-          "endBit": 15,
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "bypass"
-            },
-            {
-              "tagName": "not"
-            },
-            {
-              "tagName": "available"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 81,
-      "registerNumber": "1082",
-      "registerType": "holdingRegister",
-      "parameterDefinitionType": "Digital",
+      "parameterDefinitionType": "decimal",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2142",
           "name": "Common alarm",
           "startBit": 0,
           "endBit": 15,
+          "bitParam": 0,
           "conditions": [
             {
               "name": "Normal",
               "bitValues": 0
             },
             {
-              "name": "abnormal",
+              "name": "Alarm",
               "bitValues": 1
             }
           ],

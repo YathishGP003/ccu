@@ -9,9 +9,9 @@
   ],
   "registers": [
     {
-      "registerAddress": 35,
+      "registerAddress": 3035,
       "registerNumber": "33036",
-      "registerType": "holdingRegister",
+      "registerType": "inputRegister",
       "parameterDefinitionType": "float",
       "parameters": [
         {
@@ -53,9 +53,9 @@
       ]
     },
     {
-      "registerAddress": 27,
+      "registerAddress": 3027,
       "registerNumber": "33028",
-      "registerType": "holdingRegister",
+      "registerType": "inputRegister",
       "parameterDefinitionType": "float",
       "parameters": [
         {
@@ -97,9 +97,9 @@
       ]
     },
     {
-      "registerAddress": 29,
+      "registerAddress": 3029,
       "registerNumber": "33030",
-      "registerType": "holdingRegister",
+      "registerType": "inputRegister",
       "parameterDefinitionType": "float",
       "parameters": [
         {
@@ -141,9 +141,9 @@
       ]
     },
     {
-      "registerAddress": 31,
+      "registerAddress": 3031,
       "registerNumber": "33032",
-      "registerType": "holdingRegister",
+      "registerType": "inputRegister",
       "parameterDefinitionType": "float",
       "parameters": [
         {
@@ -184,9 +184,9 @@
       ]
     },
     {
-      "registerAddress": 9,
+      "registerAddress": 3009,
       "registerNumber": "33010",
-      "registerType": "holdingRegister",
+      "registerType": "inputRegister",
       "parameterDefinitionType": "float",
       "parameters": [
         {
@@ -199,10 +199,7 @@
               "tagName": "em"
             },
             {
-              "tagName": "phase"
-            },
-            {
-              "tagName": "cur"
+              "tagName": "phaseCur"
             },
             {
               "tagName": "average"
@@ -227,9 +224,9 @@
       ]
     },
     {
-      "registerAddress": 0,
+      "registerAddress": 2999,
       "registerNumber": "33000",
-      "registerType": "holdingRegister",
+      "registerType": "inputRegister",
       "parameterDefinitionType": "float",
       "parameters": [
         {
@@ -242,10 +239,7 @@
               "tagName": "em"
             },
             {
-              "tagName": "phase"
-            },
-            {
-              "tagName": "cur"
+              "tagName": "phaseCur"
             },
             {
               "tagName": "rPhase"
@@ -270,9 +264,9 @@
       ]
     },
     {
-      "registerAddress": 1,
+      "registerAddress": 3001,
       "registerNumber": "33002",
-      "registerType": "holdingRegister",
+      "registerType": "inputRegister",
       "parameterDefinitionType": "float",
       "parameters": [
         {
@@ -285,10 +279,7 @@
               "tagName": "em"
             },
             {
-              "tagName": "phase"
-            },
-            {
-              "tagName": "cur"
+              "tagName": "phaseCur"
             },
             {
               "tagName": "yPhase"
@@ -313,9 +304,9 @@
       ]
     },
     {
-      "registerAddress": 3,
+      "registerAddress": 3003,
       "registerNumber": "33004",
-      "registerType": "holdingRegister",
+      "registerType": "inputRegister",
       "parameterDefinitionType": "float",
       "parameters": [
         {
@@ -328,10 +319,7 @@
               "tagName": "em"
             },
             {
-              "tagName": "phase"
-            },
-            {
-              "tagName": "cur"
+              "tagName": "phaseCur"
             },
             {
               "tagName": "bPhase"
@@ -356,9 +344,9 @@
       ]
     },
     {
-      "registerAddress": 109,
+      "registerAddress": 3109,
       "registerNumber": "33110",
-      "registerType": "holdingRegister",
+      "registerType": "inputRegister",
       "parameterDefinitionType": "float",
       "parameters": [
         {
@@ -393,9 +381,9 @@
       ]
     },
     {
-      "registerAddress": 83,
+      "registerAddress": 3083,
       "registerNumber": "33084",
-      "registerType": "holdingRegister",
+      "registerType": "inputRegister",
       "parameterDefinitionType": "float",
       "parameters": [
         {
@@ -429,9 +417,9 @@
       ]
     },
     {
-      "registerAddress": 203,
+      "registerAddress": 3203,
       "registerNumber": "33204",
-      "registerType": "holdingRegister",
+      "registerType": "inputRegister",
       "parameterDefinitionType": "int",
       "parameters": [
         {
@@ -448,15 +436,11 @@
             },
             {
               "tagName": "unit",
-              "value": "Wh"
+              "value": "kWh"
             },
             {
               "tagName": "kind",
               "value": "Number"
-            },
-            {
-              "tagName": "unit",
-              "value": "Wh"
             },
             {
               "tagName": "his"

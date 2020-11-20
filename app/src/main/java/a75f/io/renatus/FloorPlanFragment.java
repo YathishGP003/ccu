@@ -1193,11 +1193,16 @@ public class FloorPlanFragment extends Fragment
 					showDialogFragment(FragmentSSEConfiguration
 							.newInstance(Short.parseShort(nodeAddr),zone.getId(), NodeType.SMART_NODE, floor.getId(),profile.getProfileType()), FragmentSSEConfiguration.ID);
 					break;
-				case MODBUS_UPS:
+				case MODBUS_UPS30:
+				case MODBUS_UPS80:
+				case MODBUS_UPS400:
+				case MODBUS_VRF:
 				case MODBUS_PAC:
 				case MODBUS_RRS:
 				case MODBUS_WLD:
 				case MODBUS_EM:
+				case MODBUS_EMS:
+				case MODBUS_ATS:
 					showDialogFragment(FragmentModbusConfiguration
 							.newInstance(Short.parseShort(nodeAddr),zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusConfiguration.ID);
 					break;

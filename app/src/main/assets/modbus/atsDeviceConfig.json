@@ -12,13 +12,24 @@
       "registerAddress": 14,
       "registerNumber": "40015",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2111",
           "name": "Main on Normal",
           "startBit": 0,
           "endBit": 15,
+          "bitParam": 0,
+          "conditions": [
+            {
+              "name": "Off",
+              "bitValues": 0
+            },
+            {
+              "name": "On",
+              "bitValues": 1
+            }
+          ],
           "logicalPointTags": [
             {
               "tagName": "ats"
@@ -48,17 +59,28 @@
       ]
     },
     {
-      "registerAddress": 15,
-      "registerNumber": "40016",
+      "registerAddress": 14,
+      "registerNumber": "40015",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2112",
           "name": "Main on Emergency",
           "startBit": 0,
           "endBit": 15,
+          "bitParam": 1,
           "displayInUiDefault": false,
+          "conditions": [
+            {
+              "name": "Off",
+              "bitValues": 0
+            },
+            {
+              "name": "On",
+              "bitValues": 1
+            }
+          ],
           "logicalPointTags": [
             {
               "tagName": "ats"
@@ -88,17 +110,28 @@
       ]
     },
     {
-      "registerAddress": 16,
-      "registerNumber": "40017",
+      "registerAddress": 14,
+      "registerNumber": "40015",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2113",
           "name": "Aux on Normal",
           "startBit": 0,
           "endBit": 15,
+          "bitParam": 2,
           "displayInUiDefault": false,
+          "conditions": [
+            {
+              "name": "Off",
+              "bitValues": 0
+            },
+            {
+              "name": "On",
+              "bitValues": 1
+            }
+          ],
           "logicalPointTags": [
             {
               "tagName": "ats"
@@ -128,16 +161,27 @@
       ]
     },
     {
-      "registerAddress": 17,
-      "registerNumber": "40018",
+      "registerAddress": 14,
+      "registerNumber": "40015",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2114",
           "name": "Aux on Emergency",
           "startBit": 0,
           "endBit": 15,
+          "bitParam": 3,
+          "conditions": [
+            {
+              "name": "Off",
+              "bitValues": 0
+            },
+            {
+              "name": "On",
+              "bitValues": 1
+            }
+          ],
           "logicalPointTags": [
             {
               "tagName": "ats"
@@ -167,16 +211,27 @@
       ]
     },
     {
-      "registerAddress": 148,
-      "registerNumber": "40149",
+      "registerAddress": 14,
+      "registerNumber": "40015",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2115",
           "name": "Normal Source Available",
           "startBit": 0,
           "endBit": 15,
+          "bitParam": 4,
+          "conditions": [
+            {
+              "name": "Off",
+              "bitValues": 0
+            },
+            {
+              "name": "On",
+              "bitValues": 1
+            }
+          ],
           "logicalPointTags": [
             {
               "tagName": "ats"
@@ -206,16 +261,27 @@
       ]
     },
     {
-      "registerAddress": 150,
-      "registerNumber": "40151",
+      "registerAddress": 14,
+      "registerNumber": "40015",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2115",
           "name": "Emergency Source Available",
           "startBit": 0,
           "endBit": 15,
+          "bitParam": 5,
+          "conditions": [
+            {
+              "name": "Off",
+              "bitValues": 0
+            },
+            {
+              "name": "On",
+              "bitValues": 1
+            }
+          ],
           "logicalPointTags": [
             {
               "tagName": "ats"
@@ -255,14 +321,19 @@
           "name": "Transfer Switch Type (OTTS, DTTS)",
           "startBit": 0,
           "endBit": 15,
+          "bitParamRange": "3-4",
           "conditions": [
             {
               "name": "OTTS",
-              "bitValues": 3
+              "bitValues": 0
             },
             {
               "name": "DTTS",
-              "bitValues": 4
+              "bitValues": 1
+            },
+            {
+              "name": "OTTS",
+              "bitValues": 3
             }
           ],
           "logicalPointTags": [
@@ -319,11 +390,26 @@
               "value": "Number"
             },
             {
+              "tagName": "minVal",
+              "value": 1
+            },
+            {
+              "tagName": "maxVal",
+              "value": 3000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 1
+            },
+            {
               "tagName": "his"
             },
             {
               "tagName": "hisInterpolate",
               "value": "cov"
+            },
+            {
+              "tagName": "sp"
             }
           ],
           "userIntentPointTags": [
@@ -339,6 +425,18 @@
             {
               "tagName": "kind",
               "value": "Number"
+            },
+            {
+              "tagName": "minVal",
+              "value": 1
+            },
+            {
+              "tagName": "maxVal",
+              "value": 3000
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 1
             },
             {
               "tagName": "his"
@@ -469,10 +567,7 @@
               "tagName": "ats"
             },
             {
-              "tagName": "event"
-            },
-            {
-              "tagName": "day"
+              "tagName": "eventDay"
             },
             {
               "tagName": "month"
@@ -538,6 +633,10 @@
               "value": 1
             },
             {
+              "tagName": "unit",
+              "value": "hour"
+            },
+            {
               "tagName": "kind",
               "value": "Number"
             },
@@ -584,6 +683,10 @@
             {
               "tagName": "incrementVal",
               "value": 1
+            },
+            {
+              "tagName": "unit",
+              "value": "minutes"
             },
             {
               "tagName": "kind",

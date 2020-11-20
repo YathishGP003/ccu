@@ -54,6 +54,9 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                 case "float":
                 case "decimal":
                 case "long":
+                case "binary":
+                case "int":
+                case "boolean":
                     if (modbusParam.get(position).getUserIntentPointTags() != null && modbusParam.get(position).getUserIntentPointTags().size() > 0) {
                         viewHolder.spValue.setVisibility(View.VISIBLE);
                         viewHolder.tvUnit.setVisibility(View.VISIBLE);
@@ -123,25 +126,13 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                     }
                                 }
                             } else {
-                                viewHolder.tvParamValue.setText(readVal(p.getId()) + " " + unit);
-                            }
-
-                        }
-                    }
-                    break;
-                case "binary":
-                    if (modbusParam.get(position).getLogicalPointTags() != null && modbusParam.get(position).getLogicalPointTags().size() > 0) {
-                        Point p = readPoint(modbusParam.get(position));
-
-                        if (modbusParam.get(position).getConditions() != null && modbusParam.get(position).getConditions().size() > 0) {
-                            for (int i = 0; i < modbusParam.get(position).getConditions().size(); i++) {
-                                String bitValues = modbusParam.get(position).getConditions().get(i).getBitValues();
-                                if (Double.parseDouble(bitValues == null ? "0" : bitValues) == readVal(p.getId())) {
-                                    viewHolder.tvParamValue.setText(modbusParam.get(position).getConditions().get(i).getName());
+                                if (modbusParam.get(position).getParameterDefinitionType().equals("binary")) {
+                                    viewHolder.tvParamValue.setText(readVal(p.getId()) == 1 ? HtmlCompat.fromHtml("<font color='#E24301'>ON</font>", HtmlCompat.FROM_HTML_MODE_LEGACY) : HtmlCompat.fromHtml("<font color='#000000'>OFF</font>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+                                } else {
+                                    viewHolder.tvParamValue.setText(readVal(p.getId()) + " " + unit);
                                 }
                             }
-                        } else {
-                            viewHolder.tvParamValue.setText(readVal(p.getId()) == 1 ? HtmlCompat.fromHtml("<font color='#E24301'>ON</font>", HtmlCompat.FROM_HTML_MODE_LEGACY) : HtmlCompat.fromHtml("<font color='#000000'>OFF</font>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+
                         }
                     }
                     break;

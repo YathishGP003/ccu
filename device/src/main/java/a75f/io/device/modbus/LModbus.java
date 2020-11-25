@@ -11,6 +11,12 @@ import com.x75f.modbus4j.msg.WriteRegisterRequest;
 import com.x75f.modbus4j.serial.rtu.RtuMessageRequest;
 
 public class LModbus {
+    
+    private static SerialCommLock modbusCommLock = new SerialCommLock();
+    
+    public static SerialCommLock getModbusCommLock() {
+        return modbusCommLock;
+    }
 
     public static byte[] getModbusData(Short slaveid, String registerType, int registerAddr, int numberOfRegisters){
         //byte[] bytes = {0xa, 3, 0, 0, 0, 14, (byte) 0xC5, (byte) 0x75};
@@ -33,7 +39,8 @@ public class LModbus {
                          rtuMessageRequest = new RtuMessageRequest(request);
                          return rtuMessageRequest.getMessageData();
                     case "inputRegister":
-                        request = new ReadInputRegistersRequest(slaveid,registerAddr, numberOfRegisters);
+                        //request = new ReadInputRegistersRequest(slaveid,registerAddr, numberOfRegisters);
+                        request = new ReadHoldingRegistersRequest(slaveid, registerAddr, numberOfRegisters);
                         rtuMessageRequest = new RtuMessageRequest(request);
                         return rtuMessageRequest.getMessageData();
                     case "writeRegister":

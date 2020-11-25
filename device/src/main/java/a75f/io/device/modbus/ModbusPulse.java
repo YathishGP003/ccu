@@ -1,5 +1,7 @@
 package a75f.io.device.modbus;
 
+import android.util.Log;
+
 import com.felhr.utils.UsbModbusUtils;
 import com.x75f.modbus4j.base.ModbusUtils;
 import com.x75f.modbus4j.msg.ModbusResponse;
@@ -7,6 +9,7 @@ import com.x75f.modbus4j.serial.rtu.RtuMessageResponse;
 import com.x75f.modbus4j.sero.util.queue.ByteQueue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -15,6 +18,8 @@ import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.mesh.DLog;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.modbusbox.EquipsManager;
 
 public class ModbusPulse {
@@ -22,7 +27,7 @@ public class ModbusPulse {
 
     public static void handleModbusPulseData(byte[] data, int slaveid){
         if(UsbModbusUtils.validSlaveId(slaveid) ) {
-            DLog.LogdSerial("*************Event Type Handle MODBUS Data type here**********************:" + data.length + "," + data.toString());
+            DLog.LogdSerial("*************Event Type Handle MODBUS Data type here**********************:" + Arrays.toString(data));
             switch (UsbModbusUtils.validateFunctionCode((data[1] & 0xff))) {
                 case UsbModbusUtils.READ_COILS:
                     if(registerIndex == 0)
@@ -77,13 +82,13 @@ public class ModbusPulse {
             RtuMessageResponse rtuResponse = new RtuMessageResponse(response);
 
             // Check the CRC
-            ModbusUtils.checkCRC(rtuResponse.getModbusMessage(), queue);
+            //ModbusUtils.checkCRC(rtuResponse.getModbusMessage(), queue);
 
             if(!rtuResponse.getModbusResponse().isException()){
-                DLog.LogdSerial("Modbus Response success==" + rtuResponse.getModbusMessage().toString());
+                DLog.LogdSerial("MODBUS Response success==" + rtuResponse.getModbusMessage().toString());
                 updateResponseToHaystack(slaveid, rtuResponse, registerNumber,registerType);
             }else {
-                DLog.Logd("Modbus handlingResponse back, exception-"+rtuResponse.getModbusResponse().getExceptionMessage());
+                DLog.Logd("MODBUS handlingResponse back, exception-"+rtuResponse.getModbusResponse().getExceptionMessage());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -105,7 +110,9 @@ public class ModbusPulse {
         int startIndex = 3;
         int responseVal = 0;
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap phyPoint = hayStack.read("point and physical and register and modbus and registerNumber == \""+registerNumber+ "\" and deviceRef == \"" + deviceRef + "\"");
+        Log.d("CCU_MODBUS"," SerialModbusComm Locked - register "+LModbus.getModbusCommLock().getRegisterNumber());
+        HashMap phyPoint = hayStack.read("point and physical and register and modbus and registerAddr == \""
+                                         +LModbus.getModbusCommLock().getRegisterNumber()+ "\" and deviceRef == \"" + deviceRef + "\"");
         //for(HashMap phyPoint : phyPoints) {
             if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
                 return;
@@ -114,11 +121,17 @@ public class ModbusPulse {
             //TODO check for valid registerAddr in phypoint based on response addrss?
             //We do get address from 1 till say 247??? based on our locally consumed parameters, we fetch that index and get value for the same.
             //int responseVal = response.getMessageData()[Integer.parseInt(phyPoint.get("registerAddress").toString())];
+    
+            Log.d("CCU_MODBUS"," Response data : "+Arrays.toString(response.getMessageData()));
             switch (UsbModbusUtils.validateFunctionCode(registerType)){
                 case UsbModbusUtils.READ_INPUT_REGISTERS:
                 case UsbModbusUtils.READ_HOLDING_REGISTERS:
-                    responseVal = response.getMessageData()[startIndex] << 8 | response.getMessageData()[startIndex + 1];
-                    startIndex +=2;
+                    //TODO-TEMP Hardcoded for float
+                    responseVal = (response.getMessageData()[startIndex] & 0xFF ) << 24
+                                                | (response.getMessageData()[startIndex + 1] & 0xFF) << 16
+                                                | (response.getMessageData()[startIndex + 2] & 0xFF) << 8
+                                                | (response.getMessageData()[startIndex + 3] & 0xFF);
+                    //startIndex +=2;
                     break;
                 case UsbModbusUtils.WRITE_REGISTER:
                     responseVal = response.getMessageData()[startIndex+1] << 8 | response.getMessageData()[startIndex + 2];
@@ -127,10 +140,17 @@ public class ModbusPulse {
                     responseVal = response.getMessageData()[startIndex];
                     break;
             }
-            if(response.getMessageData()[3] != startIndex)
-                DLog.Logd("Modbus Pulse = regType="+registerType+","+response.getMessageData()[startIndex]+","+response.getMessageData()[startIndex+1]+","+responseVal);
-            hayStack.writeHisValById(logPoint.get("id").toString(),(double)responseVal);
-            hayStack.writeHisValById(phyPoint.get("id").toString(), (double) responseVal);
+            //if(response.getMessageData()[3] != startIndex)
+            float floatVal = Float.intBitsToFloat(responseVal);
+            DLog.Logd("CCU_MODBUS Pulse = regType="+registerType+","+response.getMessageData()[startIndex]+","
+                      +response.getMessageData()[startIndex+1]+","+responseVal+" floatVal "+floatVal);
+            hayStack.writeHisValById(logPoint.get("id").toString(),(double)floatVal);
+            hayStack.writeHisValById(phyPoint.get("id").toString(), (double) floatVal);
         //}
+    
+        LModbus.getModbusCommLock().unlock();
+        Log.d("CCU_MODBUS",
+              " SerialModbusComm UnLocked SavedVal "+hayStack.readHisValById(logPoint.get("id").toString()));
     }
+    
 }

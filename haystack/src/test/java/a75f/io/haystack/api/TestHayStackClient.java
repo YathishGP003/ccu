@@ -8,6 +8,9 @@ import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.client.HClient;
 import org.projecthaystack.server.HStdOps;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.sync.HttpUtil;
 
@@ -56,6 +59,17 @@ public class TestHayStackClient
         System.out.println(HZincWriter.gridToString(resGrid));*/
 
 
+    }
+    
+    @Test
+    public void testCode() {
+        //String myString = "426FF7A1";
+        //Long i = Long.parseLong(myString, 16);
+        
+        Integer i = 0x42 << 24 | 0x6F << 16 | 0xF7 << 8 | 0xA1;
+        Float f = Float.intBitsToFloat(i);
+        System.out.println(f);
+    
     }
     
 }

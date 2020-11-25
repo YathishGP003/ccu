@@ -15,26 +15,43 @@ import a75f.io.modbusbox.EquipsManager;
 
 public class ModbusNetwork extends DeviceNetwork
 {
+    private static final int SERIAL_COMM_TIMEOUT_MS = 1000;
 
     @Override
     public void sendMessage() {
+        
+        if (!LSerial.getInstance().isModbusConnected()) {
+            CcuLog.d(L.TAG_CCU_MODBUS,"ModbusNetwork: Serial device not connected");
+            return;
+        }
         try
         {
             for (Floor floor : HSUtil.getFloors())
             {
                 for (Zone zone : HSUtil.getZones(floor.getId()))
                 {
-                    CcuLog.d(L.TAG_CCU_DEVICE,"SERIAL_ =======Modbus Zone: " + zone.getDisplayName() + " =================="+","+zone.getMarkers().contains("modbus"));
+                    CcuLog.d(L.TAG_CCU_MODBUS,"SERIAL_ =======Modbus Zone: " + zone.getDisplayName() + " =================="+","+zone.getMarkers().contains("modbus"));
                     //send request for modbus modules alone
                     for (Equip equip : HSUtil.getEquips(zone.getId())) {
                         if (equip.getMarkers().contains("modbus")) {
                             EquipmentDevice modbusDevice = EquipsManager.getInstance().fetchProfileBySlaveId(Short.parseShort(equip.getGroup()));
                             
                             for(Register register: modbusDevice.getRegisters()) {
-                                CcuLog.d(L.TAG_CCU_DEVICE,"SERIAL_ =======Modbus Zone: " + zone.getDisplayName() + " =================="+","+register.getParameters().get(0).getParameterId()+","+register.getParameters().get(0).getName());
+                                CcuLog.d(L.TAG_CCU_MODBUS,"SERIAL_ =======Modbus Zone: " + zone.getDisplayName() + " =================="+","
+                                                          +register.getParameters().get(0).getParameterId()+","
+                                                          +register.getParameters().get(0).getName()+",");
+                                                          //+register.getParameters().get(0).getParameterDefinitionType());
                                 //TODO Need to handle sequence of registers here for now we handle one by one
-                                byte[] requestData = LModbus.getModbusData(Short.parseShort(equip.getGroup()),register.registerType,register.registerAddress,1);
+                                
+                                /*int registerNum =
+                                    register.getParameters().get(0).getParameterDefinitionType().equals("float") ? 2 : 1;
+                                 */
+                                
+                                byte[] requestData = LModbus.getModbusData(Short.parseShort(equip.getGroup()),
+                                                                           register.registerType,register.registerAddress,2);
                                 LSerial.getInstance().sendSerialToModbus(requestData);
+                                CcuLog.d(L.TAG_CCU_MODBUS," SerialModbusComm lock");
+                                LModbus.getModbusCommLock().lock(SERIAL_COMM_TIMEOUT_MS, register.registerAddress);
                             }
                         }
                     }

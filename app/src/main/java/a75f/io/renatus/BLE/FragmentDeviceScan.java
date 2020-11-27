@@ -160,14 +160,16 @@ public class FragmentDeviceScan extends BaseDialogFragment
     
     private void setListViewEmptyView()
     {
-        TextView emptyText = new TextView(getActivity());
-        emptyText
-                .setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        emptyText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24);
-        emptyText.setPadding(20, 20, 20, 20);
-        ((ViewGroup) mBLEDeviceListListView.getParent()).addView(emptyText);
-        emptyText.setText(R.string.ble_no_devices_found_warning);
-        mBLEDeviceListListView.setEmptyView(emptyText);
+        if (mBLEDeviceListListView.getEmptyView() == null) {
+            TextView emptyText = new TextView(getActivity());
+            emptyText
+                    .setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            emptyText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24);
+            emptyText.setPadding(20, 20, 20, 20);
+            ((ViewGroup) mBLEDeviceListListView.getParent()).addView(emptyText);
+            emptyText.setText(R.string.ble_no_devices_found_warning);
+            mBLEDeviceListListView.setEmptyView(emptyText);
+        }
     }
     
     

@@ -7,6 +7,8 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import a75f.io.api.haystack.modbus.Register;
+
 public class SerialCommLock {
     
     private Lock      lock        = new ReentrantLock();
@@ -14,11 +16,11 @@ public class SerialCommLock {
     
     AtomicBoolean readPending = new AtomicBoolean(false);
     
-    int registerNumber = 0;
-    public void lock(long timeoutSeconds, int registerNum) {
+    Register register;
+    public void lock(Register register, long timeoutSeconds) {
         lock.lock();
         try{
-            registerNumber = registerNum;
+            this.register = register;
             readPending.set(true);
             while (readPending.get()) {
                 condition.await(timeoutSeconds, TimeUnit.MILLISECONDS);
@@ -36,8 +38,8 @@ public class SerialCommLock {
         //condition.signal();
     }
     
-    public int getRegisterNumber() {
-        return registerNumber;
+    public Register getRegister() {
+        return register;
     }
     
 }

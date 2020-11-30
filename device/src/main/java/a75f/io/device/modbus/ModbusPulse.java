@@ -110,9 +110,9 @@ public class ModbusPulse {
         int startIndex = 3;
         int responseVal = 0;
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        Log.d("CCU_MODBUS"," SerialModbusComm Locked - register "+LModbus.getModbusCommLock().getRegisterNumber());
+        Log.d("CCU_MODBUS"," SerialModbusComm Locked - register "+LModbus.getModbusCommLock().getRegister().getRegisterAddress());
         HashMap phyPoint = hayStack.read("point and physical and register and modbus and registerAddr == \""
-                                         +LModbus.getModbusCommLock().getRegisterNumber()+ "\" and deviceRef == \"" + deviceRef + "\"");
+                                         +LModbus.getModbusCommLock().getRegister().getRegisterAddress()+ "\" and deviceRef == \"" + deviceRef + "\"");
         //for(HashMap phyPoint : phyPoints) {
             if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
                 return;
@@ -121,31 +121,44 @@ public class ModbusPulse {
             //TODO check for valid registerAddr in phypoint based on response addrss?
             //We do get address from 1 till say 247??? based on our locally consumed parameters, we fetch that index and get value for the same.
             //int responseVal = response.getMessageData()[Integer.parseInt(phyPoint.get("registerAddress").toString())];
-    
+        
             Log.d("CCU_MODBUS"," Response data : "+Arrays.toString(response.getMessageData()));
+            double formattedVal = 0;
             switch (UsbModbusUtils.validateFunctionCode(registerType)){
                 case UsbModbusUtils.READ_INPUT_REGISTERS:
                 case UsbModbusUtils.READ_HOLDING_REGISTERS:
-                    //TODO-TEMP Hardcoded for float
-                    responseVal = (response.getMessageData()[startIndex] & 0xFF ) << 24
-                                                | (response.getMessageData()[startIndex + 1] & 0xFF) << 16
-                                                | (response.getMessageData()[startIndex + 2] & 0xFF) << 8
-                                                | (response.getMessageData()[startIndex + 3] & 0xFF);
+                    if (LModbus.getModbusCommLock().getRegister().getParameterDefinitionType().equals("float")) {
+                        responseVal = (response.getMessageData()[startIndex] & 0xFF) << 24 |
+                                      (response.getMessageData()[startIndex + 1] & 0xFF) << 16 |
+                                      (response.getMessageData()[startIndex + 2] & 0xFF) << 8 |
+                                      (response.getMessageData()[startIndex + 3] & 0xFF);
+    
+                        formattedVal = Float.intBitsToFloat(responseVal);
+                        
+                        if (Double.isNaN(formattedVal)) {
+                            formattedVal = 0;
+                        }
+                    } else {
+                        responseVal = (response.getMessageData()[startIndex] & 0xFF) << 8 |
+                                      (response.getMessageData()[startIndex + 1] & 0xFF) ;
+                        formattedVal = responseVal;
+                    }
                     //startIndex +=2;
                     break;
                 case UsbModbusUtils.WRITE_REGISTER:
-                    responseVal = response.getMessageData()[startIndex+1] << 8 | response.getMessageData()[startIndex + 2];
+                    //TODO:
+                    formattedVal = response.getMessageData()[startIndex+1] << 8 | response.getMessageData()[startIndex + 2];
                     break;
                 default:
-                    responseVal = response.getMessageData()[startIndex];
+                    formattedVal = response.getMessageData()[startIndex];
                     break;
             }
             //if(response.getMessageData()[3] != startIndex)
-            float floatVal = Float.intBitsToFloat(responseVal);
-            DLog.Logd("CCU_MODBUS Pulse = regType="+registerType+","+response.getMessageData()[startIndex]+","
-                      +response.getMessageData()[startIndex+1]+","+responseVal+" floatVal "+floatVal);
-            hayStack.writeHisValById(logPoint.get("id").toString(),(double)floatVal);
-            hayStack.writeHisValById(phyPoint.get("id").toString(), (double) floatVal);
+           
+            DLog.Logd("CCU_MODBUS Pulse Register: Type "+registerType+", Addr "+LModbus.getModbusCommLock().getRegister().getRegisterAddress()
+                                             +" Val "+formattedVal);
+            hayStack.writeHisValById(logPoint.get("id").toString(),formattedVal);
+            hayStack.writeHisValById(phyPoint.get("id").toString(), formattedVal);
         //}
     
         LModbus.getModbusCommLock().unlock();

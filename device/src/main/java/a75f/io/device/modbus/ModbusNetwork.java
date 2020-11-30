@@ -37,21 +37,18 @@ public class ModbusNetwork extends DeviceNetwork
                             EquipmentDevice modbusDevice = EquipsManager.getInstance().fetchProfileBySlaveId(Short.parseShort(equip.getGroup()));
                             
                             for(Register register: modbusDevice.getRegisters()) {
-                                CcuLog.d(L.TAG_CCU_MODBUS,"SERIAL_ =======Modbus Zone: " + zone.getDisplayName() + " =================="+","
-                                                          +register.getParameters().get(0).getParameterId()+","
-                                                          +register.getParameters().get(0).getName()+",");
+                                CcuLog.d(L.TAG_CCU_MODBUS,"SERIAL_ ======= Register "+register.getRegisterAddress()+
+                                                          " "+register.getParameterDefinitionType());
                                                           //+register.getParameters().get(0).getParameterDefinitionType());
                                 //TODO Need to handle sequence of registers here for now we handle one by one
                                 
-                                /*int registerNum =
-                                    register.getParameters().get(0).getParameterDefinitionType().equals("float") ? 2 : 1;
-                                 */
-                                
+                                int registerNum = register.getParameterDefinitionType().equals("float") ? 2 : 1;
                                 byte[] requestData = LModbus.getModbusData(Short.parseShort(equip.getGroup()),
-                                                                           register.registerType,register.registerAddress,2);
+                                                                           register.registerType,register.registerAddress,registerNum);
+                                
                                 LSerial.getInstance().sendSerialToModbus(requestData);
                                 CcuLog.d(L.TAG_CCU_MODBUS," SerialModbusComm lock");
-                                LModbus.getModbusCommLock().lock(SERIAL_COMM_TIMEOUT_MS, register.registerAddress);
+                                LModbus.getModbusCommLock().lock(register, SERIAL_COMM_TIMEOUT_MS);
                             }
                         }
                     }

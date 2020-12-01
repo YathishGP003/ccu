@@ -741,10 +741,7 @@
               "tagName": "bypass"
             },
             {
-              "tagName": "not"
-            },
-            {
-              "tagName": "available"
+              "tagName": "notAvailable"
             },
             {
               "tagName": "alarm"

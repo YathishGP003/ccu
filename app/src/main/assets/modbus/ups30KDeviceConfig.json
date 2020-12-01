@@ -300,7 +300,7 @@
               "bitValues": 0
             },
             {
-              "name": "abnormal",
+              "name": "Abnormal",
               "bitValues": 1
             }
           ],
@@ -344,7 +344,7 @@
               "bitValues": 0
             },
             {
-              "name": "abnormal",
+              "name": "Abnormal",
               "bitValues": 1
             }
           ],
@@ -394,7 +394,7 @@
               "bitValues": 0
             },
             {
-              "name": "abnormal",
+              "name": "Abnormal",
               "bitValues": 1
             }
           ],
@@ -444,7 +444,7 @@
               "bitValues": 0
             },
             {
-              "name": "abnormal",
+              "name": "Abnormal",
               "bitValues": 1
             }
           ],
@@ -494,7 +494,7 @@
               "bitValues": 0
             },
             {
-              "name": "abnormal",
+              "name": "Abnormal",
               "bitValues": 1
             }
           ],
@@ -547,7 +547,7 @@
               "bitValues": 0
             },
             {
-              "name": "abnormal",
+              "name": "Abnormal",
               "bitValues": 1
             }
           ],
@@ -597,7 +597,7 @@
               "bitValues": 0
             },
             {
-              "name": "abnormal",
+              "name": "Abnormal",
               "bitValues": 1
             }
           ],

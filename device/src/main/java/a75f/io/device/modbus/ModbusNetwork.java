@@ -47,7 +47,6 @@ public class ModbusNetwork extends DeviceNetwork
                                                                            register.registerType,register.registerAddress,registerNum);
                                 
                                 LSerial.getInstance().sendSerialToModbus(requestData);
-                                CcuLog.d(L.TAG_CCU_MODBUS," SerialModbusComm lock");
                                 LModbus.getModbusCommLock().lock(register, SERIAL_COMM_TIMEOUT_MS);
                             }
                         }

@@ -16,6 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.ToggleButton;
@@ -33,6 +34,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.device.mesh.LSerial;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -75,6 +77,9 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     
     @BindView(R.id.outsideHumidity)
     Spinner outsideHumidity;
+    
+    @BindView(R.id.imageCMSerial) ImageView cmSerial;
+    @BindView(R.id.imageMBSerial) ImageView mbSerial;
     
     LinearLayout testParams;
     
@@ -213,6 +218,12 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         outsideHumidity.setOnItemSelectedListener(this);
         outsideHumidity.setSelection(zeroToHundredDataAdapter.getPosition(Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                                                                              .getInt("outside_humidity", 0)));
+    
+    
+        cmSerial.setImageResource(LSerial.getInstance().isConnected() ? android.R.drawable.checkbox_on_background
+                                                                      : android.R.drawable.checkbox_off_background);
+        mbSerial.setImageResource(LSerial.getInstance().isModbusConnected() ? android.R.drawable.checkbox_on_background
+                                      : android.R.drawable.checkbox_off_background);
     }
     
     @Override

@@ -110,11 +110,14 @@ public class ModbusPulse {
         int startIndex = 3;
         int responseVal = 0;
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        Log.d("CCU_MODBUS"," SerialModbusComm Locked - register "+LModbus.getModbusCommLock().getRegister().getRegisterAddress());
+        
         HashMap phyPoint = hayStack.read("point and physical and register and modbus and registerAddr == \""
                                          +LModbus.getModbusCommLock().getRegister().getRegisterAddress()+ "\" and deviceRef == \"" + deviceRef + "\"");
         //for(HashMap phyPoint : phyPoints) {
             if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
+                Log.d("CCU_MODBUS", "Physical point does not exist for register "
+                                                +LModbus.getModbusCommLock().getRegister().getRegisterAddress()
+                                                +" and device "+deviceRef);
                 return;
             }
             HashMap logPoint = hayStack.read("point and id==" + phyPoint.get("pointRef"));
@@ -155,15 +158,14 @@ public class ModbusPulse {
             }
             //if(response.getMessageData()[3] != startIndex)
            
-            DLog.Logd("CCU_MODBUS Pulse Register: Type "+registerType+", Addr "+LModbus.getModbusCommLock().getRegister().getRegisterAddress()
-                                             +" Val "+formattedVal);
+            Log.d("CCU_MODBUS", "Pulse Register: Type "+registerType+
+                                            ", Addr "+LModbus.getModbusCommLock().getRegister().getRegisterAddress()+
+                                            " Val "+formattedVal);
             hayStack.writeHisValById(logPoint.get("id").toString(),formattedVal);
             hayStack.writeHisValById(phyPoint.get("id").toString(), formattedVal);
         //}
     
         LModbus.getModbusCommLock().unlock();
-        Log.d("CCU_MODBUS",
-              " SerialModbusComm UnLocked SavedVal "+hayStack.readHisValById(logPoint.get("id").toString()));
     }
     
 }

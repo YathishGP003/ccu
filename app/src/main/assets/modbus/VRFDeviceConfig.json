@@ -470,33 +470,33 @@
             {
               "tagName": "sp"
             }
+          ],
+          "commands": [
+            {
+              "name": "Auto",
+              "bitValues": "0"
+            },
+            {
+              "name": "Low",
+              "bitValues": "1"
+            },
+            {
+              "name": "Mid-1",
+              "bitValues": "2"
+            },
+            {
+              "name": "Mid-2",
+              "bitValues": "3"
+            },
+            {
+              "name": "Mid-3",
+              "bitValues": "4"
+            },
+            {
+              "name": "High",
+              "bitValues": "5"
+            }
           ]
-        }
-      ],
-      "commands": [
-        {
-          "name": "Auto",
-          "bitValues": "0"
-        },
-        {
-          "name": "Low",
-          "bitValues": "1"
-        },
-        {
-          "name": "Mid-1",
-          "bitValues": "2"
-        },
-        {
-          "name": "Mid-2",
-          "bitValues": "3"
-        },
-        {
-          "name": "Mid-3",
-          "bitValues": "4"
-        },
-        {
-          "name": "High",
-          "bitValues": "5"
         }
       ]
     }

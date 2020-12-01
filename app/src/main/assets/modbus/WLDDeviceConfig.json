@@ -39,23 +39,23 @@
                     ],
                     "conditions": [
                         {
-                            "name": "fault",
+                            "name": "Fault",
                             "bitValues": 0
                         },
                         {
-                            "name": "healthy",
+                            "name": "Healthy",
                             "bitValues": 1
                         },
                         {
-                            "name": "isolate",
+                            "name": "Isolate",
                             "bitValues": 2
                         },
                         {
-                            "name": "disable",
+                            "name": "Disable",
                             "bitValues": 3
                         },
                         {
-                            "name": "alarm",
+                            "name": "Alarm",
                             "bitValues": 4
                         }
                     ]
@@ -93,23 +93,23 @@
                     ],
                     "conditions": [
                         {
-                            "name": "fault",
+                            "name": "Fault",
                             "bitValues": 0
                         },
                         {
-                            "name": "healthy",
+                            "name": "Healthy",
                             "bitValues": 1
                         },
                         {
-                            "name": "isolate",
+                            "name": "Isolate",
                             "bitValues": 2
                         },
                         {
-                            "name": "disable",
+                            "name": "Disable",
                             "bitValues": 3
                         },
                         {
-                            "name": "alarm",
+                            "name": "Alarm",
                             "bitValues": 4
                         }
                     ]
@@ -147,23 +147,23 @@
                     ],
                     "conditions": [
                         {
-                            "name": "fault",
+                            "name": "Fault",
                             "bitValues": 0
                         },
                         {
-                            "name": "healthy",
+                            "name": "Healthy",
                             "bitValues": 1
                         },
                         {
-                            "name": "isolate",
+                            "name": "Isolate",
                             "bitValues": 2
                         },
                         {
-                            "name": "disable",
+                            "name": "Disable",
                             "bitValues": 3
                         },
                         {
-                            "name": "alarm",
+                            "name": "Alarm",
                             "bitValues": 4
                         }
                     ]
@@ -201,23 +201,23 @@
                     ],
                     "conditions": [
                         {
-                            "name": "fault",
+                            "name": "Fault",
                             "bitValues": 0
                         },
                         {
-                            "name": "healthy",
+                            "name": "Healthy",
                             "bitValues": 1
                         },
                         {
-                            "name": "isolate",
+                            "name": "Isolate",
                             "bitValues": 2
                         },
                         {
-                            "name": "disable",
+                            "name": "Disable",
                             "bitValues": 3
                         },
                         {
-                            "name": "alarm",
+                            "name": "Alarm",
                             "bitValues": 4
                         }
                     ]

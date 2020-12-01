@@ -300,7 +300,7 @@
               "bitValues": 0
             },
             {
-              "name": "abnormal",
+              "name": "Abnormal",
               "bitValues": 1
             }
           ],
@@ -344,7 +344,7 @@
               "bitValues": 0
             },
             {
-              "name": "abnormal",
+              "name": "Abnormal",
               "bitValues": 1
             }
           ],
@@ -380,7 +380,7 @@
       "registerAddress": 1031,
       "registerNumber": "41032",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "Digital",
+      "parameterDefinitionType": "decimal",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2120",
@@ -394,7 +394,7 @@
               "bitValues": 0
             },
             {
-              "name": "abnormal",
+              "name": "Abnormal",
               "bitValues": 1
             }
           ],
@@ -444,7 +444,7 @@
               "bitValues": 0
             },
             {
-              "name": "abnormal",
+              "name": "Abnormal",
               "bitValues": 1
             }
           ],
@@ -494,7 +494,7 @@
               "bitValues": 0
             },
             {
-              "name": "abnormal",
+              "name": "Abnormal",
               "bitValues": 1
             }
           ],
@@ -547,7 +547,7 @@
               "bitValues": 0
             },
             {
-              "name": "abnormal",
+              "name": "Abnormal",
               "bitValues": 1
             }
           ],
@@ -597,7 +597,7 @@
               "bitValues": 0
             },
             {
-              "name": "abnormal",
+              "name": "Abnormal",
               "bitValues": 1
             }
           ],

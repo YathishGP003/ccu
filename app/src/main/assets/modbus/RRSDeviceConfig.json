@@ -80,11 +80,11 @@
                     ],
                     "commands": [
                         {
-                            "name": "ultrasonicMode",
+                            "name": "Ultrasonic Mode",
                             "bitValues": "1"
                         },
                         {
-                            "name": "testSoundMode",
+                            "name": "Test Sound Mode",
                             "bitValues": "2"
                         }
                     ]

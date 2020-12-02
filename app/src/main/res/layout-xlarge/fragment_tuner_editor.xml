@@ -1,13 +1,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/zone_fragment_temp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".RenatusLandingActivity">
 
 
@@ -15,86 +16,99 @@
         android:id="@+id/textTunersLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
         android:layout_margin="10sp"
         android:text="@string/txt_tunersTitle"
-        android:textAppearance="@style/label_orange"
-        android:layout_alignParentLeft="true"
-        />
+        android:textAppearance="@style/label_orange" />
 
     <RadioGroup
         android:id="@+id/radioGrpTuner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:layout_margin="10sp"
-        android:paddingRight="30sp"
+        android:layout_toLeftOf="@+id/editTunerSearch"
         android:gravity="center_vertical|center_horizontal"
-        android:layout_toLeftOf="@+id/editTunerSearch">
+        android:orientation="horizontal"
+        android:paddingRight="30sp">
+
         <RadioButton
             android:id="@+id/radioBtnSystem"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/txt_tunersSystem"
-            android:textAppearance="@style/label_values"
             android:layout_gravity="center_vertical"
-            />
+            android:text="@string/txt_tunersSystem"
+            android:textAppearance="@style/label_values" />
+
         <RadioButton
             android:id="@+id/radioBtnZone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/txt_tunersZone"
-            android:textAppearance="@style/label_values"
+            android:layout_gravity="center_vertical"
             android:layout_marginLeft="10sp"
-            android:layout_gravity="center_vertical"/>
+            android:text="@string/txt_tunersZone"
+            android:textAppearance="@style/label_values" />
+
         <RadioButton
             android:id="@+id/radioBtnModule"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/txt_tunersModule"
-            android:textAppearance="@style/label_values"
+            android:layout_gravity="center_vertical"
             android:layout_marginLeft="10sp"
-            android:layout_gravity="center_vertical"/>
+            android:text="@string/txt_tunersModule"
+            android:textAppearance="@style/label_values" />
     </RadioGroup>
+
     <EditText
         android:id="@+id/editTunerSearch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="@string/txt_tunersSearch"
         android:layout_alignParentRight="true"
-        android:layout_margin="8sp"/>
+        android:layout_margin="8sp"
+        android:hint="@string/txt_tunersSearch" />
 
     <ExpandableListView
         android:id="@+id/expandableListView"
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@+id/textTunersLabel"
-        android:indicatorRight="?android:attr/expandableListPreferredItemIndicatorRight"
-        android:divider="@android:color/darker_gray"
-        android:layoutDirection="rtl"
+        android:divider="@color/tuner_divider"
+        android:dividerHeight="0.25dp"
         android:groupIndicator="@drawable/group_indicator"
-        android:dividerHeight="0.15dp" />
+        android:indicatorRight="?android:attr/expandableListPreferredItemIndicatorRight"
+        android:layoutDirection="rtl"
+        android:visibility="gone"
+        android:padding="5sp" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerTuner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textTunersLabel" />
 
     <TextView
         android:id="@+id/textReasonLabel"
-        android:layout_below="@+id/expandableListView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="10sp"
+        android:layout_below="@+id/recyclerTuner"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="10sp"
+        android:layout_marginTop="10sp"
         android:text="@string/text_tunerChangeReason"
         android:textAppearance="@style/tuner_text_group"
-        android:textSize="19sp"
-        android:layout_alignParentLeft="true"
-        />
+        android:textSize="19sp" />
 
     <EditText
         android:id="@+id/editChangeReason"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textReasonLabel"
-        android:hint="@string/hint_tunerChangeReason"
         android:layout_alignParentLeft="true"
+        android:layout_marginLeft="10sp"
+        android:layout_marginRight="20sp"
         android:layout_toLeftOf="@+id/buttonLayout"
-        android:layout_marginLeft="10sp"/>
+        android:hint="@string/hint_tunerChangeReason"
+        android:minHeight="50sp" />
+
     <LinearLayout
         android:id="@+id/buttonLayout"
         android:layout_width="wrap_content"
@@ -102,31 +116,32 @@
         android:layout_below="@+id/textReasonLabel"
         android:layout_alignParentRight="true"
         android:orientation="horizontal">
+
         <android.support.design.button.MaterialButton
             android:id="@+id/buttonCancel"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="100sp"
             android:layout_height="50sp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:theme="@style/Theme.MaterialComponents"
-            app:strokeColor="@color/orange_75f"
+            android:layout_marginRight="5sp"
+            android:padding="5sp"
             android:text="@string/cancel"
             android:textAppearance="@style/tuner_button_cancel"
-            android:layout_marginRight="5sp"
             android:textColor="@color/orange_75f"
-            android:padding="5sp"/>
+            android:theme="@style/Theme.MaterialComponents"
+            app:strokeColor="@color/orange_75f" />
 
         <android.support.design.button.MaterialButton
             android:id="@+id/buttonSave"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="100sp"
             android:layout_height="50sp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:theme="@style/Theme.MaterialComponents"
-            app:strokeColor="@color/grey_select"
-            android:textAppearance="@style/tuner_button_save"
-            android:text="@string/tuner_save"
             android:layout_marginLeft="5sp"
+            android:padding="5sp"
+            android:text="@string/tuner_save"
+            android:textAppearance="@style/tuner_button_save"
             android:textColor="@color/grey_select"
-            android:padding="5sp"/>
+            android:theme="@style/Theme.MaterialComponents"
+            app:strokeColor="@color/grey_select" />
 
 
     </LinearLayout>

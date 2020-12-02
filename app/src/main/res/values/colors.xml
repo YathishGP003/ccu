@@ -70,5 +70,8 @@
     <color name="spinner_divider">#99707070</color>
 
     <color name="tuner_group">#999999</color>
+    <color name="tuner_bg_white">#FFFFFF</color>
+    <color name="tuner_bg_grey">#F9F9F9</color>
+    <color name="tuner_divider">#F9F9F9</color>
 
 </resources>

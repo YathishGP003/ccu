@@ -1,6 +1,7 @@
 package a75f.io.renatus.tuners;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.GridView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -68,7 +70,7 @@ public class ExpandableTunerListAdapter extends BaseExpandableListAdapter {
             GridView tunerGrid = convertView.findViewById(R.id.tunerGrid);
             Log.i("TunersUI","tunerGroupTitle:"+this.expandableListTitle.get(listPosition));
             Log.i("TunersUI","tunerGridAdapter:");
-            tunerGrid.setAdapter(new TunerGridViewAdapter(this.context, getChildList(this.expandableListTitle.get(listPosition))));
+            tunerGrid.setAdapter(new TunerGridViewAdapter(this.context, getChildList(this.expandableListTitle.get(expandedListPosition))));
         }
         return convertView;
         /*final HashMap expandedListText = (HashMap) getChild(listPosition, expandedListPosition);
@@ -188,7 +190,11 @@ public class ExpandableTunerListAdapter extends BaseExpandableListAdapter {
             TextView expandedListTextView = convertView.findViewById(R.id.expandedListItemName);
             TextView expandedListTextVal = convertView.findViewById(R.id.expandedListItemVal);
             expandedListTextView.setText(expandedListText.get("dis").toString());
-
+            LinearLayout tunerGridBg = convertView.findViewById(R.id.tunerGridBg);
+           /* if (position % 4 == 0)
+                tunerGridBg.setBackgroundColor(Color.parseColor("#FFFFFF"));
+            else
+                tunerGridBg.setBackgroundColor(Color.parseColor("#F9F9F9"));*/
             return convertView;
         }
     }

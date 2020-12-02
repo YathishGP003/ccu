@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,13 +17,17 @@ import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -32,7 +38,7 @@ import a75f.io.renatus.R;
  * Created by samjithsadasivan on 1/17/19.
  */
 
-public class TunerFragment extends Fragment
+public class TunerFragment extends Fragment implements TunerItemClickListener
 {
     ExpandableListView            expandableListView;
     ExpandableListAdapter         expandableListAdapter;
@@ -47,6 +53,8 @@ public class TunerFragment extends Fragment
     RadioButton radioButtonSystem;
     RadioButton radioButtonZone;
     RadioButton radioButtonModule;
+    TextView reasonLabel;
+    RecyclerView recyclerViewTuner;
     public TunerFragment()
     {
     }
@@ -68,8 +76,9 @@ public class TunerFragment extends Fragment
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
+        recyclerViewTuner = view.findViewById(R.id.recyclerTuner);
         expandableListView = view.findViewById(R.id.expandableListView);
-        
+
         expandableListDetail = new HashMap<>();
         //updateData();
 
@@ -77,9 +86,16 @@ public class TunerFragment extends Fragment
 
         radioGroupTuners = view.findViewById(R.id.radioGrpTuner);
         radioButtonSystem = view.findViewById(R.id.radioBtnSystem);
-        radioButtonSystem.setChecked(true);
         radioButtonZone = view.findViewById(R.id.radioBtnZone);
         radioButtonModule = view.findViewById(R.id.radioBtnModule);
+
+        //Default Show System Tuners
+        radioGroupTuners.check(R.id.radioBtnSystem);
+        getSystemTuners();
+
+        reasonLabel = view.findViewById(R.id.textReasonLabel);
+        String text = "<font color=#E24301>*</font> <font color=#999999>Reason for Change</font>";
+        reasonLabel.setText(Html.fromHtml(text));
 
         radioGroupTuners.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.radioBtnSystem) {
@@ -92,9 +108,9 @@ public class TunerFragment extends Fragment
                 Log.i("TunersUI","Selected:radioBtnModule");
                 updateData();
             }
-            expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
+          /*  expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
             expandableListAdapter = new ExpandableTunerListAdapter(getActivity(), expandableListTitle, expandableListDetail, tunerMap);
-            expandableListView.setAdapter(expandableListAdapter);
+            expandableListView.setAdapter(expandableListAdapter);*/
         });
 
 
@@ -213,9 +229,13 @@ public class TunerFragment extends Fragment
     }
 
     private void getSystemTuners() {
-        tunerMap.clear();
-        expandableListTitle.clear();
-        expandableListDetail.clear();
+
+        TunerExpandableLayoutHelper tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(),
+                recyclerViewTuner, this, 2);
+
+        //tunerMap.clear();
+        //expandableListTitle.clear();
+        //expandableListDetail.clear();
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("tunerGroup");
         //Log.i("TunersUI","tunerGroup:"+equips);
         ArrayList<HashMap> genericTuners = new ArrayList<>();
@@ -230,16 +250,27 @@ public class TunerFragment extends Fragment
 
         // Group by countryName
         Map<String, List<HashMap>> groupByTuner = equips.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
-        for(String groupTitle: groupByTuner.keySet()){
-            ArrayList<String> tunerList = new ArrayList<>();
+        Map<String, List<HashMap>> sortedGroupTuner = new TreeMap<>(groupByTuner);
+        System.out.println("After Sorting:");
+        Set set2 = sortedGroupTuner.entrySet();
+        Iterator iterator2 = set2.iterator();
+        while(iterator2.hasNext()) {
+            Map.Entry me2 = (Map.Entry)iterator2.next();
+            Log.i("TunersUI","Sorting-"+me2.getKey());
+        }
+        for(String groupTitle: sortedGroupTuner.keySet()){
+           /* ArrayList<String> tunerList = new ArrayList<>();
             for(HashMap tunerValue : groupByTuner.get(groupTitle)) {
                 tunerList.add(tunerValue.get("dis").toString());
                 tunerMap.put(tunerValue.get("dis").toString(), tunerValue.get("id").toString());
             }
             //Log.i("TunersUI","groupTitle:"+groupTitle);
             //Log.i("TunersUI","tunerGroupList:"+tunerList);
-            expandableListDetail.put(groupTitle, groupByTuner.get(groupTitle));
-            expandableListTitle.add(groupTitle);
+            //expandableListDetail.put(groupTitle, groupByTuner.get(groupTitle));
+            //expandableListTitle.add(groupTitle);*/
+
+            tunerExpandableLayoutHelper.addSection(groupTitle, sortedGroupTuner.get(groupTitle));
+            tunerExpandableLayoutHelper.notifyDataSetChanged();
         }
 
         //Log.i("TunersUI","expandableListDetailSize-ALERT:"+expandableListDetail.get("ALERT"));
@@ -285,5 +316,14 @@ public class TunerFragment extends Fragment
         Log.i("TunersUI","genericTuners:"+genericTuners);
         Log.i("TunersUI","alertTuners:"+alertTuners);
         Log.i("TunersUI","ALERT-alertTunerList:"+alertTunerMap);*/
+    }
+    @Override
+    public void itemClicked(HashMap item) {
+        Toast.makeText(getActivity(), "TunerUI-HashMap: " + item.get("dis") + " clicked", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void itemClicked(TunerGroupItem section) {
+        Toast.makeText(getActivity(), "TunerUI-Section: " + section.getName() + " clicked", Toast.LENGTH_SHORT).show();
     }
 }

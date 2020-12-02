@@ -10,6 +10,8 @@ import com.x75f.modbus4j.msg.ReadInputRegistersRequest;
 import com.x75f.modbus4j.msg.WriteRegisterRequest;
 import com.x75f.modbus4j.serial.rtu.RtuMessageRequest;
 
+import a75f.io.logic.L;
+
 public class LModbus {
     
     private static SerialCommLock modbusCommLock = new SerialCommLock();
@@ -24,7 +26,7 @@ public class LModbus {
             RtuMessageRequest rtuMessageRequest;
             try {
                 //EquipmentDevice equipmentDevice = EquipsManager.getInstance().fetchProfileBySlaveId(slaveid);
-                Log.d("Modbus","LModbus getModbusData="+slaveid+","+registerType+","+registerAddr);
+                Log.d(L.TAG_CCU_MODBUS,"LModbus getModbusData=" + slaveid + "," + registerType + "," + registerAddr);
                 switch (registerType) {
                     case "readCoil":
                          request = new ReadCoilsRequest(slaveid, registerAddr, numberOfRegisters);
@@ -34,13 +36,12 @@ public class LModbus {
                          request = new ReadDiscreteInputsRequest(slaveid, registerAddr, numberOfRegisters);
                          rtuMessageRequest = new RtuMessageRequest(request);
                          return rtuMessageRequest.getMessageData();
-                     case "holdingRegister":
+                    case "holdingRegister":
                          request = new ReadHoldingRegistersRequest(slaveid, registerAddr, numberOfRegisters);
                          rtuMessageRequest = new RtuMessageRequest(request);
                          return rtuMessageRequest.getMessageData();
                     case "inputRegister":
-                        //request = new ReadInputRegistersRequest(slaveid,registerAddr, numberOfRegisters);
-                        request = new ReadHoldingRegistersRequest(slaveid, registerAddr, numberOfRegisters);
+                        request = new ReadInputRegistersRequest(slaveid,registerAddr, numberOfRegisters);
                         rtuMessageRequest = new RtuMessageRequest(request);
                         return rtuMessageRequest.getMessageData();
                     case "writeRegister":

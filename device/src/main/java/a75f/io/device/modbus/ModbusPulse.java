@@ -3,25 +3,18 @@ package a75f.io.device.modbus;
 import android.util.Log;
 
 import com.felhr.utils.UsbModbusUtils;
-import com.google.common.primitives.UnsignedInts;
-import com.x75f.modbus4j.base.ModbusUtils;
 import com.x75f.modbus4j.msg.ModbusResponse;
 import com.x75f.modbus4j.serial.rtu.RtuMessageResponse;
 import com.x75f.modbus4j.sero.util.queue.ByteQueue;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
-import a75f.io.api.haystack.modbus.EquipmentDevice;
-import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.mesh.DLog;
-import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.modbusbox.EquipsManager;
 
 public class ModbusPulse {
     private static final int MODBUS_DATA_START_INDEX = 3;
@@ -109,10 +102,7 @@ public class ModbusPulse {
 
     private static void updateModbusRespone(String deviceRef, RtuMessageResponse response,byte registerType){
 
-        int startIndex = 3;
-        int responseVal = 0;
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        
         Register readRegister = LModbus.getModbusCommLock().getRegister();
         
         HashMap phyPoint = hayStack.read("point and physical and register and modbus and registerAddr == \""
@@ -124,10 +114,6 @@ public class ModbusPulse {
                 return;
             }
             HashMap logPoint = hayStack.read("point and id==" + phyPoint.get("pointRef"));
-            //TODO check for valid registerAddr in phypoint based on response addrss?
-            //We do get address from 1 till say 247??? based on our locally consumed parameters, we fetch that index and get value for the same.
-            //int responseVal = response.getMessageData()[Integer.parseInt(phyPoint.get("registerAddress").toString())];
-        
             Log.d(L.TAG_CCU_MODBUS," Response data : "+Arrays.toString(response.getMessageData()));
             double formattedVal = 0;
             switch (UsbModbusUtils.validateFunctionCode(registerType)){
@@ -135,22 +121,21 @@ public class ModbusPulse {
                 case UsbModbusUtils.READ_HOLDING_REGISTERS:
                 case UsbModbusUtils.READ_DISCRETE_INPUTS:
                     formattedVal = getRegisterValFromResponse(readRegister, response);
+                    hayStack.writeHisValById(logPoint.get("id").toString(),formattedVal);
+                    hayStack.writeHisValById(phyPoint.get("id").toString(), formattedVal);
                     //startIndex +=2;
                     break;
                 case UsbModbusUtils.WRITE_REGISTER:
-                    //TODO:
-                    formattedVal = response.getMessageData()[startIndex+1] << 8 | response.getMessageData()[startIndex + 2];
+                    //Parsed only for logging.
+                    formattedVal = (response.getMessageData()[MODBUS_DATA_START_INDEX+1] << 8)
+                                    | (response.getMessageData()[MODBUS_DATA_START_INDEX + 2]);
                     break;
                 default:
                     Log.d(L.TAG_CCU_MODBUS, "Unknown Register type data "+Arrays.toString(response.getMessageData()));
                     break;
             }
-            //if(response.getMessageData()[3] != startIndex)
-           
             Log.d(L.TAG_CCU_MODBUS, "Pulse Register: Type "+registerType+ ", Addr "+readRegister.getRegisterAddress()+
                                             " Val "+formattedVal);
-            hayStack.writeHisValById(logPoint.get("id").toString(),formattedVal);
-            hayStack.writeHisValById(phyPoint.get("id").toString(), formattedVal);
         //}
     
         LModbus.getModbusCommLock().unlock();

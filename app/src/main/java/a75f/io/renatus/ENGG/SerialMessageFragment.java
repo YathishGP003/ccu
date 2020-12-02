@@ -54,6 +54,7 @@ import java.util.Set;
 import a75f.io.device.json.serializers.JsonSerializer;
 import a75f.io.device.mesh.DLog;
 import a75f.io.device.modbus.CcuToMbOverUsbReadHoldingRegistersRequest_t;
+import a75f.io.device.modbus.LModbus;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbErrorReportMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
@@ -78,15 +79,6 @@ import butterknife.OnClick;
 
 public class SerialMessageFragment extends Fragment {
     List<String> messages = Arrays.asList("Select Message",
-			/*"CcuToCmOverUsbDatabaseSeedSnMessage_t",
-			"CcuToCmOverUsbSnSettingsMessage_t",
-			"CcuToCmOverUsbSnControlsMessage_t",
-			"CcuToCmOverUsbSnLightingScheduleMessage_t",
-			"CcuToCmOverUsbDatabaseSeedSmartStatMessage_t",
-			"CcuToCmOverUsbSmartStatSettingsMessage_t",
-			"CcuToCmOverUsbSmartStatControlsMessage_t",
-			"CcuToCmOverUsbCcuHeartbeatMessage_t",
-			"CcuToCmOverUsbCmRelayActivationMessage_t",*/
             "ReadHoldingRegistersRequest",
             "ReadCoilRequest",
             "ReadDiscreateInputRegister",
@@ -113,9 +105,14 @@ public class SerialMessageFragment extends Fragment {
 
     @BindView(R.id.sendButton)
     Button sendButton;
-
-    private int msgSelection;
-    private Class<?> msgClass = null;
+    
+    @BindView(R.id.textVal)
+    TextView textVal;
+    @BindView(R.id.writeVal)
+    EditText writeVal;
+    
+    @BindView(R.id.addrVal)
+    EditText addrVal;
     
     RtuMessageRequest rtuMessageRequest = null;
     private UsbModbusService usbService;
@@ -203,12 +200,18 @@ public class SerialMessageFragment extends Fragment {
         msgSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                Log.d("SERIAL", "onItemSelected=" + position);
-                if (position == 0)
+                /*if (position == 0)
                     msgSend.setText(null);
                 else
-                    fillMessageView(position);
-                msgSelection = position > 0 ? position : 1;
+                    fillMessageView(position);*/
+                
+                if (position > 3) {
+                    textVal.setVisibility(View.VISIBLE);
+                    writeVal.setVisibility(View.VISIBLE);
+                } else {
+                    textVal.setVisibility(View.GONE);
+                    writeVal.setVisibility(View.GONE);
+                }
             }
 
             @Override
@@ -269,26 +272,13 @@ public class SerialMessageFragment extends Fragment {
     private void fillMessageView(int position) {
         try {
             Log.d(L.TAG_CCU_MODBUS,"fillMessageView =" + position + "," + messages.get(position));
-            //msgClass =  Class.forName("a75f.io.device.modbus."+messages.get(position));
-            //Log.d("SERIAL","fillMessageView ="+position+","+messages.get(position)+","+msgClass.getName());
-            //Struct msg = (Struct) msgClass.newInstance();
-            
             switch (position) {
                 case 1:
                     Log.d(L.TAG_CCU_MODBUS, "send msg prep11=" + position);
-					/*CcuToMbOverUsbReadHoldingRegistersRequest_t mbRequestMsg = new CcuToMbOverUsbReadHoldingRegistersRequest_t();
-					mbRequestMsg.slaveId.set((short)1);
-					mbRequestMsg.functionCode.set((short)3);
-					mbRequestMsg.startingAddressHigh.set((short)(0 >> 8));
-					mbRequestMsg.startingAddressLow.set((short)(0 & 0x00ff));
-					mbRequestMsg.quantityOfCoilsHigh.set((short)(0 >> 8));
-					mbRequestMsg.quantityOfCoilsLow.set((short)(14 & 0x00ff));
-					mbRequestMsg.errorCheckLow.set((short)(0xc4 >> 8));
-					mbRequestMsg.errorCheckHigh.set((short)(0x75 & 0x00ff));*/
-    
-                    modbusRequest =
-                        new ReadHoldingRegistersRequest(Integer.parseInt(slaveSpinner.getSelectedItem().toString()),
-                                                        0, Integer.parseInt(registerSpinner.getSelectedItem().toString()));
+                    
+                    modbusRequest = new ReadHoldingRegistersRequest(Integer.parseInt(slaveSpinner.getSelectedItem().toString()),
+                                                        Integer.parseInt(addrVal.getText().toString()),
+                                                        Integer.parseInt(registerSpinner.getSelectedItem().toString()));
                     rtuMessageRequest = new RtuMessageRequest(modbusRequest);
                     CcuLog.i(L.TAG_CCU_MODBUS,
                              "SerialMessage: modbus readHoldingRegister " + rtuMessageRequest.getMessageData().toString());
@@ -296,23 +286,27 @@ public class SerialMessageFragment extends Fragment {
                     Log.d(L.TAG_CCU_MODBUS, "send msg prep=" + modbusRequest.getClass() + "," + modbusRequest.toString());
                     break;
                 case 2:
-                    modbusRequest = new ReadCoilsRequest(Integer.parseInt(slaveSpinner.getSelectedItem().toString()), 0, 1);
+                    modbusRequest = new ReadCoilsRequest(Integer.parseInt(slaveSpinner.getSelectedItem().toString()),
+                                                         Integer.parseInt(addrVal.getText().toString()), 1);
                     rtuMessageRequest = new RtuMessageRequest(modbusRequest);
                     CcuLog.i(L.TAG_CCU_MODBUS, "SerialMessage: modbus ReadCoilsRequest " + rtuMessageRequest.getMessageData());
                     break;
                 case 3:
                     modbusRequest = new ReadDiscreteInputsRequest(Integer.parseInt(slaveSpinner.getSelectedItem().toString()),
-                                                                            0, 1);
+                                                                  Integer.parseInt(addrVal.getText().toString()), 1);
                     rtuMessageRequest = new RtuMessageRequest(modbusRequest);
                     CcuLog.i(L.TAG_CCU_MODBUS, "SerialMessage: modbus ReadDiscreateInputRequest " + rtuMessageRequest.getMessageData());
                     break;
                 case 4:
-                    modbusRequest = new WriteCoilRequest(Integer.parseInt(slaveSpinner.getSelectedItem().toString()), 0, true);
+                    modbusRequest = new WriteCoilRequest(Integer.parseInt(slaveSpinner.getSelectedItem().toString()),
+                                                         Integer.parseInt(addrVal.getText().toString()), true);
                     rtuMessageRequest = new RtuMessageRequest(modbusRequest);
                     CcuLog.i(L.TAG_CCU_MODBUS, "SerialMessage: modbus WriteCoilsRequest " + rtuMessageRequest.getMessageData());
                     break;
                 case 5:
-                    modbusRequest = new WriteRegisterRequest(Integer.parseInt(slaveSpinner.getSelectedItem().toString()), 0, 1);
+                    modbusRequest = new WriteRegisterRequest(Integer.parseInt(slaveSpinner.getSelectedItem().toString()),
+                                                 Integer.parseInt(addrVal.getText().toString()),
+                                                 Integer.parseInt(writeVal.getText().toString()));
                     rtuMessageRequest = new RtuMessageRequest(modbusRequest);
                     CcuLog.i(L.TAG_CCU_MODBUS, "SerialMessage: modbus WriteRegisterRequest " + rtuMessageRequest.getMessageData());
                     break;
@@ -320,52 +314,6 @@ public class SerialMessageFragment extends Fragment {
             }
     
             updateSendMsg(rtuMessageRequest.getMessageData());
-
-				/*case 1:
-					CcuToCmOverUsbDatabaseSeedSnMessage_t snSeedMsg = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
-					snSeedMsg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
-					msgSend.setText(JsonSerializer.toJson(snSeedMsg, true));
-					break;
-				case 2:
-					CcuToCmOverUsbSnSettingsMessage_t snSettingMsg = new CcuToCmOverUsbSnSettingsMessage_t();
-					snSettingMsg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_SETTINGS);
-					msgSend.setText(JsonSerializer.toJson(snSettingMsg, true));
-					break;
-				case 3:
-					CcuToCmOverUsbSnControlsMessage_t snControlMsg = new CcuToCmOverUsbSnControlsMessage_t();
-					snControlMsg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
-					msgSend.setText(JsonSerializer.toJson(snControlMsg, true));
-					break;
-				case 4:
-					CcuToCmOverUsbSnLightingScheduleMessage_t snLightingMsg = new CcuToCmOverUsbSnLightingScheduleMessage_t();
-					snLightingMsg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_LIGHTING_SCHEDULE);
-					msgSend.setText(JsonSerializer.toJson(snLightingMsg, true));
-					break;
-				case 5:
-					CcuToCmOverUsbDatabaseSeedSmartStatMessage_t ssSeedMsg = new CcuToCmOverUsbDatabaseSeedSmartStatMessage_t();
-					ssSeedMsg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SMART_STAT);
-					msgSend.setText(JsonSerializer.toJson(ssSeedMsg, true));
-					break;
-				case 6:
-					CcuToCmOverUsbSmartStatSettingsMessage_t ssSettingsMsg = new CcuToCmOverUsbSmartStatSettingsMessage_t();
-					ssSettingsMsg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_SETTINGS);
-					msgSend.setText(JsonSerializer.toJson(ssSettingsMsg, true));
-					break;
-				case 7:
-					CcuToCmOverUsbSmartStatControlsMessage_t ssControlMsg = new CcuToCmOverUsbSmartStatControlsMessage_t();
-					ssControlMsg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);
-					msgSend.setText(JsonSerializer.toJson(ssControlMsg, true));
-					break;
-				case 8:
-					CcuToCmOverUsbCcuHeartbeatMessage_t ccuHbMsg = new CcuToCmOverUsbCcuHeartbeatMessage_t();
-					ccuHbMsg.messageType.set(MessageType.CCU_HEARTBEAT_UPDATE);
-					msgSend.setText(JsonSerializer.toJson(ccuHbMsg, true));
-					break;
-				case 9:
-					CcuToCmOverUsbCmRelayActivationMessage_t cmRelayMsg = new CcuToCmOverUsbCmRelayActivationMessage_t();
-					cmRelayMsg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
-					msgSend.setText(JsonSerializer.toJson(cmRelayMsg, true));
-					break;*/
         } catch (Exception e) {
             CcuLog.d(L.TAG_CCU_MODBUS, e.getMessage());
 
@@ -376,32 +324,14 @@ public class SerialMessageFragment extends Fragment {
     @OnClick(R.id.sendButton)
     public void sendMessage() {
         try {
-
-            //TODO - Complete after verifying deserialization issues.
-            //CcuToCmOverUsbDatabaseSeedSnMessage_t msg = (CcuToCmOverUsbDatabaseSeedSnMessage_t) JsonSerializer.fromJson(msgSend.getText().toString(), msgClass);
-            //msg.smartNodeAddress.set(Integer.parseInt(channels.get(channelSelection)));
-            //Log.d("SERIAL","send msg prep="+msgSend.getText().toString()+","+msgClass.getName()+","+msgSend.getText().toString().getBytes());
-            //CcuToMbOverUsbReadHoldingRegistersRequest_t msg = (CcuToMbOverUsbReadHoldingRegistersRequest_t)JsonSerializer.fromJson(msgSend.getText().toString(),msgClass);
-            //usbService.write(msg.getOrderedBuffer());
-            //usbService.modbusWrite(msg.getOrderedBuffer());
-            //CcuLog.i("EnggUI", "SerialMessage: " + JsonSerializer.toJson(msg, true));
-    
-    
+            
             /*SerialInputStream is = new SerialInputStream();
             SerialOutputStream os = new SerialOutputStream(usbService);
-    
             ModbusMaster master = getRtuMaster(new UsbSerialWrapper(os, is));
             master.setTimeout(10000);
             master.setRetries(0);
             master.init();
             usbService.setSerialInputStream(is);*/
-            /*List<Integer> slaves = master.scanForSlaveNodes();
-            Log.d(L.TAG_CCU_MODBUS, " Slaves Count "+slaves.size());
-            for (int i : slaves) {
-                Log.d(L.TAG_CCU_MODBUS, " Slave Addr "+i);
-            }*/
-    
-    
             /*new Thread(() -> {
                 if (rtuMessageRequest != null) {
                     try {
@@ -417,8 +347,14 @@ public class SerialMessageFragment extends Fragment {
                 }
             }).start();*/
             
+            if (msgSpinner.getSelectedItemPosition() < 1) {
+                Toast.makeText(this.getActivity(), "Invalid Message", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            msgRcvd.setText(null);
+            fillMessageView(msgSpinner.getSelectedItemPosition());
+            
             if (rtuMessageRequest != null) {
-    
                 new Thread(() -> {
                     usbService.modbusWrite(rtuMessageRequest.getMessageData());
                 }).start();

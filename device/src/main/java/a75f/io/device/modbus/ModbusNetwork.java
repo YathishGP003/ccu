@@ -15,8 +15,6 @@ import a75f.io.modbusbox.EquipsManager;
 
 public class ModbusNetwork extends DeviceNetwork
 {
-    private static final int SERIAL_COMM_TIMEOUT_MS = 1000;
-
     @Override
     public void sendMessage() {
         
@@ -24,12 +22,9 @@ public class ModbusNetwork extends DeviceNetwork
             CcuLog.d(L.TAG_CCU_MODBUS,"ModbusNetwork: Serial device not connected");
             return;
         }
-        try
-        {
-            for (Floor floor : HSUtil.getFloors())
-            {
-                for (Zone zone : HSUtil.getZones(floor.getId()))
-                {
+        try {
+            for (Floor floor : HSUtil.getFloors()) {
+                for (Zone zone : HSUtil.getZones(floor.getId())) {
                     CcuLog.d(L.TAG_CCU_MODBUS,"SERIAL_ =======Modbus Zone: " + zone.getDisplayName() + " =================="+","+zone.getMarkers().contains("modbus"));
                     //send request for modbus modules alone
                     for (Equip equip : HSUtil.getEquips(zone.getId())) {
@@ -37,23 +32,14 @@ public class ModbusNetwork extends DeviceNetwork
                             EquipmentDevice modbusDevice = EquipsManager.getInstance().fetchProfileBySlaveId(Short.parseShort(equip.getGroup()));
                             
                             for(Register register: modbusDevice.getRegisters()) {
-                                CcuLog.d(L.TAG_CCU_MODBUS,"Read Register "+register.toString());
-                                                          //+register.getParameters().get(0).getParameterDefinitionType());
-                                byte[] requestData = LModbus.getModbusData(Short.parseShort(equip.getGroup()),
-                                                                           register.registerType,
-                                                                           register.registerAddress,
-                                                                           getRegisterCount(register));
-                                
-                                LSerial.getInstance().sendSerialToModbus(requestData);
-                                LModbus.getModbusCommLock().lock(register, SERIAL_COMM_TIMEOUT_MS);
+                                LModbus.readRegister(Short.parseShort(equip.getGroup()), register, getRegisterCount(register));
                             }
                         }
                     }
                 }
             }
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             e.printStackTrace();
         }
     }

@@ -199,11 +199,29 @@ public class ModbusEquip {
                     Log.d("Modbus", modbusEquipType+"MBEquip write params enums=" + enumVariables.toString());
                 }
             }
-            String logicalParamId = CCUHsApi.getInstance().addPoint(logicalParamPoint.build());
+            Point logicalPoint = logicalParamPoint.build();
+            String logicalParamId = CCUHsApi.getInstance().addPoint(logicalPoint);
             String physicalParamId = CCUHsApi.getInstance().addPoint(physicalParamPoint.setPointRef(logicalParamId).build());
-            CCUHsApi.getInstance().writeHisValById(logicalParamId, 0.0);
+            if (configParam.getUserIntentPointTags() != null) {
+                if (configParam.getCommands() != null && configParam.getCommands().size() > 0) {
+                    CCUHsApi.getInstance().writeHisValById(logicalParamId, Double.parseDouble(configParam.getCommands().get(0).getBitValues()));
+                    CCUHsApi.getInstance().writeDefaultValById(logicalParamId, Double.parseDouble(configParam.getCommands().get(0).getBitValues()));
+                } else {
+                    if (logicalPoint.getMinVal() != null) {
+                        CCUHsApi.getInstance().writeHisValById(logicalParamId, Double.parseDouble(logicalPoint.getMinVal()));
+                        CCUHsApi.getInstance().writeDefaultValById(logicalParamId, Double.parseDouble(logicalPoint.getMinVal()));
+                    } else {
+                        CCUHsApi.getInstance().writeHisValById(logicalParamId, 0.0);
+                        CCUHsApi.getInstance().writeDefaultValById(logicalParamId, 0.0);
+                    }
+                }
+
+            } else {
+                CCUHsApi.getInstance().writeHisValById(logicalParamId, 0.0);
+                CCUHsApi.getInstance().writeDefaultValById(logicalParamId, 0.0);
+            }
+
             CCUHsApi.getInstance().writeHisValById(physicalParamId,0.0);
-            CCUHsApi.getInstance().writeDefaultValById(logicalParamId,0.0);
             CCUHsApi.getInstance().writeDefaultValById(physicalParamId,0.0);
 
         }

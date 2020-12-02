@@ -29,11 +29,19 @@ public class Parameter {
 
     @SerializedName("startBit")
     @Expose
-    public int startBit;
+    public Integer startBit;
 
     @SerializedName("endBit")
     @Expose
-    public int endBit;
+    public Integer endBit;
+
+    @SerializedName("bitParamRange")
+    @Expose
+    public String bitParamRange;
+
+    @SerializedName("bitParam")
+    @Expose
+    public Integer bitParam;
 
     @SerializedName("commands")
     @Expose
@@ -100,6 +108,22 @@ public class Parameter {
 
     public void setEndBit(Integer endBit) {
         this.endBit = endBit;
+    }
+
+    public String getBitParamRange() {
+        return bitParamRange;
+    }
+
+    public void setBitParamRange(String bitParamRange) {
+        this.bitParamRange = bitParamRange;
+    }
+
+    public Integer getBitParam() {
+        return bitParam;
+    }
+
+    public void setBitParam(Integer bitParam) {
+        this.bitParam = bitParam;
     }
 
     public List<LogicalPointTags> getLogicalPointTags() {

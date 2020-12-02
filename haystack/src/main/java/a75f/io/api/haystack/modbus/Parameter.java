@@ -291,7 +291,8 @@ public class Parameter {
     
     @Override
     public String toString() {
-        return " parameterId "+parameterId +", name "+name+",startBit "+startBit+",endBit "+endBit;
+        return " Param : name "+name+",startBit "+startBit+", endBit "+endBit+", bitParam "+bitParam+", " +
+                                                                        "bitParamRange "+bitParamRange+ " : ";
     }
 
 }

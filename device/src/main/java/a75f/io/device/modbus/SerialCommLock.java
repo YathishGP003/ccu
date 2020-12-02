@@ -35,7 +35,6 @@ public class SerialCommLock {
     
     public void unlock() {
         readPending.set(false);
-        //condition.signal();
     }
     
     public Register getRegister() {

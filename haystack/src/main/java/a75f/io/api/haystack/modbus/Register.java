@@ -101,7 +101,7 @@ public class Register {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(registerNumber+":"+registerAddress+":"+registerType+":"+parameterDefinitionType+" - ");
+        sb.append(registerNumber+":"+registerAddress+":"+registerType+":"+parameterDefinitionType+" ");
         
         for(Parameter p : parameters) {
             sb.append(p.toString());

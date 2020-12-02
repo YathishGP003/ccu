@@ -157,29 +157,30 @@ public class ModbusPulse {
     }
     
     public static double getRegisterValFromResponse(Register register, RtuMessageResponse response) {
-        double formattedVal = 0;
+        double respVal = 0;
         if (register.registerType.equals("inputRegister")
                 || register.registerType.equals("discreteInput")) {
             //16bit decimal (ir) or 1 bit (di)
-            formattedVal = parseIntVal(response);
+            respVal = parseIntVal(response);
         } else if (register.registerType.equals("holdingRegister")) {
-    
             if (register.getParameterDefinitionType().equals("float")) {
-                formattedVal = parseFloatVal(response);
+                respVal = parseFloatVal(response);
             } else if (register.getParameterDefinitionType().equals("integer")
                   || register.getParameterDefinitionType().equals("decimal")
                   || register.getParameterDefinitionType().equals("range")) {
         
             } else if (register.getParameterDefinitionType().equals("binary")) {
-                int position = 0;//TODO : pos - startbit.
-                formattedVal = parseBitVal(response, position);
+                if (register.getParameters().size() > 0) {
+                    respVal = parseBitVal(response, register.getParameters().get(0).bitParam);
+                }
             } else if (register.getParameterDefinitionType().equals("boolean")) {
-                String range = "";//register.getParameters().
-                formattedVal = parseBitRangeVal(response, range);
+                if (register.getParameters().size() > 0) {
+                    respVal = parseBitRangeVal(response, register.getParameters().get(0).bitParamRange);
+                }
             }
         }
         
-        return formattedVal;
+        return respVal;
     }
     
     public static double parseFloatVal(RtuMessageResponse response) {

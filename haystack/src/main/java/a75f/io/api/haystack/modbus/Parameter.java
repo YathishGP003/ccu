@@ -264,5 +264,10 @@ public class Parameter {
             return new Gson().toJson(conditionList);
         }
     }
+    
+    @Override
+    public String toString() {
+        return " parameterId "+parameterId +", name "+name+",startBit "+startBit+",endBit "+endBit;
+    }
 
 }

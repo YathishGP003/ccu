@@ -97,5 +97,16 @@ public class Register {
             return new Gson().toJson(parameterList);
         }
     }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(registerNumber+":"+registerAddress+":"+registerType+":"+parameterDefinitionType+" - ");
+        
+        for(Parameter p : parameters) {
+            sb.append(p.toString());
+        }
+        return sb.toString();
+    }
 
 }

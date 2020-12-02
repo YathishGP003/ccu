@@ -40,11 +40,10 @@ public class ModbusNetwork extends DeviceNetwork
                                 CcuLog.d(L.TAG_CCU_MODBUS,"SERIAL_ ======= Register "+register.getRegisterAddress()+
                                                           " "+register.getParameterDefinitionType());
                                                           //+register.getParameters().get(0).getParameterDefinitionType());
-                                //TODO Need to handle sequence of registers here for now we handle one by one
-                                
-                                int registerNum = register.getParameterDefinitionType().equals("float") ? 2 : 1;
                                 byte[] requestData = LModbus.getModbusData(Short.parseShort(equip.getGroup()),
-                                                                           register.registerType,register.registerAddress,registerNum);
+                                                                           register.registerType,
+                                                                           register.registerAddress,
+                                                                           getRegisterCount(register));
                                 
                                 LSerial.getInstance().sendSerialToModbus(requestData);
                                 LModbus.getModbusCommLock().lock(register, SERIAL_COMM_TIMEOUT_MS);
@@ -60,6 +59,14 @@ public class ModbusNetwork extends DeviceNetwork
         }
     }
 
+    private int getRegisterCount(Register register) {
+        if (register.getParameterDefinitionType().equals("float")) {
+            return 2;
+        } else {
+            return 1;
+        }
+    }
+    
     public void sendSystemControl() {
         //CcuLog.d(L.TAG_CCU_DEVICE, "Modbus SendSystemControl");
     }

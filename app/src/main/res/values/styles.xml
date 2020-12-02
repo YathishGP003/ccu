@@ -282,5 +282,50 @@
         <item name="android:fontFamily">@font/lato_bold</item>
         <item name="android:gravity">center_vertical</item>
     </style>
+    <style name="label_orange_title" parent="@android:style/TextAppearance">
+        <item name="android:textSize">33.5sp</item>
+        <item name="android:textColor">@color/orange_75f</item>
+        <item name="android:fontFamily">@font/lato_bold</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+
+    <style name="tuner_text_label" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/hint_textcolor</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textAllCaps"> true</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+    <style name="tuner_text_value" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/accent</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textAllCaps"> true</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+    <style name="tuner_text_group" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/tuner_group</item>
+        <item name="android:textSize">19.5sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/lato_bold</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+    <style name="tuner_button_save" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/tuner_group</item>
+        <item name="android:textSize">19.5sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+    <style name="tuner_button_cancel" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/orange_75f</item>
+        <item name="android:textSize">19.5sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+
 
 </resources>

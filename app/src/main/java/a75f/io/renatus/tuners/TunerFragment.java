@@ -6,18 +6,23 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.tuners.TunerConstants;
@@ -32,11 +37,16 @@ public class TunerFragment extends Fragment
     ExpandableListView            expandableListView;
     ExpandableListAdapter         expandableListAdapter;
     List<String>                  expandableListTitle;
-    HashMap<String, List<String>> expandableListDetail;
-    
+    //HashMap<String, List<String>> expandableListDetail;
+    HashMap<String, List<HashMap>> expandableListDetail;
+
     HashMap<String, String> tunerMap = new HashMap();
     int lastExpandedPosition;
-    
+
+    RadioGroup radioGroupTuners;
+    RadioButton radioButtonSystem;
+    RadioButton radioButtonZone;
+    RadioButton radioButtonModule;
     public TunerFragment()
     {
     }
@@ -61,10 +71,34 @@ public class TunerFragment extends Fragment
         expandableListView = view.findViewById(R.id.expandableListView);
         
         expandableListDetail = new HashMap<>();
-        updateData();
-        expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
-        expandableListAdapter = new ExpandableTunerListAdapter(getActivity(), expandableListTitle, expandableListDetail, tunerMap);
-        expandableListView.setAdapter(expandableListAdapter);
+        //updateData();
+
+
+
+        radioGroupTuners = view.findViewById(R.id.radioGrpTuner);
+        radioButtonSystem = view.findViewById(R.id.radioBtnSystem);
+        radioButtonSystem.setChecked(true);
+        radioButtonZone = view.findViewById(R.id.radioBtnZone);
+        radioButtonModule = view.findViewById(R.id.radioBtnModule);
+
+        radioGroupTuners.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.radioBtnSystem) {
+                Log.i("TunersUI","Selected:radioBtnSystem");
+                getSystemTuners();
+            } else if (checkedId == R.id.radioBtnZone) {
+                Log.i("TunersUI","Selected:radioBtnZone");
+                updateData();
+            } else if (checkedId == R.id.radioBtnModule) {
+                Log.i("TunersUI","Selected:radioBtnModule");
+                updateData();
+            }
+            expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
+            expandableListAdapter = new ExpandableTunerListAdapter(getActivity(), expandableListTitle, expandableListDetail, tunerMap);
+            expandableListView.setAdapter(expandableListAdapter);
+        });
+
+
+
         /*expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
         
             @Override
@@ -80,11 +114,10 @@ public class TunerFragment extends Fragment
             public boolean onChildClick(ExpandableListView parent, View v,
                                         int groupPosition, int childPosition, long id) {
                 
-                String tunerName = expandableListDetail.get(expandableListTitle.get(groupPosition)).get(
-                                                childPosition);
-               /* if (!tunerName.contains("coolingUserLimitMax")&&!tunerName.contains("coolingUserLimitMin")&&!tunerName.contains("heatingUserLimitMin")
+               /* String tunerName = expandableListDetail.get(expandableListTitle.get(groupPosition)).get(childPosition);
+               *//* if (!tunerName.contains("coolingUserLimitMax")&&!tunerName.contains("coolingUserLimitMin")&&!tunerName.contains("heatingUserLimitMin")
                     &&!tunerName.contains("heatingUserLimitMax")&&!tunerName.contains("buildingLimitMin")&&!tunerName.contains("buildingLimitMax"))
-                {*/
+                {*//*
                     Toast.makeText(getActivity(), expandableListTitle.get(groupPosition) + " -> " + tunerName, Toast.LENGTH_SHORT).show();
 
                     final EditText taskEditText = new EditText(getActivity());
@@ -106,30 +139,28 @@ public class TunerFragment extends Fragment
                             .setNegativeButton("Cancel", null)
                             .create();
                     dialog.show();
-             //   }
+             //   }*/
                 return false;
             }
         });
     
-        expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
-        
-            @Override
-            public void onGroupExpand(int groupPosition) {
-                updateData();
-                expandableListView.invalidateViews();
-                if (lastExpandedPosition != -1
-                    && groupPosition != lastExpandedPosition) {
-                    expandableListView.collapseGroup(lastExpandedPosition);
-                }
-                lastExpandedPosition = groupPosition;
+        expandableListView.setOnGroupExpandListener(groupPosition -> {
+            getSystemTuners();
+            expandableListView.invalidateViews();
+            if (lastExpandedPosition != -1
+                && groupPosition != lastExpandedPosition) {
+                expandableListView.collapseGroup(lastExpandedPosition);
             }
+            lastExpandedPosition = groupPosition;
         });
     }
-    
+
+
     private void updateData() {
         tunerMap.clear();
         expandableListDetail.clear();
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
+        Log.i("TunersUI","Equips:"+equips);
         for (Map m : equips) {
             ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("tuner and equipRef == \""+m.get("id")+"\"");
             ArrayList tunerList = new ArrayList();
@@ -179,5 +210,80 @@ public class TunerFragment extends Fragment
                 // continue what you are doing...
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+    }
+
+    private void getSystemTuners() {
+        tunerMap.clear();
+        expandableListTitle.clear();
+        expandableListDetail.clear();
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("tunerGroup");
+        //Log.i("TunersUI","tunerGroup:"+equips);
+        ArrayList<HashMap> genericTuners = new ArrayList<>();
+        ArrayList<HashMap> alertTuners = new ArrayList<>();
+
+        HashMap<String, List> alertTunerMap = new HashMap();
+        HashMap<String, List> genericTunerMap = new HashMap();
+        ArrayList alertTunerList = new ArrayList();
+        ArrayList genericTunerList = new ArrayList();
+
+        Map<Integer, List<String>> valuesMap = new HashMap<>();
+
+        // Group by countryName
+        Map<String, List<HashMap>> groupByTuner = equips.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
+        for(String groupTitle: groupByTuner.keySet()){
+            ArrayList<String> tunerList = new ArrayList<>();
+            for(HashMap tunerValue : groupByTuner.get(groupTitle)) {
+                tunerList.add(tunerValue.get("dis").toString());
+                tunerMap.put(tunerValue.get("dis").toString(), tunerValue.get("id").toString());
+            }
+            //Log.i("TunersUI","groupTitle:"+groupTitle);
+            //Log.i("TunersUI","tunerGroupList:"+tunerList);
+            expandableListDetail.put(groupTitle, groupByTuner.get(groupTitle));
+            expandableListTitle.add(groupTitle);
+        }
+
+        //Log.i("TunersUI","expandableListDetailSize-ALERT:"+expandableListDetail.get("ALERT"));
+        //Log.i("TunersUI","expandableListDetailSize-GENERIC:"+expandableListDetail.get("GENERIC"));
+        //Log.i("TunersUI","expandableListDetailSize-ALERTsize:"+expandableListDetail.get("ALERT").size());
+        //Log.i("TunersUI","expandableListDetailSize-GENERICsize:"+expandableListDetail.get("GENERIC").size());
+        /*for (HashMap m : equips) {
+            Log.i("TunersUI","tunerGroup:"+m.get("tunerGroup"));
+            HashMap<String,String> tunerItem = m;
+            Log.i("TunersUI","tunerItem:"+tunerItem);
+            if(m.get("tunerGroup").toString().equals("GENERIC"))
+            {
+                genericTuners.add(m);
+                genericTunerList.add(m);
+            }
+            if(m.get("tunerGroup").toString().equals("ALERT"))
+            {
+                alertTuners.add(m);
+                alertTunerList.add(m);
+            }
+
+            alertTunerMap.put(m.get("tunerGroup").toString(),alertTunerList);
+
+            ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("tuner and equipRef == \""+m.get("id")+"\"");
+            ArrayList tunerList = new ArrayList();
+
+            for (Map t : tuners) {
+                tunerList.add(t.get("dis").toString());
+                tunerMap.put(t.get("dis").toString(), t.get("id").toString());
+            }
+
+            ArrayList<HashMap> userIntents = CCUHsApi.getInstance().readAll("userIntent and equipRef == \""+m.get("id")+"\"");
+
+            for (Map t : userIntents) {
+                if(!t.get("dis").toString().contains("desired")) {
+                    tunerList.add(t.get("dis").toString());
+                    tunerMap.put(t.get("dis").toString(), t.get("id").toString());
+                }
+            }
+            expandableListDetail.put(m.get("dis").toString(), tunerList);
+        }
+        alertTunerMap.put("GENERIC",alertTunerList);
+        Log.i("TunersUI","genericTuners:"+genericTuners);
+        Log.i("TunersUI","alertTuners:"+alertTuners);
+        Log.i("TunersUI","ALERT-alertTunerList:"+alertTunerMap);*/
     }
 }

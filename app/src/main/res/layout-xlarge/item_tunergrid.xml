@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#ffff"
+    android:paddingRight="5dp"
+    android:layoutDirection="ltr">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="3.01" >
+
+        <TextView
+            android:id="@+id/expandedListItemName"
+            android:layout_width="0sp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:gravity="left|center_vertical"
+            android:textAppearance="@style/tuner_text_label"
+            />
+
+        <TextView
+            android:id="@+id/expandedListItemVal"
+            android:layout_width="0sp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:gravity="center_horizontal|center_vertical"
+            android:textAppearance="@style/tuner_text_value" />
+
+        <View
+            android:layout_width="0sp"
+            android:layout_weight="0.01"
+            android:layout_height="match_parent"
+            android:layout_margin="5sp"
+            android:background="@color/light_gray"/>
+    </LinearLayout>
+</LinearLayout>

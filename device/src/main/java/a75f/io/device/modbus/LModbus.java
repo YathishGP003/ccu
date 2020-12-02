@@ -21,13 +21,10 @@ public class LModbus {
     }
 
     public static byte[] getModbusData(Short slaveid, String registerType, int registerAddr, int numberOfRegisters){
-        //byte[] bytes = {0xa, 3, 0, 0, 0, 14, (byte) 0xC5, (byte) 0x75};
             ModbusRequest request;
             RtuMessageRequest rtuMessageRequest;
             try {
-                //EquipmentDevice equipmentDevice = EquipsManager.getInstance().fetchProfileBySlaveId(slaveid);
-                Log.d(L.TAG_CCU_MODBUS,"LModbus getModbusData=" + slaveid + "," + registerType + "," + registerAddr);
-                switch (registerType) {
+                 switch (registerType) {
                     case "readCoil":
                          request = new ReadCoilsRequest(slaveid, registerAddr, numberOfRegisters);
                          rtuMessageRequest = new RtuMessageRequest(request);

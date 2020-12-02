@@ -37,8 +37,7 @@ public class ModbusNetwork extends DeviceNetwork
                             EquipmentDevice modbusDevice = EquipsManager.getInstance().fetchProfileBySlaveId(Short.parseShort(equip.getGroup()));
                             
                             for(Register register: modbusDevice.getRegisters()) {
-                                CcuLog.d(L.TAG_CCU_MODBUS,"SERIAL_ ======= Register "+register.getRegisterAddress()+
-                                                          " "+register.getParameterDefinitionType());
+                                CcuLog.d(L.TAG_CCU_MODBUS,"Read Register "+register.toString());
                                                           //+register.getParameters().get(0).getParameterDefinitionType());
                                 byte[] requestData = LModbus.getModbusData(Short.parseShort(equip.getGroup()),
                                                                            register.registerType,

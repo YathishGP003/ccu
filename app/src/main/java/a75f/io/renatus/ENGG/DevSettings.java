@@ -1,7 +1,10 @@
 package a75f.io.renatus.ENGG;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
@@ -41,8 +44,10 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.renatus.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-        
-        /**
+
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
+/**
   * Created by samjithsadasivan on 12/18/18.
   */
 public class DevSettings extends Fragment implements AdapterView.OnItemSelectedListener
@@ -80,7 +85,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     
     @BindView(R.id.imageCMSerial) ImageView cmSerial;
     @BindView(R.id.imageMBSerial) ImageView mbSerial;
-    
+    @BindView(R.id.reconnectSerial) Button reconnectSerial;
     LinearLayout testParams;
     
     @Override
@@ -224,6 +229,15 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                                                                       : android.R.drawable.checkbox_off_background);
         mbSerial.setImageResource(LSerial.getInstance().isModbusConnected() ? android.R.drawable.checkbox_on_background
                                       : android.R.drawable.checkbox_off_background);
+    
+        reconnectSerial.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                triggerRebirth(getActivity());
+            }
+        });
     }
     
     @Override
@@ -295,6 +309,15 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         {
             e.printStackTrace();
         }
+    }
+    
+    public static void triggerRebirth(Context context) {
+        PackageManager packageManager = context.getPackageManager();
+        Intent intent = packageManager.getLaunchIntentForPackage(context.getPackageName());
+        ComponentName componentName = intent.getComponent();
+        Intent mainIntent = Intent.makeRestartActivityTask(componentName);
+        context.startActivity(mainIntent);
+        Runtime.getRuntime().exit(0);
     }
                              
 }

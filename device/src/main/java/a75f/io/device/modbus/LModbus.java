@@ -56,6 +56,11 @@ public class LModbus {
         return null;
     }
     
+    /**
+     * This may be done asynchronously.But Modbus response does not contain the register address we are reading.
+     * Hence for now, wait until the response is received.
+     * */
+    
     public static synchronized void readRegister(Short slaveId, Register register, int offset) {
         CcuLog.d(L.TAG_CCU_MODBUS,"Read Register "+register.toString());
         byte[] requestData = LModbus.getModbusData(slaveId,

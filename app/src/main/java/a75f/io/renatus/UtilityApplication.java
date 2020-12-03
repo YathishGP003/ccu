@@ -124,6 +124,10 @@ public abstract class UtilityApplication extends Application {
                     NotificationHandler.setCMConnectionStatus(false);
                     Toast.makeText(context, "USB disconnected", Toast.LENGTH_SHORT).show();
                     break;
+                case UsbModbusService.ACTION_USB_MODBUS_DISCONNECTED: // USB DISCONNECTED
+                    //NotificationHandler.setCMConnectionStatus(false);
+                    Toast.makeText(context, "USB Modbus disconnected", Toast.LENGTH_SHORT).show();
+                    break;
                 case UsbService.ACTION_USB_NOT_SUPPORTED: // USB NOT SUPPORTED
                     NotificationHandler.setCMConnectionStatus(false);
                     Toast.makeText(context, "USB device not supported", Toast.LENGTH_SHORT).show();
@@ -227,6 +231,7 @@ public abstract class UtilityApplication extends Application {
         filter.addAction(UsbService.ACTION_USB_DISCONNECTED);
         filter.addAction(UsbService.ACTION_USB_NOT_SUPPORTED);
         filter.addAction(UsbService.ACTION_USB_PERMISSION_NOT_GRANTED);
+        filter.addAction(UsbModbusService.ACTION_USB_MODBUS_DISCONNECTED);
         registerReceiver(mUsbReceiver, filter);
     }
 

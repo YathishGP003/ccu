@@ -35,12 +35,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class UsbModbusService extends Service {
 
     public static final String TAG = "CCU_MODBUS";
-    public static final byte ESC_BYTE = (byte) 0xD9;
-    public static final byte SOF_BYTE = 0x00;
-    public static final byte EOF_BYTE = 0x03;
-
-    public static final String ACTION_USB_READY =
-            "com.felhr.connectivityservices.USB_READY";
+    public static final String ACTION_USB_MODBUS_READY =
+            "com.felhr.connectivityservices.USB_MODBUS_READY";
     public static final String ACTION_USB_ATTACHED =
             "android.hardware.usb.action.USB_DEVICE_ATTACHED";
     public static final String ACTION_USB_DETACHED =
@@ -52,8 +48,8 @@ public class UsbModbusService extends Service {
             "com.felhr.usbservice.USB_PERMISSION_GRANTED";
     public static final String ACTION_USB_PERMISSION_NOT_GRANTED =
             "com.felhr.usbservice.USB_PERMISSION_NOT_GRANTED";
-    public static final String ACTION_USB_DISCONNECTED =
-            "com.felhr.usbservice.USB_DISCONNECTED";
+    public static final String ACTION_USB_MODBUS_DISCONNECTED =
+            "com.felhr.usbservice.USB_MODBUS_DISCONNECTED";
     public static final String ACTION_CDC_DRIVER_NOT_WORKING =
             "com.felhr.connectivityservices.ACTION_CDC_DRIVER_NOT_WORKING";
     public static final String ACTION_USB_DEVICE_NOT_WORKING =
@@ -66,12 +62,6 @@ public class UsbModbusService extends Service {
     // BaudRate. Change this value if you need
     private static final boolean PARSE_DEBUG = false;
     public static boolean SERVICE_CONNECTED = false;
-    SerialState curState = SerialState.PARSE_INIT;
-    int nCRC = 0;
-    int nCurIndex;
-    //NOTE: reduced buffer size to 256
-    byte[] inDataBuffer = new byte[256];
-    int nDataLength = 0;
     private IBinder binder = new UsbBinder();
     private Context context;
     private Handler mHandler;
@@ -115,7 +105,7 @@ public class UsbModbusService extends Service {
                 // Usb device was disconnected. send an intent to the Main Activity
     
                 // Usb device was disconnected. send an intent to the Main Activity
-                Intent intent = new Intent(ACTION_USB_DISCONNECTED);
+                Intent intent = new Intent(ACTION_USB_MODBUS_DISCONNECTED);
                 arg0.sendBroadcast(intent);
                 if (serialPortConnected)
                 {
@@ -463,7 +453,7 @@ public class UsbModbusService extends Service {
                         e.printStackTrace();
                     }
                     // Everything went as expected. Send an intent to MainActivity
-                    Intent intent = new Intent(ACTION_USB_READY);
+                    Intent intent = new Intent(ACTION_USB_MODBUS_READY);
                     context.sendBroadcast(intent);
                 } else {
                     Intent intent = new Intent(ACTION_USB_DEVICE_NOT_WORKING);

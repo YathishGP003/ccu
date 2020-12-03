@@ -579,7 +579,7 @@ public class Globals {
 
     public String getSmartNodeBand() {
         HashMap device = CCUHsApi.getInstance().read("device and addr");
-        if (device != null && device.size() > 0) {
+        if (device != null && device.size() > 0 && device.get("modbus") == null) {
             String nodeAdd = device.get("addr").toString();
             return nodeAdd.substring(0, 2).concat("00");
         } else {

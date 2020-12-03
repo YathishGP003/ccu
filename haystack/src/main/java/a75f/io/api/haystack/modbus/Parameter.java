@@ -29,11 +29,11 @@ public class Parameter {
 
     @SerializedName("startBit")
     @Expose
-    public Integer startBit;
+    public int startBit;
 
     @SerializedName("endBit")
     @Expose
-    public Integer endBit;
+    public int endBit;
 
     @SerializedName("bitParamRange")
     @Expose

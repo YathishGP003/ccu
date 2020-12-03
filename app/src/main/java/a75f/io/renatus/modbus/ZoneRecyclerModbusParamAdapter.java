@@ -122,15 +122,15 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                             if (modbusParam.get(position).getConditions() != null && modbusParam.get(position).getConditions().size() > 0) {
                                 for (int i = 0; i < modbusParam.get(position).getConditions().size(); i++) {
                                     String bitValues = modbusParam.get(position).getConditions().get(i).getBitValues();
-                                    if (Double.parseDouble(bitValues == null ? "0" : bitValues) == readVal(p.getId())) {
+                                    if (Double.parseDouble(bitValues == null ? "0" : bitValues) == readHisVal(p.getId())) {
                                         viewHolder.tvParamValue.setText(modbusParam.get(position).getConditions().get(i).getName() + " " + unit);
                                     }
                                 }
                             } else {
                                 if (modbusParam.get(position).getParameterDefinitionType().equals("binary")) {
-                                    viewHolder.tvParamValue.setText(readVal(p.getId()) == 1 ? HtmlCompat.fromHtml("<font color='#E24301'>ON</font>", HtmlCompat.FROM_HTML_MODE_LEGACY) : HtmlCompat.fromHtml("<font color='#000000'>OFF</font>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+                                    viewHolder.tvParamValue.setText(readHisVal(p.getId()) == 1 ? HtmlCompat.fromHtml("<font color='#E24301'>ON</font>", HtmlCompat.FROM_HTML_MODE_LEGACY) : HtmlCompat.fromHtml("<font color='#000000'>OFF</font>", HtmlCompat.FROM_HTML_MODE_LEGACY));
                                 } else {
-                                    viewHolder.tvParamValue.setText(readVal(p.getId()) + " " + unit);
+                                    viewHolder.tvParamValue.setText(readHisVal(p.getId()) + " " + unit);
                                 }
                             }
 
@@ -152,12 +152,12 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                 if (modbusParam.get(position).getConditions() != null && modbusParam.get(position).getConditions().size() > 0) {
                     for (int i = 0; i < modbusParam.get(position).getConditions().size(); i++) {
                         String bitValues = modbusParam.get(position).getConditions().get(i).getBitValues();
-                        if (Double.parseDouble(bitValues == null ? "0" : bitValues) == readVal(p.getId())) {
+                        if (Double.parseDouble(bitValues == null ? "0" : bitValues) == readHisVal(p.getId())) {
                             viewHolder.tvParamValue.setText(modbusParam.get(position).getConditions().get(i).getName() + " " + unit);
                         }
                     }
                 } else {
-                    viewHolder.tvParamValue.setText(readVal(p.getId()) + " " + unit);
+                    viewHolder.tvParamValue.setText(readHisVal(p.getId()) + " " + unit);
                 }
 
             }
@@ -238,8 +238,9 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     private Point readPoint(Parameter configParams) {
         StringBuilder tags = new StringBuilder();
         for (LogicalPointTags marker : configParams.getLogicalPointTags()) {
-            if (!Objects.nonNull(marker.getTagValue()))
+            if (!Objects.nonNull(marker.getTagValue())){
                 tags.append(" and ").append(marker.getTagName());
+            }
         }
         HashMap pointRead = CCUHsApi.getInstance().read("point and logical and modbus and zone" + tags + " and equipRef == \"" + equipRef + "\"");
         Point logicalPoint = new Point.Builder().setHashMap(pointRead).build();
@@ -258,6 +259,10 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
             }
         }
         return 0;
+    }
+    public double readHisVal(String id) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        return hayStack.readHisValById(id);
     }
 
     private void writePoint(Point point, String value) {

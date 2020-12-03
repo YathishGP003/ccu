@@ -129,10 +129,7 @@
               "tagName": "battery"
             },
             {
-              "tagName": "charging"
-            },
-            {
-              "tagName": "status"
+              "tagName": "chargingStatus"
             },
             {
               "tagName": "kind",

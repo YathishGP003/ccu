@@ -217,8 +217,24 @@ public class ModbusEquip {
                 }
 
             } else {
-                CCUHsApi.getInstance().writeHisValById(logicalParamId, 0.0);
-                CCUHsApi.getInstance().writeDefaultValById(logicalParamId, 0.0);
+                if (configParam.getConditions() != null && configParam.getConditions().size() > 0) {
+                    CCUHsApi.getInstance().writeHisValById(logicalParamId, Double.parseDouble(configParam.getConditions().get(0).getBitValues()));
+                    if (logicalPoint.getMarkers().contains("writable")) {
+                        CCUHsApi.getInstance().writeDefaultValById(logicalParamId, Double.parseDouble(configParam.getConditions().get(0).getBitValues()));
+                    }
+                } else {
+                    if (logicalPoint.getMinVal() != null) {
+                        CCUHsApi.getInstance().writeHisValById(logicalParamId, Double.parseDouble(logicalPoint.getMinVal()));
+                        if (logicalPoint.getMarkers().contains("writable")) {
+                            CCUHsApi.getInstance().writeDefaultValById(logicalParamId, Double.parseDouble(logicalPoint.getMinVal()));
+                        }
+                    } else {
+                        CCUHsApi.getInstance().writeHisValById(logicalParamId, 0.0);
+                        if (logicalPoint.getMarkers().contains("writable")) {
+                            CCUHsApi.getInstance().writeDefaultValById(logicalParamId, 0.0);
+                        }
+                    }
+                }
             }
 
             CCUHsApi.getInstance().writeHisValById(physicalParamId,0.0);

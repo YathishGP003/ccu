@@ -121,6 +121,7 @@ public class TunerConstants
 
 	public static final String VAV_TUNER_GROUP = "VAV";
     public static final String DAB_TUNER_GROUP = "DAB";
+    public static final String TI_TUNER_GROUP = "TI";
     public static final String OAO_TUNER_GROUP = "OAO";
     public static final String GENERIC_TUNER_GROUP = "GENERIC";
     public static final String TIMER_TUNER = "TIMER";
@@ -139,5 +140,7 @@ public class TunerConstants
     public static final double DEFAULT_INTEGRAL_TIMEOUT = 30;
     
     public static final double DEFAULT_MODE_CHANGEOVER_HYSTERESIS = 0.5;
+    public static final double DEFAULT_STAGE_UP_TIMER_COUNTER = 5;
+    public static final double DEFAULT_STAGE_DOWN_TIMER_COUNTER = 2;
 
 }

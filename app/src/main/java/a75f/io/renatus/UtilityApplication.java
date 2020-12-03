@@ -125,7 +125,6 @@ public abstract class UtilityApplication extends Application {
                     Toast.makeText(context, "USB disconnected", Toast.LENGTH_SHORT).show();
                     break;
                 case UsbService.ACTION_USB_NOT_SUPPORTED: // USB NOT SUPPORTED
-
                     NotificationHandler.setCMConnectionStatus(false);
                     Toast.makeText(context, "USB device not supported", Toast.LENGTH_SHORT).show();
                     break;
@@ -389,7 +388,6 @@ public abstract class UtilityApplication extends Application {
             p = Runtime.getRuntime().exec(command);
             p.waitFor();
             BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-
             String line = "";
             while ((line = reader.readLine()) != null) {
                 output.append(line + "\n");
@@ -414,11 +412,12 @@ public abstract class UtilityApplication extends Application {
             outputStream.flush();
             su.waitFor();
         } catch (IOException e) {
+            Log.i(LOG_PREFIX, "Root Command:IOException:" + e.getMessage());
             e.printStackTrace();
         } catch (InterruptedException e) {
+            Log.i(LOG_PREFIX, "Root Command:InterruptedException:" + e.getMessage());
             e.printStackTrace();
         }
-
     }
 
     public static String ReadIp(String command) {
@@ -450,6 +449,12 @@ public abstract class UtilityApplication extends Application {
             isEthernetConnected = false;
         }
         return isEthernetConnected;
+    }
+
+    public static boolean CheckWifi() {
+        ConnectivityManager connManager = (ConnectivityManager) Globals.getInstance().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        return (networkInfo != null && networkInfo.isConnected());
     }
 
     public static String getIPConfig() {
@@ -689,19 +694,38 @@ public abstract class UtilityApplication extends Application {
     }
 
     public boolean checkNetworkConnected() {
-        if (!prefs.getBoolean("BACnetLAN")) {
-            ConnectivityManager connManager = (ConnectivityManager) Globals.getInstance().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-            return (networkInfo != null && networkInfo.isConnected());
+        Log.i(LOG_PREFIX, "checkNetworkConnected():CheckWifi:" +CheckWifi());
+        Log.i(LOG_PREFIX, "checkNetworkConnected():CheckEthernet:" +CheckEthernet());
+        Log.i(LOG_PREFIX, "BACnetLAN:" +prefs.getBoolean("BACnetLAN"));
+        if (isBACnetEnabled()) {
+            if (!prefs.getBoolean("BACnetLAN")) {
+                return CheckWifi();
+            } else {
+                return CheckEthernet();
+            }
         } else {
-            return CheckEthernet();
+            if(CheckEthernet()){
+                Log.i(LOG_PREFIX, "checkNetworkConnected():CheckEthernet:" +CheckEthernet());
+                return true;
+            }else{
+                Log.i(LOG_PREFIX, "checkNetworkConnected():CheckWifi:" +CheckWifi());
+                return CheckWifi();
+            }
         }
     }
 
     public class NetworkChangeReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.i(LOG_PREFIX, "isBACnetEnabled:" +isBACnetEnabled());
+            Log.i(LOG_PREFIX, "checkNetworkConnected:" +checkNetworkConnected());
             if (isBACnetEnabled() && checkNetworkConnected()) {
+                if(CheckEthernet()) {
+                    if (CheckWifi()) {
+                        Log.i(LOG_PREFIX, "getIPRoute:" + CheckWifi());
+                        getIPRoute();
+                    }
+                }
                 if (localDevice == null)
                     InitialiseBACnet();
                 if (localDevice != null && localDevice.isInitialized()) {
@@ -739,5 +763,45 @@ public abstract class UtilityApplication extends Application {
             }
             setLocalDevice(localDevice, isAutoMode());
         }
+    }
+
+    public static String getIPRoute() {
+        //Get Network Configuration of Ethernet and format for usage
+        try {
+            String networkConfig = readRoute("ip route show");
+            networkConfig = networkConfig.split("kernel")[0];
+            String addIPRoute = "ip route add "+networkConfig+" static scope link table wlan0";
+            Log.i(LOG_PREFIX, "getIPRoute:addIPRoute:" +addIPRoute);
+            rootCommand("su 0 setenforce 0");
+            rootCommand(addIPRoute);
+            String responseRouteShow = ShellExecuter("ip route show");
+            //Log.i(LOG_PREFIX, "responseRoute:" +responseRoute);
+            Log.i(LOG_PREFIX, "responseRouteShow:" +responseRouteShow);
+            return networkConfig;
+        } catch (Exception e) {
+            Log.i(LOG_PREFIX, "getIPRoute:Exception:" +e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String readRoute(String command) {
+        ArrayList<String> ipRoutes = new ArrayList<String>();
+        Process p;
+        try {
+            p = Runtime.getRuntime().exec(command);
+            p.waitFor();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String line = "";
+            while ((line = reader.readLine()) != null) {
+                if(line.contains("eth0")) {
+                    ipRoutes.add(line);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String response = ipRoutes.get(0);
+        return response;
     }
 }

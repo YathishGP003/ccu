@@ -163,7 +163,7 @@ public abstract class SystemProfile
 
         for (HashMap m : equips) {
             Equip q = new Equip.Builder().setHashMap(m).build();
-            if (q.getMarkers().contains("dab") || q.getMarkers().contains("vav") || q.getMarkers().contains("ti") || q.getMarkers().contains("oao") || q.getMarkers().contains("sse")) {
+            if (q.getMarkers().contains("dab") || q.getMarkers().contains("dualDuct") || q.getMarkers().contains("vav") || q.getMarkers().contains("ti") || q.getMarkers().contains("oao") || q.getMarkers().contains("sse")) {
                 q.setAhuRef(systemEquipId);
             } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid")) {
                 q.setGatewayRef(systemEquipId);
@@ -722,9 +722,6 @@ public abstract class SystemProfile
     }
     
     public void addCMPoints(String siteRef, String equipref, String equipDis , String tz) {
-		Point cmCurrentTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmCurrentTemp").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cm").addMarker("current").addMarker("temp").addMarker("his").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
-        String ctID = CCUHsApi.getInstance().addPoint(cmCurrentTemp);
-        CCUHsApi.getInstance().writeHisValById(ctID, 0.0);
         Point cmCoolDesiredTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmCoolingDesiredTemp").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cm").addMarker("cooling").addMarker("desired").addMarker("temp").addMarker("writable").addMarker("his").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
         String cmCoolDesiredTempId = CCUHsApi.getInstance().addPoint(cmCoolDesiredTemp);
         CCUHsApi.getInstance().writeDefaultValById(cmCoolDesiredTempId, 0.0);

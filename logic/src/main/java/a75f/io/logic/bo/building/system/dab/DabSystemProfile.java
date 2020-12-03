@@ -18,6 +18,7 @@ import a75f.io.logic.bo.building.system.SystemState;
 import a75f.io.logic.tuners.TunerConstants;
 
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_MODE_CHANGEOVER_HYSTERESIS;
+import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_UP_TIMER_COUNTER;
 import static a75f.io.logic.tuners.TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL;
 
 public abstract class DabSystemProfile extends SystemProfile
@@ -158,21 +159,27 @@ public abstract class DabSystemProfile extends SystemProfile
         addNewTunerPoints(equipref);
     }
     
-    public void addNewTunerPoints(String equipref) {
+    public void addNewTunerPoints(String equipRef) {
         CcuLog.d(L.TAG_CCU_SYSTEM," DabSystemProfile addNewTunerPoints ");
+        addModeChangeHysteresisChangeOverTuner(equipRef);
+        addStageUpTimerCounterTuner(equipRef);
+        addStageDownTimerCounterTuner(equipRef);
+    }
+    
+    private void addModeChangeHysteresisChangeOverTuner(String equipRef) {
         HashMap<Object, Object> modeChangeOverHysteresisPoint = CCUHsApi.getInstance()
-                                                                  .readEntity("tuner and system and dab and mode and " +
-                                                                              "changeover and hysteresis");
-        
+                                                                        .readEntity("tuner and system and dab and mode and " +
+                                                                                    "changeover and hysteresis");
+    
         if (modeChangeOverHysteresisPoint.isEmpty()) {
             CCUHsApi hayStack = CCUHsApi.getInstance();
             HashMap siteMap = hayStack.read(Tags.SITE);
             String siteRef = (String) siteMap.get(Tags.ID);
             String tz = siteMap.get("tz").toString();
             Point modeChangeoverHysteresis = new Point.Builder()
-                                                 .setDisplayName(HSUtil.getDis(equipref)+"modeChangeoverHysteresis")
+                                                 .setDisplayName(HSUtil.getDis(equipRef)+"-modeChangeoverHysteresis")
                                                  .setSiteRef(siteRef)
-                                                 .setEquipRef(equipref)
+                                                 .setEquipRef(equipRef)
                                                  .setHisInterpolate("cov")
                                                  .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
                                                  .addMarker("mode").addMarker("changeover").addMarker("hysteresis").addMarker("sp").addMarker("system")
@@ -181,10 +188,10 @@ public abstract class DabSystemProfile extends SystemProfile
                                                  .setTz(tz)
                                                  .build();
             String modeChangeoverHysteresisId = hayStack.addPoint(modeChangeoverHysteresis);
-    
+        
             HashMap defaultModeChangeoverHysteresisPoint = hayStack.read("point and tuner and default and mode and " +
-                                                                   "changeover and hysteresis");
-    
+                                                                         "changeover and hysteresis");
+        
             if (defaultModeChangeoverHysteresisPoint.isEmpty()) {
                 hayStack.pointWrite(HRef.copy(modeChangeoverHysteresisId), SYSTEM_DEFAULT_VAL_LEVEL, "ccu",
                                     HNum.make(DEFAULT_MODE_CHANGEOVER_HYSTERESIS), HNum.make(0));
@@ -199,6 +206,86 @@ public abstract class DabSystemProfile extends SystemProfile
                 }
             }
             hayStack.writeHisValById(modeChangeoverHysteresisId, HSUtil.getPriorityVal(modeChangeoverHysteresisId));
+        }
+    }
+    
+    private void addStageUpTimerCounterTuner(String equipRef) {
+        HashMap<Object, Object> stageUpTimerCounterPoint = CCUHsApi.getInstance()
+                                                                        .readEntity("tuner and system and dab and " +
+                                                                                    "stageUp and timer and counter");
+        
+        if (stageUpTimerCounterPoint.isEmpty()) {
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            HashMap siteMap = hayStack.read(Tags.SITE);
+            String siteRef = (String) siteMap.get(Tags.ID);
+            String tz = siteMap.get("tz").toString();
+            Point stageUpTimerCounter = new Point.Builder()
+                                                 .setDisplayName(HSUtil.getDis(equipRef)+"-stageUpTimerCounter")
+                                                 .setSiteRef(siteRef)
+                                                 .setEquipRef(equipRef)
+                                                 .setHisInterpolate("cov")
+                                                 .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
+                                                 .addMarker("stageUp").addMarker("timer").addMarker("counter")
+                                                 .addMarker("sp").addMarker("system")
+                                                 .setMinVal("0").setMaxVal("5").setIncrementVal("1")
+                                                 .setUnit("m")
+                                                 .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                                 .setTz(tz)
+                                                 .build();
+            String stageUpTimerCounterId = hayStack.addPoint(stageUpTimerCounter);
+            
+            HashMap defaultStageUpTimerCounterPoint = hayStack.read("point and tuner and dab and default and " +
+                                                                    "stageUp and timer and counter");
+    
+            ArrayList<HashMap> defaultStageUpTimerCounterPointArr =
+                hayStack.readPoint(defaultStageUpTimerCounterPoint.get("id").toString());
+            for (HashMap valMap : defaultStageUpTimerCounterPointArr) {
+                if (valMap.get("val") != null) {
+                    hayStack.pointWrite(HRef.copy(stageUpTimerCounterId), (int) Double.parseDouble(valMap.get("level").toString()),
+                                        valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                }
+            }
+            hayStack.writeHisValById(stageUpTimerCounterId, HSUtil.getPriorityVal(stageUpTimerCounterId));
+        }
+    }
+    
+    private void addStageDownTimerCounterTuner(String equipRef) {
+        HashMap<Object, Object> stageDownTimerCounterPoint = CCUHsApi.getInstance()
+                                                                   .readEntity("tuner and system and dab and " +
+                                                                               "stageDown and timer and counter");
+        
+        if (stageDownTimerCounterPoint.isEmpty()) {
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            HashMap siteMap = hayStack.read(Tags.SITE);
+            String siteRef = (String) siteMap.get(Tags.ID);
+            String tz = siteMap.get("tz").toString();
+            Point stageDownTimerCounter = new Point.Builder()
+                                            .setDisplayName(HSUtil.getDis(equipRef)+"-stageDownTimerCounter")
+                                            .setSiteRef(siteRef)
+                                            .setEquipRef(equipRef)
+                                            .setHisInterpolate("cov")
+                                            .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
+                                            .addMarker("stageDown").addMarker("timer").addMarker("counter")
+                                            .addMarker("sp").addMarker("system")
+                                            .setMinVal("0").setMaxVal("5").setIncrementVal("1")
+                                            .setUnit("m")
+                                            .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                            .setTz(tz)
+                                            .build();
+            String stageDownTimerCounterId = hayStack.addPoint(stageDownTimerCounter);
+            
+            HashMap defaultStageUpTimerCounterPoint = hayStack.read("point and tuner and dab and default and " +
+                                                                    "stageDown and timer and counter");
+    
+            ArrayList<HashMap> defaultStageDownTimerCounterPointArr =
+                hayStack.readPoint(defaultStageUpTimerCounterPoint.get("id").toString());
+            for (HashMap valMap : defaultStageDownTimerCounterPointArr) {
+                if (valMap.get("val") != null) {
+                    hayStack.pointWrite(HRef.copy(stageDownTimerCounterId), (int) Double.parseDouble(valMap.get("level").toString()),
+                                        valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                }
+            }
+            hayStack.writeHisValById(stageDownTimerCounterId, HSUtil.getPriorityVal(stageDownTimerCounterId));
         }
     }
     

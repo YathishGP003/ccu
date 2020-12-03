@@ -16,12 +16,14 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.building.system.SystemPILoopController;
 import a75f.io.logic.bo.building.vav.VavProfile;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.HSEquipUtil;
@@ -44,9 +46,14 @@ import static a75f.io.logic.bo.building.system.SystemMode.HEATONLY;
  */
 public class VavSystemController extends SystemController
 {
+    int    integralMaxTimeout = 15;
+    int proportionalSpread = 2;
+    double proportionalGain = 0.5;
+    double integralGain = 0.5;
+    
     private static VavSystemController instance = new VavSystemController();
     
-    ControlLoop piController;
+    SystemPILoopController piController;
     
     int coolingSignal;
     int heatingSignal;
@@ -64,11 +71,11 @@ public class VavSystemController extends SystemController
     
     double weightedAverageCoolingOnlyLoadSum;
     double weightedAverageHeatingOnlyLoadSum;
-    double weightedAverageLoadSum;
+    double weightedAverageHeatingConditioningLoadSum;
     
     double weightedAverageCoolingOnlyLoad;
     double weightedAverageHeatingOnlyLoad;
-    double weightedAverageLoad;
+    double weightedAverageHeatingConditioningLoad;
     
     double weightedAverageCoolingOnlyLoadMA;
     double weightedAverageHeatingOnlyLoadMA;
@@ -90,10 +97,15 @@ public class VavSystemController extends SystemController
     int zoneDeadCount = 0;
     boolean hasTi = false;
     
+    private Occupancy currSystemOccupancy = Occupancy.UNOCCUPIED;
+    
     private VavSystemController()
     {
-        piController = new ControlLoop();
-        piController.setProportionalSpread(2);
+        piController = new SystemPILoopController();
+        piController.setIntegralGain(integralGain);
+        piController.setProportionalGain(proportionalGain);
+        piController.setMaxAllowedError(proportionalSpread);
+        piController.setIntegralMaxTimeout(integralMaxTimeout);
     }
     
     public static VavSystemController getInstance() {
@@ -183,7 +195,8 @@ public class VavSystemController extends SystemController
 
         weightedAverageCoolingOnlyLoadSum = 0;
         weightedAverageHeatingOnlyLoadSum = 0;
-        weightedAverageLoadSum = 0;
+        weightedAverageHeatingConditioningLoadSum = 0;
+        weightedAverageHeatingConditioningLoad = 0;
         co2WeightedAverage = 0;
         totalCoolingLoad = 0;
         totalHeatingLoad = 0;
@@ -193,6 +206,20 @@ public class VavSystemController extends SystemController
         co2WeightedAverageSum = 0;
         zoneDeadCount = 0;
         hasTi = false;
+        
+        Occupancy occupancy = ScheduleProcessJob.getSystemOccupancy();
+        if (currSystemOccupancy == Occupancy.OCCUPIED ||
+            currSystemOccupancy == Occupancy.PRECONDITIONING ||
+            currSystemOccupancy == Occupancy.FORCEDOCCUPIED ||
+            currSystemOccupancy == Occupancy.OCCUPANCYSENSING) {
+        
+            if (occupancy == Occupancy.UNOCCUPIED ||
+                occupancy == Occupancy.VACATION) {
+                CcuLog.d(L.TAG_CCU_SYSTEM, "Reset Loop : Occupancy changed from "+currSystemOccupancy+" to "+occupancy);
+                resetLoop();
+            }
+        }
+        currSystemOccupancy = occupancy;
     }
 
     private void updateSystemTempHumidity(ArrayList<HashMap<Object, Object>> allEquips) {
@@ -240,7 +267,11 @@ public class VavSystemController extends SystemController
                 zoneCount++;
                 weightedAverageCoolingOnlyLoadSum += zoneCoolingLoad * zoneDynamicPriority;
                 weightedAverageHeatingOnlyLoadSum += zoneHeatingLoad * zoneDynamicPriority;
-                weightedAverageLoadSum += (zoneCoolingLoad * zoneDynamicPriority) - (zoneHeatingLoad * zoneDynamicPriority);
+    
+                double tempMidPoint = (desiredTempCooling + desiredTempHeating)/2;
+                double zoneHeatingConditioningLoad = zoneCurTemp < tempMidPoint ? desiredTempHeating - zoneCurTemp : 0;
+                weightedAverageHeatingConditioningLoadSum += zoneHeatingConditioningLoad * zoneDynamicPriority;
+                
                 prioritySum += zoneDynamicPriority;
                 co2WeightedAverageSum += (getEquipCo2(equip.getId()) * zoneDynamicPriority);
                 CcuLog.d(L.TAG_CCU_SYSTEM, equip.getDisplayName() + " zoneDynamicPriority: " + zoneDynamicPriority +
@@ -285,13 +316,18 @@ public class VavSystemController extends SystemController
                     zoneCount++;
                     weightedAverageCoolingOnlyLoadSum += zoneCoolingLoad * zoneDynamicPriority;
                     weightedAverageHeatingOnlyLoadSum += zoneHeatingLoad * zoneDynamicPriority;
-                    weightedAverageLoadSum += (zoneCoolingLoad * zoneDynamicPriority) - (zoneHeatingLoad * zoneDynamicPriority);
+                    
+                    double tempMidPoint = (desiredTempCooling + desiredTempHeating)/2;
+                    double zoneHeatingConditioningLoad = cmCurrentTemp < tempMidPoint ? desiredTempHeating - cmCurrentTemp : 0;
+                    weightedAverageHeatingConditioningLoadSum += zoneHeatingConditioningLoad * zoneDynamicPriority;
+                    
                     prioritySum += zoneDynamicPriority;
                     CcuLog.d(L.TAG_CCU_SYSTEM, "CM zoneDynamicPriority: " + zoneDynamicPriority +
                                                " zoneCoolingLoad: " + zoneCoolingLoad + " zoneHeatingLoad: " +
                                                "" + zoneHeatingLoad + " weightedAverageCoolingOnlyLoadSum " +
                                                weightedAverageCoolingOnlyLoadSum + ", prioritySum" + prioritySum +
-                                               ", cmCurrentTemp" + cmCurrentTemp
+                                               ", cmCurrentTemp" + cmCurrentTemp+
+                                               ", weightedAverageHeatingConditioningLoadSum "+weightedAverageHeatingConditioningLoadSum
                     );
                 }
             }
@@ -303,7 +339,8 @@ public class VavSystemController extends SystemController
         
         weightedAverageCoolingOnlyLoad = weightedAverageCoolingOnlyLoadSum / prioritySum;
         weightedAverageHeatingOnlyLoad = weightedAverageHeatingOnlyLoadSum / prioritySum;
-        weightedAverageLoad = weightedAverageLoadSum / prioritySum;
+        weightedAverageHeatingConditioningLoad = weightedAverageHeatingConditioningLoadSum / prioritySum;
+        
         co2WeightedAverage = co2WeightedAverageSum/prioritySum;
         comfortIndex = (int)(totalCoolingLoad + totalHeatingLoad) /zoneCount;
 
@@ -311,8 +348,7 @@ public class VavSystemController extends SystemController
     
         weightedAverageCoolingOnlyLoadPostML = weightedAverageCoolingOnlyLoad ;//+buildingLoadOffsetML
         weightedAverageHeatingOnlyLoadPostML = weightedAverageHeatingOnlyLoad ;//+buildingLoadOffsetML
-        weightedAverageLoadPostML = weightedAverageLoad ;///+buildingLoadOffsetML
-
+        
         weightedAverageCoolingOnlyLoadMAQueue.add(weightedAverageCoolingOnlyLoadPostML);
         weightedAverageHeatingOnlyLoadMAQueue.add(weightedAverageHeatingOnlyLoadPostML);
 
@@ -417,7 +453,7 @@ public class VavSystemController extends SystemController
             coolingSignal = (int)piController.getLoopOutput(weightedAverageCoolingOnlyLoadPostML, 0);
         } else if ((systemState == HEATING) && (conditioningMode == HEATONLY || conditioningMode == AUTO)){
             coolingSignal = 0;
-            heatingSignal = (int)piController.getLoopOutput(weightedAverageHeatingOnlyLoadPostML, 0);
+            heatingSignal = (int)piController.getLoopOutput(weightedAverageHeatingConditioningLoad, 0);
         } else {
             coolingSignal = 0;
             heatingSignal = 0;
@@ -430,6 +466,7 @@ public class VavSystemController extends SystemController
 
         CcuLog.d(L.TAG_CCU_SYSTEM, "weightedAverageCoolingOnlyLoadMA: "+weightedAverageCoolingOnlyLoadMA+
                                    " weightedAverageHeatingOnlyLoadMA: " +weightedAverageHeatingOnlyLoadMA +
+                                   " weightedAverageHeatingConditioningLoad "+weightedAverageHeatingConditioningLoad +
                                    " systemState: "+systemState+
                                    " coolingSignal: "+coolingSignal+
                                    " heatingSignal: "+heatingSignal
@@ -908,6 +945,12 @@ public class VavSystemController extends SystemController
     public void reset(){
         weightedAverageCoolingOnlyLoadMAQueue.clear();
         weightedAverageHeatingOnlyLoadMAQueue.clear();
+        piController.reset();
+        heatingSignal = 0;
+        coolingSignal = 0;
+    }
+    
+    public void resetLoop() {
         piController.reset();
         heatingSignal = 0;
         coolingSignal = 0;

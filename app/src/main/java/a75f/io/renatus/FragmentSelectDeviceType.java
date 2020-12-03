@@ -249,7 +249,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         for (Equip equip: zoneEquips) {
             if (equip.getProfile().contains("MODBUS")) {
                 Toast.makeText(getActivity(), "Unpair all Modbus Modules and try", Toast.LENGTH_LONG).show();
-                dismiss();
+                closeAllBaseDialogFragments();
                 return true;
             }
         }
@@ -261,7 +261,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         for (Equip equip: zoneEquips) {
             if (!equip.getProfile().contains("MODBUS")) {
                 Toast.makeText(getActivity(), "Unpair all Modules and try", Toast.LENGTH_LONG).show();
-                dismiss();
+                closeAllBaseDialogFragments();
                 return true;
             }
         }

@@ -1,7 +1,9 @@
 package a75f.io.renatus.tuners;
 
 
-public class TunerGroupItem {
+import java.io.Serializable;
+
+public class TunerGroupItem implements Serializable {
 
     private final String tunerGroupName;
 

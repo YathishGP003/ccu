@@ -32,14 +32,18 @@ import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.renatus.BASE.BaseDialogFragment;
+import a75f.io.renatus.DialogOAOProfile;
+import a75f.io.renatus.DialogSmartStatProfiling;
 import a75f.io.renatus.R;
 
 /**
  * Created by samjithsadasivan on 1/17/19.
  */
 
-public class TunerFragment extends Fragment implements TunerItemClickListener
+public class TunerFragment extends BaseDialogFragment implements TunerItemClickListener
 {
+    public static final String ID = TunerFragment.class.getSimpleName();
     ExpandableListView            expandableListView;
     ExpandableListAdapter         expandableListAdapter;
     List<String>                  expandableListTitle;
@@ -55,6 +59,7 @@ public class TunerFragment extends Fragment implements TunerItemClickListener
     RadioButton radioButtonModule;
     TextView reasonLabel;
     RecyclerView recyclerViewTuner;
+    TunerGroupItem tunerGroupOpened=null;
     public TunerFragment()
     {
     }
@@ -108,66 +113,6 @@ public class TunerFragment extends Fragment implements TunerItemClickListener
                 Log.i("TunersUI","Selected:radioBtnModule");
                 updateData();
             }
-          /*  expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
-            expandableListAdapter = new ExpandableTunerListAdapter(getActivity(), expandableListTitle, expandableListDetail, tunerMap);
-            expandableListView.setAdapter(expandableListAdapter);*/
-        });
-
-
-
-        /*expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
-        
-            @Override
-            public void onGroupExpand(int groupPosition) {
-                Toast.makeText(getActivity(),
-                        expandableListTitle.get(groupPosition) + " List Expanded.",
-                        Toast.LENGTH_SHORT).show();
-            }
-        });*/
-        
-        expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-            @Override
-            public boolean onChildClick(ExpandableListView parent, View v,
-                                        int groupPosition, int childPosition, long id) {
-                
-               /* String tunerName = expandableListDetail.get(expandableListTitle.get(groupPosition)).get(childPosition);
-               *//* if (!tunerName.contains("coolingUserLimitMax")&&!tunerName.contains("coolingUserLimitMin")&&!tunerName.contains("heatingUserLimitMin")
-                    &&!tunerName.contains("heatingUserLimitMax")&&!tunerName.contains("buildingLimitMin")&&!tunerName.contains("buildingLimitMax"))
-                {*//*
-                    Toast.makeText(getActivity(), expandableListTitle.get(groupPosition) + " -> " + tunerName, Toast.LENGTH_SHORT).show();
-
-                    final EditText taskEditText = new EditText(getActivity());
-                    String tunerVal = String.valueOf(getTuner(tunerMap.get(tunerName)));
-                    AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                            .setTitle(tunerName)
-                            .setMessage(tunerVal)
-                            .setView(taskEditText)
-                            .setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    if (taskEditText.getText().toString().trim().length() > 0) {
-                                        setTuner(tunerMap.get(tunerName), Double.parseDouble(taskEditText.getText().toString()));
-                                        tunerMap.put(tunerMap.get(tunerName), taskEditText.getText().toString());
-                                        expandableListView.invalidateViews();
-                                    }
-                                }
-                            })
-                            .setNegativeButton("Cancel", null)
-                            .create();
-                    dialog.show();
-             //   }*/
-                return false;
-            }
-        });
-    
-        expandableListView.setOnGroupExpandListener(groupPosition -> {
-            getSystemTuners();
-            expandableListView.invalidateViews();
-            if (lastExpandedPosition != -1
-                && groupPosition != lastExpandedPosition) {
-                expandableListView.collapseGroup(lastExpandedPosition);
-            }
-            lastExpandedPosition = groupPosition;
         });
     }
 
@@ -229,24 +174,9 @@ public class TunerFragment extends Fragment implements TunerItemClickListener
     }
 
     private void getSystemTuners() {
+        TunerExpandableLayoutHelper tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, 2);
 
-        TunerExpandableLayoutHelper tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(),
-                recyclerViewTuner, this, 2);
-
-        //tunerMap.clear();
-        //expandableListTitle.clear();
-        //expandableListDetail.clear();
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("tunerGroup");
-        //Log.i("TunersUI","tunerGroup:"+equips);
-        ArrayList<HashMap> genericTuners = new ArrayList<>();
-        ArrayList<HashMap> alertTuners = new ArrayList<>();
-
-        HashMap<String, List> alertTunerMap = new HashMap();
-        HashMap<String, List> genericTunerMap = new HashMap();
-        ArrayList alertTunerList = new ArrayList();
-        ArrayList genericTunerList = new ArrayList();
-
-        Map<Integer, List<String>> valuesMap = new HashMap<>();
 
         // Group by countryName
         Map<String, List<HashMap>> groupByTuner = equips.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
@@ -259,71 +189,25 @@ public class TunerFragment extends Fragment implements TunerItemClickListener
             Log.i("TunersUI","Sorting-"+me2.getKey());
         }
         for(String groupTitle: sortedGroupTuner.keySet()){
-           /* ArrayList<String> tunerList = new ArrayList<>();
-            for(HashMap tunerValue : groupByTuner.get(groupTitle)) {
-                tunerList.add(tunerValue.get("dis").toString());
-                tunerMap.put(tunerValue.get("dis").toString(), tunerValue.get("id").toString());
-            }
-            //Log.i("TunersUI","groupTitle:"+groupTitle);
-            //Log.i("TunersUI","tunerGroupList:"+tunerList);
-            //expandableListDetail.put(groupTitle, groupByTuner.get(groupTitle));
-            //expandableListTitle.add(groupTitle);*/
-
             tunerExpandableLayoutHelper.addSection(groupTitle, sortedGroupTuner.get(groupTitle));
             tunerExpandableLayoutHelper.notifyDataSetChanged();
         }
-
-        //Log.i("TunersUI","expandableListDetailSize-ALERT:"+expandableListDetail.get("ALERT"));
-        //Log.i("TunersUI","expandableListDetailSize-GENERIC:"+expandableListDetail.get("GENERIC"));
-        //Log.i("TunersUI","expandableListDetailSize-ALERTsize:"+expandableListDetail.get("ALERT").size());
-        //Log.i("TunersUI","expandableListDetailSize-GENERICsize:"+expandableListDetail.get("GENERIC").size());
-        /*for (HashMap m : equips) {
-            Log.i("TunersUI","tunerGroup:"+m.get("tunerGroup"));
-            HashMap<String,String> tunerItem = m;
-            Log.i("TunersUI","tunerItem:"+tunerItem);
-            if(m.get("tunerGroup").toString().equals("GENERIC"))
-            {
-                genericTuners.add(m);
-                genericTunerList.add(m);
-            }
-            if(m.get("tunerGroup").toString().equals("ALERT"))
-            {
-                alertTuners.add(m);
-                alertTunerList.add(m);
-            }
-
-            alertTunerMap.put(m.get("tunerGroup").toString(),alertTunerList);
-
-            ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("tuner and equipRef == \""+m.get("id")+"\"");
-            ArrayList tunerList = new ArrayList();
-
-            for (Map t : tuners) {
-                tunerList.add(t.get("dis").toString());
-                tunerMap.put(t.get("dis").toString(), t.get("id").toString());
-            }
-
-            ArrayList<HashMap> userIntents = CCUHsApi.getInstance().readAll("userIntent and equipRef == \""+m.get("id")+"\"");
-
-            for (Map t : userIntents) {
-                if(!t.get("dis").toString().contains("desired")) {
-                    tunerList.add(t.get("dis").toString());
-                    tunerMap.put(t.get("dis").toString(), t.get("id").toString());
-                }
-            }
-            expandableListDetail.put(m.get("dis").toString(), tunerList);
-        }
-        alertTunerMap.put("GENERIC",alertTunerList);
-        Log.i("TunersUI","genericTuners:"+genericTuners);
-        Log.i("TunersUI","alertTuners:"+alertTuners);
-        Log.i("TunersUI","ALERT-alertTunerList:"+alertTunerMap);*/
     }
     @Override
     public void itemClicked(HashMap item) {
-        Toast.makeText(getActivity(), "TunerUI-HashMap: " + item.get("dis") + " clicked", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), "TunerUI-HashMap: " + item.get("dis") + " clicked\n" +
+                " minValue:"+item.get("minVal")+" maxValue:"+item.get("maxVal")+" incrementBy:"+item.get("incrementVal"), Toast.LENGTH_SHORT).show();
+        DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(item,tunerGroupOpened);
+        showDialogFragment(tunerPriorityArray, DialogTunerPriorityArray.ID);
     }
 
     @Override
     public void itemClicked(TunerGroupItem section) {
         Toast.makeText(getActivity(), "TunerUI-Section: " + section.getName() + " clicked", Toast.LENGTH_SHORT).show();
+        tunerGroupOpened = section;
+    }
+    @Override
+    public String getIdString() {
+        return ID;
     }
 }

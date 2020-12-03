@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -35,7 +34,9 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
     private static final int VIEW_TYPE_SECTION = R.layout.item_tunergroup_title;
     private static final int VIEW_TYPE_ITEM = R.layout.item_tunervalue_child;
 
-    int lastExpandedPosition;
+    int lastExpandedPosition = -1;
+    int childIndexPosition = 0;
+    TunerGroupItem previousOpenGroup = null;
 
     public TunerExpandableGridAdapter(Context context, ArrayList<Object> dataArrayList,
                                       final GridLayoutManager gridLayoutManager, TunerItemClickListener itemClickListener,
@@ -67,19 +68,28 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
     public void onBindViewHolder(ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         switch (holder.viewType) {
             case VIEW_TYPE_ITEM:
-                final HashMap item = (HashMap) mDataArrayList.get(position);
-                Log.i("TunersUI", "GridHashMap:" + item);
-                holder.itemTextView.setText(item.get("dis").toString());
-                holder.itemTextValueView.setText("" + getTunerValue(item.get("id").toString()));
-                if (position % 2 == 0) {
+                childIndexPosition++;
+                final HashMap tunerItem = (HashMap) mDataArrayList.get(position);
+                Log.i("TunersUI", "GridTunerName:" + tunerItem.get("dis").toString());
+                Log.i("TunersUI", "GridTunerValue:" + getTunerValue(tunerItem.get("id").toString()));
+                String tunerName = tunerItem.get("dis").toString();
+                holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
+                if (tunerItem.containsKey("unit")) {
+                    holder.itemTextValueView.setText("" + getTunerValue(tunerItem.get("id").toString()) + " " + tunerItem.get("unit").toString().toUpperCase());
+                } else {
+                    holder.itemTextValueView.setText("" + getTunerValue(tunerItem.get("id").toString()));
+                }
+                if (childIndexPosition % 2 == 0) {
                     holder.itemDivider.setVisibility(View.GONE);
                 } else {
                     holder.itemDivider.setVisibility(View.VISIBLE);
                 }
-                holder.view.setOnClickListener(v -> mItemClickListener.itemClicked(item));
+                holder.view.setOnClickListener(v -> mItemClickListener.itemClicked(tunerItem));
                 break;
             case VIEW_TYPE_SECTION:
+                childIndexPosition = 0;
                 final TunerGroupItem section = (TunerGroupItem) mDataArrayList.get(position);
+                previousOpenGroup = section;
                 holder.tunerGroupTitle.setText(section.getName());
                 holder.tunerGroupTitle.setOnClickListener(v -> {
                     mItemClickListener.itemClicked(section);
@@ -87,16 +97,19 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                         mSectionStateChangeListener.onSectionStateChanged(section, false);
                     } else {
                         mSectionStateChangeListener.onSectionStateChanged(section, true);
+                        lastExpandedPosition = position;
                     }
                 });
                 holder.tunerGroupToggle.setChecked(section.isExpanded);
-                holder.tunerGroupToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        mSectionStateChangeListener.onSectionStateChanged(section, isChecked);
-                    }
-                });
+                if (lastExpandedPosition != -1) {
+                    mSectionStateChangeListener.onSectionStateChanged(previousOpenGroup, false);
+                }
+                holder.tunerGroupToggle.setOnCheckedChangeListener((buttonView, isChecked)
+                        ->
+                        mSectionStateChangeListener.onSectionStateChanged(section, isChecked));
                 break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + holder.viewType);
         }
     }
 

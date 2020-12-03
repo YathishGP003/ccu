@@ -73,5 +73,6 @@
     <color name="tuner_bg_white">#FFFFFF</color>
     <color name="tuner_bg_grey">#F9F9F9</color>
     <color name="tuner_divider">#F9F9F9</color>
+    <color name="tuner_header_bg">#EBECED</color>
 
 </resources>

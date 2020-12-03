@@ -439,11 +439,11 @@ public class UsbModbusService extends Service {
             if (serialPort != null) {
                 if (serialPort.open()) {
                     serialPortConnected = true;
-                    serialPort.setBaudRate(19200);
+                    serialPort.setBaudRate(9600);
                     serialPort.setModbusDevice(true);
                     serialPort.setDataBits(UsbSerialInterface.DATA_BITS_8);
                     serialPort.setStopBits(UsbSerialInterface.STOP_BITS_1);
-                    serialPort.setParity(UsbSerialInterface.PARITY_EVEN);
+                    serialPort.setParity(UsbSerialInterface.PARITY_NONE);
                     /**
                      * Current flow control Options:
                      * UsbSerialInterface.FLOW_CONTROL_OFF

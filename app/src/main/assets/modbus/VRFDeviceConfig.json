@@ -337,6 +337,10 @@
               "value": 10
             },
             {
+              "tagName": "incrementVal",
+              "value": 10
+            },
+            {
               "tagName": "his"
             },
             {

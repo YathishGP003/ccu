@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.text.HtmlCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,7 +48,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int viewPosition) {
         int position = viewHolder.getAdapterPosition();
-        viewHolder.tvParamLabel.setText(modbusParam.get(position).getName() + ":");
+        viewHolder.tvParamLabel.setText(modbusParam.get(position).getName());
         if (modbusParam.get(position).getParameterDefinitionType() != null) {
             switch (modbusParam.get(position).getParameterDefinitionType()) {
                 case "range":
@@ -60,7 +61,6 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                 case "digital":
                     if (modbusParam.get(position).getUserIntentPointTags() != null && modbusParam.get(position).getUserIntentPointTags().size() > 0) {
                         viewHolder.spValue.setVisibility(View.VISIBLE);
-                        viewHolder.tvUnit.setVisibility(View.VISIBLE);
                         viewHolder.tvParamValue.setVisibility(View.GONE);
 
                         String unit = null;
@@ -72,8 +72,8 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                 unit = entry.getKey();
                                 commands = entry.getValue();
                             }
-                            CommandSpinnerAdapter commandAdapter = new CommandSpinnerAdapter(context, R.layout.spinner_cpu_configure_item, commands);
-                            commandAdapter.setDropDownViewResource(R.layout.spinner_cpu_configure_item);
+                            CommandSpinnerAdapter commandAdapter = new CommandSpinnerAdapter(context, R.layout.spinner_item_orange, commands);
+                            commandAdapter.setDropDownViewResource(R.layout.spinner_item_orange);
                             viewHolder.spValue.setAdapter(commandAdapter);
                             for (int i = 0; i < modbusParam.get(position).getCommands().size(); i++) {
                                 if (Double.parseDouble(modbusParam.get(position).getCommands().get(i).getBitValues()) == readVal(p.getId())) {
@@ -87,13 +87,11 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                 unit = entry.getKey();
                                 doubleArrayList = entry.getValue();
                             }
-                            ArrayAdapter<Double> spinnerAdapter = new ArrayAdapter<>(context, R.layout.spinner_cpu_configure_item, doubleArrayList);
-                            spinnerAdapter.setDropDownViewResource(R.layout.spinner_cpu_configure_item);
+                            ArrayAdapter<Double> spinnerAdapter = new ArrayAdapter<>(context, R.layout.spinner_item_orange, doubleArrayList);
+                            spinnerAdapter.setDropDownViewResource(R.layout.spinner_item_orange);
                             viewHolder.spValue.setAdapter(spinnerAdapter);
                             viewHolder.spValue.setSelection(doubleArrayList.indexOf(readVal(p.getId())), false);
                         }
-
-                        viewHolder.tvUnit.setText(unit);
 
                         viewHolder.spValue.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                             @Override
@@ -114,6 +112,12 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                             }
                         });
 
+                        if (unit != null && !unit.equals("")) {
+                            viewHolder.tvUnit.setVisibility(View.VISIBLE);
+                            viewHolder.tvUnit.setText("("+unit+")");
+                        } else {
+                            viewHolder.tvUnit.setVisibility(View.GONE);
+                        }
                     } else {
                         if (modbusParam.get(position).getLogicalPointTags() != null && modbusParam.get(position).getLogicalPointTags().size() > 0) {
                             Point p = readPoint(modbusParam.get(position));
@@ -123,17 +127,22 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                 for (int i = 0; i < modbusParam.get(position).getConditions().size(); i++) {
                                     String bitValues = modbusParam.get(position).getConditions().get(i).getBitValues();
                                     if (Double.parseDouble(bitValues == null ? "0" : bitValues) == readHisVal(p.getId())) {
-                                        viewHolder.tvParamValue.setText(modbusParam.get(position).getConditions().get(i).getName() + " " + unit);
+                                        viewHolder.tvParamValue.setText(modbusParam.get(position).getConditions().get(i).getName());
                                     }
                                 }
                             } else {
                                 if (modbusParam.get(position).getParameterDefinitionType().equals("binary")) {
                                     viewHolder.tvParamValue.setText(readHisVal(p.getId()) == 1 ? HtmlCompat.fromHtml("<font color='#E24301'>ON</font>", HtmlCompat.FROM_HTML_MODE_LEGACY) : HtmlCompat.fromHtml("<font color='#000000'>OFF</font>", HtmlCompat.FROM_HTML_MODE_LEGACY));
                                 } else {
-                                    viewHolder.tvParamValue.setText(readHisVal(p.getId()) + " " + unit);
+                                    viewHolder.tvParamValue.setText(""+readHisVal(p.getId()));
                                 }
                             }
-
+                            if (unit != null && !unit.equals(" ")) {
+                                viewHolder.tvUnit.setVisibility(View.VISIBLE);
+                                viewHolder.tvUnit.setText("("+unit+")");
+                            } else {
+                                viewHolder.tvUnit.setVisibility(View.GONE);
+                            }
                         }
                     }
                     break;
@@ -153,13 +162,18 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                     for (int i = 0; i < modbusParam.get(position).getConditions().size(); i++) {
                         String bitValues = modbusParam.get(position).getConditions().get(i).getBitValues();
                         if (Double.parseDouble(bitValues == null ? "0" : bitValues) == readHisVal(p.getId())) {
-                            viewHolder.tvParamValue.setText(modbusParam.get(position).getConditions().get(i).getName() + " " + unit);
+                            viewHolder.tvParamValue.setText(modbusParam.get(position).getConditions().get(i).getName());
                         }
                     }
                 } else {
-                    viewHolder.tvParamValue.setText(readHisVal(p.getId()) + " " + unit);
+                    viewHolder.tvParamValue.setText("" + readHisVal(p.getId()));
                 }
-
+                if (unit != null && !unit.equals(" ")) {
+                    viewHolder.tvUnit.setVisibility(View.VISIBLE);
+                    viewHolder.tvUnit.setText("("+unit+")");
+                } else {
+                    viewHolder.tvUnit.setVisibility(View.GONE);
+                }
             }
 
         }

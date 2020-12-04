@@ -1051,6 +1051,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setRoomRef(room).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("fan").addMarker("operation").addMarker("mode").addMarker("his")
                 .addMarker("pipe2").addMarker("fcu").addMarker("zone")
+                .setEnums("off,auto,low,medium,high")
                 .setTz(tz)
                 .build();
         String fanOpModeId = CCUHsApi.getInstance().addPoint(fanOpMode);

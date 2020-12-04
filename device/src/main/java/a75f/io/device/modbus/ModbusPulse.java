@@ -153,7 +153,7 @@ public class ModbusPulse {
             } else if (register.getParameterDefinitionType().equals("integer")
                   || register.getParameterDefinitionType().equals("decimal")
                   || register.getParameterDefinitionType().equals("range")) {
-        
+                respVal = parseIntVal(response);
             } else if (register.getParameterDefinitionType().equals("binary")) {
                 if (register.getParameters().size() > 0) {
                     respVal = parseBitVal(response, register.getParameters().get(0).bitParam);

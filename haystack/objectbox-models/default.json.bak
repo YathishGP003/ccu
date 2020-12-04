@@ -208,7 +208,7 @@
     },
     {
       "id": "4:648221881845039292",
-      "lastPropertyId": "15:4076360049162068206",
+      "lastPropertyId": "17:2171657581980711684",
       "name": "Parameter",
       "properties": [
         {
@@ -231,13 +231,13 @@
           "id": "4:4327661987072712521",
           "name": "startBit",
           "type": 5,
-          "flags": 4
+          "flags": 2
         },
         {
           "id": "5:990129972778416636",
           "name": "endBit",
           "type": 5,
-          "flags": 4
+          "flags": 2
         },
         {
           "id": "6:4633236243768475267",
@@ -291,6 +291,17 @@
           "id": "15:4076360049162068206",
           "name": "parameterDefinitionType",
           "type": 9
+        },
+        {
+          "id": "16:7402968662724102846",
+          "name": "bitParamRange",
+          "type": 9
+        },
+        {
+          "id": "17:2171657581980711684",
+          "name": "bitParam",
+          "type": 5,
+          "flags": 2
         }
       ],
       "relations": []

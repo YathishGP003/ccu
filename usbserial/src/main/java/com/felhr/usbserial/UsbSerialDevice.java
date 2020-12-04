@@ -412,7 +412,7 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 			}
 			//Log.d("CCU_MODBUS", " handleIncomigModbusData "+inData+" modbusState "+modbusState);
 			if (modbusState == ModbusState.DATA_AVAILABLE) {
-				Log.d("CCU_MODBUS", "USB SERIAL: Length "+(nCurIndex+1)+ " DATA: "+Arrays.toString(inDataBuffer));
+				Log.d("CCU_MODBUS", "USB SERIAL: Data Length "+(nCurIndex+1));
 				Log.d("CCU_MODBUS"," Packet Xfer Time "+(System.currentTimeMillis() - startTimeLog)+"ms");
 				onReceivedData(inDataBuffer, nCurIndex+1);
 				nCurIndex = 0;

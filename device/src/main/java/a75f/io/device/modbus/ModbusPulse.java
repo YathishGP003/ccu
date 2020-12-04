@@ -22,47 +22,45 @@ public class ModbusPulse {
 
     public static void handleModbusPulseData(byte[] data, int slaveid){
         if(UsbModbusUtils.validSlaveId(slaveid) ) {
-            DLog.LogdSerial("*************Event Type Handle MODBUS Data type here**********************:" + Arrays.toString(data));
             switch (UsbModbusUtils.validateFunctionCode((data[1] & 0xff))) {
                 case UsbModbusUtils.READ_COILS:
-                    if(registerIndex == 0)
-
                     validateResponse(slaveid, data, "registerNumber", UsbModbusUtils.READ_COILS);
-                    DLog.LogdSerial("Event Type MODBUS Read Coil :" + data.length + "," + data.toString());
+                    //DLog.LogdSerial("Event Type MODBUS Read Coil :" + data.length + "," + data.toString());
                     break;
                 case UsbModbusUtils.READ_DISCRETE_INPUTS:
                     validateResponse(slaveid, data, "registerNumber",UsbModbusUtils.READ_DISCRETE_INPUTS);
-                    DLog.LogdSerial("Event Type MODBUS Read Discreate inputs:" + data.length + "," + data.toString());
+                    //DLog.LogdSerial("Event Type MODBUS Read Discreate inputs:" + data.length + "," + data.toString());
                     break;
                 case UsbModbusUtils.READ_HOLDING_REGISTERS:
                     validateResponse(slaveid, data,"registerNumber", UsbModbusUtils.READ_HOLDING_REGISTERS);
-                    DLog.LogdSerial("Event Type MODBUS Read Holding Registers:" + data.length + "," + data.toString());
+                    //DLog.LogdSerial("Event Type MODBUS Read Holding Registers:" + data.length + "," + data.toString
+                    // ());
                     break;
                 case UsbModbusUtils.READ_INPUT_REGISTERS:
                     validateResponse(slaveid, data, "registerNumber",UsbModbusUtils.READ_INPUT_REGISTERS);
-                    DLog.LogdSerial("Event Type MODBUS Read Input Registers:" + data.length + "," + data.toString());
+                    //DLog.LogdSerial("Event Type MODBUS Read Input Registers:" + data.length + "," + data.toString());
                     break;
                 case UsbModbusUtils.WRITE_COIL:
-                    DLog.LogdSerial("Event Type MODBUS write coil:" + data.length + "," + data.toString());
+                    //DLog.LogdSerial("Event Type MODBUS write coil:" + data.length + "," + data.toString());
                     break;
                 case UsbModbusUtils.WRITE_REGISTER:
                     validateResponse(slaveid, data, "registerNumber",UsbModbusUtils.WRITE_REGISTER);
-                    DLog.LogdSerial("Event Type MODBUS write register:" + data.length + "," + data.toString());
+                    //DLog.LogdSerial("Event Type MODBUS write register:" + data.length + "," + data.toString());
                     break;
                 case UsbModbusUtils.READ_EXCEPTION_STATUS:
-                    DLog.LogdSerial("Event Type MODBUS Read Exception status:" + data.length + "," + data.toString());
+                    //DLog.LogdSerial("Event Type MODBUS Read Exception status:" + data.length + "," + data.toString());
                     break;
                 case UsbModbusUtils.WRITE_COILS:
-                    DLog.LogdSerial("Event Type MODBUS write coils:" + data.length + "," + data.toString());
+                    //DLog.LogdSerial("Event Type MODBUS write coils:" + data.length + "," + data.toString());
                     break;
                 case UsbModbusUtils.WRITE_REGISTERS:
-                    DLog.LogdSerial("Event Type MODBUS Write Registers:" + data.length + "," + data.toString());
+                    //DLog.LogdSerial("Event Type MODBUS Write Registers:" + data.length + "," + data.toString());
                     break;
                 case UsbModbusUtils.REPORT_SLAVE_ID:
-                    DLog.LogdSerial("Event Type MODBUS Report slave id:" + data.length + "," + data.toString());
+                    //DLog.LogdSerial("Event Type MODBUS Report slave id:" + data.length + "," + data.toString());
                     break;
                 case UsbModbusUtils.WRITE_MASK_REGISTER:
-                    DLog.LogdSerial("Event Type MODBUS Write Mask Registers:" + data.length + "," + data.toString());
+                    //DLog.LogdSerial("Event Type MODBUS Write Mask Registers:" + data.length + "," + data.toString());
                     break;
 
             }
@@ -114,7 +112,7 @@ public class ModbusPulse {
                 return;
             }
             HashMap logPoint = hayStack.read("point and id==" + phyPoint.get("pointRef"));
-            Log.d(L.TAG_CCU_MODBUS," Response data : "+Arrays.toString(response.getMessageData()));
+            Log.d(L.TAG_CCU_MODBUS,"Response data : "+Arrays.toString(response.getMessageData()));
             double formattedVal = 0;
             switch (UsbModbusUtils.validateFunctionCode(registerType)){
                 case UsbModbusUtils.READ_INPUT_REGISTERS:
@@ -162,6 +160,10 @@ public class ModbusPulse {
                 if (register.getParameters().size() > 0) {
                     respVal = parseBitRangeVal(response, register.getParameters().get(0).bitParamRange);
                 }
+            }  else if (register.getParameterDefinitionType().equals("Int64")) {
+                if (register.getParameters().size() > 0) {
+                    respVal = parseInt64Val(response);
+                }
             }
         }
         
@@ -169,10 +171,16 @@ public class ModbusPulse {
     }
     
     public static double parseFloatVal(RtuMessageResponse response) {
-        int responseVal = (response.getMessageData()[MODBUS_DATA_START_INDEX] & 0xFF) << 24 |
+        /*int responseVal = (response.getMessageData()[MODBUS_DATA_START_INDEX] & 0xFF) << 24 |
                       (response.getMessageData()[MODBUS_DATA_START_INDEX + 1] & 0xFF) << 16 |
                       (response.getMessageData()[MODBUS_DATA_START_INDEX + 2] & 0xFF) << 8 |
-                      (response.getMessageData()[MODBUS_DATA_START_INDEX + 3] & 0xFF);
+                      (response.getMessageData()[MODBUS_DATA_START_INDEX + 3] & 0xFF);*/
+    
+        int responseVal = 0;
+        for (int i = 0; i < 4; i++) {
+            responseVal <<= Long.BYTES ;
+            responseVal |= (response.getMessageData()[MODBUS_DATA_START_INDEX + i] & 0xFF);
+        }
     
         double formattedVal = Float.intBitsToFloat(responseVal);
     
@@ -190,6 +198,16 @@ public class ModbusPulse {
     public static long parseLongVal(RtuMessageResponse response) {
         long responseVal = (response.getMessageData()[MODBUS_DATA_START_INDEX] & 0xFF) << 8 |
                            (response.getMessageData()[MODBUS_DATA_START_INDEX + 1] & 0xFF) ;
+        return responseVal;
+    }
+    
+    public static long parseInt64Val(RtuMessageResponse response) {
+    
+        long responseVal = 0;
+        for (int i = 0; i < Long.BYTES; i++) {
+            responseVal <<= Long.BYTES;
+            responseVal |= (response.getMessageData()[MODBUS_DATA_START_INDEX + i] & 0xFF);
+        }
         return responseVal;
     }
     

@@ -125,13 +125,11 @@ public class UsbModbusService extends Service {
             new UsbSerialInterface.UsbReadCallback() {
                 @Override
                 public void onReceivedData(byte[] data, int mLength) {
-                    Log.d(TAG," onReceivedData ");
                     if (data.length > 0) {
                         int nMsg;
                         try {
                             nMsg = (data[0] & 0xff);
-                            Log.d(TAG,
-                                    "Modbus message received from Slave: " + nMsg);
+                            Log.d(TAG, "onReceivedData: Slave: " + nMsg);
                         } catch (ArrayIndexOutOfBoundsException e) {
                             Log.d(TAG,
                                     "Modbus Bad message type received: " + String.valueOf(data[0] & 0xff) +

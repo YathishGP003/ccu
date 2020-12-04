@@ -16,8 +16,18 @@
             style="@style/label_grey"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Unit Status:" />
-
+            android:text="Unit Status" />
+        <TextView
+            android:id="@+id/tvUnit"
+            style="@style/label_grey"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+        <TextView
+            style="@style/label_grey"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=":" />
         <TextView
             android:id="@+id/tvParamValue"
             style="@style/label_grey"
@@ -34,13 +44,6 @@
             android:gravity="center"
             android:layout_gravity="start|center"
             android:spinnerMode="dropdown"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/tvUnit"
-            style="@style/label_grey"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:visibility="gone" />
     </LinearLayout>
 

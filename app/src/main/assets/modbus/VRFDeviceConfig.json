@@ -329,6 +329,14 @@
               "value": "Number"
             },
             {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 10
+            },
+            {
               "tagName": "his"
             },
             {

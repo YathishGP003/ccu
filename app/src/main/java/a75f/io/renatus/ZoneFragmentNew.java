@@ -1711,7 +1711,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
                                 RecyclerView modbusParams = zoneDetails.findViewById(R.id.recyclerParams);
                                 TextView tvEquipmentType = zoneDetails.findViewById(R.id.tvEquipmentType);
-                                tvEquipmentType.setText(modbusDevices.get(i).getName()+ "-" +modbusDevices.get(i).getSlaveId());
+                                tvEquipmentType.setText(modbusDevices.get(i).getEquipType()+ "("+modbusDevices.get(i).getSlaveId()+")");
                                 GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(),2);
                                 modbusParams.setLayoutManager(gridLayoutManager);
 

@@ -177,10 +177,7 @@
               "tagName": "battery"
             },
             {
-              "tagName": "discharging"
-            },
-            {
-              "tagName": "status"
+              "tagName": "dischargingStatus"
             },
             {
               "tagName": "kind",

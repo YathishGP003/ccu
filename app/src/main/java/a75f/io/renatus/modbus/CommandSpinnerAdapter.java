@@ -43,7 +43,7 @@ class CommandSpinnerAdapter extends ArrayAdapter<Command> {
         Command rowItem = getItem(position);
 
         if (convertView == null) {
-            convertView = layoutInflater.inflate(R.layout.spinner_cpu_configure_item, parent, false);
+            convertView = layoutInflater.inflate(R.layout.spinner_item_orange, parent, false);
         }
 
         TextView txtTitle = (TextView) convertView.findViewById(R.id.spinnerTarget);

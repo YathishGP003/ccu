@@ -16,17 +16,20 @@
             style="@style/label_grey"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="22sp"
             android:text="Unit Status" />
         <TextView
             android:id="@+id/tvUnit"
             style="@style/label_grey"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="22sp"
             android:visibility="gone" />
         <TextView
             style="@style/label_grey"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="22sp"
             android:text=":" />
         <TextView
             android:id="@+id/tvParamValue"
@@ -34,6 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
+            android:textSize="22sp"
             android:text="Off" />
 
         <Spinner

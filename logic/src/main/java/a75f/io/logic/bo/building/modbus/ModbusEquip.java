@@ -173,9 +173,9 @@ public class ModbusEquip {
                 for(Condition readCondition :configParam.getConditions()) {
                     if(Objects.nonNull(readCondition.getBitValues())) {
                         if(enumVariables.length() == 0)
-                            enumVariables.append(readCondition.getName());
+                            enumVariables.append(readCondition.getBitValues()+"="+readCondition.getName());
                         else {
-                            enumVariables.append(",");enumVariables.append(readCondition.getName());
+                            enumVariables.append(",");enumVariables.append(readCondition.getBitValues()+"="+readCondition.getName());
                         }
                     }
                 }
@@ -188,9 +188,9 @@ public class ModbusEquip {
                 for(Command writeCommand :configParam.getCommands()) {
                     if(Objects.nonNull(writeCommand.getBitValues())) {
                         if(enumVariables.length() == 0)
-                            enumVariables.append(writeCommand.getName());
+                            enumVariables.append(writeCommand.getBitValues()+"="+writeCommand.getName());
                         else {
-                            enumVariables.append(",");enumVariables.append(writeCommand.getName());
+                            enumVariables.append(",");enumVariables.append(writeCommand.getBitValues()+"="+writeCommand.getName());
                         }
                     }
                 }

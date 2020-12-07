@@ -1,6 +1,6 @@
 {
   "modbusEquipId (_id)": "5f1f30ad18b11f4f1d9a222",
-  "name": "UPS -400kVA",
+  "name": "UPS -400k",
   "description": "This document contains the configuration necessary to ups-400kva",
   "equipType": "UPS400K",
   "manufacturer": "Vertiv",

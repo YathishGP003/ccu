@@ -1,6 +1,6 @@
 {
   "modbusEquipId (_id)": "5f1f30ad18beef4f1d9a222",
-  "name": "UPS -30kVA",
+  "name": "UPS -30k",
   "description": "This document contains the configuration necessary to ups-30kva",
   "equipType": "UPS30K",
   "manufacturer": "Vertiv",

@@ -1,19 +1,24 @@
 package a75f.io.renatus.tuners;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -22,7 +27,7 @@ import a75f.io.renatus.R;
 import butterknife.ButterKnife;
 
 
-public class DialogTunerPriorityArray extends BaseDialogFragment {
+public class DialogTunerPriorityArray extends BaseDialogFragment implements PriorityItemClickListener {
     public static final String ID = DialogTunerPriorityArray.class.getSimpleName();
     public static final String TUNER_ITEM = "tunerItem";
     public static final String TUNER_GROUP_ITEM = "TunerGroupItem";
@@ -100,15 +105,21 @@ public class DialogTunerPriorityArray extends BaseDialogFragment {
             textTunerDefaultValue.setText("" + getTunerValue(tunerItemSelected.get("id").toString()) + " (" + tunerItemSelected.get("unit").toString().toUpperCase() + ")");
         } else {
             textTunerName.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
-            textTunerDefaultValue.setText(""+getTunerValue(tunerItemSelected.get("id").toString()));
+            textTunerDefaultValue.setText("" + getTunerValue(tunerItemSelected.get("id").toString()));
         }
 
         textTunerGroupTitle.setText(tunerGroupSelected.getName());
 
         ArrayList<HashMap> priorityList = CCUHsApi.getInstance().readPoint(tunerItemSelected.get("id").toString());
         Log.i("TunersUI", "priorityList:" + priorityList);
-        TunerPriorityArrayAdapter priorityArrayAdapter = new TunerPriorityArrayAdapter(getActivity(), priorityList);
+        PriorityArrayAdapter priorityArrayAdapter = new PriorityArrayAdapter(getActivity(), priorityList, this);
         recyclerViewPriority.setAdapter(priorityArrayAdapter);
+
+        buttonSaveTuner.setOnClickListener(v -> {
+        });
+        buttonCancel.setOnClickListener(v -> dismiss());
+
+
     }
 
 
@@ -124,5 +135,71 @@ public class DialogTunerPriorityArray extends BaseDialogFragment {
             }
         }
         return 0;
+    }
+
+    @Override
+    public void priorityClicked(int position) {
+        if (position == 13) {
+            LayoutInflater inflater = this.getLayoutInflater();
+
+            View dialogView = inflater.inflate(R.layout.dialog_tuner_range, null);
+            AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
+            dialog.setView(dialogView);
+            AlertDialog valueDialog = dialog.show();
+            valueDialog.getWindow().setLayout(500, 380);
+            valueDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+            NumberPicker npTunerRange = dialogView.findViewById(R.id.npTunerValue);
+            TextView textViewLevel = dialogView.findViewById(R.id.textLevelLabel);
+            String text = "<font color=#999999>Level 14</font> <font color=#E24301>System</font>";
+            textViewLevel.setText(Html.fromHtml(text));
+
+            if (tunerItemSelected.containsKey("minVal") && tunerItemSelected.containsKey("maxVal")) {
+
+                int currentValue = (int) getTunerValue(tunerItemSelected.get("id").toString());
+                int minValue = (int) (Double.parseDouble(tunerItemSelected.get("minVal").toString()));
+                int maxValue = (int) (Double.parseDouble(tunerItemSelected.get("maxVal").toString()));
+                int incrementVal = (int) (Double.parseDouble(tunerItemSelected.get("incrementVal").toString()));
+
+                double currentValueDb =  getTunerValue(tunerItemSelected.get("id").toString());
+                double minValueDb =  (Double.parseDouble(tunerItemSelected.get("minVal").toString()));
+                double maxValueDb = (Double.parseDouble(tunerItemSelected.get("maxVal").toString()));
+                double incrementValDb = (Double.parseDouble(tunerItemSelected.get("incrementVal").toString()));
+
+                Log.i("TunersUI", "currentValue:" + currentValue + " minValue:" + minValue + " maxValue:" + maxValue + " incVal:" + incrementVal);
+
+                ArrayList<String> valueList = new ArrayList<>();
+                if (incrementValDb == 0) {
+                    incrementValDb = 1.0;
+                }
+                int k = 0;
+                int currentValPos = 0;
+                for (double i = minValueDb; i <= maxValueDb; i += incrementValDb) {
+                    valueList.add(String.valueOf(i));
+                    if (currentValue == i) {
+                        currentValPos = k;
+                    }
+                    k++;
+                }
+                Log.i("TunersUI", " currentValPos:" + currentValPos + " value:" + valueList.get(currentValPos) + " valueList:" + valueList);
+                npTunerRange.setMinValue(minValue);
+                if (maxValue > 0) {
+                    Log.i("TunersUI", "maxValue > 0:" + " maxValue:" + (maxValue / incrementVal));
+                    npTunerRange.setMaxValue(maxValue / incrementVal);
+                }
+                Log.i("TunersUI", "valueList :" + valueList);
+                npTunerRange.setDisplayedValues(valueList.toArray(new String[valueList.size()]));
+                npTunerRange.setValue(currentValPos);
+                if (currentValue > maxValueDb || currentValue < minValueDb) {
+                    Log.i("TunersUI", "currentValue > maxValue:" + maxValueDb + " incrementVal:" + incrementValDb + " currentValue:" + currentValueDb);
+                    npTunerRange.setValue(maxValue / incrementVal);
+                }
+                npTunerRange.setWrapSelectorWheel(false);
+                npTunerRange.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+            } else {
+
+            }
+
+            //dialog.show();
+        }
     }
 }

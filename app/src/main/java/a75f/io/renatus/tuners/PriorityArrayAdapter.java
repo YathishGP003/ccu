@@ -15,13 +15,15 @@ import java.util.HashMap;
 
 import a75f.io.renatus.R;
 
-public class TunerPriorityArrayAdapter extends RecyclerView.Adapter<TunerPriorityArrayAdapter.PriorityViewHolder> {
+public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdapter.PriorityViewHolder> {
     Context context;
     ArrayList<HashMap> priorityArrayList;
+    PriorityItemClickListener priorityItemClickListener;
 
-    public TunerPriorityArrayAdapter(Context context, ArrayList<HashMap> priorityArrayList) {
+    public PriorityArrayAdapter(Context context, ArrayList<HashMap> priorityArrayList,PriorityItemClickListener itemClickListener) {
         this.context = context;
         this.priorityArrayList = priorityArrayList;
+        this.priorityItemClickListener = itemClickListener;
     }
 
     @Override
@@ -32,6 +34,9 @@ public class TunerPriorityArrayAdapter extends RecyclerView.Adapter<TunerPriorit
     @Override
     public void onBindViewHolder(final PriorityViewHolder holder, @SuppressLint("RecyclerView") final int position) {
         final HashMap priorityItem = priorityArrayList.get(position);
+        holder.textViewCurrentValue.setOnClickListener(v -> {
+            priorityItemClickListener.priorityClicked(position);
+        });
         holder.textViewPriority.setText(priorityItem.get("level").toString());
         if (position == 9) {
             holder.textViewName.setText("Zone");

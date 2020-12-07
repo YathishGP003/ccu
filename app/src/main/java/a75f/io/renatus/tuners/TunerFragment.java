@@ -45,13 +45,9 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 {
     public static final String ID = TunerFragment.class.getSimpleName();
     ExpandableListView            expandableListView;
-    ExpandableListAdapter         expandableListAdapter;
-    List<String>                  expandableListTitle;
-    //HashMap<String, List<String>> expandableListDetail;
     HashMap<String, List<HashMap>> expandableListDetail;
 
     HashMap<String, String> tunerMap = new HashMap();
-    int lastExpandedPosition;
 
     RadioGroup radioGroupTuners;
     RadioButton radioButtonSystem;

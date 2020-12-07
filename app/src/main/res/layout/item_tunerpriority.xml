@@ -45,6 +45,7 @@
             android:id="@+id/tunerCheckbox"
             android:layout_width="0sp"
             android:layout_height="30sp"
+            android:visibility="gone"
             android:layout_gravity="center_vertical|center_horizontal"
             android:layout_weight="1" />
 

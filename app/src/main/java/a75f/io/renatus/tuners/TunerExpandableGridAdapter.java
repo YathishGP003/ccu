@@ -3,12 +3,15 @@ package a75f.io.renatus.tuners;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Color;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -34,7 +37,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
     private static final int VIEW_TYPE_SECTION = R.layout.item_tunergroup_title;
     private static final int VIEW_TYPE_ITEM = R.layout.item_tunervalue_child;
 
-    int lastExpandedPosition = -1;
+    int lastExpandedPosition ;
     int childIndexPosition = 0;
     TunerGroupItem previousOpenGroup = null;
 
@@ -85,6 +88,11 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                     holder.itemDivider.setVisibility(View.VISIBLE);
                 }
                 holder.view.setOnClickListener(v -> mItemClickListener.itemClicked(tunerItem));
+                if((position/2) % 2 == 0){
+                    holder.tunerGridBg.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                }else {
+                    holder.tunerGridBg.setBackgroundColor(Color.parseColor("#F9F9F9"));
+                }
                 break;
             case VIEW_TYPE_SECTION:
                 childIndexPosition = 0;
@@ -138,6 +146,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
         //for TunerItem
         TextView itemTextView;
         TextView itemTextValueView;
+        CardView tunerGridBg;
         View itemDivider;
 
         public ViewHolder(View view, int viewType) {
@@ -148,6 +157,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                 itemTextView = view.findViewById(R.id.expandedListItemName);
                 itemTextValueView = view.findViewById(R.id.expandedListItemVal);
                 itemDivider = view.findViewById(R.id.tunerDivider);
+                tunerGridBg = view.findViewById(R.id.tunerGridBg);
             } else {
                 tunerGroupTitle = view.findViewById(R.id.groupTitle);
                 tunerGroupToggle = view.findViewById(R.id.toggleTunerGroup);

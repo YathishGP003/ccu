@@ -121,6 +121,10 @@ public class ModbusPulse {
                     formattedVal = getRegisterValFromResponse(readRegister, response);
                     hayStack.writeHisValById(logPoint.get("id").toString(),formattedVal);
                     hayStack.writeHisValById(phyPoint.get("id").toString(), formattedVal);
+                    
+                    if (logPoint.containsKey("writable")) {
+                        hayStack.writePoint(logPoint.get("id").toString(), formattedVal);
+                    }
                     //startIndex +=2;
                     break;
                 case UsbModbusUtils.WRITE_REGISTER:

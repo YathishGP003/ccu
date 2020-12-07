@@ -447,7 +447,7 @@ public class CCUHsApi
                 HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
                 HDict[] dictArr  = {b.toDict()};
                 CcuLog.d("CCU_HS", "PointWrite- "+id+" : "+val);
-                HttpUtil.executePointWriteAsync(getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+                HttpUtil.executePostAsync(getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
                 
             }
         }

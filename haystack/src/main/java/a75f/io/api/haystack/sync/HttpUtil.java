@@ -59,21 +59,21 @@ public class HttpUtil
         return call;
     }
     
-    public static void executePointWriteAsync(String targetURL, String urlParameters) {
+    public static void executePostAsync(String targetURL, String urlParameters) {
         
         post(targetURL, urlParameters, CCUHsApi.getInstance().getJwt(), new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                CcuLog.i("CCU_HS","Point Write Failed : "+e.getMessage());
+                CcuLog.i("CCU_HS","executePostAsync Failed : "+e.getMessage());
             }
         
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     String responseStr = response.body().string();
-                    CcuLog.i("CCU_HS","Point Write Succeeded : "+responseStr);
+                    CcuLog.i("CCU_HS","executePostAsync Succeeded : "+responseStr);
                 } else {
-                    CcuLog.i("CCU_HS","Point Write Failed : ");
+                    CcuLog.i("CCU_HS","executePostAsync Failed : ");
                 }
             }
         });

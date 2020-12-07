@@ -37,7 +37,7 @@ public class SerialCommLock {
         } finally{
             if (readPending.get()) {
                 Log.d(L.TAG_CCU_MODBUS, " SerialComm Timeout :"+register.getRegisterAddress());
-                ModbusWatchdog.getInstance().reportTimeout();
+                //ModbusWatchdog.getInstance().reportTimeout();
             }
             lock.unlock();
         }
@@ -47,7 +47,7 @@ public class SerialCommLock {
     public void unlock() {
         Log.d(L.TAG_CCU_MODBUS, " SerialCommLock unlock :"+register.getRegisterAddress());
         readPending.set(false);
-        ModbusWatchdog.getInstance().pet();
+        //ModbusWatchdog.getInstance().pet();
     }
     
     public Register getRegister() {

@@ -34,6 +34,8 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
     @Override
     public void onBindViewHolder(final PriorityViewHolder holder, @SuppressLint("RecyclerView") final int position) {
         final HashMap priorityItem = priorityArrayList.get(position);
+        priorityItem.put("newValue","");
+        priorityArrayList.add(position,priorityItem);
         holder.textViewCurrentValue.setOnClickListener(v -> {
             priorityItemClickListener.priorityClicked(position);
         });
@@ -48,6 +50,10 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
             final HashMap systemPriority = priorityArrayList.get(16);
             if (systemPriority.containsKey("val")) {
                 holder.textViewCurrentValue.setText("" + systemPriority.get("val"));
+                setOrangeTextColor(holder.textViewCurrentValue);
+                if(!systemPriority.get("newValue").toString().equals("")){
+                    holder.textViewCurrentValue.setText("" + systemPriority.get("newValue"));
+                }
             }
         } else if (position == 15) {
             holder.textViewName.setText("Building");

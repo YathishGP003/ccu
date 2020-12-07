@@ -1,19 +1,16 @@
 package a75f.io.renatus.tuners;
 
-import android.content.DialogInterface;
+import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -21,7 +18,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -33,8 +29,6 @@ import java.util.stream.Collectors;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.BASE.BaseDialogFragment;
-import a75f.io.renatus.DialogOAOProfile;
-import a75f.io.renatus.DialogSmartStatProfiling;
 import a75f.io.renatus.R;
 
 /**
@@ -56,6 +50,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     TextView reasonLabel;
     RecyclerView recyclerViewTuner;
     TunerGroupItem tunerGroupOpened=null;
+    final int  DIALOG_TUNER_PRIORITY = 10;
     public TunerFragment()
     {
     }
@@ -194,6 +189,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         Toast.makeText(getActivity(), "TunerUI-HashMap: " + item.get("dis") + " clicked\n" +
                 " minValue:"+item.get("minVal")+" maxValue:"+item.get("maxVal")+" incrementBy:"+item.get("incrementVal"), Toast.LENGTH_SHORT).show();
         DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(item,tunerGroupOpened);
+        tunerPriorityArray.setTargetFragment(this, DIALOG_TUNER_PRIORITY);
         showDialogFragment(tunerPriorityArray, DialogTunerPriorityArray.ID);
     }
 
@@ -205,5 +201,23 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     @Override
     public String getIdString() {
         return ID;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case DIALOG_TUNER_PRIORITY:
+                if (resultCode == Activity.RESULT_OK) {
+                    Bundle bundle = data.getExtras();
+                    HashMap tunerItemSelected = (HashMap) bundle.getSerializable("Tuner_HashMap_Selected");
+                    TunerGroupItem tunerGroupSelected = (TunerGroupItem) bundle.getSerializable("Tuner_Group_Selected");
+                    String tunerValue =  bundle.getString("Tuner_Value_Selected");
+                    Toast.makeText(getActivity(), "TunerUI-HashMap: " + tunerItemSelected.get("dis") + " clicked\n" +
+                            " tunerGroupSelected:"+tunerGroupSelected.getName()+" tunerValue:"+tunerValue, Toast.LENGTH_SHORT).show();
+                }
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + requestCode);
+        }
     }
 }

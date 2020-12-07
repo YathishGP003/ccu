@@ -1,7 +1,9 @@
 package a75f.io.renatus.tuners;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,9 +16,14 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.NumberPicker;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.Serializable;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,7 +46,9 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     TextView textTunerDefaultValue;
     Button buttonSaveTuner;
     Button buttonCancel;
-
+    String selectedTunerValue;
+    PriorityArrayAdapter priorityArrayAdapter;
+    ArrayList<HashMap> priorityList;
     public DialogTunerPriorityArray() {
     }
 
@@ -110,12 +119,19 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
 
         textTunerGroupTitle.setText(tunerGroupSelected.getName());
 
-        ArrayList<HashMap> priorityList = CCUHsApi.getInstance().readPoint(tunerItemSelected.get("id").toString());
+        priorityList = CCUHsApi.getInstance().readPoint(tunerItemSelected.get("id").toString());
         Log.i("TunersUI", "priorityList:" + priorityList);
-        PriorityArrayAdapter priorityArrayAdapter = new PriorityArrayAdapter(getActivity(), priorityList, this);
+        priorityArrayAdapter = new PriorityArrayAdapter(getActivity(), priorityList, this);
         recyclerViewPriority.setAdapter(priorityArrayAdapter);
+        recyclerViewPriority.scrollToPosition(priorityList.size() - 1);
 
         buttonSaveTuner.setOnClickListener(v -> {
+            Intent tunerValue = new Intent()
+                    .putExtra("Tuner_HashMap_Selected", (Serializable) tunerItemSelected)
+                    .putExtra("Tuner_Group_Selected", (Serializable) tunerGroupSelected)
+                    .putExtra("Tuner_Value_Selected", selectedTunerValue);
+            getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, tunerValue);
+            dismiss();
         });
         buttonCancel.setOnClickListener(v -> dismiss());
 
@@ -150,6 +166,10 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             valueDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
             NumberPicker npTunerRange = dialogView.findViewById(R.id.npTunerValue);
             TextView textViewLevel = dialogView.findViewById(R.id.textLevelLabel);
+            Button buttonSaveAlert = dialogView.findViewById(R.id.buttonSaveTuner);
+            Button buttonCancelAlert = dialogView.findViewById(R.id.buttonCancelTuner);
+            ImageButton buttonUndo = dialogView.findViewById(R.id.imgBtnUndo);
+            buttonUndo.setVisibility(View.GONE);
             String text = "<font color=#999999>Level 14</font> <font color=#E24301>System</font>";
             textViewLevel.setText(Html.fromHtml(text));
 
@@ -160,9 +180,11 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 int maxValue = (int) (Double.parseDouble(tunerItemSelected.get("maxVal").toString()));
                 int incrementVal = (int) (Double.parseDouble(tunerItemSelected.get("incrementVal").toString()));
 
-                double currentValueDb =  getTunerValue(tunerItemSelected.get("id").toString());
-                double minValueDb =  (Double.parseDouble(tunerItemSelected.get("minVal").toString()));
-                double maxValueDb = (Double.parseDouble(tunerItemSelected.get("maxVal").toString()));
+                DecimalFormat df = new DecimalFormat("##.#");
+
+                double currentValueDb = (getTunerValue(tunerItemSelected.get("id").toString()));
+                double minValueDb = (Double.parseDouble((tunerItemSelected.get("minVal").toString())));
+                double maxValueDb = (Double.parseDouble((tunerItemSelected.get("maxVal").toString())));
                 double incrementValDb = (Double.parseDouble(tunerItemSelected.get("incrementVal").toString()));
 
                 Log.i("TunersUI", "currentValue:" + currentValue + " minValue:" + minValue + " maxValue:" + maxValue + " incVal:" + incrementVal);
@@ -170,11 +192,12 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 ArrayList<String> valueList = new ArrayList<>();
                 if (incrementValDb == 0) {
                     incrementValDb = 1.0;
+                    incrementVal = 1;
                 }
                 int k = 0;
                 int currentValPos = 0;
                 for (double i = minValueDb; i <= maxValueDb; i += incrementValDb) {
-                    valueList.add(String.valueOf(i));
+                    valueList.add(String.format("%.1f", i));
                     if (currentValue == i) {
                         currentValPos = k;
                     }
@@ -183,22 +206,49 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 Log.i("TunersUI", " currentValPos:" + currentValPos + " value:" + valueList.get(currentValPos) + " valueList:" + valueList);
                 npTunerRange.setMinValue(minValue);
                 if (maxValue > 0) {
-                    Log.i("TunersUI", "maxValue > 0:" + " maxValue:" + (maxValue / incrementVal));
-                    npTunerRange.setMaxValue(maxValue / incrementVal);
+                    try {
+                        Log.i("TunersUI", "maxValue > 0:" + "incrementVal" + incrementVal + " maxValue:" + (maxValue / incrementVal));
+                        npTunerRange.setMaxValue(maxValue / incrementVal);
+                    } catch (ArithmeticException e) {
+                        npTunerRange.setMaxValue(maxValue);
+                        Log.i("TunersUI", "ArithmeticException :" + e.getMessage());
+                        e.printStackTrace();
+                    }
                 }
-                Log.i("TunersUI", "valueList :" + valueList);
                 npTunerRange.setDisplayedValues(valueList.toArray(new String[valueList.size()]));
-                npTunerRange.setValue(currentValPos);
+                npTunerRange.setValue(currentValPos*incrementVal);
+                Log.i("TunersUI", "valueList :" + Arrays.toString(npTunerRange.getDisplayedValues()));
                 if (currentValue > maxValueDb || currentValue < minValueDb) {
                     Log.i("TunersUI", "currentValue > maxValue:" + maxValueDb + " incrementVal:" + incrementValDb + " currentValue:" + currentValueDb);
                     npTunerRange.setValue(maxValue / incrementVal);
                 }
+
                 npTunerRange.setWrapSelectorWheel(false);
                 npTunerRange.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+                double finalIncrementValDb = incrementValDb;
+                npTunerRange.setOnValueChangedListener((numberPicker, oldValue, newValue) ->
+                {
+                    Toast.makeText(getActivity(), "TunersUI-oldValue:" + oldValue + " newValue:" + newValue, Toast.LENGTH_SHORT).show();
+                    if(oldValue != newValue ){
+                        buttonUndo.setVisibility(View.VISIBLE);
+                        selectedTunerValue = String.valueOf(newValue * finalIncrementValDb);
+                    }
+                });
+                int finalCurrentValPos = currentValPos;
+                buttonUndo.setOnClickListener(v -> npTunerRange.setValue(finalCurrentValPos)
+                );
+                buttonCancelAlert.setOnClickListener(v -> valueDialog.dismiss());
+                buttonSaveAlert.setOnClickListener(v -> {
+                            selectedTunerValue = String.valueOf(npTunerRange.getValue() * finalIncrementValDb);
+                            tunerItemSelected.put("newValue",selectedTunerValue);
+                            priorityList.set(position,tunerItemSelected);
+                            priorityArrayAdapter.notifyItemChanged(position);
+                            valueDialog.dismiss();
+                        }
+                );
             } else {
 
             }
-
             //dialog.show();
         }
     }

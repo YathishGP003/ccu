@@ -446,8 +446,9 @@ public class CCUHsApi
 
                 HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
                 HDict[] dictArr  = {b.toDict()};
-                String  response = HttpUtil.executePost(getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
-                CcuLog.d("CCU_HS", "Response: \n" + response);
+                CcuLog.d("CCU_HS", "PointWrite- "+id+" : "+val);
+                HttpUtil.executePointWriteAsync(getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+                
             }
         }
     }
@@ -667,13 +668,12 @@ public class CCUHsApi
             HisItem cachedItem = curRead(cachedId);
             return cachedItem == null ? 0 : cachedItem.getVal();
         } else {
-            ArrayList points = readAll(query);
-            String    id     = points.size() == 0 ? null : ((HashMap) points.get(0)).get("id").toString();
-            if (id == null || id == "")
-            {
+            HashMap point = read(query);
+            if (point.isEmpty()) {
+                CcuLog.d("CCU_HS","write point id is null : "+query);
                 return 0.0;
             }
-    
+            String    id     = point.get("id").toString();
             HisItem item = curRead(id);
             return item == null ? 0 : item.getVal();
         }
@@ -710,12 +710,12 @@ public class CCUHsApi
                 }
             }
         } else {
-            ArrayList points = readAll(query);
-            String    id     = points.size() == 0 ? null : ((HashMap) points.get(0)).get("id").toString();
-            if (id == null || id == "") {
-                CcuLog.d("CCU_HS","write point id is null");
+            HashMap point = read(query);
+            if (point.isEmpty()) {
+                CcuLog.d("CCU_HS","write point id is null : "+query);
                 return;
             }
+            String    id     = point.get("id").toString();
             HisItem previtem = curRead(id);
             Double prevVal = previtem == null ? 0 : previtem.getVal();
             if((previtem == null) || (!previtem.initialized) || !prevVal.equals(val) || query.contains("and diag")) {

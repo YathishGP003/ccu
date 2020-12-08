@@ -78,10 +78,11 @@ public class ModbusPulse {
             //ModbusUtils.checkCRC(rtuResponse.getModbusMessage(), queue);
 
             if(!rtuResponse.getModbusResponse().isException()){
-                DLog.LogdSerial("MODBUS Response success==" + rtuResponse.getModbusMessage().toString());
+                Log.d(L.TAG_CCU_MODBUS, "Response success==" + rtuResponse.getModbusMessage().toString());
                 updateResponseToHaystack(slaveid, rtuResponse,registerType);
             }else {
-                DLog.Logd("MODBUS handlingResponse, exception-"+rtuResponse.getModbusResponse().getExceptionMessage());
+                Log.d(L.TAG_CCU_MODBUS,
+                      "handlingResponse, exception-"+rtuResponse.getModbusResponse().getExceptionMessage());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -103,8 +104,10 @@ public class ModbusPulse {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         Register readRegister = LModbus.getModbusCommLock().getRegister();
         
-        HashMap phyPoint = hayStack.read("point and physical and register and modbus and registerAddr == \""
-                                         +readRegister.getRegisterAddress()+ "\" and deviceRef == \"" + deviceRef + "\"");
+        HashMap phyPoint = hayStack.read("point and physical and register and modbus" +
+                                         " and registerType == \""+readRegister.getRegisterType()+"\""+
+                                         " and registerAddr == \""+readRegister.getRegisterAddress()+ "\""+
+                                         " and deviceRef == \"" + deviceRef + "\"");
         //for(HashMap phyPoint : phyPoints) {
             if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
                 Log.d(L.TAG_CCU_MODBUS, "Physical point does not exist for register "

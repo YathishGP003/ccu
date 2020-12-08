@@ -471,6 +471,7 @@ public class CCUTagsDb extends HServer {
         if (p.getRegisterNumber() != null) b.add("registerNumber", p.getRegisterNumber());
         if (p.getStartBit() != null) b.add("startBit", p.getStartBit());
         if (p.getEndBit() != null) b.add("endBit", p.getEndBit());
+        if (p.getRegisterType() != null) b.add("registerType", p.getRegisterType());
         
         for (String m : p.getMarkers()) {
             b.add(m);
@@ -503,6 +504,7 @@ public class CCUTagsDb extends HServer {
         if (p.getRegisterNumber() != null) b.add("registerNumber", p.getRegisterNumber());
         if (p.getStartBit() != null) b.add("startBit", p.getStartBit());
         if (p.getEndBit() != null) b.add("endBit", p.getEndBit());
+        if (p.getRegisterType() != null) b.add("registerType", p.getRegisterType());
         
         for (String m : p.getMarkers()) {
             b.add(m);

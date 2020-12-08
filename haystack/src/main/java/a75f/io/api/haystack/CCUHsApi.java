@@ -307,7 +307,7 @@ public class CCUHsApi
      */
     public HashMap read(String query)
     {
-        //CcuLog.d("CCU_HS", "Read Query: " + query);
+        CcuLog.d("CCU_HS", "Read Query: " + query);
         HashMap<Object, Object> map = new HashMap<>();
         try
         {

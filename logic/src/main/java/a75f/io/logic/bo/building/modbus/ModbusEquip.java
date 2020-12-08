@@ -106,8 +106,12 @@ public class ModbusEquip {
                     .setShortDis(configParam.getName())
                     .setDeviceRef(deviceRef)
                     .setFloorRef(floorRef)
-                    .setRoomRef(roomRef).setRegisterAddress(String.valueOf(configParam.getRegisterAddress())).setStartBit(String.valueOf(configParam.getStartBit()))
-                    .setEndBit(String.valueOf(configParam.getEndBit())).setRegisterNumber(configParam.getRegisterNumber())
+                    .setRoomRef(roomRef)
+                    .setRegisterAddress(String.valueOf(configParam.getRegisterAddress()))
+                    .setStartBit(String.valueOf(configParam.getStartBit()))
+                    .setEndBit(String.valueOf(configParam.getEndBit()))
+                    .setRegisterNumber(configParam.getRegisterNumber())
+                    .setRegisterType(configParam.getRegisterType())
                     .setSiteRef(siteRef).addMarker("register").addMarker("modbus")
                     .setTz(tz);
             if(configParam.isDisplayInUI()){

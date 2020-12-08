@@ -46,6 +46,7 @@ public class RawPoint extends Entity
     private String registerNumber;
     private String startBit;
     private String endBit;
+    private String registerType;
 
     public boolean getEnabled()
     {
@@ -147,6 +148,9 @@ public class RawPoint extends Entity
     public String getEndBit() {
         return endBit;
     }
+    public String getRegisterType() {
+        return registerType;
+    }
 
     public static class Builder{
         private String            displayName;
@@ -168,6 +172,7 @@ public class RawPoint extends Entity
         private String registerNumber;
         private String startBit;
         private String endBit;
+        private String registerType;
         public Builder setEnabled(boolean enabled)
         {
             this.enabled = enabled;
@@ -276,7 +281,12 @@ public class RawPoint extends Entity
             this.endBit = endBit;
             return this;
         }
-
+    
+        public Builder setRegisterType(String registerType) {
+            this.registerType = registerType;
+            return this;
+        }
+    
         public RawPoint build(){
             RawPoint p = new RawPoint();
             p.displayName = this.displayName;
@@ -300,6 +310,7 @@ public class RawPoint extends Entity
             p.registerNumber = this.registerNumber;
             p.startBit = this.startBit;
             p.endBit = this.endBit;
+            p.registerType = this.registerType;
             //CCUHsApi.getInstance().addRawPoint(p);
             return p;
         }
@@ -394,6 +405,10 @@ public class RawPoint extends Entity
                 else if (pair.getKey().equals("endBit"))
                 {
                     this.endBit = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("registerType"))
+                {
+                    this.registerType = pair.getValue().toString();
                 }
                 //it.remove();
             }

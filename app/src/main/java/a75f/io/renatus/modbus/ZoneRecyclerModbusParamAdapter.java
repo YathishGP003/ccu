@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.text.HtmlCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,9 +20,14 @@ import java.util.Objects;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.modbus.Command;
+import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.LogicalPointTags;
 import a75f.io.api.haystack.modbus.Parameter;
+import a75f.io.api.haystack.modbus.Register;
 import a75f.io.api.haystack.modbus.UserIntentPointTags;
+import a75f.io.device.mesh.LSerial;
+import a75f.io.device.modbus.LModbus;
+import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.R;
 
 public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRecyclerModbusParamAdapter.ViewHolder> {
@@ -99,9 +103,9 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                 new Thread(() -> {
                                     if (modbusParam.get(position).getCommands() != null && modbusParam.get(position).getCommands().size() > 0) {
                                         Command command = (Command) adapterView.getSelectedItem();
-                                        writePoint(p, command.getBitValues());
+                                        writePoint(p, command.getBitValues(),modbusParam.get(position));
                                     } else {
-                                        writePoint(p, adapterView.getItemAtPosition(pos).toString());
+                                        writePoint(p, adapterView.getItemAtPosition(pos).toString(), modbusParam.get(position));
                                     }
                                 }).start();
                             }
@@ -279,10 +283,23 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
         return hayStack.readHisValById(id);
     }
 
-    private void writePoint(Point point, String value) {
+    private void writePoint(Point point, String value, Parameter parameter) {
         CCUHsApi.getInstance().writePoint(point.getId(), Double.valueOf(value));
         if (point.getMarkers().contains("his")) {
             CCUHsApi.getInstance().writeHisValById(point.getId(), Double.valueOf(value));
+        }
+        EquipmentDevice modbusDevice = EquipsManager.getInstance().fetchProfileBySlaveId(Short.parseShort(point.getGroup()));
+        for (Register register : modbusDevice.getRegisters()) {
+             for (Parameter pam : register.getParameters()){
+                 if (pam.getUserIntentPointTags() != null) {
+                     if (pam.getName().equals(parameter.getName())) {
+                         if (LSerial.getInstance().isModbusConnected()) {
+                             LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) Double.parseDouble(value));
+                         }
+                         break;
+                     }
+                 }
+             }
         }
     }
 }

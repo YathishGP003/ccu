@@ -35,10 +35,9 @@ import a75f.io.renatus.R;
  * Created by samjithsadasivan on 1/17/19.
  */
 
-public class TunerFragment extends BaseDialogFragment implements TunerItemClickListener
-{
+public class TunerFragment extends BaseDialogFragment implements TunerItemClickListener {
     public static final String ID = TunerFragment.class.getSimpleName();
-    ExpandableListView            expandableListView;
+    ExpandableListView expandableListView;
     HashMap<String, List<HashMap>> expandableListDetail;
 
     HashMap<String, String> tunerMap = new HashMap();
@@ -49,35 +48,31 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     RadioButton radioButtonModule;
     TextView reasonLabel;
     RecyclerView recyclerViewTuner;
-    TunerGroupItem tunerGroupOpened=null;
-    final int  DIALOG_TUNER_PRIORITY = 10;
-    public TunerFragment()
-    {
+    TunerGroupItem tunerGroupOpened = null;
+    final int DIALOG_TUNER_PRIORITY = 10;
+
+    public TunerFragment() {
     }
-    
-    public static TunerFragment newInstance()
-    {
+
+    public static TunerFragment newInstance() {
         return new TunerFragment();
     }
-    
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState)
-    {
+                             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_tuner_editor, container, false);
         //ButterKnife.bind(this, rootView);
         return rootView;
     }
-    
+
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
-    {
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         recyclerViewTuner = view.findViewById(R.id.recyclerTuner);
         expandableListView = view.findViewById(R.id.expandableListView);
 
         expandableListDetail = new HashMap<>();
         //updateData();
-
 
 
         radioGroupTuners = view.findViewById(R.id.radioGrpTuner);
@@ -95,13 +90,13 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
         radioGroupTuners.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.radioBtnSystem) {
-                Log.i("TunersUI","Selected:radioBtnSystem");
+                Log.i("TunersUI", "Selected:radioBtnSystem");
                 getSystemTuners();
             } else if (checkedId == R.id.radioBtnZone) {
-                Log.i("TunersUI","Selected:radioBtnZone");
+                Log.i("TunersUI", "Selected:radioBtnZone");
                 updateData();
             } else if (checkedId == R.id.radioBtnModule) {
-                Log.i("TunersUI","Selected:radioBtnModule");
+                Log.i("TunersUI", "Selected:radioBtnModule");
                 updateData();
             }
         });
@@ -112,20 +107,20 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         tunerMap.clear();
         expandableListDetail.clear();
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
-        Log.i("TunersUI","Equips:"+equips);
+        Log.i("TunersUI", "Equips:" + equips);
         for (Map m : equips) {
-            ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("tuner and equipRef == \""+m.get("id")+"\"");
+            ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("tuner and equipRef == \"" + m.get("id") + "\"");
             ArrayList tunerList = new ArrayList();
-        
+
             for (Map t : tuners) {
                 tunerList.add(t.get("dis").toString());
                 tunerMap.put(t.get("dis").toString(), t.get("id").toString());
             }
-            
-            ArrayList<HashMap> userIntents = CCUHsApi.getInstance().readAll("userIntent and equipRef == \""+m.get("id")+"\"");
-            
+
+            ArrayList<HashMap> userIntents = CCUHsApi.getInstance().readAll("userIntent and equipRef == \"" + m.get("id") + "\"");
+
             for (Map t : userIntents) {
-                if(!t.get("dis").toString().contains("desired")) {
+                if (!t.get("dis").toString().contains("desired")) {
                     tunerList.add(t.get("dis").toString());
                     tunerMap.put(t.get("dis").toString(), t.get("id").toString());
                 }
@@ -133,13 +128,13 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             expandableListDetail.put(m.get("dis").toString(), tunerList);
         }
     }
+
     public double getTuner(String id) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList values = hayStack.readPoint(id);
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
+        if (values != null && values.size() > 0) {
+            for (int l = 1; l <= values.size(); l++) {
+                HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("val") != null) {
                     return Double.parseDouble(valMap.get("val").toString());
                 }
@@ -147,18 +142,18 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         }
         return 0;
     }
-    
+
     public void setTuner(String id, double val) {
         new AsyncTask<String, Void, Void>() {
             @Override
-            protected Void doInBackground( final String ... params ) {
+            protected Void doInBackground(final String... params) {
                 CCUHsApi.getInstance().writePoint(id, TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", val, 0);
                 CCUHsApi.getInstance().writeHisValById(id, val);
                 return null;
             }
-        
+
             @Override
-            protected void onPostExecute( final Void result ) {
+            protected void onPostExecute(final Void result) {
                 // continue what you are doing...
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
@@ -175,29 +170,30 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         System.out.println("After Sorting:");
         Set set2 = sortedGroupTuner.entrySet();
         Iterator iterator2 = set2.iterator();
-        while(iterator2.hasNext()) {
-            Map.Entry me2 = (Map.Entry)iterator2.next();
-            Log.i("TunersUI","Sorting-"+me2.getKey());
+        while (iterator2.hasNext()) {
+            Map.Entry me2 = (Map.Entry) iterator2.next();
+            Log.i("TunersUI", "Sorting-" + me2.getKey());
         }
-        for(String groupTitle: sortedGroupTuner.keySet()){
+        for (String groupTitle : sortedGroupTuner.keySet()) {
             tunerExpandableLayoutHelper.addSection(groupTitle, sortedGroupTuner.get(groupTitle));
             tunerExpandableLayoutHelper.notifyDataSetChanged();
         }
     }
+
     @Override
     public void itemClicked(HashMap item) {
-        Toast.makeText(getActivity(), "TunerUI-HashMap: " + item.get("dis") + " clicked\n" +
-                " minValue:"+item.get("minVal")+" maxValue:"+item.get("maxVal")+" incrementBy:"+item.get("incrementVal"), Toast.LENGTH_SHORT).show();
-        DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(item,tunerGroupOpened);
+        //Toast.makeText(getActivity(), "TunerUI-HashMap: " + item.get("dis") + " clicked\n" + " minValue:" + item.get("minVal") + " maxValue:" + item.get("maxVal") + " incrementBy:" + item.get("incrementVal"), Toast.LENGTH_SHORT).show();
+        DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(item, tunerGroupOpened);
         tunerPriorityArray.setTargetFragment(this, DIALOG_TUNER_PRIORITY);
         showDialogFragment(tunerPriorityArray, DialogTunerPriorityArray.ID);
     }
 
     @Override
     public void itemClicked(TunerGroupItem section) {
-        Toast.makeText(getActivity(), "TunerUI-Section: " + section.getName() + " clicked", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getActivity(), "TunerUI-Section: " + section.getName() + " clicked", Toast.LENGTH_SHORT).show();
         tunerGroupOpened = section;
     }
+
     @Override
     public String getIdString() {
         return ID;
@@ -211,9 +207,9 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     Bundle bundle = data.getExtras();
                     HashMap tunerItemSelected = (HashMap) bundle.getSerializable("Tuner_HashMap_Selected");
                     TunerGroupItem tunerGroupSelected = (TunerGroupItem) bundle.getSerializable("Tuner_Group_Selected");
-                    String tunerValue =  bundle.getString("Tuner_Value_Selected");
+                    String tunerValue = bundle.getString("Tuner_Value_Selected");
                     Toast.makeText(getActivity(), "TunerUI-HashMap: " + tunerItemSelected.get("dis") + " clicked\n" +
-                            " tunerGroupSelected:"+tunerGroupSelected.getName()+" tunerValue:"+tunerValue, Toast.LENGTH_SHORT).show();
+                            " tunerGroupSelected:" + tunerGroupSelected.getName() + " tunerValue:" + tunerValue, Toast.LENGTH_SHORT).show();
                 }
                 break;
             default:

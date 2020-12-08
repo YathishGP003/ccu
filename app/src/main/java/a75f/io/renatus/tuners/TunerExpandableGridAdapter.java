@@ -73,8 +73,8 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
             case VIEW_TYPE_ITEM:
                 childIndexPosition++;
                 final HashMap tunerItem = (HashMap) mDataArrayList.get(position);
-                Log.i("TunersUI", "GridTunerName:" + tunerItem.get("dis").toString());
-                Log.i("TunersUI", "GridTunerValue:" + getTunerValue(tunerItem.get("id").toString()));
+                //Log.i("TunersUI", "GridTunerName:" + tunerItem.get("dis").toString());
+                //Log.i("TunersUI", "GridTunerValue:" + getTunerValue(tunerItem.get("id").toString()));
                 String tunerName = tunerItem.get("dis").toString();
                 holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
                 if (tunerItem.containsKey("unit")) {

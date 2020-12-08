@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +21,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
     ArrayList<HashMap> priorityArrayList;
     PriorityItemClickListener priorityItemClickListener;
 
-    public PriorityArrayAdapter(Context context, ArrayList<HashMap> priorityArrayList,PriorityItemClickListener itemClickListener) {
+    public PriorityArrayAdapter(Context context, ArrayList<HashMap> priorityArrayList, PriorityItemClickListener itemClickListener) {
         this.context = context;
         this.priorityArrayList = priorityArrayList;
         this.priorityItemClickListener = itemClickListener;
@@ -34,11 +35,9 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
     @Override
     public void onBindViewHolder(final PriorityViewHolder holder, @SuppressLint("RecyclerView") final int position) {
         final HashMap priorityItem = priorityArrayList.get(position);
-        priorityItem.put("newValue","");
-        priorityArrayList.add(position,priorityItem);
-        holder.textViewCurrentValue.setOnClickListener(v -> {
-            priorityItemClickListener.priorityClicked(position);
-        });
+        Log.i("TunersUI", "priorityItem:" + priorityItem.toString());
+        //priorityArrayList.add(position, priorityItem);
+        holder.textViewCurrentValue.setOnClickListener(v -> priorityItemClickListener.priorityClicked(position));
         holder.textViewPriority.setText(priorityItem.get("level").toString());
         if (position == 9) {
             holder.textViewName.setText("Zone");
@@ -51,8 +50,10 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
             if (systemPriority.containsKey("val")) {
                 holder.textViewCurrentValue.setText("" + systemPriority.get("val"));
                 setOrangeTextColor(holder.textViewCurrentValue);
-                if(!systemPriority.get("newValue").toString().equals("")){
-                    holder.textViewCurrentValue.setText("" + systemPriority.get("newValue"));
+                if (priorityItem.containsKey("newValue")) {
+                    if (!priorityItem.get("newValue").toString().equals("")) {
+                        holder.textViewCurrentValue.setText("" + priorityItem.get("newValue"));
+                    }
                 }
             }
         } else if (position == 15) {
@@ -63,6 +64,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
             holder.textViewName.setText("Default");
             setBlackTextColor(holder.textViewName);
             if (priorityItem.containsKey("val")) {
+                Log.i("TunersUI", "priorityItem:" + " val:" + priorityItem.get("val").toString());
                 holder.textViewValue.setText("" + priorityItem.get("val"));
             }
         } else {
@@ -101,7 +103,6 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
             textViewCurrentValue = itemView.findViewById(R.id.textCurrentValue);
             textViewName = itemView.findViewById(R.id.textDefaultValue);
             checkBoxparent = itemView.findViewById(R.id.tunerCheckbox);
-
         }
 
     }

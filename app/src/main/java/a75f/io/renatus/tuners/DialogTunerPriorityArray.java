@@ -47,6 +47,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     Button buttonSaveTuner;
     Button buttonCancel;
     String selectedTunerValue;
+
     PriorityArrayAdapter priorityArrayAdapter;
     ArrayList<HashMap> priorityList;
     public DialogTunerPriorityArray() {
@@ -118,7 +119,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         }
 
         textTunerGroupTitle.setText(tunerGroupSelected.getName());
-
+        priorityList = new ArrayList<>();
         priorityList = CCUHsApi.getInstance().readPoint(tunerItemSelected.get("id").toString());
         Log.i("TunersUI", "priorityList:" + priorityList);
         priorityArrayAdapter = new PriorityArrayAdapter(getActivity(), priorityList, this);
@@ -216,7 +217,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     }
                 }
                 npTunerRange.setDisplayedValues(valueList.toArray(new String[valueList.size()]));
-                npTunerRange.setValue(currentValPos*incrementVal);
+                npTunerRange.setValue(currentValPos);
                 Log.i("TunersUI", "valueList :" + Arrays.toString(npTunerRange.getDisplayedValues()));
                 if (currentValue > maxValueDb || currentValue < minValueDb) {
                     Log.i("TunersUI", "currentValue > maxValue:" + maxValueDb + " incrementVal:" + incrementValDb + " currentValue:" + currentValueDb);
@@ -229,7 +230,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 npTunerRange.setOnValueChangedListener((numberPicker, oldValue, newValue) ->
                 {
                     Toast.makeText(getActivity(), "TunersUI-oldValue:" + oldValue + " newValue:" + newValue, Toast.LENGTH_SHORT).show();
-                    if(oldValue != newValue ){
+                    if (oldValue != newValue) {
                         buttonUndo.setVisibility(View.VISIBLE);
                         selectedTunerValue = String.valueOf(newValue * finalIncrementValDb);
                     }
@@ -240,8 +241,10 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 buttonCancelAlert.setOnClickListener(v -> valueDialog.dismiss());
                 buttonSaveAlert.setOnClickListener(v -> {
                             selectedTunerValue = String.valueOf(npTunerRange.getValue() * finalIncrementValDb);
-                            tunerItemSelected.put("newValue",selectedTunerValue);
-                            priorityList.set(position,tunerItemSelected);
+                            //tunerItemSelected.put("newValue", selectedTunerValue);
+                            HashMap newValue = (HashMap) priorityList.get(position);
+                            newValue.put("newValue", selectedTunerValue);
+                            priorityList.set(position,newValue);
                             priorityArrayAdapter.notifyItemChanged(position);
                             valueDialog.dismiss();
                         }

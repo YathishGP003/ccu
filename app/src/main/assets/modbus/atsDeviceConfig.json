@@ -368,7 +368,7 @@
       "registerAddress": 44,
       "registerNumber": "40045",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "float",
+      "parameterDefinitionType": "integer",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2117",
@@ -395,7 +395,7 @@
             },
             {
               "tagName": "maxVal",
-              "value": 3000
+              "value": 300
             },
             {
               "tagName": "incrementVal",
@@ -459,7 +459,7 @@
       "registerAddress": 45,
       "registerNumber": "40046",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "float",
+      "parameterDefinitionType": "integer",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2118",
@@ -507,7 +507,7 @@
       "registerAddress": 46,
       "registerNumber": "40047",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "float",
+      "parameterDefinitionType": "integer",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2119",
@@ -555,7 +555,7 @@
       "registerAddress": 47,
       "registerNumber": "40048",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "float",
+      "parameterDefinitionType": "integer",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2120",
@@ -603,7 +603,7 @@
       "registerAddress": 49,
       "registerNumber": "40050",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "float",
+      "parameterDefinitionType": "integer",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2121",
@@ -655,7 +655,7 @@
       "registerAddress": 50,
       "registerNumber": "40051",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "float",
+      "parameterDefinitionType": "integer",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2122",
@@ -707,7 +707,7 @@
       "registerAddress": 52,
       "registerNumber": "40053",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "float",
+      "parameterDefinitionType": "integer",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2123",
@@ -743,7 +743,7 @@
       "registerAddress": 53,
       "registerNumber": "40054",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "float",
+      "parameterDefinitionType": "integer",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2124",

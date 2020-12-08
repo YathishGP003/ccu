@@ -150,7 +150,7 @@ public class ModbusPulse {
             respVal = parseByteVal(response);
         } else if (register.registerType.equals("inputRegister")) {
             respVal = parseIntVal(response);
-        } if (register.registerType.equals("holdingRegister")) {
+        } else if (register.registerType.equals("holdingRegister")) {
             if (register.getParameterDefinitionType().equals("float")) {
                 respVal = parseFloatVal(response);
             } else if (register.getParameterDefinitionType().equals("integer")

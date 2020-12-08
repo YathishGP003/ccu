@@ -9,8 +9,8 @@
     "manufacturer": "C Systems",
     "registers": [
         {
-            "registerAddress": 3999,
-            "registerNumber": "44000",
+            "registerAddress": 4000,
+            "registerNumber": "44001",
             "registerType": "holdingRegister",
             "parameterDefinitionType": "decimal",
             "parameters": [
@@ -63,8 +63,8 @@
             ]
         },
         {
-            "registerAddress": 4000,
-            "registerNumber": "44001",
+            "registerAddress": 4001,
+            "registerNumber": "44002",
             "registerType": "holdingRegister",
             "parameterDefinitionType": "decimal",
             "parameters": [
@@ -117,8 +117,8 @@
             ]
         },
         {
-            "registerAddress": 4001,
-            "registerNumber": "44002",
+            "registerAddress": 4002,
+            "registerNumber": "44003",
             "registerType": "holdingRegister",
             "parameterDefinitionType": "decimal",
             "parameters": [
@@ -171,8 +171,8 @@
             ]
         },
         {
-            "registerAddress": 4002,
-            "registerNumber": "44003",
+            "registerAddress": 4003,
+            "registerNumber": "44004",
             "registerType": "holdingRegister",
             "parameterDefinitionType": "decimal",
             "parameters": [

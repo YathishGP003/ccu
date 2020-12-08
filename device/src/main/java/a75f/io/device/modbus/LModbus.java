@@ -7,6 +7,7 @@ import com.x75f.modbus4j.msg.ReadCoilsRequest;
 import com.x75f.modbus4j.msg.ReadDiscreteInputsRequest;
 import com.x75f.modbus4j.msg.ReadHoldingRegistersRequest;
 import com.x75f.modbus4j.msg.ReadInputRegistersRequest;
+import com.x75f.modbus4j.msg.WriteCoilRequest;
 import com.x75f.modbus4j.msg.WriteRegisterRequest;
 import com.x75f.modbus4j.serial.rtu.RtuMessageRequest;
 
@@ -16,6 +17,14 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 
 public class LModbus {
+    
+    public static final String MODBUS_REGISTER_DISCRETE_INPUT = "discreteInput";
+    public static final String MODBUS_REGISTER_HOLDING = "holdingRegister";
+    public static final String MODBUS_REGISTER_INPUT = "inputRegister";
+    public static final String MODBUS_REGISTER_READ_COIL = "readCoil";
+    public static final String MODBUS_REGISTER_WRITE_COIL = "writeCoil";
+    
+    
     
     private static final int SERIAL_COMM_TIMEOUT_MS = 1000;
     private static SerialCommLock modbusCommLock = new SerialCommLock();
@@ -29,24 +38,20 @@ public class LModbus {
             RtuMessageRequest rtuMessageRequest;
             try {
                  switch (registerType) {
-                    case "readCoil":
+                    case MODBUS_REGISTER_READ_COIL:
                          request = new ReadCoilsRequest(slaveid, registerAddr, numberOfRegisters);
                          rtuMessageRequest = new RtuMessageRequest(request);
                          return rtuMessageRequest.getMessageData();
-                    case "discreteInput":
+                    case MODBUS_REGISTER_DISCRETE_INPUT:
                          request = new ReadDiscreteInputsRequest(slaveid, registerAddr, numberOfRegisters);
                          rtuMessageRequest = new RtuMessageRequest(request);
                          return rtuMessageRequest.getMessageData();
-                    case "holdingRegister":
+                    case MODBUS_REGISTER_HOLDING:
                          request = new ReadHoldingRegistersRequest(slaveid, registerAddr, numberOfRegisters);
                          rtuMessageRequest = new RtuMessageRequest(request);
                          return rtuMessageRequest.getMessageData();
-                    case "inputRegister":
+                    case MODBUS_REGISTER_INPUT:
                         request = new ReadInputRegistersRequest(slaveid,registerAddr, numberOfRegisters);
-                        rtuMessageRequest = new RtuMessageRequest(request);
-                        return rtuMessageRequest.getMessageData();
-                    case "writeRegister":
-                        request = new WriteRegisterRequest(slaveid,registerAddr,1);
                         rtuMessageRequest = new RtuMessageRequest(request);
                         return rtuMessageRequest.getMessageData();
                 }
@@ -74,7 +79,16 @@ public class LModbus {
     public static synchronized void writeRegister(int slaveId, Register register, int writeValue) {
         CcuLog.d(L.TAG_CCU_MODBUS, "writeRegister Register " + register.toString()+" writeValue "+writeValue);
         try {
-            ModbusRequest request = new WriteRegisterRequest(slaveId, register.getRegisterAddress(), writeValue);
+            ModbusRequest request;
+            if (register.getRegisterType().equals(MODBUS_REGISTER_HOLDING)) {
+                request = new WriteRegisterRequest(slaveId, register.getRegisterAddress(), writeValue);
+            } else if (register.getRegisterType().equals(MODBUS_REGISTER_DISCRETE_INPUT)) {
+                request = new WriteCoilRequest(slaveId, register.getRegisterAddress(), writeValue > 0 ? true : false);
+            } else {
+                CcuLog.d(L.TAG_CCU_MODBUS,
+                         "Write cannot be executed : Invalid Register Type "+register.getRegisterType());
+                return;
+            }
             RtuMessageRequest rtuMessageRequest = new RtuMessageRequest(request);
             LSerial.getInstance().sendSerialToModbus(rtuMessageRequest.getMessageData());
             LModbus.getModbusCommLock().lock(register, SERIAL_COMM_TIMEOUT_MS);

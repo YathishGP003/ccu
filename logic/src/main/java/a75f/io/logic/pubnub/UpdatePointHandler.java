@@ -23,7 +23,8 @@ public class UpdatePointHandler
 {
     public static final String CMD = "updatePoint";
     private static ZoneDataInterface zoneDataInterface = null;
-    
+    private static ModbusDataInterface modbusDataInterface = null;
+
     public static void handleMessage(final JsonObject msgObject) {
         String src = msgObject.get("who").getAsString();
 
@@ -127,8 +128,14 @@ public class UpdatePointHandler
                 zoneDataInterface.refreshScreen(luid);
             }
         }
+        if (p.getMarkers().contains("modbus")){
+            if (modbusDataInterface != null) {
+                modbusDataInterface.refreshScreen(luid);
+            }
+        }
     }
 
     public static void setZoneDataInterface(ZoneDataInterface in) { zoneDataInterface = in; }
+    public static void setModbusDataInterface(ModbusDataInterface in) { modbusDataInterface = in; }
     public static void setSystemDataInterface(ZoneDataInterface in) { zoneDataInterface = in; }
 }

@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
         //priorityArrayList.add(position, priorityItem);
         holder.textViewCurrentValue.setOnClickListener(v -> priorityItemClickListener.priorityClicked(position));
         holder.textViewPriority.setText(priorityItem.get("level").toString());
+        holder.imgBtnTunerUndo.setVisibility(View.GONE);
         if (position == 9) {
             holder.textViewName.setText("Zone");
             setBlackTextColor(holder.textViewName);
@@ -53,6 +55,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                 if (priorityItem.containsKey("newValue")) {
                     if (!priorityItem.get("newValue").toString().equals("")) {
                         holder.textViewCurrentValue.setText("" + priorityItem.get("newValue"));
+                        holder.imgBtnTunerUndo.setVisibility(View.VISIBLE);
                     }
                 }
             }
@@ -74,6 +77,14 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
             setBlackTextColor(holder.textViewName);
         }
 
+        holder.imgBtnTunerUndo.setOnClickListener(v -> {
+            final HashMap systemPriority = priorityArrayList.get(16);
+            if (systemPriority.containsKey("val")) {
+                holder.textViewCurrentValue.setText("" + systemPriority.get("val"));
+                setOrangeTextColor(holder.textViewCurrentValue);
+                holder.imgBtnTunerUndo.setVisibility(View.GONE);
+            }
+        });
     }
 
     public void setOrangeTextColor(TextView textView) {
@@ -94,7 +105,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
         TextView textViewName;
         TextView textViewValue;
         TextView textViewCurrentValue;
-        CheckBox checkBoxparent;
+        ImageButton imgBtnTunerUndo;
 
         public PriorityViewHolder(View itemView) {
             super(itemView);
@@ -102,7 +113,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
             textViewValue = itemView.findViewById(R.id.textTunerValue);
             textViewCurrentValue = itemView.findViewById(R.id.textCurrentValue);
             textViewName = itemView.findViewById(R.id.textDefaultValue);
-            checkBoxparent = itemView.findViewById(R.id.tunerCheckbox);
+            imgBtnTunerUndo = itemView.findViewById(R.id.imgBtnTunerUndo);
         }
 
     }

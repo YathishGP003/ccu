@@ -6,52 +6,45 @@
 
 
     <LinearLayout
-        android:id="@+id/layoutValues"
-        android:layout_width="wrap_content"
+        android:id="@+id/layoutHeader"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:orientation="horizontal">
+        android:orientation="vertical"
+        android:padding="16sp">
 
         <TextView
-            android:id="@+id/textLevelLabel"
+            android:id="@+id/textView_Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_gravity="center_vertical"
-            android:layout_marginRight="16sp"
-            android:layout_toLeftOf="@+id/npTunerValue"
-            android:fontFamily="@font/lato_regular"
-            android:text="Level 14"
-            android:layout_margin="5sp"
-            android:textSize="19.5sp" />
+            android:text="@string/apply_tuner"
+            android:textAppearance="@style/tuner_text_title_black" />
 
-        <NumberPicker
-            android:id="@+id/npTunerValue"
+        <TextView
+            android:id="@+id/textView_confirmMsg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/oaoArc"
-            android:layout_centerInParent="true"
-            android:layout_gravity="center_vertical"
-            android:layout_margin="16sp"
-            android:minWidth="120sp"/>
-        <ImageButton
-            android:id="@+id/imgBtnUndo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_refresh"
-            android:layout_gravity="center_vertical"
-            android:layout_margin="5sp"
-            android:padding="5sp"
-            android:scaleX="-1"
-            android:background="@null"/>
+            android:layout_marginTop="5sp"
+            android:text="@string/confirm_tuner"
+            android:textAppearance="@style/tuner_text_label_black" />
     </LinearLayout>
 
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/layoutHeader">
+    <LinearLayout
+        android:id="@+id/layoutConfirmBody"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" />
+    </ScrollView>
     <View
         android:id="@+id/horizontalDivider"
         android:layout_width="match_parent"
         android:layout_height="0.05sp"
-        android:layout_below="@+id/layoutValues"
+        android:layout_below="@+id/scrollView"
         android:layout_margin="10sp"
         android:alpha="0.75"
         android:background="@color/light_gray" />
@@ -60,8 +53,8 @@
         android:id="@+id/layoutFooterButtons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
         android:layout_below="@+id/horizontalDivider"
+        android:layout_alignParentRight="true"
         android:orientation="horizontal">
 
         <Button
@@ -85,7 +78,7 @@
             android:background="@color/light_gray" />
 
         <Button
-            android:id="@+id/buttonSaveTuner"
+            android:id="@+id/buttonApplyTuner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="10sp"
@@ -93,8 +86,8 @@
             android:fontFamily="@font/lato_regular"
             android:gravity="center_vertical|center_horizontal"
             android:padding="5sp"
-            android:text="@string/tuner_save"
-            android:textColor="@color/grey_select"
+            android:text="@string/button_apply"
+            android:textColor="@color/orange_75f"
             android:textSize="19.5sp" />
     </LinearLayout>
 </RelativeLayout>

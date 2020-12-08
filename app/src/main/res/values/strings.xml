@@ -749,4 +749,8 @@
     <string name="hint_tunerChangeReason">Reason for Change</string>
     <string name="tuner_save">Save</string>
     <string name="tuner_label_priority">Override Priority:</string>
+    <string name="apply_tuner">APPLY TUNERS</string>
+    <string name="confirm_tuner">Are you sure you want to apply the following tuners?</string>
+    <string name="button_apply">APPLY</string>
+    <string name="text_rightArrow">f061</string>
 </resources>

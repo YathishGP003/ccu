@@ -22,7 +22,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.Serializable;
-import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,6 +49,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
 
     PriorityArrayAdapter priorityArrayAdapter;
     ArrayList<HashMap> priorityList;
+
     public DialogTunerPriorityArray() {
     }
 
@@ -221,7 +221,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 Log.i("TunersUI", "valueList :" + Arrays.toString(npTunerRange.getDisplayedValues()));
                 if (currentValue > maxValueDb || currentValue < minValueDb) {
                     Log.i("TunersUI", "currentValue > maxValue:" + maxValueDb + " incrementVal:" + incrementValDb + " currentValue:" + currentValueDb);
-                    npTunerRange.setValue(maxValue / incrementVal);
+                    npTunerRange.setValue(minValue);
                 }
 
                 npTunerRange.setWrapSelectorWheel(false);
@@ -244,7 +244,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                             //tunerItemSelected.put("newValue", selectedTunerValue);
                             HashMap newValue = (HashMap) priorityList.get(position);
                             newValue.put("newValue", selectedTunerValue);
-                            priorityList.set(position,newValue);
+                            priorityList.set(position, newValue);
                             priorityArrayAdapter.notifyItemChanged(position);
                             valueDialog.dismiss();
                         }

@@ -3,6 +3,7 @@ package a75f.io.renatus.tuners;
 import android.content.Context;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,6 +57,11 @@ public class TunerExpandableLayoutHelper implements TunerGroupChangeListener {
     public void addItem(String section, HashMap item) {
         mSectionDataMap.get(mSectionMap.get(section)).add(item);
     }
+    public void updateTuner(String section, HashMap item, int position) {
+        Log.i("TunersUI", "section:" + section+" pos:"+position+" hashmap:"+item);
+        mSectionDataMap.get(mSectionMap.get(section)).add(position,item);
+        notifyDataSetChanged();
+    }
 
     public void removeItem(String section, HashMap item) {
         mSectionDataMap.get(mSectionMap.get(section)).remove(item);
@@ -74,9 +80,6 @@ public class TunerExpandableLayoutHelper implements TunerGroupChangeListener {
             if (key.isExpanded)
                 mDataArrayList.addAll(entry.getValue());
         }
-
-
-
     }
 
     @Override

@@ -125,10 +125,10 @@
             android:layout_marginRight="5sp"
             android:padding="5sp"
             android:text="@string/cancel"
-            android:textAppearance="@style/tuner_button_cancel"
-            android:textColor="@color/orange_75f"
-            android:theme="@style/Theme.MaterialComponents"
-            app:strokeColor="@color/orange_75f" />
+            android:theme="@style/tunerButton_Enabled"
+            android:textAppearance="@style/tunerButton_Enabled"
+            app:strokeColor="@color/orange_75f"
+            />
 
         <android.support.design.button.MaterialButton
             android:id="@+id/buttonSave"
@@ -137,11 +137,11 @@
             android:layout_height="50sp"
             android:layout_marginLeft="5sp"
             android:padding="5sp"
+            android:enabled="true"
             android:text="@string/tuner_save"
-            android:textAppearance="@style/tuner_button_save"
-            android:textColor="@color/grey_select"
-            android:theme="@style/Theme.MaterialComponents"
-            app:strokeColor="@color/grey_select" />
+            android:theme="@style/tunerButton_Enabled"
+            android:textAppearance="@style/tunerButton_Enabled"
+            app:strokeColor="@color/orange_75f"/>
 
 
     </LinearLayout>

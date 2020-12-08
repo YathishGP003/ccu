@@ -15,6 +15,10 @@ import a75f.io.modbusbox.EquipsManager;
 
 public class ModbusNetwork extends DeviceNetwork
 {
+    public static final int READ_REGISTER_ONE = 1;
+    public static final int READ_REGISTER_TWO = 2;
+    public static final int READ_REGISTER_FOUR = 4;
+    
     @Override
     public void sendMessage() {
         
@@ -45,10 +49,13 @@ public class ModbusNetwork extends DeviceNetwork
     }
 
     private int getRegisterCount(Register register) {
-        if (register.getParameterDefinitionType().equals("float")) {
-            return 2;
+        
+        if (register.getParameterDefinitionType().equals("long") || register.getParameterDefinitionType().equals("Int64")) {
+            return READ_REGISTER_FOUR;
+        } else if (register.getParameterDefinitionType().equals("float")) {
+            return READ_REGISTER_TWO;
         } else {
-            return 1;
+            return READ_REGISTER_ONE;
         }
     }
     

@@ -145,11 +145,12 @@ public class ModbusPulse {
     
     public static double getRegisterValFromResponse(Register register, RtuMessageResponse response) {
         double respVal = 0;
-        if (register.registerType.equals("inputRegister")
-                || register.registerType.equals("discreteInput")) {
+        if (register.registerType.equals("discreteInput")) {
             //16bit decimal (ir) or 1 bit (di)
+            respVal = parseByteVal(response);
+        } else if (register.registerType.equals("inputRegister")) {
             respVal = parseIntVal(response);
-        } else if (register.registerType.equals("holdingRegister")) {
+        } if (register.registerType.equals("holdingRegister")) {
             if (register.getParameterDefinitionType().equals("float")) {
                 respVal = parseFloatVal(response);
             } else if (register.getParameterDefinitionType().equals("integer")
@@ -164,7 +165,8 @@ public class ModbusPulse {
                 if (register.getParameters().size() > 0) {
                     respVal = parseBitRangeVal(response, register.getParameters().get(0).bitParamRange);
                 }
-            }  else if (register.getParameterDefinitionType().equals("Int64")) {
+            }  else if (register.getParameterDefinitionType().equals("Int64") ||
+                        register.getParameterDefinitionType().equals("long")) {
                 if (register.getParameters().size() > 0) {
                     respVal = parseInt64Val(response);
                 }
@@ -192,6 +194,10 @@ public class ModbusPulse {
             formattedVal = 0;
         }
         return formattedVal;
+    }
+    
+    public static int parseByteVal(RtuMessageResponse response) {
+        return response.getMessageData()[MODBUS_DATA_START_INDEX] & 0xFF ;
     }
     
     public static int parseIntVal(RtuMessageResponse response) {

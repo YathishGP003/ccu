@@ -330,6 +330,10 @@
             {
               "name": "DTTS",
               "bitValues": 1
+            },
+            {
+              "name": "OTTS",
+              "bitValues": 3
             }
           ],
           "logicalPointTags": [

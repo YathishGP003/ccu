@@ -2,6 +2,7 @@ package a75f.io.renatus.modbus;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -29,6 +30,7 @@ import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.ModbusEquipsInfo;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.Register;
+import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -38,6 +40,7 @@ import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.FloorPlanFragment;
+import a75f.io.renatus.FragmentEMRConfiguration;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
@@ -240,20 +243,31 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     }
     private void saveConfig(){
 
-        setBtn.setEnabled(false);
-        if(ProgressDialogUtils.isDialogShowing())
-            ProgressDialogUtils.hideProgressDialog();
-        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving Modbus Configuration");
-        new Thread(() -> {
-            setUpsModbusProfile();
-            L.saveCCUState();
-        }).start();
+        new AsyncTask<String, Void, Void>() {
 
-        new Handler().postDelayed(() -> {
-            ProgressDialogUtils.hideProgressDialog();
-            FragmentModbusConfiguration.this.closeAllBaseDialogFragments();
-            getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-        },12000);
+            @Override
+            protected void onPreExecute() {
+                setBtn.setEnabled(false);
+                if(ProgressDialogUtils.isDialogShowing())
+                    ProgressDialogUtils.hideProgressDialog();
+                ProgressDialogUtils.showProgressDialog(getActivity(),"Saving Modbus Configuration");
+                super.onPreExecute();
+            }
+
+            @Override
+            protected Void doInBackground( final String ... params ) {
+                setUpsModbusProfile();
+                L.saveCCUState();
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute( final Void result ) {
+                ProgressDialogUtils.hideProgressDialog();
+                FragmentModbusConfiguration.this.closeAllBaseDialogFragments();
+                getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
     private void setUpsModbusProfile() {
 

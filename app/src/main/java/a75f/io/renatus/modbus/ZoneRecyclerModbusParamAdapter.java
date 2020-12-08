@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.text.HtmlCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,12 +20,19 @@ import java.util.Objects;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.modbus.Command;
+import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.LogicalPointTags;
 import a75f.io.api.haystack.modbus.Parameter;
+import a75f.io.api.haystack.modbus.Register;
 import a75f.io.api.haystack.modbus.UserIntentPointTags;
+import a75f.io.device.mesh.LSerial;
+import a75f.io.device.modbus.LModbus;
+import a75f.io.logic.pubnub.ModbusDataInterface;
+import a75f.io.logic.pubnub.UpdatePointHandler;
+import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.R;
 
-public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRecyclerModbusParamAdapter.ViewHolder> {
+public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRecyclerModbusParamAdapter.ViewHolder> implements ModbusDataInterface {
 
     Context context;
     List<Parameter> modbusParam;
@@ -36,6 +42,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
         this.context = context;
         this.modbusParam = modbusParam;
         this.equipRef = equipRef;
+        UpdatePointHandler.setModbusDataInterface(this);
     }
 
     @NonNull
@@ -99,9 +106,9 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                 new Thread(() -> {
                                     if (modbusParam.get(position).getCommands() != null && modbusParam.get(position).getCommands().size() > 0) {
                                         Command command = (Command) adapterView.getSelectedItem();
-                                        writePoint(p, command.getBitValues());
+                                        writePoint(p, command.getBitValues(), modbusParam.get(position));
                                     } else {
-                                        writePoint(p, adapterView.getItemAtPosition(pos).toString());
+                                        writePoint(p, adapterView.getItemAtPosition(pos).toString(), modbusParam.get(position));
                                     }
                                 }).start();
                             }
@@ -114,7 +121,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
 
                         if (unit != null && !unit.equals("")) {
                             viewHolder.tvUnit.setVisibility(View.VISIBLE);
-                            viewHolder.tvUnit.setText("("+unit+")");
+                            viewHolder.tvUnit.setText("(" + unit + ")");
                         } else {
                             viewHolder.tvUnit.setVisibility(View.GONE);
                         }
@@ -134,12 +141,12 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                 if (modbusParam.get(position).getParameterDefinitionType().equals("binary")) {
                                     viewHolder.tvParamValue.setText(readHisVal(p.getId()) == 1 ? HtmlCompat.fromHtml("<font color='#E24301'>ON</font>", HtmlCompat.FROM_HTML_MODE_LEGACY) : HtmlCompat.fromHtml("<font color='#000000'>OFF</font>", HtmlCompat.FROM_HTML_MODE_LEGACY));
                                 } else {
-                                    viewHolder.tvParamValue.setText(""+readHisVal(p.getId()));
+                                    viewHolder.tvParamValue.setText("" + readHisVal(p.getId()));
                                 }
                             }
                             if (unit != null && !unit.equals(" ")) {
                                 viewHolder.tvUnit.setVisibility(View.VISIBLE);
-                                viewHolder.tvUnit.setText("("+unit+")");
+                                viewHolder.tvUnit.setText("(" + unit + ")");
                             } else {
                                 viewHolder.tvUnit.setVisibility(View.GONE);
                             }
@@ -170,7 +177,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                 }
                 if (unit != null && !unit.equals(" ")) {
                     viewHolder.tvUnit.setVisibility(View.VISIBLE);
-                    viewHolder.tvUnit.setText("("+unit+")");
+                    viewHolder.tvUnit.setText("(" + unit + ")");
                 } else {
                     viewHolder.tvUnit.setVisibility(View.GONE);
                 }
@@ -232,6 +239,27 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
         return modbusParam != null ? modbusParam.size() : 0;
     }
 
+    @Override
+    public void refreshScreen(String id) {
+        HashMap pointMap = CCUHsApi.getInstance().readMapById(id);
+        Point point = new Point.Builder().setHashMap(pointMap).build();
+        double value = readVal(id);
+        //write to modbus
+        EquipmentDevice modbusDevice = EquipsManager.getInstance().fetchProfileBySlaveId(Short.parseShort(point.getGroup()));
+        for (Register register : modbusDevice.getRegisters()) {
+            for (Parameter pam : register.getParameters()) {
+                if (pam.getUserIntentPointTags() != null) {
+                    if (pam.getName().equals(point.getShortDis())) {
+                        if (LSerial.getInstance().isModbusConnected()) {
+                            LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) value);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView tvParamLabel;
         public TextView tvParamValue;
@@ -252,7 +280,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     private Point readPoint(Parameter configParams) {
         StringBuilder tags = new StringBuilder();
         for (LogicalPointTags marker : configParams.getLogicalPointTags()) {
-            if (!Objects.nonNull(marker.getTagValue())){
+            if (!Objects.nonNull(marker.getTagValue())) {
                 tags.append(" and ").append(marker.getTagName());
             }
         }
@@ -274,15 +302,29 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
         }
         return 0;
     }
+
     public double readHisVal(String id) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         return hayStack.readHisValById(id);
     }
 
-    private void writePoint(Point point, String value) {
+    private void writePoint(Point point, String value, Parameter parameter) {
         CCUHsApi.getInstance().writePoint(point.getId(), Double.valueOf(value));
         if (point.getMarkers().contains("his")) {
             CCUHsApi.getInstance().writeHisValById(point.getId(), Double.valueOf(value));
+        }
+        EquipmentDevice modbusDevice = EquipsManager.getInstance().fetchProfileBySlaveId(Short.parseShort(point.getGroup()));
+        for (Register register : modbusDevice.getRegisters()) {
+            for (Parameter pam : register.getParameters()) {
+                if (pam.getUserIntentPointTags() != null) {
+                    if (pam.getName().equals(parameter.getName())) {
+                        if (LSerial.getInstance().isModbusConnected()) {
+                            LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) Double.parseDouble(value));
+                        }
+                        break;
+                    }
+                }
+            }
         }
     }
 }

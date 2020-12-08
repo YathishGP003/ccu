@@ -1,6 +1,6 @@
 {
   "modbusEquipId (_id)": "5f1f30ad18bbbf4f1d9a222",
-  "name": "UPS -80kVA",
+  "name": "UPS -80k",
   "description": "This document contains the configuration necessary to ups-80kva",
   "equipType": "UPS80K",
   "manufacturer": "Vertiv",

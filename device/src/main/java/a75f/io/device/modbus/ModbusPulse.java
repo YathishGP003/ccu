@@ -242,7 +242,7 @@ public class ModbusPulse {
     
     public static int parseBitVal(RtuMessageResponse response, int position) {
         long responseVal = parseLongVal(response);
-        return (int) responseVal & (1 << position);
+        return (responseVal & (1 << position)) > 0 ? 1 : 0;
     }
     
     public static long extractBits(final long l, final int nrBits, final int offset)

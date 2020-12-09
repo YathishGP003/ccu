@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.design.button.MaterialButton;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -122,6 +123,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
             dialog.setView(dialogView);
             AlertDialog valueDialog = dialog.show();
+
             valueDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
             LinearLayout linearLayoutBody = dialogView.findViewById(R.id.layoutConfirmBody);
             View tunerItemViewTop = inflater.inflate(R.layout.dialog_apply_tuner_item, null);
@@ -146,12 +148,12 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 textView_SectionLabel.setText("System");
                 textView_Section.setText("Current System");
                 if (newTunerValueItem.containsKey("unit")) {
-                    textView_tuner.setText(newTunerValueItem.get("newValue").toString() + " " + newTunerValueItem.get("unit").toString().toUpperCase() + " | ");
+                    textView_tuner.setText(newTunerValueItem.get("dis").toString() + " " + newTunerValueItem.get("unit").toString().toUpperCase() + " | ");
                 } else {
                     textView_tuner.setText(newTunerValueItem.get("dis").toString() + " | ");
                 }
-                textView_level.setText("Level 14");
-                textView_newLevel.setText("Level 14");
+                textView_level.setText("Level 14 : ");
+                textView_newLevel.setText("Level 14 : ");
                 textView_oldValue.setText(String.valueOf(getTunerValue(newTunerValueItem.get("id").toString())));
                 textView_newValue.setText(newTunerValueItem.get("newValue").toString());
                 linearLayoutBody.addView(tunerItemViewBody);
@@ -163,13 +165,16 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     setTuner(newTunerValueItem.get("id").toString(), Double.parseDouble(newTunerValueItem.get("newValue").toString()));
                 }
                 Toast.makeText(getActivity(), "Tuner Values Updated Successfully", Toast.LENGTH_SHORT).show();
+                updatedTunerValues.clear();
                 valueDialog.dismiss();
+                saveTunerValues.setEnabled(false);
             });
             buttonCancelTuners.setOnClickListener(dialogV -> {
                 valueDialog.dismiss();
             });
             linearLayoutBody.invalidate();
             dialogView.invalidate();
+            valueDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         });
     }
 

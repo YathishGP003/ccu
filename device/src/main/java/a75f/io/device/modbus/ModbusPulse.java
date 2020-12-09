@@ -236,7 +236,7 @@ public class ModbusPulse {
     
         long responseVal = parseLongVal(response);
         
-        int rangeVal = (int) extractBits(responseVal, upperLimit-lowerLimit, lowerLimit);
+        int rangeVal = (int) extractBits(responseVal, upperLimit-lowerLimit + 1, lowerLimit);
         return rangeVal;
     }
     

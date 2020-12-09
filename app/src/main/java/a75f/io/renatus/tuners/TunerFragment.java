@@ -146,11 +146,14 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 TextView textView_newLevel = tunerItemViewBody.findViewById(R.id.textView_newLevel);
                 TextView textView_newValue = tunerItemViewBody.findViewById(R.id.textView_newValue);
                 textView_SectionLabel.setText("System");
-                textView_Section.setText("Current System");
+                textView_Section.setText(":");
+
+                String tunerName = newTunerValueItem.get("dis").toString();
+                tunerName = tunerName.substring(tunerName.lastIndexOf("-") + 1);
                 if (newTunerValueItem.containsKey("unit")) {
-                    textView_tuner.setText(newTunerValueItem.get("dis").toString() + " " + newTunerValueItem.get("unit").toString().toUpperCase() + " | ");
+                    textView_tuner.setText(tunerName + " " + newTunerValueItem.get("unit").toString().toUpperCase() + " | ");
                 } else {
-                    textView_tuner.setText(newTunerValueItem.get("dis").toString() + " | ");
+                    textView_tuner.setText(tunerName + " | ");
                 }
                 textView_level.setText("Level 14 : ");
                 textView_newLevel.setText("Level 14 : ");
@@ -169,9 +172,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 valueDialog.dismiss();
                 saveTunerValues.setEnabled(false);
             });
-            buttonCancelTuners.setOnClickListener(dialogV -> {
-                valueDialog.dismiss();
-            });
+            buttonCancelTuners.setOnClickListener(dialogV -> valueDialog.dismiss());
             linearLayoutBody.invalidate();
             dialogView.invalidate();
             valueDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);

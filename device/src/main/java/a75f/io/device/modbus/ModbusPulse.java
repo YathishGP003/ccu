@@ -103,10 +103,11 @@ public class ModbusPulse {
 
         CCUHsApi hayStack = CCUHsApi.getInstance();
         Register readRegister = LModbus.getModbusCommLock().getRegister();
-        
+
         HashMap phyPoint = hayStack.read("point and physical and register and modbus" +
                                          " and registerType == \""+readRegister.getRegisterType()+"\""+
                                          " and registerAddr == \""+readRegister.getRegisterAddress()+ "\""+
+                                         " and parameterId == \""+readRegister.getParameters().get(0).getParameterId()+ "\""+
                                          " and deviceRef == \"" + deviceRef + "\"");
         //for(HashMap phyPoint : phyPoints) {
             if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {

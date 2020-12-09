@@ -112,6 +112,7 @@ public class ModbusEquip {
                     .setEndBit(String.valueOf(configParam.getEndBit()))
                     .setRegisterNumber(configParam.getRegisterNumber())
                     .setRegisterType(configParam.getRegisterType())
+                    .setParameterId(configParam.getParameterId())
                     .setSiteRef(siteRef).addMarker("register").addMarker("modbus")
                     .setTz(tz);
             if(configParam.isDisplayInUI()){

@@ -76,73 +76,82 @@
         android:groupIndicator="@drawable/group_indicator"
         android:indicatorRight="?android:attr/expandableListPreferredItemIndicatorRight"
         android:layoutDirection="rtl"
-        android:visibility="gone"
-        android:padding="5sp" />
+        android:padding="5sp"
+        android:visibility="gone" />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recyclerTuner"
+    <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textTunersLabel" />
-
-    <TextView
-        android:id="@+id/textReasonLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/recyclerTuner"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="10sp"
-        android:layout_marginTop="10sp"
-        android:text="@string/text_tunerChangeReason"
-        android:textAppearance="@style/tuner_text_group"
-        android:textSize="19sp" />
-
-    <EditText
-        android:id="@+id/editChangeReason"
+        android:layout_below="@+id/textTunersLabel">
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textReasonLabel"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="10sp"
-        android:layout_marginRight="20sp"
-        android:layout_toLeftOf="@+id/buttonLayout"
-        android:hint="@string/hint_tunerChangeReason"
-        android:minHeight="50sp" />
+        >
 
-    <LinearLayout
-        android:id="@+id/buttonLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textReasonLabel"
-        android:layout_alignParentRight="true"
-        android:orientation="horizontal">
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerTuner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
-        <android.support.design.button.MaterialButton
-            android:id="@+id/buttonCancel"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="100sp"
-            android:layout_height="50sp"
-            android:layout_marginRight="5sp"
-            android:padding="5sp"
-            android:text="@string/cancel"
-            android:theme="@style/tunerButton_Enabled"
-            android:textAppearance="@style/tunerButton_Enabled"
-            app:strokeColor="@color/orange_75f"
-            />
+        <TextView
+            android:id="@+id/textReasonLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/recyclerTuner"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="10sp"
+            android:layout_marginTop="10sp"
+            android:text="@string/text_tunerChangeReason"
+            android:textAppearance="@style/tuner_text_group"
+            android:textSize="19sp" />
 
-        <android.support.design.button.MaterialButton
-            android:id="@+id/buttonSave"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="100sp"
-            android:layout_height="50sp"
-            android:layout_marginLeft="5sp"
-            android:padding="5sp"
-            android:enabled="false"
-            android:text="@string/tuner_save"
-            android:theme="@style/tunerButton_Enabled"
-            android:textAppearance="@style/tunerButton_Enabled"
-            app:strokeColor="@color/orange_75f"/>
+        <EditText
+            android:id="@+id/editChangeReason"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textReasonLabel"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="10sp"
+            android:layout_marginRight="20sp"
+            android:layout_toLeftOf="@+id/buttonLayout"
+            android:hint="@string/hint_tunerChangeReason"
+            android:minHeight="50sp" />
+
+        <LinearLayout
+            android:id="@+id/buttonLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textReasonLabel"
+            android:layout_alignParentRight="true"
+            android:orientation="horizontal">
+
+            <android.support.design.button.MaterialButton
+                android:id="@+id/buttonCancel"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="100sp"
+                android:layout_height="50sp"
+                android:layout_marginRight="5sp"
+                android:padding="5sp"
+                android:text="@string/cancel"
+                android:textAppearance="@style/tunerButton_Enabled"
+                android:theme="@style/tunerButton_Enabled"
+                app:strokeColor="@color/orange_75f" />
+
+            <android.support.design.button.MaterialButton
+                android:id="@+id/buttonSave"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="100sp"
+                android:layout_height="50sp"
+                android:layout_marginLeft="5sp"
+                android:enabled="false"
+                android:padding="5sp"
+                android:text="@string/tuner_save"
+                android:textAppearance="@style/tunerButton_Enabled"
+                android:theme="@style/tunerButton_Enabled"
+                app:strokeColor="@color/orange_75f" />
 
 
-    </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+    </android.support.v4.widget.NestedScrollView>
 </RelativeLayout>

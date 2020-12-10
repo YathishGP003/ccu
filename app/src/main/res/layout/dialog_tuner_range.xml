@@ -26,7 +26,7 @@
             android:layout_margin="5sp"
             android:textSize="19.5sp" />
 
-        <NumberPicker
+        <a75f.io.renatus.views.NumberPicker.SystemNumberPicker
             android:id="@+id/npTunerValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -34,7 +34,7 @@
             android:layout_centerInParent="true"
             android:layout_gravity="center_vertical"
             android:layout_margin="16sp"
-            android:minWidth="120sp"/>
+            android:minWidth="160sp"/>
         <ImageButton
             android:id="@+id/imgBtnUndo"
             android:layout_width="wrap_content"

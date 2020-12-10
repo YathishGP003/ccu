@@ -30,6 +30,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
+import a75f.io.renatus.views.NumberPicker.SystemNumberPicker;
 import butterknife.ButterKnife;
 
 
@@ -165,7 +166,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             AlertDialog valueDialog = dialog.show();
             valueDialog.getWindow().setLayout(500, 380);
             valueDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
-            NumberPicker npTunerRange = dialogView.findViewById(R.id.npTunerValue);
+            SystemNumberPicker npTunerRange = dialogView.findViewById(R.id.npTunerValue);
             TextView textViewLevel = dialogView.findViewById(R.id.textLevelLabel);
             Button buttonSaveAlert = dialogView.findViewById(R.id.buttonSaveTuner);
             Button buttonCancelAlert = dialogView.findViewById(R.id.buttonCancelTuner);
@@ -197,14 +198,25 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 }
                 int k = 0;
                 int currentValPos = 0;
-                for (double i = minValueDb; i <= maxValueDb; i += incrementValDb) {
-                    valueList.add(String.format("%.1f", i));
-                    if (currentValue == i) {
-                        currentValPos = k;
+                if (minValue < 0) {
+                    for (double i = minValueDb; i <= maxValueDb; i += incrementValDb) {
+                        valueList.add(String.format("%.1f", i));
+                        if (currentValue == i) {
+                            currentValPos = k;
+                        }
+                        k++;
                     }
-                    k++;
+                } else {
+                    for (double i = minValueDb; i <= maxValueDb; i += incrementValDb) {
+                        valueList.add(String.format("%.1f", i));
+                        if (currentValue == i) {
+                            currentValPos = k;
+                        }
+                        k++;
+                    }
                 }
                 Log.i("TunersUI", " currentValPos:" + currentValPos + " value:" + valueList.get(currentValPos) + " valueList:" + valueList);
+                npTunerRange.setDisplayedValues(valueList.toArray(new String[valueList.size()]));
                 npTunerRange.setMinValue(minValue);
                 if (maxValue > 0) {
                     try {
@@ -215,8 +227,11 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                         Log.i("TunersUI", "ArithmeticException :" + e.getMessage());
                         e.printStackTrace();
                     }
+                }else{
+                    npTunerRange.setMaxValue(maxValue);
                 }
-                npTunerRange.setDisplayedValues(valueList.toArray(new String[valueList.size()]));
+
+
                 npTunerRange.setValue(currentValPos);
                 Log.i("TunersUI", "valueList :" + Arrays.toString(npTunerRange.getDisplayedValues()));
                 if (currentValue > maxValueDb || currentValue < minValueDb) {

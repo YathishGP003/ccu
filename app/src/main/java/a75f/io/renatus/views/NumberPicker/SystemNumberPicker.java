@@ -22,6 +22,7 @@ import android.text.TextUtils;
 import android.text.method.NumberKeyListener;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.KeyEvent;
@@ -41,6 +42,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.Locale;
 
 import a75f.io.renatus.R;
@@ -2223,7 +2225,11 @@ public class SystemNumberPicker extends LinearLayout {
         } else {
             if (mDisplayedValues != null) {
                 int displayedValueIndex = selectorIndex - mMinValue;
-                scrollSelectorValue = mDisplayedValues[displayedValueIndex];
+                if(mMinValue < 0){
+                    scrollSelectorValue = mDisplayedValues[selectorIndex];
+                }else {
+                    scrollSelectorValue = mDisplayedValues[displayedValueIndex];
+                }
             } else {
                 scrollSelectorValue = formatNumber(selectorIndex);
             }
@@ -2249,6 +2255,8 @@ public class SystemNumberPicker extends LinearLayout {
          * find the correct value in the displayed values for the current
          * number.
          */
+        Log.i("TunersUI","mDisplayedValues:"+ Arrays.toString(mDisplayedValues));
+        Log.i("TunersUI","mValue:"+mValue+" mMinValue:"+mMinValue+" maxValue:"+mMaxValue);
         String text = (mDisplayedValues == null) ? formatNumber(mValue)
                 : mDisplayedValues[mValue - mMinValue];
         if (!TextUtils.isEmpty(text)) {

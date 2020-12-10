@@ -77,22 +77,17 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                 Log.i("TunersUI", "tunerItem:" + tunerItem);
                 String tunerName = tunerItem.get("dis").toString();
                 holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
-                if (tunerItem.containsKey("unit")) {
-                    if (tunerItem.containsKey("newValue")) {
-                        holder.itemTextValueView.setText(tunerItem.get("newValue").toString() + " " + tunerItem.get("unit").toString().toUpperCase());
-                        holder.imgBtnUndoChange.setVisibility(View.GONE);
-                    } else {
-                        holder.itemTextValueView.setText("" + getTunerValue(tunerItem.get("id").toString()) + " " + tunerItem.get("unit").toString().toUpperCase());
-                        holder.imgBtnUndoChange.setVisibility(View.GONE);
-                    }
+                if (tunerItem.containsKey("newValue")) {
+                    holder.itemTextValueView.setText(tunerItem.get("newValue").toString());
+                    holder.imgBtnUndoChange.setVisibility(View.GONE);
                 } else {
-                    if (tunerItem.containsKey("newValue")) {
-                        holder.itemTextValueView.setText(tunerItem.get("newValue").toString());
-                        holder.imgBtnUndoChange.setVisibility(View.GONE);
-                    } else {
-                        holder.itemTextValueView.setText("" + getTunerValue(tunerItem.get("id").toString()));
-                        holder.imgBtnUndoChange.setVisibility(View.GONE);
-                    }
+                    holder.itemTextValueView.setText(String.valueOf(getTunerValue(tunerItem.get("id").toString())));
+                    holder.imgBtnUndoChange.setVisibility(View.GONE);
+                }
+                if (tunerItem.containsKey("unit")) {
+                    holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1) + " (" + tunerItem.get("unit").toString().toUpperCase() + ")");
+                } else {
+                    holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
                 }
                 if (childIndexPosition % 2 == 0) {
                     holder.itemDivider.setVisibility(View.GONE);
@@ -102,14 +97,14 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
 
                 holder.imgBtnUndoChange.setOnClickListener(v -> {
                     if (tunerItem.containsKey("unit")) {
-                            holder.itemTextValueView.setText("" + getTunerValue(tunerItem.get("id").toString()) + " " + tunerItem.get("unit").toString().toUpperCase());
+                        holder.itemTextValueView.setText("" + getTunerValue(tunerItem.get("id").toString()) + " " + tunerItem.get("unit").toString().toUpperCase());
                     } else {
-                            holder.itemTextValueView.setText("" + getTunerValue(tunerItem.get("id").toString()));
+                        holder.itemTextValueView.setText("" + getTunerValue(tunerItem.get("id").toString()));
                     }
                     holder.imgBtnUndoChange.setVisibility(View.GONE);
                 });
 
-                holder.view.setOnClickListener(v -> mItemClickListener.itemClicked(tunerItem,childIndexPosition));
+                holder.view.setOnClickListener(v -> mItemClickListener.itemClicked(tunerItem, childIndexPosition));
                 if ((position / 2) % 2 == 0) {
                     holder.tunerGridBg.setBackgroundColor(Color.parseColor("#FFFFFF"));
                 } else {

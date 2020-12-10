@@ -30,6 +30,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.TunerNumberPicker;
 import a75f.io.renatus.views.NumberPicker.SystemNumberPicker;
 import butterknife.ButterKnife;
 
@@ -166,7 +167,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             AlertDialog valueDialog = dialog.show();
             valueDialog.getWindow().setLayout(500, 380);
             valueDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
-            SystemNumberPicker npTunerRange = dialogView.findViewById(R.id.npTunerValue);
+            TunerNumberPicker npTunerRange = dialogView.findViewById(R.id.npTunerValue);
             TextView textViewLevel = dialogView.findViewById(R.id.textLevelLabel);
             Button buttonSaveAlert = dialogView.findViewById(R.id.buttonSaveTuner);
             Button buttonCancelAlert = dialogView.findViewById(R.id.buttonCancelTuner);

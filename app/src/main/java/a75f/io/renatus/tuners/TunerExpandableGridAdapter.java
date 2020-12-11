@@ -104,7 +104,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                     holder.imgBtnUndoChange.setVisibility(View.GONE);
                 });
 
-                holder.view.setOnClickListener(v -> mItemClickListener.itemClicked(tunerItem, childIndexPosition));
+                holder.view.setOnClickListener(v -> mItemClickListener.itemClicked(tunerItem, position));
                 if ((position / 2) % 2 == 0) {
                     holder.tunerGridBg.setBackgroundColor(Color.parseColor("#FFFFFF"));
                 } else {

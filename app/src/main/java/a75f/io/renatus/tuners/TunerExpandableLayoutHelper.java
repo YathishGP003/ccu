@@ -57,10 +57,12 @@ public class TunerExpandableLayoutHelper implements TunerGroupChangeListener {
     public void addItem(String section, HashMap item) {
         mSectionDataMap.get(mSectionMap.get(section)).add(item);
     }
-    public void updateTuner(String section, HashMap item, int position) {
-        Log.i("TunersUI", "section:" + section+" pos:"+position+" hashmap:"+item);
-        mSectionDataMap.get(mSectionMap.get(section)).add(position,item);
+
+    public void updateTuner(String section, HashMap item, HashMap oldItem) {
+        Log.i("TunersUI", "section:" + section + " hashmap:" + item);
+        mSectionDataMap.get(mSectionMap.get(section)).set(mSectionDataMap.get(mSectionMap.get(section)).indexOf(oldItem), item);
         notifyDataSetChanged();
+        //mSectionedExpandableGridAdapter.notifyItemChanged(position);
     }
 
     public void removeItem(String section, HashMap item) {

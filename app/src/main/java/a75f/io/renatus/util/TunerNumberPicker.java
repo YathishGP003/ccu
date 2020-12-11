@@ -2082,9 +2082,9 @@ public class TunerNumberPicker extends LinearLayout {
      * @param notifyChange Whether to notify if the current value changed.
      */
     private void setValueInternal(int current, boolean notifyChange) {
-        if (mValue == current) {
+        /*if (mValue == current) {
             return;
-        }
+        }*/
         // Wrap around the values if we go past the start or end
         if (mWrapSelectorWheel) {
             current = getWrappedSelectorIndex(current);

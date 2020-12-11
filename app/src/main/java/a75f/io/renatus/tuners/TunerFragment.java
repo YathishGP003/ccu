@@ -261,6 +261,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     public void itemClicked(HashMap item, int position) {
         //Toast.makeText(getActivity(), "TunerUI-HashMap: " + item.get("dis") + " clicked\n" + " minValue:" + item.get("minVal") + " maxValue:" + item.get("maxVal") + " incrementBy:" + item.get("incrementVal"), Toast.LENGTH_SHORT).show();
         childSelected = position;
+        Log.i("TunersUI", "childSelected:" + childSelected + " hashmap:" + item);
         DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(item, tunerGroupOpened);
         tunerPriorityArray.setTargetFragment(this, DIALOG_TUNER_PRIORITY);
         showDialogFragment(tunerPriorityArray, DialogTunerPriorityArray.ID);
@@ -284,12 +285,13 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 if (resultCode == Activity.RESULT_OK) {
                     Bundle bundle = data.getExtras();
                     HashMap tunerItemSelected = (HashMap) bundle.getSerializable("Tuner_HashMap_Selected");
+                    HashMap oldTunerItemSelected = (HashMap) bundle.getSerializable("Tuner_HashMap_Selected");
                     TunerGroupItem tunerGroupSelected = (TunerGroupItem) bundle.getSerializable("Tuner_Group_Selected");
                     String tunerValue = bundle.getString("Tuner_Value_Selected");
                     Toast.makeText(getActivity(), "TunerUI-HashMap: " + tunerItemSelected.get("dis") + " clicked\n" +
                             " tunerGroupSelected:" + tunerGroupSelected.getName() + " tunerValue:" + tunerValue, Toast.LENGTH_SHORT).show();
                     tunerItemSelected.put("newValue", tunerValue);
-                    tunerExpandableLayoutHelper.updateTuner(tunerGroupSelected.getName(), tunerItemSelected, childSelected);
+                    tunerExpandableLayoutHelper.updateTuner(tunerGroupSelected.getName(), tunerItemSelected, oldTunerItemSelected);
                     updatedTunerValues.add(tunerItemSelected);
                     if (updatedTunerValues.size() > 0) {
                         saveTunerValues.setEnabled(true);

@@ -23,15 +23,15 @@
           "conditions": [
             {
               "name": "No Power Supply",
-              "bitValues": "00"
+              "bitValues": "0"
             },
             {
               "name": "Internal Bypass Supply",
-              "bitValues": "01"
+              "bitValues": "1"
             },
             {
               "name": "UPS Intervention Supply",
-              "bitValues": "10"
+              "bitValues": "2"
             }
           ],
           "logicalPointTags": [
@@ -286,7 +286,7 @@
       "registerAddress": 1032,
       "registerNumber": "41033",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "decimal",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2108",
@@ -330,7 +330,7 @@
       "registerAddress": 1030,
       "registerNumber": "41031",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "decimal",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2109",
@@ -380,7 +380,7 @@
       "registerAddress": 1031,
       "registerNumber": "41032",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "decimal",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2120",
@@ -430,7 +430,7 @@
       "registerAddress": 1033,
       "registerNumber": "41034",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "decimal",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2121",
@@ -480,7 +480,7 @@
       "registerAddress": 1031,
       "registerNumber": "41032",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "decimal",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2122",
@@ -533,7 +533,7 @@
       "registerAddress": 1031,
       "registerNumber": "41032",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "decimal",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2124",
@@ -583,7 +583,7 @@
       "registerAddress": 1032,
       "registerNumber": "41033",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "decimal",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2126",
@@ -633,7 +633,7 @@
       "registerAddress": 1080,
       "registerNumber": "41081",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "decimal",
+      "parameterDefinitionType": "boolean",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2129",
@@ -644,15 +644,15 @@
           "conditions": [
             {
               "name": "Shutdown",
-              "bitValues": "00"
+              "bitValues": "0"
             },
             {
               "name": "Open",
-              "bitValues": "01"
+              "bitValues": "1"
             },
             {
               "name": "Invalid",
-              "bitValues": "10"
+              "bitValues": "2"
             }
           ],
           "logicalPointTags": [
@@ -690,7 +690,7 @@
       "registerAddress": 1030,
       "registerNumber": "41031",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "decimal",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18beef4f1d9a2142",

@@ -66,6 +66,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                 case "integer":
                 case "boolean":
                 case "digital":
+                case "int64":
                     if (modbusParam.get(position).getUserIntentPointTags() != null && modbusParam.get(position).getUserIntentPointTags().size() > 0) {
                         viewHolder.spValue.setVisibility(View.VISIBLE);
                         viewHolder.tvParamValue.setVisibility(View.GONE);

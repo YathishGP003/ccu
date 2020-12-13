@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import static a75f.io.usbserial.UsbUtils.DEVICE_ID_FTDI;
 
 /**
  * Created by rmatt isOn 7/30/2017.
@@ -408,7 +409,8 @@ public class UsbService extends Service
 				int devicePID = device.getProductId();
 				Log.i(TAG, "USB Device VID: " + deviceVID);
 				Log.i(TAG, "USB Device PID: " + devicePID);
-				if (deviceVID == 0x0403 || deviceVID == 1003)
+				if (deviceVID == 0x0403 || deviceVID == 1003 ||
+				                    (deviceVID == DEVICE_ID_FTDI && UsbUtils.isBiskitMode(getApplicationContext())))
 				{
 					boolean success = grantRootPermissionToUSBDevice(device);
 					connection = usbManager.openDevice(device);
@@ -425,6 +427,7 @@ public class UsbService extends Service
 						UsbService.this.getApplicationContext().sendBroadcast(intent);
 						keep = false;
 					}
+					Log.d(TAG, "Opened Serial MODBUS device instance for "+deviceVID);
 				}
 				else
 				{

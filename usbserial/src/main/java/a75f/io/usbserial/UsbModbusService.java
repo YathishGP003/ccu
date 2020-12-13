@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import static a75f.io.usbserial.UsbUtils.DEVICE_ID_FTDI;
 
 /**
  * Created by rmatt isOn 7/30/2017.
@@ -237,7 +238,6 @@ public class UsbModbusService extends Service {
         registerReceiver(usbReceiver, filter);
     }
 
-
     private void findModbuSerialPortDevice() {
 
         HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
@@ -250,7 +250,7 @@ public class UsbModbusService extends Service {
                 int devicePID = device.getProductId();
                 Log.i(TAG, "Modbus USB Device VID: " + deviceVID);
                 Log.i(TAG, "Modbus USB Device PID: " + devicePID);
-                if (deviceVID == 4292 || deviceVID == 1027) {
+                if (deviceVID == 4292 || (deviceVID == DEVICE_ID_FTDI && !UsbUtils.isBiskitMode(getApplicationContext()))) {
                     //if (deviceVID == 4292) {
                     boolean success = grantRootPermissionToUSBDevice(device);
                     connection = usbManager.openDevice(device);
@@ -265,7 +265,7 @@ public class UsbModbusService extends Service {
                         UsbModbusService.this.getApplicationContext().sendBroadcast(intent);
                         keep = false;
                     }
-                    Log.d(TAG, "Successfully Opened device instance "+deviceVID);
+                    Log.d(TAG, "Opened Serial MODBUS device instance for "+deviceVID);
                 } else {
                     connection = null;
                     device = null;

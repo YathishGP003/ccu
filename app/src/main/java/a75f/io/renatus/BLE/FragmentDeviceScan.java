@@ -4,11 +4,18 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.DialogFragment;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,6 +49,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
     
     public static final  String ID                = "scan_dialog";
     static final         int    REQUEST_ENABLE_BT = 1;
+    private static final long SCAN_PERIOD = 60000;
     private static final String PROFILE_TYPE      = "profile_type";
     @BindView(R.id.ble_device_list_list_view)
     ListView mBLEDeviceListListView;
@@ -51,23 +59,23 @@ public class FragmentDeviceScan extends BaseDialogFragment
     ProfileType         mProfileType;
     LeDeviceListAdapter mLeDeviceListAdapter;
     BluetoothAdapter    mBluetoothAdapter;
+    private BluetoothLeScanner mBluetoothLeScanner;
     boolean             mScanning;
-    BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback()
+
+    private ScanCallback mScanCallback = new ScanCallback()
     {
-        
         @Override
-        public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord)
-        {
+        public void onScanResult(int callbackType, ScanResult result) {
+            super.onScanResult(callbackType, result);
+
             if(getActivity() != null) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (device != null && device.getName() != null &&
-                                (device.getName().equalsIgnoreCase(SerialConsts.SMART_NODE_NAME) ||
-                                        device.getName().equalsIgnoreCase(SerialConsts.SMART_STAT_NAME))) {
-                            mLeDeviceListAdapter.addDevice(device);
-                            mLeDeviceListAdapter.notifyDataSetChanged();
-                        }
+                getActivity().runOnUiThread(() -> {
+                    BluetoothDevice device = result.getDevice();
+                    if (device != null && device.getName() != null &&
+                            (device.getName().equalsIgnoreCase(SerialConsts.SMART_NODE_NAME) ||
+                                    device.getName().equalsIgnoreCase(SerialConsts.SMART_STAT_NAME))) {
+                        mLeDeviceListAdapter.addDevice(device);
+                        mLeDeviceListAdapter.notifyDataSetChanged();
                     }
                 });
             }
@@ -128,33 +136,29 @@ public class FragmentDeviceScan extends BaseDialogFragment
         // Ensures Bluetooth is enabled isOn the device.  If Bluetooth is not currently enabled,
         // fire an intent to display a dialog asking the user to grant permission to enable it.
         //Skip BLE because we can't emulate it.
-        if (mBluetoothAdapter != null)
-        {
-            if (!mBluetoothAdapter.isEnabled())
+        new Thread(() -> {
+            if (mBluetoothAdapter != null)
             {
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-            }
-            else
-            {
-                // Initializes list view adapter.
-                mLeDeviceListAdapter = new LeDeviceListAdapter();
-                setListViewEmptyView();
-                mBLEDeviceListListView.setAdapter(mLeDeviceListAdapter);
-                mBLEDeviceListListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+                if (!mBluetoothAdapter.isEnabled())
                 {
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int position,
-                                            long id)
-                    {
+                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                }
+                else
+                {
+                    // Initializes list view adapter.
+                    mLeDeviceListAdapter = new LeDeviceListAdapter();
+                    setListViewEmptyView();
+                    mBLEDeviceListListView.setAdapter(mLeDeviceListAdapter);
+                    mBLEDeviceListListView.setOnItemClickListener((adapterView, view, position, id) -> {
                         final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
                         finish(device);
                         scanLeDevice(false);
-                    }
-                });
-                scanLeDevice(true);
+                    });
+                    scanLeDevice(true);
+                }
             }
-        }
+        }).start();
     }
     
     
@@ -184,12 +188,14 @@ public class FragmentDeviceScan extends BaseDialogFragment
         if (enable)
         {
             mScanning = true;
-            mBluetoothAdapter.startLeScan(mLeScanCallback);
+            new Handler(Looper.getMainLooper()).postDelayed(() -> mBluetoothLeScanner.stopScan(mScanCallback),SCAN_PERIOD);
+
+            mBluetoothLeScanner.startScan(mScanCallback);
         }
         else
         {
             mScanning = false;
-            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+            mBluetoothLeScanner.stopScan(mScanCallback);
         }
     }
     
@@ -205,7 +211,9 @@ public class FragmentDeviceScan extends BaseDialogFragment
     public void onPause()
     {
         super.onPause();
-        scanLeDevice(false);
+        if (mBluetoothAdapter != null && mBluetoothAdapter.isEnabled()) {
+            scanLeDevice(false);
+        }
     }
     
     
@@ -226,6 +234,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
         final BluetoothManager bluetoothManager =
                 (BluetoothManager) getActivity().getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
+        mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
         // Checks if Bluetooth is supported isOn the device.
         if (mBluetoothAdapter == null)
         {

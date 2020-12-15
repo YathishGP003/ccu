@@ -10,6 +10,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.bo.building.CCUApplication;
@@ -39,6 +40,7 @@ public class L
     public static final String TAG_CCU_SCHEDULER = "CCU_SCHEDULER";
     public static final String TAG_CCU_PUBNUB = "CCU_PUBNUB";
     public static final String TAG_CCU_WARN = "CCU_WARN";
+    public static final String TAG_CCU_MODBUS = "CCU_MODBUS";
 
     public static Context app()
     {
@@ -76,6 +78,31 @@ public class L
     }
 
 
+    public static boolean isModbusSlaveIdExists(Short slaveId) {
+        ArrayList<HashMap> nodes = CCUHsApi.getInstance().readAll("device and modbus");
+        if(nodes.size() == 0)
+            return false;
+
+        for (HashMap node : nodes)
+        {
+            if (node.get("addr").toString().equals(String.valueOf(slaveId))) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public static List<String> getExistingModbusSlaveIds() {
+        List<String> existingSlaveIds = new ArrayList<String>();
+        ArrayList<HashMap> nodes = CCUHsApi.getInstance().readAll("device and modbus");
+        if(nodes.size() == 0)
+            return existingSlaveIds;
+
+        for (HashMap node : nodes)
+        {
+            existingSlaveIds.add(node.get("addr").toString());
+        }
+        return existingSlaveIds;
+    }
     public static short generateSmartNodeAddress()
     {
         short currentBand = L.ccu().getSmartNodeAddressBand();
@@ -83,7 +110,7 @@ public class L
         if (nodes.size() == 0) {
             return currentBand;
         }
-    
+
         boolean addrUsed = true;
         short nextAddr = currentBand;
         while (addrUsed)
@@ -99,10 +126,10 @@ public class L
                 }
             }
         }
-        
+
         return nextAddr;
     }
-    
+
     public static Zone findZoneByName(String mFloorName, String mRoomName)
     {
         return ZoneBLL.findZoneByName(mFloorName, mRoomName);
@@ -153,7 +180,7 @@ public class L
     {
         return LZoneProfile.resolveZoneProfileLogicalValue(profile);
     }
-    
+
     public static float getDesiredTemp(ZoneProfile profile)
     {
         for (short node : profile.getNodeAddresses())
@@ -169,7 +196,7 @@ public class L
         }
         return 0;
     }
-    
+
     public static void setDesiredTemp(double desiredTemp, ZoneProfile profile)
     {
         for (short node : profile.getNodeAddresses())
@@ -288,7 +315,7 @@ public class L
         Globals.getInstance().setCCU(state);
         saveCCUState();
     }
-    
+
     /*
     This should set a preference to what environment
     the user would like to use with Kinvey for testing and development purposes.
@@ -296,7 +323,7 @@ public class L
     public static void setServerEnvironment(String serverEnvironment) {
         //L.serverEnvironment = serverEnvironment;
     }
-    
+
     public static void removeHSDeviceEntities(Short node) {
         CCUHsApi hsApi = CCUHsApi.getInstance();
         if (L.ccu().oaoProfile != null && L.ccu().oaoProfile.getNodeAddress() == node) {
@@ -314,10 +341,10 @@ public class L
         }
         removeProfile(node);
     }
-    
+
     public static ZoneProfile getProfile(short addr) {
         Log.d("CCU","Profiles "+L.ccu().zoneProfiles.size());
-    
+
         for (Iterator<ZoneProfile> it = L.ccu().zoneProfiles.iterator(); it.hasNext();)
         {
             ZoneProfile p = it.next();
@@ -327,12 +354,12 @@ public class L
                     return p;
                 }
             }
-    
+
         }
         Log.d("CCU","Profile Not found for "+addr);
         return null;
     }
-    
+
     public static void removeProfile(short addr) {
         ZoneProfile deleteProfile = null;
         for(ZoneProfile p : L.ccu().zoneProfiles) {

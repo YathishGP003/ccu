@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.bacnet.BACnetUtils;
 import a75f.io.logic.L;
+import a75f.io.modbusbox.EquipsManager;
 
 class ModuleListActionMenuListener implements MultiChoiceModeListener
 {
@@ -64,6 +65,7 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 				{ //TODO check prefconfigured profiels
 					
 					deleteSelectedFSV();
+					EquipsManager.getInstance().deleteModules(seletedModules);
 					seletedModules.clear();
                     floorPlanActivity.refreshScreen();
 					mode.finish(); // Action picked, so close the CAB

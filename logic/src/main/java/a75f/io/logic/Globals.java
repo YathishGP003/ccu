@@ -40,6 +40,7 @@ import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.erm.EmrProfile;
+import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
 import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile;
@@ -544,6 +545,20 @@ public class Globals {
                             fourPfcu.addLogicalMap(Short.valueOf(eq.getGroup()), z.getId());
                             L.ccu().zoneProfiles.add(fourPfcu);
                             break;
+                        case MODBUS_PAC:
+                        case MODBUS_RRS:
+                        case MODBUS_VRF:
+                        case MODBUS_UPS30:
+                        case MODBUS_UPS80:
+                        case MODBUS_UPS400:
+                        case MODBUS_WLD:
+                        case MODBUS_EM:
+                        case MODBUS_EMS:
+                        case MODBUS_ATS:
+                            ModbusProfile mbProfile = new ModbusProfile();
+                            mbProfile.addMbEquip(Short.valueOf(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
+                            L.ccu().zoneProfiles.add(mbProfile);
+                            break;
                             
                     }
                 }
@@ -564,7 +579,7 @@ public class Globals {
 
     public String getSmartNodeBand() {
         HashMap device = CCUHsApi.getInstance().read("device and addr");
-        if (device != null && device.size() > 0) {
+        if (device != null && device.size() > 0 && device.get("modbus") == null) {
             String nodeAdd = device.get("addr").toString();
             return nodeAdd.substring(0, 2).concat("00");
         } else {

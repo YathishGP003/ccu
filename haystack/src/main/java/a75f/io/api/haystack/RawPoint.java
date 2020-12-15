@@ -42,6 +42,12 @@ public class RawPoint extends Entity
     private String shortDis;
     private String minVal;
     private String maxVal;
+    private String registerAddress;
+    private String registerNumber;
+    private String startBit;
+    private String endBit;
+    private String registerType;
+    private String parameterId;
 
     public boolean getEnabled()
     {
@@ -131,6 +137,24 @@ public class RawPoint extends Entity
     public String getMaxVal() {
         return maxVal;
     }
+    public String getRegisterAddress() {
+        return registerAddress;
+    }
+    public String getRegisterNumber() {
+        return registerNumber;
+    }
+    public String getStartBit() {
+        return startBit;
+    }
+    public String getEndBit() {
+        return endBit;
+    }
+    public String getRegisterType() {
+        return registerType;
+    }
+    public String getParameterId() {
+        return parameterId;
+    }
 
     public static class Builder{
         private String            displayName;
@@ -148,6 +172,12 @@ public class RawPoint extends Entity
         private String shortDis;
         private String minVal;
         private String maxVal;
+        private String registerAddress;
+        private String registerNumber;
+        private String startBit;
+        private String endBit;
+        private String registerType;
+        private String parameterId;
         public Builder setEnabled(boolean enabled)
         {
             this.enabled = enabled;
@@ -155,7 +185,7 @@ public class RawPoint extends Entity
         }
         private boolean enabled;
         private String  id;
-    
+
         public Builder setKind(String kind)
         {
             this.kind = kind;
@@ -236,7 +266,37 @@ public class RawPoint extends Entity
             this.maxVal = maxVal;
             return this;
         }
-        
+
+        public Builder setRegisterAddress(String addr) {
+            this.registerAddress = addr;
+            return this;
+        }
+
+        public Builder setRegisterNumber(String regNumber) {
+            this.registerNumber = regNumber;
+            return this;
+        }
+
+        public Builder setStartBit(String startBit) {
+            this.startBit = startBit;
+            return this;
+        }
+
+        public Builder setEndBit(String endBit) {
+            this.endBit = endBit;
+            return this;
+        }
+    
+        public Builder setRegisterType(String registerType) {
+            this.registerType = registerType;
+            return this;
+        }
+
+        public Builder setParameterId(String parameterId) {
+            this.parameterId = parameterId;
+            return this;
+        }
+    
         public RawPoint build(){
             RawPoint p = new RawPoint();
             p.displayName = this.displayName;
@@ -256,10 +316,16 @@ public class RawPoint extends Entity
             p.shortDis = this.shortDis;
             p.minVal = this.minVal;
             p.maxVal = this.maxVal;
+            p.registerAddress = this.registerAddress;
+            p.registerNumber = this.registerNumber;
+            p.startBit = this.startBit;
+            p.endBit = this.endBit;
+            p.registerType = this.registerType;
+            p.parameterId = this.parameterId;
             //CCUHsApi.getInstance().addRawPoint(p);
             return p;
         }
-    
+
         public Builder setHashMap(HashMap site)
         {
             Iterator it = site.entrySet().iterator();
@@ -335,11 +401,34 @@ public class RawPoint extends Entity
                 {
                     this.minVal = pair.getValue().toString();
                 }
+                else if (pair.getKey().equals("registerAddress"))
+                {
+                    this.registerAddress = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("registerNumber"))
+                {
+                    this.registerNumber = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("startBit"))
+                {
+                    this.startBit = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("endBit"))
+                {
+                    this.endBit = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("registerType"))
+                {
+                    this.registerType = pair.getValue().toString();
+                }else if (pair.getKey().equals("parameterId"))
+                {
+                    this.parameterId = pair.getValue().toString();
+                }
                 //it.remove();
             }
             return this;
         }
     }
-    
-    
+
+
 }

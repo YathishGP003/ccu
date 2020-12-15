@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -380,22 +381,36 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             zonePriority.setSelection(2);//NORMAL
         }
         
-        setButton.setOnClickListener(v -> {
-
-            setButton.setEnabled(false);
-            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB Configuration");
-
-            new Thread(() -> {
-                setupDabZoneProfile();
-                L.saveCCUState();
-            }).start();
-
-            new Handler().postDelayed(() -> {
-                ProgressDialogUtils.hideProgressDialog();
-                FragmentDABConfiguration.this.closeAllBaseDialogFragments();
-                getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
-            }, 12000);
+        setButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+            
+                new AsyncTask<Void, Void, Void>() {
+                
+                    @Override
+                    protected void onPreExecute() {
+                        setButton.setEnabled(false);
+                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB Configuration");
+                        super.onPreExecute();
+                    }
+                
+                    @Override
+                    protected Void doInBackground( final Void ... params ) {
+                        setupDabZoneProfile();
+                        L.saveCCUState();
+                        return null;
+                    }
+                
+                    @Override
+                    protected void onPostExecute( final Void result ) {
+                        ProgressDialogUtils.hideProgressDialog();
+                        FragmentDABConfiguration.this.closeAllBaseDialogFragments();
+                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                        LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
+                    }
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            
+            }
         });
         
     }

@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import static a75f.io.usbserial.UsbUtils.DEVICE_ID_FTDI;
 
 /**
  * Created by rmatt isOn 7/30/2017.
@@ -74,7 +75,7 @@ public class UsbService extends Service
 	SerialState curState = SerialState.PARSE_INIT;
 	int         nCRC     = 0;
 	int nCurIndex;
-    //NOTE: reduced buffer size to 256
+	//NOTE: reduced buffer size to 256
 	byte[] inDataBuffer = new byte[256];
 	int    nDataLength  = 0;
 	private IBinder binder = new UsbBinder();
@@ -144,8 +145,8 @@ public class UsbService extends Service
 	private       UsbSerialInterface.UsbReadCallback mCallback   =
 			new UsbSerialInterface.UsbReadCallback()
 			{
-        @Override
-        public void onReceivedData(byte[] data, int mLength) {
+				@Override
+				public void onReceivedData(byte[] data, int mLength) {
 					if (data.length > 0)
 					{
 						int nMsg;
@@ -153,8 +154,8 @@ public class UsbService extends Service
 							nMsg = (data[0] & 0xff);
 						} catch (ArrayIndexOutOfBoundsException e) {
 							Log.d("SERIAL_DEBUG",
-										"Bad message type received: " + String.valueOf(data[0] & 0xff) +
-												e.getMessage());
+									"Bad message type received: " + String.valueOf(data[0] & 0xff) +
+											e.getMessage());
 							return;
 						}
 						if (data.length < 3) {
@@ -397,7 +398,7 @@ public class UsbService extends Service
 	{
 		// This snippet will try to open the first encountered usb device connected, excluding usb root hubs
 		HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
-		Log.d("USB","findSerialPortDevce="+usbDevices.size());
+		Log.d(TAG,"findSerialPortDevce="+usbDevices.size());
 		if (!usbDevices.isEmpty())
 		{
 			boolean keep = true;
@@ -406,9 +407,10 @@ public class UsbService extends Service
 				device = entry.getValue();
 				int deviceVID = device.getVendorId();
 				int devicePID = device.getProductId();
-				Log.i("CCU_SERIAL", "USB Device VID: " + deviceVID);
-				Log.i("CCU_SERIAL", "USB Device PID: " + devicePID);
-				if (deviceVID == 0x0403 || deviceVID == 0x1027 || deviceVID == 1003)
+				Log.i(TAG, "USB Device VID: " + deviceVID);
+				Log.i(TAG, "USB Device PID: " + devicePID);
+				if (deviceVID == 0x0403 || deviceVID == 1003 ||
+				                    (deviceVID == DEVICE_ID_FTDI && UsbUtils.isBiskitMode(getApplicationContext())))
 				{
 					boolean success = grantRootPermissionToUSBDevice(device);
 					connection = usbManager.openDevice(device);
@@ -425,6 +427,7 @@ public class UsbService extends Service
 						UsbService.this.getApplicationContext().sendBroadcast(intent);
 						keep = false;
 					}
+					Log.d(TAG, "Opened Serial MODBUS device instance for "+deviceVID);
 				}
 				else
 				{
@@ -456,7 +459,7 @@ public class UsbService extends Service
 	{
 		IBinder b = ServiceManager.getService(Context.USB_SERVICE);
 		IUsbManager service = IUsbManager.Stub.asInterface(b);
-		Log.i("CCU_SERIAL", "Try connecting!");
+		Log.i(TAG, "Try connecting!");
 		// There is a device connected to our Android device. Try to open it as a Serial Port.
 		try
 		{
@@ -589,12 +592,12 @@ public class UsbService extends Service
 		this.mHandler = mHandler;
 	}
 
-    public boolean isConnected() {
-        return serialPortConnected;
-    }
+	public boolean isConnected() {
+		return serialPortConnected;
+	}
 
 
-    private enum SerialState
+	private enum SerialState
 	{
 		PARSE_INIT, ESC_BYTE_RCVD, SOF_BYTE_RCVD, LEN_BYTE_RCVD, ESC_BYTE_IN_DATA_RCVD, CRC_RCVD,
 		ESC_BYTE_AS_END_OF_PACKET_RCVD, BAD_PACKET, DATA_AVAILABLE
@@ -623,7 +626,7 @@ public class UsbService extends Service
 			{
 				if (serialPort.open())
 				{
-                    setDebug(false);
+					setDebug(false);
 					serialPortConnected = true;
 					serialPort.setBaudRate(BAUD_RATE);
 					serialPort.setDataBits(UsbSerialInterface.DATA_BITS_8);
@@ -642,11 +645,11 @@ public class UsbService extends Service
 					//
 					// Some Arduinos would need some sleep because firmware wait some time to know whether a new sketch is going
 					// to be uploaded or not
-                    try {
-                        sleep(2000); // sleep some. YMMV with different chips.
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+					try {
+						sleep(2000); // sleep some. YMMV with different chips.
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 					// Everything went as expected. Send an intent to MainActivity
 					Intent intent = new Intent(ACTION_USB_READY);
 					context.sendBroadcast(intent);

@@ -24,6 +24,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class HisSyncHandler
 {
@@ -34,12 +36,13 @@ public class HisSyncHandler
     CCUHsApi ccuHsApi;
     
     public boolean entitySyncRequired = false;
+    Lock syncLock = new ReentrantLock();
     
     public HisSyncHandler(CCUHsApi api) {
         ccuHsApi = api;
     }
     
-    public synchronized void sync() {
+    private void sync() {
         CcuLog.d(TAG, "doHisSync ->");
 
         HashMap site = CCUHsApi.getInstance().read("site");
@@ -70,6 +73,19 @@ public class HisSyncHandler
         }
 
         CcuLog.d(TAG,"<- doHisSync");
+    }
+    
+    public void syncData() {
+        if (syncLock.tryLock()) {
+            try {
+                sync();
+            }
+            finally {
+                syncLock.unlock();
+            }
+        } else {
+            CcuLog.d(TAG,"No need to start HisSync. Already in progress.");
+        }
     }
 
     private void syncHistorizedEquipPoints(boolean timeForQuarterHourSync) {

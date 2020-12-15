@@ -1013,7 +1013,7 @@ public class CCUHsApi
 
     public void syncHisData()
     {
-        hisSyncHandler.sync();
+        hisSyncHandler.syncData();
     }
 
     public boolean syncExistingSite(String siteId) {

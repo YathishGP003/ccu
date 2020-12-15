@@ -2,6 +2,8 @@ package a75f.io.logic.jobs;
 
 import android.util.Log;
 
+import org.joda.time.DateTime;
+
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -90,6 +92,13 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                     CCUHsApi.getInstance().syncHisData();
                 }
             }.start();
+    
+            DateTime now = new DateTime();
+            boolean timeForEntitySync = now.getMinuteOfDay() % 15 == 0 ? true : false;
+            if (timeForEntitySync) {
+                CCUHsApi.getInstance().scheduleSync();
+            }
+            
         }catch (Exception e){
             Log.d(L.TAG_CCU_JOB,"BuildingProcessJob Sync Exception = "+e.getMessage());
             e.printStackTrace();

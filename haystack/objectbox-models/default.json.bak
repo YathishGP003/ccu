@@ -10,23 +10,32 @@
       "properties": [
         {
           "id": "1:3695294132339087731",
-          "name": "id"
+          "name": "id",
+          "type": 6,
+          "flags": 1
         },
         {
           "id": "2:3721575554880413599",
-          "name": "rec"
+          "name": "rec",
+          "type": 9
         },
         {
           "id": "3:2636138725932829874",
-          "name": "date"
+          "name": "date",
+          "type": 6,
+          "flags": 4
         },
         {
           "id": "4:5458775097776216905",
-          "name": "val"
+          "name": "val",
+          "type": 8,
+          "flags": 2
         },
         {
           "id": "5:4375675092661972556",
-          "name": "syncStatus"
+          "name": "syncStatus",
+          "type": 1,
+          "flags": 4
         }
       ],
       "relations": []
@@ -38,74 +47,443 @@
       "properties": [
         {
           "id": "1:1266283906766086815",
-          "name": "id"
+          "name": "id",
+          "type": 6,
+          "flags": 1
         },
         {
           "id": "3:4972674601855791834",
-          "name": "mTitle"
+          "name": "mTitle",
+          "type": 9
         },
         {
           "id": "4:2586924490983167743",
-          "name": "mMessage"
+          "name": "mMessage",
+          "type": 9
         },
         {
           "id": "5:3279220949577218363",
-          "name": "mNotificationMsg"
+          "name": "mNotificationMsg",
+          "type": 9
         },
         {
           "id": "6:8256445436889612611",
-          "name": "mSeverity"
+          "name": "mSeverity",
+          "type": 5,
+          "flags": 2
         },
         {
           "id": "8:8688767729521073221",
-          "name": "startTime"
+          "name": "startTime",
+          "type": 6,
+          "flags": 4
         },
         {
           "id": "9:6508014023708824090",
-          "name": "endTime"
+          "name": "endTime",
+          "type": 6,
+          "flags": 4
         },
         {
           "id": "10:1223141086957328758",
-          "name": "isFixed"
+          "name": "isFixed",
+          "type": 1,
+          "flags": 4
         },
         {
           "id": "13:3554938844371872188",
-          "name": "ref"
+          "name": "ref",
+          "type": 9
         },
         {
           "id": "14:5199480498727618562",
-          "name": "deviceRef"
+          "name": "deviceRef",
+          "type": 9
         },
         {
           "id": "15:6784406268212841692",
-          "name": "siteRef"
+          "name": "siteRef",
+          "type": 9
         },
         {
           "id": "16:1166649113366590750",
-          "name": "syncStatus"
+          "name": "syncStatus",
+          "type": 1,
+          "flags": 4
         },
         {
           "id": "17:813217564508575276",
-          "name": "mEnabled"
+          "name": "mEnabled",
+          "type": 1,
+          "flags": 4
         },
         {
           "id": "18:7517296999905547159",
-          "name": "_id"
+          "name": "_id",
+          "type": 9
         },
         {
           "id": "19:1563815564009531725",
-          "name": "mAlertType"
+          "name": "mAlertType",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "3:4064082301962546987",
+      "lastPropertyId": "13:1941396072351035739",
+      "name": "EquipmentDevice",
+      "properties": [
+        {
+          "id": "1:7462841658618079894",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:193282389109791208",
+          "name": "modbusEquipIdId",
+          "type": 9
+        },
+        {
+          "id": "3:2098446980940211131",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "4:4917851139782356902",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "5:7542359199596803745",
+          "name": "equipType",
+          "type": 9
+        },
+        {
+          "id": "6:5567897934296808463",
+          "name": "manufacturer",
+          "type": 9
+        },
+        {
+          "id": "7:2870720425082122495",
+          "name": "modelNumbers",
+          "type": 9
+        },
+        {
+          "id": "8:2274886216555663084",
+          "name": "registers",
+          "type": 9
+        },
+        {
+          "id": "9:4066496411924061482",
+          "name": "slaveId",
+          "type": 5,
+          "flags": 4
+        },
+        {
+          "id": "10:6569885286861572178",
+          "name": "zoneRef",
+          "type": 9
+        },
+        {
+          "id": "11:8048130112155553562",
+          "name": "floorRef",
+          "type": 9
+        },
+        {
+          "id": "12:9199566280571570577",
+          "name": "equipRef",
+          "type": 9
+        },
+        {
+          "id": "13:1941396072351035739",
+          "name": "isPaired",
+          "type": 1,
+          "flags": 4
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "4:648221881845039292",
+      "lastPropertyId": "17:2171657581980711684",
+      "name": "Parameter",
+      "properties": [
+        {
+          "id": "1:5830113743805887764",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:5895045106779765636",
+          "name": "parameterId",
+          "type": 9
+        },
+        {
+          "id": "3:6822050883035132084",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "4:4327661987072712521",
+          "name": "startBit",
+          "type": 5,
+          "flags": 2
+        },
+        {
+          "id": "5:990129972778416636",
+          "name": "endBit",
+          "type": 5,
+          "flags": 2
+        },
+        {
+          "id": "6:4633236243768475267",
+          "name": "commands",
+          "type": 9
+        },
+        {
+          "id": "7:935228859204791124",
+          "name": "logicalPointTags",
+          "type": 9
+        },
+        {
+          "id": "8:2060094040120582244",
+          "name": "userIntentPointTags",
+          "type": 9
+        },
+        {
+          "id": "9:8112943168550047551",
+          "name": "conditions",
+          "type": 9
+        },
+        {
+          "id": "10:2172204557650419496",
+          "name": "displayInUiDefault",
+          "type": 1,
+          "flags": 4
+        },
+        {
+          "id": "11:1923871058791032913",
+          "name": "displayInUI",
+          "type": 1,
+          "flags": 4
+        },
+        {
+          "id": "12:7777315355788318979",
+          "name": "registerAddress",
+          "type": 5,
+          "flags": 4
+        },
+        {
+          "id": "13:4246681260524234415",
+          "name": "registerNumber",
+          "type": 9
+        },
+        {
+          "id": "14:2140280706724679473",
+          "name": "registerType",
+          "type": 9
+        },
+        {
+          "id": "15:4076360049162068206",
+          "name": "parameterDefinitionType",
+          "type": 9
+        },
+        {
+          "id": "16:7402968662724102846",
+          "name": "bitParamRange",
+          "type": 9
+        },
+        {
+          "id": "17:2171657581980711684",
+          "name": "bitParam",
+          "type": 5,
+          "flags": 2
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "5:5761946006575361571",
+      "lastPropertyId": "3:6077800632754336315",
+      "name": "Command",
+      "properties": [
+        {
+          "id": "1:2363385458572152555",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8832036881520845077",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:6077800632754336315",
+          "name": "bitValues",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "6:2989990805532220522",
+      "lastPropertyId": "6:276358405298364052",
+      "name": "Register",
+      "properties": [
+        {
+          "id": "1:3925332701500658299",
+          "name": "registerNumber",
+          "type": 9
+        },
+        {
+          "id": "2:7375516732196766852",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "3:2861490680873125749",
+          "name": "registerAddress",
+          "type": 5,
+          "flags": 4
+        },
+        {
+          "id": "4:130319211367863035",
+          "name": "registerType",
+          "type": 9
+        },
+        {
+          "id": "5:5321015336009918310",
+          "name": "parameterDefinitionType",
+          "type": 9
+        },
+        {
+          "id": "6:276358405298364052",
+          "name": "parameters",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "7:626411761062565052",
+      "lastPropertyId": "5:4945600181514521412",
+      "name": "ModbusEquipsInfo",
+      "properties": [
+        {
+          "id": "1:6510631283666954357",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:5243541122177632034",
+          "name": "zoneRef",
+          "type": 9
+        },
+        {
+          "id": "3:3313048253775637774",
+          "name": "equipRef",
+          "type": 9
+        },
+        {
+          "id": "4:9178933363927155688",
+          "name": "modbusEquipId",
+          "type": 9
+        },
+        {
+          "id": "5:4945600181514521412",
+          "name": "slaveId",
+          "type": 5,
+          "flags": 4
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "8:2479345401963924061",
+      "lastPropertyId": "3:1374497228891488550",
+      "name": "Condition",
+      "properties": [
+        {
+          "id": "1:2764145130533348054",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6713007639378923143",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:1374497228891488550",
+          "name": "bitValues",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "9:5215812911700633276",
+      "lastPropertyId": "3:8664936322650068707",
+      "name": "UserIntentPointTags",
+      "properties": [
+        {
+          "id": "1:6112388889869928542",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6601199705488134713",
+          "name": "tagName",
+          "type": 9
+        },
+        {
+          "id": "3:8664936322650068707",
+          "name": "tagValue",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "10:2828061373610410341",
+      "lastPropertyId": "3:1786031099576536878",
+      "name": "LogicalPointTags",
+      "properties": [
+        {
+          "id": "1:4563629527339351839",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:1857454460178543622",
+          "name": "tagName",
+          "type": 9
+        },
+        {
+          "id": "3:1786031099576536878",
+          "name": "tagValue",
+          "type": 9
         }
       ],
       "relations": []
     }
   ],
-  "lastEntityId": "2:6756934624209419492",
+  "lastEntityId": "10:2828061373610410341",
   "lastIndexId": "3:6552647423424257173",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
-  "modelVersion": 4,
-  "modelVersionParserMinimum": 4,
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
   "retiredEntityUids": [],
   "retiredIndexUids": [
     5977877711410822094,

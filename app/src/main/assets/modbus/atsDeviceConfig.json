@@ -1,0 +1,1147 @@
+{
+  "modbusEquipId (_id)": "5f1f30ad18bcbf4f1d9a2fff",
+  "name": "Automatic Transfer Switch (ATS)",
+  "description": "This document contains the configuration necessary to automatic transfer switch",
+  "equipType": "ATS",
+  "manufacturer": "ASCO",
+  "modelNumbers": [
+    "ASCO"
+  ],
+  "registers": [
+    {
+      "registerAddress": 14,
+      "registerNumber": "40015",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2111",
+          "name": "Main on Normal",
+          "startBit": 0,
+          "endBit": 15,
+          "bitParam": 0,
+          "conditions": [
+            {
+              "name": "Off",
+              "bitValues": 0
+            },
+            {
+              "name": "On",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "ats"
+            },
+            {
+              "tagName": "main"
+            },
+            {
+              "tagName": "on"
+            },
+            {
+              "tagName": "normal"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 14,
+      "registerNumber": "40015",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2112",
+          "name": "Main on Emergency",
+          "startBit": 0,
+          "endBit": 15,
+          "bitParam": 1,
+          "displayInUiDefault": false,
+          "conditions": [
+            {
+              "name": "Off",
+              "bitValues": 0
+            },
+            {
+              "name": "On",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "ats"
+            },
+            {
+              "tagName": "main"
+            },
+            {
+              "tagName": "on"
+            },
+            {
+              "tagName": "emergency"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 14,
+      "registerNumber": "40015",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2113",
+          "name": "Aux on Normal",
+          "startBit": 0,
+          "endBit": 15,
+          "bitParam": 2,
+          "displayInUiDefault": false,
+          "conditions": [
+            {
+              "name": "Off",
+              "bitValues": 0
+            },
+            {
+              "name": "On",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "ats"
+            },
+            {
+              "tagName": "aux"
+            },
+            {
+              "tagName": "on"
+            },
+            {
+              "tagName": "normal"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 14,
+      "registerNumber": "40015",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2114",
+          "name": "Aux on Emergency",
+          "startBit": 0,
+          "endBit": 15,
+          "bitParam": 3,
+          "conditions": [
+            {
+              "name": "Off",
+              "bitValues": 0
+            },
+            {
+              "name": "On",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "ats"
+            },
+            {
+              "tagName": "aux"
+            },
+            {
+              "tagName": "on"
+            },
+            {
+              "tagName": "emergency"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 14,
+      "registerNumber": "40015",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2115",
+          "name": "Normal Source Available",
+          "startBit": 0,
+          "endBit": 15,
+          "bitParam": 4,
+          "conditions": [
+            {
+              "name": "Off",
+              "bitValues": 0
+            },
+            {
+              "name": "On",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "ats"
+            },
+            {
+              "tagName": "normal"
+            },
+            {
+              "tagName": "source"
+            },
+            {
+              "tagName": "available"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 14,
+      "registerNumber": "40015",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2105",
+          "name": "Emergency Source Available",
+          "startBit": 0,
+          "endBit": 15,
+          "bitParam": 5,
+          "conditions": [
+            {
+              "name": "Off",
+              "bitValues": 0
+            },
+            {
+              "name": "On",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "ats"
+            },
+            {
+              "tagName": "emergency"
+            },
+            {
+              "tagName": "source"
+            },
+            {
+              "tagName": "available"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 25,
+      "registerNumber": "40026",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "boolean",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2116",
+          "name": "Transfer Switch Type (OTTS, DTTS)",
+          "startBit": 0,
+          "endBit": 15,
+          "bitParamRange": "3-4",
+          "conditions": [
+            {
+              "name": "OTTS",
+              "bitValues": 0
+            },
+            {
+              "name": "DTTS",
+              "bitValues": 1
+            },
+            {
+              "name": "OTTS",
+              "bitValues": 3
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "ats"
+            },
+            {
+              "tagName": "transfer"
+            },
+            {
+              "tagName": "switch"
+            },
+            {
+              "tagName": "type"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 44,
+      "registerNumber": "40045",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "integer",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2117",
+          "name": "Event Number",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "ats"
+            },
+            {
+              "tagName": "event"
+            },
+            {
+              "tagName": "number"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "minVal",
+              "value": 1
+            },
+            {
+              "tagName": "maxVal",
+              "value": 300
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 1
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "sp"
+            }
+          ],
+          "userIntentPointTags": [
+            {
+              "tagName": "ats"
+            },
+            {
+              "tagName": "event"
+            },
+            {
+              "tagName": "number"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "minVal",
+              "value": 1
+            },
+            {
+              "tagName": "maxVal",
+              "value": 300
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 1
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "writable"
+            },
+            {
+              "tagName": "sp"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 45,
+      "registerNumber": "40046",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "integer",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2118",
+          "name": "Event Year",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "ats"
+            },
+            {
+              "tagName": "event"
+            },
+            {
+              "tagName": "year"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 99
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 1
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 46,
+      "registerNumber": "40047",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "integer",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2119",
+          "name": "Event Month",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "ats"
+            },
+            {
+              "tagName": "event"
+            },
+            {
+              "tagName": "month"
+            },
+            {
+              "tagName": "minVal",
+              "value": 1
+            },
+            {
+              "tagName": "maxVal",
+              "value": 12
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 1
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 47,
+      "registerNumber": "40048",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "integer",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2120",
+          "name": "Event day of Month",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "ats"
+            },
+            {
+              "tagName": "eventDay"
+            },
+            {
+              "tagName": "month"
+            },
+            {
+              "tagName": "minVal",
+              "value": 1
+            },
+            {
+              "tagName": "maxVal",
+              "value": 31
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 1
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 49,
+      "registerNumber": "40050",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "integer",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2121",
+          "name": "Event Hour",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "ats"
+            },
+            {
+              "tagName": "event"
+            },
+            {
+              "tagName": "hour"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 23
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 1
+            },
+            {
+              "tagName": "unit",
+              "value": "hour"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 50,
+      "registerNumber": "40051",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "integer",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2122",
+          "name": "Event Minute",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "ats"
+            },
+            {
+              "tagName": "event"
+            },
+            {
+              "tagName": "minute"
+            },
+            {
+              "tagName": "minVal",
+              "value": 0
+            },
+            {
+              "tagName": "maxVal",
+              "value": 59
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 1
+            },
+            {
+              "tagName": "unit",
+              "value": "minutes"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 52,
+      "registerNumber": "40053",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "integer",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2123",
+          "name": "Event Type",
+          "startBit": 0,
+          "endBit": 15,
+          "conditions": [
+            {
+              "name": "Reserved",
+              "bitValues": 0
+            },
+            {
+              "name": "Engine Start",
+              "bitValues": 1
+            },
+            {
+              "name": "Engine Stop",
+              "bitValues": 2
+            },
+            {
+              "name": "Transfer Normal to Emergency",
+              "bitValues": 3
+            },
+            {
+              "name": "Transfer Emergency to Normal",
+              "bitValues": 4
+            },
+            {
+              "name": "Emergency Source Accepted",
+              "bitValues": 5
+            },
+            {
+              "name": "Emergency Source Not Accepted",
+              "bitValues": 6
+            },
+            {
+              "name": "Normal Source Accepted",
+              "bitValues": 7
+            },
+            {
+              "name": "Normal Source Not Accepted",
+              "bitValues": 8
+            },
+            {
+              "name": "Transfer Abort",
+              "bitValues": 9
+            },
+            {
+              "name": "Reserved",
+              "bitValues": 10
+            },
+            {
+              "name": "Reserved",
+              "bitValues": 11
+            },
+            {
+              "name": "DTTS Load Connected",
+              "bitValues": 12
+            },
+            {
+              "name": "DTTS Load Disconnected",
+              "bitValues": 13
+            },
+            {
+              "name": "Not in Automatic",
+              "bitValues": 14
+            },
+            {
+              "name": "Return to Automatic",
+              "bitValues": 15
+            },
+            {
+              "name": "Alarm Reset",
+              "bitValues": 16
+            },
+            {
+              "name": "Timer 2B Bypass",
+              "bitValues": 17
+            },
+            {
+              "name": "Timer 3A Bypass",
+              "bitValues": 18
+            },
+            {
+              "name": "Timer 31 Bypass",
+              "bitValues": 19
+            },
+            {
+              "name": "Initial Switch Position (on boot up)",
+              "bitValues": 20
+            },
+            {
+              "name": "Clear Events Data Base",
+              "bitValues": 21
+            },
+            {
+              "name": "Clear Statistics Data Base",
+              "bitValues": 22
+            },
+            {
+              "name": "Clock Set",
+              "bitValues": 23
+            },
+            {
+              "name": "DST Turned ON",
+              "bitValues": 24
+            },
+            {
+              "name": "DST Turned OFF",
+              "bitValues": 25
+            },
+            {
+              "name": "In-Phase Turned ON",
+              "bitValues": 26
+            },
+            {
+              "name": "In-Phase Turned OFF",
+              "bitValues": 27
+            },
+            {
+              "name": "Failure to Accept Timer",
+              "bitValues": 28
+            },
+            {
+              "name": "NVM Defaults Loaded",
+              "bitValues": 29
+            },
+            {
+              "name": "Upload Mode Entered",
+              "bitValues": 30
+            },
+            {
+              "name": "Firmware Updated",
+              "bitValues": 31
+            },
+            {
+              "name": "OTTS Type Set",
+              "bitValues": 32
+            },
+            {
+              "name": "DTTS Type Set",
+              "bitValues": 33
+            },
+            {
+              "name": "Password Changed",
+              "bitValues": 34
+            },
+            {
+              "name": "Transfer Committed",
+              "bitValues": 35
+            },
+            {
+              "name": "Local Transfer Override",
+              "bitValues": 36
+            },
+            {
+              "name": "Alarm transfer fail",
+              "bitValues": 37
+            },
+            {
+              "name": "Alarm position error",
+              "bitValues": 38
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "ats"
+            },
+            {
+              "tagName": "event"
+            },
+            {
+              "tagName": "type"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 53,
+      "registerNumber": "40054",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "integer",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2124",
+          "name": "Event Cause",
+          "startBit": 0,
+          "endBit": 15,
+          "conditions": [
+            {
+              "name": "N/A - No Event Cause",
+              "bitValues": 0
+            },
+            {
+              "name": "Load Shed",
+              "bitValues": 1
+            },
+            {
+              "name": "Normal Source Accepted",
+              "bitValues": 2
+            },
+            {
+              "name": "Manual Transfer",
+              "bitValues": 3
+            },
+            {
+              "name": "Test 5",
+              "bitValues": 4
+            },
+            {
+              "name": "Test 17",
+              "bitValues": 5
+            },
+            {
+              "name": "Serial 17",
+              "bitValues": 6
+            },
+            {
+              "name": "Engine Exercise",
+              "bitValues": 7
+            },
+            {
+              "name": "Emergency Source Not Accepted",
+              "bitValues": 8
+            },
+            {
+              "name": "Normal Under Voltage",
+              "bitValues": 9
+            },
+            {
+              "name": "Normal Over Voltage",
+              "bitValues": 10
+            },
+            {
+              "name": "Normal Under frequency",
+              "bitValues": 11
+            },
+            {
+              "name": "Normal Over frequency",
+              "bitValues": 12
+            },
+            {
+              "name": "N/A - No Event Cause",
+              "bitValues": 13
+            },
+            {
+              "name": "N/A - No Event Cause",
+              "bitValues": 14
+            },
+            {
+              "name": "Emergency Under voltage",
+              "bitValues": 15
+            },
+            {
+              "name": "Emergency Over voltage",
+              "bitValues": 16
+            },
+            {
+              "name": "Emergency Under frequency",
+              "bitValues": 17
+            },
+            {
+              "name": "Emergency Over frequency",
+              "bitValues": 18
+            },
+            {
+              "name": "N/A - No Event Cause",
+              "bitValues": 19
+            },
+            {
+              "name": "N/A - No Event Cause",
+              "bitValues": 20
+            },
+            {
+              "name": "Feature 6 NE Aborts Transfer",
+              "bitValues": 21
+            },
+            {
+              "name": "N/A - No Event Cause",
+              "bitValues": 22
+            },
+            {
+              "name": "N/A - No Event Cause",
+              "bitValues": 23
+            },
+            {
+              "name": "Position Error",
+              "bitValues": 24
+            },
+            {
+              "name": "Manual Mode Enabled",
+              "bitValues": 25
+            },
+            {
+              "name": "Feature 34B Activated",
+              "bitValues": 26
+            },
+            {
+              "name": "Test Cancel",
+              "bitValues": 27
+            },
+            {
+              "name": "Local User",
+              "bitValues": 28
+            },
+            {
+              "name": "Remote User",
+              "bitValues": 29
+            },
+            {
+              "name": "Switch on normal",
+              "bitValues": 30
+            },
+            {
+              "name": "Switch on emergency",
+              "bitValues": 31
+            },
+            {
+              "name": "Switch on center off (disconnected)",
+              "bitValues": 32
+            },
+            {
+              "name": "to",
+              "bitValues": 33
+            },
+            {
+              "name": "- 001",
+              "bitValues": 34
+            },
+            {
+              "name": "- 002",
+              "bitValues": 35
+            },
+            {
+              "name": "- 003",
+              "bitValues": 36
+            },
+            {
+              "name": "- 004",
+              "bitValues": 37
+            },
+            {
+              "name": "- 005",
+              "bitValues": 38
+            },
+            {
+              "name": "- 006",
+              "bitValues": 39
+            },
+            {
+              "name": "- 007",
+              "bitValues": 39
+            },
+            {
+              "name": "- 008",
+              "bitValues": 40
+            },
+            {
+              "name": "- 009",
+              "bitValues": 41
+            },
+            {
+              "name": "Acknowledge alarms",
+              "bitValues": 42
+            },
+            {
+              "name": "-010",
+              "bitValues": 43
+            },
+            {
+              "name": "-011",
+              "bitValues": 44
+            },
+            {
+              "name": "-012",
+              "bitValues": 45
+            },
+            {
+              "name": "-013",
+              "bitValues": 46
+            },
+            {
+              "name": "-014",
+              "bitValues": 47
+            },
+            {
+              "name": "-015",
+              "bitValues": 48
+            },
+            {
+              "name": "-016",
+              "bitValues": 49
+            },
+            {
+              "name": "-017",
+              "bitValues": 50
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "ats"
+            },
+            {
+              "tagName": "event"
+            },
+            {
+              "tagName": "cause"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -418,7 +418,7 @@ public class CCUTagsDb extends HServer {
         tagsMap.put(id.toVal(), b.toDict());
         return id.toCode();
     }
-    
+
     public void updatePoint(Point p, String i) {
         HDictBuilder b = new HDictBuilder()
                              .add("id", HRef.copy(i))
@@ -439,15 +439,15 @@ public class CCUTagsDb extends HServer {
         if (p.getTunerGroup() != null) b.add("tunerGroup",p.getTunerGroup());
         if (p.getHisInterpolate() != null) b.add("hisInterpolate",p.getHisInterpolate());
         if (p.getShortDis() != null) b.add("shortDis",p.getShortDis());
-        
+
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-        
+
         HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
     }
-    
+
     public String addPoint(RawPoint p) {
         HDictBuilder b = new HDictBuilder()
                 .add("id", HRef.make(UUID.randomUUID().toString()))
@@ -467,6 +467,13 @@ public class CCUTagsDb extends HServer {
         if (p.getMinVal() != null) b.add("minVal",Double.parseDouble(p.getMinVal()));
         if (p.getMaxVal() != null) b.add("maxVal",Double.parseDouble(p.getMaxVal()));
         
+        if (p.getRegisterAddress() != null) b.add("registerAddr", p.getRegisterAddress());
+        if (p.getRegisterNumber() != null) b.add("registerNumber", p.getRegisterNumber());
+        if (p.getStartBit() != null) b.add("startBit", p.getStartBit());
+        if (p.getEndBit() != null) b.add("endBit", p.getEndBit());
+        if (p.getRegisterType() != null) b.add("registerType", p.getRegisterType());
+        if (p.getParameterId() != null) b.add("parameterId", p.getParameterId());
+
         for (String m : p.getMarkers()) {
             b.add(m);
         }
@@ -493,6 +500,13 @@ public class CCUTagsDb extends HServer {
         if (p.getShortDis() != null) b.add("shortDis",p.getShortDis());
         if (p.getMinVal() != null) b.add("minVal",Double.parseDouble(p.getMinVal()));
         if (p.getMaxVal() != null) b.add("maxVal",Double.parseDouble(p.getMaxVal()));
+    
+        if (p.getRegisterAddress() != null) b.add("registerAddr", p.getRegisterAddress());
+        if (p.getRegisterNumber() != null) b.add("registerNumber", p.getRegisterNumber());
+        if (p.getStartBit() != null) b.add("startBit", p.getStartBit());
+        if (p.getEndBit() != null) b.add("endBit", p.getEndBit());
+        if (p.getRegisterType() != null) b.add("registerType", p.getRegisterType());
+        if (p.getParameterId() != null) b.add("parameterId", p.getParameterId());
         for (String m : p.getMarkers()) {
             b.add(m);
         }
@@ -512,7 +526,7 @@ public class CCUTagsDb extends HServer {
                                  .add("kind", p.getKind() == null ? "Number" : p.getKind());
                 
         if (p.getUnit() != null) b.add("unit", p.getUnit());
-        
+
         for (String m : p.getMarkers()) {
             b.add(m);
         }
@@ -892,8 +906,6 @@ public class CCUTagsDb extends HServer {
         hisQuery.equal(HisItem_.rec, pointId)
                 .equal(HisItem_.syncStatus, false)
                 .orderDesc(HisItem_.date);
-
-        CcuLog.d("CCU_HS", "Finding unsynced items for point ID " + pointId);
 
         List<HisItem> hisItems = hisQuery.build().find();
 

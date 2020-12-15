@@ -1,0 +1,99 @@
+package a75f.io.device.modbus;
+
+import android.util.Log;
+
+import com.x75f.modbus4j.msg.ModbusRequest;
+import com.x75f.modbus4j.msg.ReadCoilsRequest;
+import com.x75f.modbus4j.msg.ReadDiscreteInputsRequest;
+import com.x75f.modbus4j.msg.ReadHoldingRegistersRequest;
+import com.x75f.modbus4j.msg.ReadInputRegistersRequest;
+import com.x75f.modbus4j.msg.WriteCoilRequest;
+import com.x75f.modbus4j.msg.WriteRegisterRequest;
+import com.x75f.modbus4j.serial.rtu.RtuMessageRequest;
+
+import a75f.io.api.haystack.modbus.Register;
+import a75f.io.device.mesh.LSerial;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
+
+public class LModbus {
+    
+    public static final String MODBUS_REGISTER_DISCRETE_INPUT = "discreteInput";
+    public static final String MODBUS_REGISTER_HOLDING = "holdingRegister";
+    public static final String MODBUS_REGISTER_INPUT = "inputRegister";
+    public static final String MODBUS_REGISTER_READ_COIL = "readCoil";
+    public static final String MODBUS_REGISTER_WRITE_COIL = "writeCoil";
+    
+    
+    
+    private static final int SERIAL_COMM_TIMEOUT_MS = 1000;
+    private static SerialCommLock modbusCommLock = new SerialCommLock();
+    
+    public static SerialCommLock getModbusCommLock() {
+        return modbusCommLock;
+    }
+
+    public static byte[] getModbusData(Short slaveid, String registerType, int registerAddr, int numberOfRegisters){
+            ModbusRequest request;
+            RtuMessageRequest rtuMessageRequest;
+            try {
+                 switch (registerType) {
+                    case MODBUS_REGISTER_READ_COIL:
+                         request = new ReadCoilsRequest(slaveid, registerAddr, numberOfRegisters);
+                         rtuMessageRequest = new RtuMessageRequest(request);
+                         return rtuMessageRequest.getMessageData();
+                    case MODBUS_REGISTER_DISCRETE_INPUT:
+                         request = new ReadDiscreteInputsRequest(slaveid, registerAddr, numberOfRegisters);
+                         rtuMessageRequest = new RtuMessageRequest(request);
+                         return rtuMessageRequest.getMessageData();
+                    case MODBUS_REGISTER_HOLDING:
+                         request = new ReadHoldingRegistersRequest(slaveid, registerAddr, numberOfRegisters);
+                         rtuMessageRequest = new RtuMessageRequest(request);
+                         return rtuMessageRequest.getMessageData();
+                    case MODBUS_REGISTER_INPUT:
+                        request = new ReadInputRegistersRequest(slaveid,registerAddr, numberOfRegisters);
+                        rtuMessageRequest = new RtuMessageRequest(request);
+                        return rtuMessageRequest.getMessageData();
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        return null;
+    }
+    
+    /**
+     * This may be done asynchronously.But Modbus response does not contain the register address we are reading.
+     * Hence for now, wait until the response is received.
+     * */
+    
+    public static synchronized void readRegister(Short slaveId, Register register, int offset) {
+        CcuLog.d(L.TAG_CCU_MODBUS,"Read Register "+register.toString());
+        byte[] requestData = LModbus.getModbusData(slaveId,
+                                                   register.registerType,
+                                                   register.registerAddress,
+                                                   offset);
+        LSerial.getInstance().sendSerialToModbus(requestData);
+        LModbus.getModbusCommLock().lock(register, SERIAL_COMM_TIMEOUT_MS);
+    }
+    
+    public static synchronized void writeRegister(int slaveId, Register register, int writeValue) {
+        CcuLog.d(L.TAG_CCU_MODBUS, "writeRegister Register " + register.toString()+" writeValue "+writeValue);
+        try {
+            ModbusRequest request;
+            if (register.getRegisterType().equals(MODBUS_REGISTER_HOLDING)) {
+                request = new WriteRegisterRequest(slaveId, register.getRegisterAddress(), writeValue);
+            } else if (register.getRegisterType().equals(MODBUS_REGISTER_DISCRETE_INPUT)) {
+                request = new WriteCoilRequest(slaveId, register.getRegisterAddress(), writeValue > 0 ? true : false);
+            } else {
+                CcuLog.d(L.TAG_CCU_MODBUS,
+                         "Write cannot be executed : Invalid Register Type "+register.getRegisterType());
+                return;
+            }
+            RtuMessageRequest rtuMessageRequest = new RtuMessageRequest(request);
+            LSerial.getInstance().sendSerialToModbus(rtuMessageRequest.getMessageData());
+            LModbus.getModbusCommLock().lock(register, SERIAL_COMM_TIMEOUT_MS);
+        } catch (Exception e) {
+            Log.d(L.TAG_CCU_MODBUS, "Modbus write failed. "+register.getRegisterAddress()+" : "+writeValue+" "+e.getMessage());
+        }
+    }
+}

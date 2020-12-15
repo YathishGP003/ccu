@@ -14,13 +14,14 @@
             android:layout_height="30dp"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            android:text="Select Message"/>
+            android:text="Message"/>
         <Spinner
             android:id="@+id/msgSpinner"
             android:layout_width="wrap_content"
             android:layout_height="match_parent">
 
         </Spinner>
+
         <Space
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -30,13 +31,69 @@
             android:id="@+id/selectChannel"
             android:layout_width="wrap_content"
             android:layout_height="30dp"
-            android:text="Select Channel"/>
+            android:text="Slave"/>
         <Spinner
             android:id="@+id/channelSpinner"
             android:layout_width="wrap_content"
             android:layout_height="match_parent">
+        </Spinner>
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Start Address"
+            android:gravity="center_horizontal"/>
+        <EditText
+            android:id="@+id/addrVal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/border"
+            android:layout_weight="1"/>
+        
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:id="@+id/selectRegCount"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:text="Register Count"/>
+        <Spinner
+            android:id="@+id/registerSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
 
         </Spinner>
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:id="@+id/textVal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Val"
+            android:visibility="gone"
+            android:gravity="center_horizontal"/>
+        <EditText
+            android:id="@+id/writeVal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/border"
+            android:visibility="gone"
+            android:layout_weight="1"/>
+
         <Space
             android:layout_width="0dp"
             android:layout_height="0dp"

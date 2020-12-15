@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.MeshNetwork;
+import a75f.io.device.modbus.ModbusNetwork;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.watchdog.WatchdogMonitor;
@@ -15,7 +16,7 @@ import a75f.io.logic.watchdog.WatchdogMonitor;
 public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
 {
     DeviceNetwork deviceNw;
-    
+    ModbusNetwork modbusNetwork;
     boolean watchdogMonitor = false;
     
     @Override
@@ -32,6 +33,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
     {
         super();
         deviceNw = new MeshNetwork();//TODO- TEMP
+        modbusNetwork = new ModbusNetwork();
     }
     
     public void doJob()
@@ -52,5 +54,9 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
         deviceNw.sendMessage();
         deviceNw.sendSystemControl();
         CcuLog.d(L.TAG_CCU_JOB, "<-DeviceUpdateJob ");
+
+        //Todo tobe tested with real device setup
+        modbusNetwork.sendMessage();
+        modbusNetwork.sendSystemControl();
     }
 }

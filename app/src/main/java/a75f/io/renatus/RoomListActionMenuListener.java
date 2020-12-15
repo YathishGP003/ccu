@@ -15,6 +15,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.bacnet.BACnetUtils;
 import a75f.io.logic.L;
+import a75f.io.modbusbox.EquipsManager;
 
 
 class RoomListActionMenuListener implements MultiChoiceModeListener
@@ -107,6 +108,7 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 			CCUHsApi.getInstance().deleteEntityTree(sZone.getId());
 			CCUHsApi.getInstance().saveTagsData();
 			floorPlanActivity.refreshScreen();
+			EquipsManager.getInstance().deleteEquipByZone(sZone.getId());
 		}
 		new AsyncTask<String, Void, Void>() {
 			@Override

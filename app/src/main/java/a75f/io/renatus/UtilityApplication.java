@@ -84,9 +84,11 @@ import a75f.io.device.mesh.LSerial;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.watchdog.Watchdog;
+import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.registration.InstallerOptions;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.usbserial.SerialEvent;
+import a75f.io.usbserial.UsbModbusService;
 import a75f.io.usbserial.UsbService;
 
 
@@ -122,6 +124,10 @@ public abstract class UtilityApplication extends Application {
                     NotificationHandler.setCMConnectionStatus(false);
                     Toast.makeText(context, "USB disconnected", Toast.LENGTH_SHORT).show();
                     break;
+                case UsbModbusService.ACTION_USB_MODBUS_DISCONNECTED: // USB DISCONNECTED
+                    //NotificationHandler.setCMConnectionStatus(false);
+                    Toast.makeText(context, "USB Modbus disconnected", Toast.LENGTH_SHORT).show();
+                    break;
                 case UsbService.ACTION_USB_NOT_SUPPORTED: // USB NOT SUPPORTED
                     NotificationHandler.setCMConnectionStatus(false);
                     Toast.makeText(context, "USB device not supported", Toast.LENGTH_SHORT).show();
@@ -131,6 +137,7 @@ public abstract class UtilityApplication extends Application {
     };
 
     private UsbService usbService;
+    private UsbModbusService usbModbusService;
 
     private DeviceUpdateJob deviceUpdateJob;
     private static BACnetUpdateJob baCnetUpdateJob;
@@ -159,6 +166,28 @@ public abstract class UtilityApplication extends Application {
             usbService = null;
         }
     };
+    
+    private final ServiceConnection usbModbusConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName arg0, IBinder arg1) {
+            try {
+                Log.d(LOG_PREFIX, "utility Application -" + arg1.isBinderAlive() + "," + arg1.toString() + "," + arg0.getClassName() + "," + arg1.getInterfaceDescriptor());
+                if (arg1.isBinderAlive()) {
+                    //Todo : modbus USB Serial to tested with real device
+                    usbModbusService = ((UsbModbusService.UsbBinder) arg1).getService();
+                    LSerial.getInstance().setModbusUSBService(usbModbusService);
+                    usbModbusService.setHandler(null);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            usbModbusService = null;
+        }
+    };
 
 
     @Override
@@ -167,9 +196,19 @@ public abstract class UtilityApplication extends Application {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         Globals.getInstance().setApplicationContext(this);
         AlertManager.getInstance(this).setApplicationContext(this);
+
+        //Modbus EquipmendManager
+        EquipsManager.getInstance(this).setApplicationContext(this);
+
         setUsbFilters();  // Start listening notifications from UsbService
         startService(new Intent(this, OTAUpdateHandlerService.class));  // Start OTA update event + timer handler service
-        startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it
+        startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and
+        // Bind it
+    
+        startUsbModbusService(UsbModbusService.class, usbModbusConnection, null); // Start UsbService(if it was not
+        // started before)
+        // and Bind it
+        
         EventBus.getDefault().register(this);
 
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -192,12 +231,29 @@ public abstract class UtilityApplication extends Application {
         filter.addAction(UsbService.ACTION_USB_DISCONNECTED);
         filter.addAction(UsbService.ACTION_USB_NOT_SUPPORTED);
         filter.addAction(UsbService.ACTION_USB_PERMISSION_NOT_GRANTED);
+        filter.addAction(UsbModbusService.ACTION_USB_MODBUS_DISCONNECTED);
         registerReceiver(mUsbReceiver, filter);
     }
 
 
     private void startService(Class<?> service, ServiceConnection serviceConnection, Bundle extras) {
         if (!UsbService.SERVICE_CONNECTED) {
+            Intent startService = new Intent(this, service);
+            if (extras != null && !extras.isEmpty()) {
+                Set<String> keys = extras.keySet();
+                for (String key : keys) {
+                    String extra = extras.getString(key);
+                    startService.putExtra(key, extra);
+                }
+            }
+            this.startService(startService);
+        }
+        Intent bindingIntent = new Intent(this, service);
+        bindService(bindingIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+    
+    private void startUsbModbusService(Class<?> service, ServiceConnection serviceConnection, Bundle extras) {
+        if (!UsbModbusService.SERVICE_CONNECTED) {
             Intent startService = new Intent(this, service);
             if (extras != null && !extras.isEmpty()) {
                 Set<String> keys = extras.keySet();

@@ -1,0 +1,737 @@
+{
+  "modbusEquipId (_id)": "5f1f30ad18beef4f1d9a222",
+  "name": "UPS -30k",
+  "description": "This document contains the configuration necessary to ups-30kva",
+  "equipType": "UPS30K",
+  "manufacturer": "Vertiv",
+  "modelNumbers": [
+    "ITA2"
+  ],
+  "registers": [
+    {
+      "registerAddress": 1080,
+      "registerNumber": "41081",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "boolean",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a21a19",
+          "name": "UPS status",
+          "startBit": 0,
+          "endBit": 15,
+          "bitParamRange": "0-1",
+          "conditions": [
+            {
+              "name": "No Power Supply",
+              "bitValues": "0"
+            },
+            {
+              "name": "Internal Bypass Supply",
+              "bitValues": "1"
+            },
+            {
+              "name": "UPS Intervention Supply",
+              "bitValues": "2"
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "status"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 1177,
+      "registerNumber": "41178",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18beef4f1d9a2a02",
+          "name": "Battery voltage (pos Voltage - Charging)",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "battery"
+            },
+            {
+              "tagName": "voltage"
+            },
+            {
+              "tagName": "pos"
+            },
+            {
+              "tagName": "charge"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 1180,
+      "registerNumber": "41181",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18beef4f1d9a2102",
+          "name": "Battery Voltage (neg Voltage - Discharging)",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "battery"
+            },
+            {
+              "tagName": "voltage"
+            },
+            {
+              "tagName": "neg"
+            },
+            {
+              "tagName": "discharge"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 1202,
+      "registerNumber": "41203",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18beef4f1d9a2105",
+          "name": "Battery total discharge time",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "battery"
+            },
+            {
+              "tagName": "total"
+            },
+            {
+              "tagName": "discharge"
+            },
+            {
+              "tagName": "time"
+            },
+            {
+              "tagName": "unit",
+              "value": "seconds"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 1178,
+      "registerNumber": "41179",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18beef4f1d9a2105",
+          "name": "Battery charging current",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "battery"
+            },
+            {
+              "tagName": "charging"
+            },
+            {
+              "tagName": "current"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "A"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 1181,
+      "registerNumber": "41182",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18beef4f1d9a2106",
+          "name": "Battery Discharging Current",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "battery"
+            },
+            {
+              "tagName": "discharging"
+            },
+            {
+              "tagName": "current"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "A"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 1032,
+      "registerNumber": "41033",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18beef4f1d9a2108",
+          "name": "UPS in maintenance",
+          "startBit": 32,
+          "endBit": 47,
+          "bitParam": 44,
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Abnormal",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "maintenance"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 1030,
+      "registerNumber": "41031",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18beef4f1d9a2109",
+          "name": "Rectifier failure alarm",
+          "startBit": 0,
+          "endBit": 15,
+          "bitParam": 15,
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Abnormal",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "rectifier"
+            },
+            {
+              "tagName": "failure"
+            },
+            {
+              "tagName": "alarm"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 1031,
+      "registerNumber": "41032",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18beef4f1d9a2120",
+          "name": "Inverter failure alarm",
+          "startBit": 16,
+          "endBit": 31,
+          "bitParam": 17,
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Abnormal",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "inverter"
+            },
+            {
+              "tagName": "failure"
+            },
+            {
+              "tagName": "alarm"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 1033,
+      "registerNumber": "41034",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18beef4f1d9a2121",
+          "name": "Battery discharge alarm",
+          "startBit": 48,
+          "endBit": 63,
+          "bitParam": 52,
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Abnormal",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "battery"
+            },
+            {
+              "tagName": "discharge"
+            },
+            {
+              "tagName": "alarm"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 1031,
+      "registerNumber": "41032",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18beef4f1d9a2122",
+          "name": "Low battery warning alarm",
+          "startBit": 16,
+          "endBit": 31,
+          "bitParam": 27,
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Abnormal",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "low"
+            },
+            {
+              "tagName": "battery"
+            },
+            {
+              "tagName": "warning"
+            },
+            {
+              "tagName": "alarm"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 1031,
+      "registerNumber": "41032",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18beef4f1d9a2124",
+          "name": "Battery disconnected alarm",
+          "startBit": 16,
+          "endBit": 31,
+          "bitParam": 16,
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Abnormal",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "battery"
+            },
+            {
+              "tagName": "disconnected"
+            },
+            {
+              "tagName": "alarm"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 1032,
+      "registerNumber": "41033",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18beef4f1d9a2126",
+          "name": "Fan failure alarm",
+          "startBit": 32,
+          "endBit": 47,
+          "bitParam": 34,
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Abnormal",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "fan"
+            },
+            {
+              "tagName": "failure"
+            },
+            {
+              "tagName": "alarm"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 1080,
+      "registerNumber": "41081",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "boolean",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18beef4f1d9a2129",
+          "name": "Static switch unable alarm",
+          "startBit": 0,
+          "endBit": 15,
+          "bitParamRange": "14-15",
+          "conditions": [
+            {
+              "name": "Shutdown",
+              "bitValues": "0"
+            },
+            {
+              "name": "Open",
+              "bitValues": "1"
+            },
+            {
+              "name": "Invalid",
+              "bitValues": "2"
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "static"
+            },
+            {
+              "tagName": "switch"
+            },
+            {
+              "tagName": "unable"
+            },
+            {
+              "tagName": "alarm"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 1030,
+      "registerNumber": "41031",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18beef4f1d9a2142",
+          "name": "Common alarm",
+          "startBit": 0,
+          "endBit": 15,
+          "bitParam": 0,
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Alarm",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "common"
+            },
+            {
+              "tagName": "alarm"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -71,7 +71,7 @@ public class HisSyncHandler
                 }
             }
         }
-
+        doPurge();
         CcuLog.d(TAG,"<- doHisSync");
     }
     
@@ -173,8 +173,6 @@ public class HisSyncHandler
                     CcuLog.d(TAG,"There are no unsynced historized items for point GUID " + pointGuid +  "; resyncing with time of " + quarterHourSyncDateTimeForDeviceOrEquip + "; value of " + pointValue);
                 }
             }
-
-            ccuHsApi.tagsDb.removeExpiredHisItems(HRef.copy(pointID));
         }
 
         if (!hDictList.isEmpty()) {
@@ -235,5 +233,26 @@ public class HisSyncHandler
         }
 
         return entitiesWithGuid;
+    }
+    
+    private void doPurge() {
+    
+        DateTime now = new DateTime();
+        boolean timeForPurge = now.getMinuteOfDay() % 10 == 0 ? true : false;
+        
+        if (timeForPurge) {
+            Thread purgeThread = new Thread() {
+                @Override public void run() {
+                    super.run();
+                    CcuLog.d(TAG, "doPurge ->");
+                    ArrayList<HashMap<Object, Object>> allHisPoints = ccuHsApi.readAllEntities("point and his");
+                    for (HashMap<Object, Object> point : allHisPoints) {
+                        ccuHsApi.tagsDb.removeExpiredHisItems(HRef.copy(point.get("id").toString()));
+                    }
+                    CcuLog.d(TAG, "<- doPurge");
+                }
+            };
+            purgeThread.start();
+        }
     }
 }

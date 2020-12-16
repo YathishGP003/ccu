@@ -34,8 +34,9 @@
         {
           "id": "5:4375675092661972556",
           "name": "syncStatus",
+          "indexId": "4:1032520257028094496",
           "type": 1,
-          "flags": 4
+          "flags": 12
         }
       ],
       "relations": []
@@ -479,7 +480,7 @@
     }
   ],
   "lastEntityId": "10:2828061373610410341",
-  "lastIndexId": "3:6552647423424257173",
+  "lastIndexId": "4:1032520257028094496",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

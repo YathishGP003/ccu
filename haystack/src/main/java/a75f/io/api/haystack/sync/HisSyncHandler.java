@@ -170,7 +170,11 @@ public class HisSyncHandler
 
                     HDict hDict = buildHDict(pointGuid, pointTimezone, pointValue, pointTimestamp);
                     hDictList.add(hDict);
-                    CcuLog.d(TAG,"There are no unsynced historized items for point GUID " + pointGuid +  "; resyncing with time of " + quarterHourSyncDateTimeForDeviceOrEquip + "; value of " + pointValue);
+                    CcuLog.d(TAG,
+                             "There are no unsynced historized items for point GUID " + pointGuid +  "-" +pointToSync.get("dis")+
+                                            " :resyncing with time of " + quarterHourSyncDateTimeForDeviceOrEquip + "; value of " + pointValue);
+                } else {
+                    CcuLog.d(TAG,"LastSyncItem is empty for "+pointToSync.get("dis"));
                 }
             }
         }

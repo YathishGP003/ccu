@@ -1013,7 +1013,11 @@ public class CCUHsApi
 
     public void syncHisData()
     {
-        hisSyncHandler.syncData();
+        if (!entitySyncHandler.isSyncProgress()) {
+            hisSyncHandler.syncData();
+        } else {
+            Log.d("CCU_HS", "EntitySync in progress : Skip HisSync");
+        }
     }
 
     public boolean syncExistingSite(String siteId) {

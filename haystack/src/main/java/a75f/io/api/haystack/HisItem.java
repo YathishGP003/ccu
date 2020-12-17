@@ -14,6 +14,7 @@ public class HisItem
     @Id
     long id;
     
+    @Index
     String rec;
     
     long date;

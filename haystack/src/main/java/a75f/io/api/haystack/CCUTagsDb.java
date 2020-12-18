@@ -351,6 +351,13 @@ public class CCUTagsDb extends HServer {
         if(q.getGatewayRef() != null){
             equip.add("gatewayRef",q.getGatewayRef());
         }
+        if(q.getVendor() != null){
+            equip.add("vendor",q.getVendor());
+        }
+        if(q.getModel() != null){
+            equip.add("model",q.getModel());
+        }
+
         for (String m : q.getMarkers()) {
             equip.add(m);
         }
@@ -377,6 +384,12 @@ public class CCUTagsDb extends HServer {
         }
 		if(q.getGatewayRef() != null){
             equip.add("gatewayRef",q.getGatewayRef());
+        }
+        if(q.getVendor() != null){
+            equip.add("vendor",q.getVendor());
+        }
+        if(q.getModel() != null){
+            equip.add("model",q.getModel());
         }
         for (String m : q.getMarkers()) {
             equip.add(m);
@@ -467,7 +480,7 @@ public class CCUTagsDb extends HServer {
         if (p.getMinVal() != null) b.add("minVal",Double.parseDouble(p.getMinVal()));
         if (p.getMaxVal() != null) b.add("maxVal",Double.parseDouble(p.getMaxVal()));
         
-        if (p.getRegisterAddress() != null) b.add("registerAddr", p.getRegisterAddress());
+        if (p.getRegisterAddress() != null) b.add("registerAddress", p.getRegisterAddress());
         if (p.getRegisterNumber() != null) b.add("registerNumber", p.getRegisterNumber());
         if (p.getStartBit() != null) b.add("startBit", p.getStartBit());
         if (p.getEndBit() != null) b.add("endBit", p.getEndBit());
@@ -501,7 +514,7 @@ public class CCUTagsDb extends HServer {
         if (p.getMinVal() != null) b.add("minVal",Double.parseDouble(p.getMinVal()));
         if (p.getMaxVal() != null) b.add("maxVal",Double.parseDouble(p.getMaxVal()));
     
-        if (p.getRegisterAddress() != null) b.add("registerAddr", p.getRegisterAddress());
+        if (p.getRegisterAddress() != null) b.add("registerAddress", p.getRegisterAddress());
         if (p.getRegisterNumber() != null) b.add("registerNumber", p.getRegisterNumber());
         if (p.getStartBit() != null) b.add("startBit", p.getStartBit());
         if (p.getEndBit() != null) b.add("endBit", p.getEndBit());

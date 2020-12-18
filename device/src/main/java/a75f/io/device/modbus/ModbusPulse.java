@@ -106,7 +106,7 @@ public class ModbusPulse {
 
         HashMap phyPoint = hayStack.read("point and physical and register and modbus" +
                                          " and registerType == \""+readRegister.getRegisterType()+"\""+
-                                         " and registerAddr == \""+readRegister.getRegisterAddress()+ "\""+
+                                         " and registerAddress == \""+readRegister.getRegisterAddress()+ "\""+
                                          " and parameterId == \""+readRegister.getParameters().get(0).getParameterId()+ "\""+
                                          " and deviceRef == \"" + deviceRef + "\"");
         //for(HashMap phyPoint : phyPoints) {

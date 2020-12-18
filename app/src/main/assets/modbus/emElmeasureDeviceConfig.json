@@ -3,8 +3,8 @@
   "name": "Energy Meter El Measure",
   "description": "This document contains the configuration necessary to manage Energy meters",
   "equipType": "EM",
-  "manufacturer": "El Measure",
-  "modelNumbers": [
+  "vendor": "El Measure",
+  "model": [
     "Multi Function Meters"
   ],
   "registers": [

@@ -3,8 +3,8 @@
     "name": "Rodent Repellent System-C Systems ",
     "description": "This document contains the configuration necessary to manage a C Systems Rodent Repellent System.",
     "equipType": "RRS",
-    "manufacturer": "C Systems",
-    "modelNumbers": [
+    "vendor": "C Systems",
+    "model": [
         "URRS12T",
         "URRS24T"
     ],

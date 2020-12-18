@@ -3,8 +3,8 @@
   "name": "UPS -80k",
   "description": "This document contains the configuration necessary to ups-80kva",
   "equipType": "UPS80K",
-  "manufacturer": "Vertiv",
-  "modelNumbers": [
+  "vendor": "Vertiv",
+  "model": [
     "eXM:Using Vertiv Unity Card"
   ],
   "registers": [

@@ -3,8 +3,8 @@
   "name": "Daikin IDU",
   "description": "This document contains the configuration necessary to manage a Daikin IDU.",
   "equipType": "VRF",
-  "manufacturer": "Intesis",
-  "modelNumbers": [
+  "vendor": "Intesis",
+  "model": [
     "ASCO"
   ],
   "registers": [

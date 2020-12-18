@@ -35,10 +35,10 @@ public class EquipmentDevice {
     @SerializedName("equipType")
     @Expose
     private String equipType;
-    @SerializedName("manufacturer")
+    @SerializedName("vendor")
     @Expose
-    private String manufacturer;
-    @SerializedName("modelNumbers")
+    private String vendor;
+    @SerializedName("model")
     @Expose
     @Convert(converter = StringListConverter.class, dbType = String.class)
     private List<String> modelNumbers = null;
@@ -96,12 +96,12 @@ public class EquipmentDevice {
         this.equipType = equipType;
     }
 
-    public String getManufacturer() {
-        return manufacturer;
+    public String getVendor() {
+        return vendor;
     }
 
-    public void setManufacturer(String manufacturer) {
-        this.manufacturer = manufacturer;
+    public void setVendor(String vendor) {
+        this.vendor = vendor;
     }
 
     public List<String> getModelNumbers() {

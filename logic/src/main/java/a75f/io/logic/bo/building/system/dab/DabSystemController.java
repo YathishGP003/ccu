@@ -143,6 +143,7 @@ public class DabSystemController extends SystemController
         }
 
         systemProfile.setSystemPoint("operating and mode", systemState.ordinal());
+        resetPILoopAtMidpoint();
         updateLoopOpSignals();
         
         logAlgoVariables();
@@ -412,6 +413,13 @@ public class DabSystemController extends SystemController
 
             coolingSignal = 0;
             heatingSignal = 0;
+            piController.reset();
+        }
+    }
+    
+    private void resetPILoopAtMidpoint() {
+        if ((systemState == HEATING && weightedAverageHeatingLoadPostML == 0 )
+            || (systemState == COOLING && weightedAverageCoolingLoadPostML == 0)) {
             piController.reset();
         }
     }

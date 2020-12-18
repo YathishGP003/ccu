@@ -5,6 +5,7 @@ import java.util.Date;
 import a75f.io.logger.CcuLog;
 import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
+import io.objectbox.annotation.Index;
 import io.objectbox.annotation.Transient;
 
 @Entity
@@ -13,12 +14,14 @@ public class HisItem
     @Id
     long id;
     
+    @Index
     String rec;
     
     long date;
     
     Double val;
     
+    @Index
     boolean syncStatus;
     
     @Transient

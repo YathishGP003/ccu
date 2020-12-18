@@ -470,7 +470,7 @@ public class CCUHsApi
             ArrayList values = CCUHsApi.getInstance().readPoint(id);
             if (values != null && values.size() > 0) {
                 HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
-                CcuLog.d("CCU_HS", "" + valMap);
+                //CcuLog.d("CCU_HS", "" + valMap);
                 return valMap.get("val") == null ? 0 : Double.parseDouble(valMap.get("val").toString());
             } else {
                 return null;
@@ -517,7 +517,7 @@ public class CCUHsApi
         if (values != null && values.size() > 0)
         {
             HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
-            CcuLog.d("CCU_HS", "" + valMap);
+            //CcuLog.d("CCU_HS", "" + valMap);
             return valMap.get("val") == null ? "" : valMap.get("val").toString();
         } else
         {
@@ -1013,7 +1013,11 @@ public class CCUHsApi
 
     public void syncHisData()
     {
-        hisSyncHandler.sync();
+        if (!entitySyncHandler.isSyncProgress()) {
+            hisSyncHandler.syncData();
+        } else {
+            Log.d("CCU_HS", "EntitySync in progress : Skip HisSync");
+        }
     }
 
     public boolean syncExistingSite(String siteId) {

@@ -55,14 +55,21 @@ public class ModbusEquip {
             gatewayRef = systemEquip.get("id").toString();
         }
 
-        Equip b = new Equip.Builder().setSiteRef(siteRef)
+        Equip.Builder mbEquip = new Equip.Builder().setSiteRef(siteRef)
                 .setDisplayName(equipDis)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .setProfile(profileType.name())
                 .addMarker("equip").addMarker("modbus").addMarker(modbusEquipType.toLowerCase()).addMarker("zone")
-                .setGatewayRef(gatewayRef).setTz(tz).setGroup(String.valueOf(slaveId)).build();
-        equipRef = hayStack.addEquip(b);
+                .setGatewayRef(gatewayRef).setTz(tz).setGroup(String.valueOf(slaveId));
+        if (equipmentInfo.getVendor()!= null && !equipmentInfo.getVendor().equals("")) {
+            mbEquip.setVendor(equipmentInfo.getVendor());
+        }
+        if (equipmentInfo.getModelNumbers() != null && equipmentInfo.getModelNumbers().size() >0) {
+
+            mbEquip.setModel(equipmentInfo.getModelNumbers().get(0));
+        }
+        equipRef = hayStack.addEquip(mbEquip.build());
 
 
         Point equipScheduleType = new Point.Builder()
@@ -206,7 +213,8 @@ public class ModbusEquip {
             }
             Point logicalPoint = logicalParamPoint.build();
             String logicalParamId = CCUHsApi.getInstance().addPoint(logicalPoint);
-            String physicalParamId = CCUHsApi.getInstance().addPoint(physicalParamPoint.setPointRef(logicalParamId).build());
+            RawPoint physicalPoint = physicalParamPoint.setPointRef(logicalParamId).build();
+            String physicalParamId = CCUHsApi.getInstance().addPoint(physicalPoint);
             if (configParam.getUserIntentPointTags() != null) {
                 if (configParam.getCommands() != null && configParam.getCommands().size() > 0) {
                     CCUHsApi.getInstance().writeHisValById(logicalParamId, Double.parseDouble(configParam.getCommands().get(0).getBitValues()));
@@ -243,7 +251,9 @@ public class ModbusEquip {
             }
 
             CCUHsApi.getInstance().writeHisValById(physicalParamId,0.0);
-            CCUHsApi.getInstance().writeDefaultValById(physicalParamId,0.0);
+            if (physicalPoint.getMarkers().contains("writable")){
+                CCUHsApi.getInstance().writeDefaultValById(physicalParamId,0.0);
+            }
 
         }
         CCUHsApi.getInstance().syncEntityTree();

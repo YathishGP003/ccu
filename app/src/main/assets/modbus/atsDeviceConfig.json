@@ -3,8 +3,8 @@
   "name": "Automatic Transfer Switch (ATS)",
   "description": "This document contains the configuration necessary to automatic transfer switch",
   "equipType": "ATS",
-  "manufacturer": "ASCO",
-  "modelNumbers": [
+  "vendor": "ASCO",
+  "model": [
     "ASCO"
   ],
   "registers": [

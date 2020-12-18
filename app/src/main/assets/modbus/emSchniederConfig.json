@@ -3,8 +3,8 @@
   "name": "Energy Meter Schnieder",
   "description": "This document contains the configuration necessary to manage Energy meters",
   "equipType": "EMS",
-  "manufacturer": "Schnieder",
-  "modelNumbers": [
+  "vendor": "Schnieder",
+  "model": [
     "Multi Function Meters (iEM 3150)"
   ],
   "registers": [

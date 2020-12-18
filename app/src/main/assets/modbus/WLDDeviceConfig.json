@@ -2,11 +2,11 @@
     "modbusEquipId (_id)": "5f1f30ad18bcbf4f1d9a1db4",
     "name": "Water Leak Detection- C System",
     "equipType": "WLD",
-    "modelNumber": [
+    "model": [
         "C Systems"
     ],
     "description": "This document contains the configuration necessary to manage a Water Leak Detection (WLD) system",
-    "manufacturer": "C Systems",
+    "vendor": "C Systems",
     "registers": [
         {
             "registerAddress": 4000,

@@ -3,8 +3,8 @@
   "name": "UPS -30k",
   "description": "This document contains the configuration necessary to ups-30kva",
   "equipType": "UPS30K",
-  "manufacturer": "Vertiv",
-  "modelNumbers": [
+  "vendor": "Vertiv",
+  "model": [
     "ITA2"
   ],
   "registers": [

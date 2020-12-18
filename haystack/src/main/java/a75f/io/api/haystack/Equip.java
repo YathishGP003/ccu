@@ -16,6 +16,25 @@ public class Equip extends Entity
     private String siteRef;
     private String roomRef;
     private String floorRef;
+
+    public String getVendor() {
+        return vendor;
+    }
+
+    public void setVendor(String vendor) {
+        this.vendor = vendor;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    private String vendor;
+    private String model;
     public void setAhuRef(String ahuRef)
     {
         this.ahuRef = ahuRef;
@@ -132,6 +151,18 @@ public class Equip extends Entity
             return this;
         }
         private String profile;
+        private String vendor;
+        private String model;
+        public Builder setVendor(String vendor)
+        {
+            this.vendor = vendor;
+            return this;
+        }
+        public Builder setModel(String model)
+        {
+            this.model = model;
+            return this;
+        }
         public Builder setGroup(String group)
         {
             this.group = group;
@@ -181,6 +212,8 @@ public class Equip extends Entity
             q.gatewayRef = this.gatewayRef;
             q.id = this.id;
             q.tz = this.tz;
+            q.model = this.model;
+            q.vendor = this.vendor;
             return q;
         }
         
@@ -239,6 +272,14 @@ public class Equip extends Entity
                 else if(pair.getKey().equals("tz"))
                 {
                     this.tz = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("vendor"))
+                {
+                    this.vendor = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("model"))
+                {
+                    this.model = pair.getValue().toString();
                 }
                 //it.remove();
             }

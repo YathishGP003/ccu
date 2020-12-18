@@ -3,14 +3,14 @@
   "name": "Daikin IDU",
   "description": "This document contains the configuration necessary to manage a Daikin IDU.",
   "equipType": "VRF",
-  "manufacturer": "Intesis",
-  "modelNumbers": [
+  "vendor": "Intesis",
+  "model": [
     "ASCO"
   ],
   "registers": [
     {
       "registerAddress": 0,
-      "registerNumber": "40000",
+      "registerNumber": "40001",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
@@ -91,7 +91,7 @@
     },
     {
       "registerAddress": 1,
-      "registerNumber": "40001",
+      "registerNumber": "40002",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
@@ -190,7 +190,7 @@
     },
     {
       "registerAddress": 4,
-      "registerNumber": "40004",
+      "registerNumber": "40005",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "range",
       "parameters": [
@@ -283,7 +283,7 @@
     },
     {
       "registerAddress": 3,
-      "registerNumber": "40003",
+      "registerNumber": "40004",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
@@ -406,7 +406,7 @@
     },
     {
       "registerAddress": 2,
-      "registerNumber": "40002",
+      "registerNumber": "40003",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [

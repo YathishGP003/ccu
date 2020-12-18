@@ -1,99 +1,19 @@
- - Merged PR 323: Modbus UI and Configuration
- - set gateway ref for modbus
- - fixed ups 30k json
- - fix em param type and update json for ats
- - Disable modbus when biskit is connected with FTDI of same deviceID
- - Merge branch 'story/modbus/2745-modbus_usb_service' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/modbus/2745-modbus_usb_service
- - Bit range parsing fix
- - add parameter id to Rawpoint
- - bitParama not parsed correctly
- - Use registerType on points to avoid duplicate points on the same slave with same addr
- - Merge branch 'story/modbus/2745-modbus_configuration_ui' into story/modbus/2745-modbus_usb_service
- - json files fixes
- - Update register read
- - Merge branch 'story/modbus/2745-modbus_configuration_ui' into story/modbus/2745-modbus_usb_service
- - DI and long support
- - add ats bit value
- - update points from pubnub
- - fix for the point write
- - fixed enum issue
- - Merge branch 'story/modbus/2745-modbus_usb_service' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/modbus/2745-modbus_usb_service
- - Disable Modbus Watchdog
- - Disable Modbus Watchdog
- - Async Point Write using okhttp
- - Optmized his read/write
- - Update writable points form modbus message
- - Merge branch 'story/modbus/2745-modbus_configuration_ui' into story/modbus/2745-modbus_usb_service
- - Watchdog , int64 support and log removal
- - Merged PR 285: bug/mahesh/4480-CCU_remove_SN_pairing_screen_while_pairing_TI
- - Merged PR 284: bug/mahesh/4603-CCU_unit_modification_emr_and_humidity_compensation
- - Merged PR 283: bug/mahesh/4573-CCU_add_enum_2PFCU_Fan_op_mode
- - update text size
- - parse decimal
- - Merge branch 'story/modbus/2745-modbus_configuration_ui' into story/modbus/2745-modbus_usb_service
- - changes updated
- - USB reconnect option
- - fixes for logic points
- - Update baudrate and parity for modbus serial
- - Merge branch 'story/modbus/2745-modbus_configuration_ui' into story/modbus/2745-modbus_usb_service
- - Update parity and baudrate for modbus serial connection
- - fixes
- - WriteRegister support
- - bit param usage
- - write parameter default value
- - include bitrange and bitparam
- - modbus type restructure
- - fixed enums
- - config file fix and hide edit icon
- - update tags for ups and vrf
- - update type
- - Serial Connection status
- - Format conversion
- - Serial message parsing
- - update timer
- - update mb modules json file and set configuration
- - update new json files
- - USB Serial Service rework Modbus4j porting layer.
- - USB port renamed
- - USB serial test UI and usb modbus changes
- - Usbdevice changes for refactor
- - Separate Service for Modbus USB Port
- - load zone profile
- - update display in ui marker
- - mb energy meter setup
- - updating usb serial device init
- - update the user intent points based on commands
- - update modbus module and zone ui
- - WriteRegister support
- - bit param usage
- - Merge branch 'story/modbus/2745-modbus_configuration_ui' into story/modbus/2745-modbus_usb_service
- - modbus type restructure
- - write parameter default value
- - include bitrange and bitparam
- - merge
- - Serial Connection status
- - fixed enums
- - config file fix and hide edit icon
- - update tags for ups and vrf
- - Format conversion
- - remove SN pairing screen, directly load TI profile
- - modify units for emr equip and humidity compensation
- - update fan op mode enum
- - Serial message parsing
- - update type
- - update timer
- - Merge branch 'story/modbus/2745-modbus_configuration_ui' into story/modbus/2745-modbus_usb_service
- - USB Serial Service rework Modbus4j porting layer.
- - update mb modules json file and set configuration
- - USB port renamed
- - USB serial test UI and usb modbus changes
- - Usbdevice changes for refactor
- - Merge branch 'story/modbus/2745-modbus_usb_service' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/modbus/2745-modbus_usb_service
- - Separate Service for Modbus USB Port
- - update new json files
- - load zone profile
- - update display in ui marker
- - mb energy meter setup
- - updating usb serial device init
- - update the user intent points based on commands
- - update modbus module and zone ui
+ - Merged PR 331: Modbus-Tags update
+ - Merged PR 322: bug/mahesh/4677-CCU_pairing_issue_when_more_SN_same_time
+ - fix spelling
+ - Merged PR 282: bug/mahesh/4496-CCU_no_device_found_error_display_fix_while_pairing
+ - Merged PR 330: Modbus - Add vendor and model to equip
+ - vendor and model
+ - Merged PR 329: Sync Issues
+ - Fix resource leak
+ - Index id and avoid hisSync during entitySync
+ - HisWrite optmizations
+ - Merge branch 'master' into Bug/samjith/4669_sync_issues
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - his sync refactor
+ - fix for scan BLE
+ - fix json files
+ - Objectbox performance test
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - 4648 : DAB PILoop reset at midpoint
+ - check before adding empty view if already exists no need to add.

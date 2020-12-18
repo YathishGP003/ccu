@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#103F51B5"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/layoutHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="40dp">
+        <TextView
+            android:id="@+id/textTitleFragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:fontFamily="@font/lato_bold"
+            android:text="@string/title_mb_config"
+            android:textAllCaps="true"
+            android:textColor="@color/orange_75f"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="70dp"
+        android:layout_marginRight="36dp"
+        android:orientation="horizontal"
+        android:paddingTop="20dp">
+        <TextView
+            android:id="@+id/textBaudRate"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginTop="20dp"
+            android:layout_gravity="center_vertical"
+            android:text="@string/txt_mb_baudRate"
+            android:textAppearance="@style/title_normal" />
+
+        <Spinner
+            android:id="@+id/spinnerBaudRate"
+            style="@style/Widget.AppCompat.Spinner.Underlined"
+            android:layout_width="160dp"
+            android:layout_height="42dp"
+            android:layout_marginTop="20dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="80dp"
+            android:layout_toEndOf="@+id/textBaudRate"
+            android:entries="@array/mb_config_baudrate_array"
+            tools:listitem="@layout/spinner_dropdown_item" />
+
+        <TextView
+            android:id="@+id/textParity"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginTop="20dp"
+            android:layout_gravity="center_vertical"
+            android:text="@string/txt_mb_parity"
+            android:layout_below="@+id/textBaudRate"
+            android:textAppearance="@style/title_normal" />
+
+        <Spinner
+            android:id="@+id/spinnerParity"
+            style="@style/Widget.AppCompat.Spinner.Underlined"
+            android:layout_width="160dp"
+            android:layout_height="42dp"
+            android:layout_marginTop="20dp"
+            android:layout_gravity="center_vertical"
+            android:layout_below="@+id/spinnerBaudRate"
+            android:layout_toEndOf="@+id/textParity"
+            android:layout_alignStart="@id/spinnerBaudRate"
+            android:layout_alignEnd="@id/spinnerBaudRate"
+            android:entries="@array/mb_config_parity_array"
+            tools:listitem="@layout/spinner_dropdown_item" />
+
+        <TextView
+            android:id="@+id/txtDataBits"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginTop="20dp"
+            android:layout_gravity="center_vertical"
+            android:text="@string/txt_mb_dataBits"
+            android:layout_below="@+id/textParity"
+            android:textAppearance="@style/title_normal" />
+
+        <Spinner
+            android:id="@+id/spinnerDatabits"
+            style="@style/Widget.AppCompat.Spinner.Underlined"
+            android:layout_width="160dp"
+            android:layout_height="42dp"
+            android:layout_marginTop="20dp"
+            android:layout_gravity="center_vertical"
+            android:layout_below="@+id/spinnerParity"
+            android:layout_toEndOf="@+id/txtDataBits"
+            android:layout_alignStart="@id/spinnerBaudRate"
+            android:layout_alignEnd="@id/spinnerBaudRate"
+            android:entries="@array/mb_config_databits_array"
+            tools:listitem="@layout/spinner_dropdown_item" />
+
+        <TextView
+            android:id="@+id/txtStopBits"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginTop="20dp"
+            android:layout_gravity="center_vertical"
+            android:text="@string/txt_mb_stopBits"
+            android:layout_below="@+id/txtDataBits"
+            android:textAppearance="@style/title_normal" />
+
+        <Spinner
+            android:id="@+id/spinnerStopBits"
+            style="@style/Widget.AppCompat.Spinner.Underlined"
+            android:layout_width="160dp"
+            android:layout_height="42dp"
+            android:layout_marginTop="20dp"
+            android:layout_gravity="center_vertical"
+            android:layout_below="@+id/spinnerDatabits"
+            android:layout_toEndOf="@+id/txtStopBits"
+            android:layout_alignStart="@id/spinnerBaudRate"
+            android:layout_alignEnd="@id/spinnerBaudRate"
+            android:entries="@array/mb_config_stopbits_array"
+            tools:listitem="@layout/spinner_dropdown_item" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal">
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="40dp"
+            android:text="@string/txt_mb_restart_prompt"
+            android:textAppearance="@style/title_normal" />
+
+        <Button
+            android:id="@+id/btnRestart"
+            android:layout_marginLeft="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/lato_regular"
+            android:text="@string/txt_restart"
+            android:textColor="@color/orange_75f"
+            android:textSize="19.5sp"
+            android:background="@null"
+            android:button="@null"
+            />
+
+    </LinearLayout>
+</LinearLayout>

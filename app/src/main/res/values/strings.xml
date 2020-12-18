@@ -736,6 +736,7 @@
     <string name="txt_smartstat">SmartStat</string>
     <string name="txt_itm_hia">ITM-HIA</string>
     <string name="txt_itm_lpi">ITM-LPI</string>
+    <string name="txt_modbus_config">Modbus Config</string>
 
     <string name="toast_msg_permission_denial">"All the required permissions are not granted. CCU may not work as
         expected.\nYou may grant missing permissions to Renatus app from System Settings"</string>
@@ -773,4 +774,36 @@
         <item>0x2233112</item>
         <item>0x0000000</item>
     </string-array>
+
+
+    <string name="title_mb_config">MODBUS CONFIG</string>
+    <string name="txt_mb_baudRate">BaudRate:</string>
+    <string name="txt_mb_parity">Parity:</string>
+    <string name="txt_mb_dataBits">Data Bits:</string>
+    <string name="txt_mb_stopBits">Stop Bits:</string>
+
+    <string name="txt_mb_restart_prompt">Changes in config requires Application restart</string>
+    <string name="txt_restart">Restart Now</string>
+    <string-array name="mb_config_baudrate_array">
+        <item>  9600 </item>
+        <item>  19200 </item>
+        <item>  38400 </item>
+    </string-array>
+
+    <string-array name="mb_config_parity_array">
+        <item>  NONE </item>
+        <item>  ODD </item>
+        <item>  EVEN </item>
+    </string-array>
+
+    <string-array name="mb_config_databits_array">
+        <item>  7 </item>
+        <item>  8 </item>
+    </string-array>
+
+    <string-array name="mb_config_stopbits_array">
+        <item>  1 </item>
+        <item>  2 </item>
+    </string-array>
+
 </resources>

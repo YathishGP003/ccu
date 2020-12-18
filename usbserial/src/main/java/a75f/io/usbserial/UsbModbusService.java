@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.hardware.usb.IUsbManager;
@@ -16,6 +17,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.felhr.usbserial.UsbSerialDevice;
@@ -424,6 +426,8 @@ public class UsbModbusService extends Service {
         public void run() {
             serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
             Log.d(TAG," ModbusRunnable : run serialPortMB "+serialPort);
+            Log.d(TAG," ModbusRunnable : USB Params "+getModbusBaudrate()+" "+getModbusParity()+" "
+                      +getModbusDataBits()+" "+getModbusStopBits());
             if (serialPort != null) {
                 if (serialPort.open()) {
                     serialPortConnected = true;
@@ -464,6 +468,26 @@ public class UsbModbusService extends Service {
             }
         }
     }
-
+    
+    private int getModbusBaudrate() {
+        return readIntPref("mb_baudrate", 9600);
+    }
+    
+    private int getModbusParity() {
+        return readIntPref("mb_parity", 0);
+    }
+    
+    private int getModbusDataBits() {
+        return readIntPref("mb_databits", 8);
+    }
+    
+    private int getModbusStopBits() {
+        return readIntPref("mb_stopbits", 1);
+    }
+    
+    private int readIntPref(String key, int defaultVal) {
+        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        return spDefaultPrefs.getInt(key, defaultVal);
+    }
 }
 

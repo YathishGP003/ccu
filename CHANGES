@@ -1,19 +1,2 @@
- - Merged PR 331: Modbus-Tags update
- - Merged PR 322: bug/mahesh/4677-CCU_pairing_issue_when_more_SN_same_time
- - fix spelling
- - Merged PR 282: bug/mahesh/4496-CCU_no_device_found_error_display_fix_while_pairing
- - Merged PR 330: Modbus - Add vendor and model to equip
- - vendor and model
- - Merged PR 329: Sync Issues
- - Fix resource leak
- - Index id and avoid hisSync during entitySync
- - HisWrite optmizations
- - Merge branch 'master' into Bug/samjith/4669_sync_issues
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - his sync refactor
- - fix for scan BLE
- - fix json files
- - Objectbox performance test
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - 4648 : DAB PILoop reset at midpoint
- - check before adding empty view if already exists no need to add.
+ - Merged PR 337: Add system sharedUserId to renatus
+ - Add system sharedUserId to renatus

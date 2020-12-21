@@ -309,7 +309,7 @@ public class ConventionalUnitLogicalMap {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker(profile)
+                .addMarker("standalone").addMarker(profile).addMarker("his")
                 .addMarker("air").addMarker("temp").addMarker("th2").addMarker("sensor").addMarker("logical").addMarker("zone")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")
@@ -655,7 +655,8 @@ public class ConventionalUnitLogicalMap {
                 .setSiteRef(siteRef)
                 .setFloorRef(floor)
                 .setRoomRef(room)
-                .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone").addMarker("th2").addMarker("sp").addMarker("enable").addMarker(profile)
+                .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone").addMarker("th2")
+                .addMarker("sp").addMarker("enable").addMarker(profile).addMarker("his")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();

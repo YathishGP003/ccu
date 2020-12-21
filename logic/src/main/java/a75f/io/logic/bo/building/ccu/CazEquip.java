@@ -231,7 +231,7 @@ public class CazEquip
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .setHisInterpolate("cov")
-                .addMarker("standalone").addMarker("ti")
+                .addMarker("standalone").addMarker("ti").addMarker("his")
                 .addMarker("air").addMarker("temp").addMarker("th2").addMarker("sensor").addMarker("logical").addMarker("zone")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")

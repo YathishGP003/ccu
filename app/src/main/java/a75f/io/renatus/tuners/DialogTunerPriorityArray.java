@@ -197,23 +197,26 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     incrementValDb = 1.0;
                     incrementVal = 1;
                 }
-                int k = 0;
                 int currentValPos = 0;
                 if (minValue < 0) {
                     for (double i = minValueDb; i <= maxValueDb; i += incrementValDb) {
                         valueList.add(String.format("%.1f", i));
-                        if (currentValue == i) {
-                            currentValPos = k;
+                    }
+                    for (String currVal : valueList){
+                        if (currentValueDb == Double.parseDouble(currVal)){
+                            currentValPos = valueList.indexOf(currVal);
+                            break;
                         }
-                        k++;
                     }
                 } else {
                     for (double i = minValueDb; i <= maxValueDb; i += incrementValDb) {
                         valueList.add(String.format("%.1f", i));
-                        if (currentValue == i) {
-                            currentValPos = k;
+                    }
+                    for (String currVal : valueList){
+                        if (currentValueDb == Double.parseDouble(currVal)){
+                            currentValPos = valueList.indexOf(currVal);
+                            break;
                         }
-                        k++;
                     }
                 }
                 Log.i("TunersUI", " currentValPos:" + currentValPos + " value:" + valueList.get(currentValPos) + " valueList:" + valueList);
@@ -222,23 +225,19 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 if (maxValue > 0) {
                     try {
                         Log.i("TunersUI", "maxValue > 0:" + "incrementVal" + incrementVal + " maxValue:" + (maxValue / incrementVal));
-                        npTunerRange.setMaxValue(maxValue / incrementVal);
+                        npTunerRange.setMaxValue(valueList.size() -1);
                     } catch (ArithmeticException e) {
-                        npTunerRange.setMaxValue(maxValue);
+                        npTunerRange.setMaxValue(valueList.size() -1);
                         Log.i("TunersUI", "ArithmeticException :" + e.getMessage());
                         e.printStackTrace();
                     }
                 }else{
-                    npTunerRange.setMaxValue(maxValue);
+                    npTunerRange.setMaxValue(valueList.size() -1);
                 }
 
 
                 npTunerRange.setValue(currentValPos);
                 Log.i("TunersUI", "valueList :" + Arrays.toString(npTunerRange.getDisplayedValues()));
-                if (currentValue > maxValueDb || currentValue < minValueDb) {
-                    Log.i("TunersUI", "currentValue > maxValue:" + maxValueDb + " incrementVal:" + incrementValDb + " currentValue:" + currentValueDb);
-                    npTunerRange.setValue(minValue);
-                }
 
                 npTunerRange.setWrapSelectorWheel(false);
                 npTunerRange.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);

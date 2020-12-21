@@ -92,11 +92,12 @@ public class ModbusConfigFragment extends Fragment {
             }
         });
     
-        spinnerDatabits.setSelection(readIntPref(PREF_MB_STOP_BITS, 0));
+        spinnerDatabits.setSelection(((ArrayAdapter<String>)spinnerDatabits.getAdapter())
+                                         .getPosition(String.valueOf(readIntPref(PREF_MB_STOP_BITS, 1))));
         spinnerStopbits.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                writeIntPref(PREF_MB_STOP_BITS, position);
+                writeIntPref(PREF_MB_STOP_BITS, Integer.parseInt(spinnerStopbits.getSelectedItem().toString()));
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {

@@ -256,18 +256,22 @@ public class UsbModbusService extends Service {
                     //if (deviceVID == 4292) {
                     boolean success = grantRootPermissionToUSBDevice(device);
                     connection = usbManager.openDevice(device);
-                    if (success) {
-                        ModbusRunnable modbusRunnable = new ModbusRunnable(device, connection);
-                        new Thread(modbusRunnable).start();
-                        Intent intent = new Intent(ACTION_USB_PERMISSION_GRANTED);
-                        UsbModbusService.this.getApplicationContext().sendBroadcast(intent);
-                        keep = true;
+                    if (connection != null) {
+                        if (success) {
+                            ModbusRunnable modbusRunnable = new ModbusRunnable(device, connection);
+                            new Thread(modbusRunnable).start();
+                            Intent intent = new Intent(ACTION_USB_PERMISSION_GRANTED);
+                            UsbModbusService.this.getApplicationContext().sendBroadcast(intent);
+                            keep = true;
+                        } else {
+                            Intent intent = new Intent(ACTION_USB_PERMISSION_NOT_GRANTED);
+                            UsbModbusService.this.getApplicationContext().sendBroadcast(intent);
+                            keep = false;
+                        }
+                        Log.d(TAG, "Opened Serial MODBUS device instance for " + deviceVID);
                     } else {
-                        Intent intent = new Intent(ACTION_USB_PERMISSION_NOT_GRANTED);
-                        UsbModbusService.this.getApplicationContext().sendBroadcast(intent);
-                        keep = false;
+                        Log.d(TAG, "Failed to Open Serial MODBUS device instance for " + deviceVID);
                     }
-                    Log.d(TAG, "Opened Serial MODBUS device instance for "+deviceVID);
                 } else {
                     connection = null;
                     device = null;
@@ -442,6 +446,7 @@ public class UsbModbusService extends Service {
                      * UsbSerialInterface.FLOW_CONTROL_RTS_CTS only for CP2102 and FT232
                      * UsbSerialInterface.FLOW_CONTROL_DSR_DTR only for CP2102 and FT232
                      */
+                    
                     serialPort.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
                     serialPort.read(modbusCallback);
                     serialPort.getCTS(ctsCallback);

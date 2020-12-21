@@ -204,7 +204,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     }
                     for (String currVal : valueList){
                         if (currentValueDb == Double.parseDouble(currVal)){
-                            currentValPos = valueList.indexOf(currVal);
+                            currentValPos = valueList.indexOf(currVal) + 1;
                             break;
                         }
                     }
@@ -231,8 +231,8 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                         Log.i("TunersUI", "ArithmeticException :" + e.getMessage());
                         e.printStackTrace();
                     }
-                }else{
-                    npTunerRange.setMaxValue(valueList.size() -1);
+                } else{
+                    npTunerRange.setMaxValue(maxValue);
                 }
 
 

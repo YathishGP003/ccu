@@ -313,7 +313,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
-                .addMarker("standalone").addMarker(profile).addMarker("fcu")
+                .addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("his")
                 .addMarker("air").addMarker("temp").addMarker("th2").addMarker("sensor").addMarker("logical").addMarker("zone")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")
@@ -632,7 +632,8 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setFloorRef(floor)
                 .setRoomRef(room)
-                .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone").addMarker("th2").addMarker("sp").addMarker("enable").addMarker(profile).addMarker("fcu")
+                .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone").addMarker("th2").addMarker("sp")
+                .addMarker("enable").addMarker(profile).addMarker("fcu").addMarker("his")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();

@@ -1,10 +1,9 @@
 package a75f.io.device.modbus;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 
-import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.Floor;
-import a75f.io.api.haystack.HSUtil;
-import a75f.io.api.haystack.Zone;
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.DeviceNetwork;
@@ -26,25 +25,20 @@ public class ModbusNetwork extends DeviceNetwork
             CcuLog.d(L.TAG_CCU_MODBUS,"ModbusNetwork: Serial device not connected");
             return;
         }
-        try {
-            for (Floor floor : HSUtil.getFloors()) {
-                for (Zone zone : HSUtil.getZones(floor.getId())) {
-                    CcuLog.d(L.TAG_CCU_MODBUS,"SERIAL_ =======Modbus Zone: " + zone.getDisplayName() + " =================="+","+zone.getMarkers().contains("modbus"));
-                    //send request for modbus modules alone
-                    for (Equip equip : HSUtil.getEquips(zone.getId())) {
-                        if (equip.getMarkers().contains("modbus")) {
-                            EquipmentDevice modbusDevice = EquipsManager.getInstance().fetchProfileBySlaveId(Short.parseShort(equip.getGroup()));
-                            
-                            for(Register register: modbusDevice.getRegisters()) {
-                                LModbus.readRegister(Short.parseShort(equip.getGroup()), register, getRegisterCount(register));
-                            }
-                        }
-                    }
+    
+        ArrayList<HashMap<Object, Object>> modbusEquips = CCUHsApi.getInstance()
+                                                                  .readAllEntities("zone and equip and modbus");
+        for (HashMap equip : modbusEquips) {
+            try {
+                Short slaveId = Short.parseShort(equip.get("group").toString());
+                EquipmentDevice modbusDevice = EquipsManager.getInstance().fetchProfileBySlaveId(slaveId);
+                for (Register register : modbusDevice.getRegisters()) {
+                    LModbus.readRegister(slaveId, register, getRegisterCount(register));
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+                CcuLog.d(L.TAG_CCU_MODBUS,"Modbus read failed : "+equip.toString());
             }
-        }
-        catch (Exception e) {
-            e.printStackTrace();
         }
     }
 

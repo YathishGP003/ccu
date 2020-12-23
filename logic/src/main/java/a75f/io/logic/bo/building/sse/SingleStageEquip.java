@@ -260,7 +260,8 @@ public class SingleStageEquip {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("standalone").addMarker("sse").addMarker("temp").addMarker("th2").addMarker("sensor").addMarker("logical").addMarker("zone")
+                .addMarker("standalone").addMarker("sse").addMarker("temp").addMarker("th2").addMarker("sensor")
+                .addMarker("logical").addMarker("zone").addMarker("his")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")
                 .setTz(tz)
@@ -275,6 +276,7 @@ public class SingleStageEquip {
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp").addMarker("zone").addMarker("sse")
                 .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
+                .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(occupancy);
@@ -399,7 +401,8 @@ public class SingleStageEquip {
                 .setSiteRef(siteRef)
                 .setFloorRef(floorRef)
                 .setRoomRef(roomRef)
-                .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone").addMarker("th2").addMarker("sp").addMarker("enable").addMarker(profile)
+                .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone").addMarker("th2").addMarker("sp")
+                .addMarker("enable").addMarker(profile).addMarker("his")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("Ohm")
                 .setTz(tz)

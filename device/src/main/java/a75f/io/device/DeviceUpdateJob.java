@@ -1,10 +1,14 @@
 package a75f.io.device;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.MeshNetwork;
+import a75f.io.device.mesh.Pulse;
 import a75f.io.device.modbus.ModbusNetwork;
+import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.watchdog.WatchdogMonitor;
@@ -40,7 +44,6 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
     {
         CcuLog.d(L.TAG_CCU_JOB, "DeviceUpdateJob -> ");
         watchdogMonitor = false;
-        
         HashMap site = CCUHsApi.getInstance().read("site");
         if (site == null || site.size() == 0) {
             CcuLog.d(L.TAG_CCU_DEVICE,"No Site Registered ! <-DeviceUpdateJob ");
@@ -59,4 +62,5 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
         modbusNetwork.sendMessage();
         modbusNetwork.sendSystemControl();
     }
+    
 }

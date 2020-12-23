@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.hardware.usb.IUsbManager;
@@ -16,6 +17,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.felhr.usbserial.UsbSerialDevice;
@@ -254,18 +256,22 @@ public class UsbModbusService extends Service {
                     //if (deviceVID == 4292) {
                     boolean success = grantRootPermissionToUSBDevice(device);
                     connection = usbManager.openDevice(device);
-                    if (success) {
-                        ModbusRunnable modbusRunnable = new ModbusRunnable(device, connection);
-                        new Thread(modbusRunnable).start();
-                        Intent intent = new Intent(ACTION_USB_PERMISSION_GRANTED);
-                        UsbModbusService.this.getApplicationContext().sendBroadcast(intent);
-                        keep = true;
+                    if (connection != null) {
+                        if (success) {
+                            ModbusRunnable modbusRunnable = new ModbusRunnable(device, connection);
+                            new Thread(modbusRunnable).start();
+                            Intent intent = new Intent(ACTION_USB_PERMISSION_GRANTED);
+                            UsbModbusService.this.getApplicationContext().sendBroadcast(intent);
+                            keep = true;
+                        } else {
+                            Intent intent = new Intent(ACTION_USB_PERMISSION_NOT_GRANTED);
+                            UsbModbusService.this.getApplicationContext().sendBroadcast(intent);
+                            keep = false;
+                        }
+                        Log.d(TAG, "Opened Serial MODBUS device instance for " + deviceVID);
                     } else {
-                        Intent intent = new Intent(ACTION_USB_PERMISSION_NOT_GRANTED);
-                        UsbModbusService.this.getApplicationContext().sendBroadcast(intent);
-                        keep = false;
+                        Log.d(TAG, "Failed to Open Serial MODBUS device instance for " + deviceVID);
                     }
-                    Log.d(TAG, "Opened Serial MODBUS device instance for "+deviceVID);
                 } else {
                     connection = null;
                     device = null;
@@ -424,20 +430,23 @@ public class UsbModbusService extends Service {
         public void run() {
             serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
             Log.d(TAG," ModbusRunnable : run serialPortMB "+serialPort);
+            Log.d(TAG," ModbusRunnable : USB Params "+getModbusBaudrate()+" "+getModbusParity()+" "
+                      +getModbusDataBits()+" "+getModbusStopBits());
             if (serialPort != null) {
                 if (serialPort.open()) {
                     serialPortConnected = true;
-                    serialPort.setBaudRate(9600);
+                    serialPort.setBaudRate(getModbusBaudrate());
                     serialPort.setModbusDevice(true);
-                    serialPort.setDataBits(UsbSerialInterface.DATA_BITS_8);
-                    serialPort.setStopBits(UsbSerialInterface.STOP_BITS_1);
-                    serialPort.setParity(UsbSerialInterface.PARITY_NONE);
+                    serialPort.setDataBits(getModbusDataBits());
+                    serialPort.setStopBits(getModbusStopBits());
+                    serialPort.setParity(getModbusParity());
                     /**
                      * Current flow control Options:
                      * UsbSerialInterface.FLOW_CONTROL_OFF
                      * UsbSerialInterface.FLOW_CONTROL_RTS_CTS only for CP2102 and FT232
                      * UsbSerialInterface.FLOW_CONTROL_DSR_DTR only for CP2102 and FT232
                      */
+                    
                     serialPort.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
                     serialPort.read(modbusCallback);
                     serialPort.getCTS(ctsCallback);
@@ -464,6 +473,26 @@ public class UsbModbusService extends Service {
             }
         }
     }
-
+    
+    private int getModbusBaudrate() {
+        return readIntPref("mb_baudrate", 9600);
+    }
+    
+    private int getModbusParity() {
+        return readIntPref("mb_parity", 0);
+    }
+    
+    private int getModbusDataBits() {
+        return readIntPref("mb_databits", 8);
+    }
+    
+    private int getModbusStopBits() {
+        return readIntPref("mb_stopbits", 1);
+    }
+    
+    private int readIntPref(String key, int defaultVal) {
+        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        return spDefaultPrefs.getInt(key, defaultVal);
+    }
 }
 

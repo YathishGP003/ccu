@@ -70,7 +70,7 @@ public class ModbusConfigFragment extends Fragment {
             }
         });
     
-        spinnerParity.setSelection(readIntPref(PREF_MB_PARITY, 0));
+        spinnerParity.setSelection(readIntPref(PREF_MB_PARITY, 0),false);
         spinnerParity.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 writeIntPref(PREF_MB_PARITY, position);
@@ -79,8 +79,8 @@ public class ModbusConfigFragment extends Fragment {
             }
         });
     
-        spinnerDatabits.setSelection(((ArrayAdapter<String>)spinnerBaudRate.getAdapter())
-                       .getPosition(String.valueOf(readIntPref(PREF_MB_DATA_BITS, 8))));
+        spinnerDatabits.setSelection(((ArrayAdapter<String>)spinnerDatabits.getAdapter())
+                       .getPosition(String.valueOf(readIntPref(PREF_MB_DATA_BITS, 8))),false);
         spinnerDatabits.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -91,8 +91,8 @@ public class ModbusConfigFragment extends Fragment {
             
             }
         });
-    
-        spinnerDatabits.setSelection(((ArrayAdapter<String>)spinnerDatabits.getAdapter())
+
+        spinnerStopbits.setSelection(((ArrayAdapter<String>)spinnerStopbits.getAdapter())
                                          .getPosition(String.valueOf(readIntPref(PREF_MB_STOP_BITS, 1))));
         spinnerStopbits.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override

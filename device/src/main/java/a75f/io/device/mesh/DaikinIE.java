@@ -1,5 +1,6 @@
 package a75f.io.device.mesh;
 
+import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -178,33 +179,43 @@ public class DaikinIE
     }
     
     public static void send(final String urlString,final String data) {
-        try
-        {
-            Log.d("DAIKIN_IE", urlString + "\n data: \n" + data);
-            URL url = new URL(urlString);
-            HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
-            httpCon.setDoOutput(true);
-            httpCon.setRequestMethod("PUT");
-            httpCon.setRequestProperty("Content-Type", "text/plain");
-            httpCon.setRequestProperty("Authorization", "Bearer=11021962");
-        
-            OutputStreamWriter out = new OutputStreamWriter(httpCon.getOutputStream());
-            out.write(data);
-            out.close();
-        
-            StringBuilder sb = new StringBuilder();
-            BufferedReader br = new BufferedReader(new InputStreamReader((httpCon.getInputStream())));
-            String output;
-            while ((output = br.readLine()) != null)
-            {
-                sb.append(output);
+        new AsyncTask<String, Void, String>() {
+
+            @Override
+            protected String doInBackground(String... strings) {
+                StringBuilder sb = new StringBuilder();
+                try
+                {
+                    Log.d("DAIKIN_IE", urlString + "\n data: \n" + data);
+                    URL url = new URL(urlString);
+                    HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
+                    httpCon.setDoOutput(true);
+                    httpCon.setRequestMethod("PUT");
+                    httpCon.setRequestProperty("Content-Type", "text/plain");
+                    httpCon.setRequestProperty("Authorization", "Bearer=11021962");
+
+                    OutputStreamWriter out = new OutputStreamWriter(httpCon.getOutputStream());
+                    out.write(data);
+                    out.close();
+
+                    BufferedReader br = new BufferedReader(new InputStreamReader((httpCon.getInputStream())));
+                    String output;
+                    while ((output = br.readLine()) != null)
+                    {
+                        sb.append(output);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return sb.toString();
             }
-            Log.d("DAIKIN_IE", " response \n" + sb.toString());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+            @Override
+            protected void onPostExecute(String response) {
+                Log.d("DAIKIN_IE", " response \n" + response);
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+
     }
     
     public static void sendAsync(final String urlString,final String data) {

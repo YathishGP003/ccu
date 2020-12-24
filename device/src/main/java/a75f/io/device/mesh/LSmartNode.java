@@ -25,6 +25,7 @@ import a75f.io.device.serial.CcuToCmOverUsbSnSettingsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartNodeControls_t;
 import a75f.io.device.serial.SmartNodeSettings_t;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -124,6 +125,10 @@ public class LSmartNode
                         {
                             RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
                             HashMap logicalOpPoint = hayStack.read("point and id == " + p.getPointRef());
+                            if (logicalOpPoint.isEmpty()) {
+                                CcuLog.d(TAG_CCU_DEVICE, " Logical point does not exist for "+opPoint.get("dis"));
+                                continue;
+                            }
                             double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
                             short mappedVal = 0;
                             if (isEquipType("vav", node))

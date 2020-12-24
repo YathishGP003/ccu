@@ -40,7 +40,7 @@ import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
 
-import static a75f.io.renatus.ENGG.ZoneFragmentTemp.getPointVal;
+import static a75f.io.renatus.ENGG.HaystackExplorer.getPointVal;
 
 
 /**
@@ -319,6 +319,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
         return convertView;
     }
     
+    
     private void alignZoneSchedule(Schedule zoneSchedule) {
         Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
         zoneSchedule.getDays().clear();
@@ -504,4 +505,5 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
+    
 }

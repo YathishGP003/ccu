@@ -27,17 +27,18 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 				fragment = DevSettings.newInstance();
 				break;
 			case 1:
-				fragment = LogFragment.newInstance();
+				fragment = HaystackExplorer.newInstance();
 				break;
 			case 2:
+				fragment = LogFragment.newInstance();
+				break;
+			case 3:
 				fragment = FieldTestFragment.newInstance();
 				break;
 			//case 3:
 			//	fragment = SerialMessageFragment.newInstance();
 			//	break;
-			case 3:
-				fragment = ZoneFragmentTemp.newInstance();
-				break;
+			
 			case 4:
 				fragment = OTAUpdateTestFragment.newInstance();
 				break;
@@ -59,11 +60,11 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 			case 0:
 				return "Dev Settings";
 			case 1:
-				return "CcuLog";
-			case 2:
-				return "Field Test";
-			case 3:
 				return "Haystack Explorer";
+			case 2:
+				return "CcuLog";
+			case 3:
+				return "Field Test";
 			case 4:
 				return "OTA Update";
 			case 5:

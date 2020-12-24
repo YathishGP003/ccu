@@ -1,6 +1,7 @@
 package a75f.io.renatus.ENGG;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -8,9 +9,12 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.text.method.DigitsKeyListener;
 import android.text.method.KeyListener;
+import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
@@ -26,27 +30,34 @@ import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.EquipTempExpandableListAdapter;
+import a75f.io.renatus.FloorPlanFragment;
+import a75f.io.renatus.FragmentDABDualDuctConfiguration;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.ProgressDialogUtils;
 
-public class ZoneFragmentTemp extends Fragment
+public class HaystackExplorer extends Fragment
 {
     ExpandableListView            expandableListView;
-    ExpandableListAdapter         expandableListAdapter;
+    EquipTempExpandableListAdapter         expandableListAdapter;
     List<String>                  expandableListTitle;
     HashMap<String, List<String>> expandableListDetail;
 
     
     HashMap<String, String> tunerMap = new HashMap();
+    HashMap<String, String> equipMap = new HashMap();
     int lastExpandedPosition;
     
-    public ZoneFragmentTemp()
+    private boolean passCodeValidationRequired = true;
+    
+    public HaystackExplorer()
     {
     }
     
-    public static ZoneFragmentTemp newInstance()
+    public static HaystackExplorer newInstance()
     {
-        return new ZoneFragmentTemp();
+        return new HaystackExplorer();
     }
     
     @Override
@@ -64,14 +75,18 @@ public class ZoneFragmentTemp extends Fragment
         
         expandableListDetail = new HashMap<>();
         updateAllData();
-        expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
-        expandableListAdapter = new EquipTempExpandableListAdapter(ZoneFragmentTemp.this, expandableListTitle, expandableListDetail, tunerMap, getActivity());
+        expandableListAdapter = new EquipTempExpandableListAdapter(HaystackExplorer.this, expandableListTitle, expandableListDetail, tunerMap, getActivity());
         expandableListView.setAdapter(expandableListAdapter);
         expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v,
                                         int groupPosition, int childPosition, long id) {
-                
+    
+                if (passCodeValidationRequired) {
+                    showPassCodeScren();
+                    return true;
+                }
+                Log.d("CCU_HE", "onChildClick "+groupPosition+" "+childPosition);
                 String tunerName = expandableListDetail.get(expandableListTitle.get(groupPosition)).get(
                         childPosition);
                 
@@ -107,7 +122,6 @@ public class ZoneFragmentTemp extends Fragment
         });
         
         expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
-            
             @Override
             public void onGroupExpand(int groupPosition) {
                 updateAllData();
@@ -126,11 +140,122 @@ public class ZoneFragmentTemp extends Fragment
 
             }
         });
+    
+        setupLongClick();
+    }
+    
+    private void showPassCodeScren() {
+        final EditText taskEditText = new EditText(getActivity());
+        KeyListener keyListener = DigitsKeyListener.getInstance("0123456789");
+        taskEditText.setKeyListener(keyListener);
+    
+        AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                                 .setTitle("Enter passcode")
+                                 .setMessage("Changing haystack data may corrupt the device.\n" +
+                                             "We are making sure you know what you are doing.")
+                                 .setView(taskEditText)
+                                 .setPositiveButton("Done", new DialogInterface.OnClickListener() {
+                                     @Override
+                                     public void onClick(DialogInterface dialog, int which) {
+                                         if (taskEditText.getText().toString().trim().equals("7575")) {
+                                            dialog.dismiss();
+                                            passCodeValidationRequired = false;
+                                         } else {
+                                             taskEditText.getText().clear();
+                                             Toast.makeText(getActivity(), "Incorrect passcode", Toast.LENGTH_SHORT).show();
+                                         }
+                                     }
+                                 })
+                                 .setCancelable(false)
+                                 .create();
+        dialog.show();
+    }
+    private void setupLongClick() {
+        expandableListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+    
+                if (passCodeValidationRequired) {
+                    showPassCodeScren();
+                    return true;
+                }
+                long packedPosition = expandableListView.getExpandableListPosition(position);
+                if (ExpandableListView.getPackedPositionType(packedPosition) ==
+                    ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
+                    int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
+                    
+                    String equip = expandableListTitle.get(groupPosition);
+                    new AlertDialog.Builder(getContext())
+                        .setTitle("Delete ?")
+                        .setMessage("Do you want to delete "+equip+" and all its points?")
+                           .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                               public void onClick(DialogInterface dialog, int which) {
+                                   deleteEntity(equipMap.get(equip));
+                               }
+                           })
+                       .setNegativeButton(android.R.string.no, null)
+                       .setIcon(android.R.drawable.ic_dialog_alert)
+                       .show();
+                    return true;
+                } else if (ExpandableListView.getPackedPositionType(packedPosition) ==
+                           ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+                    
+                    int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
+                    int childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
+                
+                    String point = expandableListDetail.get(expandableListTitle.get(groupPosition)).get(
+                        childPosition);
+                
+                    new AlertDialog.Builder(getContext())
+                        .setTitle("Delete ?")
+                        .setMessage("Points should be deleted only when there are duplicates, otherwise this may " +
+                                    "result in app crashes.\n\n" +
+                                    "Do you want to delete the point "+point+"?")
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                deleteEntity(tunerMap.get(point));
+                            }
+                        })
+                        .setNegativeButton(android.R.string.no, null)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+                }
+                return true;
+            }
+        });
+    }
+    
+    private void deleteEntity(String entityId) {
+    
+        new AsyncTask<Void, Void, Void>() {
+        
+            @Override
+            protected void onPreExecute() {
+                ProgressDialogUtils.showProgressDialog(getActivity(), "Deleting ...");
+                super.onPreExecute();
+            }
+        
+            @Override
+            protected Void doInBackground( final Void ... params ) {
+                CCUHsApi.getInstance().deleteEntityTree(entityId);
+                updateAllData();
+                CCUHsApi.getInstance().syncEntityTree();
+                return null;
+            }
+        
+            @Override
+            protected void onPostExecute( final Void result ) {
+                ProgressDialogUtils.hideProgressDialog();
+                expandableListAdapter.notifyDataSetChanged();
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
     
     private void updateAllData() {
         tunerMap.clear();
         expandableListDetail.clear();
+        equipMap.clear();
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
         for (Map m : equips) {
             ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and equipRef == \""+m.get("id")+"\"");
@@ -154,7 +279,8 @@ public class ZoneFragmentTemp extends Fragment
                 tunerList.add(t.get("dis").toString());
                 tunerMap.put(t.get("dis").toString(), t.get("id").toString());
             }
-            expandableListDetail.put(m.get("dis").toString()+" "+ m.get("id"), tunerList);
+            expandableListDetail.put(m.get("dis").toString(), tunerList);
+            equipMap.put(m.get("dis").toString(), m.get("id").toString());
         }
     
         ArrayList<HashMap> devices = CCUHsApi.getInstance().readAll("device");
@@ -167,7 +293,9 @@ public class ZoneFragmentTemp extends Fragment
                 tunerMap.put(t.get("dis").toString(), t.get("id").toString());
             }
             expandableListDetail.put(m.get("dis").toString(), tunerList);
+            equipMap.put(m.get("dis").toString(), m.get("id").toString());
         }
+        expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
     }
     
     public static double getPointVal(String id) {

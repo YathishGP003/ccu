@@ -125,6 +125,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                         lastExpandedPosition = position;
                     }
                 });
+                holder.tunerGroupToggle.setOnCheckedChangeListener(null);
                 holder.tunerGroupToggle.setChecked(section.isExpanded);
                 if (lastExpandedPosition != -1) {
                     mSectionStateChangeListener.onSectionStateChanged(previousOpenGroup, false);
@@ -132,12 +133,6 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                 holder.tunerGroupToggle.setOnCheckedChangeListener((buttonView, isChecked)
                         -> {
                     mItemClickListener.itemClicked(section);
-                    if (isChecked) {
-                        mSectionStateChangeListener.onSectionStateChanged(section, false);
-                    } else {
-                        mSectionStateChangeListener.onSectionStateChanged(section, true);
-                        lastExpandedPosition = position;
-                    }
                     mSectionStateChangeListener.onSectionStateChanged(section, isChecked);
                 });
                 break;

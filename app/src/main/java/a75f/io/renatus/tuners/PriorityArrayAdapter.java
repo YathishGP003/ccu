@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -16,6 +15,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.renatus.R;
+
+import static a75f.io.logic.tuners.TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL;
+import static a75f.io.logic.tuners.TunerConstants.TUNER_EQUIP_VAL_LEVEL;
 
 public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdapter.PriorityViewHolder> {
     Context context;
@@ -36,56 +38,65 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
     @Override
     public void onBindViewHolder(final PriorityViewHolder holder, @SuppressLint("RecyclerView") final int position) {
         final HashMap priorityItem = priorityArrayList.get(position);
-        Log.i("TunersUI", "priorityItem:" + priorityItem.toString());
-        //priorityArrayList.add(position, priorityItem);
+        HashMap priorityMap = getPriorityLevelMap(priorityArrayList);
+
         holder.textViewCurrentValue.setOnClickListener(v -> priorityItemClickListener.priorityClicked(position));
         holder.textViewPriority.setText(priorityItem.get("level").toString());
+        setBlackTextColor(holder.textViewName);
         holder.imgBtnTunerUndo.setVisibility(View.GONE);
-        if (position == 7) {
-            holder.textViewName.setText("Equip");
-            setOrangeTextColor(holder.textViewName);
-            if (priorityItem.containsKey("val")) {
-                if (!priorityItem.get("val").toString().equals("")) {
-                    holder.textViewCurrentValue.setText("" + priorityItem.get("val"));
+        if (priorityMap != null && priorityMap.size() > 0) {
+            if (priorityMap.get("level") != null) {
+                if (priorityItem.get("newValue") != null && !priorityItem.get("newValue").toString().equals("")) {
+                    holder.textViewCurrentValue.setText(priorityItem.get("newValue").toString());
                     setOrangeTextColor(holder.textViewCurrentValue);
-                }
-                if (priorityItem.containsKey("newValue")) {
-                    if (!priorityItem.get("newValue").toString().equals("")) {
-                        holder.textViewCurrentValue.setText("" + priorityItem.get("newValue"));
-                        holder.imgBtnTunerUndo.setVisibility(View.VISIBLE);
+                    setOrangeTextColor(holder.textViewName);
+                    holder.imgBtnTunerUndo.setVisibility(View.VISIBLE);
+                } else {
+                    if (Integer.parseInt(priorityMap.get("level").toString()) == TUNER_EQUIP_VAL_LEVEL) {
+                        if (position == 7 && priorityMap.get("val") != null) {
+                            holder.textViewCurrentValue.setText(priorityMap.get("val").toString());
+                            holder.textViewValue.setText("");
+                            setOrangeTextColor(holder.textViewCurrentValue);
+                            setOrangeTextColor(holder.textViewName);
+                        } else {
+                            if (priorityItem.get("val") != null && !priorityItem.get("val").toString().equals("")) {
+                                holder.textViewValue.setText(priorityItem.get("val").toString());
+                            } else {
+                                holder.textViewValue.setText("");
+                            }
+                            holder.textViewCurrentValue.setText("");
+                            setBlackTextColor(holder.textViewName);
+                        }
+                    } else if (Integer.parseInt(priorityMap.get("level").toString()) == SYSTEM_DEFAULT_VAL_LEVEL) {
+                        if (position == 13 && priorityMap.get("val") != null) {
+                            holder.textViewCurrentValue.setText(priorityMap.get("val").toString());
+                            holder.textViewValue.setText("");
+                            setOrangeTextColor(holder.textViewCurrentValue);
+                            setOrangeTextColor(holder.textViewName);
+                        } else {
+                            if (priorityItem.get("val") != null && !priorityItem.get("val").toString().equals("")) {
+                                holder.textViewValue.setText(priorityItem.get("val").toString());
+                            } else {
+                                holder.textViewValue.setText("");
+                            }
+                            holder.textViewCurrentValue.setText("");
+                            setBlackTextColor(holder.textViewName);
+                        }
                     }
                 }
             }
+        }
 
+        if (position == 7) {
+            holder.textViewName.setText(context.getText(R.string.txt_tunersModule));
         } else if (position == 9) {
             holder.textViewName.setText("Zone");
-            setBlackTextColor(holder.textViewName);
-            holder.textViewCurrentValue.setText("");
         } else if (position == 13) {
             holder.textViewName.setText("System");
-            setOrangeTextColor(holder.textViewName);
-            final HashMap systemPriority = priorityArrayList.get(16);
-            if (systemPriority.containsKey("val")) {
-                holder.textViewCurrentValue.setText("" + systemPriority.get("val"));
-                setOrangeTextColor(holder.textViewCurrentValue);
-                if (priorityItem.containsKey("newValue")) {
-                    if (!priorityItem.get("newValue").toString().equals("")) {
-                        holder.textViewCurrentValue.setText("" + priorityItem.get("newValue"));
-                        holder.imgBtnTunerUndo.setVisibility(View.VISIBLE);
-                    }
-                }
-            }
         } else if (position == 15) {
             holder.textViewName.setText("Building");
-            setBlackTextColor(holder.textViewName);
-            holder.textViewCurrentValue.setText("");
         } else if (position == 16) {
             holder.textViewName.setText("Default");
-            setBlackTextColor(holder.textViewName);
-            if (priorityItem.containsKey("val")) {
-                Log.i("TunersUI", "priorityItem:" + " val:" + priorityItem.get("val").toString());
-                holder.textViewValue.setText("" + priorityItem.get("val"));
-            }
         } else {
             holder.textViewName.setText("");
             holder.textViewCurrentValue.setText("");
@@ -94,13 +105,26 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
         }
 
         holder.imgBtnTunerUndo.setOnClickListener(v -> {
-            final HashMap systemPriority = priorityArrayList.get(16);
-            if (systemPriority.containsKey("val")) {
-                holder.textViewCurrentValue.setText("" + systemPriority.get("val"));
+            final HashMap priorityValMap = getPriorityLevelMap(priorityArrayList);
+            if (priorityValMap.containsKey("val")) {
+                holder.textViewCurrentValue.setText(priorityValMap.get("val").toString());
                 setOrangeTextColor(holder.textViewCurrentValue);
                 holder.imgBtnTunerUndo.setVisibility(View.GONE);
             }
         });
+    }
+
+    private HashMap getPriorityLevelMap(ArrayList<HashMap> values) {
+
+        if (values != null && values.size() > 0) {
+            for (int l = 1; l <= values.size(); l++) {
+                HashMap valMap = values.get(l - 1);
+                if (valMap.get("level") != null && valMap.get("val") != null) {
+                    return valMap;
+                }
+            }
+        }
+        return null;
     }
 
     public void setOrangeTextColor(TextView textView) {

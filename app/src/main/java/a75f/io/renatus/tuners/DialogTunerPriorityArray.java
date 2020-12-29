@@ -189,10 +189,10 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             ImageButton buttonUndo = dialogView.findViewById(R.id.imgBtnUndo);
             buttonUndo.setVisibility(View.GONE);
             buttonSaveAlert.setEnabled(false);
-            String levelName = (position == 13) ? "System" : "Equip";
+            String levelName = (position == 13) ? "System" : getString(R.string.txt_tunersModule);
             String text = "Level "+(position +1)+" "+levelName;
             text = text.replaceAll("System","<font color='#E24301'>System</font>");
-            text = text.replaceAll("Equip","<font color='#E24301'>Equip</font>");
+            text = text.replaceAll(getString(R.string.txt_tunersModule),"<font color='#E24301'>Module</font>");
             textViewLevel.setText(Html.fromHtml(text));
 
             if (tunerItemSelected.containsKey("minVal") && tunerItemSelected.containsKey("maxVal")) {

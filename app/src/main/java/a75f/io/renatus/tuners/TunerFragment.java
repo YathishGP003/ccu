@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -63,6 +64,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     ArrayList<HashMap> updatedTunerValues;
     MaterialButton saveTunerValues;
     MaterialButton cancelTunerUpdate;
+    EditText editChangeReason;
 
     public TunerFragment() {
     }
@@ -95,6 +97,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
         saveTunerValues = view.findViewById(R.id.buttonSave);
         cancelTunerUpdate = view.findViewById(R.id.buttonCancel);
+        editChangeReason = view.findViewById(R.id.editChangeReason);
         saveTunerValues.setEnabled(false);
         //Default Show System Tuners
         radioGroupTuners.check(R.id.radioBtnSystem);
@@ -104,6 +107,10 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         String text = "<font color=#E24301>*</font> <font color=#999999>Reason for Change</font>";
         reasonLabel.setText(Html.fromHtml(text));
 
+        cancelTunerUpdate.setOnClickListener(view1 -> {
+            editChangeReason.setText("");
+            editChangeReason.clearFocus();
+        });
         radioGroupTuners.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.radioBtnSystem) {
                 Log.i("TunersUI", "Selected:radioBtnSystem");
@@ -118,10 +125,19 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         });
         updatedTunerValues = new ArrayList<>();
         saveTunerValues.setOnClickListener(v -> {
+            if (editChangeReason.getText().toString().length() == 0){
+                Toast.makeText(getActivity(),"Please enter reason to save!",Toast.LENGTH_SHORT).show();
+                return;
+            }
+            saveTunerValues.setTextColor(getActivity().getColor(R.color.tuner_group));
             LayoutInflater inflater = this.getLayoutInflater();
             View dialogView = inflater.inflate(R.layout.dialog_apply_tuner, null);
             AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
             dialog.setView(dialogView);
+
+            HashMap ccu = CCUHsApi.getInstance().read("ccu");
+            ((TextView)dialogView.findViewById(R.id.textView_Building)).setText(ccu.get("dis").toString());
+
             AlertDialog valueDialog = dialog.show();
 
             valueDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
@@ -132,12 +148,8 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 Toast.makeText(getActivity(), "Tuner Values Updated: " + newTunerValueItem.get("dis").toString() + " tunerValue:" + newTunerValueItem.get("newValue").toString(), Toast.LENGTH_SHORT).show();
                 View tunerItemViewBody = inflater.inflate(R.layout.dialog_apply_tuner_item, null);
 
-                LinearLayout layoutValuesTop = tunerItemViewBody.findViewById(R.id.layoutBuilding);
-                layoutValuesTop.setVisibility(View.GONE);
-
                 LinearLayout layoutValues = tunerItemViewBody.findViewById(R.id.layoutValues);
                 layoutValues.setVisibility(View.VISIBLE);
-
                 TextView textView_SectionLabel = tunerItemViewBody.findViewById(R.id.textView_SectionLabel);
                 TextView textView_Section = tunerItemViewBody.findViewById(R.id.textView_Section);
                 TextView textView_tuner = tunerItemViewBody.findViewById(R.id.textView_tuner);
@@ -155,8 +167,8 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 } else {
                     textView_tuner.setText(tunerName + " | ");
                 }
-                textView_level.setText("Level 14 : ");
-                textView_newLevel.setText("Level 14 : ");
+                textView_level.setText("Level "+getTunerLevelValue(newTunerValueItem.get("id").toString())+" : ");
+                textView_newLevel.setText("Level 8 : ");
                 textView_oldValue.setText(String.valueOf(getTunerValue(newTunerValueItem.get("id").toString())));
                 textView_newValue.setText(newTunerValueItem.get("newValue").toString());
                 linearLayoutBody.addView(tunerItemViewBody);
@@ -169,10 +181,16 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 }
                 Toast.makeText(getActivity(), "Tuner Values Updated Successfully", Toast.LENGTH_SHORT).show();
                 updatedTunerValues.clear();
+                editChangeReason.setText("");
                 valueDialog.dismiss();
                 saveTunerValues.setEnabled(false);
+                saveTunerValues.setTextColor(getActivity().getColor(R.color.tuner_group));
             });
-            buttonCancelTuners.setOnClickListener(dialogV -> valueDialog.dismiss());
+            buttonCancelTuners.setOnClickListener(dialogV -> {
+                saveTunerValues.setEnabled(true);
+                saveTunerValues.setTextColor(getActivity().getColor(R.color.orange_75f));
+                valueDialog.dismiss();
+            });
             linearLayoutBody.invalidate();
             dialogView.invalidate();
             valueDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -239,7 +257,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     private void getSystemTuners() {
         tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, 2);
 
-        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("tunerGroup");
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("tunerGroup and system");
 
         // Group by countryName
         Map<String, List<HashMap>> groupByTuner = equips.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
@@ -295,6 +313,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     updatedTunerValues.add(tunerItemSelected);
                     if (updatedTunerValues.size() > 0) {
                         saveTunerValues.setEnabled(true);
+                        saveTunerValues.setTextColor(getActivity().getColor(R.color.orange_75f));
                     }
                 }
                 break;
@@ -315,5 +334,18 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             }
         }
         return 0;
+    }
+    public String getTunerLevelValue(String id) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        ArrayList values = hayStack.readPoint(id);
+        if (values != null && values.size() > 0) {
+            for (int l = 1; l <= values.size(); l++) {
+                HashMap valMap = ((HashMap) values.get(l - 1));
+                if (valMap.get("val") != null && valMap.get("level") != null) {
+                    return valMap.get("level").toString();
+                }
+            }
+        }
+        return "14";
     }
 }

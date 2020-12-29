@@ -41,7 +41,23 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
         holder.textViewCurrentValue.setOnClickListener(v -> priorityItemClickListener.priorityClicked(position));
         holder.textViewPriority.setText(priorityItem.get("level").toString());
         holder.imgBtnTunerUndo.setVisibility(View.GONE);
-        if (position == 9) {
+        if (position == 7) {
+            holder.textViewName.setText("Equip");
+            setOrangeTextColor(holder.textViewName);
+            if (priorityItem.containsKey("val")) {
+                if (!priorityItem.get("val").toString().equals("")) {
+                    holder.textViewCurrentValue.setText("" + priorityItem.get("val"));
+                    setOrangeTextColor(holder.textViewCurrentValue);
+                }
+                if (priorityItem.containsKey("newValue")) {
+                    if (!priorityItem.get("newValue").toString().equals("")) {
+                        holder.textViewCurrentValue.setText("" + priorityItem.get("newValue"));
+                        holder.imgBtnTunerUndo.setVisibility(View.VISIBLE);
+                    }
+                }
+            }
+
+        } else if (position == 9) {
             holder.textViewName.setText("Zone");
             setBlackTextColor(holder.textViewName);
             holder.textViewCurrentValue.setText("");

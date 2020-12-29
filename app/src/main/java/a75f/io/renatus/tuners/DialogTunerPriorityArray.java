@@ -105,6 +105,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         buttonCancel = view.findViewById(R.id.buttonCancelTuner);
 
         recyclerViewPriority.setLayoutManager(new LinearLayoutManager(getActivity()));
+        buttonSaveTuner.setEnabled(false);
         return view;
     }
 
@@ -114,10 +115,10 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         String tunerName = tunerItemSelected.get("dis").toString();
         if (tunerItemSelected.containsKey("unit")) {
             textTunerName.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1) + " (" + tunerItemSelected.get("unit").toString().toUpperCase() + ")");
-            textTunerDefaultValue.setText("" + getTunerValue(tunerItemSelected.get("id").toString()) + " (" + tunerItemSelected.get("unit").toString().toUpperCase() + ")");
+            textTunerDefaultValue.setText(getTunerDefaultValue(tunerItemSelected.get("id").toString()) + " (" + tunerItemSelected.get("unit").toString().toUpperCase() + ")");
         } else {
             textTunerName.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
-            textTunerDefaultValue.setText("" + getTunerValue(tunerItemSelected.get("id").toString()));
+            textTunerDefaultValue.setText("" + getTunerDefaultValue(tunerItemSelected.get("id").toString()));
         }
 
         textTunerGroupTitle.setText(tunerGroupSelected.getName());
@@ -126,7 +127,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         Log.i("TunersUI", "priorityList:" + priorityList);
         priorityArrayAdapter = new PriorityArrayAdapter(getActivity(), priorityList, this);
         recyclerViewPriority.setAdapter(priorityArrayAdapter);
-        recyclerViewPriority.scrollToPosition(priorityList.size() - 1);
+      //  recyclerViewPriority.scrollToPosition(priorityList.size() - 1);
 
         buttonSaveTuner.setOnClickListener(v -> {
             Intent tunerValue = new Intent()
@@ -156,9 +157,23 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         return 0;
     }
 
+    public double getTunerDefaultValue(String id) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        ArrayList values = hayStack.readPoint(id);
+        if (values != null && values.size() > 0) {
+            for (int l = 1; l <= values.size(); l++) {
+                HashMap valMap = ((HashMap) values.get(l - 1));
+                if (valMap.get("level").toString().equals("17") && valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        return 0;
+    }
+
     @Override
     public void priorityClicked(int position) {
-        if (position == 13) {
+        if (position == 13 || position == 7) {
             LayoutInflater inflater = this.getLayoutInflater();
 
             View dialogView = inflater.inflate(R.layout.dialog_tuner_range, null);
@@ -173,7 +188,11 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             Button buttonCancelAlert = dialogView.findViewById(R.id.buttonCancelTuner);
             ImageButton buttonUndo = dialogView.findViewById(R.id.imgBtnUndo);
             buttonUndo.setVisibility(View.GONE);
-            String text = "<font color=#999999>Level 14</font> <font color=#E24301>System</font>";
+            buttonSaveAlert.setEnabled(false);
+            String levelName = (position == 13) ? "System" : "Equip";
+            String text = "Level "+(position +1)+" "+levelName;
+            text = text.replaceAll("System","<font color='#E24301'>System</font>");
+            text = text.replaceAll("Equip","<font color='#E24301'>Equip</font>");
             textViewLevel.setText(Html.fromHtml(text));
 
             if (tunerItemSelected.containsKey("minVal") && tunerItemSelected.containsKey("maxVal")) {
@@ -246,6 +265,8 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 {
                     Toast.makeText(getActivity(), "TunersUI-oldValue:" + oldValue + " newValue:" + newValue, Toast.LENGTH_SHORT).show();
                     if (oldValue != newValue) {
+                        buttonSaveAlert.setEnabled(true);
+                        buttonSaveAlert.setTextColor(getActivity().getColor(R.color.orange_75f));
                         buttonUndo.setVisibility(View.VISIBLE);
                         if (newValue < 0){
                             selectedTunerValue = String.valueOf(newValue * finalIncrementValDb);
@@ -273,6 +294,8 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                             priorityList.set(position, newValue);
                             priorityArrayAdapter.notifyItemChanged(position);
                             valueDialog.dismiss();
+                            buttonSaveTuner.setEnabled(true);
+                            buttonSaveTuner.setTextColor(getActivity().getColor(R.color.orange_75f));
                         }
                 );
             } else {

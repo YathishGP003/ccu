@@ -1660,9 +1660,9 @@ public class TunerNumberPicker extends LinearLayout {
      *                 {@link #getMaxValue()} - {@link #getMinValue()} + 1.
      */
     public void setMaxValue(int maxValue) {
-        if (maxValue < 0) {
+       /* if (maxValue < 0) {
             throw new IllegalArgumentException("maxValue must be >= 0");
-        }
+        }*/
         mMaxValue = maxValue;
         if (mMaxValue < mValue) {
             mValue = mMaxValue;

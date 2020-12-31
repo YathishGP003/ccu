@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -218,8 +219,8 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 }
                 int currentValPos = 0;
                 if (minValue < 0) {
-                    for (double i = minValueDb; i <= maxValueDb; i += incrementValDb) {
-                        valueList.add(String.format("%.1f", i));
+                    for (double i = 100*minValueDb; i <= 100*maxValueDb; i += 100*incrementValDb) {
+                        valueList.add(String.valueOf(i/100.0));
                     }
                     for (String currVal : valueList){
                         if (currentValueDb == Double.parseDouble(currVal)){
@@ -228,8 +229,8 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                         }
                     }
                 } else {
-                    for (double i = minValueDb; i <= maxValueDb; i += incrementValDb) {
-                        valueList.add(String.format("%.1f", i));
+                    for (double i = 100*minValueDb; i <= 100*maxValueDb; i += 100*incrementValDb) {
+                        valueList.add(String.valueOf(i/100.0));
                     }
                     for (String currVal : valueList){
                         if (currentValueDb == Double.parseDouble(currVal)){
@@ -240,22 +241,10 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 }
                 Log.i("TunersUI", " currentValPos:" + currentValPos + " value:" + valueList.get(currentValPos) + " valueList:" + valueList);
                 npTunerRange.setDisplayedValues(valueList.toArray(new String[valueList.size()]));
-                npTunerRange.setMinValue(minValue);
-                if (maxValue > 0) {
-                    try {
-                        Log.i("TunersUI", "maxValue > 0:" + "incrementVal" + incrementVal + " maxValue:" + (maxValue / incrementVal));
-                        npTunerRange.setMaxValue(valueList.size() -1);
-                    } catch (ArithmeticException e) {
-                        npTunerRange.setMaxValue(valueList.size() -1);
-                        Log.i("TunersUI", "ArithmeticException :" + e.getMessage());
-                        e.printStackTrace();
-                    }
-                } else{
-                    npTunerRange.setMaxValue(maxValue);
-                }
-
-                if (minValue == 1){
-                    npTunerRange.setValue(currentValue);
+                npTunerRange.setMinValue(0);
+                npTunerRange.setMaxValue(valueList.size() -1);
+                if (minValue < 0 || maxValue < 0){
+                    npTunerRange.setValue(currentValPos -1);
                 } else {
                     npTunerRange.setValue(currentValPos);
                 }
@@ -271,13 +260,8 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                         buttonSaveAlert.setEnabled(true);
                         buttonSaveAlert.setTextColor(getActivity().getColor(R.color.orange_75f));
                         buttonUndo.setVisibility(View.VISIBLE);
-                        if (newValue < 0){
-                            selectedTunerValue = String.valueOf(newValue * finalIncrementValDb);
-                        } else {
-                            double selectedValue = Double.parseDouble(valueList.get(newValue));
-                            selectedTunerValue = new DecimalFormat("##.#").format(selectedValue);
-                        }
-
+                        double selectedValue = Double.parseDouble(valueList.get(newValue));
+                        selectedTunerValue = new DecimalFormat("##.#").format(selectedValue);
                     }
                 });
                 int finalCurrentValPos = currentValPos;

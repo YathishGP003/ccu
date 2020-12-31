@@ -254,8 +254,11 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     npTunerRange.setMaxValue(maxValue);
                 }
 
-
-                npTunerRange.setValue(currentValPos);
+                if (minValue == 1){
+                    npTunerRange.setValue(currentValue);
+                } else {
+                    npTunerRange.setValue(currentValPos);
+                }
                 Log.i("TunersUI", "valueList :" + Arrays.toString(npTunerRange.getDisplayedValues()));
 
                 npTunerRange.setWrapSelectorWheel(false);
@@ -285,7 +288,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     if (npTunerRange.getValue() < 0){
                         selectedTunerValue = String.valueOf(npTunerRange.getValue() * finalIncrementValDb);
                     } else {
-                        double selectedValue = Double.parseDouble(valueList.get(npTunerRange.getValue()));
+                        double selectedValue = minValue == 1 ? npTunerRange.getValue() : Double.parseDouble(valueList.get(npTunerRange.getValue()));
                         selectedTunerValue = new DecimalFormat("##.#").format(selectedValue);
                     }
                             //tunerItemSelected.put("newValue", selectedTunerValue);

@@ -310,7 +310,9 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                             " tunerGroupSelected:" + tunerGroupSelected.getName() + " tunerValue:" + tunerValue, Toast.LENGTH_SHORT).show();
                     tunerItemSelected.put("newValue", tunerValue);
                     tunerExpandableLayoutHelper.updateTuner(tunerGroupSelected.getName(), tunerItemSelected, oldTunerItemSelected);
-                    updatedTunerValues.add(tunerItemSelected);
+                    if (!updatedTunerValues.contains(tunerItemSelected)){
+                        updatedTunerValues.add(tunerItemSelected);
+                    }
                     if (updatedTunerValues.size() > 0) {
                         saveTunerValues.setEnabled(true);
                         saveTunerValues.setTextColor(getActivity().getColor(R.color.orange_75f));

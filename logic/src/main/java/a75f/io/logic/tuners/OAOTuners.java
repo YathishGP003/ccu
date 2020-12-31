@@ -279,7 +279,6 @@ public class OAOTuners
                     .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
                     .addMarker("sp").addMarker("purge").addMarker("dab").addMarker("damper").addMarker("pos").addMarker("multiplier").addMarker("min")
                     .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
-                    .setUnit("%")
                     .setTz(tz)
                     .build();
             String smartPurgeDabDamperMinOpenMultiplierId = hayStack.addPoint(smartPurgeDabDamperMinOpenMultiplier);
@@ -295,7 +294,6 @@ public class OAOTuners
                     .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
                     .addMarker("sp").addMarker("purge").addMarker("vav").addMarker("damper").addMarker("pos").addMarker("multiplier").addMarker("min")
                     .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
-                    .setUnit("%")
                     .setTz(tz)
                     .build();
             String smartPurgeVavDamperMinOpenMultiplierId = hayStack.addPoint(smartPurgeVavDamperMinOpenMultiplier);
@@ -697,7 +695,6 @@ public class OAOTuners
                     .addMarker("tuner").addMarker("system").addMarker("oao").addMarker("writable").addMarker("his")
                     .addMarker("sp").addMarker("purge").addMarker("dab").addMarker("damper").addMarker("pos").addMarker("multiplier").addMarker("min")
                     .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
-                    .setUnit("%")
                     .setTz(tz)
                     .build();
             String smartPurgeDabDamperMinOpenMultiplierId = hayStack.addPoint(smartPurgeDabDamperMinOpenMultiplier);
@@ -720,7 +717,6 @@ public class OAOTuners
                     .addMarker("tuner").addMarker("system").addMarker("oao").addMarker("writable").addMarker("his")
                     .addMarker("sp").addMarker("purge").addMarker("vav").addMarker("damper").addMarker("pos").addMarker("multiplier").addMarker("min")
                     .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
-                    .setUnit("%")
                     .setTz(tz)
                     .build();
             String smartPurgeVavDamperMinOpenMultiplierId = hayStack.addPoint(smartPurgeVavDamperMinOpenMultiplier);

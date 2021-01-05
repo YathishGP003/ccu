@@ -149,6 +149,8 @@ public class ModbusPulse {
     
     public static double getRegisterValFromResponse(Register register, RtuMessageResponse response) {
         double respVal = 0;
+        Log.d("CCU_MODBUS","reg param type "+ register.getParameterDefinitionType());
+
         if (register.registerType.equals("discreteInput")) {
             //16bit decimal (ir) or 1 bit (di)
             respVal = parseByteVal(response);

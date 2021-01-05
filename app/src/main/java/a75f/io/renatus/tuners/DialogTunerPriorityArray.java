@@ -224,7 +224,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     }
                     for (String currVal : valueList){
                         if (currentValueDb == Double.parseDouble(currVal)){
-                            currentValPos = valueList.indexOf(currVal) + 1;
+                            currentValPos = valueList.indexOf(currVal);
                             break;
                         }
                     }
@@ -243,11 +243,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 npTunerRange.setDisplayedValues(valueList.toArray(new String[valueList.size()]));
                 npTunerRange.setMinValue(0);
                 npTunerRange.setMaxValue(valueList.size() -1);
-                if (minValue < 0 || maxValue < 0){
-                    npTunerRange.setValue(currentValPos -1);
-                } else {
-                    npTunerRange.setValue(currentValPos);
-                }
+                npTunerRange.setValue(currentValPos);
                 Log.i("TunersUI", "valueList :" + Arrays.toString(npTunerRange.getDisplayedValues()));
 
                 npTunerRange.setWrapSelectorWheel(false);
@@ -260,8 +256,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                         buttonSaveAlert.setEnabled(true);
                         buttonSaveAlert.setTextColor(getActivity().getColor(R.color.orange_75f));
                         buttonUndo.setVisibility(View.VISIBLE);
-                        double selectedValue = Double.parseDouble(valueList.get(newValue));
-                        selectedTunerValue = new DecimalFormat("##.#").format(selectedValue);
+                        selectedTunerValue = valueList.get(newValue);
                     }
                 });
                 int finalCurrentValPos = currentValPos;
@@ -272,8 +267,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     if (npTunerRange.getValue() < 0){
                         selectedTunerValue = String.valueOf(npTunerRange.getValue() * finalIncrementValDb);
                     } else {
-                        double selectedValue = minValue == 1 ? npTunerRange.getValue() : Double.parseDouble(valueList.get(npTunerRange.getValue()));
-                        selectedTunerValue = new DecimalFormat("##.#").format(selectedValue);
+                        selectedTunerValue = valueList.get(npTunerRange.getValue());
                     }
                             //tunerItemSelected.put("newValue", selectedTunerValue);
                             HashMap newValue = (HashMap) priorityList.get(position);

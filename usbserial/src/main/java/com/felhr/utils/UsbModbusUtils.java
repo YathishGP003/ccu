@@ -52,7 +52,7 @@ public class UsbModbusUtils {
         return -1;
     }
     public static boolean validSlaveId(int id){
-        return ((id > 0) && (id < 247)) ;
+        return ((id > 0) && (id < 248)) ;
     }
     /**
      * <p>toString.</p>

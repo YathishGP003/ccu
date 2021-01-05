@@ -44,7 +44,7 @@ public class ModbusNetwork extends DeviceNetwork
 
     private int getRegisterCount(Register register) {
         
-        if (register.getParameterDefinitionType().equals("long") || register.getParameterDefinitionType().equals("Int64")) {
+        if (register.getParameterDefinitionType().equals("long") || register.getParameterDefinitionType().equals("unsigned long") || register.getParameterDefinitionType().equals("int64")) {
             return READ_REGISTER_FOUR;
         } else if (register.getParameterDefinitionType().equals("float")) {
             return READ_REGISTER_TWO;

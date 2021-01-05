@@ -169,7 +169,7 @@ public class ModbusPulse {
                 if (register.getParameters().size() > 0) {
                     respVal = parseBitRangeVal(response, register.getParameters().get(0).bitParamRange);
                 }
-            }  else if (register.getParameterDefinitionType().equals("Int64") ||
+            }  else if (register.getParameterDefinitionType().equals("int64") || register.getParameterDefinitionType().equals("unsigned long") ||
                         register.getParameterDefinitionType().equals("long")) {
                 if (register.getParameters().size() > 0) {
                     respVal = parseInt64Val(response);

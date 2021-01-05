@@ -30,7 +30,11 @@ public class Register {
     @Expose
     @SerializedName("parameterDefinitionType")
     public String parameterDefinitionType;
-
+    
+    @SerializedName("wordOrder")
+    @Expose
+    public String wordOrder;
+    
     @SerializedName("parameters")
     @Expose
     @Convert(converter = EncounterParameterConverter.class, dbType = String.class)
@@ -67,6 +71,13 @@ public class Register {
     public void setParameterDefinitionType(String parameterDefinitionType) {
         this.parameterDefinitionType = parameterDefinitionType;
     }
+    
+    public String getWordOrder() {
+        return wordOrder;
+    }
+    public void setWordOrder(String wordOrder) {
+        this.wordOrder = wordOrder;
+    }
 
     public List<Parameter> getParameters() {
         return parameters;
@@ -75,7 +86,7 @@ public class Register {
     public void setParameters(List<Parameter> parameters) {
         this.parameters = parameters;
     }
-
+    
     public static class EncounterParameterConverter implements PropertyConverter<List<Parameter>, String> {
 
         @Override
@@ -101,7 +112,7 @@ public class Register {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(registerNumber+":"+registerAddress+":"+registerType+":"+parameterDefinitionType+" ");
+        sb.append(registerNumber+":"+registerAddress+":"+registerType+":"+parameterDefinitionType+":"+wordOrder+" ");
         
         for(Parameter p : parameters) {
             sb.append(p.toString());

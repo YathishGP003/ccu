@@ -13,6 +13,7 @@
       "registerNumber": "40141",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2f14",
@@ -57,6 +58,7 @@
       "registerNumber": "40143",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2f15",
@@ -101,6 +103,7 @@
       "registerNumber": "40145",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2f16",
@@ -145,6 +148,7 @@
       "registerNumber": "40147",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2f17",
@@ -188,6 +192,7 @@
       "registerNumber": "40149",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2f18",
@@ -228,6 +233,7 @@
       "registerNumber": "40151",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2f19",
@@ -268,6 +274,7 @@
       "registerNumber": "40153",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2fea",
@@ -308,6 +315,7 @@
       "registerNumber": "40155",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2feb",
@@ -348,6 +356,7 @@
       "registerNumber": "40157",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2fec",
@@ -385,6 +394,7 @@
       "registerNumber": "40117",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2fed",
@@ -421,6 +431,7 @@
       "registerNumber": "40217",
       "registerType": "holdingRegister",
       "parameterDefinitionType": "unsigned long",
+      "wordOrder": "littleEndian",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2fee",

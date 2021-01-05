@@ -25,42 +25,30 @@ public class ModbusPulse {
             switch (UsbModbusUtils.validateFunctionCode((data[1] & 0xff))) {
                 case UsbModbusUtils.READ_COILS:
                     validateResponse(slaveid, data, "registerNumber", UsbModbusUtils.READ_COILS);
-                    //DLog.LogdSerial("Event Type MODBUS Read Coil :" + data.length + "," + data.toString());
                     break;
                 case UsbModbusUtils.READ_DISCRETE_INPUTS:
                     validateResponse(slaveid, data, "registerNumber",UsbModbusUtils.READ_DISCRETE_INPUTS);
-                    //DLog.LogdSerial("Event Type MODBUS Read Discreate inputs:" + data.length + "," + data.toString());
                     break;
                 case UsbModbusUtils.READ_HOLDING_REGISTERS:
                     validateResponse(slaveid, data,"registerNumber", UsbModbusUtils.READ_HOLDING_REGISTERS);
-                    //DLog.LogdSerial("Event Type MODBUS Read Holding Registers:" + data.length + "," + data.toString
-                    // ());
                     break;
                 case UsbModbusUtils.READ_INPUT_REGISTERS:
                     validateResponse(slaveid, data, "registerNumber",UsbModbusUtils.READ_INPUT_REGISTERS);
-                    //DLog.LogdSerial("Event Type MODBUS Read Input Registers:" + data.length + "," + data.toString());
                     break;
                 case UsbModbusUtils.WRITE_COIL:
-                    //DLog.LogdSerial("Event Type MODBUS write coil:" + data.length + "," + data.toString());
                     break;
                 case UsbModbusUtils.WRITE_REGISTER:
                     validateResponse(slaveid, data, "registerNumber",UsbModbusUtils.WRITE_REGISTER);
-                    //DLog.LogdSerial("Event Type MODBUS write register:" + data.length + "," + data.toString());
                     break;
                 case UsbModbusUtils.READ_EXCEPTION_STATUS:
-                    //DLog.LogdSerial("Event Type MODBUS Read Exception status:" + data.length + "," + data.toString());
                     break;
                 case UsbModbusUtils.WRITE_COILS:
-                    //DLog.LogdSerial("Event Type MODBUS write coils:" + data.length + "," + data.toString());
                     break;
                 case UsbModbusUtils.WRITE_REGISTERS:
-                    //DLog.LogdSerial("Event Type MODBUS Write Registers:" + data.length + "," + data.toString());
                     break;
                 case UsbModbusUtils.REPORT_SLAVE_ID:
-                    //DLog.LogdSerial("Event Type MODBUS Report slave id:" + data.length + "," + data.toString());
                     break;
                 case UsbModbusUtils.WRITE_MASK_REGISTER:
-                    //DLog.LogdSerial("Event Type MODBUS Write Mask Registers:" + data.length + "," + data.toString());
                     break;
 
             }
@@ -108,40 +96,39 @@ public class ModbusPulse {
                                          " and registerAddress == \""+readRegister.getRegisterAddress()+ "\""+
                                          " and parameterId == \""+readRegister.getParameters().get(0).getParameterId()+ "\""+
                                          " and deviceRef == \"" + deviceRef + "\"");
-        //for(HashMap phyPoint : phyPoints) {
-            if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
-                Log.d(L.TAG_CCU_MODBUS, "Physical point does not exist for register "
-                                                +readRegister.getRegisterAddress() +" and device "+deviceRef);
-                return;
-            }
-            HashMap logPoint = hayStack.read("point and id==" + phyPoint.get("pointRef"));
-            Log.d(L.TAG_CCU_MODBUS,"Response data : "+Arrays.toString(response.getMessageData()));
-            double formattedVal = 0;
-            switch (UsbModbusUtils.validateFunctionCode(registerType)){
-                case UsbModbusUtils.READ_INPUT_REGISTERS:
-                case UsbModbusUtils.READ_HOLDING_REGISTERS:
-                case UsbModbusUtils.READ_DISCRETE_INPUTS:
-                    formattedVal = getRegisterValFromResponse(readRegister, response);
-                    hayStack.writeHisValById(logPoint.get("id").toString(),formattedVal);
-                    hayStack.writeHisValById(phyPoint.get("id").toString(), formattedVal);
-                    
-                    if (logPoint.containsKey("writable")) {
-                        hayStack.writePoint(logPoint.get("id").toString(), formattedVal);
-                    }
-                    //startIndex +=2;
-                    break;
-                case UsbModbusUtils.WRITE_REGISTER:
-                    //Parsed only for logging.
-                    formattedVal = (response.getMessageData()[MODBUS_DATA_START_INDEX+1] << 8)
-                                    | (response.getMessageData()[MODBUS_DATA_START_INDEX + 2]);
-                    break;
-                default:
-                    Log.d(L.TAG_CCU_MODBUS, "Unknown Register type data "+Arrays.toString(response.getMessageData()));
-                    break;
-            }
-            Log.d(L.TAG_CCU_MODBUS, "Pulse Register: Type "+registerType+ ", Addr "+readRegister.getRegisterAddress()+
-                                            " Val "+formattedVal);
-        //}
+        
+        if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
+            Log.d(L.TAG_CCU_MODBUS, "Physical point does not exist for register "
+                                            +readRegister.getRegisterAddress() +" and device "+deviceRef);
+            return;
+        }
+        HashMap logPoint = hayStack.read("point and id==" + phyPoint.get("pointRef"));
+        Log.d(L.TAG_CCU_MODBUS,"Response data : "+Arrays.toString(response.getMessageData()));
+        double formattedVal = 0;
+        switch (UsbModbusUtils.validateFunctionCode(registerType)){
+            case UsbModbusUtils.READ_INPUT_REGISTERS:
+            case UsbModbusUtils.READ_HOLDING_REGISTERS:
+            case UsbModbusUtils.READ_DISCRETE_INPUTS:
+                formattedVal = getRegisterValFromResponse(readRegister, response);
+                hayStack.writeHisValById(logPoint.get("id").toString(),formattedVal);
+                hayStack.writeHisValById(phyPoint.get("id").toString(), formattedVal);
+                
+                if (logPoint.containsKey("writable")) {
+                    hayStack.writePoint(logPoint.get("id").toString(), formattedVal);
+                }
+                //startIndex +=2;
+                break;
+            case UsbModbusUtils.WRITE_REGISTER:
+                //Parsed only for logging.
+                formattedVal = (response.getMessageData()[MODBUS_DATA_START_INDEX+1] << 8)
+                                | (response.getMessageData()[MODBUS_DATA_START_INDEX + 2]);
+                break;
+            default:
+                Log.d(L.TAG_CCU_MODBUS, "Unknown Register type data "+Arrays.toString(response.getMessageData()));
+                break;
+        }
+        Log.d(L.TAG_CCU_MODBUS, "Pulse Register: Type "+registerType+ ", Addr "+readRegister.getRegisterAddress()+
+                                        " Val "+formattedVal);
     
         LModbus.getModbusCommLock().unlock();
     }
@@ -154,26 +141,41 @@ public class ModbusPulse {
             //16bit decimal (ir) or 1 bit (di)
             respVal = parseByteVal(response);
         } else if (register.registerType.equals("inputRegister")) {
-            respVal = parseIntVal(response);
+            if (register.getWordOrder() != null && register.getWordOrder().equals("littleEndian")) {
+                respVal = parseLittleEndianFloatVal(response);
+            } else {
+                respVal = parseIntVal(response);
+            }
         } else if (register.registerType.equals("holdingRegister")) {
+            
             if (register.getParameterDefinitionType().equals("float")) {
+                
                 respVal = parseFloatVal(response);
             } else if (register.getParameterDefinitionType().equals("integer")
                   || register.getParameterDefinitionType().equals("decimal")
                   || register.getParameterDefinitionType().equals("range")) {
+                
                 respVal = parseIntVal(response);
             } else if (register.getParameterDefinitionType().equals("binary")) {
+                
                 if (register.getParameters().size() > 0) {
                     respVal = parseBitVal(response, register.getParameters().get(0).bitParam);
                 }
             } else if (register.getParameterDefinitionType().equals("boolean")) {
+                
                 if (register.getParameters().size() > 0) {
                     respVal = parseBitRangeVal(response, register.getParameters().get(0).bitParamRange);
                 }
-            }  else if (register.getParameterDefinitionType().equals("int64") || register.getParameterDefinitionType().equals("unsigned long") ||
+            }  else if (register.getParameterDefinitionType().equals("int64") ||
+                        register.getParameterDefinitionType().equals("unsigned long") ||
                         register.getParameterDefinitionType().equals("long")) {
+                
                 if (register.getParameters().size() > 0) {
-                    respVal = parseInt64Val(response);
+                    if (register.getWordOrder() != null && register.getWordOrder().equals("littleEndian")) {
+                        respVal = parseLittleEndianInt64Val(response);
+                    } else {
+                        respVal = parseInt64Val(response);
+                    }
                 }
             }
         }
@@ -241,14 +243,14 @@ public class ModbusPulse {
     }
     
     public static long parseLittleEndianInt64Val(RtuMessageResponse response) {
-        long responseVal = (response.getMessageData()[MODBUS_DATA_START_INDEX + 6] & 0xFF) << 56 |
-                           (response.getMessageData()[MODBUS_DATA_START_INDEX + 7] & 0xFF) << 48 |
-                           (response.getMessageData()[MODBUS_DATA_START_INDEX + 4] & 0xFF) << 40 |
-                           (response.getMessageData()[MODBUS_DATA_START_INDEX + 5] & 0xFF) << 32 |
-                           (response.getMessageData()[MODBUS_DATA_START_INDEX + 2] & 0xFF) << 24 |
-                           (response.getMessageData()[MODBUS_DATA_START_INDEX + 3] & 0xFF) << 16 |
-                           (response.getMessageData()[MODBUS_DATA_START_INDEX] & 0xFF) << 8 |
-                           (response.getMessageData()[MODBUS_DATA_START_INDEX + 1] & 0xFF);
+        long responseVal = ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 6] & 0xFF) << 56 |
+                           ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 7] & 0xFF) << 48 |
+                           ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 4] & 0xFF) << 40 |
+                           ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 5] & 0xFF) << 32 |
+                           ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 2] & 0xFF) << 24 |
+                           ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 3] & 0xFF) << 16 |
+                           ((long)response.getMessageData()[MODBUS_DATA_START_INDEX] & 0xFF) << 8 |
+                           ((long)response.getMessageData()[MODBUS_DATA_START_INDEX + 1] & 0xFF);
         return responseVal;
     }
     

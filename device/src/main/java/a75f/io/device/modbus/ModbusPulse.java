@@ -94,7 +94,6 @@ public class ModbusPulse {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap device = hayStack.read("device and addr == \""+slaveid+"\"");
         if (device != null && device.size() > 0) {
-            Device d = new Device.Builder().setHashMap(device).build();
             updateModbusRespone(device.get("id").toString(), response, registerType);
         }
     }
@@ -202,6 +201,21 @@ public class ModbusPulse {
         return formattedVal;
     }
     
+    public static double parseLittleEndianFloatVal(RtuMessageResponse response) {
+        
+        int responseVal = (response.getMessageData()[MODBUS_DATA_START_INDEX + 2] & 0xFF) << 24 |
+                      (response.getMessageData()[MODBUS_DATA_START_INDEX + 3] & 0xFF) << 16 |
+                      (response.getMessageData()[MODBUS_DATA_START_INDEX] & 0xFF) << 8 |
+                      (response.getMessageData()[MODBUS_DATA_START_INDEX + 1] & 0xFF);
+        
+        double formattedVal = Float.intBitsToFloat(responseVal);
+        
+        if (Double.isNaN(formattedVal)) {
+            formattedVal = 0;
+        }
+        return formattedVal;
+    }
+    
     public static int parseByteVal(RtuMessageResponse response) {
         return response.getMessageData()[MODBUS_DATA_START_INDEX] & 0xFF ;
     }
@@ -218,12 +232,23 @@ public class ModbusPulse {
     }
     
     public static long parseInt64Val(RtuMessageResponse response) {
-    
         long responseVal = 0;
         for (int i = 0; i < Long.BYTES; i++) {
             responseVal <<= Long.BYTES;
             responseVal |= (response.getMessageData()[MODBUS_DATA_START_INDEX + i] & 0xFF);
         }
+        return responseVal;
+    }
+    
+    public static long parseLittleEndianInt64Val(RtuMessageResponse response) {
+        long responseVal = (response.getMessageData()[MODBUS_DATA_START_INDEX + 6] & 0xFF) << 56 |
+                           (response.getMessageData()[MODBUS_DATA_START_INDEX + 7] & 0xFF) << 48 |
+                           (response.getMessageData()[MODBUS_DATA_START_INDEX + 4] & 0xFF) << 40 |
+                           (response.getMessageData()[MODBUS_DATA_START_INDEX + 5] & 0xFF) << 32 |
+                           (response.getMessageData()[MODBUS_DATA_START_INDEX + 2] & 0xFF) << 24 |
+                           (response.getMessageData()[MODBUS_DATA_START_INDEX + 3] & 0xFF) << 16 |
+                           (response.getMessageData()[MODBUS_DATA_START_INDEX] & 0xFF) << 8 |
+                           (response.getMessageData()[MODBUS_DATA_START_INDEX + 1] & 0xFF);
         return responseVal;
     }
     

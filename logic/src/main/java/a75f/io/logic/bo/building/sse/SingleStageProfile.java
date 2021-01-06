@@ -177,15 +177,14 @@ public class SingleStageProfile extends ZoneProfile
                         setCmdSignal("fan and stage1", 0, (short) sseEquip.nodeAddr);
                 }
             } else {
+                // neither heating, cooling, nor zone dead
                 if ((relay2config > 0) && occupied) {
                     stageStatus = stageStatus.isEmpty() ? "Fan ON" : stageStatus + ", Fan ON";
                     setCmdSignal("fan and stage1", 1.0, (short) sseEquip.nodeAddr);
                 } else
                     setCmdSignal("fan and stage1", 0, (short) sseEquip.nodeAddr);
                 reset((short) sseEquip.nodeAddr);
-                state = TEMPDEAD;
-
-
+                state = DEADBAND;
             }
            sseEquip.setStatus(stageStatus, state.ordinal(), (state == HEATING ? buildingLimitMinBreached() : state == COOLING ? buildingLimitMaxBreached() : false));
             if (occuStatus != null) {

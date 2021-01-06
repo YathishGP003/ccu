@@ -497,7 +497,7 @@ public class SingleStageEquip {
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
-        String equipDis = siteDis + "-HPU-" + nodeAddr;
+        String equipDis = siteDis + "-SSE-" + nodeAddr;
         double prevConfigR1Val = getConfigNumVal("enable and relay1");
         SSEStage ssePrevStage = SSEStage.values()[(int)prevConfigR1Val];
         SSEStage sseStage = SSEStage.values()[(int)config.enableRelay1];

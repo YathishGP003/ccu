@@ -155,8 +155,7 @@ public class LSerial
             //context.startService(eventIntent);
         }else if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_MODBUS) {
             byte[] data = event.getBytes();
-            MessageType messageType = MessageType.values()[(event.getBytes()[0] & 0xff)];
-            ModbusPulse.handleModbusPulseData(data, messageType.ordinal());
+            ModbusPulse.handleModbusPulseData(data, (event.getBytes()[0] & 0xff));
         }
     }
 

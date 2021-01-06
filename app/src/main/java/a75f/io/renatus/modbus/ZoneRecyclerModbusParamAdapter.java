@@ -143,7 +143,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                 if (modbusParam.get(position).getParameterDefinitionType().equals("binary")) {
                                     viewHolder.tvParamValue.setText(readHisVal(p.getId()) == 1 ? HtmlCompat.fromHtml("<font color='#E24301'>ON</font>", HtmlCompat.FROM_HTML_MODE_LEGACY) : HtmlCompat.fromHtml("<font color='#000000'>OFF</font>", HtmlCompat.FROM_HTML_MODE_LEGACY));
                                 } else {
-                                    viewHolder.tvParamValue.setText("" + readHisVal(p.getId()));
+                                    viewHolder.tvParamValue.setText(String.valueOf(readHisVal(p.getId())));
                                 }
                             }
                             if (unit != null && !unit.equals(" ")) {
@@ -175,7 +175,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                         }
                     }
                 } else {
-                    viewHolder.tvParamValue.setText("" + readHisVal(p.getId()));
+                    viewHolder.tvParamValue.setText(String.valueOf(readHisVal(p.getId())));
                 }
                 if (unit != null && !unit.equals(" ")) {
                     viewHolder.tvUnit.setVisibility(View.VISIBLE);

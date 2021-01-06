@@ -150,17 +150,15 @@ public class DabSystemController extends SystemController
         
         ArrayList<HashMap<Object, Object>> dabEquips = CCUHsApi.getInstance()
                                                                .readAllEntities("equip and zone and dab");
-        HashMap<String, Double> damperPosMap;
 
         if (isNormalizationRequired()) {
             HashMap<String, Double> normalizedDamperPosMap = getNormalizedDamperPosMap(dabEquips,
                                                                                        getBaseDamperPosMap(dabEquips));
-            damperPosMap = getAdjustedDamperPosMap(dabEquips, normalizedDamperPosMap, systemProfile.getSystemEquipRef());
-        } else {
-            damperPosMap = getBaseDamperPosMap(dabEquips);
+            HashMap<String, Double> damperPosMap = getAdjustedDamperPosMap(dabEquips,
+                                                                           normalizedDamperPosMap,
+                                                                           systemProfile.getSystemEquipRef());
+            applyLimitsAndSetDamperPosition(dabEquips, damperPosMap);
         }
-
-        applyLimitsAndSetDamperPosition(dabEquips, damperPosMap);
     }
 
     private void initializeAlgoLoopVariables() {

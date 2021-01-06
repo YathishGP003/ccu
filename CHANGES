@@ -1,14 +1,13 @@
- - Merged PR 345: 4781 haystack explorer tool
- - 4781 haystack explorer tool
- - Merged PR 310: bug/mahesh/4699-CCU_page_becomes_NR_for_Daikin
- - Merged PR 344: Modbus Configuration
- - fix for the spinner selection
- - Merged PR 343: Modbus configuration
- - Remove shared userId update
- - Merge branch 'master' into story/samjith/4742_modbus_config
- - Modbus config changes
- - Fix warning about thermistor point missing his tag
- - Add node address to SSE-occupancy point
- - Fetch modbus config from preference
- - Modbus config implementation
- - make send request async
+ - Merged PR 356: Modbus Little Endian Float/long support
+ - Merged PR 349: 3689:  Module is appearing as Zone dead when relays are in disable state for SSE
+ - Merged PR 357: Hold normalized damper pos when normalization is not required
+ - WordOrder support
+ - Little endian float/int64 parsing
+ - support till 247
+ - fixes
+ - Merged PR 354: Modbus fix
+ - unsigned long support
+ - Hold normalized damper pos when normalization is not required
+ - SSE: change tempdead to deadband for valid temp in non-configured setup
+ - Fix typo in equip display portion of point display for SSE
+ - Fix typo in onboarding

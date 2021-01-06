@@ -213,8 +213,7 @@ public class Globals {
                 if (!isPubnubSubscribed())
                 {
                     if (!site.isEmpty()) {
-                        String siteLUID = site.get("id").toString();
-                        String siteGUID = CCUHsApi.getInstance().getGUID(siteLUID);
+                        String siteGUID = CCUHsApi.getInstance().getGlobalSiteId();
                         if (siteGUID != null && siteGUID != "") {
                             Globals.getInstance().registerSiteToPubNub(siteGUID);
                         }

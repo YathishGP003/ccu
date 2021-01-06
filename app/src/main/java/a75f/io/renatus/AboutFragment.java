@@ -121,7 +121,7 @@ public class AboutFragment extends Fragment {
             e.printStackTrace();
         }
 
-        String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
+        String siteGUID = CCUHsApi.getInstance().getGlobalSiteId();
         tvSiteId.setText(siteGUID == null? site.get("id").toString() :siteGUID);
 
         String ccuGUID = CCUHsApi.getInstance().getGUID(CCUHsApi.getInstance().getCcuId().toString());

@@ -135,22 +135,4 @@ public class RenatusApp extends UtilityApplication
 		android.os.Process.killProcess(android.os.Process.myPid());
 		System.exit(0);
 	}
-	public static void saveLogcat() {
-		try {
-			Process process = Runtime.getRuntime().exec("logcat -v threadtime -d");
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-			StringBuilder log = new StringBuilder();
-			String line = "";
-			while ((line = bufferedReader.readLine()) != null) {
-				if (line.contains("CCU") || line.contains("Schedule"))
-					log.append(line + "\n");
-			}
-			//TODO need to save this logs to server
-			//CCUHsApi.getInstance().uploadLogs(log.toString());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-	}
-
 }

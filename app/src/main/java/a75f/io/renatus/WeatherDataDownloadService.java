@@ -1,40 +1,22 @@
 package a75f.io.renatus;
 
-import a75f.io.api.haystack.sync.HttpUtil;
-import a75f.io.constants.HttpConstants;
-import a75f.io.logger.CcuLog;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import io.fabric.sdk.android.services.network.HttpMethod;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.List;
-
-import javax.net.ssl.HttpsURLConnection;
-
+import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.constants.HttpConstants;
+import a75f.io.logger.CcuLog;
 import a75f.io.renatus.util.CCUUtils;
 
 public class WeatherDataDownloadService extends IntentService {

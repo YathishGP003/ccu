@@ -164,9 +164,7 @@ public class RegisterGatherCCUDetails extends Activity {
             @Override
             protected Void doInBackground(String... strings) {
                 HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-                HashMap site = CCUHsApi.getInstance().read("site");
-                String siteLUID = site.get("id").toString();
-                String siteGUID = CCUHsApi.getInstance().getGUID(siteLUID);
+                String siteGUID = CCUHsApi.getInstance().getGlobalSiteId();
                 HDict tDict = new HDictBuilder().add("filter", "equip and group and siteRef == " + siteGUID).toDict();
                 HGrid schedulePoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
                 Iterator it = schedulePoint.iterator();

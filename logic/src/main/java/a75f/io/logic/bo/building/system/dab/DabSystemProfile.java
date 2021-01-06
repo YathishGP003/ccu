@@ -1,6 +1,5 @@
 package a75f.io.logic.bo.building.system.dab;
 
-import org.greenrobot.essentials.StringUtils;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -18,7 +17,6 @@ import a75f.io.logic.bo.building.system.SystemState;
 import a75f.io.logic.tuners.TunerConstants;
 
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_MODE_CHANGEOVER_HYSTERESIS;
-import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_UP_TIMER_COUNTER;
 import static a75f.io.logic.tuners.TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL;
 
 public abstract class DabSystemProfile extends SystemProfile

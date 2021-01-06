@@ -13,11 +13,11 @@ repositories {
 }
 
 dependencies {
-    implementation 'ai.serotonin.oss:sero-scheduler:[1.1.0,2)'
-    implementation 'ai.serotonin.oss:sero-warp:1.0.0'
-    implementation 'org.apache.commons:commons-lang3:3.5'
+    implementation 'ai.serotonin.oss:sero-scheduler:1.1.0'
+    // implementation 'ai.serotonin.oss:sero-warp:1.0.0'      // should be showing up on jcenter()
+    implementation 'org.apache.commons:commons-lang3:3.6'
     implementation 'org.scream3r:jssc:2.8.0'
-    implementation 'org.slf4j:slf4j-api:[1.7.0,1.8)'
+    implementation 'org.slf4j:slf4j-api:1.7.30'
     implementation 'org.threeten:threetenbp:1.4.0'
     
     //testCompile 'junit:junit:4.12'

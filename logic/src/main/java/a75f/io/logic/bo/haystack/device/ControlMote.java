@@ -107,10 +107,16 @@ public class ControlMote
         addRelayStatePoint("relay7");
         addRelayStatePoint("relay8");
     
-        addAnalogOutValPoint("analog1");
-        addAnalogOutValPoint("analog2");
-        addAnalogOutValPoint("analog3");
-        addAnalogOutValPoint("analog4");
+        addCMOutPortPoint("analog1");
+        addCMOutPortPoint("analog2");
+        addCMOutPortPoint("analog3");
+        addCMOutPortPoint("analog4");
+        
+        addCMInPortPoint("analog1");
+        addCMInPortPoint("analog2");
+    
+        addCMInPortPoint("th1");
+        addCMInPortPoint("th2");
     
         setRelayState("relay1",0);
         setRelayState("relay2",0);
@@ -126,6 +132,11 @@ public class ControlMote
         setAnalogOut("analog2",0);
         setAnalogOut("analog3",0);
         setAnalogOut("analog4",0);
+    
+        setAnalogThInVal("analog1", 0);
+        setAnalogThInVal("analog2", 0);
+        setAnalogThInVal("th1", 0);
+        setAnalogThInVal("th2", 0);
     }
 
 //For CCU as a zone part
@@ -207,17 +218,30 @@ public class ControlMote
         }
     }
     
-    private void addAnalogOutValPoint(String analog) {
+    private void addCMOutPortPoint(String port) {
         
         RawPoint p = new RawPoint.Builder()
-                          .setDisplayName(site.getDisplayName()+"-CM-"+analog+"Out")
+                          .setDisplayName(site.getDisplayName()+"-CM-"+port+"Out")
                           .setDeviceRef(deviceRef)
                           .setSiteRef(site.getId())
-                          .addMarker(analog).addMarker("his").addMarker("system").addMarker("out")
+                          .addMarker(port).addMarker("his").addMarker("system").addMarker("out")
                           .setTz(site.getTz())
                           .build();
         CCUHsApi.getInstance().addPoint(p);
     }
+    
+    private void addCMInPortPoint(String port) {
+        
+        RawPoint p = new RawPoint.Builder()
+                         .setDisplayName(site.getDisplayName()+"-CM-"+port+"In")
+                         .setDeviceRef(deviceRef)
+                         .setSiteRef(site.getId())
+                         .addMarker(port).addMarker("his").addMarker("system").addMarker("in")
+                         .setTz(site.getTz())
+                         .build();
+        CCUHsApi.getInstance().addPoint(p);
+    }
+    
     
     public static double getAnalogOut(String analog)
     {
@@ -227,6 +251,11 @@ public class ControlMote
     public static void setAnalogOut(String analog, double val)
     {
         CCUHsApi.getInstance().writeHisValByQuery("point and his and system and out and "+analog, val);
+    }
+    
+    public static void setAnalogThInVal(String analog, double val)
+    {
+        CCUHsApi.getInstance().writeHisValByQuery("point and his and system and in and "+analog, val);
     }
     
     private void addRelayStatePoint(String relay){

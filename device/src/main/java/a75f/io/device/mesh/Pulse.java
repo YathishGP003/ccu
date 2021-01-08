@@ -549,8 +549,41 @@ public class Pulse
 			}
 			CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Humidity " + val );
 		}
-
-
+		
+		//Done as per requirement from support team and not used in system operation.
+		updateCMPhysicalPoints(cmRegularUpdateMessage_t);
+	}
+	
+	private static void updateCMPhysicalPoints(CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t) {
+		
+		CCUHsApi hayStack = CCUHsApi.getInstance();
+		HashMap device = hayStack.read("device and cm");
+		if (!device.isEmpty()) {
+			String deviceId = device.get("id").toString();
+			HashMap analog1In = hayStack.read("point and analog1 and in and deviceRef == "+deviceId);
+			if (!analog1In.isEmpty()) {
+				hayStack.writeHisValById(analog1In.get("id").toString(),
+				                         (double) cmRegularUpdateMessage_t.analogSense1.get());
+			}
+			
+			HashMap analog2In = hayStack.read("point and analog2 and in and deviceRef == "+deviceId);
+			if (!analog1In.isEmpty()) {
+				hayStack.writeHisValById(analog2In.get("id").toString(),
+				                         (double) cmRegularUpdateMessage_t.analogSense2.get());
+			}
+			
+			HashMap th1In = hayStack.read("point and th1 and in and deviceRef == "+deviceId);
+			if (!th1In.isEmpty()) {
+				hayStack.writeHisValById(th1In.get("id").toString(),
+				                         (double) cmRegularUpdateMessage_t.thermistor1.get());
+			}
+			
+			HashMap th2In = hayStack.read("point and th2 and in and deviceRef == "+deviceId);
+			if (!th2In.isEmpty()) {
+				hayStack.writeHisValById(th2In.get("id").toString(),
+				                         (double) cmRegularUpdateMessage_t.thermistor2.get());
+			}
+		}
 	}
 
 

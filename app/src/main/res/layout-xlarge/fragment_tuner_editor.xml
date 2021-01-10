@@ -32,9 +32,20 @@
         android:paddingRight="30sp">
 
         <RadioButton
+            android:id="@+id/radioBtnBuilding"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="@string/title_building"
+            android:enabled="true"
+            android:checked="true"
+            android:textAppearance="@style/label_values" />
+
+        <RadioButton
             android:id="@+id/radioBtnSystem"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
             android:layout_gravity="center_vertical"
             android:text="@string/txt_tunersSystem"
             android:textAppearance="@style/label_values" />

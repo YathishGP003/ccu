@@ -55,6 +55,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     RadioButton radioButtonSystem;
     RadioButton radioButtonZone;
     RadioButton radioButtonModule;
+    RadioButton radioBtnBuilding;
     TextView reasonLabel;
     RecyclerView recyclerViewTuner;
     TunerGroupItem tunerGroupOpened = null;
@@ -91,6 +92,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
 
         radioGroupTuners = view.findViewById(R.id.radioGrpTuner);
+        radioBtnBuilding = view.findViewById(R.id.radioBtnBuilding);
         radioButtonSystem = view.findViewById(R.id.radioBtnSystem);
         radioButtonZone = view.findViewById(R.id.radioBtnZone);
         radioButtonModule = view.findViewById(R.id.radioBtnModule);
@@ -100,8 +102,8 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         editChangeReason = view.findViewById(R.id.editChangeReason);
         saveTunerValues.setEnabled(false);
         //Default Show System Tuners
-        radioGroupTuners.check(R.id.radioBtnSystem);
-        getSystemTuners();
+        radioGroupTuners.check(R.id.radioBtnBuilding);
+        getBuildingTuners();
 
         reasonLabel = view.findViewById(R.id.textReasonLabel);
         String text = "<font color=#E24301>*</font> <font color=#999999>Reason for Change</font>";
@@ -112,7 +114,10 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             editChangeReason.clearFocus();
         });
         radioGroupTuners.setOnCheckedChangeListener((group, checkedId) -> {
-            if (checkedId == R.id.radioBtnSystem) {
+            if (checkedId == R.id.radioBtnBuilding) {
+                Log.i("TunersUI", "Selected:radioBtnBuilding");
+                getBuildingTuners();
+            } else if (checkedId == R.id.radioBtnSystem) {
                 Log.i("TunersUI", "Selected:radioBtnSystem");
                 getSystemTuners();
             } else if (checkedId == R.id.radioBtnZone) {
@@ -257,10 +262,29 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     private void getSystemTuners() {
         tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, 2);
 
-        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("tunerGroup and system");
+        ArrayList<HashMap> systemEquips = CCUHsApi.getInstance().readAll("tunerGroup and system");
 
-        // Group by countryName
-        Map<String, List<HashMap>> groupByTuner = equips.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
+        Map<String, List<HashMap>> groupByTuner = systemEquips.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
+        Map<String, List<HashMap>> sortedGroupTuner = new TreeMap<>(groupByTuner);
+
+        Set set2 = sortedGroupTuner.entrySet();
+        Iterator iterator2 = set2.iterator();
+        while (iterator2.hasNext()) {
+            Map.Entry me2 = (Map.Entry) iterator2.next();
+            Log.i("TunersUI", "Sorting-" + me2.getKey());
+        }
+        for (String groupTitle : sortedGroupTuner.keySet()) {
+            tunerExpandableLayoutHelper.addSection(groupTitle, sortedGroupTuner.get(groupTitle));
+            tunerExpandableLayoutHelper.notifyDataSetChanged();
+        }
+    }
+
+    private void getBuildingTuners() {
+        tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, 2);
+
+        ArrayList<HashMap> buildingEquips = CCUHsApi.getInstance().readAll("tunerGroup and not system");
+
+        Map<String, List<HashMap>> groupByTuner = buildingEquips.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
         Map<String, List<HashMap>> sortedGroupTuner = new TreeMap<>(groupByTuner);
         System.out.println("After Sorting:");
         Set set2 = sortedGroupTuner.entrySet();

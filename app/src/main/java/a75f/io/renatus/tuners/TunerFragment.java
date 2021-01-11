@@ -206,26 +206,28 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     private void updateData() {
         tunerMap.clear();
         expandableListDetail.clear();
-        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
-        Log.i("TunersUI", "Equips:" + equips);
-        for (Map m : equips) {
-            ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("tuner and equipRef == \"" + m.get("id") + "\"");
-            ArrayList tunerList = new ArrayList();
+        tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, 2);
 
-            for (Map t : tuners) {
-                tunerList.add(t.get("dis").toString());
-                tunerMap.put(t.get("dis").toString(), t.get("id").toString());
-            }
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("tuner");
+        ArrayList<HashMap> zoneEquips = new ArrayList<>();
+        for (HashMap m : equips) {
+          if (!m.get("roomRef").toString().equals("SYSTEM")){
+              zoneEquips.add(m);
+          }
+        }
 
-            ArrayList<HashMap> userIntents = CCUHsApi.getInstance().readAll("userIntent and equipRef == \"" + m.get("id") + "\"");
+        Map<String, List<HashMap>> groupByTuner = zoneEquips.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
+        Map<String, List<HashMap>> sortedGroupTuner = new TreeMap<>(groupByTuner);
 
-            for (Map t : userIntents) {
-                if (!t.get("dis").toString().contains("desired")) {
-                    tunerList.add(t.get("dis").toString());
-                    tunerMap.put(t.get("dis").toString(), t.get("id").toString());
-                }
-            }
-            expandableListDetail.put(m.get("dis").toString(), tunerList);
+        Set set2 = sortedGroupTuner.entrySet();
+        Iterator iterator2 = set2.iterator();
+        while (iterator2.hasNext()) {
+            Map.Entry me2 = (Map.Entry) iterator2.next();
+            Log.i("TunersUI", "Sorting-" + me2.getKey());
+        }
+        for (String groupTitle : sortedGroupTuner.keySet()) {
+            tunerExpandableLayoutHelper.addSection(groupTitle, sortedGroupTuner.get(groupTitle));
+            tunerExpandableLayoutHelper.notifyDataSetChanged();
         }
     }
 

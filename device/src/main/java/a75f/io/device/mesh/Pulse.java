@@ -564,24 +564,28 @@ public class Pulse
 			if (!analog1In.isEmpty()) {
 				hayStack.writeHisValById(analog1In.get("id").toString(),
 				                         (double) cmRegularUpdateMessage_t.analogSense1.get());
+				CcuLog.d(L.TAG_CCU_DEVICE, "updateCMPhysicalPoint AI1 "+cmRegularUpdateMessage_t.analogSense1.get());
 			}
 			
 			HashMap analog2In = hayStack.read("point and analog2 and in and deviceRef == "+deviceId);
 			if (!analog1In.isEmpty()) {
 				hayStack.writeHisValById(analog2In.get("id").toString(),
 				                         (double) cmRegularUpdateMessage_t.analogSense2.get());
+				CcuLog.d(L.TAG_CCU_DEVICE, "updateCMPhysicalPoint AI2 "+cmRegularUpdateMessage_t.analogSense2.get());
 			}
 			
 			HashMap th1In = hayStack.read("point and th1 and in and deviceRef == "+deviceId);
 			if (!th1In.isEmpty()) {
 				hayStack.writeHisValById(th1In.get("id").toString(),
 				                         (double) cmRegularUpdateMessage_t.thermistor1.get());
+				CcuLog.d(L.TAG_CCU_DEVICE, "updateCMPhysicalPoint TH1 "+cmRegularUpdateMessage_t.thermistor1.get());
 			}
 			
 			HashMap th2In = hayStack.read("point and th2 and in and deviceRef == "+deviceId);
 			if (!th2In.isEmpty()) {
 				hayStack.writeHisValById(th2In.get("id").toString(),
 				                         (double) cmRegularUpdateMessage_t.thermistor2.get());
+				CcuLog.d(L.TAG_CCU_DEVICE, "updateCMPhysicalPoint TH2 "+cmRegularUpdateMessage_t.thermistor2.get());
 			}
 		}
 	}

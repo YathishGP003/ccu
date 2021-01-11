@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,18 +15,17 @@ import java.util.HashMap;
 
 import a75f.io.renatus.R;
 
-import static a75f.io.logic.tuners.TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL;
-import static a75f.io.logic.tuners.TunerConstants.TUNER_EQUIP_VAL_LEVEL;
-
 public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdapter.PriorityViewHolder> {
     Context context;
     ArrayList<HashMap> priorityArrayList;
     PriorityItemClickListener priorityItemClickListener;
+    String tunerGroupType;
 
-    public PriorityArrayAdapter(Context context, ArrayList<HashMap> priorityArrayList, PriorityItemClickListener itemClickListener) {
+    public PriorityArrayAdapter(Context context, String tunerGroupType, ArrayList<HashMap> priorityArrayList, PriorityItemClickListener itemClickListener) {
         this.context = context;
         this.priorityArrayList = priorityArrayList;
         this.priorityItemClickListener = itemClickListener;
+        this.tunerGroupType = tunerGroupType;
     }
 
     @Override
@@ -52,8 +50,9 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                     setOrangeTextColor(holder.textViewName);
                     holder.imgBtnTunerUndo.setVisibility(View.VISIBLE);
                 } else {
-                    if (Integer.parseInt(priorityMap.get("level").toString()) == TUNER_EQUIP_VAL_LEVEL) {
-                        if (position == 7 && priorityMap.get("val") != null) {
+                    if (tunerGroupType.contains("Module")) {
+                        if (position == 7) {
+                            holder.textViewName.setText(context.getText(R.string.txt_tunersModule));
                             holder.textViewCurrentValue.setText(priorityMap.get("val").toString());
                             holder.textViewValue.setText("");
                             setOrangeTextColor(holder.textViewCurrentValue);
@@ -67,8 +66,41 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                             holder.textViewCurrentValue.setText("");
                             setBlackTextColor(holder.textViewName);
                         }
-                    } else if (Integer.parseInt(priorityMap.get("level").toString()) == SYSTEM_DEFAULT_VAL_LEVEL) {
-                        if (position == 13 && priorityMap.get("val") != null) {
+                    } else if (tunerGroupType.contains("Zone")) {
+                        if (position == 9) {
+                            holder.textViewName.setText("Zone");
+                            holder.textViewCurrentValue.setText(priorityMap.get("val").toString());
+                            holder.textViewValue.setText("");
+                            setOrangeTextColor(holder.textViewCurrentValue);
+                            setOrangeTextColor(holder.textViewName);
+                        } else {
+                            if (priorityItem.get("val") != null && !priorityItem.get("val").toString().equals("")) {
+                                holder.textViewValue.setText(priorityItem.get("val").toString());
+                            } else {
+                                holder.textViewValue.setText("");
+                            }
+                            holder.textViewCurrentValue.setText("");
+                            setBlackTextColor(holder.textViewName);
+                        }
+                    } else if (tunerGroupType.contains("System")) {
+                        if (position == 13) {
+                            holder.textViewName.setText("System");
+                            holder.textViewCurrentValue.setText(priorityMap.get("val").toString());
+                            holder.textViewValue.setText("");
+                            setOrangeTextColor(holder.textViewCurrentValue);
+                            setOrangeTextColor(holder.textViewName);
+                        } else {
+                            if (priorityItem.get("val") != null && !priorityItem.get("val").toString().equals("")) {
+                                holder.textViewValue.setText(priorityItem.get("val").toString());
+                            } else {
+                                holder.textViewValue.setText("");
+                            }
+                            holder.textViewCurrentValue.setText("");
+                            setBlackTextColor(holder.textViewName);
+                        }
+                    }else if (tunerGroupType.contains("Building")) {
+                        if (position == 15) {
+                            holder.textViewName.setText("Building");
                             holder.textViewCurrentValue.setText(priorityMap.get("val").toString());
                             holder.textViewValue.setText("");
                             setOrangeTextColor(holder.textViewCurrentValue);
@@ -155,6 +187,5 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
             textViewName = itemView.findViewById(R.id.textDefaultValue);
             imgBtnTunerUndo = itemView.findViewById(R.id.imgBtnTunerUndo);
         }
-
     }
 }

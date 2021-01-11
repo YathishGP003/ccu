@@ -9,7 +9,6 @@ import android.support.annotation.Nullable;
 import android.support.design.button.MaterialButton;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
-import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,8 +22,6 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import org.javolution.text.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -162,7 +159,19 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 TextView textView_oldValue = tunerItemViewBody.findViewById(R.id.textView_oldValue);
                 TextView textView_newLevel = tunerItemViewBody.findViewById(R.id.textView_newLevel);
                 TextView textView_newValue = tunerItemViewBody.findViewById(R.id.textView_newValue);
-                textView_SectionLabel.setText("System");
+                switch (newTunerValueItem.get("newLevel").toString()) {
+                    case "8":
+                        textView_SectionLabel.setText("Module");
+                        break;
+                    case "10":
+                        textView_SectionLabel.setText("Zone");
+                        break;
+                    case "16":
+                        textView_SectionLabel.setText("Building");
+                        break;
+                    default:
+                        textView_SectionLabel.setText("System");
+                }
                 textView_Section.setText(":");
 
                 String tunerName = newTunerValueItem.get("dis").toString();
@@ -172,8 +181,8 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 } else {
                     textView_tuner.setText(tunerName + " | ");
                 }
-                textView_level.setText("Level "+getTunerLevelValue(newTunerValueItem.get("id").toString())+" : ");
-                textView_newLevel.setText("Level 8 : ");
+                textView_level.setText("Level "+ getTunerLevelValue(newTunerValueItem.get("id").toString())+" : ");
+                textView_newLevel.setText("Level : "+newTunerValueItem.get("newLevel").toString());
                 textView_oldValue.setText(String.valueOf(getTunerValue(newTunerValueItem.get("id").toString())));
                 textView_newValue.setText(newTunerValueItem.get("newValue").toString());
                 linearLayoutBody.addView(tunerItemViewBody);
@@ -306,7 +315,17 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         //Toast.makeText(getActivity(), "TunerUI-HashMap: " + item.get("dis") + " clicked\n" + " minValue:" + item.get("minVal") + " maxValue:" + item.get("maxVal") + " incrementBy:" + item.get("incrementVal"), Toast.LENGTH_SHORT).show();
         childSelected = position;
         Log.i("TunersUI", "childSelected:" + childSelected + " hashmap:" + item);
-        DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(item, tunerGroupOpened);
+        String tunerGroupType = "Building";
+        if (radioBtnBuilding.isChecked()){
+            tunerGroupType = "Building";
+        } else if(radioButtonSystem.isChecked()){
+            tunerGroupType = "System";
+        } else if(radioButtonZone.isChecked()){
+            tunerGroupType ="Zone";
+        } else if(radioButtonModule.isChecked()){
+            tunerGroupType = "Module";
+        }
+        DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(item,tunerGroupType, tunerGroupOpened);
         tunerPriorityArray.setTargetFragment(this, DIALOG_TUNER_PRIORITY);
         showDialogFragment(tunerPriorityArray, DialogTunerPriorityArray.ID);
     }
@@ -332,9 +351,11 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     HashMap oldTunerItemSelected = (HashMap) bundle.getSerializable("Tuner_HashMap_Selected");
                     TunerGroupItem tunerGroupSelected = (TunerGroupItem) bundle.getSerializable("Tuner_Group_Selected");
                     String tunerValue = bundle.getString("Tuner_Value_Selected");
+                    String tunerLevel = bundle.getString("Tuner_Level_Selected");
                     Toast.makeText(getActivity(), "TunerUI-HashMap: " + tunerItemSelected.get("dis") + " clicked\n" +
                             " tunerGroupSelected:" + tunerGroupSelected.getName() + " tunerValue:" + tunerValue, Toast.LENGTH_SHORT).show();
                     tunerItemSelected.put("newValue", tunerValue);
+                    tunerItemSelected.put("newLevel", tunerLevel);
                     tunerExpandableLayoutHelper.updateTuner(tunerGroupSelected.getName(), tunerItemSelected, oldTunerItemSelected);
                     if (!updatedTunerValues.contains(tunerItemSelected)){
                         updatedTunerValues.add(tunerItemSelected);

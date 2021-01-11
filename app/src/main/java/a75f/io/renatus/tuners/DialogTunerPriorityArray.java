@@ -40,6 +40,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     public static final String ID = DialogTunerPriorityArray.class.getSimpleName();
     public static final String TUNER_ITEM = "tunerItem";
     public static final String TUNER_GROUP_ITEM = "TunerGroupItem";
+    public static final String TUNER_GROUP_TYPE = "TunerGroupType";
     HashMap tunerItemSelected = null;
     TunerGroupItem tunerGroupSelected = null;
     RecyclerView recyclerViewPriority;
@@ -49,6 +50,8 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     Button buttonSaveTuner;
     Button buttonCancel;
     String selectedTunerValue;
+    String selectedTunerLevel;
+    String tunerGroupType;
 
     PriorityArrayAdapter priorityArrayAdapter;
     ArrayList<HashMap> priorityList;
@@ -56,11 +59,12 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     public DialogTunerPriorityArray() {
     }
 
-    public static DialogTunerPriorityArray newInstance(HashMap tunerItem, TunerGroupItem tunerGroupItem) {
+    public static DialogTunerPriorityArray newInstance(HashMap tunerItem, String tunerGroupType, TunerGroupItem tunerGroupItem) {
         DialogTunerPriorityArray priorityArrayFragment = new DialogTunerPriorityArray();
         Bundle bundle = new Bundle();
         bundle.putSerializable(TUNER_ITEM, tunerItem);
         bundle.putSerializable(TUNER_GROUP_ITEM, tunerGroupItem);
+        bundle.putSerializable(TUNER_GROUP_TYPE, tunerGroupType);
         priorityArrayFragment.setArguments(bundle);
         return priorityArrayFragment;
     }
@@ -89,6 +93,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         if (getArguments() != null && getArguments().containsKey(TUNER_ITEM)) {
             tunerItemSelected = (HashMap) getArguments().getSerializable(TUNER_ITEM);
             tunerGroupSelected = (TunerGroupItem) getArguments().getSerializable(TUNER_GROUP_ITEM);
+            tunerGroupType = (String)getArguments().getSerializable(TUNER_GROUP_TYPE);
         }
     }
 
@@ -126,21 +131,20 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         priorityList = new ArrayList<>();
         priorityList = CCUHsApi.getInstance().readPoint(tunerItemSelected.get("id").toString());
         Log.i("TunersUI", "priorityList:" + priorityList);
-        priorityArrayAdapter = new PriorityArrayAdapter(getActivity(), priorityList, this);
+
+        priorityArrayAdapter = new PriorityArrayAdapter(getActivity(),tunerGroupType, priorityList, this);
         recyclerViewPriority.setAdapter(priorityArrayAdapter);
-      //  recyclerViewPriority.scrollToPosition(priorityList.size() - 1);
 
         buttonSaveTuner.setOnClickListener(v -> {
             Intent tunerValue = new Intent()
                     .putExtra("Tuner_HashMap_Selected", (Serializable) tunerItemSelected)
                     .putExtra("Tuner_Group_Selected", (Serializable) tunerGroupSelected)
-                    .putExtra("Tuner_Value_Selected", selectedTunerValue);
+                    .putExtra("Tuner_Value_Selected", selectedTunerValue)
+                    .putExtra("Tuner_Level_Selected", selectedTunerLevel);
             getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, tunerValue);
             dismiss();
         });
         buttonCancel.setOnClickListener(v -> dismiss());
-
-
     }
 
 
@@ -174,7 +178,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
 
     @Override
     public void priorityClicked(int position) {
-        if (position == 13 || position == 7) {
+        if (position == 7 || position == 9 || position == 13 ||position == 15) {
             LayoutInflater inflater = this.getLayoutInflater();
 
             View dialogView = inflater.inflate(R.layout.dialog_tuner_range, null);
@@ -190,10 +194,22 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             ImageButton buttonUndo = dialogView.findViewById(R.id.imgBtnUndo);
             buttonUndo.setVisibility(View.GONE);
             buttonSaveAlert.setEnabled(false);
-            String levelName = (position == 13) ? "System" : getString(R.string.txt_tunersModule);
+            String levelName = "Building";
+            int level;
+            if (position == 15) {
+                levelName = "Building";
+            } else if (position == 13) {
+                levelName = "System";
+            } else if (position == 9) {
+                levelName = "Zone";
+            } else {
+                levelName = "Module";
+            }
             String text = "Level "+(position +1)+" "+levelName;
             text = text.replaceAll("System","<font color='#E24301'>System</font>");
             text = text.replaceAll(getString(R.string.txt_tunersModule),"<font color='#E24301'>Module</font>");
+            text = text.replaceAll("Zone","<font color='#E24301'>Zone</font>");
+            text = text.replaceAll("Building","<font color='#E24301'>Building</font>");
             textViewLevel.setText(Html.fromHtml(text));
 
             if (tunerItemSelected.containsKey("minVal") && tunerItemSelected.containsKey("maxVal")) {
@@ -202,8 +218,6 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 int minValue = (int) (Double.parseDouble(tunerItemSelected.get("minVal").toString()));
                 int maxValue = (int) (Double.parseDouble(tunerItemSelected.get("maxVal").toString()));
                 int incrementVal = (int) (Double.parseDouble(tunerItemSelected.get("incrementVal").toString()));
-
-                DecimalFormat df = new DecimalFormat("##.#");
 
                 double currentValueDb = (getTunerValue(tunerItemSelected.get("id").toString()));
                 double minValueDb = (Double.parseDouble((tunerItemSelected.get("minVal").toString())));
@@ -272,6 +286,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                             //tunerItemSelected.put("newValue", selectedTunerValue);
                             HashMap newValue = (HashMap) priorityList.get(position);
                             newValue.put("newValue", selectedTunerValue);
+                            selectedTunerLevel = String.valueOf(position +1);
                             priorityList.set(position, newValue);
                             priorityArrayAdapter.notifyItemChanged(position);
                             valueDialog.dismiss();

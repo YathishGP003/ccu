@@ -20,7 +20,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -44,8 +43,6 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Created by samjithsadasivan on 1/17/19.
@@ -305,12 +302,6 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         Map<String, List<HashMap>> groupByTuner = moduleTuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
         Map<String, List<HashMap>> sortedGroupTuner = new TreeMap<>(groupByTuner);
 
-        Set set2 = sortedGroupTuner.entrySet();
-        Iterator iterator2 = set2.iterator();
-        while (iterator2.hasNext()) {
-            Map.Entry me2 = (Map.Entry) iterator2.next();
-            Log.i("TunersUI", "Sorting-" + me2.getKey());
-        }
         for (String groupTitle : sortedGroupTuner.keySet()) {
             tunerExpandableLayoutHelper.addSection(groupTitle, sortedGroupTuner.get(groupTitle));
             tunerExpandableLayoutHelper.notifyDataSetChanged();
@@ -356,12 +347,6 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         Map<String, List<HashMap>> groupByTuner = zoneTuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
         Map<String, List<HashMap>> sortedGroupTuner = new TreeMap<>(groupByTuner);
 
-        Set set2 = sortedGroupTuner.entrySet();
-        Iterator iterator2 = set2.iterator();
-        while (iterator2.hasNext()) {
-            Map.Entry me2 = (Map.Entry) iterator2.next();
-            Log.i("TunersUI", "Sorting-" + me2.getKey());
-        }
         for (String groupTitle : sortedGroupTuner.keySet()) {
             tunerExpandableLayoutHelper.addSection(groupTitle, sortedGroupTuner.get(groupTitle));
             tunerExpandableLayoutHelper.notifyDataSetChanged();
@@ -402,17 +387,18 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         tuners.clear();
         tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, 2);
 
-        tuners = CCUHsApi.getInstance().readAll("tunerGroup and system");
+        tuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and system and roomRef == \""+ "SYSTEM" +"\"");
 
-        Map<String, List<HashMap>> groupByTuner = tuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
+        ArrayList<HashMap> systemTuners = new ArrayList<>();
+        for (HashMap m : tuners) {
+            if (!m.get("dis").toString().contains("Building")) {
+                systemTuners.add(m);
+            }
+        }
+
+        Map<String, List<HashMap>> groupByTuner = systemTuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
         Map<String, List<HashMap>> sortedGroupTuner = new TreeMap<>(groupByTuner);
 
-        Set set2 = sortedGroupTuner.entrySet();
-        Iterator iterator2 = set2.iterator();
-        while (iterator2.hasNext()) {
-            Map.Entry me2 = (Map.Entry) iterator2.next();
-            Log.i("TunersUI", "Sorting-" + me2.getKey());
-        }
         for (String groupTitle : sortedGroupTuner.keySet()) {
             tunerExpandableLayoutHelper.addSection(groupTitle, sortedGroupTuner.get(groupTitle));
             tunerExpandableLayoutHelper.notifyDataSetChanged();
@@ -423,17 +409,17 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         tuners.clear();
         tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, 2);
 
-        tuners = CCUHsApi.getInstance().readAll("tunerGroup and not system");
-
-        Map<String, List<HashMap>> groupByTuner = tuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
-        Map<String, List<HashMap>> sortedGroupTuner = new TreeMap<>(groupByTuner);
-        System.out.println("After Sorting:");
-        Set set2 = sortedGroupTuner.entrySet();
-        Iterator iterator2 = set2.iterator();
-        while (iterator2.hasNext()) {
-            Map.Entry me2 = (Map.Entry) iterator2.next();
-            Log.i("TunersUI", "Sorting-" + me2.getKey());
+        tuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and roomRef == \""+ "SYSTEM" +"\"");
+        ArrayList<HashMap> buildingTuners = new ArrayList<>();
+        for (HashMap m : tuners) {
+            if (m.get("dis").toString().contains("Building")) {
+                buildingTuners.add(m);
+            }
         }
+
+        Map<String, List<HashMap>> groupByTuner = buildingTuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
+        Map<String, List<HashMap>> sortedGroupTuner = new TreeMap<>(groupByTuner);
+
         for (String groupTitle : sortedGroupTuner.keySet()) {
             tunerExpandableLayoutHelper.addSection(groupTitle, sortedGroupTuner.get(groupTitle));
             tunerExpandableLayoutHelper.notifyDataSetChanged();

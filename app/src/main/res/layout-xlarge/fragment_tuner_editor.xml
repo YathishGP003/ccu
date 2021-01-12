@@ -5,6 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
@@ -21,6 +23,18 @@
         android:text="@string/txt_tunersTitle"
         android:textAppearance="@style/label_orange" />
 
+    <android.support.v7.widget.AppCompatSpinner
+        android:id="@+id/spinnerSelection"
+        style="@style/Widget.AppCompat.Spinner.Underlined"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textTunersLabel"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="10dp"
+        android:overlapAnchor="false"
+        android:spinnerMode="dropdown"
+        android:visibility="gone" />
+
     <RadioGroup
         android:id="@+id/radioGrpTuner"
         android:layout_width="wrap_content"
@@ -36,17 +50,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:text="@string/title_building"
-            android:enabled="true"
             android:checked="true"
+            android:enabled="true"
+            android:text="@string/title_building"
             android:textAppearance="@style/label_values" />
 
         <RadioButton
             android:id="@+id/radioBtnSystem"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
             android:layout_gravity="center_vertical"
+            android:layout_marginStart="10dp"
             android:text="@string/txt_tunersSystem"
             android:textAppearance="@style/label_values" />
 
@@ -71,33 +85,26 @@
 
     <EditText
         android:id="@+id/editTunerSearch"
-        android:layout_width="wrap_content"
+        android:layout_width="180dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_margin="8sp"
-        android:hint="@string/txt_tunersSearch" />
-
-    <ExpandableListView
-        android:id="@+id/expandableListView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textTunersLabel"
-        android:divider="@color/tuner_divider"
-        android:dividerHeight="0.25dp"
-        android:groupIndicator="@drawable/group_indicator"
-        android:indicatorRight="?android:attr/expandableListPreferredItemIndicatorRight"
-        android:layoutDirection="rtl"
-        android:padding="5sp"
-        android:visibility="gone" />
+        android:layout_alignParentEnd="true"
+        android:layout_centerHorizontal="true"
+        android:drawableEnd="@drawable/ic_search"
+        android:drawablePadding="5dp"
+        android:hint="@string/txt_tunersSearch"
+        android:imeOptions="actionDone"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:textSize="18sp" />
 
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textTunersLabel">
+        android:layout_below="@+id/spinnerSelection">
+
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
+            android:layout_height="wrap_content">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/recyclerTuner"

@@ -19,11 +19,8 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.NumberPicker;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -32,7 +29,6 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.TunerNumberPicker;
-import a75f.io.renatus.views.NumberPicker.SystemNumberPicker;
 import butterknife.ButterKnife;
 
 
@@ -265,7 +261,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 double finalIncrementValDb = incrementValDb;
                 npTunerRange.setOnValueChangedListener((numberPicker, oldValue, newValue) ->
                 {
-                    Toast.makeText(getActivity(), "TunersUI-oldValue:" + oldValue + " newValue:" + newValue, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getActivity(), "TunersUI-oldValue:" + oldValue + " newValue:" + newValue, Toast.LENGTH_SHORT).show();
                     if (oldValue != newValue) {
                         buttonSaveAlert.setEnabled(true);
                         buttonSaveAlert.setTextColor(getActivity().getColor(R.color.orange_75f));

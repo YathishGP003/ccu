@@ -130,7 +130,12 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 for (Floor f : HSUtil.getFloors()) {
                     zones.addAll(HSUtil.getZones(f.getId()));
                 }
-                spinnerSelection.setVisibility(View.VISIBLE);
+                if (zones.size()>0){
+                    spinnerSelection.setVisibility(View.VISIBLE);
+                } else {
+                    spinnerSelection.setVisibility(View.GONE);
+                    tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, 2);
+                }
                 ArrayAdapter<Zone> selectionSpinner = new ArrayAdapter<>(this.getActivity(), R.layout.spinner_item_tuner, zones);
                 selectionSpinner.setDropDownViewResource(R.layout.spinner_item_tuner);
                 spinnerSelection.setAdapter(selectionSpinner);
@@ -145,7 +150,12 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     }
                 }
 
-                spinnerSelection.setVisibility(View.VISIBLE);
+                if (equips.size()>0){
+                    spinnerSelection.setVisibility(View.VISIBLE);
+                } else {
+                    spinnerSelection.setVisibility(View.GONE);
+                    tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, 2);
+                }
                 ArrayAdapter<Equip> selectionSpinner = new ArrayAdapter<>(this.getActivity(), R.layout.spinner_item_tuner, equips);
                 selectionSpinner.setDropDownViewResource(R.layout.spinner_item_tuner);
                 spinnerSelection.setAdapter(selectionSpinner);
@@ -387,16 +397,15 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         tuners.clear();
         tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, 2);
 
-        tuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and system and roomRef == \""+ "SYSTEM" +"\"");
+        ArrayList<HashMap> systemTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and system and roomRef == \""+ "SYSTEM" +"\"");
 
-        ArrayList<HashMap> systemTuners = new ArrayList<>();
-        for (HashMap m : tuners) {
+        for (HashMap m : systemTuners) {
             if (!m.get("dis").toString().contains("Building")) {
-                systemTuners.add(m);
+                tuners.add(m);
             }
         }
 
-        Map<String, List<HashMap>> groupByTuner = systemTuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
+        Map<String, List<HashMap>> groupByTuner = tuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
         Map<String, List<HashMap>> sortedGroupTuner = new TreeMap<>(groupByTuner);
 
         for (String groupTitle : sortedGroupTuner.keySet()) {
@@ -409,15 +418,14 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         tuners.clear();
         tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, 2);
 
-        tuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and roomRef == \""+ "SYSTEM" +"\"");
-        ArrayList<HashMap> buildingTuners = new ArrayList<>();
-        for (HashMap m : tuners) {
+        ArrayList<HashMap> buildingTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and roomRef == \""+ "SYSTEM" +"\"");
+        for (HashMap m : buildingTuners) {
             if (m.get("dis").toString().contains("Building")) {
-                buildingTuners.add(m);
+                tuners.add(m);
             }
         }
 
-        Map<String, List<HashMap>> groupByTuner = buildingTuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
+        Map<String, List<HashMap>> groupByTuner = tuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
         Map<String, List<HashMap>> sortedGroupTuner = new TreeMap<>(groupByTuner);
 
         for (String groupTitle : sortedGroupTuner.keySet()) {

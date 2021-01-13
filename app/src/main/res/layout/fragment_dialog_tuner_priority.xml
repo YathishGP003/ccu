@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/tunerParentView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -83,7 +81,7 @@
                     android:id="@+id/cardTitle"
                     android:layout_width="0sp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="2"
+                    android:layout_weight="2.5"
                     android:orientation="vertical">
 
                     <LinearLayout
@@ -91,76 +89,87 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:weightSum="5">
+                        android:weightSum="7">
 
                         <LinearLayout
                             android:layout_width="0sp"
-                            android:weightSum="3"
-                            android:layout_weight="3"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="3.5"
                             android:background="@drawable/border_grey"
-                            android:layout_height="wrap_content">
-                        <TextView
-                            android:id="@+id/textLabelPriority"
-                            android:layout_width="0sp"
-                            android:layout_weight="1"
-                            android:layout_height="wrap_content"
-                            android:elevation="1sp"
-                            android:gravity="center_vertical|left"
-                            android:minWidth="240sp"
-                            android:minHeight="64sp"
-                            android:padding="5sp"
-                            android:text="Priority"
-                            android:textAppearance="@style/tuner_text_label_black" />
+                            android:weightSum="3">
 
-                        <TextView
-                            android:id="@+id/textLabel"
-                            android:layout_width="0sp"
-                            android:layout_weight="1"
-                            android:layout_height="wrap_content"
-                            android:elevation="1sp"
-                            android:gravity="center_vertical|left"
-                            android:minWidth="160sp"
-                            android:minHeight="64sp"
-                            android:padding="5sp"
-                            android:textAppearance="@style/tuner_text_label_black" />
+                            <TextView
+                                android:id="@+id/textLabelPriority"
+                                android:layout_width="0sp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:elevation="1sp"
+                                android:gravity="center_vertical|left"
+                                android:minWidth="240sp"
+                                android:minHeight="64sp"
+                                android:padding="5sp"
+                                android:text="Priority"
+                                android:textAppearance="@style/tuner_text_label_black" />
+
+                            <TextView
+                                android:id="@+id/textLabel"
+                                android:layout_width="0sp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:elevation="1sp"
+                                android:gravity="center_vertical|left"
+                                android:minWidth="160sp"
+                                android:minHeight="64sp"
+                                android:padding="5sp"
+                                android:textAppearance="@style/tuner_text_label_black" />
 
 
-                        <View
-                            android:layout_width="0sp"
-                            android:layout_weight="1"
-                            android:layout_height="30sp"
-                            android:layout_gravity="center_vertical"
-                            />
+                            <View
+                                android:layout_width="0sp"
+                                android:layout_height="30sp"
+                                android:layout_gravity="center_vertical"
+                                android:layout_weight="1" />
 
                         </LinearLayout>
+
                         <TextView
                             android:id="@+id/textLabelBlank"
                             android:layout_width="0sp"
-                            android:layout_weight="1"
                             android:layout_height="wrap_content"
-                            android:elevation="1sp"
-                            android:gravity="center_vertical|left"
-                            android:minWidth="160sp"
-                            android:minHeight="64sp"
-                            android:padding="5sp"
-                            android:background="@drawable/border_grey"
-                            android:textAppearance="@style/tuner_text_label_black" />
-
-
-                        <TextView
-                            android:id="@+id/textLabelTunerType"
-                            android:layout_width="0sp"
-                            android:layout_weight="1"
-                            android:layout_height="wrap_content"
+                            android:layout_weight="1.5"
                             android:background="@drawable/border_grey"
                             android:elevation="1sp"
                             android:gravity="center_vertical|left"
                             android:minWidth="160sp"
                             android:minHeight="64sp"
                             android:padding="5sp"
-                            android:text="CCU Name"
                             android:textAppearance="@style/tuner_text_label_black" />
 
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="2"
+                            android:background="@drawable/border_grey"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/textLabelBuilding"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="5dp"
+                                android:layout_marginEnd="5dp"
+                                android:text="CCU Name"
+                                android:textAppearance="@style/tuner_text_label_black" />
+
+                            <TextView
+                                android:id="@+id/textLabelCCU"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="5dp"
+                                android:gravity="center"
+                                android:text=""
+                                android:textSize="14sp" />
+                        </LinearLayout>
                     </LinearLayout>
 
                     <android.support.v7.widget.RecyclerView
@@ -168,10 +177,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/layoutTitle"
-                        android:scrollbarStyle="insideOverlay"
-                        android:scrollbars="vertical"
                         android:layout_alignStart="@+id/layoutTitle"
-                        android:layout_alignEnd="@+id/layoutTitle" />
+                        android:layout_alignEnd="@+id/layoutTitle"
+                        android:scrollbarStyle="insideOverlay"
+                        android:scrollbars="vertical" />
                 </RelativeLayout>
 
                 <RelativeLayout

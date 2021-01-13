@@ -26,8 +26,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HSUtil;
+import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.TunerNumberPicker;
 import butterknife.ButterKnife;
 
@@ -43,6 +46,8 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     TextView textTunerGroupTitle;
     TextView textTunerName;
     TextView textTunerDefaultValue;
+    TextView textLabelBuilding;
+    TextView textLabelCCU;
     Button buttonSaveTuner;
     Button buttonCancel;
     String selectedTunerValue;
@@ -105,6 +110,8 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         textTunerDefaultValue = view.findViewById(R.id.textTunerDefaultValue);
         buttonSaveTuner = view.findViewById(R.id.buttonSaveTuner);
         buttonCancel = view.findViewById(R.id.buttonCancelTuner);
+        textLabelBuilding = view.findViewById(R.id.textLabelBuilding);
+        textLabelCCU = view.findViewById(R.id.textLabelCCU);
 
         recyclerViewPriority.setLayoutManager(new LinearLayoutManager(getActivity()));
         buttonSaveTuner.setEnabled(false);
@@ -122,7 +129,10 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             textTunerName.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
             textTunerDefaultValue.setText("" + getTunerDefaultValue(tunerItemSelected.get("id").toString()));
         }
-
+        HashMap site = CCUHsApi.getInstance().read("site");
+        HashMap ccu = CCUHsApi.getInstance().read("ccu");
+        textLabelCCU.setText(ccu.get("dis").toString());
+        textLabelBuilding.setText(site.get("dis").toString());
         textTunerGroupTitle.setText(tunerGroupSelected.getName());
         priorityList = new ArrayList<>();
         priorityList = CCUHsApi.getInstance().readPoint(tunerItemSelected.get("id").toString());

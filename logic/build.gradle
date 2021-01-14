@@ -79,6 +79,9 @@ dependencies {
     androidTestImplementation 'com.android.support.test:rules:1.0.1'
     implementation project(':algos')
 
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.7.0'
+
     implementation 'info.guardianproject.netcipher:netcipher:1.2'
     implementation project(':haystack')
     implementation project(':usbserial')

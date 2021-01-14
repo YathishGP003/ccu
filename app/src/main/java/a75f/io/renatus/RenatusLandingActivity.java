@@ -33,6 +33,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 import a75f.io.alerts.AlertManager;
@@ -49,8 +50,10 @@ import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.filesystem.FileSystemTools;
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.logtasks.UploadLogs;
 import a75f.io.logic.pubnub.RemoteCommandHandleInterface;
 import a75f.io.logic.pubnub.RemoteCommandUpdateHandler;
 import a75f.io.renatus.ENGG.AppInstaller;
@@ -61,6 +64,13 @@ import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.CloudConnetionStatusThread;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.Receiver.ConnectionChangeReceiver;
+
+import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESET_CM;
+import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_CCU;
+import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_MODULE;
+import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_TABLET;
+import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.SAVE_CCU_LOGS;
+import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.UPDATE_CCU;
 
 public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface {
 
@@ -479,19 +489,24 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     @Override
     public void updateRemoteCommands(String commands,String cmdLevel,String id) {
         CcuLog.d("RemoteCommand","PUBNUB RenatusLandingActivity="+commands+","+cmdLevel);
-        if(!commands.isEmpty() && commands.equals("restart_ccu")){
+        if (!commands.isEmpty() && commands.equals(RESTART_CCU)) {
             RenatusApp.closeApp();
-        }else if(!commands.isEmpty() && commands.equals("restart_tablet")){
+        } else if (!commands.isEmpty() && commands.equals(RESTART_TABLET)) {
             RenatusApp.rebootTablet();
-        }else if(!commands.isEmpty() && commands.equals("save_log_cat")){
-            RenatusApp.saveLogcat();
-        }else if(!commands.isEmpty() && commands.equals("reset_cm")){
+        } else if (!commands.isEmpty() && commands.equals(SAVE_CCU_LOGS)) {
+            new Thread() {
+                @Override
+                public void run() {
+                    UploadLogs.instanceOf().saveCcuLogs();
+                }
+            }.start();
+        } else if (!commands.isEmpty() && commands.equals(RESET_CM)) {
             CcuToCmOverUsbCmResetMessage_t msg = new CcuToCmOverUsbCmResetMessage_t();
             msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_CM_RESET);
             msg.reset.set((short)1);
             MeshUtil.sendStructToCM(msg);
             LSerial.getInstance().setResetSeedMessage(true);
-        }else if(!commands.isEmpty() && commands.equals("update_ccu")){
+        } else if (!commands.isEmpty() && commands.equals(UPDATE_CCU)) {
             String apkName = id;
             Log.d("CCU_DOWNLOAD", "got command to install update--"+ DownloadManager.EXTRA_DOWNLOAD_ID +","+apkName);
             RenatusApp.getAppContext().registerReceiver(new BroadcastReceiver() {
@@ -520,7 +535,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                 AppInstaller.getHandle().downloadHomeInstall(apkName);
             else if(apkName.startsWith("RENATUS_CCU"))
                 AppInstaller.getHandle().downloadCCUInstall(apkName);
-        }else if(!commands.isEmpty() && commands.equals("restart_module")){
+        } else if (!commands.isEmpty() && commands.equals(RESTART_MODULE)) {
 
             //TODO Send commands to SmartNode
             switch (cmdLevel){

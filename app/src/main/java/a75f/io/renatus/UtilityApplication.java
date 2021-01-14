@@ -506,8 +506,6 @@ public abstract class UtilityApplication extends Application {
             }
             localDevice = new LocalDevice(L.ccu().getSmartNodeAddressBand() + 99, ccuName, defaultTransport);
             localDevice.writePropertyInternal(PropertyIdentifier.firmwareRevision, new CharacterString("4.13"));
-            HashMap site = CCUHsApi.getInstance().read("site");
-            String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
             String ccuGUID = CCUHsApi.getInstance().getGUID(CCUHsApi.getInstance().getCcuId().toString());
             localDevice.writePropertyInternal(PropertyIdentifier.serialNumber, new CharacterString(ccuGUID));
             localDevice.writePropertyInternal(PropertyIdentifier.applicationSoftwareVersion, new CharacterString(Integer.toString(BuildConfig.VERSION_CODE)));
@@ -546,7 +544,7 @@ public abstract class UtilityApplication extends Application {
             defaultTransport.setLocalDevice(localDevice);
             localDevice.writePropertyInternal(PropertyIdentifier.firmwareRevision, new CharacterString("4.13"));
             HashMap site = CCUHsApi.getInstance().read("site");
-            String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
+            String siteGUID = CCUHsApi.getInstance().getGlobalSiteId();
             String ccuGUID = CCUHsApi.getInstance().getGUID(CCUHsApi.getInstance().getCcuId().toString());
             localDevice.writePropertyInternal(PropertyIdentifier.serialNumber, new CharacterString(ccuGUID));
             localDevice.writePropertyInternal(PropertyIdentifier.applicationSoftwareVersion, new CharacterString(Integer.toString(BuildConfig.VERSION_CODE)));

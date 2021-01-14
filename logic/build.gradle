@@ -1,6 +1,12 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 android {
+    def Properties properties = new Properties()
+    if (project.rootProject.file("local.properties").exists()) {
+        properties.load(project.rootProject.file("local.properties").newDataInputStream())
+    }
+
     compileSdkVersion 26
 
     defaultConfig {
@@ -43,19 +49,24 @@ android {
     buildTypes {
         local {
             minifyEnabled false
+            buildConfigField "String", 'FILE_STORAGE_API_BASE', properties.getProperty("filestorage.api.base", "")
         }
         dev {
             minifyEnabled false
+            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-dev.azurewebsites.net/\"'
         }
         prod {
             minifyEnabled false
+            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service.azurewebsites.net/\"'
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
         }
         qa {
+            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-qa.azurewebsites.net/\"'
             minifyEnabled false
         }
         staging {
+            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-staging.azurewebsites.net/\"'
             minifyEnabled false
         }
     }
@@ -71,6 +82,9 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+    }
 }
 
 dependencies {
@@ -88,4 +102,8 @@ dependencies {
     implementation 'com.pubnub:pubnub-gson:4.20.0'
     api 'com.google.guava:guava:26.0-android'
     implementation project(':alerts')
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
+repositories {
+    mavenCentral()
 }

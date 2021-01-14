@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
@@ -24,28 +23,18 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.ToggleButton;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.LSerial;
+import a75f.io.logic.filesystem.FileSystemTools;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.renatus.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 /**
   * Created by samjithsadasivan on 12/18/18.
@@ -119,8 +108,8 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                 AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
     
                 alert.setTitle("Log File Name ");
-    
-                String date = new SimpleDateFormat("yyyy-MM-dd-HH-mm", Locale.getDefault()).format(new Date());
+                FileSystemTools fileSystemTools = new FileSystemTools(getContext().getApplicationContext());
+                String date = fileSystemTools.timeStamp();
                 
                 //alert.setMessage(date);
     
@@ -132,12 +121,17 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     
                 alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        new Thread()
-                        {
+                        new Thread() {
                             @Override
-                            public void run()
-                            {
-                                writeLogCat(input.getText().toString()+".txt");
+                            public void run() {
+                                try {
+                                    fileSystemTools.writeLogCat(input.getText().toString() + ".txt");
+                                }
+                                catch (IOException | SecurityException ex) {
+                                    ex.printStackTrace();
+                                    getActivity().runOnUiThread(() -> showErrorDialog(
+                                            "Unable to save log file: " + ex.getMessage()));
+                                }
                             }
                         }.start();
                     }
@@ -265,50 +259,14 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         // TODO Auto-generated method stub
         
     }
-    
-    
-    protected void writeLogCat(String name)
-    {
-        try
-        {
-            Process process = Runtime.getRuntime().exec("logcat -v threadtime -d | grep CCU");
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            StringBuilder log = new StringBuilder();
-            String line;
-            while((line = bufferedReader.readLine()) != null)
-            {
-                log.append(line);
-                log.append("\n");
-            }
-            
-            //Create txt file in SD Card
-            File sdCard = Environment.getExternalStorageDirectory();
-            File dir = new File(sdCard.getAbsolutePath() +File.separator + "RenatusLogs");
-            
-            if(!dir.exists())
-            {
-                dir.mkdirs();
-            }
-            
-            File file = new File(dir, name);
-            
-            //To write logcat in text file
-            FileOutputStream fout = new FileOutputStream(file);
-            OutputStreamWriter osw = new OutputStreamWriter(fout);
-            
-            //Writing the string to file
-            osw.write(log.toString());
-            osw.flush();
-            osw.close();
-        }
-        catch(FileNotFoundException e)
-        {
-            e.printStackTrace();
-        }
-        catch(IOException e)
-        {
-            e.printStackTrace();
-        }
+
+    // Shows a simple error dialog for the given message.  (We should have a general tool for this.)
+    private void showErrorDialog(String msg) {
+        new AlertDialog.Builder(getActivity())
+                .setTitle("Error")
+                .setIcon(R.drawable.ic_alert)
+                .setMessage(msg)
+                .show();
     }
     
     public static void triggerRebirth(Context context) {

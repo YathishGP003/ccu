@@ -47,8 +47,7 @@ public class HisSyncHandler
 
         HashMap site = CCUHsApi.getInstance().read("site");
         if (site.size() > 0) {
-            String siteLUID = site.get("id").toString();
-            String siteGUID = CCUHsApi.getInstance().getGUID(siteLUID);
+            String siteGUID = CCUHsApi.getInstance().getGlobalSiteId();
 
             CcuLog.d(TAG,"Site is found during sync.");
 

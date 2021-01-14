@@ -1,6 +1,7 @@
 package a75f.io.logic.pubnub;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.google.gson.JsonObject;
 
@@ -14,7 +15,6 @@ import a75f.io.logic.L;
 
 public class PubNubHandler
 {
-    //
     public static final String CM_RESET = "CM RESET";
     public static final String PRE_DEF_ALERT = "predefinedAlertDefinition";
 

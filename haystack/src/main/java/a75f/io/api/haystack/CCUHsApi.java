@@ -8,6 +8,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projecthaystack.HDate;
@@ -849,6 +850,11 @@ public class CCUHsApi
         tagsDb.idMap.put(luid, guid);
     }
 
+    /**
+     * Get the Global unique ID for a given local Id.
+     * @param luid local ID
+     * @return the global Id
+     */
     public String getGUID(String luid)
     {
         return tagsDb.idMap.get(luid);
@@ -1387,11 +1393,31 @@ public class CCUHsApi
 
     }
 
+    /**
+     * This methods returns the Local siteId, not the global siteId.  Also, there is no
+     * @ in front of the id here, which you might also want.
+     *
+     * @return
+     */
     public HRef getSiteId()
     {
         HDict hDict = new HDictBuilder().add("filter", "site").toDict();
         HGrid site  = getHSClient().call("read", HGridBuilder.dictToGrid(hDict));
         return site.row(0).getRef("id");
+    }
+ /**
+     * Return the global site id if it exists.
+     * Otherwise null.
+     * @return site id or null
+     */
+    @Nullable
+    public String getGlobalSiteId() {
+        HashMap site = read("site");
+
+        if (site == null || site.get("id") == null) return null;
+        String siteLuid = site.get("id").toString();
+
+        return getGUID(siteLuid);
     }
 
     public HRef getCcuId() {

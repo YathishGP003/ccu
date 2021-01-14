@@ -374,9 +374,7 @@ public class FloorPlanFragment extends Fragment
 					return null;
 				}
 				HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-				HashMap site = CCUHsApi.getInstance().read("site");
-				String siteLUID = site.get("id").toString();
-				String siteGUID = CCUHsApi.getInstance().getGUID(siteLUID);
+				String siteGUID = CCUHsApi.getInstance().getGlobalSiteId();
 
 				if (siteGUID == null) {
 					return null;

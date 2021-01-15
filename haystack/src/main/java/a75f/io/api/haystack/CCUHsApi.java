@@ -1429,6 +1429,11 @@ public class CCUHsApi
         }
         return siteRef;
     }
+    
+    public String getCCUGuid() {
+        HRef ccuId = getCcuId();
+        return ccuId != null ? getGUID(ccuId.toString()) : null;
+    }
 
     public ArrayList<Schedule> getSystemSchedule(boolean vacation)
     {

@@ -10,8 +10,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true">
         <service
-            android:name=".jobs.BearerTokenManagementJob"
-            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:name=".jobs.bearertoken.BearerTokenManagerService"
             android:exported="true"/>
     </application>
 

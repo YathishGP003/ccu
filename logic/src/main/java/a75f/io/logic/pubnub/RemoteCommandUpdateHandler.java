@@ -19,12 +19,12 @@ public class RemoteCommandUpdateHandler
     public static final String OTA_UPDATE_SD = "ota_update_smartdevice";
     public static final String OTA_UPDATE_ITM = "ota_update_itm";
     public static final String UPDATE_CCU = "update_ccu";
-    private static final String RESTART_CCU = "restart_ccu";
-    private static final String RESTART_TABLET = "restart_tablet";
-    private static final String RESET_CM = "reset_cm";
+    public static final String RESTART_CCU = "restart_ccu";
+    public static final String RESTART_TABLET = "restart_tablet";
+    public static final String RESET_CM = "reset_cm";
     public static final String CM_RESET = "CM RESET";
-    private static final String SAVE_CCU_LOGS = "save_ccu_logs";
-    private static final String RESTART_MODULE = "restart_module";
+    public static final String SAVE_CCU_LOGS = "save_ccu_logs";
+    public static final String RESTART_MODULE = "restart_module";
     private static RemoteCommandHandleInterface remoteCommandInterface = null;
     
     public static void handleMessage(JsonObject msgObject, Context context) {

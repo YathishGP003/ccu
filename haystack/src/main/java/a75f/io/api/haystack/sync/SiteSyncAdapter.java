@@ -31,11 +31,9 @@ public class SiteSyncAdapter extends EntitySyncAdapter {
 
         boolean synced = false;
 
-        HDict sDict =  CCUHsApi.getInstance().readHDict("site");
-        HDictBuilder b = new HDictBuilder().add(sDict);
-        String siteLuid = b.get(SiteFieldConstants.ID).toString();
-        String siteGuid = CCUHsApi.getInstance().getGUID(siteLuid);
+        String siteGuid = CCUHsApi.getInstance().getGlobalSiteId();
 
+        HDict sDict =  CCUHsApi.getInstance().readHDict("site");
         if (StringUtils.isBlank(siteGuid)) {
             synced = siteCreationSync(sDict);
         } else {

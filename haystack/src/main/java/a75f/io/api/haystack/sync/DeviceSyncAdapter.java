@@ -35,9 +35,7 @@ public class DeviceSyncAdapter extends EntitySyncAdapter {
         boolean synced = false;
 
         if (CCUHsApi.getInstance().isCCURegistered()) {
-            HashMap site = CCUHsApi.getInstance().read("site");
-            String siteLuid = site.get("id").toString();
-            String siteRef = CCUHsApi.getInstance().getGUID(siteLuid);
+            String siteRef = CCUHsApi.getInstance().getGlobalSiteId();
 
             if (StringUtils.isNotBlank(siteRef)) {
                 synced = syncCcuDevice(siteRef);

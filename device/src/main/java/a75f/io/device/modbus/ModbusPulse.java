@@ -141,16 +141,15 @@ public class ModbusPulse {
             //16bit decimal (ir) or 1 bit (di)
             respVal = parseByteVal(response);
         } else if (register.registerType.equals("inputRegister")) {
-            if (register.getWordOrder() != null && register.getWordOrder().equals("littleEndian")) {
-                respVal = parseLittleEndianFloatVal(response);
-            } else {
-                respVal = parseIntVal(response);
-            }
+            respVal = parseIntVal(response);
         } else if (register.registerType.equals("holdingRegister")) {
             
             if (register.getParameterDefinitionType().equals("float")) {
-                
-                respVal = parseFloatVal(response);
+                    if (register.getWordOrder() != null && register.getWordOrder().equals("littleEndian")) {
+                        respVal = parseLittleEndianFloatVal(response);
+                    } else {
+                        respVal = parseFloatVal(response);
+                    }
             } else if (register.getParameterDefinitionType().equals("integer")
                   || register.getParameterDefinitionType().equals("decimal")
                   || register.getParameterDefinitionType().equals("range")) {

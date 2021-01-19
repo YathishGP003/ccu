@@ -1,13 +1,12 @@
- - Merged PR 356: Modbus Little Endian Float/long support
- - Merged PR 349: 3689:  Module is appearing as Zone dead when relays are in disable state for SSE
- - Merged PR 357: Hold normalized damper pos when normalization is not required
- - WordOrder support
- - Little endian float/int64 parsing
- - support till 247
- - fixes
- - Merged PR 354: Modbus fix
- - unsigned long support
- - Hold normalized damper pos when normalization is not required
- - SSE: change tempdead to deadband for valid temp in non-configured setup
- - Fix typo in equip display portion of point display for SSE
- - Fix typo in onboarding
+ - Merged PR 391: DAB zone damper not updating
+ - Merged PR 360: ModbusFix
+ - Merged PR 378: CM board analog/thermistor input points
+ - ZonePriority logic update
+ - DAB damper position update in deadband
+ - Merged PR 379: 4726  Upload log files
+ - Update query
+ - Add CM AI/TH during upgrades
+ - add logs for AI/TH writes
+ - CM physical points his data write for analogIn/thIn
+ - limit to 2 decimal
+ - update fix for float type

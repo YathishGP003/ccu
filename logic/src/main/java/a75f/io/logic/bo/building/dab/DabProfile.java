@@ -125,7 +125,6 @@ public class DabProfile extends ZoneProfile
         co2 = dabEquip.getCO2();
         voc = dabEquip.getVOC();
         
-        Damper damper = new Damper();
         Log.d(L.TAG_CCU_ZONE, "DAB : roomTemp" + roomTemp + " setTempCooling:  " + setTempCooling+" setTempHeating: "+setTempHeating);
     
         SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
@@ -161,9 +160,12 @@ public class DabProfile extends ZoneProfile
     
         updateDamperIAQCompensation();
         
-        int damperPos = (int)(damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * (damperOpController.getControlVariable() / damperOpController.getMaxAllowedError()));
-        if(damper.currentPosition != damperPos) {
-            damper.currentPosition = damperPos;
+        damper.currentPosition =
+            (int)(damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * (damperOpController.getControlVariable() / damperOpController.getMaxAllowedError()));
+        
+        double hisDamperPos = CCUHsApi.getInstance().readHisValByQuery("point and damper and base and cmd and primary"+
+                                                                    " and group == \""+dabEquip.nodeAddr+"\"");
+        if(damper.currentPosition != hisDamperPos) {
             dabEquip.setDamperPos(damper.currentPosition, "primary");
             dabEquip.setDamperPos(damper.currentPosition, "secondary");
         }

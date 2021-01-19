@@ -27,10 +27,8 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
-import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
-import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.TunerNumberPicker;
 import butterknife.ButterKnife;
 
@@ -131,8 +129,16 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         }
         HashMap site = CCUHsApi.getInstance().read("site");
         HashMap ccu = CCUHsApi.getInstance().read("ccu");
-        textLabelCCU.setText(ccu.get("dis").toString());
-        textLabelBuilding.setText(site.get("dis").toString());
+        if (tunerGroupType.contains("Zone")) {
+            textLabelBuilding.setText(ccu.get("dis").toString());
+            textLabelCCU.setText(HSUtil.getDis(tunerItemSelected.get("roomRef").toString()));
+        } else if (tunerGroupType.contains("Module")) {
+            textLabelBuilding.setText(ccu.get("dis").toString());
+            textLabelCCU.setText(HSUtil.getDis(tunerItemSelected.get("equipRef").toString()));
+        } else {
+            textLabelBuilding.setText(site.get("dis").toString());
+            textLabelCCU.setText(ccu.get("dis").toString());
+        }
         textTunerGroupTitle.setText(tunerGroupSelected.getName());
         priorityList = new ArrayList<>();
         priorityList = CCUHsApi.getInstance().readPoint(tunerItemSelected.get("id").toString());

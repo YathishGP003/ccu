@@ -31,21 +31,19 @@ public class BearerTokenManager{
     }
     
     public void scheduleJob() {
-        Log.d(L.TAG_CCU_JOB, " BearerTokenManager : scheduleJob");
+        
         Context appContext = Globals.getInstance().getApplicationContext();
         AlarmManager alarmMgr = (AlarmManager)appContext.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(appContext, BearerTokenManagerService.class);
         PendingIntent alarmIntent = PendingIntent.getService(appContext, 0, intent, 0);
     
-        alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                                     SystemClock.elapsedRealtime() + 0 /*AlarmManager.INTERVAL_FIFTEEN_MINUTES*/,
-                                     AlarmManager.INTERVAL_HALF_HOUR, alarmIntent);
+        alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(),
+                                     AlarmManager.INTERVAL_DAY, alarmIntent);
     }
     
     public void fetchToken(CCUHsApi hayStack) {
-        Log.d(L.TAG_CCU_JOB, " BearerTokenManagerService : fetchToken");
         
-        GateKeeperService service = GateKeeperServiceGenerator.createService(GateKeeperService.class, hayStack.getJwt());
+        CaretakerService service = CaretakerServiceGenerator.createService(CaretakerService.class, hayStack.getJwt());
         Call<BearerToken> callAsync = service.getAccessToken(hayStack.getCCUGuid());
         
         callAsync.enqueue(new Callback<BearerToken>() {
@@ -54,7 +52,7 @@ public class BearerTokenManager{
                 Log.d(L.TAG_CCU_JOB, " BearerTokenManagerService : fetchToken response "+response);
                 if (response != null && response.isSuccessful()) {
                     BearerToken token = response.body();
-                    CcuLog.d(L.TAG_CCU_JOB, "Set new token " + token.getAccessToken());
+                    CcuLog.d(L.TAG_CCU_JOB, "BearerTokenManagerService: Set new token " + token.getAccessToken());
                     hayStack.setJwt(token.getAccessToken());
                 }
             }

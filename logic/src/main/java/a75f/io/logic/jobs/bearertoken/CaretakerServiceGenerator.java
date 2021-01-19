@@ -7,7 +7,7 @@ import okhttp3.Request;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-class GateKeeperServiceGenerator {
+class CaretakerServiceGenerator {
     
     private static Retrofit getRetrofitClient(String bearerToken) {
         
@@ -25,7 +25,7 @@ class GateKeeperServiceGenerator {
                                       .build();
         
         Retrofit retrofit = new Retrofit.Builder()
-                                .baseUrl(BuildConfig.GATEKEEPER_API_BASE)
+                                .baseUrl(BuildConfig.CARETAKER_API_BASE)
                                 .addConverterFactory(GsonConverterFactory.create())
                                 .client(httpClient)
                                 .build();

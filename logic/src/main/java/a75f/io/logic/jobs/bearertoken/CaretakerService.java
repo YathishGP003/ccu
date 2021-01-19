@@ -4,9 +4,9 @@ import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 
-interface GateKeeperService {
+interface CaretakerService {
     
-    @GET("/device/{deviceId}/refreshToken")
+    @GET("/api/v1/devices/{deviceId}/token/refresh")
     Call<BearerToken> getAccessToken(@Path("deviceId") String deviceId);
     
 }

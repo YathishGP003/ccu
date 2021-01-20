@@ -132,7 +132,6 @@
                 android:layout_marginLeft="10sp"
                 android:layout_marginRight="20sp"
                 android:layout_toLeftOf="@+id/buttonLayout"
-                android:hint="@string/hint_tunerChangeReason"
                 android:minHeight="50sp" />
 
             <LinearLayout

@@ -79,10 +79,11 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                 holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
                 if (tunerItem.containsKey("newValue")) {
                     holder.itemTextValueView.setText(tunerItem.get("newValue").toString());
+                    holder.imgBtnEdit.setVisibility(View.VISIBLE);
                 } else {
+                    holder.imgBtnEdit.setVisibility(View.GONE);
                     holder.itemTextValueView.setText(String.valueOf(getTunerValue(tunerItem.get("id").toString())));
                 }
-                holder.imgBtnUndoChange.setVisibility(View.GONE);
                 if (tunerItem.containsKey("unit")) {
                     holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1) + " (" + tunerItem.get("unit").toString().toUpperCase() + ")");
                 } else {
@@ -94,13 +95,8 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                     holder.itemDivider.setVisibility(View.VISIBLE);
                 }
 
-                holder.imgBtnUndoChange.setOnClickListener(v -> {
-                    if (tunerItem.containsKey("unit")) {
-                        holder.itemTextValueView.setText("" + getTunerValue(tunerItem.get("id").toString()) + " " + tunerItem.get("unit").toString().toUpperCase());
-                    } else {
-                        holder.itemTextValueView.setText("" + getTunerValue(tunerItem.get("id").toString()));
-                    }
-                    holder.imgBtnUndoChange.setVisibility(View.GONE);
+                holder.imgBtnEdit.setOnClickListener(v -> {
+                    mItemClickListener.itemClicked(tunerItem, position);
                 });
 
                 holder.view.setOnClickListener(v -> mItemClickListener.itemClicked(tunerItem, position));
@@ -166,7 +162,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
         TextView itemTextView;
         TextView itemTextValueView;
         CardView tunerGridBg;
-        ImageButton imgBtnUndoChange;
+        ImageButton imgBtnEdit;
         View itemDivider;
 
         public ViewHolder(View view, int viewType) {
@@ -178,7 +174,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                 itemTextValueView = view.findViewById(R.id.expandedListItemVal);
                 itemDivider = view.findViewById(R.id.tunerDivider);
                 tunerGridBg = view.findViewById(R.id.tunerGridBg);
-                imgBtnUndoChange = view.findViewById(R.id.imgBtnUndoChange);
+                imgBtnEdit = view.findViewById(R.id.imgBtnEdit);
             } else {
                 tunerGroupTitle = view.findViewById(R.id.groupTitle);
                 tunerGroupToggle = view.findViewById(R.id.toggleTunerGroup);

@@ -12,10 +12,11 @@ import com.pubnub.api.callbacks.SubscribeCallback;
 import com.pubnub.api.enums.PNStatusCategory;
 import com.pubnub.api.models.consumer.PNPublishResult;
 import com.pubnub.api.models.consumer.PNStatus;
+import com.pubnub.api.models.consumer.history.PNHistoryItemResult;
+import com.pubnub.api.models.consumer.history.PNHistoryResult;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
@@ -32,9 +33,6 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.CCUApplication;
-import a75f.io.logic.bo.building.Day;
-import a75f.io.logic.bo.building.NamedSchedule;
-import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.ccu.CazProfile;
 import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -67,6 +65,8 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.pubnub.PubNubHandler;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.watchdog.Watchdog;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /*
     This is used to keep track of global static associated with application context.
@@ -106,7 +106,8 @@ public class Globals {
     PubNub pubnub;
     boolean pubnubSubscribed = false;
     private boolean _siteAlreadyCreated;
-
+    
+    private Long curPubNubMsgTimeToken;
 
     private Globals() {
     }
@@ -168,7 +169,7 @@ public class Globals {
     public void initilize() {
         
         taskExecutor = Executors.newScheduledThreadPool(NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES);
-        populate();
+        
         //mHeartBeatJob = new HeartBeatJob();
         //5 seconds after application initializes start heart beat
         
@@ -242,56 +243,6 @@ public class Globals {
             setTestMode(false);
         }
     }
-    
-
-    private void populate() {
-        //TODO: get this from kinvey.
-        //This seems like overkill, but it has to follow the meta to support the unit test
-        // framework.
-
-        //TODO test method
-        if (ccu().getLCMNamedSchedules().size() == 0) {
-            //Mock schedule M-F, 8AM - 5:30PM turn isOn lights to value 100.
-            //Mock schedule M-F, 8AM - 5:30PM turn isOn lights to value 100.
-
-
-            NamedSchedule namedSchedule = new NamedSchedule();
-            namedSchedule.setName("LCM Named Schedule 100");
-            namedSchedule.setSchedule(getSchedules(100));
-
-
-            NamedSchedule namedScheduleTwo = new NamedSchedule();
-            namedScheduleTwo.setName("LCM Named Schedule 75");
-            namedScheduleTwo.setSchedule(getSchedules(75));
-
-            ccu().getLCMNamedSchedules().put(namedSchedule.getName(), namedSchedule);
-            ccu().getLCMNamedSchedules().put(namedScheduleTwo.getName(), namedScheduleTwo);
-            ccu().setDefaultLightSchedule(getSchedules(100));
-            ccu().setDefaultTemperatureSchedule(getSchedules(75));
-        }
-    }
-
-    private ArrayList<Schedule> getSchedules(int val) {
-        Schedule schedule = new Schedule();
-        int[] ints = {0, 1, 2, 3, 4};
-        ArrayList<Day> intsaslist = new ArrayList<Day>();
-        for (int i : ints) { //as
-            Day day = new Day();
-            day.setDay(i);
-            day.setSthh(8);
-            day.setStmm(00);
-            day.setEthh(17);
-            day.setEtmm(30);
-            day.setVal((short) val);
-            intsaslist.add(day);
-        }
-        schedule.setDays(intsaslist);
-        ArrayList<Schedule> schedules = new ArrayList<Schedule>();
-        schedules.add(schedule);
-
-        return schedules;
-    }
-
 
     public boolean testHarness() {
         return testHarness;
@@ -326,7 +277,7 @@ public class Globals {
 
         messageJsonObject.addProperty("msg", "Configuration");
     
-        CcuLog.d(L.TAG_CCU,"CCU Message to send: " + messageJsonObject.toString());
+        CcuLog.d(L.TAG_CCU_PUBNUB,"CCU Message to send: " + messageJsonObject.toString());
 
         pubnub.addListener(new SubscribeCallback() {
             @Override
@@ -334,7 +285,7 @@ public class Globals {
 
 
                 if (status.getCategory() == PNStatusCategory.PNUnexpectedDisconnectCategory) {
-                    CcuLog.d(L.TAG_CCU, "pubnub PNUnexpectedDisconnectCategory ");
+                    CcuLog.d(L.TAG_CCU_PUBNUB, "Event PNUnexpectedDisconnectCategory ");
                     pubnub.reconnect();
                     // This event happens when radio / connectivity is lost
                 } else if (status.getCategory() == PNStatusCategory.PNConnectedCategory) {
@@ -344,7 +295,7 @@ public class Globals {
                     // UI / internal notifications, etc
 
                     if (status.getCategory() == PNStatusCategory.PNConnectedCategory) {
-                        CcuLog.d(L.TAG_CCU, "PNConnectedCategory publish");
+                        CcuLog.d(L.TAG_CCU_PUBNUB, "Event PNConnectedCategory publish");
                         pubnub.publish().channel(siteId.replace("@","")).message(messageJsonObject).async(new PNCallback<PNPublishResult>() {
                             @Override
                             public void onResponse(PNPublishResult result, PNStatus status) {
@@ -368,37 +319,26 @@ public class Globals {
 
                     // Happens as part of our regular operation. This event happens when
                     // radio / connectivity is lost, then regained.
+                    CcuLog.d(L.TAG_CCU_PUBNUB, "Event PNReconnectedCategory");
+                    handleReconnect(siteId.replaceFirst("@",""));
                 } else if (status.getCategory() == PNStatusCategory.PNDecryptionErrorCategory) {
-
                     // Handle messsage decryption error. Probably client configured to
                     // encrypt messages and on live data feed it received plain text.
+                    CcuLog.d(L.TAG_CCU_PUBNUB, "Event PNDecryptionErrorCategory");
                 }else if(status.getCategory() == PNStatusCategory.PNTimeoutCategory){
 
-                    CcuLog.d(L.TAG_CCU, "pubnub  PNTimeoutCategory ");
+                    CcuLog.d(L.TAG_CCU_PUBNUB, "Event PNTimeoutCategory ");
                     pubnub.reconnect();
                 }
             }
 
             @Override
             public void message(PubNub pubnub, PNMessageResult message) {
-                // Handle new message stored in message.message
-                if (message.getChannel() != null) {
-                    // Message has been received on channel group stored in
-                    // message.getChannel()
-                } else {
-                    // Message has been received on channel stored in
-                    // message.getSubscription()
-                }
-
-                JsonElement receivedMessageObject = message.getMessage();
-                CcuLog.d(L.TAG_CCU_PUBNUB, "PubNub Received message content: " + receivedMessageObject.toString());
                 
-                try
-                {
-                    PubNubHandler.handleMessage(message.getMessage().getAsJsonObject(), getApplicationContext());
-                } catch (NumberFormatException e) {
-                    Log.d(L.TAG_CCU_PUBNUB, " Ignoring PubNub Message "+e.getMessage());
-                }
+                //JsonElement receivedMessageObject = message.getMessage();
+                
+                handlePunubMessage(message.getMessage().getAsJsonObject(), getApplicationContext());
+                
             }
 
             @Override
@@ -412,7 +352,56 @@ public class Globals {
 
         pubnubSubscribed = true;
     }
-
+    
+    private void handleReconnect(String channelId) {
+        Log.d(L.TAG_CCU_PUBNUB, " handleReconnect ");
+        pubnub.history()
+              .channel(channelId) // where to fetch history from
+              .count(100) // how many items to fetch
+              .async(new PNCallback<PNHistoryResult>() {
+                  @Override
+                  public void onResponse(PNHistoryResult result, PNStatus status) {
+                      if (result.getEndTimetoken() < curPubNubMsgTimeToken) {
+                          CcuLog.d(L.TAG_CCU_PUBNUB, " Not missed a PubNub message out of "+result.getMessages().size());
+                          return;
+                      }
+    
+                      Observable.fromIterable(result.getMessages())
+                                .subscribeOn(Schedulers.io())
+                                .doOnNext(msg -> {
+                                    CcuLog.d(L.TAG_CCU_PUBNUB, " Message from history "+msg.toString());
+                                })
+                                .filter(msg -> msg.getTimetoken() > curPubNubMsgTimeToken)
+                                .map(msg -> msg.getEntry())
+                                .subscribe(msg -> {
+                                    handlePunubMessage(msg, getApplicationContext());
+                                });
+                              
+                      
+                      /*for(PNHistoryItemResult msg : result.getMessages()) {
+                          if (msg.getTimetoken() > curPubNubMsgTimeToken) {
+                              JsonElement receivedMessageObject = msg.getEntry()
+                              CcuLog.d(L.TAG_CCU_PUBNUB,
+                                       "PubNub message read from history: " + receivedMessageObject.toString());
+                              handlePunubMessage(receivedMessageObject, getApplicationContext());
+                          }
+                      }*/
+                  }
+              });
+    }
+    
+    
+    private void handlePunubMessage(JsonElement receivedMessageObject, Context appContext) {
+    
+        CcuLog.d(L.TAG_CCU_PUBNUB, "handlePunubMessage: " + receivedMessageObject.toString());
+    
+        try {
+            PubNubHandler.handleMessage(receivedMessageObject.getAsJsonObject(), appContext);
+        } catch (NumberFormatException e) {
+            Log.d(L.TAG_CCU_PUBNUB, "Invalid data format, igoring PubNub Message " + e.getMessage());
+        }
+    }
+    
     public boolean isPubnubSubscribed() {
         return pubnubSubscribed;
     }

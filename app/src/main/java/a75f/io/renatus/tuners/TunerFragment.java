@@ -20,6 +20,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -29,10 +30,8 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -41,6 +40,8 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
+import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
 
@@ -221,6 +222,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 layoutValues.setVisibility(View.VISIBLE);
                 TextView textView_SectionLabel = tunerItemViewBody.findViewById(R.id.textView_SectionLabel);
                 TextView textView_Section = tunerItemViewBody.findViewById(R.id.textView_Section);
+                ImageView imageViewArrow = tunerItemViewBody.findViewById(R.id.imageViewArrow);
                 TextView textView_tuner = tunerItemViewBody.findViewById(R.id.textView_tuner);
                 TextView textView_level = tunerItemViewBody.findViewById(R.id.textView_level);
                 TextView textView_oldValue = tunerItemViewBody.findViewById(R.id.textView_oldValue);
@@ -248,16 +250,36 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 } else {
                     textView_tuner.setText(tunerName + " | ");
                 }
-                textView_level.setText("Level " + getTunerLevelValue(newTunerValueItem.get("id").toString()) + " : ");
-                textView_newLevel.setText("Level : " + newTunerValueItem.get("newLevel").toString());
-                textView_oldValue.setText(String.valueOf(getTunerValue(newTunerValueItem.get("id").toString())));
-                textView_newValue.setText(newTunerValueItem.get("newValue").toString());
+                if (newTunerValueItem.get("newLevel").toString().equals("16") && newTunerValueItem.get("tunerGroup").toString().contains("VAV") || newTunerValueItem.get("tunerGroup").toString().contains("DAB") ){
+                    if ( newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(getSystemProfileType())){
+                        textView_level.setText("Level " + getTunerLevelValue(newTunerValueItem.get("id").toString()) + " : ");
+                        textView_newLevel.setText("Level : " + newTunerValueItem.get("newLevel").toString());
+                        textView_oldValue.setText(String.valueOf(getTunerValue(newTunerValueItem.get("id").toString())));
+                        textView_newValue.setText(newTunerValueItem.get("newValue").toString());
+                    } else {
+                        textView_level.setText("(Tuner is not applicable)");
+                        textView_newLevel.setVisibility(View.GONE);
+                        textView_oldValue.setVisibility(View.GONE);
+                        textView_newValue.setVisibility(View.GONE);
+                        imageViewArrow.setVisibility(View.GONE);
+                    }
+                } else {
+                    textView_level.setText("Level " + getTunerLevelValue(newTunerValueItem.get("id").toString()) + " : ");
+                    textView_newLevel.setText("Level : " + newTunerValueItem.get("newLevel").toString());
+                    textView_oldValue.setText(String.valueOf(getTunerValue(newTunerValueItem.get("id").toString())));
+                    textView_newValue.setText(newTunerValueItem.get("newValue").toString());
+                }
                 linearLayoutBody.addView(tunerItemViewBody);
             }
             Button buttonApplyTuners = dialogView.findViewById(R.id.buttonApplyTuner);
             Button buttonCancelTuners = dialogView.findViewById(R.id.buttonCancelTuner);
             buttonApplyTuners.setOnClickListener(dialogV -> {
                 for (HashMap newTunerValueItem : updatedTunerValues) {
+                    if (newTunerValueItem.get("newLevel").toString().equals("16") && newTunerValueItem.get("tunerGroup").toString().contains("VAV") || newTunerValueItem.get("tunerGroup").toString().contains("DAB")) {
+                        if (!newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(getSystemProfileType())) {
+                            continue;
+                        }
+                    }
                     setTuner(newTunerValueItem.get("id").toString(), Integer.valueOf(newTunerValueItem.get("newLevel").toString()), Double.parseDouble(newTunerValueItem.get("newValue").toString()));
                 }
                 Toast.makeText(getActivity(), "Tuner Values Updated Successfully", Toast.LENGTH_SHORT).show();
@@ -521,5 +543,23 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             }
         }
         return "14";
+    }
+
+    private String getSystemProfileType(){
+        ProfileType profileType =  L.ccu().systemProfile.getProfileType();
+        switch (profileType){
+            case SYSTEM_DAB_ANALOG_RTU:
+            case SYSTEM_DAB_HYBRID_RTU:
+            case SYSTEM_DAB_STAGED_RTU:
+            case SYSTEM_DAB_STAGED_VFD_RTU:
+                return "DAB";
+            case SYSTEM_VAV_ANALOG_RTU:
+            case SYSTEM_VAV_HYBRID_RTU:
+            case SYSTEM_VAV_IE_RTU:
+            case SYSTEM_VAV_STAGED_RTU:
+            case SYSTEM_VAV_STAGED_VFD_RTU:
+                return "VAV";
+        }
+        return "default";
     }
 }

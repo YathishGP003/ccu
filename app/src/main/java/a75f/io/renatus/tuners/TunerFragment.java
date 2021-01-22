@@ -28,6 +28,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -348,7 +350,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         List<HashMap> filteredList = new ArrayList<>();
         for (String groupTitle : sortedGroupTuner.keySet()) {
            for (HashMap tuners : sortedGroupTuner.get(groupTitle)){
-               if(tuners.get("dis").toString().contains(filteredString)) {
+               if(StringUtils.containsIgnoreCase(tuners.get("dis").toString(),filteredString)) {
                    filteredList.add(tuners);
                }
             }

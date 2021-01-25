@@ -3,28 +3,14 @@ package a75f.io.logic;
 import android.content.Context;
 import android.util.Log;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
-import com.pubnub.api.callbacks.PNCallback;
-import com.pubnub.api.callbacks.SubscribeCallback;
-import com.pubnub.api.enums.PNStatusCategory;
-import com.pubnub.api.models.consumer.PNPublishResult;
-import com.pubnub.api.models.consumer.PNStatus;
-import com.pubnub.api.models.consumer.history.PNHistoryItemResult;
-import com.pubnub.api.models.consumer.history.PNHistoryResult;
-import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
-import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.alerts.AlertProcessJob;
-import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
@@ -62,11 +48,9 @@ import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
-import a75f.io.logic.pubnub.PubNubHandler;
+import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.watchdog.Watchdog;
-import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /*
     This is used to keep track of global static associated with application context.
@@ -211,12 +195,12 @@ public class Globals {
             
                 loadEquipProfiles();
             
-                if (!isPubnubSubscribed())
+                if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed())
                 {
                     if (!site.isEmpty()) {
                         String siteGUID = CCUHsApi.getInstance().getGlobalSiteId();
                         if (siteGUID != null && siteGUID != "") {
-                            Globals.getInstance().registerSiteToPubNub(siteGUID);
+                                PbSubscriptionHandler.getInstance().registerSite(getApplicationContext(), siteGUID);
                         }
                     }
                 }
@@ -254,156 +238,6 @@ public class Globals {
 
     public void saveTags() {
         CCUHsApi.getInstance().saveTagsData();
-    }
-
-    public void registerSiteToPubNub(final String siteId) {
-
-        CcuLog.d(L.TAG_CCU,"registerSiteToPubNub "+siteId.replace("@",""));
-
-        PNConfiguration pnConfiguration = new PNConfiguration();
-
-        final String pubnubSubscribeKey = BuildConfig.PUBNUB_SUBSCRIBE_KEY;
-        final String pubnubPublishKey = BuildConfig.PUBNUB_PUBLISH_KEY;
-
-        pnConfiguration.setSubscribeKey(pubnubSubscribeKey);
-        pnConfiguration.setPublishKey(pubnubPublishKey);
-
-        pnConfiguration.setSecure(false);
-
-        pubnub = new PubNub(pnConfiguration);
-
-        // create message payload using Gson
-        final JsonObject messageJsonObject = new JsonObject();
-
-        messageJsonObject.addProperty("msg", "Configuration");
-    
-        CcuLog.d(L.TAG_CCU_PUBNUB,"CCU Message to send: " + messageJsonObject.toString());
-
-        pubnub.addListener(new SubscribeCallback() {
-            @Override
-            public void status(PubNub pubnub, PNStatus status) {
-
-
-                if (status.getCategory() == PNStatusCategory.PNUnexpectedDisconnectCategory) {
-                    CcuLog.d(L.TAG_CCU_PUBNUB, "Event PNUnexpectedDisconnectCategory ");
-                    pubnub.reconnect();
-                    // This event happens when radio / connectivity is lost
-                } else if (status.getCategory() == PNStatusCategory.PNConnectedCategory) {
-
-                    // Connect event. You can do stuff like publish, and know you'll get it.
-                    // Or just use the connected event to confirm you are subscribed for
-                    // UI / internal notifications, etc
-
-                    if (status.getCategory() == PNStatusCategory.PNConnectedCategory) {
-                        CcuLog.d(L.TAG_CCU_PUBNUB, "Event PNConnectedCategory publish");
-                        pubnub.publish().channel(siteId.replace("@","")).message(messageJsonObject).async(new PNCallback<PNPublishResult>() {
-                            @Override
-                            public void onResponse(PNPublishResult result, PNStatus status) {
-                                // Check whether request successfully completed or not.
-                                if (!status.isError()) {
-
-                                    // Message successfully published to specified channel.
-                                }
-                                // Request processing failed.
-                                else {
-
-                                    // Handle message publish error. Check 'category' property to find out possible issue
-                                    // because of which request did fail.
-                                    //
-                                    // Request can be resent using: [status retry];
-                                }
-                            }
-                        });
-                    }
-                } else if (status.getCategory() == PNStatusCategory.PNReconnectedCategory) {
-
-                    // Happens as part of our regular operation. This event happens when
-                    // radio / connectivity is lost, then regained.
-                    CcuLog.d(L.TAG_CCU_PUBNUB, "Event PNReconnectedCategory");
-                    handleReconnect(siteId.replaceFirst("@",""));
-                } else if (status.getCategory() == PNStatusCategory.PNDecryptionErrorCategory) {
-                    // Handle messsage decryption error. Probably client configured to
-                    // encrypt messages and on live data feed it received plain text.
-                    CcuLog.d(L.TAG_CCU_PUBNUB, "Event PNDecryptionErrorCategory");
-                }else if(status.getCategory() == PNStatusCategory.PNTimeoutCategory){
-
-                    CcuLog.d(L.TAG_CCU_PUBNUB, "Event PNTimeoutCategory ");
-                    pubnub.reconnect();
-                }
-            }
-
-            @Override
-            public void message(PubNub pubnub, PNMessageResult message) {
-                
-                //JsonElement receivedMessageObject = message.getMessage();
-                
-                handlePunubMessage(message.getMessage().getAsJsonObject(), getApplicationContext());
-                
-            }
-
-            @Override
-            public void presence(PubNub pubnub, PNPresenceEventResult presence) {
-
-            }
-        });
-
-    
-        pubnub.subscribe().channels(Arrays.asList(siteId.replace("@",""))).execute();
-
-        pubnubSubscribed = true;
-    }
-    
-    private void handleReconnect(String channelId) {
-        Log.d(L.TAG_CCU_PUBNUB, " handleReconnect ");
-        pubnub.history()
-              .channel(channelId) // where to fetch history from
-              .count(100) // how many items to fetch
-              .async(new PNCallback<PNHistoryResult>() {
-                  @Override
-                  public void onResponse(PNHistoryResult result, PNStatus status) {
-                      if (result.getEndTimetoken() < curPubNubMsgTimeToken) {
-                          CcuLog.d(L.TAG_CCU_PUBNUB, " Not missed a PubNub message out of "+result.getMessages().size());
-                          return;
-                      }
-    
-                      Observable.fromIterable(result.getMessages())
-                                .subscribeOn(Schedulers.io())
-                                .doOnNext(msg -> {
-                                    CcuLog.d(L.TAG_CCU_PUBNUB, " Message from history "+msg.toString());
-                                })
-                                .filter(msg -> msg.getTimetoken() > curPubNubMsgTimeToken)
-                                .map(msg -> msg.getEntry())
-                                .subscribe(msg -> {
-                                    handlePunubMessage(msg, getApplicationContext());
-                                });
-                              
-                      
-                      /*for(PNHistoryItemResult msg : result.getMessages()) {
-                          if (msg.getTimetoken() > curPubNubMsgTimeToken) {
-                              JsonElement receivedMessageObject = msg.getEntry()
-                              CcuLog.d(L.TAG_CCU_PUBNUB,
-                                       "PubNub message read from history: " + receivedMessageObject.toString());
-                              handlePunubMessage(receivedMessageObject, getApplicationContext());
-                          }
-                      }*/
-                  }
-              });
-    }
-    
-    
-    private void handlePunubMessage(JsonElement receivedMessageObject, Context appContext) {
-    
-        CcuLog.d(L.TAG_CCU_PUBNUB, "handlePunubMessage: " + receivedMessageObject.toString());
-    
-        try {
-            PubNubHandler.handleMessage(receivedMessageObject.getAsJsonObject(), appContext);
-        } catch (NumberFormatException e) {
-            Log.d(L.TAG_CCU_PUBNUB, "Invalid data format, igoring PubNub Message " + e.getMessage());
-        }
-    }
-    
-    public boolean isPubnubSubscribed() {
-        return pubnubSubscribed;
     }
 
     public void loadEquipProfiles() {

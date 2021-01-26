@@ -1168,7 +1168,7 @@ public class HeatPumpUnitEquip{
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        CCUHsApi.getInstance().pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "ccu", HNum.make(desiredTemp), HNum.make(0));
+        CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make(desiredTemp), HNum.make(0));
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
     }
 
@@ -1198,7 +1198,7 @@ public class HeatPumpUnitEquip{
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        CCUHsApi.getInstance().pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "ccu", HNum.make(desiredTemp), HNum.make(0));
+        CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make(desiredTemp), HNum.make(0));
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
     }
 
@@ -1250,7 +1250,7 @@ public class HeatPumpUnitEquip{
                 .setTz(tz)
                 .build();
         String fanOpModeId = CCUHsApi.getInstance().addPoint(fanOpMode);
-        CCUHsApi.getInstance().writePoint(fanOpModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_DEFAULT_FAN_OPERATIONAL_MODE, 0);
+        CCUHsApi.getInstance().writePointForCcuUser(fanOpModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_DEFAULT_FAN_OPERATIONAL_MODE, 0);
         CCUHsApi.getInstance().writeHisValById(fanOpModeId, TunerConstants.STANDALONE_DEFAULT_FAN_OPERATIONAL_MODE);
 
         Point conditionalMode = new Point.Builder()
@@ -1265,7 +1265,7 @@ public class HeatPumpUnitEquip{
                 .setTz(tz)
                 .build();
         String conditionalModeId = CCUHsApi.getInstance().addPoint(conditionalMode);
-        CCUHsApi.getInstance().writePoint(conditionalModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_DEFAULT_CONDITIONAL_MODE, 0);
+        CCUHsApi.getInstance().writePointForCcuUser(conditionalModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_DEFAULT_CONDITIONAL_MODE, 0);
         CCUHsApi.getInstance().writeHisValById(conditionalModeId, TunerConstants.STANDALONE_DEFAULT_CONDITIONAL_MODE);
 
 
@@ -1275,7 +1275,7 @@ public class HeatPumpUnitEquip{
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("his")
                 .setTz(tz).addMarker("dehumidifier").addMarker("sp").build();
         String targetDehumidifierId = CCUHsApi.getInstance().addPoint(targetDehumidifier);
-        CCUHsApi.getInstance().writePoint(targetDehumidifierId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_TARGET_DEHUMIDIFIER, 0);
+        CCUHsApi.getInstance().writePointForCcuUser(targetDehumidifierId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_TARGET_DEHUMIDIFIER, 0);
         CCUHsApi.getInstance().writeHisValById(targetDehumidifierId, TunerConstants.STANDALONE_TARGET_DEHUMIDIFIER);
         Point targetHumidty = new Point.Builder()
                 .setDisplayName(equipDis + "-" + "targetHumidity")
@@ -1283,7 +1283,7 @@ public class HeatPumpUnitEquip{
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("humidity").addMarker("sp")
                 .addMarker("his").setTz(tz).build();
         String targetHumidtyId = CCUHsApi.getInstance().addPoint(targetHumidty);
-        CCUHsApi.getInstance().writePoint(targetHumidtyId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_TARGET_HUMIDITY, 0);
+        CCUHsApi.getInstance().writePointForCcuUser(targetHumidtyId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_TARGET_HUMIDITY, 0);
         CCUHsApi.getInstance().writeHisValById(targetHumidtyId, TunerConstants.STANDALONE_TARGET_HUMIDITY);
     }
 }

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/white">
+    android:background="@color/white"
+    android:orientation="vertical">
 
 
     <LinearLayout
@@ -60,19 +61,21 @@
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/layoutHeader">
-    <LinearLayout
-        android:id="@+id/layoutConfirmBody"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:id="@+id/layoutConfirmBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
     </ScrollView>
+
     <View
         android:id="@+id/horizontalDivider"
         android:layout_width="match_parent"
         android:layout_height="0.05sp"
-        android:layout_below="@+id/scrollView"
         android:layout_margin="10sp"
         android:alpha="0.75"
         android:background="@color/light_gray" />
@@ -81,8 +84,7 @@
         android:id="@+id/layoutFooterButtons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/horizontalDivider"
-        android:layout_alignParentRight="true"
+        android:layout_gravity="end"
         android:orientation="horizontal">
 
         <Button
@@ -118,4 +120,4 @@
             android:textColor="@color/orange_75f"
             android:textSize="19.5sp" />
     </LinearLayout>
-</RelativeLayout>
+</LinearLayout>

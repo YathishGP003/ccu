@@ -244,20 +244,24 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 TextView textView_oldValue = tunerItemViewBody.findViewById(R.id.textView_oldValue);
                 TextView textView_newLevel = tunerItemViewBody.findViewById(R.id.textView_newLevel);
                 TextView textView_newValue = tunerItemViewBody.findViewById(R.id.textView_newValue);
+                HashMap ccuinfo = CCUHsApi.getInstance().read("device and ccu");
                 switch (newTunerValueItem.get("newLevel").toString()) {
                     case "8":
                         textView_SectionLabel.setText("Module");
+                        textView_Section.setText(": " +HSUtil.getDis(newTunerValueItem.get("equipRef").toString()).replace(HSUtil.getDis(newTunerValueItem.get("siteRef").toString()),"").replace("-",""));
                         break;
                     case "10":
                         textView_SectionLabel.setText("Zone");
+                        textView_Section.setText(": " +HSUtil.getDis(newTunerValueItem.get("roomRef").toString()));
                         break;
                     case "16":
                         textView_SectionLabel.setText("Building");
+                        textView_Section.setText(": " +ccuinfo.get("dis").toString());
                         break;
                     default:
                         textView_SectionLabel.setText("System");
+                        textView_Section.setText(": " +ccuinfo.get("dis").toString());
                 }
-                textView_Section.setText(":");
 
                 String tunerName = newTunerValueItem.get("dis").toString();
                 tunerName = tunerName.substring(tunerName.lastIndexOf("-") + 1);

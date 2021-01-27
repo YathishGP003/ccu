@@ -1451,7 +1451,7 @@ public class BuildingTuners
                                                .setTz(tz)
                                                .build();
         String targetCumulativeDamperId = hayStack.addPoint(targetCumulativeDamper);
-        hayStack.writePointForCcuUser(targetCumulativeDamperId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, , TunerConstants.TARGET_CUMULATIVE_DAMPER, 0);
+        hayStack.writePointForCcuUser(targetCumulativeDamperId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.TARGET_CUMULATIVE_DAMPER, 0);
         hayStack.writeHisValById(targetCumulativeDamperId, TunerConstants.TARGET_CUMULATIVE_DAMPER);
     
         Point analogFanSpeedMultiplier = new Point.Builder()

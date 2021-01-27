@@ -37,13 +37,6 @@ import static com.pubnub.api.enums.PNStatusCategory.PNReconnectedCategory;
 
 public class PbSubscriptionHandler {
     
-    private static final int PB_HISTORY_FETCH_COUNT = 6000;
-    private static final int PB_MAX_RECONNECTION_TRIES = 10;
-    
-    
-    final String pubnubSubscribeKey = BuildConfig.PUBNUB_SUBSCRIBE_KEY;
-    final String pubnubPublishKey = BuildConfig.PUBNUB_PUBLISH_KEY;
-    
     private PubNub  pbInstance;
     private boolean pbSubscriptionStatus = false;
     
@@ -78,8 +71,8 @@ public class PbSubscriptionHandler {
     private PNConfiguration getConfiguration(String siteId) {
         
         PNConfiguration pnConfiguration = new PNConfiguration();
-        pnConfiguration.setSubscribeKey(pubnubSubscribeKey);
-        pnConfiguration.setPublishKey(pubnubPublishKey);
+        pnConfiguration.setSubscribeKey(BuildConfig.PUBNUB_SUBSCRIBE_KEY);
+        pnConfiguration.setPublishKey(BuildConfig.PUBNUB_PUBLISH_KEY);
         pnConfiguration.setUuid(siteId);
         pnConfiguration.setSecure(false);
         pnConfiguration.setReconnectionPolicy(LINEAR);
@@ -91,21 +84,13 @@ public class PbSubscriptionHandler {
         return new SubscribeCallback() {
             @Override
             public void status(PubNub pubnub, PNStatus status) {
-                
-                /**
-                 * PubNub reconnect does not seem to generate a status callback with Operation and Category
-                 * during reconnect. Instead there is a status update with operation as null and category
-                 * PNReconnectedCategory.
-                 * This could be cleaned if a future version of pubnub lirary fixes this.
-                 * */
-                if (status.getOperation() == null && status.getCategory() == PNReconnectedCategory) {
-                    CcuLog.i(L.TAG_CCU_PUBNUB, "Event PNReconnectedCategory "+status.toString());
-                    pbSubscriptionStatus = true;
-                    handleReconnect(siteId.replaceFirst("@",""),
-                                    PbPreferences.getLastHandledTimeToken(appContext),
-                                    appContext);
+    
+                if (status.getOperation() == null) {
+                    CcuLog.i(L.TAG_CCU_PUBNUB, "Event Invalid Operation: "+status.toString());
                     return;
                 }
+    
+                CcuLog.i(L.TAG_CCU_PUBNUB, "Event "+status.getOperation()+":"+status.getCategory());
                 
                 switch (status.getOperation()) {
                     case PNSubscribeOperation:
@@ -113,27 +98,29 @@ public class PbSubscriptionHandler {
                         switch (status.getCategory()) {
                             case PNConnectedCategory:
                                 // No error or issue whatsoever.
-                                CcuLog.i(L.TAG_CCU_PUBNUB, "Event PNConnectedCategory "+status.toString());
                                 pbSubscriptionStatus = true;
+                                PbReconnectionHandler.handleReconnect(siteId.replaceFirst("@",""),
+                                                                        PbPreferences.getLastHandledTimeToken(appContext),
+                                                                        pbInstance,
+                                                                        appContext);
                                 break;
                             case PNReconnectedCategory:
                                 // Subscribe temporarily failed but reconnected.
                                 // There is no longer any issue.
-                                CcuLog.i(L.TAG_CCU_PUBNUB, "Event PNReconnectedCategory "+status.toString());
-                                handleReconnect(siteId.replaceFirst("@",""),
-                                                PbPreferences.getLastHandledTimeToken(appContext),
-                                                appContext);
+                                PbReconnectionHandler.handleReconnect(siteId.replaceFirst("@",""),
+                                                                      PbPreferences.getLastHandledTimeToken(appContext),
+                                                                      pbInstance,
+                                                                      appContext);
                                 pbSubscriptionStatus = true;
                                 break;
                             case PNDisconnectedCategory:
                                 // No error in unsubscribing from everything.
-                                CcuLog.i(L.TAG_CCU_PUBNUB, "Event PNDisconnectedCategory "+status.toString());
                                 pbSubscriptionStatus = false;
                                 break;
                             case PNUnexpectedDisconnectCategory:
                                 // Usually an issue with the internet connection.
                                 // This is an error: handle appropriately.
-                                CcuLog.i(L.TAG_CCU_PUBNUB, "Event PNUnexpectedDisconnectCategory "+status.toString());
+                                PbReconnectionHandler.handleDisconnect(pbInstance);
                                 break;
                             case PNAccessDeniedCategory:
                                 CcuLog.i(L.TAG_CCU_PUBNUB, "Event PNAccessDeniedCategory "+status.toString());
@@ -197,35 +184,6 @@ public class PbSubscriptionHandler {
             }
     
         };
-    }
-    
-    
-    private void handleReconnect(String channelId, Long pbLastTimeToken, Context appContext) {
-        
-        Log.d(L.TAG_CCU_PUBNUB, "handleReconnect: timeToken "+pbLastTimeToken);
-    
-        pbInstance.history()
-                  .channel(channelId)
-                  .reverse(false)
-                  .includeTimetoken(true)
-                  .includeMeta(false)
-                  .end(pbLastTimeToken)
-                  .count(PB_HISTORY_FETCH_COUNT)
-                  .async((result, status) -> {
-                      CcuLog.d(L.TAG_CCU_PUBNUB,
-                               "handleReconnect: Pending Messages Count - "+result.getMessages().size());
-    
-                      Observable.fromIterable(result.getMessages())
-                                .subscribeOn(Schedulers.io())
-                                .filter(msg -> msg.getTimetoken() > pbLastTimeToken)
-                                .subscribe(msg -> {
-                                    PbMessageHandler.handlePunubMessage(msg.getEntry(), appContext);
-                                    PbPreferences.setLastHandledTimeToken(msg.getTimetoken(), appContext);
-                                }, throwable -> {
-                                    CcuLog.d(L.TAG_CCU_PUBNUB, " Error! "+throwable.getMessage());
-                                });
-                  });
-                  
     }
     
     public boolean isPubnubSubscribed() {

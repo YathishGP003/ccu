@@ -1436,6 +1436,11 @@ public class CCUHsApi
         return getGUID(siteLuid);
     }
 
+    public String getGlobalCcuId() {
+        HRef ccuId = getCcuId();
+        return ccuId != null ? getGUID(ccuId.toString()) : null;
+    }
+    
     public HRef getCcuId() {
         HRef siteRef = null;
         HDict hDict = new HDictBuilder().add("filter", "ccu").toDict();
@@ -1444,11 +1449,6 @@ public class CCUHsApi
             siteRef = site.row(0).getRef("id");
         }
         return siteRef;
-    }
-    
-    public String getCCUGuid() {
-        HRef ccuId = getCcuId();
-        return ccuId != null ? getGUID(ccuId.toString()) : null;
     }
     
     public ArrayList<Schedule> getSystemSchedule(boolean vacation)
@@ -1967,8 +1967,9 @@ public class CCUHsApi
             updateEquip(updatedEquip, updatedEquip.getId());
         }
     }
-    
+    '['
     public String getCCUUserName() {
-        return Tags.CCU+"_"+getCCUGuid();
+        String ccuGuid = getGlobalCcuId();
+        return ccuGuid == null ? Tags.CCU : Tags.CCU+"_"+ccuGuid;
     }
 }

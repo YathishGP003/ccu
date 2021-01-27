@@ -19,7 +19,7 @@ public class PbMessageHandler
     public static final String CM_RESET = "CM RESET";
     public static final String PRE_DEF_ALERT = "predefinedAlertDefinition";
     
-    public static void handlePunubMessage(JsonElement receivedMessageObject, Context appContext) {
+    public static void handlePunubMessage(JsonElement receivedMessageObject, Long timeToken, Context appContext) {
         
         CcuLog.d(L.TAG_CCU_PUBNUB, "handlePunubMessage: " + receivedMessageObject.toString());
         
@@ -28,6 +28,8 @@ public class PbMessageHandler
         } catch (NumberFormatException e) {
             Log.d(L.TAG_CCU_PUBNUB, "Invalid data format, igoring PubNub Message " + e.getMessage());
         }
+    
+        PbPreferences.setLastHandledTimeToken(timeToken, appContext);
     }
     
     public static void handleMessage(JsonObject msg, Context context){

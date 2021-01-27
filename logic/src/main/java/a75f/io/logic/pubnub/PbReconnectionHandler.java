@@ -47,8 +47,7 @@ class PbReconnectionHandler {
                                 .subscribeOn(Schedulers.io())
                                 .filter(msg -> msg.getTimetoken() > pbLastTimeToken)
                                 .subscribe(msg -> {
-                                    PbMessageHandler.handlePunubMessage(msg.getEntry(), appContext);
-                                    PbPreferences.setLastHandledTimeToken(msg.getTimetoken(), appContext);
+                                    PbMessageHandler.handlePunubMessage(msg.getEntry(), msg.getTimetoken(), appContext);
                                 }, throwable -> {
                                     CcuLog.e(L.TAG_CCU_PUBNUB, "Pubnub handling Error! "+throwable.getMessage());
                                 });

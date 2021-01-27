@@ -1967,7 +1967,7 @@ public class CCUHsApi
             updateEquip(updatedEquip, updatedEquip.getId());
         }
     }
-    '['
+    
     public String getCCUUserName() {
         String ccuGuid = getGlobalCcuId();
         return ccuGuid == null ? Tags.CCU : Tags.CCU+"_"+ccuGuid;

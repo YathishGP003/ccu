@@ -3,8 +3,6 @@ package a75f.io.logic;
 import android.content.Context;
 import android.util.Log;
 
-import com.pubnub.api.PubNub;
-
 import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -86,13 +84,9 @@ public class Globals {
     private CCUApplication mCCUApplication;
     private boolean isSimulation = false;
     private boolean testHarness = true;
-
-    PubNub pubnub;
-    boolean pubnubSubscribed = false;
+    
     private boolean _siteAlreadyCreated;
     
-    private Long curPubNubMsgTimeToken;
-
     private Globals() {
     }
 

@@ -135,17 +135,19 @@ public class UpdatePointHandler
     public static void setModbusDataInterface(ModbusDataInterface in) { modbusDataInterface = in; }
     public static void setSystemDataInterface(ZoneDataInterface in) { zoneDataInterface = in; }
     
-    public static boolean canIgnorePointUpdate(String pbSource, String pointGuid) {
+    private static boolean canIgnorePointUpdate(String pbSource, String pointGuid) {
         HashMap ccu = CCUHsApi.getInstance().read("ccu");
         String ccuName = ccu.get("dis").toString();
     
-        //Notification for update from the same CCU.
+        //Notification for update from the same CCU by using ccu_deviceId format..
         if (pbSource.equals(CCUHsApi.getInstance().getCCUUserName())) {
             CcuLog.d(L.TAG_CCU_PUBNUB, "PubNub received for CCU write : Ignore "+pbSource);
             return true;
         }
     
         //Notification for updates which are local to a CCU.
+        //Some places we still update the user as ccu_displayName. Until that is removed, we will keep name
+        //comparison too.
         if (pbSource.equals("ccu_"+ccuName) || pbSource.equals("Scheduler") || pbSource.equals("manual")) {
             CcuLog.d(L.TAG_CCU_PUBNUB, "PubNub received for CCU write : Ignore");
             return true;

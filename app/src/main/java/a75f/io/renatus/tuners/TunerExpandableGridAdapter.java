@@ -2,7 +2,9 @@ package a75f.io.renatus.tuners;
 
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
@@ -12,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -32,6 +33,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
 
     //listeners
     private final TunerItemClickListener mItemClickListener;
+    private final TunerUndoClickListener mUndoClickListener;
     private final TunerGroupChangeListener mSectionStateChangeListener;
 
     //view type
@@ -41,14 +43,17 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
     int lastExpandedPosition;
     int childIndexPosition = 0;
     TunerGroupItem previousOpenGroup = null;
+    String tunerGroupType = "Building";
 
     public TunerExpandableGridAdapter(Context context, ArrayList<Object> dataArrayList,
                                       final GridLayoutManager gridLayoutManager, TunerItemClickListener itemClickListener,
-                                      TunerGroupChangeListener sectionStateChangeListener) {
+                                      TunerUndoClickListener undoClickListener, TunerGroupChangeListener sectionStateChangeListener, String tunerGroupType) {
         mContext = context;
         mItemClickListener = itemClickListener;
         mSectionStateChangeListener = sectionStateChangeListener;
         mDataArrayList = dataArrayList;
+        this.tunerGroupType = tunerGroupType;
+        this.mUndoClickListener = undoClickListener;
 
         gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
@@ -79,10 +84,14 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                 holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
                 if (tunerItem.containsKey("newValue")) {
                     holder.itemTextValueView.setText(tunerItem.get("newValue").toString());
-                    holder.imgBtnEdit.setVisibility(View.VISIBLE);
+                    holder.imgBtnUndo.setVisibility(View.VISIBLE);
                 } else {
-                    holder.imgBtnEdit.setVisibility(View.GONE);
-                    holder.itemTextValueView.setText(String.valueOf(getTunerValue(tunerItem.get("id").toString())));
+                    holder.imgBtnUndo.setVisibility(View.GONE);
+                    if (getTunerValue(tunerItem.get("id").toString()) != 0){
+                        holder.itemTextValueView.setText(String.valueOf(getTunerValue(tunerItem.get("id").toString())));
+                    } else {
+                        holder.itemTextValueView.setText("-");
+                    }
                 }
                 if (tunerItem.containsKey("unit")) {
                     holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1) + " (" + tunerItem.get("unit").toString().toUpperCase() + ")");
@@ -95,8 +104,17 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                     holder.itemDivider.setVisibility(View.VISIBLE);
                 }
 
-                holder.imgBtnEdit.setOnClickListener(v -> {
-                    mItemClickListener.itemClicked(tunerItem, position);
+                holder.imgBtnUndo.setOnClickListener(v -> {
+                    holder.imgBtnUndo.setVisibility(View.GONE);
+                    tunerItem.remove("newValue");
+                    tunerItem.remove("newLevel");
+                    if (getTunerValue(tunerItem.get("id").toString()) != 0){
+                        holder.itemTextValueView.setText(String.valueOf(getTunerValue(tunerItem.get("id").toString())));
+                    } else {
+                        holder.itemTextValueView.setText("-");
+                    }
+                    mUndoClickListener.onUndoClick(tunerItem);
+                    notifyItemChanged(position);
                 });
 
                 holder.view.setOnClickListener(v -> mItemClickListener.itemClicked(tunerItem, position));
@@ -162,7 +180,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
         TextView itemTextView;
         TextView itemTextValueView;
         CardView tunerGridBg;
-        ImageButton imgBtnEdit;
+        ImageButton imgBtnUndo;
         View itemDivider;
 
         public ViewHolder(View view, int viewType) {
@@ -174,7 +192,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                 itemTextValueView = view.findViewById(R.id.expandedListItemVal);
                 itemDivider = view.findViewById(R.id.tunerDivider);
                 tunerGridBg = view.findViewById(R.id.tunerGridBg);
-                imgBtnEdit = view.findViewById(R.id.imgBtnEdit);
+                imgBtnUndo = view.findViewById(R.id.imgBtnUndo);
             } else {
                 tunerGroupTitle = view.findViewById(R.id.groupTitle);
                 tunerGroupToggle = view.findViewById(R.id.toggleTunerGroup);
@@ -183,12 +201,23 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
     }
 
     public double getTunerValue(String id) {
+        int level = 17;
+        if (tunerGroupType.equalsIgnoreCase("Building")){
+            level = 16;
+        } else if (tunerGroupType.equalsIgnoreCase("System")){
+            level = 14;
+        } else if (tunerGroupType.equalsIgnoreCase("Zone")){
+            level = 10;
+        }else if (tunerGroupType.equalsIgnoreCase("Module")){
+            level = 8;
+        }
+
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList values = hayStack.readPoint(id);
         if (values != null && values.size() > 0) {
             for (int l = 1; l <= values.size(); l++) {
                 HashMap valMap = ((HashMap) values.get(l - 1));
-                if (valMap.get("val") != null) {
+                if (valMap.get("val") != null && valMap.get("level").toString().equals(String.valueOf(level))) {
                     return Double.parseDouble(valMap.get("val").toString());
                 }
             }

@@ -47,11 +47,13 @@
             android:textAppearance="@style/tuner_text_value" />
 
             <ImageButton
-                android:id="@+id/imgBtnEdit"
+                android:id="@+id/imgBtnUndo"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
-                android:src="@drawable/ic_pencil"
+                android:padding="5dp"
+                android:scaleX="-1"
+                android:src="@drawable/ic_refresh"
                 android:layout_gravity="center_vertical"
                 android:background="@null"/>
         </LinearLayout>

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.renatus.R;
 
 public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdapter.PriorityViewHolder> {
@@ -20,12 +22,14 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
     ArrayList<HashMap> priorityArrayList;
     PriorityItemClickListener priorityItemClickListener;
     String tunerGroupType;
+    HashMap tunerItemSelected;
 
-    public PriorityArrayAdapter(Context context, String tunerGroupType, ArrayList<HashMap> priorityArrayList, PriorityItemClickListener itemClickListener) {
+    public PriorityArrayAdapter(Context context, String tunerGroupType, ArrayList<HashMap> priorityArrayList, PriorityItemClickListener itemClickListener, HashMap tunerItemSelected) {
         this.context = context;
         this.priorityArrayList = priorityArrayList;
         this.priorityItemClickListener = itemClickListener;
         this.tunerGroupType = tunerGroupType;
+        this.tunerItemSelected = tunerItemSelected;
     }
 
     @Override
@@ -46,8 +50,14 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
             if (priorityMap.get("level") != null) {
                 if (priorityItem.get("newValue") != null && !priorityItem.get("newValue").toString().equals("")) {
                     holder.textViewCurrentValue.setText(priorityItem.get("newValue").toString());
+                    if (getTunerValue(tunerItemSelected.get("id").toString()) != 0){
+                        holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
+                    } else {
+                        holder.textViewValue.setText("");
+                    }
                     setOrangeTextColor(holder.textViewCurrentValue);
                     setOrangeTextColor(holder.textViewName);
+                    setOrangeTextColor(holder.textViewValue);
                     holder.imgBtnTunerUndo.setVisibility(View.VISIBLE);
                 } else {
                     if (tunerGroupType.contains("Module")) {
@@ -55,16 +65,19 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                             holder.textViewName.setText(context.getText(R.string.txt_tunersModule));
                             if (priorityItem.get("newValue") != null) {
                                 holder.textViewCurrentValue.setText(priorityMap.get("newValue").toString());
+                                holder.textViewValue.setText(priorityMap.get("val").toString());
                             } else {
-                                if (Integer.parseInt(priorityMap.get("level").toString()) == position +1){
-                                    holder.textViewCurrentValue.setText(priorityMap.get("val").toString());
-                                }else {
+                                if (getTunerValue(tunerItemSelected.get("id").toString()) != 0){
+                                    holder.textViewCurrentValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
+                                    holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
+                                } else {
                                     holder.textViewCurrentValue.setText("-");
+                                    holder.textViewValue.setText("");
                                 }
                             }
-                            holder.textViewValue.setText("");
                             setOrangeTextColor(holder.textViewCurrentValue);
                             setOrangeTextColor(holder.textViewName);
+                            setOrangeTextColor(holder.textViewValue);
                         } else {
                             if (priorityItem.get("val") != null && !priorityItem.get("val").toString().equals("")) {
                                 holder.textViewValue.setText(priorityItem.get("val").toString());
@@ -79,16 +92,19 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                             holder.textViewName.setText("Zone");
                             if (priorityItem.get("newValue") != null) {
                                 holder.textViewCurrentValue.setText(priorityMap.get("newValue").toString());
-                            }else {
-                                if (Integer.parseInt(priorityMap.get("level").toString()) == position +1){
-                                    holder.textViewCurrentValue.setText(priorityMap.get("val").toString());
-                                }else {
+                                holder.textViewValue.setText(priorityMap.get("val").toString());
+                            } else {
+                                if (getTunerValue(tunerItemSelected.get("id").toString()) != 0){
+                                    holder.textViewCurrentValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
+                                    holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
+                                } else {
                                     holder.textViewCurrentValue.setText("-");
+                                    holder.textViewValue.setText("");
                                 }
                             }
-                            holder.textViewValue.setText("");
                             setOrangeTextColor(holder.textViewCurrentValue);
                             setOrangeTextColor(holder.textViewName);
+                            setOrangeTextColor(holder.textViewValue);
                         } else {
                             if (priorityItem.get("val") != null) {
                                 holder.textViewValue.setText(priorityItem.get("val").toString());
@@ -103,16 +119,19 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                             holder.textViewName.setText("System");
                             if (priorityItem.get("newValue") != null) {
                                 holder.textViewCurrentValue.setText(priorityMap.get("newValue").toString());
-                            }else {
-                                if (Integer.parseInt(priorityMap.get("level").toString()) == position +1){
-                                    holder.textViewCurrentValue.setText(priorityMap.get("val").toString());
-                                }else {
+                                holder.textViewValue.setText(priorityMap.get("val").toString());
+                            } else {
+                                if (getTunerValue(tunerItemSelected.get("id").toString()) != 0){
+                                    holder.textViewCurrentValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
+                                    holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
+                                } else {
                                     holder.textViewCurrentValue.setText("-");
+                                    holder.textViewValue.setText("");
                                 }
                             }
-                            holder.textViewValue.setText("");
                             setOrangeTextColor(holder.textViewCurrentValue);
                             setOrangeTextColor(holder.textViewName);
+                            setOrangeTextColor(holder.textViewValue);
                         } else {
                             if (priorityItem.get("val") != null && !priorityItem.get("val").toString().equals("")) {
                                 holder.textViewValue.setText(priorityItem.get("val").toString());
@@ -127,16 +146,19 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                             holder.textViewName.setText("Building");
                             if (priorityItem.get("newValue") != null) {
                                 holder.textViewCurrentValue.setText(priorityMap.get("newValue").toString());
+                                holder.textViewValue.setText(priorityMap.get("val").toString());
                             } else {
-                                if (Integer.parseInt(priorityMap.get("level").toString()) == position +1){
-                                    holder.textViewCurrentValue.setText(priorityMap.get("val").toString());
+                                if (getTunerValue(tunerItemSelected.get("id").toString()) != 0){
+                                    holder.textViewCurrentValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
+                                    holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
                                 } else {
                                     holder.textViewCurrentValue.setText("-");
+                                    holder.textViewValue.setText("");
                                 }
                             }
-                            holder.textViewValue.setText("");
                             setOrangeTextColor(holder.textViewCurrentValue);
                             setOrangeTextColor(holder.textViewName);
+                            setOrangeTextColor(holder.textViewValue);
                         } else {
                             if (priorityItem.get("val") != null && !priorityItem.get("val").toString().equals("")) {
                                 holder.textViewValue.setText(priorityItem.get("val").toString());
@@ -171,7 +193,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
         holder.imgBtnTunerUndo.setOnClickListener(v -> {
             final HashMap priorityValMap = getPriorityLevelMap(priorityArrayList);
             if (priorityValMap.containsKey("val")) {
-                holder.textViewCurrentValue.setText(priorityValMap.get("val").toString());
+                holder.textViewCurrentValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
                 setOrangeTextColor(holder.textViewCurrentValue);
                 holder.imgBtnTunerUndo.setVisibility(View.GONE);
             }
@@ -189,6 +211,31 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
             }
         }
         return null;
+    }
+
+    public double getTunerValue(String id) {
+        int level = 17;
+        if (tunerGroupType.equalsIgnoreCase("Building")){
+            level = 16;
+        } else if (tunerGroupType.equalsIgnoreCase("System")){
+            level = 14;
+        } else if (tunerGroupType.equalsIgnoreCase("Zone")){
+            level = 10;
+        }else if (tunerGroupType.equalsIgnoreCase("Module")){
+            level = 8;
+        }
+
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        ArrayList values = hayStack.readPoint(id);
+        if (values != null && values.size() > 0) {
+            for (int l = 1; l <= values.size(); l++) {
+                HashMap valMap = ((HashMap) values.get(l - 1));
+                if (valMap.get("val") != null && valMap.get("level").toString().equals(String.valueOf(level))) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        return 0;
     }
 
     public void setOrangeTextColor(TextView textView) {

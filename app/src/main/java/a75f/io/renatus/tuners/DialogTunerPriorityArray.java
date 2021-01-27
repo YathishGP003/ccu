@@ -144,7 +144,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         priorityList = CCUHsApi.getInstance().readPoint(tunerItemSelected.get("id").toString());
         Log.i("TunersUI", "priorityList:" + priorityList);
 
-        priorityArrayAdapter = new PriorityArrayAdapter(getActivity(),tunerGroupType, priorityList, this);
+        priorityArrayAdapter = new PriorityArrayAdapter(getActivity(),tunerGroupType, priorityList, this, tunerItemSelected);
         recyclerViewPriority.setAdapter(priorityArrayAdapter);
 
         buttonSaveTuner.setOnClickListener(v -> {
@@ -167,6 +167,31 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             for (int l = 1; l <= values.size(); l++) {
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        return 0;
+    }
+
+    public double getTunerValByLevel(String id) {
+        int level = 17;
+        if (tunerGroupType.equalsIgnoreCase("Building")){
+            level = 16;
+        } else if (tunerGroupType.equalsIgnoreCase("System")){
+            level = 14;
+        } else if (tunerGroupType.equalsIgnoreCase("Zone")){
+            level = 10;
+        }else if (tunerGroupType.equalsIgnoreCase("Module")){
+            level = 8;
+        }
+
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        ArrayList values = hayStack.readPoint(id);
+        if (values != null && values.size() > 0) {
+            for (int l = 1; l <= values.size(); l++) {
+                HashMap valMap = ((HashMap) values.get(l - 1));
+                if (valMap.get("val") != null && valMap.get("level").toString().equals(String.valueOf(level))) {
                     return Double.parseDouble(valMap.get("val").toString());
                 }
             }
@@ -225,13 +250,23 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             textViewLevel.setText(Html.fromHtml(text));
 
             if (tunerItemSelected.containsKey("minVal") && tunerItemSelected.containsKey("maxVal")) {
-
-                int currentValue = (int) getTunerValue(tunerItemSelected.get("id").toString());
+                int currentValue;
+                double currentValueDb;
+                if (getTunerValByLevel(tunerItemSelected.get("id").toString()) != 0){
+                    currentValue = (int) getTunerValByLevel(tunerItemSelected.get("id").toString());
+                } else {
+                    currentValue = (int) getTunerValue(tunerItemSelected.get("id").toString());
+                }
                 int minValue = (int) (Double.parseDouble(tunerItemSelected.get("minVal").toString()));
                 int maxValue = (int) (Double.parseDouble(tunerItemSelected.get("maxVal").toString()));
                 int incrementVal = (int) (Double.parseDouble(tunerItemSelected.get("incrementVal").toString()));
 
-                double currentValueDb = (getTunerValue(tunerItemSelected.get("id").toString()));
+                if (getTunerValByLevel(tunerItemSelected.get("id").toString()) != 0){
+                    currentValueDb = getTunerValByLevel(tunerItemSelected.get("id").toString());
+                } else {
+                    currentValueDb = getTunerValue(tunerItemSelected.get("id").toString());
+                }
+
                 double minValueDb = (Double.parseDouble((tunerItemSelected.get("minVal").toString())));
                 double maxValueDb = (Double.parseDouble((tunerItemSelected.get("maxVal").toString())));
                 double incrementValDb = (Double.parseDouble(tunerItemSelected.get("incrementVal").toString()));

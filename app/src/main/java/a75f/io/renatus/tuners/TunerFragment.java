@@ -51,7 +51,7 @@ import a75f.io.renatus.R;
  * Created by samjithsadasivan on 1/17/19.
  */
 
-public class TunerFragment extends BaseDialogFragment implements TunerItemClickListener {
+public class TunerFragment extends BaseDialogFragment implements TunerItemClickListener,TunerUndoClickListener {
     public static final String ID = TunerFragment.class.getSimpleName();
 
     RadioGroup radioGroupTuners;
@@ -72,7 +72,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     EditText editTunerSearch;
     Spinner spinnerSelection;
     ArrayList<HashMap> tuners = new ArrayList<>();
-
+    String tunerGroupType = "Building";
     public TunerFragment() {
     }
 
@@ -117,33 +117,37 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         });
         radioGroupTuners.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.radioBtnBuilding) {
+                tunerGroupType = "Building";
                 getBuildingTuners();
                 spinnerSelection.setVisibility(View.GONE);
                 editTunerSearch.clearFocus();
                 editTunerSearch.getText().clear();
             } else if (checkedId == R.id.radioBtnSystem) {
+                tunerGroupType = "System";
                 getSystemTuners();
                 spinnerSelection.setVisibility(View.GONE);
                 editTunerSearch.clearFocus();
                 editTunerSearch.getText().clear();
             } else if (checkedId == R.id.radioBtnZone) {
+                tunerGroupType = "Zone";
                 editTunerSearch.clearFocus();
                 editTunerSearch.getText().clear();
                 ArrayList<Zone> zones = new ArrayList<>();
                 for (Floor f : HSUtil.getFloors()) {
                     zones.addAll(HSUtil.getZones(f.getId()));
                 }
-                if (zones.size()>0){
+                if (zones.size() > 0){
                     spinnerSelection.setVisibility(View.VISIBLE);
                 } else {
                     spinnerSelection.setVisibility(View.GONE);
-                    tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, 2);
+                    tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, this,2, tunerGroupType);
                 }
                 ArrayAdapter<Zone> selectionSpinner = new ArrayAdapter<>(this.getActivity(), R.layout.spinner_item_tuner, zones);
                 selectionSpinner.setDropDownViewResource(R.layout.spinner_item_tuner);
                 spinnerSelection.setAdapter(selectionSpinner);
 
             } else if (checkedId == R.id.radioBtnModule) {
+                tunerGroupType = "Module";
                 editTunerSearch.clearFocus();
                 editTunerSearch.getText().clear();
                 ArrayList<Equip> equips = new ArrayList<>();
@@ -152,14 +156,21 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                         equips.addAll(HSUtil.getEquips(z.getId()));
                     }
                 }
-
+                ArrayList<Equip> UpdatedEquips = new ArrayList<>();
+                for(Equip p: equips){
+                    HashMap map = CCUHsApi.getInstance().readMapById(p.getId());
+                    map.put("dis", p.getDisplayName().replace(HSUtil.getDis(p.getSiteRef())+"-",HSUtil.getDis(p.getRoomRef())+"_").replace("-",""));
+                    Equip.Builder eb = new Equip.Builder();
+                    eb.setHashMap(map);
+                    UpdatedEquips.add(eb.build());
+                }
                 if (equips.size()>0){
                     spinnerSelection.setVisibility(View.VISIBLE);
                 } else {
                     spinnerSelection.setVisibility(View.GONE);
-                    tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, 2);
+                    tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, this,2, tunerGroupType);
                 }
-                ArrayAdapter<Equip> selectionSpinner = new ArrayAdapter<>(this.getActivity(), R.layout.spinner_item_tuner, equips);
+                ArrayAdapter<Equip> selectionSpinner = new ArrayAdapter<>(this.getActivity(), R.layout.spinner_item_tuner, UpdatedEquips);
                 selectionSpinner.setDropDownViewResource(R.layout.spinner_item_tuner);
                 spinnerSelection.setAdapter(selectionSpinner);
             }
@@ -199,6 +210,9 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         saveTunerValues.setOnClickListener(v -> {
             if (editChangeReason.getText().toString().length() == 0) {
                 Toast.makeText(getActivity(), "Please enter reason to save!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (updatedTunerValues.size() <= 0){
                 return;
             }
             saveTunerValues.setTextColor(getActivity().getColor(R.color.tuner_group));
@@ -282,7 +296,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                             continue;
                         }
                     }
-                    setTuner(newTunerValueItem.get("id").toString(), Integer.valueOf(newTunerValueItem.get("newLevel").toString()), Double.parseDouble(newTunerValueItem.get("newValue").toString()));
+                    setTuner(newTunerValueItem.get("id").toString(), Integer.parseInt(newTunerValueItem.get("newLevel").toString()), Double.parseDouble(newTunerValueItem.get("newValue").toString()));
                 }
                 Toast.makeText(getActivity(), "Tuner Values Updated Successfully", Toast.LENGTH_SHORT).show();
                 updatedTunerValues.clear();
@@ -322,7 +336,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
     private void updateModuleData(String equipRef) {
         tuners.clear();
-        tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, 2);
+        tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, this,2, tunerGroupType);
 
         tuners = CCUHsApi.getInstance().readAll("tuner and equipRef == \""+equipRef+"\"");
 
@@ -343,7 +357,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     }
 
     void filter(String filteredString){
-        tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, 2);
+        tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, this,2, tunerGroupType);
 
         Map<String, List<HashMap>> groupByTuner = tuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));
         Map<String, List<HashMap>> sortedGroupTuner = new TreeMap<>(groupByTuner);
@@ -367,7 +381,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
     private void updateZoneData(String roomRef) {
         tuners.clear();
-        tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, 2);
+        tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, this,2, tunerGroupType);
 
         tuners = CCUHsApi.getInstance().readAll("tuner and roomRef == \""+roomRef+"\"");
 
@@ -419,7 +433,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
     private void getSystemTuners() {
         tuners.clear();
-        tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, 2);
+        tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, this,2, tunerGroupType);
 
         ArrayList<HashMap> systemTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and system and roomRef == \""+ "SYSTEM" +"\"");
 
@@ -440,7 +454,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
     private void getBuildingTuners() {
         tuners.clear();
-        tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, 2);
+        tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, this,2, tunerGroupType);
 
         ArrayList<HashMap> buildingTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and roomRef == \""+ "SYSTEM" +"\"");
         for (HashMap m : buildingTuners) {
@@ -463,7 +477,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         //Toast.makeText(getActivity(), "TunerUI-HashMap: " + item.get("dis") + " clicked\n" + " minValue:" + item.get("minVal") + " maxValue:" + item.get("maxVal") + " incrementBy:" + item.get("incrementVal"), Toast.LENGTH_SHORT).show();
         childSelected = position;
         Log.i("TunersUI", "childSelected:" + childSelected + " hashmap:" + item);
-        String tunerGroupType = "Building";
+
         if (radioBtnBuilding.isChecked()) {
             tunerGroupType = "Building";
         } else if (radioButtonSystem.isChecked()) {
@@ -504,7 +518,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                             " tunerGroupSelected:" + tunerGroupSelected.getName() + " tunerValue:" + tunerValue, Toast.LENGTH_SHORT).show();*/
                     tunerItemSelected.put("newValue", tunerValue);
                     tunerItemSelected.put("newLevel", tunerLevel);
-                    tunerExpandableLayoutHelper.updateTuner(tunerGroupSelected.getName(), tunerItemSelected, oldTunerItemSelected);
+                    tunerExpandableLayoutHelper.updateTuner(tunerGroupSelected, tunerItemSelected, oldTunerItemSelected);
                     if (!updatedTunerValues.contains(tunerItemSelected)) {
                         updatedTunerValues.add(tunerItemSelected);
                     }
@@ -563,5 +577,12 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 return "VAV";
         }
         return "default";
+    }
+
+    @Override
+    public void onUndoClick(HashMap item) {
+        if (updatedTunerValues != null && updatedTunerValues.size() > 0){
+            updatedTunerValues.remove(item);
+        }
     }
 }

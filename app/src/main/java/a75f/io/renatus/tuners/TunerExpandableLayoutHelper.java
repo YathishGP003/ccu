@@ -7,12 +7,9 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 
 public class TunerExpandableLayoutHelper implements TunerGroupChangeListener {
 
@@ -30,14 +27,14 @@ public class TunerExpandableLayoutHelper implements TunerGroupChangeListener {
     //recycler view
     RecyclerView mRecyclerView;
 
-    public TunerExpandableLayoutHelper(Context context, RecyclerView recyclerView, TunerItemClickListener itemClickListener,
-                                       int gridSpanCount) {
+    public TunerExpandableLayoutHelper(Context context, RecyclerView recyclerView, TunerItemClickListener itemClickListener, TunerUndoClickListener undoClickListener,
+                                       int gridSpanCount, String tunerGroupType) {
 
         //setting the recycler view
         GridLayoutManager gridLayoutManager = new GridLayoutManager(context, gridSpanCount);
         recyclerView.setLayoutManager(gridLayoutManager);
         mSectionedExpandableGridAdapter = new TunerExpandableGridAdapter(context, mDataArrayList,
-                gridLayoutManager, itemClickListener, this);
+                gridLayoutManager, itemClickListener, undoClickListener,this,tunerGroupType);
         recyclerView.setAdapter(mSectionedExpandableGridAdapter);
         mRecyclerView = recyclerView;
     }
@@ -58,11 +55,15 @@ public class TunerExpandableLayoutHelper implements TunerGroupChangeListener {
         mSectionDataMap.get(mSectionMap.get(section)).add(item);
     }
 
-    public void updateTuner(String section, HashMap item, HashMap oldItem) {
+    public void updateTuner(TunerGroupItem section, HashMap item, HashMap oldItem) {
         Log.i("TunersUI", "section:" + section + " hashmap:" + item);
-        mSectionDataMap.get(mSectionMap.get(section)).set(mSectionDataMap.get(mSectionMap.get(section)).indexOf(oldItem), item);
-        notifyDataSetChanged();
-        //mSectionedExpandableGridAdapter.notifyItemChanged(position);
+        if (mSectionDataMap != null && mSectionDataMap.size() >0){
+            List<HashMap> hashMapList = mSectionDataMap.get(section);
+            if (hashMapList != null && hashMapList.size() > 0 && hashMapList.contains(oldItem)){
+                hashMapList.set(hashMapList.indexOf(oldItem), item);
+                notifyDataSetChanged();
+            }
+        }
     }
 
     public void removeItem(String section, HashMap item) {

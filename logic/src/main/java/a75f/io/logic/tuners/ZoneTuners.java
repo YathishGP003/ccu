@@ -14,10 +14,9 @@ import a75f.io.api.haystack.Point;
 
 public class ZoneTuners {
     
-    public static void addZoneTunersForEquip(String siteRef, String equipdis, String equipref, String roomRef,
-                                       String floorRef, String tz ) {
+    public static void addZoneTunersForEquip(CCUHsApi hayStack, String siteRef, String equipdis, String equipref,
+                                             String roomRef, String floorRef, String tz ) {
         Log.d("CCU", "addZoneTunersForEquip for " + equipdis);
-        CCUHsApi hayStack = CCUHsApi.getInstance();
         Point unoccupiedZoneSetback = new Point.Builder()
                                           .setDisplayName(equipdis+"-"+"unoccupiedZoneSetback")
                                           .setSiteRef(siteRef)

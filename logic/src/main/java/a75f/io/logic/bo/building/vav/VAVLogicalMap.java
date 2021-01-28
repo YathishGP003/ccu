@@ -201,7 +201,7 @@ public class VAVLogicalMap
         }
         String equipRef = CCUHsApi.getInstance().addEquip(b.build());
         
-        VavTuners.addVavEquipTuners(siteRef, siteDis + "-VAV-" + nodeAddr, equipRef, room, floor, tz);
+        VavTuners.addVavEquipTuners( CCUHsApi.getInstance(), siteRef, siteDis + "-VAV-" + nodeAddr, equipRef, room, floor, tz);
     
         createVavConfigPoints(config, equipRef, floor, room);
     

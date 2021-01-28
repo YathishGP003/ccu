@@ -114,7 +114,7 @@ class DualDuctEquip {
         
         createConfigPoints(siteRef, equipDis, tz, config);
         
-        DualDuctTuners.addEquipTuners(siteRef, equipDis, equipRef, roomRef, floorRef, tz);
+        DualDuctTuners.addEquipTuners(hayStack, siteRef, equipDis, equipRef, roomRef, floorRef, tz);
     
         setDefaultValues();
         

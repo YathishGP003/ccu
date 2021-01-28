@@ -16,8 +16,8 @@ import a75f.io.logic.L;
 
 public class DualDuctTuners {
     
-    public static void addDefaultTuners(String siteRef, String equipRef, String equipDis, String tz){
-        CCUHsApi hayStack = CCUHsApi.getInstance();
+    public static void addDefaultTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis, String tz){
+        
         HashMap tuner = hayStack.read("point and tuner and default and dualDuct");
         if (tuner != null && tuner.size() > 0) {
             CcuLog.d(L.TAG_CCU_SYSTEM, "Default DualDuct Tuner points already exist");
@@ -216,13 +216,12 @@ public class DualDuctTuners {
     }
     
     
-    public static void addEquipTuners(String siteRef, String equipdis, String equipref, String roomRef,
-                                       String floorRef, String tz) {
+    public static void addEquipTuners(CCUHsApi hayStack, String siteRef, String equipdis, String equipref,
+                                      String roomRef, String floorRef, String tz) {
         
         Log.d("CCU", "addEquipDualDuctTuners for " + equipdis);
-        CCUHsApi hayStack = CCUHsApi.getInstance();
         
-        ZoneTuners.addZoneTunersForEquip(siteRef, equipdis, equipref, roomRef, floorRef, tz);
+        ZoneTuners.addZoneTunersForEquip(hayStack, siteRef, equipdis, equipref, roomRef, floorRef, tz);
     
         Point zonePrioritySpread = new Point.Builder()
                                        .setDisplayName(equipdis+"-"+"zonePrioritySpread")

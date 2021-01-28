@@ -76,8 +76,10 @@ public class TwoPipeFanCoilUnitEquip {
 
         String equipRef = CCUHsApi.getInstance().addEquip(b.build());
 
-        BuildingTuners.getInstance().addEquipStandaloneTuners(siteDis+"-2PFCU-"+nodeAddr, equipRef, room, floor);
-        StandAloneTuners.addTwoPipeFanEquipStandaloneTuners(siteRef,siteDis + "-2PFCU-" + nodeAddr, equipRef, room, floor, tz);
+        StandAloneTuners.addEquipStandaloneTuners(CCUHsApi.getInstance(), siteRef,siteDis+"-2PFCU-"+nodeAddr, equipRef
+                                                                                        , room, floor, tz);
+        StandAloneTuners.addTwoPipeFanEquipStandaloneTuners(CCUHsApi.getInstance(), siteRef, siteDis + "-2PFCU-" + nodeAddr,
+                                                            equipRef, room, floor, tz);
 
         createTwoPipeConfigPoints(config, equipRef,floor,room);
 

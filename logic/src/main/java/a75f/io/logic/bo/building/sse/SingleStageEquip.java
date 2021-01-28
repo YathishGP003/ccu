@@ -70,7 +70,9 @@ public class SingleStageEquip {
                 .setGroup(String.valueOf(nodeAddr));
         equipRef = CCUHsApi.getInstance().addEquip(b.build());
 
-        BuildingTuners.getInstance().addEquipStandaloneTuners(siteDis+"-SSE-"+nodeAddr, equipRef, roomRef, floorRef);
+        StandAloneTuners.addEquipStandaloneTuners( CCUHsApi.getInstance(), siteRef, siteDis + "-SSE-" + nodeAddr,
+                                                   equipRef, roomRef, floorRef
+            , tz);
         createSSEConfigPoints(config, equipRef,floorRef,roomRef);
 
 

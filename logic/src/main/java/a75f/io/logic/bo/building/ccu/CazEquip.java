@@ -70,10 +70,9 @@ public class CazEquip
                 .setTz(tz)
                 .setGroup(String.valueOf(nodeAddr));
         equipRef = CCUHsApi.getInstance().addEquip(b.build());
-        BuildingTuners.getInstance().addEquipTiTuners(siteDis + "-TI-" + nodeAddr, equipRef, roomRef, floorRef);
+        TITuners.addEquipTiTuners( CCUHsApi.getInstance(), siteRef,siteDis + "-TI-" + nodeAddr, equipRef, roomRef,
+                                   floorRef, tz);
         createCcuConfigPoints(config, equipRef);
-
-
 
         Point currentTemp = new Point.Builder()
                 .setDisplayName(siteDis+"-TI-"+nodeAddr+"-currentTemp")

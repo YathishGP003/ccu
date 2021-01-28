@@ -13,8 +13,8 @@ import a75f.io.api.haystack.Point;
 public class OAOTuners
 {
     
-    public static void addDefaultTuners(String siteRef, String equipRef, String equipDis, String tz) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
+    public static void addDefaultTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,
+                                        String tz) {
         Point co2DamperOpeningRate = new Point.Builder()
                                              .setDisplayName(equipDis+"-OAO-"+"co2DamperOpeningRate")
                                              .setSiteRef(siteRef)
@@ -138,11 +138,11 @@ public class OAOTuners
         String economizingToMainCoolingLoopMapId = hayStack.addPoint(economizingToMainCoolingLoopMap);
         hayStack.writePointForCcuUser(economizingToMainCoolingLoopMapId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ECONOMIZING_TO_MAIN_COOLING_LOOP_MAP, 0);
         hayStack.writeHisValById(economizingToMainCoolingLoopMapId, TunerConstants.OAO_ECONOMIZING_TO_MAIN_COOLING_LOOP_MAP);
-        updateNewTuners( siteRef,equipRef, equipDis,tz,true);
+        updateNewTuners(hayStack, siteRef,equipRef, equipDis,tz,true);
     }
 
-    public static void updateNewTuners(String siteRef, String equipRef, String equipDis, String tz,boolean isNewSite){
-        CCUHsApi hayStack = CCUHsApi.getInstance();
+    public static void updateNewTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis, String tz,
+                                       boolean isNewSite){
         if(isNewSite || !verifyPointsAvailability("default","prePurge and runtime",equipRef)) {
             Point smartPrePurgeRuntime  = new Point.Builder()
                     .setDisplayName(equipDis+"-OAO-"+"systemPrePurgeRuntimeTuner")
@@ -314,9 +314,9 @@ public class OAOTuners
         }
         return false;
     }
-    public static void updateOaoSystemTuners(String siteRef, String equipref, String equipdis, String tz,String systemProfile) {
-
-        CCUHsApi hayStack = CCUHsApi.getInstance();
+    public static void updateOaoSystemTuners(CCUHsApi hayStack, String siteRef, String equipref, String equipdis,
+                                             String tz,String systemProfile) {
+        
         if (!verifyPointsAvailability("not default","co2 and damper and opening and rate",equipref)) {
             Point co2DamperOpeningRate = new Point.Builder()
                     .setDisplayName(equipdis + "-" + "co2DamperOpeningRate")

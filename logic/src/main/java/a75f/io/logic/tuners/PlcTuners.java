@@ -12,9 +12,9 @@ import a75f.io.api.haystack.Point;
 
 public class PlcTuners {
     
-    public static void addDefaultPlcTuners(String siteRef, String equipRef, String equipDis, String tz) {
-    
-        CCUHsApi hayStack = CCUHsApi.getInstance();
+    public static void addDefaultPlcTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,
+                                           String tz) {
+        
         Point propGain = new Point.Builder()
                              .setDisplayName(equipDis+"-"+"proportionalKFactor")
                              .setSiteRef(siteRef)
@@ -56,11 +56,10 @@ public class PlcTuners {
         hayStack.writeHisValById(iTimeoutId, TunerConstants.VAV_INTEGRAL_TIMEOUT);
     }
     
-    public static void addPlcEquipTuners(String siteRef, String equipdis, String equipref, String roomRef,
-                                         String floorRef, String tz){
+    public static void addPlcEquipTuners(CCUHsApi hayStack, String siteRef, String equipdis, String equipref,
+                                         String roomRef, String floorRef, String tz){
         
         //addEquipZoneTuners(equipdis, equipref);
-        CCUHsApi hayStack = CCUHsApi.getInstance();
         Point propGain = new Point.Builder()
                              .setDisplayName(equipdis+"-"+"proportionalKFactor")
                              .setSiteRef(siteRef)

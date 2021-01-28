@@ -76,7 +76,8 @@ public class FourPipeFanCoilUnitEquip  {
 
         String equipRef = CCUHsApi.getInstance().addEquip(b.build());
 
-        BuildingTuners.getInstance().addEquipStandaloneTuners(siteDis+"-4PFCU-"+nodeAddr, equipRef, room, floor);
+        StandAloneTuners.addEquipStandaloneTuners( CCUHsApi.getInstance(), siteRef,siteDis + "-4PFCU-" + nodeAddr,
+                                                   equipRef, room, floor, tz);
 
         createFourPipeConfigPoints(config, equipRef,floor,room);
 

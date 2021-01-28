@@ -43,13 +43,14 @@ class UploadLogs(
     */
    fun saveCcuLogs() {
       val dateStr = fileSystemTools.timeStamp()
-      val ccuId = haystackApi.ccuId.`val`
+      val ccuGuid = haystackApi.globalCcuId ?: "ccu-id-missing"
+      val ccuGuidTrimmed = if (ccuGuid.startsWith("@")) ccuGuid.drop(1) else ccuGuid
 
       val logFile = fileSystemTools.writeLogCat("Renatus_Logs_$dateStr.txt")
       val prefsFile = fileSystemTools.writePreferences("Renatus_Prefs_$dateStr.txt")
 
       // This specific file id format is a requirement (Earth(CCU)-4726)
-      val fileId = ccuId + "_" + dateStr
+      val fileId = ccuGuidTrimmed + "_" + dateStr + ".zip"
       val zipFile = fileSystemTools.zipFiles(listOf(logFile, prefsFile), fileId)
 
       val siteRef = haystackApi.globalSiteId

@@ -1420,6 +1420,9 @@ public class CCUHsApi
         return getGUID(siteLuid);
     }
 
+    /**
+     * This methods returns the Local ccuId, not the global ccuId.
+     */
     public HRef getCcuId() {
         HRef siteRef = null;
         HDict hDict = new HDictBuilder().add("filter", "ccu").toDict();
@@ -1428,6 +1431,18 @@ public class CCUHsApi
             siteRef = site.row(0).getRef("id");
         }
         return siteRef;
+    }
+
+    /**
+     * Return the global ccu id if it exists.
+     * Otherwise null.
+     * @return ccu id or null
+     */
+    @Nullable
+    public String getGlobalCcuId() {
+        HRef ccuId = getCcuId();
+        if (ccuId == null) return null;
+        else return getGUID(getCcuId().toString());
     }
 
     public ArrayList<Schedule> getSystemSchedule(boolean vacation)

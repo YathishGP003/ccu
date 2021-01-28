@@ -44,7 +44,7 @@ public class DualDuctTuners {
                                            .setEquipRef(equipRef).setHisInterpolate("cov")
                                            .addMarker("tuner").addMarker("default").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                            .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
-                                           .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
+                                           .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                                            .setTz(tz)
                                            .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
@@ -256,7 +256,7 @@ public class DualDuctTuners {
                                            .setFloorRef(floorRef).setHisInterpolate("cov")
                                            .addMarker("tuner").addMarker("dualDuct").addMarker("writable").addMarker("his")
                                            .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
-                                           .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
+                                           .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.DUAL_DUCT_TUNER_GROUP)
                                            .setTz(tz)
                                            .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);

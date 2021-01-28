@@ -261,7 +261,7 @@ public abstract class SystemProfile
         }
 
         Point stage1CoolingAirflowTempLowerOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage1CoolingAirflowTempLowerOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage1").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
-                .setMinVal("-120").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage1CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage1CoolingAirflowTempLowerOffset);
@@ -672,7 +672,7 @@ public abstract class SystemProfile
             }
         }
         Point zoneTempDeadLeeway = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "zoneTemperatureDeadLeeway").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("temp").addMarker("dead").addMarker("leeway").addMarker("sp")
-                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP).setUnit("\u00B0F")
+                .setMinVal("0").setMaxVal("20").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP).setUnit("\u00B0F")
                 .setTz(tz).build();
         String zoneTempDeadLeewayId = hayStack.addPoint(zoneTempDeadLeeway);
         HashMap zoneTempDeadLeewayPoint = hayStack.read("point and tuner and default and temp and dead and leeway");

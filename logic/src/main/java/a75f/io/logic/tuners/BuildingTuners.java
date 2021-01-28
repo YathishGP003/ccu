@@ -185,7 +185,7 @@ public class BuildingTuners
                                                    .setEquipRef(equipRef).setHisInterpolate("cov")
                                                    .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
                                                    .addMarker("temp").addMarker("dead").addMarker("leeway").addMarker("sp")
-                                                   .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                                                   .setMinVal("0").setMaxVal("20").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                                    .setUnit("\u00B0F")
                                                    .setTz(tz)
                                                    .build();
@@ -464,7 +464,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
                 .addMarker("stage1").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
-                .setMinVal("-120").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -877,7 +877,7 @@ public class BuildingTuners
                                            .setEquipRef(equipRef).setHisInterpolate("cov")
                                            .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("his")
                                            .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
-                                           .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                           .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                            .setTz(tz)
                                            .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
@@ -1827,7 +1827,7 @@ public class BuildingTuners
                                            .setFloorRef(floorRef).setHisInterpolate("cov")
                                            .addMarker("tuner").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("his")
                                            .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
-                                           .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                           .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                            .setTz(tz)
                                            .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
@@ -2281,7 +2281,7 @@ public class BuildingTuners
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("ti").addMarker("writable").addMarker("his")
                 .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
-                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.TI_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.TI_TUNER_GROUP)
                 .setTz(tz)
                 .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
@@ -2424,7 +2424,7 @@ public class BuildingTuners
                                                .setEquipRef(equipRef).setHisInterpolate("cov")
                                                .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
                                                .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
-                                               .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                               .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                                .setTz(tz)
                                                .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
@@ -2692,7 +2692,7 @@ public class BuildingTuners
                                                .setFloorRef(floorRef).setHisInterpolate("cov")
                                                .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
                                                .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
-                                               .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                               .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                                .setTz(tz)
                                                .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
@@ -3039,7 +3039,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("ti").addMarker("writable").addMarker("his")
                 .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
-                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.TI_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.TI_TUNER_GROUP)
                 .setTz(tz)
                 .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);

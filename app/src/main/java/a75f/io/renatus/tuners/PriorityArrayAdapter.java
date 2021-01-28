@@ -68,7 +68,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                                 holder.textViewValue.setText(priorityMap.get("val").toString());
                             } else {
                                 if (getTunerValue(tunerItemSelected.get("id").toString()) != 0){
-                                    holder.textViewCurrentValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
+                                    holder.textViewCurrentValue.setText("-");
                                     holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
                                 } else {
                                     holder.textViewCurrentValue.setText("-");
@@ -95,7 +95,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                                 holder.textViewValue.setText(priorityMap.get("val").toString());
                             } else {
                                 if (getTunerValue(tunerItemSelected.get("id").toString()) != 0){
-                                    holder.textViewCurrentValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
+                                    holder.textViewCurrentValue.setText("-");
                                     holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
                                 } else {
                                     holder.textViewCurrentValue.setText("-");
@@ -122,7 +122,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                                 holder.textViewValue.setText(priorityMap.get("val").toString());
                             } else {
                                 if (getTunerValue(tunerItemSelected.get("id").toString()) != 0){
-                                    holder.textViewCurrentValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
+                                    holder.textViewCurrentValue.setText("-");
                                     holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
                                 } else {
                                     holder.textViewCurrentValue.setText("-");
@@ -149,7 +149,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                                 holder.textViewValue.setText(priorityMap.get("val").toString());
                             } else {
                                 if (getTunerValue(tunerItemSelected.get("id").toString()) != 0){
-                                    holder.textViewCurrentValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
+                                    holder.textViewCurrentValue.setText("-");
                                     holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
                                 } else {
                                     holder.textViewCurrentValue.setText("-");

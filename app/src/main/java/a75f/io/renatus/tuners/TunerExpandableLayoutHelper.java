@@ -57,13 +57,13 @@ public class TunerExpandableLayoutHelper implements TunerGroupChangeListener {
 
     public void updateTuner(TunerGroupItem section, HashMap item, HashMap oldItem) {
         Log.i("TunersUI", "section:" + section + " hashmap:" + item);
-        if (mSectionDataMap != null && mSectionDataMap.size() >0){
-            List<HashMap> hashMapList = mSectionDataMap.get(section);
-            if (hashMapList != null && hashMapList.size() > 0 && hashMapList.contains(oldItem)){
-                hashMapList.set(hashMapList.indexOf(oldItem), item);
-                notifyDataSetChanged();
+        for(HashMap m: mSectionDataMap.get(section)){
+            if (m.get("id").toString().equals(oldItem.get("id").toString())){
+                mSectionDataMap.get(section).set(mSectionDataMap.get(section).indexOf(m), item);
+                break;
             }
         }
+        notifyDataSetChanged();
     }
 
     public void removeItem(String section, HashMap item) {

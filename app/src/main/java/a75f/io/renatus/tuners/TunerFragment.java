@@ -300,6 +300,63 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                             continue;
                         }
                     }
+
+                    /*
+                    * when building level tuner update check all linked level tuners (System/Zone/Module) and update
+                    * */
+
+                    if (newTunerValueItem.get("newLevel").toString().equals("16")){
+
+                        //Update linked system tuner
+                        ArrayList<HashMap> systemTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and system and roomRef == \""+ "SYSTEM" +"\"");
+                        String buildingTunerDis = newTunerValueItem.get("dis").toString();
+                        for (HashMap systemTunersMap : systemTuners) {
+                            String systemTunerDis = systemTunersMap.get("dis").toString();
+                            if (!systemTunerDis.contains("Building")) {
+                             if (buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(systemTunerDis.substring(systemTunerDis.lastIndexOf("-") + 1))){
+                                 setTuner(systemTunersMap.get("id").toString(), 14, Double.parseDouble(newTunerValueItem.get("newValue").toString()));
+                             }
+                            }
+                        }
+
+                        //Update linked zone tuner
+                        ArrayList<Zone> zoneArrayList = new ArrayList<>();
+                        ArrayList<Equip> equipArrayList = new ArrayList<>();
+
+                        for(Floor f: HSUtil.getFloors()){
+                            zoneArrayList.addAll(HSUtil.getZones(f.getId()));
+                        }
+
+                        for (Zone z: zoneArrayList) {
+                            equipArrayList.addAll(HSUtil.getEquips(z.getId()));
+
+                            ArrayList<HashMap> zoneTuners = CCUHsApi.getInstance().readAll("tuner and roomRef == \"" + z.getId() + "\"");
+
+                            for (HashMap zoneTunersMap : zoneTuners) {
+                                if (!zoneTunersMap.get("roomRef").toString().equals("SYSTEM")) {
+                                    String zoneTunerDis = zoneTunersMap.get("dis").toString();
+                                    if (buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(zoneTunerDis.substring(zoneTunerDis.lastIndexOf("-") + 1))) {
+                                        setTuner(zoneTunersMap.get("id").toString(), 10, Double.parseDouble(newTunerValueItem.get("newValue").toString()));
+                                    }
+                                }
+                            }
+                        }
+
+                        //Update linked module tuner
+                        for (Equip e : equipArrayList){
+                            ArrayList<HashMap> moduleTuners = CCUHsApi.getInstance().readAll("tuner and equipRef == \""+e.getId()+"\"");
+
+                            for (HashMap moduleTunerMap : moduleTuners) {
+                                if (!moduleTunerMap.get("roomRef").toString().equals("SYSTEM")) {
+                                    String moduleTunerDis = moduleTunerMap.get("dis").toString();
+                                    if (buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(moduleTunerDis.substring(moduleTunerDis.lastIndexOf("-") + 1))) {
+                                        setTuner(moduleTunerMap.get("id").toString(), 8, Double.parseDouble(newTunerValueItem.get("newValue").toString()));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     setTuner(newTunerValueItem.get("id").toString(), Integer.parseInt(newTunerValueItem.get("newLevel").toString()), Double.parseDouble(newTunerValueItem.get("newValue").toString()));
                 }
                 Toast.makeText(getActivity(), "Tuner Values Updated Successfully", Toast.LENGTH_SHORT).show();

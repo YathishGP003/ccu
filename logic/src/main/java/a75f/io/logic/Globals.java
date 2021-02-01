@@ -62,6 +62,7 @@ import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
 import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
+import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.pubnub.PubNubHandler;
@@ -225,6 +226,8 @@ public class Globals {
             
                 mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
                                                 TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);
+                
+                BearerTokenManager.getInstance().scheduleJob();
             
                 mAlertProcessJob = new AlertProcessJob(mApplicationContext);
                 getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);

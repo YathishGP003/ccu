@@ -1432,6 +1432,11 @@ public class CCUHsApi
         }
         return siteRef;
     }
+    
+    public String getCCUGuid() {
+        HRef ccuId = getCcuId();
+        return ccuId != null ? getGUID(ccuId.toString()) : null;
+    }
 
     /**
      * Return the global ccu id if it exists.

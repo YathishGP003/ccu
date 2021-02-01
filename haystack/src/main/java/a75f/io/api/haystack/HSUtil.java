@@ -16,6 +16,8 @@ import java.util.Map;
 
 public class HSUtil
 {
+    public static final String QUERY_JOINER = " and ";
+
     public static ArrayList<Floor> getFloors() {
         ArrayList<HashMap> floors = CCUHsApi.getInstance().readAll("floor");
         ArrayList<Floor> floorList = new ArrayList<>();
@@ -179,7 +181,35 @@ public class HSUtil
         }
         return null;
     }
-    
+
+    public static String getHQueryFromMarkers(ArrayList<String> markers) {
+        StringBuilder builder = new StringBuilder();
+        for(String marker : markers) {
+            builder.append(marker);
+            builder.append(QUERY_JOINER);
+        }
+        String queryString = builder.toString();
+        if (queryString.endsWith(QUERY_JOINER)) {
+            int index = queryString.lastIndexOf(QUERY_JOINER);
+            return queryString.substring(0, index);
+        }
+        return queryString;
+    }
+
+    public static boolean isBuildingTuner(String entityId, CCUHsApi hayStack) {
+        HashMap<Object, Object> entityMap = hayStack.readMapById(entityId);
+        if (!entityMap.containsKey(Tags.TUNER)) {
+            return false;
+        }
+
+        HashMap<Object, Object> tunerEquip = hayStack.readMapById("tuner and equip");
+        if (!tunerEquip.get(Tags.ID).equals(entityMap.get(Tags.EQUIPREF))) {
+            return false;
+        }
+        return true;
+    }
+
+
     //To update after merging Tuner branch.
     public static boolean isSystemConfigOutputPoint(String id, CCUHsApi hayStack) {
         HashMap pointEntity = hayStack.readMapById(id);
@@ -187,7 +217,7 @@ public class HSUtil
                && pointEntity.containsKey("config")
                && pointEntity.containsKey("output");
     }
-    
+
     public static boolean isSystemConfigHumidifierType(String id, CCUHsApi hayStack) {
         HashMap pointEntity = hayStack.readMapById(id);
         return pointEntity.containsKey("system")
@@ -202,7 +232,7 @@ public class HSUtil
         HashMap pointMap = hayStack.readMapById(id);
         return pointMap.get("dis").toString().contains("Building");
     }
-    
+
     public static double getSystemUserIntentVal(String tags)
     {
         CCUHsApi hayStack = CCUHsApi.getInstance();

@@ -8,9 +8,10 @@ public class TunerConstants
 {
     
     public static final int DEFAULT_VAL_LEVEL = 17;
-    public static final int BUILDING_VAL_LEVEL = 16;
-    
     public static final int TUNER_EQUIP_VAL_LEVEL = 8;
+    public static final int TUNER_ZONE_VAL_LEVEL = 10;
+    public static final int TUNER_SYSTEM_VAL_LEVEL = 14;
+    public static final int TUNER_BUILDING_VAL_LEVEL = 16;
     
     public static final double SYSTEM_ANALOG1_MIN = 0;
     public static final double SYSTEM_ANALOG1_MAX = 10;

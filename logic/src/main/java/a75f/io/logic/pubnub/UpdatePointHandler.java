@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -132,6 +133,10 @@ public class UpdatePointHandler
             if (modbusDataInterface != null) {
                 modbusDataInterface.refreshScreen(luid);
             }
+        }
+        
+        if (HSUtil.isSystemConfigOutputPoint(luid, CCUHsApi.getInstance())) {
+            ConfigPointUpdateHandler.updateConfigPoint();
         }
     }
 

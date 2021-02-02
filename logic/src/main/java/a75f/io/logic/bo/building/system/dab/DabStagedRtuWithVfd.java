@@ -149,13 +149,11 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
             }
     
             signal = ANALOG_SCALE * signal;
-            
-            if (signal != getCmdSignal("fan and modulating")) {
-                setCmdSignal("fan and modulating", signal);
-            }
-            
         }
-        
+    
+        if (signal != getCmdSignal("fan and modulating")) {
+            setCmdSignal("fan and modulating", signal);
+        }
         ControlMote.setAnalogOut("analog2", signal);
         CcuLog.d(L.TAG_CCU_SYSTEM, " analog2 Signal : "+signal);
     }

@@ -177,11 +177,13 @@ public class VavIERtu extends VavSystemProfile
             {
                 signal = (int) (coolingDatMin - (coolingDatMin - coolingDatMax) * (systemCoolingLoopOp/100));
             }
-
-            setCmdSignal("cooling",signal);
             
         } else {
             signal = 0;
+        }
+    
+        if (signal != getCmdSignal("cooling")) {
+            setCmdSignal("cooling", signal);
         }
         
         if (VavSystemController.getInstance().getSystemState() == HEATING)
@@ -205,9 +207,12 @@ public class VavIERtu extends VavSystemProfile
             {
                 signal = (int) (heatingDatMin - (heatingDatMax - heatingDatMin) * (systemHeatingLoopOp / 100));
             }
-            setCmdSignal("heating", signal);
         } else {
             signal = 0;
+        }
+    
+        if (signal != getCmdSignal("heating")) {
+            setCmdSignal("heating", signal);
         }
     
         double datSp = VavSystemController.getInstance().getSystemState() == COOLING ? getCmdSignal("cooling") : getCmdSignal("heating");
@@ -265,6 +270,11 @@ public class VavIERtu extends VavSystemProfile
         } else {
             spSignal = 0;
         }
+    
+        if (spSignal != getCmdSignal("fan")) {
+            setCmdSignal("fan", spSignal);
+        }
+        
         ControlMote.setAnalogOut("analog2", spSignal);
         
         ControlMote.setAnalogOut("analog3", VavSystemController.getInstance().getAverageSystemHumidity());

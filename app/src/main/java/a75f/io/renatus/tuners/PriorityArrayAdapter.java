@@ -21,15 +21,17 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
     Context context;
     ArrayList<HashMap> priorityArrayList;
     PriorityItemClickListener priorityItemClickListener;
+    TunerUndoClickListener undoClickListener;
     String tunerGroupType;
     HashMap tunerItemSelected;
 
-    public PriorityArrayAdapter(Context context, String tunerGroupType, ArrayList<HashMap> priorityArrayList, PriorityItemClickListener itemClickListener, HashMap tunerItemSelected) {
+    public PriorityArrayAdapter(Context context, String tunerGroupType, ArrayList<HashMap> priorityArrayList, PriorityItemClickListener itemClickListener, TunerUndoClickListener undoClickListener, HashMap tunerItemSelected) {
         this.context = context;
         this.priorityArrayList = priorityArrayList;
         this.priorityItemClickListener = itemClickListener;
         this.tunerGroupType = tunerGroupType;
         this.tunerItemSelected = tunerItemSelected;
+        this.undoClickListener = undoClickListener;
     }
 
     @Override
@@ -192,6 +194,8 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
 
         holder.imgBtnTunerUndo.setOnClickListener(v -> {
             final HashMap priorityValMap = getPriorityLevelMap(priorityArrayList);
+            undoClickListener.onUndoClick(tunerItemSelected);
+
             if (priorityValMap.containsKey("val")) {
                 holder.textViewCurrentValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
                 setOrangeTextColor(holder.textViewCurrentValue);

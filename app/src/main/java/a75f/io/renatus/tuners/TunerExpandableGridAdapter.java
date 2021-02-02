@@ -81,6 +81,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                 final HashMap tunerItem = (HashMap) mDataArrayList.get(position);
                 Log.i("TunersUI", "tunerItem:" + tunerItem);
                 String tunerName = tunerItem.get("dis").toString();
+
                 holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
                 if (tunerItem.containsKey("newValue")) {
                     holder.itemTextValueView.setText(tunerItem.get("newValue").toString());
@@ -93,11 +94,20 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                         holder.itemTextValueView.setText("-");
                     }
                 }
-                if (tunerItem.containsKey("unit")) {
-                    holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1) + " (" + tunerItem.get("unit").toString().toUpperCase() + ")");
+                if (tunerGroupType.equals("Zone")){
+                    if (tunerItem.containsKey("unit")) {
+                        holder.itemTextView.setText(tunerName.substring(tunerName.indexOf("-") + 1) + " (" + tunerItem.get("unit").toString().toUpperCase() + ")");
+                    } else {
+                        holder.itemTextView.setText(tunerName.substring(tunerName.indexOf("-") + 1));
+                    }
                 } else {
-                    holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
+                    if (tunerItem.containsKey("unit")) {
+                        holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1) + " (" + tunerItem.get("unit").toString().toUpperCase() + ")");
+                    } else {
+                        holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
+                    }
                 }
+
                 if (childIndexPosition % 2 == 0) {
                     holder.itemDivider.setVisibility(View.GONE);
                 } else {

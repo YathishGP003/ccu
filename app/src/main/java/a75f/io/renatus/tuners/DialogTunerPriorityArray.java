@@ -33,7 +33,7 @@ import a75f.io.renatus.util.TunerNumberPicker;
 import butterknife.ButterKnife;
 
 
-public class DialogTunerPriorityArray extends BaseDialogFragment implements PriorityItemClickListener {
+public class DialogTunerPriorityArray extends BaseDialogFragment implements PriorityItemClickListener,TunerUndoClickListener {
     public static final String ID = DialogTunerPriorityArray.class.getSimpleName();
     public static final String TUNER_ITEM = "tunerItem";
     public static final String TUNER_GROUP_ITEM = "TunerGroupItem";
@@ -144,7 +144,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         priorityList = CCUHsApi.getInstance().readPoint(tunerItemSelected.get("id").toString());
         Log.i("TunersUI", "priorityList:" + priorityList);
 
-        priorityArrayAdapter = new PriorityArrayAdapter(getActivity(),tunerGroupType, priorityList, this, tunerItemSelected);
+        priorityArrayAdapter = new PriorityArrayAdapter(getActivity(),tunerGroupType, priorityList, this, this, tunerItemSelected);
         recyclerViewPriority.setAdapter(priorityArrayAdapter);
 
         buttonSaveTuner.setOnClickListener(v -> {
@@ -346,5 +346,11 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             }
             //dialog.show();
         }
+    }
+
+    @Override
+    public void onUndoClick(HashMap item) {
+        buttonSaveTuner.setEnabled(false);
+        buttonSaveTuner.setTextColor(getActivity().getColor(R.color.grey_select));
     }
 }

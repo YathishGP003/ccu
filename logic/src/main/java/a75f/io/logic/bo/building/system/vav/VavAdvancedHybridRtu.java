@@ -143,14 +143,13 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemCoolingLoopOp/100)));
             }
             
-            if (systemCoolingLoopOp != getCmdSignal("cooling and modulating")) {
-                setCmdSignal("cooling and modulating", systemCoolingLoopOp);
-            }
-            
         } else {
             signal = 0;
         }
-        
+    
+        if (signal != getCmdSignal("cooling and modulating")) {
+            setCmdSignal("cooling and modulating", signal);
+        }
         ControlMote.setAnalogOut("analog1", signal);
         
         if (getConfigEnabled("analog2") > 0)
@@ -168,16 +167,14 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
             {
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemFanLoopOp/100)));
             }
-    
-            if (systemFanLoopOp != getCmdSignal("fan and modulating")) {
-                setCmdSignal("fan and modulating", systemFanLoopOp);
-            }
-            
             
         } else {
             signal = 0;
         }
-        
+    
+        if (signal != getCmdSignal("fan and modulating")) {
+            setCmdSignal("fan and modulating", signal);
+        }
         ControlMote.setAnalogOut("analog2", signal);
         
         if (getConfigEnabled("analog3") > 0)
@@ -194,15 +191,14 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
             {
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemHeatingLoopOp / 100)));
             }
-    
-            if (systemHeatingLoopOp != getCmdSignal("heating and modulating")) {
-                setCmdSignal("heating and modulating", systemHeatingLoopOp);
-            }
             
         } else  {
             signal = 0;
         }
-        
+    
+        if (signal != getCmdSignal("heating and modulating")) {
+            setCmdSignal("heating and modulating", signal);
+        }
         ControlMote.setAnalogOut("analog3", signal);
         
         if (getConfigEnabled("analog4") > 0)

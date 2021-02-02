@@ -106,12 +106,12 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             {
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemCoolingLoopOp/100)));
             }
-
-            if (systemCoolingLoopOp != getCmdSignal("cooling")) {
-                setCmdSignal("cooling", systemCoolingLoopOp);
-            }
         } else {
             signal = 0;
+        }
+        
+        if (signal != getCmdSignal("cooling")) {
+            setCmdSignal("cooling", signal);
         }
         ControlMote.setAnalogOut("analog1", signal);
         
@@ -138,11 +138,12 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             {
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemHeatingLoopOp / 100)));
             }
-            if (systemHeatingLoopOp != getCmdSignal("heating")) {
-                setCmdSignal("heating", systemHeatingLoopOp);
-            }
         } else {
             signal = 0;
+        }
+        
+        if (signal != getCmdSignal("heating")) {
+            setCmdSignal("heating", signal);
         }
         ControlMote.setAnalogOut("analog3", signal);
         
@@ -196,12 +197,13 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             {
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemFanLoopOp/100)));
             }
-
-            if (systemFanLoopOp != getCmdSignal("fan")) {
-                setCmdSignal("fan", systemFanLoopOp);
-            }
+            
         } else {
             signal = 0;
+        }
+        
+        if (signal != getCmdSignal("fan")) {
+            setCmdSignal("fan", signal);
         }
         ControlMote.setAnalogOut("analog2", signal);
     
@@ -209,11 +211,13 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         if (getConfigVal("relay3 and output and enabled") > 0 && systemMode != SystemMode.OFF)
         {
             signal = ((ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION) || systemFanLoopOp > 0) ? 1 : 0;
-
-            if(signal != getCmdSignal("occupancy"))
-                setCmdSignal("occupancy",signal);
+            
         }else {
             signal = 0;
+        }
+    
+        if(signal != getCmdSignal("occupancy")) {
+            setCmdSignal("occupancy", signal);
         }
         ControlMote.setRelayState("relay3", signal);
         
@@ -609,8 +613,6 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     }
     public double getConfigEnabled(String config) {
         
-        //return sysEquip.getConfigEnabled(config)? 1:0;
-        //return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and enabled and "+config);
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap configPoint = hayStack.read("point and system and config and output and enabled and "+config);
         return hayStack.readPointPriorityVal(configPoint.get("id").toString());

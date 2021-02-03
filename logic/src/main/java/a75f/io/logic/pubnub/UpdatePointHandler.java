@@ -32,13 +32,18 @@ public class UpdatePointHandler
         if (canIgnorePointUpdate(src, pointGuid)) {
             return;
         }
+    
+        String luid = CCUHsApi.getInstance().getLUID("@" + pointGuid);
+        if (HSUtil.isSystemConfigOutputPoint(luid, CCUHsApi.getInstance())) {
+            ConfigPointUpdateHandler.updateConfigPoint(msgObject);
+            return;
+        }
         
         new Thread(new Runnable()
         {
             @Override
             public void run()
             {
-                String luid = CCUHsApi.getInstance().getLUID("@" + pointGuid);
                 if (luid != null && luid != "")
                 {
                     HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote("@" + pointGuid);

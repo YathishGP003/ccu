@@ -137,4 +137,60 @@
         <attr name="np_wheelItemCount" format="integer" />
         <attr name="np_wrapSelectorWheel" format="boolean" />
     </declare-styleable>
+
+    <declare-styleable name="NumberPicker">
+        <attr name="nps_width" format="dimension" />
+        <attr name="nps_height" format="dimension" />
+        <attr name="nps_accessibilityDescriptionEnabled" format="boolean" />
+        <attr name="nps_divider" format="reference" />
+        <attr name="nps_dividerType" format="enum">
+            <enum name="side_lines" value="0" />
+            <enum name="underline" value="1" />
+        </attr>
+        <attr name="nps_dividerColor" format="color" />
+        <attr name="nps_dividerDistance" format="dimension" />
+        <attr name="nps_dividerLength" format="dimension" />
+        <attr name="nps_dividerThickness" format="dimension" />
+        <attr name="nps_fadingEdgeEnabled" format="boolean" />
+        <attr name="nps_fadingEdgeStrength" format="float" />
+        <attr name="nps_formatter" format="string" />
+        <attr name="nps_hideWheelUntilFocused" format="boolean" />
+        <attr name="nps_itemSpacing" format="dimension" />
+        <attr name="nps_lineSpacingMultiplier" format="float" />
+        <attr name="nps_max" format="integer" />
+        <attr name="nps_maxFlingVelocityCoefficient" format="integer" />
+        <attr name="nps_min" format="integer" />
+        <attr name="nps_order" format="enum">
+            <enum name="ascending" value="0" />
+            <enum name="descending" value="1" />
+        </attr>
+        <attr name="nps_orientation" format="enum">
+            <enum name="horizontal" value="0" />
+            <enum name="vertical" value="1" />
+        </attr>
+        <attr name="nps_scrollerEnabled" format="boolean" />
+        <attr name="nps_selectedTextAlign" format="enum">
+            <enum name="selectedTextAlignRight" value="0" />
+            <enum name="selectedTextAlignCenter" value="1" />
+            <enum name="selectedTextAlignLeft" value="2" />
+        </attr>
+        <attr name="nps_selectedTextColor" format="color" />
+        <attr name="nps_selectedTextSize" format="dimension" />
+        <attr name="nps_selectedTextStrikeThru" format="boolean" />
+        <attr name="nps_selectedTextUnderline" format="boolean" />
+        <attr name="nps_selectedTypeface" format="string" />
+        <attr name="nps_textAlign" format="enum">
+            <enum name="textAlignRight" value="0" />
+            <enum name="textAlignCenter" value="1" />
+            <enum name="textAlignLeft" value="2" />
+        </attr>
+        <attr name="nps_textColor" format="color" />
+        <attr name="nps_textSize" format="dimension" />
+        <attr name="nps_textStrikeThru" format="boolean" />
+        <attr name="nps_textUnderline" format="boolean" />
+        <attr name="nps_typeface" format="string" />
+        <attr name="nps_value" format="integer" />
+        <attr name="nps_wheelItemCount" format="integer" />
+        <attr name="nps_wrapSelectorWheel" format="boolean" />
+    </declare-styleable>
 </resources>

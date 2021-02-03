@@ -1436,11 +1436,6 @@ public class CCUHsApi
         return getGUID(siteLuid);
     }
 
-    public String getGlobalCcuId() {
-        HRef ccuId = getCcuId();
-        return ccuId != null ? getGUID(ccuId.toString()) : null;
-    }
-
     /**
      * This methods returns the Local ccuId, not the global ccuId.
      */

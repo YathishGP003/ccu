@@ -565,7 +565,7 @@ public class VavTRTuners
                                                    .setEquipRef(equipRef).setHisInterpolate("cov")
                                                    .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
                                                    .addMarker("co2").addMarker("timeInterval").addMarker("writable").addMarker("his")
-                                                   .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                                   .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                                    .setUnit("m")
                                                    .setTz(tz)
                                                    .build();

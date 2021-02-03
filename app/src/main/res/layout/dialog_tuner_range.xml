@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/white">
+
+
+    <LinearLayout
+        android:id="@+id/layoutValues"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textLevelLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="16sp"
+            android:layout_toLeftOf="@+id/npTunerValue"
+            android:fontFamily="@font/lato_regular"
+            android:text="Level 14"
+            android:layout_margin="5sp"
+            android:textSize="19.5sp" />
+
+        <a75f.io.renatus.util.TunerNumberPicker
+            android:id="@+id/npTunerValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/oaoArc"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center_vertical"
+            android:layout_margin="16sp"
+            android:minWidth="160sp"/>
+        <ImageButton
+            android:id="@+id/imgBtnUndo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_refresh"
+            android:layout_gravity="center_vertical"
+            android:layout_margin="5sp"
+            android:padding="5sp"
+            android:scaleX="-1"
+            android:background="@null"/>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/horizontalDivider"
+        android:layout_width="match_parent"
+        android:layout_height="0.05sp"
+        android:layout_below="@+id/layoutValues"
+        android:layout_margin="10sp"
+        android:alpha="0.75"
+        android:background="@color/light_gray" />
+
+    <LinearLayout
+        android:id="@+id/layoutFooterButtons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/horizontalDivider"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/buttonCancelTuner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10sp"
+            android:background="@null"
+            android:fontFamily="@font/lato_regular"
+            android:gravity="center_vertical|center_horizontal"
+            android:padding="5sp"
+            android:text="@string/cancel"
+            android:textColor="@color/orange_75f"
+            android:textSize="19.5sp" />
+
+        <View
+            android:id="@+id/tunerDivider"
+            android:layout_width="0.5sp"
+            android:layout_height="25sp"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:background="@color/light_gray" />
+
+        <Button
+            android:id="@+id/buttonSaveTuner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10sp"
+            android:background="@null"
+            android:fontFamily="@font/lato_regular"
+            android:gravity="center_vertical|center_horizontal"
+            android:padding="5sp"
+            android:text="@string/tuner_save"
+            android:textColor="@color/grey_select"
+            android:textSize="19.5sp" />
+    </LinearLayout>
+</RelativeLayout>

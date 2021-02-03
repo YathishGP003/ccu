@@ -1,4 +1,5 @@
-package a75f.io.renatus.views.NumberPicker;
+package a75f.io.renatus.util;
+
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -38,6 +39,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.text.DecimalFormatSymbols;
@@ -52,29 +54,40 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 /**
  * A widget that enables the user to select a number from a predefined range.
  */
-public class SystemNumberPicker extends LinearLayout {
+public class TunerNumberPicker extends LinearLayout {
 
     @Retention(SOURCE)
     @IntDef({VERTICAL, HORIZONTAL})
-    public @interface Orientation{}
+    public @interface Orientation {
+    }
 
     public static final int VERTICAL = LinearLayout.VERTICAL;
     public static final int HORIZONTAL = LinearLayout.HORIZONTAL;
 
     @Retention(SOURCE)
     @IntDef({ASCENDING, DESCENDING})
-    public @interface Order{}
+    public @interface Order {
+    }
 
     public static final int ASCENDING = 0;
     public static final int DESCENDING = 1;
 
     @Retention(SOURCE)
     @IntDef({LEFT, CENTER, RIGHT})
-    public @interface Align{}
+    public @interface Align {
+    }
 
     public static final int RIGHT = 0;
     public static final int CENTER = 1;
     public static final int LEFT = 2;
+
+    @Retention(SOURCE)
+    @IntDef({SIDE_LINES, UNDERLINE})
+    public @interface DividerType {
+    }
+
+    public static final int SIDE_LINES = 0;
+    public static final int UNDERLINE = 1;
 
     /**
      * The default update interval during long press.
@@ -180,11 +193,9 @@ public class SystemNumberPicker extends LinearLayout {
 
         final Object[] mArgs = new Object[1];
 
-        Locale mLocale;
-
         TwoDigitFormatter() {
-            mLocale = Locale.getDefault();
-            init(mLocale);
+            final Locale locale = Locale.getDefault();
+            init(locale);
         }
 
         private void init(Locale locale) {
@@ -193,11 +204,7 @@ public class SystemNumberPicker extends LinearLayout {
         }
 
         public String format(int value) {
-            Locale currentLocale = Locale.getDefault();
-            // to force the locale value set by using setter method
-            if (!mLocale.equals(currentLocale)) {
-                currentLocale = mLocale;
-            }
+            final Locale currentLocale = Locale.getDefault();
             if (mZeroDigit != getZeroDigit(currentLocale)) {
                 init(currentLocale);
             }
@@ -212,15 +219,6 @@ public class SystemNumberPicker extends LinearLayout {
             return new DecimalFormatSymbols(locale).getZeroDigit();
         }
 
-        // to force the locale value set by using setter method
-        void setLocale(Locale locale) {
-            if (this.mLocale != null && mLocale.equals(locale)) {
-                return;
-            }
-            this.mLocale = locale;
-            init(mLocale);
-        }
-
         private java.util.Formatter createFormatter(Locale locale) {
             return new java.util.Formatter(mBuilder, locale);
         }
@@ -228,7 +226,7 @@ public class SystemNumberPicker extends LinearLayout {
 
     private static final TwoDigitFormatter sTwoDigitFormatter = new TwoDigitFormatter();
 
-    public static final Formatter getTwoDigitFormatter() {
+    public static Formatter getTwoDigitFormatter() {
         return sTwoDigitFormatter;
     }
 
@@ -296,6 +294,11 @@ public class SystemNumberPicker extends LinearLayout {
      * Flag whether the selected text should underlined.
      */
     private boolean mSelectedTextUnderline;
+
+    /**
+     * The typeface of the selected text.
+     */
+    private Typeface mSelectedTypeface;
 
     /**
      * The align of the text.
@@ -438,11 +441,6 @@ public class SystemNumberPicker extends LinearLayout {
     private final Scroller mAdjustScroller;
 
     /**
-     * The {@link Locale} responsible for setting the locale.
-     */
-    private Locale mLocale;
-
-    /**
      * The previous X coordinate while scrolling the selector.
      */
     private int mPreviousScrollerX;
@@ -530,6 +528,11 @@ public class SystemNumberPicker extends LinearLayout {
     /**
      * The thickness of the divider.
      */
+    private int mDividerLength;
+
+    /**
+     * The thickness of the divider.
+     */
     private int mDividerThickness;
 
     /**
@@ -553,6 +556,11 @@ public class SystemNumberPicker extends LinearLayout {
     private int mRightDividerRight;
 
     /**
+     * The type of the divider.
+     */
+    private int mDividerType;
+
+    /**
      * The current scroll state of the number picker.
      */
     private int mScrollState = OnScrollListener.SCROLL_STATE_IDLE;
@@ -566,16 +574,6 @@ public class SystemNumberPicker extends LinearLayout {
      * Flag whether the selector wheel should hidden until the picker has focus.
      */
     private boolean mHideWheelUntilFocused;
-
-    /**
-     * The width of this widget.
-     */
-    private float mWidth;
-
-    /**
-     * The height of this widget.
-     */
-    private float mHeight;
 
     /**
      * The orientation of this widget.
@@ -613,6 +611,11 @@ public class SystemNumberPicker extends LinearLayout {
     private int mMaxFlingVelocityCoefficient = DEFAULT_MAX_FLING_VELOCITY_COEFFICIENT;
 
     /**
+     * Flag whether the accessibility description enabled.
+     */
+    private boolean mAccessibilityDescriptionEnabled = true;
+
+    /**
      * The context of this widget.
      */
     private Context mContext;
@@ -639,8 +642,13 @@ public class SystemNumberPicker extends LinearLayout {
          * @param oldVal The previous value.
          * @param newVal The new value.
          */
-        void onValueChange(SystemNumberPicker picker, int oldVal, int newVal);
+        void onValueChange(TunerNumberPicker picker, int oldVal, int newVal);
     }
+
+    /**
+     * The amount of space between items.
+     */
+    private int mItemSpacing = 0;
 
     /**
      * Interface to listen for the picker scroll state.
@@ -649,7 +657,8 @@ public class SystemNumberPicker extends LinearLayout {
 
         @IntDef({SCROLL_STATE_IDLE, SCROLL_STATE_TOUCH_SCROLL, SCROLL_STATE_FLING})
         @Retention(RetentionPolicy.SOURCE)
-        public @interface ScrollState{}
+        public @interface ScrollState {
+        }
 
         /**
          * The view is not scrolling.
@@ -675,7 +684,7 @@ public class SystemNumberPicker extends LinearLayout {
          *                    {@link #SCROLL_STATE_TOUCH_SCROLL} or
          *                    {@link #SCROLL_STATE_IDLE}.
          */
-        public void onScrollStateChange(SystemNumberPicker view, @ScrollState int scrollState);
+        public void onScrollStateChange(TunerNumberPicker view, @ScrollState int scrollState);
     }
 
     /**
@@ -697,7 +706,7 @@ public class SystemNumberPicker extends LinearLayout {
      *
      * @param context The application environment.
      */
-    public SystemNumberPicker(Context context) {
+    public TunerNumberPicker(Context context) {
         this(context, null);
     }
 
@@ -705,30 +714,29 @@ public class SystemNumberPicker extends LinearLayout {
      * Create a new number picker.
      *
      * @param context The application environment.
-     * @param attrs A collection of attributes.
+     * @param attrs   A collection of attributes.
      */
-    public SystemNumberPicker(Context context, AttributeSet attrs) {
+    public TunerNumberPicker(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
     /**
      * Create a new number picker
      *
-     * @param context the application environment.
-     * @param attrs a collection of attributes.
+     * @param context  the application environment.
+     * @param attrs    a collection of attributes.
      * @param defStyle The default style to apply to this view.
      */
-    public SystemNumberPicker(Context context, AttributeSet attrs, int defStyle) {
+    public TunerNumberPicker(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs);
         mContext = context;
         mNumberFormatter = NumberFormat.getInstance();
-        mLocale = Locale.getDefault();
 
         final TypedArray attributes = context.obtainStyledAttributes(attrs,
-                R.styleable.SystemNumberPicker, defStyle, 0);
+                R.styleable.NumberPicker, defStyle, 0);
 
         final Drawable selectionDivider = attributes.getDrawable(
-                R.styleable.SystemNumberPicker_np_divider);
+                R.styleable.NumberPicker_nps_divider);
         if (selectionDivider != null) {
             selectionDivider.setCallback(this);
             if (selectionDivider.isStateful()) {
@@ -736,7 +744,7 @@ public class SystemNumberPicker extends LinearLayout {
             }
             mDividerDrawable = selectionDivider;
         } else {
-            mDividerColor = attributes.getColor(R.styleable.SystemNumberPicker_np_dividerColor,
+            mDividerColor = attributes.getColor(R.styleable.NumberPicker_nps_dividerColor,
                     mDividerColor);
             setDividerColor(mDividerColor);
         }
@@ -747,64 +755,72 @@ public class SystemNumberPicker extends LinearLayout {
         final int defDividerThickness = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 UNSCALED_DEFAULT_DIVIDER_THICKNESS, displayMetrics);
         mDividerDistance = attributes.getDimensionPixelSize(
-                R.styleable.SystemNumberPicker_np_dividerDistance, defDividerDistance);
+                R.styleable.NumberPicker_nps_dividerDistance, defDividerDistance);
+        mDividerLength = attributes.getDimensionPixelSize(
+                R.styleable.NumberPicker_nps_dividerLength, 0);
         mDividerThickness = attributes.getDimensionPixelSize(
-                R.styleable.SystemNumberPicker_np_dividerThickness, defDividerThickness);
+                R.styleable.NumberPicker_nps_dividerThickness, defDividerThickness);
+        mDividerType = attributes.getInt(R.styleable.NumberPicker_nps_dividerType, SIDE_LINES);
 
-        mOrder = attributes.getInt(R.styleable.SystemNumberPicker_np_order, ASCENDING);
-        mOrientation = attributes.getInt(R.styleable.SystemNumberPicker_np_orientation, VERTICAL);
+        mOrder = attributes.getInt(R.styleable.NumberPicker_nps_order, ASCENDING);
+        mOrientation = attributes.getInt(R.styleable.NumberPicker_nps_orientation, VERTICAL);
 
-        mWidth = attributes.getDimensionPixelSize(R.styleable.SystemNumberPicker_np_width,
+        final float width = attributes.getDimensionPixelSize(R.styleable.NumberPicker_nps_width,
                 SIZE_UNSPECIFIED);
-        mHeight = attributes.getDimensionPixelSize(R.styleable.SystemNumberPicker_np_height,
+        final float height = attributes.getDimensionPixelSize(R.styleable.NumberPicker_nps_height,
                 SIZE_UNSPECIFIED);
 
         setWidthAndHeight();
 
         mComputeMaxWidth = true;
 
-        mValue = attributes.getInt(R.styleable.SystemNumberPicker_np_value, mValue);
-        mMaxValue = attributes.getInt(R.styleable.SystemNumberPicker_np_max, mMaxValue);
-        mMinValue = attributes.getInt(R.styleable.SystemNumberPicker_np_min, mMinValue);
+        mValue = attributes.getInt(R.styleable.NumberPicker_nps_value, mValue);
+        mMaxValue = attributes.getInt(R.styleable.NumberPicker_nps_max, mMaxValue);
+        mMinValue = attributes.getInt(R.styleable.NumberPicker_nps_min, mMinValue);
 
-        mSelectedTextAlign = attributes.getInt(R.styleable.SystemNumberPicker_np_selectedTextAlign,
+        mSelectedTextAlign = attributes.getInt(R.styleable.NumberPicker_nps_selectedTextAlign,
                 mSelectedTextAlign);
-        mSelectedTextColor = attributes.getColor(R.styleable.SystemNumberPicker_np_selectedTextColor,
+        mSelectedTextColor = attributes.getColor(R.styleable.NumberPicker_nps_selectedTextColor,
                 mSelectedTextColor);
-        mSelectedTextSize = attributes.getDimension(R.styleable.SystemNumberPicker_np_selectedTextSize,
+        mSelectedTextSize = attributes.getDimension(R.styleable.NumberPicker_nps_selectedTextSize,
                 spToPx(mSelectedTextSize));
         mSelectedTextStrikeThru = attributes.getBoolean(
-                R.styleable.SystemNumberPicker_np_selectedTextStrikeThru, mSelectedTextStrikeThru);
+                R.styleable.NumberPicker_nps_selectedTextStrikeThru, mSelectedTextStrikeThru);
         mSelectedTextUnderline = attributes.getBoolean(
-                R.styleable.SystemNumberPicker_np_selectedTextUnderline, mSelectedTextUnderline);
-        mTextAlign = attributes.getInt(R.styleable.SystemNumberPicker_np_textAlign, mTextAlign);
-        mTextColor = attributes.getColor(R.styleable.SystemNumberPicker_np_textColor, mTextColor);
-        mTextSize = attributes.getDimension(R.styleable.SystemNumberPicker_np_textSize,
+                R.styleable.NumberPicker_nps_selectedTextUnderline, mSelectedTextUnderline);
+        mSelectedTypeface = Typeface.create(attributes.getString(
+                R.styleable.NumberPicker_nps_selectedTypeface), Typeface.NORMAL);
+        mTextAlign = attributes.getInt(R.styleable.NumberPicker_nps_textAlign, mTextAlign);
+        mTextColor = attributes.getColor(R.styleable.NumberPicker_nps_textColor, mTextColor);
+        mTextSize = attributes.getDimension(R.styleable.NumberPicker_nps_textSize,
                 spToPx(mTextSize));
         mTextStrikeThru = attributes.getBoolean(
-                R.styleable.SystemNumberPicker_np_textStrikeThru, mTextStrikeThru);
+                R.styleable.NumberPicker_nps_textStrikeThru, mTextStrikeThru);
         mTextUnderline = attributes.getBoolean(
-                R.styleable.SystemNumberPicker_np_textUnderline, mTextUnderline);
-        mTypeface = Typeface.create(attributes.getString(R.styleable.SystemNumberPicker_np_typeface),
+                R.styleable.NumberPicker_nps_textUnderline, mTextUnderline);
+        mTypeface = Typeface.create(attributes.getString(R.styleable.NumberPicker_nps_typeface),
                 Typeface.NORMAL);
-        mFormatter = stringToFormatter(attributes.getString(R.styleable.SystemNumberPicker_np_formatter));
-        mFadingEdgeEnabled = attributes.getBoolean(R.styleable.SystemNumberPicker_np_fadingEdgeEnabled,
+        mFormatter = stringToFormatter(attributes.getString(R.styleable.NumberPicker_nps_formatter));
+        mFadingEdgeEnabled = attributes.getBoolean(R.styleable.NumberPicker_nps_fadingEdgeEnabled,
                 mFadingEdgeEnabled);
-        mFadingEdgeStrength = attributes.getFloat(R.styleable.SystemNumberPicker_np_fadingEdgeStrength,
+        mFadingEdgeStrength = attributes.getFloat(R.styleable.NumberPicker_nps_fadingEdgeStrength,
                 mFadingEdgeStrength);
-        mScrollerEnabled = attributes.getBoolean(R.styleable.SystemNumberPicker_np_scrollerEnabled,
+        mScrollerEnabled = attributes.getBoolean(R.styleable.NumberPicker_nps_scrollerEnabled,
                 mScrollerEnabled);
-        mWheelItemCount = attributes.getInt(R.styleable.SystemNumberPicker_np_wheelItemCount,
+        mWheelItemCount = attributes.getInt(R.styleable.NumberPicker_nps_wheelItemCount,
                 mWheelItemCount);
         mLineSpacingMultiplier = attributes.getFloat(
-                R.styleable.SystemNumberPicker_np_lineSpacingMultiplier, mLineSpacingMultiplier);
+                R.styleable.NumberPicker_nps_lineSpacingMultiplier, mLineSpacingMultiplier);
         mMaxFlingVelocityCoefficient = attributes.getInt(
-                R.styleable.SystemNumberPicker_np_maxFlingVelocityCoefficient,
+                R.styleable.NumberPicker_nps_maxFlingVelocityCoefficient,
                 mMaxFlingVelocityCoefficient);
         mHideWheelUntilFocused = attributes.getBoolean(
-                R.styleable.SystemNumberPicker_np_hideWheelUntilFocused, false);
-
-        // By default Linearlayout that we extend is not drawn. This is
+                R.styleable.NumberPicker_nps_hideWheelUntilFocused, false);
+        mAccessibilityDescriptionEnabled = attributes.getBoolean(
+                R.styleable.NumberPicker_nps_accessibilityDescriptionEnabled, true);
+        mItemSpacing = attributes.getDimensionPixelSize(
+                R.styleable.NumberPicker_nps_itemSpacing, 0);
+        // By default LinearLayout that we extend is not drawn. This is
         // its draw() method is not called but dispatchDraw() is called
         // directly (see ViewGroup.drawChild()). However, this class uses
         // the fading edge effect implemented by View and we need our
@@ -832,6 +848,7 @@ public class SystemNumberPicker extends LinearLayout {
         setTextSize(mTextSize);
         setSelectedTextSize(mSelectedTextSize);
         setTypeface(mTypeface);
+        setSelectedTypeface(mSelectedTypeface);
         setFormatter(mFormatter);
         updateInputTextView();
 
@@ -841,19 +858,21 @@ public class SystemNumberPicker extends LinearLayout {
 
         setWheelItemCount(mWheelItemCount);
 
-        mWrapSelectorWheel = attributes.getBoolean(R.styleable.SystemNumberPicker_np_wrapSelectorWheel,
+        mWrapSelectorWheel = attributes.getBoolean(R.styleable.NumberPicker_nps_wrapSelectorWheel,
                 mWrapSelectorWheel);
         setWrapSelectorWheel(mWrapSelectorWheel);
 
-        if (mWidth != SIZE_UNSPECIFIED && mHeight != SIZE_UNSPECIFIED) {
-            setScaleX(mWidth / mMinWidth);
-            setScaleY(mHeight / mMaxHeight);
-        } else if (mWidth != SIZE_UNSPECIFIED) {
-            setScaleX(mWidth / mMinWidth);
-            setScaleY(mWidth / mMinWidth);
-        } else if (mHeight != SIZE_UNSPECIFIED) {
-            setScaleX(mHeight / mMaxHeight);
-            setScaleY(mHeight / mMaxHeight);
+        if (width != SIZE_UNSPECIFIED && height != SIZE_UNSPECIFIED) {
+            setScaleX(width / mMinWidth);
+            setScaleY(height / mMaxHeight);
+        } else if (width != SIZE_UNSPECIFIED) {
+            final float scale = width / mMinWidth;
+            setScaleX(scale);
+            setScaleY(scale);
+        } else if (height != SIZE_UNSPECIFIED) {
+            final float scale = height / mMaxHeight;
+            setScaleX(scale);
+            setScaleY(scale);
         }
 
         // initialize constants
@@ -898,8 +917,8 @@ public class SystemNumberPicker extends LinearLayout {
         final int inptTxtRight = inptTxtLeft + inptTxtMsrdWdth;
         final int inptTxtBottom = inptTxtTop + inptTxtMsrdHght;
         mSelectedText.layout(inptTxtLeft, inptTxtTop, inptTxtRight, inptTxtBottom);
-        mSelectedTextCenterX = mSelectedText.getX() + mSelectedText.getMeasuredWidth() / 2;
-        mSelectedTextCenterY = mSelectedText.getY() + mSelectedText.getMeasuredHeight() / 2;
+        mSelectedTextCenterX = mSelectedText.getX() + mSelectedText.getMeasuredWidth() / 2f - 2f;
+        mSelectedTextCenterY = mSelectedText.getY() + mSelectedText.getMeasuredHeight() / 2f - 5f;
 
         if (changed) {
             // need to do all this when we know our size
@@ -910,6 +929,7 @@ public class SystemNumberPicker extends LinearLayout {
             if (isHorizontalMode()) {
                 mLeftDividerLeft = (getWidth() - mDividerDistance) / 2 - mDividerThickness;
                 mRightDividerRight = mLeftDividerLeft + dividerDistance;
+                mBottomDividerBottom = getHeight();
             } else {
                 mTopDividerTop = (getHeight() - mDividerDistance) / 2 - mDividerThickness;
                 mBottomDividerBottom = mTopDividerTop + dividerDistance;
@@ -984,55 +1004,56 @@ public class SystemNumberPicker extends LinearLayout {
         }
 
         final int action = event.getAction() & MotionEvent.ACTION_MASK;
-        switch (action) {
-            case MotionEvent.ACTION_DOWN: {
-                removeAllCallbacks();
-                // Make sure we support flinging inside scrollables.
-                getParent().requestDisallowInterceptTouchEvent(true);
+        if (action != MotionEvent.ACTION_DOWN) {
+            return false;
+        }
 
-                if (isHorizontalMode()) {
-                    mLastDownOrMoveEventX = mLastDownEventX = event.getX();
-                    if (!mFlingScroller.isFinished()) {
-                        mFlingScroller.forceFinished(true);
-                        mAdjustScroller.forceFinished(true);
-                        onScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
-                    } else if (!mAdjustScroller.isFinished()) {
-                        mFlingScroller.forceFinished(true);
-                        mAdjustScroller.forceFinished(true);
-                    } else if (mLastDownEventX >= mLeftDividerLeft
-                            && mLastDownEventX <= mRightDividerRight) {
-                        if (mOnClickListener != null) {
-                            mOnClickListener.onClick(this);
-                        }
-                    } else if (mLastDownEventX < mLeftDividerLeft) {
-                        postChangeCurrentByOneFromLongPress(false);
-                    } else if (mLastDownEventX > mRightDividerRight) {
-                        postChangeCurrentByOneFromLongPress(true);
-                    }
-                } else {
-                    mLastDownOrMoveEventY = mLastDownEventY = event.getY();
-                    if (!mFlingScroller.isFinished()) {
-                        mFlingScroller.forceFinished(true);
-                        mAdjustScroller.forceFinished(true);
-                        onScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
-                    } else if (!mAdjustScroller.isFinished()) {
-                        mFlingScroller.forceFinished(true);
-                        mAdjustScroller.forceFinished(true);
-                    } else if (mLastDownEventY >= mTopDividerTop
-                            && mLastDownEventY <= mBottomDividerBottom) {
-                        if (mOnClickListener != null) {
-                            mOnClickListener.onClick(this);
-                        }
-                    } else if (mLastDownEventY < mTopDividerTop) {
-                        postChangeCurrentByOneFromLongPress(false);
-                    } else if (mLastDownEventY > mBottomDividerBottom) {
-                        postChangeCurrentByOneFromLongPress(true);
-                    }
+        removeAllCallbacks();
+        // Make sure we support flinging inside scrollables.
+        getParent().requestDisallowInterceptTouchEvent(true);
+
+        if (isHorizontalMode()) {
+            mLastDownOrMoveEventX = mLastDownEventX = event.getX();
+            if (!mFlingScroller.isFinished()) {
+                mFlingScroller.forceFinished(true);
+                mAdjustScroller.forceFinished(true);
+                onScrollerFinished(mFlingScroller);
+                onScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
+            } else if (!mAdjustScroller.isFinished()) {
+                mFlingScroller.forceFinished(true);
+                mAdjustScroller.forceFinished(true);
+                onScrollerFinished(mAdjustScroller);
+            } else if (mLastDownEventX >= mLeftDividerLeft
+                    && mLastDownEventX <= mRightDividerRight) {
+                if (mOnClickListener != null) {
+                    mOnClickListener.onClick(this);
                 }
-                return true;
+            } else if (mLastDownEventX < mLeftDividerLeft) {
+                postChangeCurrentByOneFromLongPress(false);
+            } else if (mLastDownEventX > mRightDividerRight) {
+                postChangeCurrentByOneFromLongPress(true);
+            }
+        } else {
+            mLastDownOrMoveEventY = mLastDownEventY = event.getY();
+            if (!mFlingScroller.isFinished()) {
+                mFlingScroller.forceFinished(true);
+                mAdjustScroller.forceFinished(true);
+                onScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
+            } else if (!mAdjustScroller.isFinished()) {
+                mFlingScroller.forceFinished(true);
+                mAdjustScroller.forceFinished(true);
+            } else if (mLastDownEventY >= mTopDividerTop
+                    && mLastDownEventY <= mBottomDividerBottom) {
+                if (mOnClickListener != null) {
+                    mOnClickListener.onClick(this);
+                }
+            } else if (mLastDownEventY < mTopDividerTop) {
+                postChangeCurrentByOneFromLongPress(false);
+            } else if (mLastDownEventY > mBottomDividerBottom) {
+                postChangeCurrentByOneFromLongPress(true);
             }
         }
-        return false;
+        return true;
     }
 
     @Override
@@ -1247,61 +1268,59 @@ public class SystemNumberPicker extends LinearLayout {
         }
         int[] selectorIndices = getSelectorIndices();
         int startScrollOffset = mCurrentScrollOffset;
-        int gap;
+        int gap = (int) getMaxTextSize();
         if (isHorizontalMode()) {
             if (isAscendingOrder()) {
                 if (!mWrapSelectorWheel && x > 0
-                    && selectorIndices[mWheelMiddleItemIndex] <= mMinValue) {
+                        && selectorIndices[mWheelMiddleItemIndex] <= mMinValue) {
                     mCurrentScrollOffset = mInitialScrollOffset;
                     return;
                 }
                 if (!mWrapSelectorWheel && x < 0
-                    && selectorIndices[mWheelMiddleItemIndex] >= mMaxValue) {
+                        && selectorIndices[mWheelMiddleItemIndex] >= mMaxValue) {
                     mCurrentScrollOffset = mInitialScrollOffset;
                     return;
                 }
             } else {
                 if (!mWrapSelectorWheel && x > 0
-                    && selectorIndices[mWheelMiddleItemIndex] >= mMaxValue) {
+                        && selectorIndices[mWheelMiddleItemIndex] >= mMaxValue) {
                     mCurrentScrollOffset = mInitialScrollOffset;
                     return;
                 }
                 if (!mWrapSelectorWheel && x < 0
-                    && selectorIndices[mWheelMiddleItemIndex] <= mMinValue) {
+                        && selectorIndices[mWheelMiddleItemIndex] <= mMinValue) {
                     mCurrentScrollOffset = mInitialScrollOffset;
                     return;
                 }
             }
 
             mCurrentScrollOffset += x;
-            gap = mSelectorTextGapWidth;
         } else {
             if (isAscendingOrder()) {
                 if (!mWrapSelectorWheel && y > 0
-                    && selectorIndices[mWheelMiddleItemIndex] <= mMinValue) {
+                        && selectorIndices[mWheelMiddleItemIndex] <= mMinValue) {
                     mCurrentScrollOffset = mInitialScrollOffset;
                     return;
                 }
                 if (!mWrapSelectorWheel && y < 0
-                    && selectorIndices[mWheelMiddleItemIndex] >= mMaxValue) {
+                        && selectorIndices[mWheelMiddleItemIndex] >= mMaxValue) {
                     mCurrentScrollOffset = mInitialScrollOffset;
                     return;
                 }
             } else {
                 if (!mWrapSelectorWheel && y > 0
-                    && selectorIndices[mWheelMiddleItemIndex] >= mMaxValue) {
+                        && selectorIndices[mWheelMiddleItemIndex] >= mMaxValue) {
                     mCurrentScrollOffset = mInitialScrollOffset;
                     return;
                 }
                 if (!mWrapSelectorWheel && y < 0
-                    && selectorIndices[mWheelMiddleItemIndex] <= mMinValue) {
+                        && selectorIndices[mWheelMiddleItemIndex] <= mMinValue) {
                     mCurrentScrollOffset = mInitialScrollOffset;
                     return;
                 }
             }
 
             mCurrentScrollOffset += y;
-            gap = mSelectorTextGapHeight;
         }
 
         while (mCurrentScrollOffset - mInitialScrollOffset > gap) {
@@ -1387,18 +1406,6 @@ public class SystemNumberPicker extends LinearLayout {
     }
 
     /**
-     * Set locale other than default locale
-     */
-    public void setLocale(Locale locale) {
-        if (mLocale != null && mLocale.equals(locale)) {
-            return;
-        }
-        this.mLocale = locale;
-        sTwoDigitFormatter.setLocale(mLocale);
-        invalidate();
-    }
-
-    /**
      * Set listener to be notified on click of the current value.
      *
      * @param onClickListener The listener.
@@ -1433,8 +1440,8 @@ public class SystemNumberPicker extends LinearLayout {
      * </p>
      *
      * @param formatter The formatter object. If formatter is <code>null</code>,
-     *            {@link String#valueOf(int)} will be used.
-     *@see #setDisplayedValues(String[])
+     *                  {@link String#valueOf(int)} will be used.
+     * @see #setDisplayedValues(String[])
      */
     public void setFormatter(Formatter formatter) {
         if (formatter == mFormatter) {
@@ -1448,24 +1455,24 @@ public class SystemNumberPicker extends LinearLayout {
     /**
      * Set the current value for the number picker.
      * <p>
-     * If the argument is less than the {@link SystemNumberPicker#getMinValue()} and
-     * {@link SystemNumberPicker#getWrapSelectorWheel()} is <code>false</code> the
-     * current value is set to the {@link SystemNumberPicker#getMinValue()} value.
+     * If the argument is less than the {@link TunerNumberPicker#getMinValue()} and
+     * {@link TunerNumberPicker#getWrapSelectorWheel()} is <code>false</code> the
+     * current value is set to the {@link TunerNumberPicker#getMinValue()} value.
      * </p>
      * <p>
-     * If the argument is less than the {@link SystemNumberPicker#getMinValue()} and
-     * {@link SystemNumberPicker#getWrapSelectorWheel()} is <code>true</code> the
-     * current value is set to the {@link SystemNumberPicker#getMaxValue()} value.
+     * If the argument is less than the {@link TunerNumberPicker#getMinValue()} and
+     * {@link TunerNumberPicker#getWrapSelectorWheel()} is <code>true</code> the
+     * current value is set to the {@link TunerNumberPicker#getMaxValue()} value.
      * </p>
      * <p>
-     * If the argument is less than the {@link SystemNumberPicker#getMaxValue()} and
-     * {@link SystemNumberPicker#getWrapSelectorWheel()} is <code>false</code> the
-     * current value is set to the {@link SystemNumberPicker#getMaxValue()} value.
+     * If the argument is less than the {@link TunerNumberPicker#getMaxValue()} and
+     * {@link TunerNumberPicker#getWrapSelectorWheel()} is <code>false</code> the
+     * current value is set to the {@link TunerNumberPicker#getMaxValue()} value.
      * </p>
      * <p>
-     * If the argument is less than the {@link SystemNumberPicker#getMaxValue()} and
-     * {@link SystemNumberPicker#getWrapSelectorWheel()} is <code>true</code> the
-     * current value is set to the {@link SystemNumberPicker#getMinValue()} value.
+     * If the argument is less than the {@link TunerNumberPicker#getMaxValue()} and
+     * {@link TunerNumberPicker#getWrapSelectorWheel()} is <code>true</code> the
+     * current value is set to the {@link TunerNumberPicker#getMinValue()} value.
      * </p>
      *
      * @param value The current value.
@@ -1513,9 +1520,8 @@ public class SystemNumberPicker extends LinearLayout {
             }
             maxTextWidth = (int) (numberOfDigits * maxDigitWidth);
         } else {
-            final int valueCount = mDisplayedValues.length;
-            for (int i = 0; i < valueCount; i++) {
-                final float textWidth = mSelectorWheelPaint.measureText(mDisplayedValues[i]);
+            for (String displayedValue : mDisplayedValues) {
+                final float textWidth = mSelectorWheelPaint.measureText(displayedValue);
                 if (textWidth > maxTextWidth) {
                     maxTextWidth = (int) textWidth;
                 }
@@ -1523,11 +1529,7 @@ public class SystemNumberPicker extends LinearLayout {
         }
         maxTextWidth += mSelectedText.getPaddingLeft() + mSelectedText.getPaddingRight();
         if (mMaxWidth != maxTextWidth) {
-            if (maxTextWidth > mMinWidth) {
-                mMaxWidth = maxTextWidth;
-            } else {
-                mMaxWidth = mMinWidth;
-            }
+            mMaxWidth = Math.max(maxTextWidth, mMinWidth);
             invalidate();
         }
     }
@@ -1536,7 +1538,6 @@ public class SystemNumberPicker extends LinearLayout {
      * Gets whether the selector wheel wraps when reaching the min/max value.
      *
      * @return True if the selector wheel wraps.
-     *
      * @see #getMinValue()
      * @see #getMaxValue()
      */
@@ -1546,8 +1547,8 @@ public class SystemNumberPicker extends LinearLayout {
 
     /**
      * Sets whether the selector wheel shown during flinging/scrolling should
-     * wrap around the {@link SystemNumberPicker#getMinValue()} and
-     * {@link SystemNumberPicker#getMaxValue()} values.
+     * wrap around the {@link TunerNumberPicker#getMinValue()} and
+     * {@link TunerNumberPicker#getMaxValue()} values.
      * <p>
      * By default if the range (max - min) is more than the number of items shown
      * on the selector wheel the selector wheel wrapping is enabled.
@@ -1589,7 +1590,7 @@ public class SystemNumberPicker extends LinearLayout {
      * </p>
      *
      * @param intervalMillis The speed (in milliseconds) at which the numbers
-     *            will be incremented and decremented.
+     *                       will be incremented and decremented.
      */
     public void setOnLongPressUpdateInterval(long intervalMillis) {
         mLongPressUpdateInterval = intervalMillis;
@@ -1618,10 +1619,10 @@ public class SystemNumberPicker extends LinearLayout {
      *
      * @param minValue The min value inclusive.
      *
-     * <strong>Note:</strong> The length of the displayed values array
-     * set via {@link #setDisplayedValues(String[])} must be equal to the
-     * range of selectable numbers which is equal to
-     * {@link #getMaxValue()} - {@link #getMinValue()} + 1.
+     *                 <strong>Note:</strong> The length of the displayed values array
+     *                 set via {@link #setDisplayedValues(String[])} must be equal to the
+     *                 range of selectable numbers which is equal to
+     *                 {@link #getMaxValue()} - {@link #getMinValue()} + 1.
      */
     public void setMinValue(int minValue) {
 //        if (minValue < 0) {
@@ -1631,7 +1632,8 @@ public class SystemNumberPicker extends LinearLayout {
         if (mMinValue > mValue) {
             mValue = mMinValue;
         }
-        setWrapSelectorWheel(isWrappingAllowed());
+
+        updateWrapSelectorWheel();
         initializeSelectorWheelIndices();
         updateInputTextView();
         tryComputeMaxWidth();
@@ -1652,15 +1654,15 @@ public class SystemNumberPicker extends LinearLayout {
      *
      * @param maxValue The max value inclusive.
      *
-     * <strong>Note:</strong> The length of the displayed values array
-     * set via {@link #setDisplayedValues(String[])} must be equal to the
-     * range of selectable numbers which is equal to
-     * {@link #getMaxValue()} - {@link #getMinValue()} + 1.
+     *                 <strong>Note:</strong> The length of the displayed values array
+     *                 set via {@link #setDisplayedValues(String[])} must be equal to the
+     *                 range of selectable numbers which is equal to
+     *                 {@link #getMaxValue()} - {@link #getMinValue()} + 1.
      */
     public void setMaxValue(int maxValue) {
-        if (maxValue < 0) {
+       /* if (maxValue < 0) {
             throw new IllegalArgumentException("maxValue must be >= 0");
-        }
+        }*/
         mMaxValue = maxValue;
         if (mMaxValue < mValue) {
             mValue = mMaxValue;
@@ -1687,9 +1689,9 @@ public class SystemNumberPicker extends LinearLayout {
      *
      * @param displayedValues The displayed values.
      *
-     * <strong>Note:</strong> The length of the displayed values array
-     * must be equal to the range of selectable numbers which is equal to
-     * {@link #getMaxValue()} - {@link #getMinValue()} + 1.
+     *                        <strong>Note:</strong> The length of the displayed values array
+     *                        must be equal to the range of selectable numbers which is equal to
+     *                        {@link #getMaxValue()} - {@link #getMinValue()} + 1.
      */
     public void setDisplayedValues(String[] displayedValues) {
         if (mDisplayedValues == displayedValues) {
@@ -1742,10 +1744,9 @@ public class SystemNumberPicker extends LinearLayout {
     @Override
     protected void drawableStateChanged() {
         super.drawableStateChanged();
-        final Drawable selectionDivider = mDividerDrawable;
-        if (selectionDivider != null && selectionDivider.isStateful()
-                && selectionDivider.setState(getDrawableState())) {
-            invalidateDrawable(selectionDivider);
+        if (mDividerDrawable != null && mDividerDrawable.isStateful()
+                && mDividerDrawable.setState(getDrawableState())) {
+            invalidateDrawable(mDividerDrawable);
         }
     }
 
@@ -1763,7 +1764,7 @@ public class SystemNumberPicker extends LinearLayout {
         // save canvas
         canvas.save();
 
-        final boolean showSelectorWheel = mHideWheelUntilFocused ? hasFocus() : true;
+        final boolean showSelectorWheel = !mHideWheelUntilFocused || hasFocus();
         float x, y;
         if (isHorizontalMode()) {
             x = mCurrentScrollOffset;
@@ -1772,7 +1773,7 @@ public class SystemNumberPicker extends LinearLayout {
                 canvas.clipRect(mLeftDividerLeft, 0, mRightDividerRight, getBottom());
             }
         } else {
-            x = (getRight() - getLeft()) / 2;
+            x = (getRight() - getLeft()) / 2f;
             y = mCurrentScrollOffset;
             if (mRealWheelItemCount < DEFAULT_WHEEL_ITEM_COUNT) {
                 canvas.clipRect(0, mTopDividerTop, getRight(), mBottomDividerBottom);
@@ -1788,19 +1789,22 @@ public class SystemNumberPicker extends LinearLayout {
                 mSelectorWheelPaint.setColor(mSelectedTextColor);
                 mSelectorWheelPaint.setStrikeThruText(mSelectedTextStrikeThru);
                 mSelectorWheelPaint.setUnderlineText(mSelectedTextUnderline);
-                mSelectorWheelPaint.setFakeBoldText(true);
+                mSelectorWheelPaint.setTypeface(mSelectedTypeface);
             } else {
                 mSelectorWheelPaint.setTextAlign(Paint.Align.values()[mTextAlign]);
                 mSelectorWheelPaint.setTextSize(mTextSize);
                 mSelectorWheelPaint.setColor(mTextColor);
                 mSelectorWheelPaint.setStrikeThruText(mTextStrikeThru);
                 mSelectorWheelPaint.setUnderlineText(mTextUnderline);
-                mSelectorWheelPaint.setFakeBoldText(false);
+                mSelectorWheelPaint.setTypeface(mTypeface);
             }
 
             int selectorIndex = selectorIndices[isAscendingOrder()
                     ? i : selectorIndices.length - i - 1];
             String scrollSelectorValue = mSelectorIndexToStringCache.get(selectorIndex);
+            if (scrollSelectorValue == null) {
+                continue;
+            }
             // Do not draw the middle item if input is visible since the input
             // is shown only if the wheel is static and it covers the middle
             // item. Otherwise, if the user starts editing the text via the
@@ -1812,7 +1816,27 @@ public class SystemNumberPicker extends LinearLayout {
                 if (!isHorizontalMode()) {
                     textY += getPaintCenterY(mSelectorWheelPaint.getFontMetrics());
                 }
-                drawText(scrollSelectorValue, x, textY, mSelectorWheelPaint, canvas);
+
+                int xOffset = 0;
+                int yOffset = 0;
+
+                if (i != mWheelMiddleItemIndex && mItemSpacing != 0) {
+                    if (isHorizontalMode()) {
+                        if (i > mWheelMiddleItemIndex) {
+                            xOffset = mItemSpacing;
+                        } else {
+                            xOffset = -mItemSpacing;
+                        }
+                    } else {
+                        if (i > mWheelMiddleItemIndex) {
+                            yOffset = mItemSpacing;
+                        } else {
+                            yOffset = -mItemSpacing;
+                        }
+                    }
+                }
+
+                drawText(scrollSelectorValue, x + xOffset, textY + yOffset, mSelectorWheelPaint, canvas);
             }
 
             if (isHorizontalMode()) {
@@ -1827,35 +1851,97 @@ public class SystemNumberPicker extends LinearLayout {
 
         // draw the dividers
         if (showSelectorWheel && mDividerDrawable != null) {
-            if (isHorizontalMode()) {
-                final int bottom = getBottom();
+            if (isHorizontalMode())
+                drawHorizontalDividers(canvas);
+            else
+                drawVerticalDividers(canvas);
+        }
+    }
 
+    private void drawHorizontalDividers(Canvas canvas) {
+        switch (mDividerType) {
+            case SIDE_LINES:
+                final int top;
+                final int bottom;
+                if (mDividerLength > 0 && mDividerLength <= mMaxHeight) {
+                    top = (mMaxHeight - mDividerLength) / 2;
+                    bottom = top + mDividerLength;
+                } else {
+                    top = 0;
+                    bottom = getBottom();
+                }
                 // draw the left divider
                 final int leftOfLeftDivider = mLeftDividerLeft;
                 final int rightOfLeftDivider = leftOfLeftDivider + mDividerThickness;
-                mDividerDrawable.setBounds(leftOfLeftDivider, 0, rightOfLeftDivider, bottom);
+                mDividerDrawable.setBounds(leftOfLeftDivider, top, rightOfLeftDivider, bottom);
                 mDividerDrawable.draw(canvas);
-
                 // draw the right divider
                 final int rightOfRightDivider = mRightDividerRight;
                 final int leftOfRightDivider = rightOfRightDivider - mDividerThickness;
-                mDividerDrawable.setBounds(leftOfRightDivider, 0, rightOfRightDivider, bottom);
+                mDividerDrawable.setBounds(leftOfRightDivider, top, rightOfRightDivider, bottom);
                 mDividerDrawable.draw(canvas);
-            } else {
-                final int right = getRight();
+                break;
+            case UNDERLINE:
+                final int left;
+                final int right;
+                if (mDividerLength > 0 && mDividerLength <= mMaxWidth) {
+                    left = (mMaxWidth - mDividerLength) / 2;
+                    right = left + mDividerLength;
+                } else {
+                    left = mLeftDividerLeft;
+                    right = mRightDividerRight;
+                }
+                final int bottomOfUnderlineDivider = mBottomDividerBottom;
+                final int topOfUnderlineDivider = bottomOfUnderlineDivider - mDividerThickness;
+                mDividerDrawable.setBounds(
+                        left,
+                        topOfUnderlineDivider,
+                        right,
+                        bottomOfUnderlineDivider
+                );
+                mDividerDrawable.draw(canvas);
+                break;
+        }
+    }
 
+    private void drawVerticalDividers(Canvas canvas) {
+        final int left;
+        final int right;
+        if (mDividerLength > 0 && mDividerLength <= mMaxWidth) {
+            left = (mMaxWidth - mDividerLength) / 2;
+            right = left + mDividerLength;
+        } else {
+            left = 0;
+            right = getRight();
+        }
+        switch (mDividerType) {
+            case SIDE_LINES:
                 // draw the top divider
                 final int topOfTopDivider = mTopDividerTop;
                 final int bottomOfTopDivider = topOfTopDivider + mDividerThickness;
-                mDividerDrawable.setBounds(0, topOfTopDivider, right, bottomOfTopDivider);
+                mDividerDrawable.setBounds(left, topOfTopDivider, right, bottomOfTopDivider);
                 mDividerDrawable.draw(canvas);
-
                 // draw the bottom divider
                 final int bottomOfBottomDivider = mBottomDividerBottom;
                 final int topOfBottomDivider = bottomOfBottomDivider - mDividerThickness;
-                mDividerDrawable.setBounds(0, topOfBottomDivider, right, bottomOfBottomDivider);
+                mDividerDrawable.setBounds(
+                        left,
+                        topOfBottomDivider,
+                        right,
+                        bottomOfBottomDivider);
                 mDividerDrawable.draw(canvas);
-            }
+                break;
+            case UNDERLINE:
+                final int bottomOfUnderlineDivider = mBottomDividerBottom;
+                final int topOfUnderlineDivider = bottomOfUnderlineDivider - mDividerThickness;
+                mDividerDrawable.setBounds(
+                        left,
+                        topOfUnderlineDivider,
+                        right,
+                        bottomOfUnderlineDivider
+                );
+                mDividerDrawable.draw(canvas);
+                break;
         }
     }
 
@@ -1878,7 +1964,7 @@ public class SystemNumberPicker extends LinearLayout {
     @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
-        event.setClassName(SystemNumberPicker.class.getName());
+        event.setClassName(TunerNumberPicker.class.getName());
         event.setScrollable(isScrollerEnabled());
         final int scroll = (mMinValue + mValue) * mSelectorElementSize;
         final int maxScroll = (mMaxValue - mMinValue) * mSelectorElementSize;
@@ -1895,7 +1981,7 @@ public class SystemNumberPicker extends LinearLayout {
      * Makes a measure spec that tries greedily to use the max value.
      *
      * @param measureSpec The measure spec.
-     * @param maxSize The max value for the size.
+     * @param maxSize     The max value for the size.
      * @return A measure spec greedily imposing the max size.
      */
     private int makeMeasureSpec(int measureSpec, int maxSize) {
@@ -1921,9 +2007,9 @@ public class SystemNumberPicker extends LinearLayout {
      * by a MeasureSpec. Tries to respect the min size, unless a different size
      * is imposed by the constraints.
      *
-     * @param minSize The minimal desired size.
+     * @param minSize      The minimal desired size.
      * @param measuredSize The currently measured size.
-     * @param measureSpec The current measure spec.
+     * @param measureSpec  The current measure spec.
      * @return The resolved size and state.
      */
     private int resolveSizeAndStateRespectingMinSize(int minSize, int measuredSize,
@@ -1944,7 +2030,7 @@ public class SystemNumberPicker extends LinearLayout {
      * optionally the bit {@link #MEASURED_STATE_TOO_SMALL} set if the resulting
      * size is smaller than the size the view wants to be.
      *
-     * @param size How big the view wants to be
+     * @param size        How big the view wants to be
      * @param measureSpec Constraints imposed by the parent
      * @return Size information bit mask as defined by
      * {@link #MEASURED_SIZE_MASK} and {@link #MEASURED_STATE_TOO_SMALL}.
@@ -1952,7 +2038,7 @@ public class SystemNumberPicker extends LinearLayout {
     public static int resolveSizeAndState(int size, int measureSpec, int childMeasuredState) {
         int result = size;
         int specMode = MeasureSpec.getMode(measureSpec);
-        int specSize =  MeasureSpec.getSize(measureSpec);
+        int specSize = MeasureSpec.getSize(measureSpec);
         switch (specMode) {
             case MeasureSpec.UNSPECIFIED:
                 result = size;
@@ -1968,7 +2054,7 @@ public class SystemNumberPicker extends LinearLayout {
                 result = specSize;
                 break;
         }
-        return result | (childMeasuredState&MEASURED_STATE_MASK);
+        return result | (childMeasuredState & MEASURED_STATE_MASK);
     }
 
     /**
@@ -1979,7 +2065,7 @@ public class SystemNumberPicker extends LinearLayout {
         mSelectorIndexToStringCache.clear();
         int[] selectorIndices = getSelectorIndices();
         int current = getValue();
-        for (int i = 0; i < mSelectorIndices.length; i++) {
+        for (int i = 0; i < selectorIndices.length; i++) {
             int selectorIndex = current + (i - mWheelMiddleItemIndex);
             if (mWrapSelectorWheel) {
                 selectorIndex = getWrappedSelectorIndex(selectorIndex);
@@ -1992,13 +2078,13 @@ public class SystemNumberPicker extends LinearLayout {
     /**
      * Sets the current value of this NumberPicker.
      *
-     * @param current The new value of the NumberPicker.
+     * @param current      The new value of the NumberPicker.
      * @param notifyChange Whether to notify if the current value changed.
      */
     private void setValueInternal(int current, boolean notifyChange) {
-        if (mValue == current) {
+        /*if (mValue == current) {
             return;
-        }
+        }*/
         // Wrap around the values if we go past the start or end
         if (mWrapSelectorWheel) {
             current = getWrappedSelectorIndex(current);
@@ -2025,6 +2111,10 @@ public class SystemNumberPicker extends LinearLayout {
      * to the currently selected value
      */
     private void updateAccessibilityDescription() {
+        if (!mAccessibilityDescriptionEnabled) {
+            return;
+        }
+
         this.setContentDescription(String.valueOf(getValue()));
     }
 
@@ -2059,23 +2149,16 @@ public class SystemNumberPicker extends LinearLayout {
      * Starts a smooth scroll
      *
      * @param increment True to increment, false to decrement.
-     * @param steps The steps to scroll.
+     * @param steps     The steps to scroll.
      */
     public void smoothScroll(boolean increment, int steps) {
+        final int diffSteps = (increment ? -mSelectorElementSize : mSelectorElementSize) * steps;
         if (isHorizontalMode()) {
             mPreviousScrollerX = 0;
-            if (increment) {
-                mFlingScroller.startScroll(0, 0, -mSelectorElementSize * steps, 0, SNAP_SCROLL_DURATION);
-            } else {
-                mFlingScroller.startScroll(0, 0, mSelectorElementSize * steps, 0, SNAP_SCROLL_DURATION);
-            }
+            mFlingScroller.startScroll(0, 0, diffSteps, 0, SNAP_SCROLL_DURATION);
         } else {
             mPreviousScrollerY = 0;
-            if (increment) {
-                mFlingScroller.startScroll(0, 0, 0, -mSelectorElementSize * steps, SNAP_SCROLL_DURATION);
-            } else {
-                mFlingScroller.startScroll(0, 0, 0, mSelectorElementSize * steps, SNAP_SCROLL_DURATION);
-            }
+            mFlingScroller.startScroll(0, 0, 0, diffSteps, SNAP_SCROLL_DURATION);
         }
         invalidate();
     }
@@ -2083,21 +2166,18 @@ public class SystemNumberPicker extends LinearLayout {
     private void initializeSelectorWheel() {
         initializeSelectorWheelIndices();
         int[] selectorIndices = getSelectorIndices();
-        int totalTextSize = (selectorIndices.length - 1) * (int) mTextSize
-                + (int) mSelectedTextSize;
+        int totalTextSize = (int) ((selectorIndices.length - 1) * mTextSize + mSelectedTextSize);
         float textGapCount = selectorIndices.length;
         if (isHorizontalMode()) {
             float totalTextGapWidth = (getRight() - getLeft()) - totalTextSize;
             mSelectorTextGapWidth = (int) (totalTextGapWidth / textGapCount);
             mSelectorElementSize = (int) getMaxTextSize() + mSelectorTextGapWidth;
-            mInitialScrollOffset = (int) mSelectedTextCenterX
-                    - (mSelectorElementSize * mWheelMiddleItemIndex);
+            mInitialScrollOffset = (int) (mSelectedTextCenterX - mSelectorElementSize * mWheelMiddleItemIndex);
         } else {
             float totalTextGapHeight = (getBottom() - getTop()) - totalTextSize;
             mSelectorTextGapHeight = (int) (totalTextGapHeight / textGapCount);
             mSelectorElementSize = (int) getMaxTextSize() + mSelectorTextGapHeight;
-            mInitialScrollOffset = (int) mSelectedTextCenterY
-                    - (mSelectorElementSize * mWheelMiddleItemIndex);
+            mInitialScrollOffset = (int) (mSelectedTextCenterY - mSelectorElementSize * mWheelMiddleItemIndex);
         }
         mCurrentScrollOffset = mInitialScrollOffset;
         updateInputTextView();
@@ -2106,8 +2186,10 @@ public class SystemNumberPicker extends LinearLayout {
     private void initializeFadingEdges() {
         if (isHorizontalMode()) {
             setHorizontalFadingEdgeEnabled(true);
+            setVerticalFadingEdgeEnabled(false);
             setFadingEdgeLength((getRight() - getLeft() - (int) mTextSize) / 2);
         } else {
+            setHorizontalFadingEdgeEnabled(false);
             setVerticalFadingEdgeEnabled(true);
             setFadingEdgeLength((getBottom() - getTop() - (int) mTextSize) / 2);
         }
@@ -2225,11 +2307,11 @@ public class SystemNumberPicker extends LinearLayout {
         } else {
             if (mDisplayedValues != null) {
                 int displayedValueIndex = selectorIndex - mMinValue;
-                if(mMinValue < 0){
-                    scrollSelectorValue = mDisplayedValues[selectorIndex];
-                }else {
-                    scrollSelectorValue = mDisplayedValues[displayedValueIndex];
+                if (displayedValueIndex >= mDisplayedValues.length) {
+                    cache.remove(selectorIndex);
+                    return;
                 }
+                scrollSelectorValue = mDisplayedValues[displayedValueIndex];
             } else {
                 scrollSelectorValue = formatNumber(selectorIndex);
             }
@@ -2246,10 +2328,8 @@ public class SystemNumberPicker extends LinearLayout {
      * the string corresponding to the index specified by the current value will
      * be returned. Otherwise, the formatter specified in {@link #setFormatter}
      * will be used to format the number.
-     *
-     * @return Whether the text was updated.
      */
-    private boolean updateInputTextView() {
+    private void updateInputTextView() {
         /*
          * If we don't have displayed values then use the current number else
          * find the correct value in the displayed values for the current
@@ -2257,17 +2337,24 @@ public class SystemNumberPicker extends LinearLayout {
          */
         Log.i("TunersUI","mDisplayedValues:"+ Arrays.toString(mDisplayedValues));
         Log.i("TunersUI","mValue:"+mValue+" mMinValue:"+mMinValue+" maxValue:"+mMaxValue);
-        String text = (mDisplayedValues == null) ? formatNumber(mValue)
-                : mDisplayedValues[mValue - mMinValue];
-        if (!TextUtils.isEmpty(text)) {
-            CharSequence beforeText = mSelectedText.getText();
-            if (!text.equals(beforeText.toString())) {
-                mSelectedText.setText(text);
-                return true;
-            }
-        }
 
-        return false;
+        try {
+            String text = (mDisplayedValues == null) ? formatNumber(mValue)
+                    : mDisplayedValues[mValue - mMinValue];
+            if (TextUtils.isEmpty(text)) {
+                return;
+            }
+
+            CharSequence beforeText = mSelectedText.getText();
+            if (text.equals(beforeText.toString())) {
+                return;
+            }
+
+            mSelectedText.setText(text);
+        } catch (Exception e) {
+            Log.i("TunersUI","NumberPickerException:"+ e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -2276,7 +2363,7 @@ public class SystemNumberPicker extends LinearLayout {
      */
     private void notifyChange(int previous, int current) {
         if (mOnValueChangeListener != null) {
-            mOnValueChangeListener.onValueChange(this, previous, mValue);
+            mOnValueChangeListener.onValueChange(this, previous, current);
         }
     }
 
@@ -2372,26 +2459,26 @@ public class SystemNumberPicker extends LinearLayout {
     /**
      * The numbers accepted by the input text's {@link Filter}
      */
-    private static final char[] DIGIT_CHARACTERS = new char[] {
-        // Latin digits are the common case
-        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-        // Arabic-Indic
-        '\u0660', '\u0661', '\u0662', '\u0663', '\u0664',
-        '\u0665', '\u0666', '\u0667', '\u0668', '\u0669',
-        // Extended Arabic-Indic
-        '\u06f0', '\u06f1', '\u06f2', '\u06f3', '\u06f4',
-        '\u06f5', '\u06f6', '\u06f7', '\u06f8', '\u06f9',
-        // Hindi and Marathi (Devanagari script)
-        '\u0966', '\u0967', '\u0968', '\u0969', '\u096a',
-        '\u096b', '\u096c', '\u096d', '\u096e', '\u096f',
-        // Bengali
-        '\u09e6', '\u09e7', '\u09e8', '\u09e9', '\u09ea',
-        '\u09eb', '\u09ec', '\u09ed', '\u09ee', '\u09ef',
-        // Kannada
-        '\u0ce6', '\u0ce7', '\u0ce8', '\u0ce9', '\u0cea',
-        '\u0ceb', '\u0cec', '\u0ced', '\u0cee', '\u0cef',
-        // Negative
-        '-'
+    private static final char[] DIGIT_CHARACTERS = new char[]{
+            // Latin digits are the common case
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            // Arabic-Indic
+            '\u0660', '\u0661', '\u0662', '\u0663', '\u0664',
+            '\u0665', '\u0666', '\u0667', '\u0668', '\u0669',
+            // Extended Arabic-Indic
+            '\u06f0', '\u06f1', '\u06f2', '\u06f3', '\u06f4',
+            '\u06f5', '\u06f6', '\u06f7', '\u06f8', '\u06f9',
+            // Hindi and Marathi (Devanagari script)
+            '\u0966', '\u0967', '\u0968', '\u0969', '\u096a',
+            '\u096b', '\u096c', '\u096d', '\u096e', '\u096f',
+            // Bengali
+            '\u09e6', '\u09e7', '\u09e8', '\u09e9', '\u09ea',
+            '\u09eb', '\u09ec', '\u09ed', '\u09ee', '\u09ef',
+            // Kannada
+            '\u0ce6', '\u0ce7', '\u0ce8', '\u0ce9', '\u0cea',
+            '\u0ceb', '\u0cec', '\u0ced', '\u0cee', '\u0cef',
+            // Negative
+            '-'
     };
 
     /**
@@ -2426,7 +2513,7 @@ public class SystemNumberPicker extends LinearLayout {
                 }
 
                 String result = String.valueOf(dest.subSequence(0, dstart)) + filtered
-                    + dest.subSequence(dend, dest.length());
+                        + dest.subSequence(dend, dest.length());
 
                 if ("".equals(result)) {
                     return result;
@@ -2451,7 +2538,7 @@ public class SystemNumberPicker extends LinearLayout {
                     return "";
                 }
                 String result = String.valueOf(dest.subSequence(0, dstart)) + filtered
-                    + dest.subSequence(dend, dest.length());
+                        + dest.subSequence(dend, dest.length());
                 String str = String.valueOf(result).toLowerCase();
                 for (String val : mDisplayedValues) {
                     String valLowerCase = val.toLowerCase();
@@ -2468,27 +2555,25 @@ public class SystemNumberPicker extends LinearLayout {
     /**
      * Ensures that the scroll wheel is adjusted i.e. there is no offset and the
      * middle element is in the middle of the widget.
-     *
-     * @return Whether an adjustment has been made.
      */
-    private boolean ensureScrollWheelAdjusted() {
+    private void ensureScrollWheelAdjusted() {
         // adjust to the closest value
         int delta = mInitialScrollOffset - mCurrentScrollOffset;
-        if (delta != 0) {
-            if (Math.abs(delta) > mSelectorElementSize / 2) {
-                delta += (delta > 0) ? -mSelectorElementSize : mSelectorElementSize;
-            }
-            if (isHorizontalMode()) {
-                mPreviousScrollerX = 0;
-                mAdjustScroller.startScroll(0, 0, delta, 0, SELECTOR_ADJUSTMENT_DURATION_MILLIS);
-            } else {
-                mPreviousScrollerY = 0;
-                mAdjustScroller.startScroll(0, 0, 0, delta, SELECTOR_ADJUSTMENT_DURATION_MILLIS);
-            }
-            invalidate();
-            return true;
+        if (delta == 0) {
+            return;
         }
-        return false;
+
+        if (Math.abs(delta) > mSelectorElementSize / 2) {
+            delta += (delta > 0) ? -mSelectorElementSize : mSelectorElementSize;
+        }
+        if (isHorizontalMode()) {
+            mPreviousScrollerX = 0;
+            mAdjustScroller.startScroll(0, 0, delta, 0, SELECTOR_ADJUSTMENT_DURATION_MILLIS);
+        } else {
+            mPreviousScrollerY = 0;
+            mAdjustScroller.startScroll(0, 0, 0, delta, SELECTOR_ADJUSTMENT_DURATION_MILLIS);
+        }
+        invalidate();
     }
 
     /**
@@ -2501,14 +2586,16 @@ public class SystemNumberPicker extends LinearLayout {
         private int mSelectionStart;
         private int mSelectionEnd;
 
-        /** Whether this runnable is currently posted. */
+        /**
+         * Whether this runnable is currently posted.
+         */
         private boolean mPosted;
 
-        public SetSelectionCommand(EditText inputText) {
+        SetSelectionCommand(EditText inputText) {
             mInputText = inputText;
         }
 
-        public void post(int selectionStart, int selectionEnd) {
+        void post(int selectionStart, int selectionEnd) {
             mSelectionStart = selectionStart;
             mSelectionEnd = selectionEnd;
             if (!mPosted) {
@@ -2517,13 +2604,14 @@ public class SystemNumberPicker extends LinearLayout {
             }
         }
 
-        public void cancel() {
+        void cancel() {
             if (mPosted) {
                 mInputText.removeCallbacks(this);
                 mPosted = false;
             }
         }
 
+        @Override
         public void run() {
             mPosted = false;
             mInputText.setSelection(mSelectionStart, mSelectionEnd);
@@ -2576,7 +2664,7 @@ public class SystemNumberPicker extends LinearLayout {
         return new Formatter() {
             @Override
             public String format(int i) {
-                return String.format(mLocale, formatter, i);
+                return String.format(Locale.getDefault(), formatter, i);
             }
         };
     }
@@ -2593,6 +2681,10 @@ public class SystemNumberPicker extends LinearLayout {
             mMinWidth = (int) dpToPx(DEFAULT_MIN_WIDTH);
             mMaxWidth = SIZE_UNSPECIFIED;
         }
+    }
+
+    public void setAccessibilityDescriptionEnabled(boolean enabled) {
+        mAccessibilityDescriptionEnabled = enabled;
     }
 
     public void setDividerColor(@ColorInt int color) {
@@ -2612,6 +2704,11 @@ public class SystemNumberPicker extends LinearLayout {
         setDividerDistance(getResources().getDimensionPixelSize(dimenId));
     }
 
+    public void setDividerType(@DividerType int dividerType) {
+        mDividerType = dividerType;
+        invalidate();
+    }
+
     public void setDividerThickness(int thickness) {
         mDividerThickness = thickness;
     }
@@ -2622,8 +2719,9 @@ public class SystemNumberPicker extends LinearLayout {
 
     /**
      * Should sort numbers in ascending or descending order.
+     *
      * @param order Pass {@link #ASCENDING} or {@link #ASCENDING}.
-     * Default value is {@link #DESCENDING}.
+     *              Default value is {@link #DESCENDING}.
      */
     public void setOrder(@Order int order) {
         mOrder = order;
@@ -2632,6 +2730,7 @@ public class SystemNumberPicker extends LinearLayout {
     public void setOrientation(@Orientation int orientation) {
         mOrientation = orientation;
         setWidthAndHeight();
+        requestLayout();
     }
 
     public void setWheelItemCount(int count) {
@@ -2639,7 +2738,7 @@ public class SystemNumberPicker extends LinearLayout {
             throw new IllegalArgumentException("Wheel item count must be >= 1");
         }
         mRealWheelItemCount = count;
-        mWheelItemCount = count < DEFAULT_WHEEL_ITEM_COUNT ? DEFAULT_WHEEL_ITEM_COUNT : count;
+        mWheelItemCount = Math.max(count, DEFAULT_WHEEL_ITEM_COUNT);
         mWheelMiddleItemIndex = mWheelItemCount / 2;
         mSelectorIndices = new int[mWheelItemCount];
     }
@@ -2698,6 +2797,36 @@ public class SystemNumberPicker extends LinearLayout {
         mSelectedTextUnderline = underlineText;
     }
 
+    public void setSelectedTypeface(Typeface typeface) {
+        mSelectedTypeface = typeface;
+        if (mSelectedTypeface != null) {
+            mSelectorWheelPaint.setTypeface(mSelectedTypeface);
+        } else if (mTypeface != null) {
+            mSelectorWheelPaint.setTypeface(mTypeface);
+        } else {
+            mSelectorWheelPaint.setTypeface(Typeface.MONOSPACE);
+        }
+    }
+
+    public void setSelectedTypeface(String string, int style) {
+        if (TextUtils.isEmpty(string)) {
+            return;
+        }
+        setSelectedTypeface(Typeface.create(string, style));
+    }
+
+    public void setSelectedTypeface(String string) {
+        setSelectedTypeface(string, Typeface.NORMAL);
+    }
+
+    public void setSelectedTypeface(@StringRes int stringId, int style) {
+        setSelectedTypeface(getResources().getString(stringId), style);
+    }
+
+    public void setSelectedTypeface(@StringRes int stringId) {
+        setSelectedTypeface(stringId, Typeface.NORMAL);
+    }
+
     public void setTextAlign(@Align int align) {
         mTextAlign = align;
     }
@@ -2732,10 +2861,9 @@ public class SystemNumberPicker extends LinearLayout {
         mTypeface = typeface;
         if (mTypeface != null) {
             mSelectedText.setTypeface(mTypeface);
-            mSelectorWheelPaint.setTypeface(mTypeface);
+            setSelectedTypeface(mSelectedTypeface);
         } else {
             mSelectedText.setTypeface(Typeface.MONOSPACE);
-            mSelectorWheelPaint.setTypeface(Typeface.MONOSPACE);
         }
     }
 
@@ -2768,12 +2896,20 @@ public class SystemNumberPicker extends LinearLayout {
                 / mMaxFlingVelocityCoefficient;
     }
 
+    public void setItemSpacing(int itemSpacing) {
+        mItemSpacing = itemSpacing;
+    }
+
     public boolean isHorizontalMode() {
         return getOrientation() == HORIZONTAL;
     }
 
     public boolean isAscendingOrder() {
         return getOrder() == ASCENDING;
+    }
+
+    public boolean isAccessibilityDescriptionEnabled() {
+        return mAccessibilityDescriptionEnabled;
     }
 
     public int getDividerColor() {

@@ -127,7 +127,7 @@ public class ZoneTuners {
                                        .setFloorRef(floorRef).setHisInterpolate("cov")
                                        .addMarker("tuner").addMarker("writable").addMarker("his")
                                        .addMarker("zone").addMarker("adr").addMarker("cooling").addMarker("deadband").addMarker("sp")
-                                       .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                                       .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                                        .setUnit("\u00B0F")
                                        .setTz(tz)
                                        .build();
@@ -152,7 +152,7 @@ public class ZoneTuners {
                                        .setFloorRef(floorRef).setHisInterpolate("cov")
                                        .addMarker("tuner").addMarker("writable").addMarker("his")
                                        .addMarker("zone").addMarker("adr").addMarker("heating").addMarker("deadband").addMarker("sp")
-                                       .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                                       .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                                        .setUnit("\u00B0F")
                                        .setTz(tz)
                                        .build();
@@ -177,7 +177,7 @@ public class ZoneTuners {
                                          .setFloorRef(floorRef).setHisInterpolate("cov")
                                          .addMarker("tuner").addMarker("writable").addMarker("his")
                                          .addMarker("zone").addMarker("sn").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("sp")
-                                         .setMinVal("35").setMaxVal("70").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                                         .setMinVal("35").setMaxVal("75").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                                          .setUnit("\u00B0F")
                                          .setTz(tz)
                                          .build();
@@ -202,7 +202,7 @@ public class ZoneTuners {
                                          .setFloorRef(floorRef).setHisInterpolate("cov")
                                          .addMarker("tuner").addMarker("writable").addMarker("his")
                                          .addMarker("zone").addMarker("sn").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("sp")
-                                         .setMinVal("80").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                                         .setMinVal("65").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                                          .setUnit("\u00B0F")
                                          .setTz(tz)
                                          .build();

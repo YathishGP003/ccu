@@ -146,7 +146,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         } else {
             signal = 0;
         }
-    
+        
         if (signal != getCmdSignal("cooling and modulating")) {
             setCmdSignal("cooling and modulating", signal);
         }
@@ -171,7 +171,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         } else {
             signal = 0;
         }
-    
+
         if (signal != getCmdSignal("fan and modulating")) {
             setCmdSignal("fan and modulating", signal);
         }
@@ -195,7 +195,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         } else  {
             signal = 0;
         }
-    
+        
         if (signal != getCmdSignal("heating and modulating")) {
             setCmdSignal("heating and modulating", signal);
         }

@@ -68,8 +68,8 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
             if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed()) {
                 CCUHsApi.getInstance().syncEntityTree();
                 String siteGUID = CCUHsApi.getInstance().getGlobalSiteId();
-                if (siteGUID != null && siteGUID != "") {
-                    PbSubscriptionHandler.getInstance().isPubnubSubscribed();
+                if (siteGUID != null && !siteGUID.equals("")) {
+                    PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(), siteGUID);
                 }
             }
     

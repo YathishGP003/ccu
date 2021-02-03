@@ -374,7 +374,7 @@ public class CCUHsApi
         }
         return null;
     }
-    
+
     /**
      * Write to a 'writable' point
      * The 'who' field will be populated with ccu_#id where #id is the HRef of haystack device entity for ccu.
@@ -383,7 +383,7 @@ public class CCUHsApi
     {
         pointWrite(HRef.copy(id), level, getCCUUserName(), HNum.make(val), HNum.make(duration));
     }
-    
+
     /**
      * Write to a 'writable' point
      */
@@ -453,7 +453,7 @@ public class CCUHsApi
     {
         pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, getCCUUserName(), HStr.make(val), HNum.make(0));
     }
-    
+
     /**
      * pointWrite method implements the default pointWrite api of haystack library. It only accepts native haystack
      * type arguments.
@@ -461,7 +461,7 @@ public class CCUHsApi
     public void pointWriteForCcuUser(HRef id, int level, HVal val, HNum dur) {
         pointWrite(id, level, getCCUUserName(), val, dur);
     }
-    
+
     public void pointWrite(HRef id, int level, String who, HVal val, HNum dur) {
         hsClient.pointWrite(id, level, who, val, dur);
 
@@ -1448,11 +1448,9 @@ public class CCUHsApi
         return getGUID(siteLuid);
     }
 
-    public String getGlobalCcuId() {
-        HRef ccuId = getCcuId();
-        return ccuId != null ? getGUID(ccuId.toString()) : null;
-    }
-    
+    /**
+     * This methods returns the Local ccuId, not the global ccuId.
+     */
     public HRef getCcuId() {
         HRef siteRef = null;
         HDict hDict = new HDictBuilder().add("filter", "ccu").toDict();
@@ -1462,7 +1460,23 @@ public class CCUHsApi
         }
         return siteRef;
     }
-    
+
+    public String getCCUGuid() {
+        HRef ccuId = getCcuId();
+        return ccuId != null ? getGUID(ccuId.toString()) : null;
+    }
+
+    /**
+     * Return the global ccu id if it exists.
+     * Otherwise null.
+     * @return ccu id or null
+     */
+    @Nullable
+    public String getGlobalCcuId() {
+        HRef ccuId = getCcuId();
+        if (ccuId == null) return null;
+        else return getGUID(getCcuId().toString());
+    }
     public ArrayList<Schedule> getSystemSchedule(boolean vacation)
     {
         ArrayList<Schedule> schedules = new ArrayList<>();
@@ -1979,7 +1993,7 @@ public class CCUHsApi
             updateEquip(updatedEquip, updatedEquip.getId());
         }
     }
-    
+
     public String getCCUUserName() {
         String ccuGuid = getGlobalCcuId();
         return ccuGuid == null ? Tags.CCU : Tags.CCU+"_"+ccuGuid;

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="0.05sp"
+    android:orientation="vertical"
+    android:id="@+id/tunerGridBg"
+    android:padding="5dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="3.01">
+
+        <TextView
+            android:id="@+id/expandedListItemName"
+            android:layout_width="0sp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2.30"
+            android:gravity="left|center_vertical"
+            android:layout_gravity="center_vertical"
+            android:paddingLeft="10sp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:textAppearance="@style/tuner_text_label" />
+
+        <LinearLayout
+            android:layout_width="0sp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.70"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+        <TextView
+            android:id="@+id/expandedListItemVal"
+            android:layout_width="0sp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.5"
+            android:layout_gravity="center_vertical"
+            android:gravity="right|center_vertical"
+            android:paddingRight="10sp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:textAllCaps="false"
+            android:textAppearance="@style/tuner_text_value" />
+
+            <ImageButton
+                android:id="@+id/imgBtnUndo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:padding="5dp"
+                android:scaleX="-1"
+                android:src="@drawable/ic_refresh"
+                android:layout_gravity="center_vertical"
+                android:background="@null"/>
+        </LinearLayout>
+
+        <View
+            android:id="@+id/tunerDivider"
+            android:layout_width="0sp"
+            android:layout_height="25sp"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:layout_weight="0.01"
+            android:background="@color/light_gray" />
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>

@@ -154,7 +154,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         } else {
             signal = 0;
         }
-    
+        
         if (signal != getCmdSignal("cooling")) {
             setCmdSignal("cooling", signal);
         }
@@ -186,7 +186,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         } else {
             signal = 0;
         }
-    
+        
         if (signal != getCmdSignal("heating")) {
             setCmdSignal("heating", signal);
         }
@@ -241,7 +241,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         } else {
             signal = 0;
         }
-    
+        
         if (signal != getCmdSignal("fan")) {
             setCmdSignal("fan", signal);
         }
@@ -268,7 +268,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         } else {
             signal = 0;
         }
-    
+        
         if (signal != getCmdSignal("co2")) {
             setCmdSignal("co2", signal);
         }

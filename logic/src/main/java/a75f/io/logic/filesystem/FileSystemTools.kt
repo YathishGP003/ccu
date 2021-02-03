@@ -56,7 +56,7 @@ class FileSystemTools(private val appContext: Context) {
    fun zipFiles(files: List<File>, fileId: String): File {
       if (files.isEmpty()) throw IllegalArgumentException("list of files empty in zipFiles()")
 
-      val destZipPath = files[0].parentFile.absolutePath + File.separator + fileId + ".zip"
+      val destZipPath = files[0].parentFile.absolutePath + File.separator + fileId
       ZipUtility().zip(files, destZipPath)
       return File(destZipPath)
    }

@@ -64,7 +64,7 @@ public class HaystackExplorer extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
     {
-        View rootView = inflater.inflate(R.layout.fragment_tuner_editor, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_tuner_explore, container, false);
         return rootView;
     }
 

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:id="@+id/layoutValues"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal"
+        android:layout_marginLeft="5sp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/textView_SectionLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10sp"
+            android:gravity="center_vertical|left"
+            android:text="System:"
+            android:textAppearance="@style/tuner_text_group" />
+
+        <TextView
+            android:id="@+id/textView_Section"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="5sp"
+            android:gravity="center_vertical|left"
+            android:text=":"
+            android:textAppearance="@style/tuner_button_save" />
+
+        <TextView
+            android:id="@+id/textView_tuner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="5sp"
+            android:gravity="center_vertical|left"
+            android:text="abnormalTunername"
+            android:textAppearance="@style/tuner_button_cancel" />
+
+        <TextView
+            android:id="@+id/textView_level"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="5sp"
+            android:gravity="center_vertical|left"
+            android:text="Level 8:"
+            android:textAppearance="@style/tuner_button_save" />
+
+        <TextView
+            android:id="@+id/textView_oldValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="5sp"
+            android:layout_marginRight="10sp"
+            android:gravity="center_vertical|left"
+            android:text="40"
+            android:textAppearance="@style/tuner_text_value" />
+
+        <ImageView
+            android:id="@+id/imageViewArrow"
+            android:layout_width="30sp"
+            android:layout_height="28sp"
+            android:layout_gravity="center_vertical"
+            android:padding="5sp"
+            android:src="@drawable/arrow_right" />
+
+        <TextView
+            android:id="@+id/textView_newLevel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="5sp"
+            android:gravity="center_vertical|left"
+            android:text="Level 8:"
+            android:textAppearance="@style/tuner_button_save" />
+
+        <TextView
+            android:id="@+id/textView_newValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="10dp"
+            android:layout_marginRight="10dp"
+            android:gravity="center_vertical|left"
+            android:text="100"
+            android:textAppearance="@style/tuner_text_value" />
+    </LinearLayout>
+</RelativeLayout>

@@ -86,7 +86,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
         {
             LayoutInflater layoutInflater = (LayoutInflater) this.mFragment.getContext()
                                                                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = layoutInflater.inflate(R.layout.tuner_list_item, parent, false);
+            convertView = layoutInflater.inflate(R.layout.exp_list_item, parent, false);
 
 
             TextView expandedListTextView = convertView

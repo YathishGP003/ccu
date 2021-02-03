@@ -59,14 +59,19 @@ public class UpdatePointHandler
                     while (it.hasNext())
                     {
                         HRow r = (HRow) it.next();
-                        double level = Double.parseDouble(r.get("level").toString());
-                        double val = Double.parseDouble(r.get("val").toString());
                         String who = r.get("who").toString();
-                        double duration = Double.parseDouble(r.get("dur").toString());
-                        //If duration shows it has already expired, then just write 1ms to force-expire it locally.
-                        double dur = (duration == 0 ? 0 : (duration - System.currentTimeMillis() ) > 0 ? (duration - System.currentTimeMillis()) : 1);
-                        CcuLog.d(L.TAG_CCU_PUBNUB, "Remote point:  level " + level + " val " + val + " who " + who + " duration "+duration+" dur "+dur);
-                        CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(luid), (int) level, who, HNum.make(val), HNum.make(dur));
+
+                        try {
+                            double level = Double.parseDouble(r.get("level").toString());
+                            double val = Double.parseDouble(r.get("val").toString());
+                            double duration = Double.parseDouble(r.get("dur").toString());
+                            //If duration shows it has already expired, then just write 1ms to force-expire it locally.
+                            double dur = (duration == 0 ? 0 : (duration - System.currentTimeMillis() ) > 0 ? (duration - System.currentTimeMillis()) : 1);
+                            CcuLog.d(L.TAG_CCU_PUBNUB, "Remote point:  level " + level + " val " + val + " who " + who + " duration "+duration+" dur "+dur);
+                            CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(luid), (int) level, who, HNum.make(val), HNum.make(dur));
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
+                        }
                     }
         
                     //CcuLog.d(L.TAG_CCU_PUBNUB+" LOCAL ARRAY: ", HZincWriter.gridToString(CCUHsApi.getInstance().readPointGrid(luid)));

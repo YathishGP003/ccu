@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.system;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -25,6 +26,7 @@ import a75f.io.logic.bo.building.system.dab.DabSystemProfile;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.logic.tuners.TunerUtil;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -261,7 +263,7 @@ public abstract class SystemProfile
         }
 
         Point stage1CoolingAirflowTempLowerOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage1CoolingAirflowTempLowerOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage1").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
-                .setMinVal("-120").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz).build();
         String stage1CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage1CoolingAirflowTempLowerOffset);
@@ -613,7 +615,7 @@ public abstract class SystemProfile
         }
 
         Point ccuAlarmVolumeLevel = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "ccuAlarmVolumeLevel").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("alarm").addMarker("volume").addMarker("level").addMarker("sp")
-                .setMinVal("0").setMaxVal("7").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz).build();
         String ccuAlarmVolumeLevelId = hayStack.addPoint(ccuAlarmVolumeLevel);
         HashMap ccuAlarmVolumeLevelPoint = hayStack.read("point and tuner and default and alarm and volume and level");
@@ -672,7 +674,7 @@ public abstract class SystemProfile
             }
         }
         Point zoneTempDeadLeeway = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "zoneTemperatureDeadLeeway").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("temp").addMarker("dead").addMarker("leeway").addMarker("sp")
-                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP).setUnit("\u00B0F")
+                .setMinVal("0").setMaxVal("20").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP).setUnit("\u00B0F")
                 .setTz(tz).build();
         String zoneTempDeadLeewayId = hayStack.addPoint(zoneTempDeadLeeway);
         HashMap zoneTempDeadLeewayPoint = hayStack.read("point and tuner and default and temp and dead and leeway");
@@ -685,7 +687,9 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(zoneTempDeadLeewayId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-        Point humidityCompensationOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "humidityCompensationOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("humidity").addMarker("compensation").addMarker("offset").addMarker("sp").setTz(tz).build();
+        Point humidityCompensationOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "humidityCompensationOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("humidity").addMarker("compensation").addMarker("offset").addMarker("sp")
+                .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setTz(tz).build();
         String humidityCompensationOffsetId = hayStack.addPoint(humidityCompensationOffset);
         HashMap humidityCompensationOffsetPoint = hayStack.read("point and tuner and default and humidity and compensation and offset");
         ArrayList<HashMap> humidityCompensationOffsetArr = hayStack.readPoint(humidityCompensationOffsetPoint.get("id").toString());
@@ -810,20 +814,20 @@ public abstract class SystemProfile
         if(!verifyPointsAvailability("userIntent and prePurge and enabled",equipref)) {
             Point smartPrePurgePoint = new Point.Builder().setDisplayName(equipDis + "-" + "systemPrePurgeEnabled").setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("prePurge").addMarker("enabled").setEnums("false,true").setTz(tz).build();
             String smartPrePurgePointId = CCUHsApi.getInstance().addPoint(smartPrePurgePoint);
-            CCUHsApi.getInstance().writePoint(smartPrePurgePointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
+            CCUHsApi.getInstance().writePointForCcuUser(smartPrePurgePointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
             CCUHsApi.getInstance().writeHisValById(smartPrePurgePointId, 0.0);
         }
         if(!verifyPointsAvailability("userIntent and postPurge and enabled",equipref)) {
             Point smartPostPurgePoint = new Point.Builder().setDisplayName(equipDis + "-" + "systemPostPurgeEnabled").setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("postPurge").addMarker("enabled").setEnums("false,true").setTz(tz).build();
             String smartPostPurgePointId = CCUHsApi.getInstance().addPoint(smartPostPurgePoint);
-            CCUHsApi.getInstance().writePoint(smartPostPurgePointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
+            CCUHsApi.getInstance().writePointForCcuUser(smartPostPurgePointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
             CCUHsApi.getInstance().writeHisValById(smartPostPurgePointId, 0.0);
         }
 
         if(!verifyPointsAvailability("userIntent and enhanced and ventilation and enabled",equipref)) {
             Point enhancedVentilationPoint = new Point.Builder().setDisplayName(equipDis + "-" + "systemEnhancedVentilationEnabled").setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("enhanced").addMarker("ventilation").addMarker("enabled").setEnums("false,true").setTz(tz).build();
             String enhancedVentilationPointId = CCUHsApi.getInstance().addPoint(enhancedVentilationPoint);
-            CCUHsApi.getInstance().writePoint(enhancedVentilationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
+            CCUHsApi.getInstance().writePointForCcuUser(enhancedVentilationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
             CCUHsApi.getInstance().writeHisValById(enhancedVentilationPointId, 0.0);
         }
     }
@@ -853,6 +857,5 @@ public abstract class SystemProfile
     }
     
     public void reset() {
-    
     }
 }

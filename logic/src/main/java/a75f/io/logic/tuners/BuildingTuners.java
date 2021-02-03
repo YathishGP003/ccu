@@ -1,7 +1,6 @@
 package a75f.io.logic.tuners;
 
 import android.util.Log;
-import android.webkit.HttpAuthHandler;
 
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
@@ -16,7 +15,6 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.dualduct.DualDuctConstants;
 
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_MODE_CHANGEOVER_HYSTERESIS;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_DOWN_TIMER_COUNTER;
@@ -108,7 +106,7 @@ public class BuildingTuners
                                            .setTz(tz)
                                            .build();
         String heatingPreconditioingRateId = hayStack.addPoint(heatingPreconditioingRate);
-        hayStack.writePoint(heatingPreconditioingRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.SYSTEM_PRECONDITION_RATE, 0);
+        hayStack.writePointForCcuUser(heatingPreconditioingRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.SYSTEM_PRECONDITION_RATE, 0);
         hayStack.writeHisValById(heatingPreconditioingRateId, TunerConstants.SYSTEM_PRECONDITION_RATE);
     
         Point coolingPreconditioingRate = new Point.Builder()
@@ -121,7 +119,7 @@ public class BuildingTuners
                                                   .setTz(tz)
                                                   .build();
         String coolingPreconditioingRateId = hayStack.addPoint(coolingPreconditioingRate);
-        hayStack.writePoint(coolingPreconditioingRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.SYSTEM_PRECONDITION_RATE, 0);
+        hayStack.writePointForCcuUser(coolingPreconditioingRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.SYSTEM_PRECONDITION_RATE, 0);
         hayStack.writeHisValById(coolingPreconditioingRateId, TunerConstants.SYSTEM_PRECONDITION_RATE);
     
         Point userLimitSpread = new Point.Builder()
@@ -135,7 +133,7 @@ public class BuildingTuners
                                                   .setTz(tz)
                                                   .build();
         String userLimitSpreadId = hayStack.addPoint(userLimitSpread);
-        hayStack.writePoint(userLimitSpreadId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.USER_LIMIT_SPREAD, 0);
+        hayStack.writePointForCcuUser(userLimitSpreadId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.USER_LIMIT_SPREAD, 0);
         hayStack.writeHisValById(userLimitSpreadId, TunerConstants.USER_LIMIT_SPREAD);
     
         Point buildingLimitMin = new Point.Builder()
@@ -149,7 +147,7 @@ public class BuildingTuners
                                         .setTz(tz)
                                         .build();
         String buildingLimitMinId = hayStack.addPoint(buildingLimitMin);
-        hayStack.writePoint(buildingLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.BUILDING_LIMIT_MIN, 0);
+        hayStack.writePointForCcuUser(buildingLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.BUILDING_LIMIT_MIN, 0);
         hayStack.writeHisValById(buildingLimitMinId, TunerConstants.BUILDING_LIMIT_MIN);
     
         Point buildingLimitMax = new Point.Builder()
@@ -163,7 +161,7 @@ public class BuildingTuners
                                          .setTz(tz)
                                          .build();
         String buildingLimitMaxId = hayStack.addPoint(buildingLimitMax);
-        hayStack.writePoint(buildingLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.BUILDING_LIMIT_MAX, 0);
+        hayStack.writePointForCcuUser(buildingLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.BUILDING_LIMIT_MAX, 0);
         hayStack.writeHisValById(buildingLimitMaxId, TunerConstants.BUILDING_LIMIT_MAX);
     
         Point buildingToZoneDifferential = new Point.Builder()
@@ -176,7 +174,7 @@ public class BuildingTuners
                                          .setTz(tz)
                                          .build();
         String buildingToZoneDifferentialId = hayStack.addPoint(buildingToZoneDifferential);
-        hayStack.writePoint(buildingToZoneDifferentialId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.BUILDING_TO_ZONE_DIFFERENTIAL, 0);
+        hayStack.writePointForCcuUser(buildingToZoneDifferentialId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.BUILDING_TO_ZONE_DIFFERENTIAL, 0);
         hayStack.writeHisValById(buildingToZoneDifferentialId, TunerConstants.BUILDING_TO_ZONE_DIFFERENTIAL);
     
         Point zoneTemperatureDeadLeeway = new Point.Builder()
@@ -185,12 +183,12 @@ public class BuildingTuners
                                                    .setEquipRef(equipRef).setHisInterpolate("cov")
                                                    .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
                                                    .addMarker("temp").addMarker("dead").addMarker("leeway").addMarker("sp")
-                                                   .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                                                   .setMinVal("0").setMaxVal("20").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                                    .setUnit("\u00B0F")
                                                    .setTz(tz)
                                                    .build();
         String zoneTemperatureDeadLeewayId = hayStack.addPoint(zoneTemperatureDeadLeeway);
-        hayStack.writePoint(zoneTemperatureDeadLeewayId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_TEMP_DEAD_LEEWAY, 0);
+        hayStack.writePointForCcuUser(zoneTemperatureDeadLeewayId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_TEMP_DEAD_LEEWAY, 0);
         hayStack.writeHisValById(zoneTemperatureDeadLeewayId, TunerConstants.ZONE_TEMP_DEAD_LEEWAY);
 
 
@@ -205,7 +203,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String unoccupiedZoneSetbackId = hayStack.addPoint(unoccupiedZoneSetback);
-        hayStack.writePoint(unoccupiedZoneSetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_UNOCCUPIED_SETBACK, 0);
+        hayStack.writePointForCcuUser(unoccupiedZoneSetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_UNOCCUPIED_SETBACK, 0);
         hayStack.writeHisValById(unoccupiedZoneSetbackId, TunerConstants.ZONE_UNOCCUPIED_SETBACK);
 
         Point heatingUserLimitMin  = new Point.Builder()
@@ -219,7 +217,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String heatingUserLimitMinId = hayStack.addPoint(heatingUserLimitMin);
-        hayStack.writePoint(heatingUserLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_HEATING_USERLIMIT_MIN, 0);
+        hayStack.writePointForCcuUser(heatingUserLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_HEATING_USERLIMIT_MIN, 0);
         hayStack.writeHisValById(heatingUserLimitMinId, TunerConstants.ZONE_HEATING_USERLIMIT_MIN);
 
         Point heatingUserLimitMax  = new Point.Builder()
@@ -233,7 +231,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String heatingUserLimitMaxId = hayStack.addPoint(heatingUserLimitMax);
-        hayStack.writePoint(heatingUserLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_HEATING_USERLIMIT_MAX, 0);
+        hayStack.writePointForCcuUser(heatingUserLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_HEATING_USERLIMIT_MAX, 0);
         hayStack.writeHisValById(heatingUserLimitMaxId, TunerConstants.ZONE_HEATING_USERLIMIT_MAX);
 
         Point coolingUserLimitMin  = new Point.Builder()
@@ -247,7 +245,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String coolingUserLimitMinId = hayStack.addPoint(coolingUserLimitMin);
-        hayStack.writePoint(coolingUserLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_COOLING_USERLIMIT_MIN, 0);
+        hayStack.writePointForCcuUser(coolingUserLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_COOLING_USERLIMIT_MIN, 0);
         hayStack.writeHisValById(coolingUserLimitMinId, TunerConstants.ZONE_COOLING_USERLIMIT_MIN);
 
         Point coolingUserLimitMax  = new Point.Builder()
@@ -261,7 +259,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String coolingUserLimitMaxId = hayStack.addPoint(coolingUserLimitMax);
-        hayStack.writePoint(coolingUserLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_COOLING_USERLIMIT_MAX, 0);
+        hayStack.writePointForCcuUser(coolingUserLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_COOLING_USERLIMIT_MAX, 0);
         hayStack.writeHisValById(coolingUserLimitMaxId, TunerConstants.ZONE_COOLING_USERLIMIT_MAX);
         Point humidityCompensationOffset = new Point.Builder()
                                                   .setDisplayName(equipDis+"-"+"humidityCompensationOffset")
@@ -273,7 +271,7 @@ public class BuildingTuners
                                                   .setTz(tz)
                                                   .build();
         String humidityCompensationOffsetId = hayStack.addPoint(humidityCompensationOffset);
-        hayStack.writePoint(humidityCompensationOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
+        hayStack.writePointForCcuUser(humidityCompensationOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 0.0, 0);
         hayStack.writeHisValById(humidityCompensationOffsetId, 0.0);
 
         Point percentOfDeadZonesAllowed = new Point.Builder()
@@ -286,7 +284,7 @@ public class BuildingTuners
                                                 .setTz(tz)
                                                 .build();
         String percentOfDeadZonesAllowedId = hayStack.addPoint(percentOfDeadZonesAllowed);
-        hayStack.writePoint(percentOfDeadZonesAllowedId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.CM_TEMP_INFLU_PERCENTILE_ZONE_DEAD, 0);
+        hayStack.writePointForCcuUser(percentOfDeadZonesAllowedId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.CM_TEMP_INFLU_PERCENTILE_ZONE_DEAD, 0);
         hayStack.writeHisValById(percentOfDeadZonesAllowedId, TunerConstants.CM_TEMP_INFLU_PERCENTILE_ZONE_DEAD);
 
 
@@ -301,7 +299,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String zoneDeadTimeId = hayStack.addPoint(zoneDeadTime);
-        hayStack.writePoint(zoneDeadTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 15.0, 0);
+        hayStack.writePointForCcuUser(zoneDeadTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 15.0, 0);
         hayStack.writeHisValById(zoneDeadTimeId, 15.0);
 
         Point autoAwayTime  = new Point.Builder()
@@ -315,7 +313,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String autoAwayTimeId = hayStack.addPoint(autoAwayTime);
-        hayStack.writePoint(autoAwayTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 60.0, 0);
+        hayStack.writePointForCcuUser(autoAwayTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 60.0, 0);
         hayStack.writeHisValById(autoAwayTimeId, 60.0);
 
         Point forcedOccupiedTime  = new Point.Builder()
@@ -329,7 +327,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String forcedOccupiedTimeId = hayStack.addPoint(forcedOccupiedTime);
-        hayStack.writePoint(forcedOccupiedTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 120.0, 0);
+        hayStack.writePointForCcuUser(forcedOccupiedTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 120.0, 0);
         hayStack.writeHisValById(forcedOccupiedTimeId, 120.0);
 
         Point cmResetCommand  = new Point.Builder()
@@ -343,7 +341,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String cmResetCommandId = hayStack.addPoint(cmResetCommand);
-        hayStack.writePoint(cmResetCommandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 90.0, 0);
+        hayStack.writePointForCcuUser(cmResetCommandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 90.0, 0);
         hayStack.writeHisValById(cmResetCommandId, 90.0);
 
         Point adrCoolingDeadband  = new Point.Builder()
@@ -352,12 +350,12 @@ public class BuildingTuners
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
                 .addMarker("adr").addMarker("cooling").addMarker("deadband").addMarker("sp")
-                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
         String adrCoolingDeadbandId = hayStack.addPoint(adrCoolingDeadband);
-        hayStack.writePoint(adrCoolingDeadbandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 3.0, 0);
+        hayStack.writePointForCcuUser(adrCoolingDeadbandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 3.0, 0);
         hayStack.writeHisValById(adrCoolingDeadbandId, 3.0);
 
         Point adrHeatingDeadband  = new Point.Builder()
@@ -366,12 +364,12 @@ public class BuildingTuners
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
                 .addMarker("adr").addMarker("heating").addMarker("deadband").addMarker("sp")
-                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
         String adrHeatingDeadbandId = hayStack.addPoint(adrHeatingDeadband);
-        hayStack.writePoint(adrHeatingDeadbandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 3.0, 0);
+        hayStack.writePointForCcuUser(adrHeatingDeadbandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 3.0, 0);
         hayStack.writeHisValById(adrHeatingDeadbandId, 3.0);
 
         Point snCoolingAirflowTemperature  = new Point.Builder()
@@ -380,12 +378,12 @@ public class BuildingTuners
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
                 .addMarker("sn").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("sp")
-                .setMinVal("35").setMaxVal("70").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                .setMinVal("35").setMaxVal("75").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
         String snCoolingAirflowTemperatureId = hayStack.addPoint(snCoolingAirflowTemperature);
-        hayStack.writePoint(snCoolingAirflowTemperatureId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 60.0, 0);
+        hayStack.writePointForCcuUser(snCoolingAirflowTemperatureId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 60.0, 0);
         hayStack.writeHisValById(snCoolingAirflowTemperatureId, 60.0);
 
         Point snHeatingAirflowTemperature  = new Point.Builder()
@@ -394,12 +392,12 @@ public class BuildingTuners
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
                 .addMarker("sn").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("sp")
-                .setMinVal("80").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                .setMinVal("65").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
         String snHeatingAirflowTemperatureId = hayStack.addPoint(snHeatingAirflowTemperature);
-        hayStack.writePoint(snHeatingAirflowTemperatureId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 105.0, 0);
+        hayStack.writePointForCcuUser(snHeatingAirflowTemperatureId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 105.0, 0);
         hayStack.writeHisValById(snHeatingAirflowTemperatureId, 105.0);
 
         Point buildingLimitAlertTimer  = new Point.Builder()
@@ -413,7 +411,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String buildingLimitAlertTimerId = hayStack.addPoint(buildingLimitAlertTimer);
-        hayStack.writePoint(buildingLimitAlertTimerId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 45.0, 0);
+        hayStack.writePointForCcuUser(buildingLimitAlertTimerId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 45.0, 0);
         hayStack.writeHisValById(buildingLimitAlertTimerId, 45.0);
 
         Point constantTempAlertTime  = new Point.Builder()
@@ -427,7 +425,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String constantTempAlertTimeId = hayStack.addPoint(constantTempAlertTime);
-        hayStack.writePoint(constantTempAlertTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 40.0, 0);
+        hayStack.writePointForCcuUser(constantTempAlertTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 40.0, 0);
         hayStack.writeHisValById(constantTempAlertTimeId, 40.0);
 
         Point abnormalCurTempRiseTrigger  = new Point.Builder()
@@ -441,7 +439,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String abnormalCurTempRiseTriggerId = hayStack.addPoint(abnormalCurTempRiseTrigger);
-        hayStack.writePoint(abnormalCurTempRiseTriggerId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 4.0, 0);
+        hayStack.writePointForCcuUser(abnormalCurTempRiseTriggerId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 4.0, 0);
         hayStack.writeHisValById(abnormalCurTempRiseTriggerId, 4.0);
 
         Point airflowSampleWaitTime  = new Point.Builder()
@@ -455,7 +453,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String airflowSampleWaitTimeId = hayStack.addPoint(airflowSampleWaitTime);
-        hayStack.writePoint(airflowSampleWaitTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 5.0, 0);
+        hayStack.writePointForCcuUser(airflowSampleWaitTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 5.0, 0);
         hayStack.writeHisValById(airflowSampleWaitTimeId, 5.0);
 
         Point stage1CoolingAirflowTempLowerOffset  = new Point.Builder()
@@ -464,12 +462,12 @@ public class BuildingTuners
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
                 .addMarker("stage1").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
-                .setMinVal("-120").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
+                .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
         String stage1CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage1CoolingAirflowTempLowerOffset);
-        hayStack.writePoint(stage1CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -20.0, 0);
+        hayStack.writePointForCcuUser(stage1CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, -20.0, 0);
         hayStack.writeHisValById(stage1CoolingAirflowTempLowerOffsetId, -20.0);
 
         Point stage1CoolingAirflowTempUpperOffset  = new Point.Builder()
@@ -483,7 +481,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage1CoolingAirflowTempUpperOffsetId = hayStack.addPoint(stage1CoolingAirflowTempUpperOffset);
-        hayStack.writePoint(stage1CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -8.0, 0);
+        hayStack.writePointForCcuUser(stage1CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, -8.0, 0);
         hayStack.writeHisValById(stage1CoolingAirflowTempUpperOffsetId, -8.0);
 
         Point stage1HeatingAirflowTempUpperOffset  = new Point.Builder()
@@ -497,7 +495,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage1HeatingAirflowTempUpperOffsetId = hayStack.addPoint(stage1HeatingAirflowTempUpperOffset);
-        hayStack.writePoint(stage1HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 40.0, 0);
+        hayStack.writePointForCcuUser(stage1HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 40.0, 0);
         hayStack.writeHisValById(stage1HeatingAirflowTempUpperOffsetId, 40.0);
 
         Point stage1HeatingAirflowTempLowerOffset  = new Point.Builder()
@@ -511,7 +509,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage1HeatingAirflowTempLowerOffsetId = hayStack.addPoint(stage1HeatingAirflowTempLowerOffset);
-        hayStack.writePoint(stage1HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 25.0, 0);
+        hayStack.writePointForCcuUser(stage1HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 25.0, 0);
         hayStack.writeHisValById(stage1HeatingAirflowTempLowerOffsetId, 25.0);
 
         Point stage2CoolingAirflowTempLowerOffset  = new Point.Builder()
@@ -525,7 +523,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage2CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage2CoolingAirflowTempLowerOffset);
-        hayStack.writePoint(stage2CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -25.0, 0);
+        hayStack.writePointForCcuUser(stage2CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, -25.0, 0);
         hayStack.writeHisValById(stage2CoolingAirflowTempLowerOffsetId, -25.0);
 
         Point stage2CoolingAirflowTempUpperOffset  = new Point.Builder()
@@ -539,7 +537,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage2CoolingAirflowTempUpperOffsetId = hayStack.addPoint(stage2CoolingAirflowTempUpperOffset);
-        hayStack.writePoint(stage2CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -12.0, 0);
+        hayStack.writePointForCcuUser(stage2CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, -12.0, 0);
         hayStack.writeHisValById(stage2CoolingAirflowTempUpperOffsetId, -12.0);
 
         Point stage2HeatingAirflowTempUpperOffset  = new Point.Builder()
@@ -553,7 +551,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage2HeatingAirflowTempUpperOffsetId = hayStack.addPoint(stage2HeatingAirflowTempUpperOffset);
-        hayStack.writePoint(stage2HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 50.0, 0);
+        hayStack.writePointForCcuUser(stage2HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 50.0, 0);
         hayStack.writeHisValById(stage2HeatingAirflowTempUpperOffsetId, 50.0);
 
         Point stage2HeatingAirflowTempLowerOffset  = new Point.Builder()
@@ -567,7 +565,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage2HeatingAirflowTempLowerOffsetId = hayStack.addPoint(stage2HeatingAirflowTempLowerOffset);
-        hayStack.writePoint(stage2HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 35.0, 0);
+        hayStack.writePointForCcuUser(stage2HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 35.0, 0);
         hayStack.writeHisValById(stage2HeatingAirflowTempLowerOffsetId, 35.0);
 
         Point stage3CoolingAirflowTempLowerOffset  = new Point.Builder()
@@ -581,7 +579,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage3CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage3CoolingAirflowTempLowerOffset);
-        hayStack.writePoint(stage3CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -25.0, 0);
+        hayStack.writePointForCcuUser(stage3CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, -25.0, 0);
         hayStack.writeHisValById(stage3CoolingAirflowTempLowerOffsetId, -25.0);
 
         Point stage3CoolingAirflowTempUpperOffset  = new Point.Builder()
@@ -595,7 +593,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage3CoolingAirflowTempUpperOffsetId = hayStack.addPoint(stage3CoolingAirflowTempUpperOffset);
-        hayStack.writePoint(stage3CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -12.0, 0);
+        hayStack.writePointForCcuUser(stage3CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, -12.0, 0);
         hayStack.writeHisValById(stage3CoolingAirflowTempUpperOffsetId, -12.0);
 
         Point stage3HeatingAirflowTempUpperOffset  = new Point.Builder()
@@ -609,7 +607,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage3HeatingAirflowTempUpperOffsetId = hayStack.addPoint(stage3HeatingAirflowTempUpperOffset);
-        hayStack.writePoint(stage3HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 50.0, 0);
+        hayStack.writePointForCcuUser(stage3HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 50.0, 0);
         hayStack.writeHisValById(stage3HeatingAirflowTempUpperOffsetId, 50.0);
 
         Point stage3HeatingAirflowTempLowerOffset  = new Point.Builder()
@@ -623,7 +621,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage3HeatingAirflowTempLowerOffsetId = hayStack.addPoint(stage3HeatingAirflowTempLowerOffset);
-        hayStack.writePoint(stage3HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 35.0, 0);
+        hayStack.writePointForCcuUser(stage3HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 35.0, 0);
         hayStack.writeHisValById(stage3HeatingAirflowTempLowerOffsetId, 35.0);
 
         Point stage4CoolingAirflowTempLowerOffset  = new Point.Builder()
@@ -637,7 +635,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage4CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage4CoolingAirflowTempLowerOffset);
-        hayStack.writePoint(stage4CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -25.0, 0);
+        hayStack.writePointForCcuUser(stage4CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, -25.0, 0);
         hayStack.writeHisValById(stage1CoolingAirflowTempLowerOffsetId, -25.0);
 
         Point stage4CoolingAirflowTempUpperOffset  = new Point.Builder()
@@ -651,7 +649,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage4CoolingAirflowTempUpperOffsetId = hayStack.addPoint(stage4CoolingAirflowTempUpperOffset);
-        hayStack.writePoint(stage4CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -12.0, 0);
+        hayStack.writePointForCcuUser(stage4CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, -12.0, 0);
         hayStack.writeHisValById(stage4CoolingAirflowTempUpperOffsetId, -12.0);
 
         Point stage4HeatingAirflowTempUpperOffset  = new Point.Builder()
@@ -665,7 +663,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage4HeatingAirflowTempUpperOffsetId = hayStack.addPoint(stage4HeatingAirflowTempUpperOffset);
-        hayStack.writePoint(stage4HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 50.0, 0);
+        hayStack.writePointForCcuUser(stage4HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 50.0, 0);
         hayStack.writeHisValById(stage4HeatingAirflowTempUpperOffsetId, 50.0);
 
         Point stage4HeatingAirflowTempLowerOffset  = new Point.Builder()
@@ -679,7 +677,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage4HeatingAirflowTempLowerOffsetId = hayStack.addPoint(stage4HeatingAirflowTempLowerOffset);
-        hayStack.writePoint(stage4HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 35.0, 0);
+        hayStack.writePointForCcuUser(stage4HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 35.0, 0);
         hayStack.writeHisValById(stage4HeatingAirflowTempLowerOffsetId, 35.0);
 
         Point stage5CoolingAirflowTempLowerOffset  = new Point.Builder()
@@ -693,7 +691,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage5CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage5CoolingAirflowTempLowerOffset);
-        hayStack.writePoint(stage5CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -25.0, 0);
+        hayStack.writePointForCcuUser(stage5CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, -25.0, 0);
         hayStack.writeHisValById(stage5CoolingAirflowTempLowerOffsetId, -25.0);
 
         Point stage5CoolingAirflowTempUpperOffset  = new Point.Builder()
@@ -707,7 +705,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage5CoolingAirflowTempUpperOffsetId = hayStack.addPoint(stage5CoolingAirflowTempUpperOffset);
-        hayStack.writePoint(stage5CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -12.0, 0);
+        hayStack.writePointForCcuUser(stage5CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, -12.0, 0);
         hayStack.writeHisValById(stage5CoolingAirflowTempUpperOffsetId, -12.0);
 
         Point stage5HeatingAirflowTempUpperOffset  = new Point.Builder()
@@ -721,7 +719,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage5HeatingAirflowTempUpperOffsetId = hayStack.addPoint(stage5HeatingAirflowTempUpperOffset);
-        hayStack.writePoint(stage5HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 50.0, 0);
+        hayStack.writePointForCcuUser(stage5HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 50.0, 0);
         hayStack.writeHisValById(stage5HeatingAirflowTempUpperOffsetId, 50.0);
 
         Point stage5HeatingAirflowTempLowerOffset  = new Point.Builder()
@@ -735,7 +733,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String stage5HeatingAirflowTempLowerOffsetId = hayStack.addPoint(stage5HeatingAirflowTempLowerOffset);
-        hayStack.writePoint(stage5HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 35.0, 0);
+        hayStack.writePointForCcuUser(stage5HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 35.0, 0);
         hayStack.writeHisValById(stage5HeatingAirflowTempLowerOffsetId, 35.0);
 
         /*Point lightingIntensityOccupancyDetect  = new Point.Builder()
@@ -777,7 +775,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String clockUpdateIntervalId = hayStack.addPoint(clockUpdateInterval);
-        hayStack.writePoint(clockUpdateIntervalId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 15.0, 0);
+        hayStack.writePointForCcuUser(clockUpdateIntervalId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 15.0, 0);
         hayStack.writeHisValById(clockUpdateIntervalId, 15.0);
 
         Point perDegreeHumidityFactor  = new Point.Builder()
@@ -791,7 +789,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String perDegreeHumidityFactorId = hayStack.addPoint(perDegreeHumidityFactor);
-        hayStack.writePoint(perDegreeHumidityFactorId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 10.0, 0);
+        hayStack.writePointForCcuUser(perDegreeHumidityFactorId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 10.0, 0);
         hayStack.writeHisValById(perDegreeHumidityFactorId, 10.0);
 
         Point ccuAlarmVolumeLevel  = new Point.Builder()
@@ -800,11 +798,11 @@ public class BuildingTuners
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
                 .addMarker("alarm").addMarker("volume").addMarker("level").addMarker("sp")
-                .setMinVal("0").setMaxVal("7").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz)
                 .build();
         String ccuAlarmVolumeLevelId = hayStack.addPoint(ccuAlarmVolumeLevel);
-        hayStack.writePoint(ccuAlarmVolumeLevelId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
+        hayStack.writePointForCcuUser(ccuAlarmVolumeLevelId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 0.0, 0);
         hayStack.writeHisValById(ccuAlarmVolumeLevelId, 0.0);
 
         Point cmHeartBeatInterval  = new Point.Builder()
@@ -818,7 +816,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String cmHeartBeatIntervalId = hayStack.addPoint(cmHeartBeatInterval);
-        hayStack.writePoint(cmHeartBeatIntervalId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 1.0, 0);
+        hayStack.writePointForCcuUser(cmHeartBeatIntervalId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 1.0, 0);
         hayStack.writeHisValById(cmHeartBeatIntervalId, 1.0);
 
         Point heartBeatsToSkip  = new Point.Builder()
@@ -831,7 +829,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String heartBeatsToSkipId = hayStack.addPoint(heartBeatsToSkip);
-        hayStack.writePoint(heartBeatsToSkipId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 5.0, 0);
+        hayStack.writePointForCcuUser(heartBeatsToSkipId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 5.0, 0);
         hayStack.writeHisValById(heartBeatsToSkipId, 5.0);
 
         Point rebalanceHoldTime = new Point.Builder()
@@ -845,7 +843,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String rebalanceHoldTimeId = hayStack.addPoint(rebalanceHoldTime);
-        hayStack.writePoint(rebalanceHoldTimeId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", 20.0, 0);
+        hayStack.writePointForCcuUser(rebalanceHoldTimeId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, 20.0, 0);
         hayStack.writeHisValById(rebalanceHoldTimeId, 20.0);
         CCUHsApi.getInstance().syncEntityTree();
     }
@@ -868,7 +866,7 @@ public class BuildingTuners
                                   .setTz(tz)
                                   .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
-        hayStack.writePoint(zonePrioritySpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_PRIORITY_SPREAD, 0);
+        hayStack.writePointForCcuUser(zonePrioritySpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_PRIORITY_SPREAD, 0);
         hayStack.writeHisValById(zonePrioritySpreadId, TunerConstants.ZONE_PRIORITY_SPREAD);
     
         Point zonePriorityMultiplier = new Point.Builder()
@@ -877,11 +875,11 @@ public class BuildingTuners
                                            .setEquipRef(equipRef).setHisInterpolate("cov")
                                            .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("his")
                                            .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
-                                           .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                           .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                            .setTz(tz)
                                            .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
-        hayStack.writePoint(zonePriorityMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_PRIORITY_MULTIPLIER, 0);
+        hayStack.writePointForCcuUser(zonePriorityMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_PRIORITY_MULTIPLIER, 0);
         hayStack.writeHisValById(zonePriorityMultiplierId, TunerConstants.ZONE_PRIORITY_MULTIPLIER);
         
         Point coolingDb = new Point.Builder()
@@ -890,12 +888,12 @@ public class BuildingTuners
                                   .setEquipRef(equipRef).setHisInterpolate("cov")
                                   .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("his")
                                   .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
-                                  .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                  .setMinVal("0").setMaxVal("10").setIncrementVal("0.5").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                   .setUnit("\u00B0F")
                                   .setTz(tz)
                                   .build();
         String coolingDbId = hayStack.addPoint(coolingDb);
-        hayStack.writePoint(coolingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_COOLING_DB, 0);
+        hayStack.writePointForCcuUser(coolingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_COOLING_DB, 0);
         hayStack.writeHisValById(coolingDbId, TunerConstants.VAV_COOLING_DB);
     
         Point coolingDbMultiplier = new Point.Builder()
@@ -908,7 +906,7 @@ public class BuildingTuners
                                   .setTz(tz)
                                   .build();
         String coolingDbMultiplierId = hayStack.addPoint(coolingDbMultiplier);
-        hayStack.writePoint(coolingDbMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_COOLING_DB_MULTPLIER, 0);
+        hayStack.writePointForCcuUser(coolingDbMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_COOLING_DB_MULTPLIER, 0);
         hayStack.writeHisValById(coolingDbMultiplierId, TunerConstants.VAV_COOLING_DB_MULTPLIER);
         
         Point heatingDb = new Point.Builder()
@@ -917,12 +915,12 @@ public class BuildingTuners
                                   .setEquipRef(equipRef).setHisInterpolate("cov")
                                   .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("his")
                                   .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
-                                  .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                  .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                   .setUnit("\u00B0F")
                                   .setTz(tz)
                                   .build();
         String heatingDbId = hayStack.addPoint(heatingDb);
-        hayStack.writePoint(heatingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_HEATING_DB, 0);
+        hayStack.writePointForCcuUser(heatingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_HEATING_DB, 0);
         hayStack.writeHisValById(heatingDbId, TunerConstants.VAV_HEATING_DB);
     
         Point heatingDbMultiplier = new Point.Builder()
@@ -935,7 +933,7 @@ public class BuildingTuners
                                   .setTz(tz)
                                   .build();
         String heatingDbMultiplierId = hayStack.addPoint(heatingDbMultiplier);
-        hayStack.writePoint(heatingDbMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_HEATING_DB_MULTIPLIER, 0);
+        hayStack.writePointForCcuUser(heatingDbMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_HEATING_DB_MULTIPLIER, 0);
         hayStack.writeHisValById(heatingDbMultiplierId, TunerConstants.VAV_HEATING_DB_MULTIPLIER);
         
         Point propGain = new Point.Builder()
@@ -948,7 +946,7 @@ public class BuildingTuners
                                  .setTz(tz)
                                  .build();
         String pgainId = hayStack.addPoint(propGain);
-        hayStack.writePoint(pgainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_PROPORTIONAL_GAIN, 0);
+        hayStack.writePointForCcuUser(pgainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_PROPORTIONAL_GAIN, 0);
         hayStack.writeHisValById(pgainId, TunerConstants.VAV_PROPORTIONAL_GAIN);
         
         Point integralGain = new Point.Builder()
@@ -961,7 +959,7 @@ public class BuildingTuners
                                      .setTz(tz)
                                      .build();
         String igainId = hayStack.addPoint(integralGain);
-        hayStack.writePoint(igainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_INTEGRAL_GAIN, 0);
+        hayStack.writePointForCcuUser(igainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_INTEGRAL_GAIN, 0);
         hayStack.writeHisValById(igainId, TunerConstants.VAV_INTEGRAL_GAIN);
         
         Point propSpread = new Point.Builder()
@@ -974,7 +972,7 @@ public class BuildingTuners
                                    .setTz(tz)
                                    .build();
         String pSpreadId = hayStack.addPoint(propSpread);
-        hayStack.writePoint(pSpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_PROPORTIONAL_SPREAD, 0);
+        hayStack.writePointForCcuUser(pSpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_PROPORTIONAL_SPREAD, 0);
         hayStack.writeHisValById(pSpreadId, TunerConstants.VAV_PROPORTIONAL_SPREAD);
         
         Point integralTimeout = new Point.Builder()
@@ -988,7 +986,7 @@ public class BuildingTuners
                                         .setTz(tz)
                                         .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
-        hayStack.writePoint(iTimeoutId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_INTEGRAL_TIMEOUT, 0);
+        hayStack.writePointForCcuUser(iTimeoutId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_INTEGRAL_TIMEOUT, 0);
         hayStack.writeHisValById(iTimeoutId, TunerConstants.VAV_INTEGRAL_TIMEOUT);
     
         Point valveStartDamper  = new Point.Builder()
@@ -1001,7 +999,7 @@ public class BuildingTuners
                                         .setTz(tz)
                                         .build();
         String valveStartDamperId = hayStack.addPoint(valveStartDamper);
-        hayStack.writePoint(valveStartDamperId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VALVE_START_DAMPER, 0);
+        hayStack.writePointForCcuUser(valveStartDamperId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VALVE_START_DAMPER, 0);
         hayStack.writeHisValById(valveStartDamperId, TunerConstants.VALVE_START_DAMPER);
     
         Point zoneCO2Target  = new Point.Builder()
@@ -1015,7 +1013,7 @@ public class BuildingTuners
                                           .setTz(tz)
                                           .build();
         String zoneCO2TargetId = hayStack.addPoint(zoneCO2Target);
-        hayStack.writePoint(zoneCO2TargetId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_CO2_TARGET, 0);
+        hayStack.writePointForCcuUser(zoneCO2TargetId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_CO2_TARGET, 0);
         hayStack.writeHisValById(zoneCO2TargetId, TunerConstants.ZONE_CO2_TARGET);
     
         Point zoneCO2Threshold  = new Point.Builder()
@@ -1029,7 +1027,7 @@ public class BuildingTuners
                                        .setTz(tz)
                                        .build();
         String zoneCO2ThresholdId = hayStack.addPoint(zoneCO2Threshold);
-        hayStack.writePoint(zoneCO2ThresholdId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_CO2_THRESHOLD, 0);
+        hayStack.writePointForCcuUser(zoneCO2ThresholdId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_CO2_THRESHOLD, 0);
         hayStack.writeHisValById(zoneCO2ThresholdId, TunerConstants.ZONE_CO2_THRESHOLD);
     
         Point zoneVOCTarget  = new Point.Builder()
@@ -1043,7 +1041,7 @@ public class BuildingTuners
                                        .setTz(tz)
                                        .build();
         String zoneVOCTargetId = hayStack.addPoint(zoneVOCTarget);
-        hayStack.writePoint(zoneVOCTargetId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_VOC_TARGET, 0);
+        hayStack.writePointForCcuUser(zoneVOCTargetId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_VOC_TARGET, 0);
         hayStack.writeHisValById(zoneVOCTargetId, TunerConstants.ZONE_VOC_TARGET);
     
         Point zoneVOCThreshold  = new Point.Builder()
@@ -1057,7 +1055,7 @@ public class BuildingTuners
                                           .setTz(tz)
                                           .build();
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
-        hayStack.writePoint(zoneVOCThresholdId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_VOC_THRESHOLD, 0);
+        hayStack.writePointForCcuUser(zoneVOCThresholdId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_VOC_THRESHOLD, 0);
         hayStack.writeHisValById(zoneVOCThresholdId, TunerConstants.ZONE_VOC_THRESHOLD);
 
 
@@ -1071,7 +1069,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String co2IgnoreRequestId = hayStack.addPoint(co2IgnoreRequest);
-        hayStack.writePoint(co2IgnoreRequestId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 2.0, 0);
+        hayStack.writePointForCcuUser(co2IgnoreRequestId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 2.0, 0);
         hayStack.writeHisValById(co2IgnoreRequestId,2.0);
 
         Point co2SPInit = new Point.Builder()
@@ -1085,7 +1083,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String co2SPInitId = hayStack.addPoint(co2SPInit);
-        hayStack.writePoint(co2SPInitId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 800.0, 0);
+        hayStack.writePointForCcuUser(co2SPInitId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 800.0, 0);
         hayStack.writeHisValById(co2SPInitId,800.0);
 
         Point co2SPMax = new Point.Builder()
@@ -1099,7 +1097,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String co2SPMaxId = hayStack.addPoint(co2SPMax);
-        hayStack.writePoint(co2SPMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 1000.0, 0);
+        hayStack.writePointForCcuUser(co2SPMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 1000.0, 0);
         hayStack.writeHisValById(co2SPMaxId,1000.0);
 
         Point co2SPMin = new Point.Builder()
@@ -1113,7 +1111,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String co2SPMinId = hayStack.addPoint(co2SPMin);
-        hayStack.writePoint(co2SPMinId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 800.0,0 );
+        hayStack.writePointForCcuUser(co2SPMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 800.0, 0 );
         hayStack.writeHisValById(co2SPMinId,800.0);
 
         Point co2SPRes = new Point.Builder()
@@ -1127,7 +1125,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String co2SPResId = hayStack.addPoint(co2SPRes);
-        hayStack.writePoint(co2SPResId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",-10.0,0 );
+        hayStack.writePointForCcuUser(co2SPResId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, -10.0, 0 );
         hayStack.writeHisValById(co2SPResId,-10.0);
 
         Point co2SPResMax = new Point.Builder()
@@ -1141,7 +1139,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String co2SPResMaxId = hayStack.addPoint(co2SPResMax);
-        hayStack.writePoint(co2SPResMaxId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -30.0,0 );
+        hayStack.writePointForCcuUser(co2SPResMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, -30.0, 0 );
         hayStack.writeHisValById(co2SPResMaxId,-30.0);
 
         Point co2SPTrim = new Point.Builder()
@@ -1155,7 +1153,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String co2SPTrimId = hayStack.addPoint(co2SPTrim);
-        hayStack.writePoint(co2SPTrimId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 20.0,0 );
+        hayStack.writePointForCcuUser(co2SPTrimId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 20.0, 0 );
         hayStack.writeHisValById(co2SPTrimId,20.0);
 
         Point co2TimeDelay = new Point.Builder()
@@ -1169,7 +1167,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String co2TimeDelayId = hayStack.addPoint(co2TimeDelay);
-        hayStack.writePoint(co2TimeDelayId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",2.0,0 );
+        hayStack.writePointForCcuUser(co2TimeDelayId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 2.0, 0 );
         hayStack.writeHisValById(co2TimeDelayId,2.0);
 
         Point co2TimeInterval = new Point.Builder()
@@ -1178,12 +1176,12 @@ public class BuildingTuners
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("tr").addMarker("default").addMarker("vav").addMarker("sp")
                 .addMarker("co2").addMarker("timeInterval").addMarker("writable").addMarker("his")
-                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                 .setUnit("m")
                 .setTz(tz)
                 .build();
         String co2TimeIntervalId = hayStack.addPoint(co2TimeInterval);
-        hayStack.writePoint(co2TimeIntervalId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 2.0,0 );
+        hayStack.writePointForCcuUser(co2TimeIntervalId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 2.0, 0 );
         hayStack.writeHisValById(co2TimeIntervalId,2.0);
 
         Point satIgnoreRequest = new Point.Builder()
@@ -1196,7 +1194,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String satIgnoreRequestId = hayStack.addPoint(satIgnoreRequest);
-        hayStack.writePoint(satIgnoreRequestId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 2.0,0 );
+        hayStack.writePointForCcuUser(satIgnoreRequestId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 2.0, 0 );
         hayStack.writeHisValById(satIgnoreRequestId,2.0);
 
         Point satSPInit = new Point.Builder()
@@ -1210,7 +1208,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String satSPInitId = hayStack.addPoint(satSPInit);
-        hayStack.writePoint(satSPInitId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 65.0,0 );
+        hayStack.writePointForCcuUser(satSPInitId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 65.0, 0 );
         hayStack.writeHisValById(satSPInitId,65.0);
 
         Point satSPMax = new Point.Builder()
@@ -1224,7 +1222,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String satSPMaxId = hayStack.addPoint(satSPMax);
-        hayStack.writePoint(satSPMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",65.0,0 );
+        hayStack.writePointForCcuUser(satSPMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 65.0, 0 );
         hayStack.writeHisValById(satSPMaxId,65.0);
 
         Point satSPMin = new Point.Builder()
@@ -1238,7 +1236,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String satSPMinId = hayStack.addPoint(satSPMin);
-        hayStack.writePoint(satSPMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",55.0,0 );
+        hayStack.writePointForCcuUser(satSPMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 55.0, 0 );
         hayStack.writeHisValById(satSPMinId,55.0);
 
         Point satSPRes = new Point.Builder()
@@ -1252,7 +1250,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String satSPResId = hayStack.addPoint(satSPRes);
-        hayStack.writePoint(satSPResId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -0.3,0 );
+        hayStack.writePointForCcuUser(satSPResId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, -0.3, 0 );
         hayStack.writeHisValById(satSPResId,-0.3);
 
         Point satSPResMax = new Point.Builder()
@@ -1266,7 +1264,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String satSPResMaxId = hayStack.addPoint(satSPResMax);
-        hayStack.writePoint(satSPResMaxId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -1.0,0 );
+        hayStack.writePointForCcuUser(satSPResMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, -1.0, 0 );
         hayStack.writeHisValById(satSPResMaxId,-1.0);
 
         Point satSPTrim = new Point.Builder()
@@ -1280,7 +1278,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String satSPTrimId = hayStack.addPoint(satSPTrim);
-        hayStack.writePoint(satSPTrimId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 0.2,0 );
+        hayStack.writePointForCcuUser(satSPTrimId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 0.2, 0 );
         hayStack.writeHisValById(satSPTrimId,0.2);
 
         Point satTimeDelay = new Point.Builder()
@@ -1294,7 +1292,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String satTimeDelayId = hayStack.addPoint(satTimeDelay);
-        hayStack.writePoint(satTimeDelayId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 2.0,0);
+        hayStack.writePointForCcuUser(satTimeDelayId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 2.0, 0);
         hayStack.writeHisValById(satTimeDelayId,2.0);
 
         Point satTimeInterval = new Point.Builder()
@@ -1308,7 +1306,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String satTimeIntervalId = hayStack.addPoint(satTimeInterval);
-        hayStack.writePoint(satTimeIntervalId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 2.0,0 );
+        hayStack.writePointForCcuUser(satTimeIntervalId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 2.0, 0 );
         hayStack.writeHisValById(satTimeIntervalId,2.0);
 
         Point staticPressureIgnoreRequest = new Point.Builder()
@@ -1321,7 +1319,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String staticPressureIgnoreRequestId = hayStack.addPoint(staticPressureIgnoreRequest);
-        hayStack.writePoint(staticPressureIgnoreRequestId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",2.0,0 );
+        hayStack.writePointForCcuUser(staticPressureIgnoreRequestId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 2.0, 0 );
         hayStack.writeHisValById(staticPressureIgnoreRequestId,2.0);
 
         Point staticPressureSPInit = new Point.Builder()
@@ -1335,7 +1333,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String staticPressureSPInitId = hayStack.addPoint(staticPressureSPInit);
-        hayStack.writePoint(staticPressureSPInitId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",0.2,0);
+        hayStack.writePointForCcuUser(staticPressureSPInitId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 0.2, 0);
         hayStack.writeHisValById(staticPressureSPInitId,0.2);
 
         Point staticPressureSPMax = new Point.Builder()
@@ -1349,7 +1347,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String staticPressureSPMaxId = hayStack.addPoint(staticPressureSPMax);
-        hayStack.writePoint(staticPressureSPMaxId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 1.0,0 );
+        hayStack.writePointForCcuUser(staticPressureSPMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 1.0, 0 );
         hayStack.writeHisValById(staticPressureSPMaxId,1.0);
 
         Point staticPressureSPMin = new Point.Builder()
@@ -1363,7 +1361,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String staticPressureSPMinId = hayStack.addPoint(staticPressureSPMin);
-        hayStack.writePoint(staticPressureSPMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",0.2 ,0);
+        hayStack.writePointForCcuUser(staticPressureSPMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 0.2 , 0);
         hayStack.writeHisValById(staticPressureSPMinId,0.2);
 
         Point staticPressureSPRes = new Point.Builder()
@@ -1377,7 +1375,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String staticPressureSPResId = hayStack.addPoint(staticPressureSPRes);
-        hayStack.writePoint(staticPressureSPResId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",0.05,0 );
+        hayStack.writePointForCcuUser(staticPressureSPResId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 0.05, 0 );
         hayStack.writeHisValById(staticPressureSPResId,0.05);
 
         Point staticPressureSPResMax = new Point.Builder()
@@ -1391,7 +1389,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String staticPressureSPResMaxId = hayStack.addPoint(staticPressureSPResMax);
-        hayStack.writePoint(staticPressureSPResMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",0.1,0 );
+        hayStack.writePointForCcuUser(staticPressureSPResMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 0.1, 0 );
         hayStack.writeHisValById(staticPressureSPResMaxId,0.1);
 
         Point staticPressureSPTrim = new Point.Builder()
@@ -1405,7 +1403,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String staticPressureSPTrimId = hayStack.addPoint(staticPressureSPTrim);
-        hayStack.writePoint(staticPressureSPTrimId,TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -0.02 ,0);
+        hayStack.writePointForCcuUser(staticPressureSPTrimId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, -0.02 , 0);
         hayStack.writeHisValById(staticPressureSPTrimId,-0.02);
 
         Point staticPressureTimeDelay = new Point.Builder()
@@ -1419,7 +1417,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String staticPressureTimeDelayId = hayStack.addPoint(staticPressureTimeDelay);
-        hayStack.writePoint(staticPressureTimeDelayId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",2.0,0 );
+        hayStack.writePointForCcuUser(staticPressureTimeDelayId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 2.0, 0 );
         hayStack.writeHisValById(staticPressureTimeDelayId,2.0);
 
         Point staticPressureTimeInterval = new Point.Builder()
@@ -1433,7 +1431,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String staticPressureTimeIntervalId = hayStack.addPoint(staticPressureTimeInterval);
-        hayStack.writePoint(staticPressureTimeIntervalId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",2.0 ,0);
+        hayStack.writePointForCcuUser(staticPressureTimeIntervalId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 2.0 , 0);
         hayStack.writeHisValById(staticPressureTimeIntervalId,2.0);
         addDefaultVavSystemTuners();
         
@@ -1453,7 +1451,7 @@ public class BuildingTuners
                                                .setTz(tz)
                                                .build();
         String targetCumulativeDamperId = hayStack.addPoint(targetCumulativeDamper);
-        hayStack.writePoint(targetCumulativeDamperId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.TARGET_CUMULATIVE_DAMPER, 0);
+        hayStack.writePointForCcuUser(targetCumulativeDamperId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.TARGET_CUMULATIVE_DAMPER, 0);
         hayStack.writeHisValById(targetCumulativeDamperId, TunerConstants.TARGET_CUMULATIVE_DAMPER);
     
         Point analogFanSpeedMultiplier = new Point.Builder()
@@ -1466,7 +1464,7 @@ public class BuildingTuners
                                                .setTz(tz)
                                                .build();
         String analogFanSpeedMultiplierId = hayStack.addPoint(analogFanSpeedMultiplier);
-        hayStack.writePoint(analogFanSpeedMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ANALOG_FANSPEED_MULTIPLIER, 0);
+        hayStack.writePointForCcuUser(analogFanSpeedMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.ANALOG_FANSPEED_MULTIPLIER, 0);
         hayStack.writeHisValById(analogFanSpeedMultiplierId, TunerConstants.ANALOG_FANSPEED_MULTIPLIER);
     
         Point humidityHysteresis = new Point.Builder()
@@ -1480,7 +1478,7 @@ public class BuildingTuners
                                                  .setTz(tz)
                                                  .build();
         String humidityHysteresisId = hayStack.addPoint(humidityHysteresis);
-        hayStack.writePoint(humidityHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.HUMIDITY_HYSTERESIS_PERCENT, 0);
+        hayStack.writePointForCcuUser(humidityHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.HUMIDITY_HYSTERESIS_PERCENT, 0);
         hayStack.writeHisValById(humidityHysteresisId, TunerConstants.HUMIDITY_HYSTERESIS_PERCENT);
     
         Point relayDeactivationHysteresis = new Point.Builder()
@@ -1494,7 +1492,7 @@ public class BuildingTuners
                                            .setTz(tz)
                                            .build();
         String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
-        hayStack.writePoint(relayDeactivationHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.RELAY_DEACTIVATION_HYSTERESIS, 0);
+        hayStack.writePointForCcuUser(relayDeactivationHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.RELAY_DEACTIVATION_HYSTERESIS, 0);
         hayStack.writeHisValById(relayDeactivationHysteresisId, TunerConstants.RELAY_DEACTIVATION_HYSTERESIS);
         
     }
@@ -1604,7 +1602,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("writable").addMarker("his")
                 .addMarker("zone").addMarker("adr").addMarker("cooling").addMarker("deadband").addMarker("sp")
-                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -1628,7 +1626,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("writable").addMarker("his")
                 .addMarker("zone").addMarker("adr").addMarker("heating").addMarker("deadband").addMarker("sp")
-                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -1652,7 +1650,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("writable").addMarker("his")
                 .addMarker("zone").addMarker("sn").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("sp")
-                .setMinVal("35").setMaxVal("70").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                .setMinVal("35").setMaxVal("75").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -1676,7 +1674,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("writable").addMarker("his")
                 .addMarker("zone").addMarker("sn").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("sp")
-                .setMinVal("80").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                .setMinVal("65").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -1827,7 +1825,7 @@ public class BuildingTuners
                                            .setFloorRef(floorRef).setHisInterpolate("cov")
                                            .addMarker("tuner").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("his")
                                            .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
-                                           .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                           .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                            .setTz(tz)
                                            .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
@@ -1850,7 +1848,7 @@ public class BuildingTuners
                                   .setFloorRef(floorRef).setHisInterpolate("cov")
                                   .addMarker("tuner").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("his")
                                   .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
-                                  .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                  .setMinVal("0").setMaxVal("10").setIncrementVal("0.5").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                   .setTz(tz)
                                   .setUnit("\u00B0F")
                                   .build();
@@ -1897,7 +1895,7 @@ public class BuildingTuners
                                   .setFloorRef(floorRef).setHisInterpolate("cov")
                                   .addMarker("tuner").addMarker("vav").addMarker(fanMarker).addMarker("writable").addMarker("his")
                                   .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
-                                  .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                  .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                   .setTz(tz)
                                   .setUnit("\u00B0F")
                                   .build();
@@ -2151,7 +2149,7 @@ public class BuildingTuners
                                  .setTz(tz)
                                  .build();
         String pgainId = hayStack.addPoint(propGain);
-        hayStack.writePoint(pgainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_PROPORTIONAL_GAIN, 0);
+        hayStack.writePointForCcuUser(pgainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_PROPORTIONAL_GAIN, 0);
         hayStack.writeHisValById(pgainId, TunerConstants.VAV_PROPORTIONAL_GAIN);
     
         Point integralGain = new Point.Builder()
@@ -2164,7 +2162,7 @@ public class BuildingTuners
                                      .setTz(tz)
                                      .build();
         String igainId = hayStack.addPoint(integralGain);
-        hayStack.writePoint(igainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_INTEGRAL_GAIN, 0);
+        hayStack.writePointForCcuUser(igainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_INTEGRAL_GAIN, 0);
         hayStack.writeHisValById(igainId, TunerConstants.VAV_INTEGRAL_GAIN);
     
         Point integralTimeout = new Point.Builder()
@@ -2178,7 +2176,7 @@ public class BuildingTuners
                                         .setTz(tz)
                                         .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
-        hayStack.writePoint(iTimeoutId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_INTEGRAL_TIMEOUT, 0);
+        hayStack.writePointForCcuUser(iTimeoutId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_INTEGRAL_TIMEOUT, 0);
         hayStack.writeHisValById(iTimeoutId, TunerConstants.VAV_INTEGRAL_TIMEOUT);
     }
     
@@ -2272,7 +2270,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
-        hayStack.writePoint(zonePrioritySpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_PRIORITY_SPREAD, 0);
+        hayStack.writePointForCcuUser(zonePrioritySpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_PRIORITY_SPREAD, 0);
         hayStack.writeHisValById(zonePrioritySpreadId, TunerConstants.ZONE_PRIORITY_SPREAD);
 
         Point zonePriorityMultiplier = new Point.Builder()
@@ -2281,11 +2279,11 @@ public class BuildingTuners
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("ti").addMarker("writable").addMarker("his")
                 .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
-                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.TI_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.TI_TUNER_GROUP)
                 .setTz(tz)
                 .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
-        hayStack.writePoint(zonePriorityMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_PRIORITY_MULTIPLIER, 0);
+        hayStack.writePointForCcuUser(zonePriorityMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_PRIORITY_MULTIPLIER, 0);
         hayStack.writeHisValById(zonePriorityMultiplierId, TunerConstants.ZONE_PRIORITY_MULTIPLIER);
 
         Point coolingDb = new Point.Builder()
@@ -2294,12 +2292,12 @@ public class BuildingTuners
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("ti").addMarker("writable").addMarker("his")
                 .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
-                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.TI_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.TI_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
         String coolingDbId = hayStack.addPoint(coolingDb);
-        hayStack.writePoint(coolingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_COOLING_DB, 0);
+        hayStack.writePointForCcuUser(coolingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_COOLING_DB, 0);
         hayStack.writeHisValById(coolingDbId, TunerConstants.VAV_COOLING_DB);
 
         Point coolingDbMultiplier = new Point.Builder()
@@ -2312,7 +2310,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String coolingDbMultiplierId = hayStack.addPoint(coolingDbMultiplier);
-        hayStack.writePoint(coolingDbMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_COOLING_DB_MULTPLIER, 0);
+        hayStack.writePointForCcuUser(coolingDbMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_COOLING_DB_MULTPLIER, 0);
         hayStack.writeHisValById(coolingDbMultiplierId, TunerConstants.VAV_COOLING_DB_MULTPLIER);
 
         Point heatingDb = new Point.Builder()
@@ -2321,12 +2319,12 @@ public class BuildingTuners
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("ti").addMarker("writable").addMarker("his")
                 .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
-                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.TI_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.TI_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
         String heatingDbId = hayStack.addPoint(heatingDb);
-        hayStack.writePoint(heatingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_HEATING_DB, 0);
+        hayStack.writePointForCcuUser(heatingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_HEATING_DB, 0);
         hayStack.writeHisValById(heatingDbId, TunerConstants.VAV_HEATING_DB);
 
         Point heatingDbMultiplier = new Point.Builder()
@@ -2339,7 +2337,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String heatingDbMultiplierId = hayStack.addPoint(heatingDbMultiplier);
-        hayStack.writePoint(heatingDbMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_HEATING_DB_MULTIPLIER, 0);
+        hayStack.writePointForCcuUser(heatingDbMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_HEATING_DB_MULTIPLIER, 0);
         hayStack.writeHisValById(heatingDbMultiplierId, TunerConstants.VAV_HEATING_DB_MULTIPLIER);
 
         Point propGain = new Point.Builder()
@@ -2352,7 +2350,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String pgainId = hayStack.addPoint(propGain);
-        hayStack.writePoint(pgainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_PROPORTIONAL_GAIN, 0);
+        hayStack.writePointForCcuUser(pgainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_PROPORTIONAL_GAIN, 0);
         hayStack.writeHisValById(pgainId, TunerConstants.VAV_PROPORTIONAL_GAIN);
 
         Point integralGain = new Point.Builder()
@@ -2365,7 +2363,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String igainId = hayStack.addPoint(integralGain);
-        hayStack.writePoint(igainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_INTEGRAL_GAIN, 0);
+        hayStack.writePointForCcuUser(igainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_INTEGRAL_GAIN, 0);
         hayStack.writeHisValById(igainId, TunerConstants.VAV_INTEGRAL_GAIN);
 
         Point propSpread = new Point.Builder()
@@ -2378,7 +2376,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String pSpreadId = hayStack.addPoint(propSpread);
-        hayStack.writePoint(pSpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_PROPORTIONAL_SPREAD, 0);
+        hayStack.writePointForCcuUser(pSpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_PROPORTIONAL_SPREAD, 0);
         hayStack.writeHisValById(pSpreadId, TunerConstants.VAV_PROPORTIONAL_SPREAD);
 
         Point integralTimeout = new Point.Builder()
@@ -2392,7 +2390,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
-        hayStack.writePoint(iTimeoutId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_INTEGRAL_TIMEOUT, 0);
+        hayStack.writePointForCcuUser(iTimeoutId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_INTEGRAL_TIMEOUT, 0);
         hayStack.writeHisValById(iTimeoutId, TunerConstants.VAV_INTEGRAL_TIMEOUT);
 
     }
@@ -2415,7 +2413,7 @@ public class BuildingTuners
                                            .setTz(tz)
                                            .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
-        hayStack.writePoint(zonePrioritySpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_PRIORITY_SPREAD, 0);
+        hayStack.writePointForCcuUser(zonePrioritySpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_PRIORITY_SPREAD, 0);
         hayStack.writeHisValById(zonePrioritySpreadId, TunerConstants.ZONE_PRIORITY_SPREAD);
     
         Point zonePriorityMultiplier = new Point.Builder()
@@ -2424,11 +2422,11 @@ public class BuildingTuners
                                                .setEquipRef(equipRef).setHisInterpolate("cov")
                                                .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
                                                .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
-                                               .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                               .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                                .setTz(tz)
                                                .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
-        hayStack.writePoint(zonePriorityMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_PRIORITY_MULTIPLIER, 0);
+        hayStack.writePointForCcuUser(zonePriorityMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_PRIORITY_MULTIPLIER, 0);
         hayStack.writeHisValById(zonePriorityMultiplierId, TunerConstants.ZONE_PRIORITY_MULTIPLIER);
     
         Point coolingDb = new Point.Builder()
@@ -2437,12 +2435,12 @@ public class BuildingTuners
                                   .setEquipRef(equipRef).setHisInterpolate("cov")
                                   .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
                                   .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
-                                  .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                  .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                   .setUnit("\u00B0F")
                                   .setTz(tz)
                                   .build();
         String coolingDbId = hayStack.addPoint(coolingDb);
-        hayStack.writePoint(coolingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_COOLING_DB, 0);
+        hayStack.writePointForCcuUser(coolingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_COOLING_DB, 0);
         hayStack.writeHisValById(coolingDbId, TunerConstants.VAV_COOLING_DB);
     
         Point coolingDbMultiplier = new Point.Builder()
@@ -2455,7 +2453,7 @@ public class BuildingTuners
                                             .setTz(tz)
                                             .build();
         String coolingDbMultiplierId = hayStack.addPoint(coolingDbMultiplier);
-        hayStack.writePoint(coolingDbMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_COOLING_DB_MULTPLIER, 0);
+        hayStack.writePointForCcuUser(coolingDbMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_COOLING_DB_MULTPLIER, 0);
         hayStack.writeHisValById(coolingDbMultiplierId, TunerConstants.VAV_COOLING_DB_MULTPLIER);
     
         Point heatingDb = new Point.Builder()
@@ -2464,12 +2462,12 @@ public class BuildingTuners
                                   .setEquipRef(equipRef).setHisInterpolate("cov")
                                   .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
                                   .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
-                                  .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                  .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                   .setUnit("\u00B0F")
                                   .setTz(tz)
                                   .build();
         String heatingDbId = hayStack.addPoint(heatingDb);
-        hayStack.writePoint(heatingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_HEATING_DB, 0);
+        hayStack.writePointForCcuUser(heatingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_HEATING_DB, 0);
         hayStack.writeHisValById(heatingDbId, TunerConstants.VAV_HEATING_DB);
     
         Point heatingDbMultiplier = new Point.Builder()
@@ -2482,7 +2480,7 @@ public class BuildingTuners
                                             .setTz(tz)
                                             .build();
         String heatingDbMultiplierId = hayStack.addPoint(heatingDbMultiplier);
-        hayStack.writePoint(heatingDbMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_HEATING_DB_MULTIPLIER, 0);
+        hayStack.writePointForCcuUser(heatingDbMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_HEATING_DB_MULTIPLIER, 0);
         hayStack.writeHisValById(heatingDbMultiplierId, TunerConstants.VAV_HEATING_DB_MULTIPLIER);
     
         Point propGain = new Point.Builder()
@@ -2495,7 +2493,7 @@ public class BuildingTuners
                                  .setTz(tz)
                                  .build();
         String pgainId = hayStack.addPoint(propGain);
-        hayStack.writePoint(pgainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_PROPORTIONAL_GAIN, 0);
+        hayStack.writePointForCcuUser(pgainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_PROPORTIONAL_GAIN, 0);
         hayStack.writeHisValById(pgainId, TunerConstants.VAV_PROPORTIONAL_GAIN);
     
         Point integralGain = new Point.Builder()
@@ -2508,7 +2506,7 @@ public class BuildingTuners
                                      .setTz(tz)
                                      .build();
         String igainId = hayStack.addPoint(integralGain);
-        hayStack.writePoint(igainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_INTEGRAL_GAIN, 0);
+        hayStack.writePointForCcuUser(igainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_INTEGRAL_GAIN, 0);
         hayStack.writeHisValById(igainId, TunerConstants.VAV_INTEGRAL_GAIN);
     
         Point propSpread = new Point.Builder()
@@ -2521,7 +2519,7 @@ public class BuildingTuners
                                    .setTz(tz)
                                    .build();
         String pSpreadId = hayStack.addPoint(propSpread);
-        hayStack.writePoint(pSpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_PROPORTIONAL_SPREAD, 0);
+        hayStack.writePointForCcuUser(pSpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_PROPORTIONAL_SPREAD, 0);
         hayStack.writeHisValById(pSpreadId, TunerConstants.VAV_PROPORTIONAL_SPREAD);
     
         Point integralTimeout = new Point.Builder()
@@ -2535,7 +2533,7 @@ public class BuildingTuners
                                         .setTz(tz)
                                         .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
-        hayStack.writePoint(iTimeoutId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_INTEGRAL_TIMEOUT, 0);
+        hayStack.writePointForCcuUser(iTimeoutId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_INTEGRAL_TIMEOUT, 0);
         hayStack.writeHisValById(iTimeoutId, TunerConstants.VAV_INTEGRAL_TIMEOUT);
     
         Point zoneCO2Target  = new Point.Builder()
@@ -2549,7 +2547,7 @@ public class BuildingTuners
                                        .setTz(tz)
                                        .build();
         String zoneCO2TargetId = hayStack.addPoint(zoneCO2Target);
-        hayStack.writePoint(zoneCO2TargetId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_CO2_TARGET, 0);
+        hayStack.writePointForCcuUser(zoneCO2TargetId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_CO2_TARGET, 0);
         hayStack.writeHisValById(zoneCO2TargetId, TunerConstants.ZONE_CO2_TARGET);
     
         Point zoneCO2Threshold  = new Point.Builder()
@@ -2563,7 +2561,7 @@ public class BuildingTuners
                                           .setTz(tz)
                                           .build();
         String zoneCO2ThresholdId = hayStack.addPoint(zoneCO2Threshold);
-        hayStack.writePoint(zoneCO2ThresholdId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_CO2_THRESHOLD, 0);
+        hayStack.writePointForCcuUser(zoneCO2ThresholdId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_CO2_THRESHOLD, 0);
         hayStack.writeHisValById(zoneCO2ThresholdId, TunerConstants.ZONE_CO2_THRESHOLD);
     
         Point zoneVOCTarget  = new Point.Builder()
@@ -2577,7 +2575,7 @@ public class BuildingTuners
                                        .setTz(tz)
                                        .build();
         String zoneVOCTargetId = hayStack.addPoint(zoneVOCTarget);
-        hayStack.writePoint(zoneVOCTargetId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_VOC_TARGET, 0);
+        hayStack.writePointForCcuUser(zoneVOCTargetId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_VOC_TARGET, 0);
         hayStack.writeHisValById(zoneVOCTargetId, TunerConstants.ZONE_VOC_TARGET);
     
         Point zoneVOCThreshold  = new Point.Builder()
@@ -2591,7 +2589,7 @@ public class BuildingTuners
                                           .setTz(tz)
                                           .build();
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
-        hayStack.writePoint(zoneVOCThresholdId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_VOC_THRESHOLD, 0);
+        hayStack.writePointForCcuUser(zoneVOCThresholdId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_VOC_THRESHOLD, 0);
         hayStack.writeHisValById(zoneVOCThresholdId, TunerConstants.ZONE_VOC_THRESHOLD);
     
         addDefaultDabSystemTuners();
@@ -2610,7 +2608,7 @@ public class BuildingTuners
                                                .setTz(tz)
                                                .build();
         String targetCumulativeDamperId = hayStack.addPoint(targetCumulativeDamper);
-        hayStack.writePoint(targetCumulativeDamperId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.TARGET_CUMULATIVE_DAMPER, 0);
+        hayStack.writePointForCcuUser(targetCumulativeDamperId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.TARGET_CUMULATIVE_DAMPER, 0);
         hayStack.writeHisValById(targetCumulativeDamperId, TunerConstants.TARGET_CUMULATIVE_DAMPER);
         
         Point analogFanSpeedMultiplier = new Point.Builder()
@@ -2623,7 +2621,7 @@ public class BuildingTuners
                                                  .setTz(tz)
                                                  .build();
         String analogFanSpeedMultiplierId = hayStack.addPoint(analogFanSpeedMultiplier);
-        hayStack.writePoint(analogFanSpeedMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ANALOG_FANSPEED_MULTIPLIER, 0);
+        hayStack.writePointForCcuUser(analogFanSpeedMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.ANALOG_FANSPEED_MULTIPLIER, 0);
         hayStack.writeHisValById(analogFanSpeedMultiplierId, TunerConstants.ANALOG_FANSPEED_MULTIPLIER);
         
         Point humidityHysteresis = new Point.Builder()
@@ -2637,7 +2635,7 @@ public class BuildingTuners
                                            .setTz(tz)
                                            .build();
         String humidityHysteresisId = hayStack.addPoint(humidityHysteresis);
-        hayStack.writePoint(humidityHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.HUMIDITY_HYSTERESIS_PERCENT, 0);
+        hayStack.writePointForCcuUser(humidityHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.HUMIDITY_HYSTERESIS_PERCENT, 0);
         hayStack.writeHisValById(humidityHysteresisId, TunerConstants.HUMIDITY_HYSTERESIS_PERCENT);
         
         Point relayDeactivationHysteresis = new Point.Builder()
@@ -2651,7 +2649,7 @@ public class BuildingTuners
                                                     .setTz(tz)
                                                     .build();
         String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
-        hayStack.writePoint(relayDeactivationHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.RELAY_DEACTIVATION_HYSTERESIS, 0);
+        hayStack.writePointForCcuUser(relayDeactivationHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.RELAY_DEACTIVATION_HYSTERESIS, 0);
         hayStack.writeHisValById(relayDeactivationHysteresisId, TunerConstants.RELAY_DEACTIVATION_HYSTERESIS);
 
     }
@@ -2692,7 +2690,7 @@ public class BuildingTuners
                                                .setFloorRef(floorRef).setHisInterpolate("cov")
                                                .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
                                                .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
-                                               .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                               .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                                .setTz(tz)
                                                .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
@@ -2715,7 +2713,7 @@ public class BuildingTuners
                                   .setFloorRef(floorRef).setHisInterpolate("cov")
                                   .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
                                   .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
-                                  .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                  .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                   .setTz(tz)
                                   .setUnit("\u00B0F")
                                   .build();
@@ -2762,7 +2760,7 @@ public class BuildingTuners
                                   .setFloorRef(floorRef).setHisInterpolate("cov")
                                   .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
                                   .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
-                                  .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                  .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                   .setTz(tz)
                                   .setUnit("\u00B0F")
                                   .build();
@@ -3039,7 +3037,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("ti").addMarker("writable").addMarker("his")
                 .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
-                .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.TI_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.TI_TUNER_GROUP)
                 .setTz(tz)
                 .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
@@ -3062,7 +3060,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("ti").addMarker("writable").addMarker("his")
                 .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
-                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.TI_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.TI_TUNER_GROUP)
                 .setTz(tz)
                 .setUnit("\u00B0F")
                 .build();
@@ -3109,7 +3107,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("ti").addMarker("writable").addMarker("his")
                 .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
-                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.TI_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.TI_TUNER_GROUP)
                 .setTz(tz)
                 .setUnit("\u00B0F")
                 .build();
@@ -3246,7 +3244,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("base").addMarker("writable").addMarker("his")
                 .addMarker("standalone").addMarker("heating").addMarker("deadband").addMarker("sp")
-                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -3269,7 +3267,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
                 .addMarker("cooling").addMarker("deadband").addMarker("sp")
-                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -3293,7 +3291,7 @@ public class BuildingTuners
                 .setFloorRef(floorRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
                 .addMarker("stage1").addMarker("hysteresis").addMarker("sp")
-                .setMinVal("0.5").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("%")
                 .setTz(tz)
                 .build();
@@ -3646,12 +3644,12 @@ public class BuildingTuners
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("base").addMarker("writable").addMarker("his")
                 .addMarker("standalone").addMarker("heating").addMarker("deadband").addMarker("sp")
-                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
         String saHeatingDeadBandId = hayStack.addPoint(saHeatingDeadBand);
-        hayStack.writePoint(saHeatingDeadBandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_HEATING_DEADBAND_DEFAULT, 0);
+        hayStack.writePointForCcuUser(saHeatingDeadBandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_HEATING_DEADBAND_DEFAULT, 0);
         hayStack.writeHisValById(saHeatingDeadBandId, TunerConstants.STANDALONE_HEATING_DEADBAND_DEFAULT);
 
         Point saCoolingDeadBand = new Point.Builder()
@@ -3660,12 +3658,12 @@ public class BuildingTuners
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
                 .addMarker("cooling").addMarker("deadband").addMarker("sp")
-                .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
         String saCoolingDeadBandId = hayStack.addPoint(saCoolingDeadBand);
-        hayStack.writePoint(saCoolingDeadBandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_COOLING_DEADBAND_DEFAULT, 0);
+        hayStack.writePointForCcuUser(saCoolingDeadBandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_COOLING_DEADBAND_DEFAULT, 0);
         hayStack.writeHisValById(saCoolingDeadBandId, TunerConstants.STANDALONE_COOLING_DEADBAND_DEFAULT);
         Point saStage1Hysteresis = new Point.Builder()
                 .setDisplayName(equipDis+"-standaloneStage1Hysteresis")
@@ -3673,11 +3671,11 @@ public class BuildingTuners
                 .setEquipRef(equipRef).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
                 .addMarker("stage1").addMarker("hysteresis").addMarker("sp")
-                .setMinVal("0.5").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("0").setMaxVal("10").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz)
                 .build();
         String saStage1HysteresisId = hayStack.addPoint(saStage1Hysteresis);
-        hayStack.writePoint(saStage1HysteresisId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_STAGE1_HYSTERESIS_DEFAULT, 0);
+        hayStack.writePointForCcuUser(saStage1HysteresisId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_STAGE1_HYSTERESIS_DEFAULT, 0);
         hayStack.writeHisValById(saStage1HysteresisId, TunerConstants.STANDALONE_STAGE1_HYSTERESIS_DEFAULT);
 
         Point saAirflowSampleWaitTime = new Point.Builder()
@@ -3690,7 +3688,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String saAirflowSampleWaitTimeId = hayStack.addPoint(saAirflowSampleWaitTime);
-        hayStack.writePoint(saAirflowSampleWaitTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME, 0);
+        hayStack.writePointForCcuUser(saAirflowSampleWaitTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME, 0);
         hayStack.writeHisValById(saAirflowSampleWaitTimeId, TunerConstants.STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME);
 
         Point saStage1CoolingLowerOffset = new Point.Builder()
@@ -3703,7 +3701,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String saStage1CoolingLowerOffsetId = hayStack.addPoint(saStage1CoolingLowerOffset);
-        hayStack.writePoint(saStage1CoolingLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_COOLING_STAGE1_LOWER_OFFSET, 0);
+        hayStack.writePointForCcuUser(saStage1CoolingLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_COOLING_STAGE1_LOWER_OFFSET, 0);
         hayStack.writeHisValById(saStage1CoolingLowerOffsetId, TunerConstants.STANDALONE_COOLING_STAGE1_LOWER_OFFSET);
 
         Point saStage1CoolingUpperOffset = new Point.Builder()
@@ -3716,7 +3714,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String saStage1CoolingUpperOffsetId = hayStack.addPoint(saStage1CoolingUpperOffset);
-        hayStack.writePoint(saStage1CoolingUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_COOLING_STAGE1_UPPER_OFFSET, 0);
+        hayStack.writePointForCcuUser(saStage1CoolingUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_COOLING_STAGE1_UPPER_OFFSET, 0);
         hayStack.writeHisValById(saStage1CoolingUpperOffsetId, TunerConstants.STANDALONE_COOLING_STAGE1_UPPER_OFFSET);
 
         Point saStage1HeatingLowerOffset = new Point.Builder()
@@ -3729,7 +3727,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String saStage1HeatingLowerOffsetId = hayStack.addPoint(saStage1HeatingLowerOffset);
-        hayStack.writePoint(saStage1HeatingLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_HEATING_STAGE1_LOWER_OFFSET, 0);
+        hayStack.writePointForCcuUser(saStage1HeatingLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_HEATING_STAGE1_LOWER_OFFSET, 0);
         hayStack.writeHisValById(saStage1HeatingLowerOffsetId, TunerConstants.STANDALONE_HEATING_STAGE1_LOWER_OFFSET);
 
         Point saStage1HeatingUpperOffset = new Point.Builder()
@@ -3742,7 +3740,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String saStage1HeatingUpperOffsetId = hayStack.addPoint(saStage1HeatingUpperOffset);
-        hayStack.writePoint(saStage1HeatingUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_HEATING_STAGE1_UPPER_OFFSET, 0);
+        hayStack.writePointForCcuUser(saStage1HeatingUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_HEATING_STAGE1_UPPER_OFFSET, 0);
         hayStack.writeHisValById(saStage1HeatingUpperOffsetId, TunerConstants.STANDALONE_HEATING_STAGE1_UPPER_OFFSET);
 
         Point standaloneCoolingPreconditioningRate  = new Point.Builder()
@@ -3756,7 +3754,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String standaloneCoolingPreconditioningRateId = hayStack.addPoint(standaloneCoolingPreconditioningRate);
-        hayStack.writePoint(standaloneCoolingPreconditioningRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_COOLING_PRECONDITIONING_RATE, 0);
+        hayStack.writePointForCcuUser(standaloneCoolingPreconditioningRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_COOLING_PRECONDITIONING_RATE, 0);
         hayStack.writeHisValById(standaloneCoolingPreconditioningRateId, TunerConstants.STANDALONE_COOLING_PRECONDITIONING_RATE);
 
         Point standaloneHeatingPreconditioningRate  = new Point.Builder()
@@ -3770,7 +3768,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String standaloneHeatingPreconditioningRateId = hayStack.addPoint(standaloneHeatingPreconditioningRate);
-        hayStack.writePoint(standaloneHeatingPreconditioningRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_HEATING_PRECONDITIONING_RATE, 0);
+        hayStack.writePointForCcuUser(standaloneHeatingPreconditioningRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_HEATING_PRECONDITIONING_RATE, 0);
         hayStack.writeHisValById(standaloneHeatingPreconditioningRateId, TunerConstants.STANDALONE_HEATING_PRECONDITIONING_RATE);
 
 
@@ -3785,7 +3783,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String zoneCO2TargetId = hayStack.addPoint(zoneCO2Target);
-        hayStack.writePoint(zoneCO2TargetId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_CO2_TARGET, 0);
+        hayStack.writePointForCcuUser(zoneCO2TargetId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_CO2_TARGET, 0);
         hayStack.writeHisValById(zoneCO2TargetId, TunerConstants.ZONE_CO2_TARGET);
 
         Point zoneCO2Threshold  = new Point.Builder()
@@ -3799,7 +3797,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String zoneCO2ThresholdId = hayStack.addPoint(zoneCO2Threshold);
-        hayStack.writePoint(zoneCO2ThresholdId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_CO2_THRESHOLD, 0);
+        hayStack.writePointForCcuUser(zoneCO2ThresholdId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_CO2_THRESHOLD, 0);
         hayStack.writeHisValById(zoneCO2ThresholdId, TunerConstants.ZONE_CO2_THRESHOLD);
 
         Point zoneVOCTarget  = new Point.Builder()
@@ -3813,7 +3811,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String zoneVOCTargetId = hayStack.addPoint(zoneVOCTarget);
-        hayStack.writePoint(zoneVOCTargetId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_VOC_TARGET, 0);
+        hayStack.writePointForCcuUser(zoneVOCTargetId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_VOC_TARGET, 0);
         hayStack.writeHisValById(zoneVOCTargetId, TunerConstants.ZONE_VOC_TARGET);
 
         Point zoneVOCThreshold  = new Point.Builder()
@@ -3827,7 +3825,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
-        hayStack.writePoint(zoneVOCThresholdId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_VOC_THRESHOLD, 0);
+        hayStack.writePointForCcuUser(zoneVOCThresholdId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_VOC_THRESHOLD, 0);
         hayStack.writeHisValById(zoneVOCThresholdId, TunerConstants.ZONE_VOC_THRESHOLD);
 
 
@@ -3842,7 +3840,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String sa2PfcHeatingThresholdId = hayStack.addPoint(sa2PfcHeatingThreshold);
-        hayStack.writePoint(sa2PfcHeatingThresholdId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_HEATING_THRESHOLD_2PFCU_DEFAULT, 0);
+        hayStack.writePointForCcuUser(sa2PfcHeatingThresholdId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_HEATING_THRESHOLD_2PFCU_DEFAULT, 0);
         hayStack.writeHisValById(sa2PfcHeatingThresholdId, TunerConstants.STANDALONE_HEATING_THRESHOLD_2PFCU_DEFAULT);
 
         Point sa2PfcCoolingThreshold = new Point.Builder()
@@ -3856,7 +3854,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String sa2PfcCoolingThresholdId = hayStack.addPoint(sa2PfcCoolingThreshold);
-        hayStack.writePoint(sa2PfcCoolingThresholdId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_COOLING_THRESHOLD_2PFCU_DEFAULT, 0);
+        hayStack.writePointForCcuUser(sa2PfcCoolingThresholdId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_COOLING_THRESHOLD_2PFCU_DEFAULT, 0);
         hayStack.writeHisValById(sa2PfcCoolingThresholdId, TunerConstants.STANDALONE_COOLING_THRESHOLD_2PFCU_DEFAULT);
         Point standaloneCoolingAirflowTempLowerOffset = new Point.Builder()
                 .setDisplayName(equipDis+"-standaloneStage2CoolingLowerOffset")
@@ -3869,7 +3867,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String standaloneCoolingAirflowTempLowerOffsetId = hayStack.addPoint(standaloneCoolingAirflowTempLowerOffset);
-        hayStack.writePoint(standaloneCoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_COOLING_STAGE2_LOWER_OFFSET, 0);
+        hayStack.writePointForCcuUser(standaloneCoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_COOLING_STAGE2_LOWER_OFFSET, 0);
         hayStack.writeHisValById(standaloneCoolingAirflowTempLowerOffsetId, TunerConstants.STANDALONE_COOLING_STAGE2_LOWER_OFFSET);
 
         Point standaloneCoolingAirflowTempUpperOffset = new Point.Builder()
@@ -3883,7 +3881,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String standaloneCoolingAirflowTempUpperOffsetId = hayStack.addPoint(standaloneCoolingAirflowTempUpperOffset);
-        hayStack.writePoint(standaloneCoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_COOLING_STAGE2_UPPER_OFFSET, 0);
+        hayStack.writePointForCcuUser(standaloneCoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_COOLING_STAGE2_UPPER_OFFSET, 0);
         hayStack.writeHisValById(standaloneCoolingAirflowTempUpperOffsetId, TunerConstants.STANDALONE_COOLING_STAGE2_UPPER_OFFSET);
 
         Point standaloneHeatingAirflowTempUpperOffset = new Point.Builder()
@@ -3897,7 +3895,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String standaloneHeatingAirflowTempUpperOffsetId = hayStack.addPoint(standaloneHeatingAirflowTempUpperOffset);
-        hayStack.writePoint(standaloneHeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_HEATING_STAGE2_UPPER_OFFSET, 0);
+        hayStack.writePointForCcuUser(standaloneHeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_HEATING_STAGE2_UPPER_OFFSET, 0);
         hayStack.writeHisValById(standaloneHeatingAirflowTempUpperOffsetId, TunerConstants.STANDALONE_HEATING_STAGE2_UPPER_OFFSET);
 
         Point standaloneHeatingAirflowTempLowerOffset = new Point.Builder()
@@ -3911,7 +3909,7 @@ public class BuildingTuners
                 .setTz(tz)
                 .build();
         String standaloneHeatingAirflowTempLowerOffsetId = hayStack.addPoint(standaloneHeatingAirflowTempLowerOffset);
-        hayStack.writePoint(standaloneHeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_HEATING_STAGE1_LOWER_OFFSET, 0);
+        hayStack.writePointForCcuUser(standaloneHeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_HEATING_STAGE1_LOWER_OFFSET, 0);
         hayStack.writeHisValById(standaloneHeatingAirflowTempLowerOffsetId, TunerConstants.STANDALONE_HEATING_STAGE2_LOWER_OFFSET);
 
         CCUHsApi.getInstance().syncEntityTree();
@@ -3938,7 +3936,7 @@ public class BuildingTuners
                                                                 .setTz(tz)
                                                                 .build();
             String modeChangeoverHysteresisId = hayStack.addPoint(modeChangeoverHysteresis);
-            hayStack.writePoint(modeChangeoverHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu",
+            hayStack.writePointForCcuUser(modeChangeoverHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,
                                 DEFAULT_MODE_CHANGEOVER_HYSTERESIS, 0);
             hayStack.writeHisValById(modeChangeoverHysteresisId, DEFAULT_MODE_CHANGEOVER_HYSTERESIS);
         }
@@ -3963,7 +3961,7 @@ public class BuildingTuners
                                                                 .setTz(tz)
                                                                 .build();
             String stageUpTimerCounterId = hayStack.addPoint(stageUpTimerCounter);
-            hayStack.writePoint(stageUpTimerCounterId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu",
+            hayStack.writePointForCcuUser(stageUpTimerCounterId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,
                                 DEFAULT_STAGE_UP_TIMER_COUNTER, 0);
             hayStack.writeHisValById(stageUpTimerCounterId, DEFAULT_STAGE_UP_TIMER_COUNTER);
         }
@@ -3989,7 +3987,7 @@ public class BuildingTuners
                                                            .setTz(tz)
                                                            .build();
             String stageDownTimerCounterId = hayStack.addPoint(stageDownTimerCounter);
-            hayStack.writePoint(stageDownTimerCounterId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu",
+            hayStack.writePointForCcuUser(stageDownTimerCounterId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,
                                 DEFAULT_STAGE_DOWN_TIMER_COUNTER, 0);
             hayStack.writeHisValById(stageDownTimerCounterId, DEFAULT_STAGE_DOWN_TIMER_COUNTER);
         }
@@ -4041,7 +4039,7 @@ public class BuildingTuners
                                                            .setTz(tz)
                                                            .build();
             String stageUpTimerCounterId = hayStack.addPoint(stageUpTimerCounter);
-            hayStack.writePoint(stageUpTimerCounterId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu",
+            hayStack.writePointForCcuUser(stageUpTimerCounterId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,
                                 DEFAULT_STAGE_UP_TIMER_COUNTER, 0);
             hayStack.writeHisValById(stageUpTimerCounterId, DEFAULT_STAGE_UP_TIMER_COUNTER);
         }
@@ -4066,7 +4064,7 @@ public class BuildingTuners
                                                              .setTz(tz)
                                                              .build();
             String stageDownTimerCounterId = hayStack.addPoint(stageDownTimerCounter);
-            hayStack.writePoint(stageDownTimerCounterId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu",
+            hayStack.writePointForCcuUser(stageDownTimerCounterId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,
                                 DEFAULT_STAGE_DOWN_TIMER_COUNTER, 0);
             hayStack.writeHisValById(stageDownTimerCounterId, DEFAULT_STAGE_DOWN_TIMER_COUNTER);
         }

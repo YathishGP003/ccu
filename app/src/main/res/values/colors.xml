@@ -68,4 +68,11 @@
     <color name="line_border">#1F000000</color>
     <color name="zoneselection_gray">#F0F0F0</color>
     <color name="spinner_divider">#99707070</color>
+
+    <color name="tuner_group">#999999</color>
+    <color name="tuner_bg_white">#FFFFFF</color>
+    <color name="tuner_bg_grey">#F9F9F9</color>
+    <color name="tuner_divider">#F9F9F9</color>
+    <color name="tuner_header_bg">#EBECED</color>
+
 </resources>

@@ -740,6 +740,20 @@
     <string name="toast_msg_permission_denial">"All the required permissions are not granted. CCU may not work as
         expected.\nYou may grant missing permissions to Renatus app from System Settings"</string>
 
+    <string name="txt_tunersTitle">TUNERS</string>
+    <string name="txt_tunersSearch">Search Tuners</string>
+    <string name="txt_tunersSystem">System</string>
+    <string name="txt_tunersZone">Zone</string>
+    <string name="txt_tunersModule">Module</string>
+    <string name="text_tunerChangeReason">*Reason for Change</string>
+    <string name="hint_tunerChangeReason">Reason for Change</string>
+    <string name="tuner_save">Save</string>
+    <string name="tuner_label_priority">Override Priority:</string>
+    <string name="apply_tuner">APPLY TUNERS</string>
+    <string name="confirm_tuner">Are you sure you want to apply the following tuners?</string>
+    <string name="button_apply">APPLY</string>
+    <string name="text_rightArrow">f061</string>
+
     <!--Modbus Option-->
     <string name="title_mb">MB</string>
     <string name="title_modbus">MODBUS</string>

@@ -14,6 +14,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.diag.DiagEquip;
+import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.logic.watchdog.WatchdogMonitor;
 
 /**
@@ -64,11 +65,11 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
                 profile.updateZonePoints();
             }
 
-            if (!Globals.getInstance().isPubnubSubscribed()) {
+            if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed()) {
                 CCUHsApi.getInstance().syncEntityTree();
                 String siteGUID = CCUHsApi.getInstance().getGlobalSiteId();
-                if (siteGUID != null && siteGUID != "") {
-                    Globals.getInstance().registerSiteToPubNub(siteGUID);
+                if (siteGUID != null && !siteGUID.equals("")) {
+                    PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(), siteGUID);
                 }
             }
     

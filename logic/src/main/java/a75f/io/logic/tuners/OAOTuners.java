@@ -25,7 +25,7 @@ public class OAOTuners
                                              .setTz(tz)
                                              .build();
         String co2DamperOpeningRateId = hayStack.addPoint(co2DamperOpeningRate);
-        hayStack.writePoint(co2DamperOpeningRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_CO2_DAMPER_OPENING_RATE, 0);
+        hayStack.writePointForCcuUser(co2DamperOpeningRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_CO2_DAMPER_OPENING_RATE, 0);
         hayStack.writeHisValById(co2DamperOpeningRateId, TunerConstants.OAO_CO2_DAMPER_OPENING_RATE);
         
         Point enthalpyDuctCompensationOffset = new Point.Builder()
@@ -38,7 +38,7 @@ public class OAOTuners
                                                        .setTz(tz)
                                                        .build();
         String enthalpyDuctCompensationOffsetId = hayStack.addPoint(enthalpyDuctCompensationOffset);
-        hayStack.writePoint(enthalpyDuctCompensationOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_ENTHALPY_DUCT_COMPENSATION_OFFSET, 0);
+        hayStack.writePointForCcuUser(enthalpyDuctCompensationOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ENTHALPY_DUCT_COMPENSATION_OFFSET, 0);
         hayStack.writeHisValById(enthalpyDuctCompensationOffsetId, TunerConstants.OAO_ENTHALPY_DUCT_COMPENSATION_OFFSET);
         
         Point economizingMinTemperature = new Point.Builder()
@@ -52,7 +52,7 @@ public class OAOTuners
                                                   .setTz(tz)
                                                   .build();
         String economizingMinTemperatureId = hayStack.addPoint(economizingMinTemperature);
-        hayStack.writePoint(economizingMinTemperatureId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_ECONOMIZING_MIN_TEMP, 0);
+        hayStack.writePointForCcuUser(economizingMinTemperatureId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ECONOMIZING_MIN_TEMP, 0);
         hayStack.writeHisValById(economizingMinTemperatureId, TunerConstants.OAO_ECONOMIZING_MIN_TEMP);
         
         Point economizingMaxTemperature = new Point.Builder()
@@ -66,7 +66,7 @@ public class OAOTuners
                                                   .setTz(tz)
                                                   .build();
         String economizingMaxTemperatureId = hayStack.addPoint(economizingMaxTemperature);
-        hayStack.writePoint(economizingMaxTemperatureId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_ECONOMIZING_MAX_TEMP, 0);
+        hayStack.writePointForCcuUser(economizingMaxTemperatureId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ECONOMIZING_MAX_TEMP, 0);
         hayStack.writeHisValById(economizingMaxTemperatureId, TunerConstants.OAO_ECONOMIZING_MAX_TEMP);
         
         Point economizingMinHumidity = new Point.Builder()
@@ -80,7 +80,7 @@ public class OAOTuners
                                                .setTz(tz)
                                                .build();
         String economizingMinHumidityId = hayStack.addPoint(economizingMinHumidity);
-        hayStack.writePoint(economizingMinHumidityId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_ECONOMIZING_MIN_HUMIDITY, 0);
+        hayStack.writePointForCcuUser(economizingMinHumidityId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ECONOMIZING_MIN_HUMIDITY, 0);
         hayStack.writeHisValById(economizingMinHumidityId, TunerConstants.OAO_ECONOMIZING_MIN_HUMIDITY);
         
         Point economizingMaxHumidity = new Point.Builder()
@@ -94,7 +94,7 @@ public class OAOTuners
                                                .setTz(tz)
                                                .build();
         String economizingMaxHumidityId = hayStack.addPoint(economizingMaxHumidity);
-        hayStack.writePoint(economizingMaxHumidityId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_ECONOMIZING_MAX_HUMIDITY, 0);
+        hayStack.writePointForCcuUser(economizingMaxHumidityId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ECONOMIZING_MAX_HUMIDITY, 0);
         hayStack.writeHisValById(economizingMaxHumidityId, TunerConstants.OAO_ECONOMIZING_MAX_HUMIDITY);
         
         Point outsideDamperMixedAirTarget  = new Point.Builder()
@@ -108,7 +108,7 @@ public class OAOTuners
                                                      .setTz(tz)
                                                      .build();
         String outsideDamperMixedAirTargetId = hayStack.addPoint(outsideDamperMixedAirTarget);
-        hayStack.writePoint(outsideDamperMixedAirTargetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_OA_DAMPER_MAT_TARGET, 0);
+        hayStack.writePointForCcuUser(outsideDamperMixedAirTargetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_OA_DAMPER_MAT_TARGET, 0);
         hayStack.writeHisValById(outsideDamperMixedAirTargetId, TunerConstants.OAO_OA_DAMPER_MAT_TARGET);
         
         Point outsideDamperMixedAirMinimum  = new Point.Builder()
@@ -122,7 +122,7 @@ public class OAOTuners
                                                       .setTz(tz)
                                                       .build();
         String outsideDamperMixedAirMinimumId = hayStack.addPoint(outsideDamperMixedAirMinimum);
-        hayStack.writePoint(outsideDamperMixedAirMinimumId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_OA_DAMPER_MAT_MIN, 0);
+        hayStack.writePointForCcuUser(outsideDamperMixedAirMinimumId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_OA_DAMPER_MAT_MIN, 0);
         hayStack.writeHisValById(outsideDamperMixedAirMinimumId, TunerConstants.OAO_OA_DAMPER_MAT_MIN);
         
         Point economizingToMainCoolingLoopMap  = new Point.Builder()
@@ -136,7 +136,7 @@ public class OAOTuners
                                                          .setTz(tz)
                                                          .build();
         String economizingToMainCoolingLoopMapId = hayStack.addPoint(economizingToMainCoolingLoopMap);
-        hayStack.writePoint(economizingToMainCoolingLoopMapId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_ECONOMIZING_TO_MAIN_COOLING_LOOP_MAP, 0);
+        hayStack.writePointForCcuUser(economizingToMainCoolingLoopMapId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ECONOMIZING_TO_MAIN_COOLING_LOOP_MAP, 0);
         hayStack.writeHisValById(economizingToMainCoolingLoopMapId, TunerConstants.OAO_ECONOMIZING_TO_MAIN_COOLING_LOOP_MAP);
         updateNewTuners( siteRef,equipRef, equipDis,tz,true);
     }
@@ -155,7 +155,7 @@ public class OAOTuners
                     .setTz(tz)
                     .build();
             String smartPrePurgeRuntimeId = hayStack.addPoint(smartPrePurgeRuntime);
-            hayStack.writePoint(smartPrePurgeRuntimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_SMART_PURGE_RUNTIME_DEFAULT, 0);
+            hayStack.writePointForCcuUser(smartPrePurgeRuntimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_SMART_PURGE_RUNTIME_DEFAULT, 0);
             hayStack.writeHisValById(smartPrePurgeRuntimeId, TunerConstants.OAO_SMART_PURGE_RUNTIME_DEFAULT);
         }
 
@@ -171,7 +171,7 @@ public class OAOTuners
                     .setTz(tz)
                     .build();
             String smartPrePurgeStartTimeOffsetId = hayStack.addPoint(smartPrePurgeStartTimeOffset);
-            hayStack.writePoint(smartPrePurgeStartTimeOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_SMART_PRE_PURGE_START_TIME_OFFSET, 0);
+            hayStack.writePointForCcuUser(smartPrePurgeStartTimeOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_SMART_PRE_PURGE_START_TIME_OFFSET, 0);
             hayStack.writeHisValById(smartPrePurgeStartTimeOffsetId, TunerConstants.OAO_SMART_PRE_PURGE_START_TIME_OFFSET);
         }
 
@@ -187,7 +187,7 @@ public class OAOTuners
                     .setTz(tz)
                     .build();
             String smartPrePurgeFanSpeedId = hayStack.addPoint(smartPrePurgeFanSpeed);
-            hayStack.writePoint(smartPrePurgeFanSpeedId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_SMART_PURGE_FAN_SPEED, 0);
+            hayStack.writePointForCcuUser(smartPrePurgeFanSpeedId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_SMART_PURGE_FAN_SPEED, 0);
             hayStack.writeHisValById(smartPrePurgeFanSpeedId, TunerConstants.OAO_SMART_PURGE_FAN_SPEED);
         }
 
@@ -203,7 +203,7 @@ public class OAOTuners
                     .setTz(tz)
                     .build();
             String smartPostPurgeRuntimeId = hayStack.addPoint(smartPostPurgeRuntime);
-            hayStack.writePoint(smartPostPurgeRuntimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_SMART_PURGE_RUNTIME_DEFAULT, 0);
+            hayStack.writePointForCcuUser(smartPostPurgeRuntimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_SMART_PURGE_RUNTIME_DEFAULT, 0);
             hayStack.writeHisValById(smartPostPurgeRuntimeId, TunerConstants.OAO_SMART_PURGE_RUNTIME_DEFAULT);
         }
 
@@ -219,7 +219,7 @@ public class OAOTuners
                     .setTz(tz)
                     .build();
             String smartPostPurgeStartTimeOffsetId = hayStack.addPoint(smartPostPurgeStartTimeOffset);
-            hayStack.writePoint(smartPostPurgeStartTimeOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_SMART_POST_PURGE_START_TIME_OFFSET, 0);
+            hayStack.writePointForCcuUser(smartPostPurgeStartTimeOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_SMART_POST_PURGE_START_TIME_OFFSET, 0);
             hayStack.writeHisValById(smartPostPurgeStartTimeOffsetId, TunerConstants.OAO_SMART_POST_PURGE_START_TIME_OFFSET);
         }
 
@@ -235,7 +235,7 @@ public class OAOTuners
                     .setTz(tz)
                     .build();
             String smartPostPurgeFanSpeedId = hayStack.addPoint(smartPostPurgeFanSpeed);
-            hayStack.writePoint(smartPostPurgeFanSpeedId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_SMART_PURGE_FAN_SPEED, 0);
+            hayStack.writePointForCcuUser(smartPostPurgeFanSpeedId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_SMART_PURGE_FAN_SPEED, 0);
             hayStack.writeHisValById(smartPostPurgeFanSpeedId, TunerConstants.OAO_SMART_PURGE_FAN_SPEED);
         }
 
@@ -251,7 +251,7 @@ public class OAOTuners
                     .setTz(tz)
                     .build();
             String smartPurgeDabFanLoopOutputId = hayStack.addPoint(smartPurgeDabFanLoopOutput);
-            hayStack.writePoint(smartPurgeDabFanLoopOutputId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_SMART_PURGE_FAN_LOOP_OUTPUT_MIN, 0);
+            hayStack.writePointForCcuUser(smartPurgeDabFanLoopOutputId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_SMART_PURGE_FAN_LOOP_OUTPUT_MIN, 0);
             hayStack.writeHisValById(smartPurgeDabFanLoopOutputId, TunerConstants.OAO_SMART_PURGE_FAN_LOOP_OUTPUT_MIN);
         }
 
@@ -267,7 +267,7 @@ public class OAOTuners
                     .setTz(tz)
                     .build();
             String smartPurgeVavFanLoopOutputId = hayStack.addPoint(smartPurgeVavFanLoopOutput);
-            hayStack.writePoint(smartPurgeVavFanLoopOutputId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_SMART_PURGE_FAN_LOOP_OUTPUT_MIN, 0);
+            hayStack.writePointForCcuUser(smartPurgeVavFanLoopOutputId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_SMART_PURGE_FAN_LOOP_OUTPUT_MIN, 0);
             hayStack.writeHisValById(smartPurgeVavFanLoopOutputId, TunerConstants.OAO_SMART_PURGE_FAN_LOOP_OUTPUT_MIN);
         }
 
@@ -279,11 +279,10 @@ public class OAOTuners
                     .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
                     .addMarker("sp").addMarker("purge").addMarker("dab").addMarker("damper").addMarker("pos").addMarker("multiplier").addMarker("min")
                     .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
-                    .setUnit("%")
                     .setTz(tz)
                     .build();
             String smartPurgeDabDamperMinOpenMultiplierId = hayStack.addPoint(smartPurgeDabDamperMinOpenMultiplier);
-            hayStack.writePoint(smartPurgeDabDamperMinOpenMultiplierId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_SMART_PURGE_MIN_DAMPER_OPEN_MULTIPLIER, 0);
+            hayStack.writePointForCcuUser(smartPurgeDabDamperMinOpenMultiplierId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_SMART_PURGE_MIN_DAMPER_OPEN_MULTIPLIER, 0);
             hayStack.writeHisValById(smartPurgeDabDamperMinOpenMultiplierId, TunerConstants.OAO_SMART_PURGE_MIN_DAMPER_OPEN_MULTIPLIER);
         }
 
@@ -295,11 +294,10 @@ public class OAOTuners
                     .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
                     .addMarker("sp").addMarker("purge").addMarker("vav").addMarker("damper").addMarker("pos").addMarker("multiplier").addMarker("min")
                     .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
-                    .setUnit("%")
                     .setTz(tz)
                     .build();
             String smartPurgeVavDamperMinOpenMultiplierId = hayStack.addPoint(smartPurgeVavDamperMinOpenMultiplier);
-            hayStack.writePoint(smartPurgeVavDamperMinOpenMultiplierId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.OAO_SMART_PURGE_MIN_DAMPER_OPEN_MULTIPLIER, 0);
+            hayStack.writePointForCcuUser(smartPurgeVavDamperMinOpenMultiplierId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_SMART_PURGE_MIN_DAMPER_OPEN_MULTIPLIER, 0);
             hayStack.writeHisValById(smartPurgeVavDamperMinOpenMultiplierId, TunerConstants.OAO_SMART_PURGE_MIN_DAMPER_OPEN_MULTIPLIER);
         }
 
@@ -697,7 +695,6 @@ public class OAOTuners
                     .addMarker("tuner").addMarker("system").addMarker("oao").addMarker("writable").addMarker("his")
                     .addMarker("sp").addMarker("purge").addMarker("dab").addMarker("damper").addMarker("pos").addMarker("multiplier").addMarker("min")
                     .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
-                    .setUnit("%")
                     .setTz(tz)
                     .build();
             String smartPurgeDabDamperMinOpenMultiplierId = hayStack.addPoint(smartPurgeDabDamperMinOpenMultiplier);
@@ -720,7 +717,6 @@ public class OAOTuners
                     .addMarker("tuner").addMarker("system").addMarker("oao").addMarker("writable").addMarker("his")
                     .addMarker("sp").addMarker("purge").addMarker("vav").addMarker("damper").addMarker("pos").addMarker("multiplier").addMarker("min")
                     .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
-                    .setUnit("%")
                     .setTz(tz)
                     .build();
             String smartPurgeVavDamperMinOpenMultiplierId = hayStack.addPoint(smartPurgeVavDamperMinOpenMultiplier);

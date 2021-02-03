@@ -151,12 +151,12 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             {
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemCoolingLoopOp/100)));
             }
-
-            if (systemCoolingLoopOp != getCmdSignal("cooling")) {
-                setCmdSignal("cooling", systemCoolingLoopOp);
-            }
         } else {
             signal = 0;
+        }
+    
+        if (systemCoolingLoopOp != getCmdSignal("cooling")) {
+            setCmdSignal("cooling", systemCoolingLoopOp);
         }
         ControlMote.setAnalogOut("analog1", signal);
         
@@ -183,12 +183,12 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemHeatingLoopOp / 100)));
             }
             
-            if (systemHeatingLoopOp != getCmdSignal("heating")) {
-                setCmdSignal("heating", systemHeatingLoopOp);
-            }
-            
         } else {
             signal = 0;
+        }
+    
+        if (systemHeatingLoopOp != getCmdSignal("heating")) {
+            setCmdSignal("heating", systemHeatingLoopOp);
         }
         ControlMote.setAnalogOut("analog3", signal);
         
@@ -238,12 +238,12 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             {
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemFanLoopOp/100)));
             }
-            
-            if (systemFanLoopOp != getCmdSignal("fan")) {
-                setCmdSignal("fan", systemFanLoopOp);
-            }
         } else {
             signal = 0;
+        }
+    
+        if (systemFanLoopOp != getCmdSignal("fan")) {
+            setCmdSignal("fan", systemFanLoopOp);
         }
         ControlMote.setAnalogOut("analog2", signal);
         
@@ -265,14 +265,15 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             } else {
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * systemCo2LoopOp/100));
             }
-            
-            if (systemCo2LoopOp != getCmdSignal("co2")) {
-                setCmdSignal("co2", systemCo2LoopOp);
-            }
         } else {
             signal = 0;
         }
+    
+        if (systemCo2LoopOp != getCmdSignal("co2")) {
+            setCmdSignal("co2", systemCo2LoopOp);
+        }
         ControlMote.setAnalogOut("analog4", signal);
+        
         if (getConfigVal("relay3 and output and enabled") > 0)
         {
             double systemStaticPressureOoutput = getStaticPressure() - SystemConstants.SP_CONFIG_MIN;
@@ -286,10 +287,12 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             else if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE) && (L.ccu().oaoProfile != null) && (systemFanLoopOp > 0)){
                 signal = 1;
             }
-            if(signal != getCmdSignal("occupancy"))
-                setCmdSignal("occupancy",signal);
         } else {
             signal = 0;
+        }
+    
+        if(signal != getCmdSignal("occupancy")) {
+            setCmdSignal("occupancy", signal);
         }
         ControlMote.setRelayState("relay3", signal );
         

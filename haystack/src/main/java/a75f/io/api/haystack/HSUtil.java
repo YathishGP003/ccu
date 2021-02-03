@@ -179,4 +179,30 @@ public class HSUtil
         }
         return null;
     }
+    
+    //To update after merging Tuner branch.
+    public static boolean isSystemConfigOutputPoint(String id, CCUHsApi hayStack) {
+        HashMap pointEntity = hayStack.readMapById(id);
+        return pointEntity.containsKey("system") && pointEntity.containsKey("config") && pointEntity.containsKey(
+            "output");
+    }
+    
+    public static double getSystemUserIntentVal(String tags)
+    {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap cdb = hayStack.read("point and system and userIntent and " + tags);
+        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size(); l++)
+            {
+                HashMap valMap = ((HashMap) values.get(l - 1));
+                if (valMap.get("val") != null)
+                {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        return 0;
+    }
 }

@@ -32,7 +32,7 @@ public class StandaloneTunerUtil {
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, level, "ccu", dbVal, 0);
+        hayStack.writePointForCcuUser(id, level, dbVal, 0);
 
     }
 
@@ -82,7 +82,7 @@ public class StandaloneTunerUtil {
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, level, "ccu", dbVal, 0);
+        hayStack.writePointForCcuUser(id, level, dbVal, 0);
 
     }
     public static double readTunerValByQuery(String query) {
@@ -160,7 +160,7 @@ public class StandaloneTunerUtil {
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", val, 0);
+        hayStack.writePointForCcuUser(id, TunerConstants.UI_DEFAULT_VAL_LEVEL, val, 0);
         hayStack.writeHisValById(id, val);
     }
 }

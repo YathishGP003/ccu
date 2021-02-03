@@ -99,10 +99,13 @@ dependencies {
     implementation 'info.guardianproject.netcipher:netcipher:1.2'
     implementation project(':haystack')
     implementation project(':usbserial')
-    implementation 'com.pubnub:pubnub-gson:4.20.0'
+    implementation 'com.pubnub:pubnub-gson:4.35.0'
     api 'com.google.guava:guava:26.0-android'
     implementation project(':alerts')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
+    implementation 'io.reactivex.rxjava3:rxjava:3.0.0'
 }
 repositories {
     mavenCentral()

@@ -377,6 +377,15 @@ public class CCUHsApi
 
     /**
      * Write to a 'writable' point
+     * The 'who' field will be populated with ccu_#id where #id is the HRef of haystack device entity for ccu.
+     */
+    public void writePointForCcuUser(String id, int level, Double val, int duration)
+    {
+        pointWrite(HRef.copy(id), level, getCCUUserName(), HNum.make(val), HNum.make(duration));
+    }
+
+    /**
+     * Write to a 'writable' point
      */
     public void writePoint(String id, int level, String who, Double val, int duration)
     {
@@ -390,7 +399,7 @@ public class CCUHsApi
      */
     public void writePoint(String id, Double val)
     {
-        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "ccu", HNum.make(val), HNum.make(0));
+        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, getCCUUserName(), HNum.make(val), HNum.make(0));
     }
 
     /**
@@ -406,7 +415,7 @@ public class CCUHsApi
             if (id == null || id == "") {
                 throw new IllegalArgumentException();
             }
-            pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "ccu", HNum.make(val), HNum.make(0));
+            pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, getCCUUserName(), HNum.make(val), HNum.make(0));
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -420,21 +429,28 @@ public class CCUHsApi
         {
             throw new IllegalArgumentException();
         }
-        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "ccu", HStr.make(val), HNum.make(0));
+        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, getCCUUserName(), HStr.make(val), HNum.make(0));
     }
 
     public void writeDefaultValById(String id, Double val)
     {
-        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "ccu", HNum.make(val), HNum.make(0));
+        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, getCCUUserName(), HNum.make(val), HNum.make(0));
     }
 
     public void writeDefaultValById(String id, String val)
     {
-        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "ccu", HStr.make(val), HNum.make(0));
+        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, getCCUUserName(), HStr.make(val), HNum.make(0));
     }
 
-    public void pointWrite(HRef id, int level, String who, HVal val, HNum dur)
-    {
+    /**
+     * pointWrite method implements the default pointWrite api of haystack library. It only accepts native haystack
+     * type arguments.
+     * */
+    public void pointWriteForCcuUser(HRef id, int level, HVal val, HNum dur) {
+        pointWrite(id, level, getCCUUserName(), val, dur);
+    }
+
+    public void pointWrite(HRef id, int level, String who, HVal val, HNum dur) {
         hsClient.pointWrite(id, level, who, val, dur);
 
         if (CCUHsApi.getInstance().isCCURegistered()) {
@@ -1420,6 +1436,11 @@ public class CCUHsApi
         return getGUID(siteLuid);
     }
 
+    public String getGlobalCcuId() {
+        HRef ccuId = getCcuId();
+        return ccuId != null ? getGUID(ccuId.toString()) : null;
+    }
+
     /**
      * This methods returns the Local ccuId, not the global ccuId.
      */
@@ -1432,7 +1453,7 @@ public class CCUHsApi
         }
         return siteRef;
     }
-    
+
     public String getCCUGuid() {
         HRef ccuId = getCcuId();
         return ccuId != null ? getGUID(ccuId.toString()) : null;
@@ -1449,7 +1470,6 @@ public class CCUHsApi
         if (ccuId == null) return null;
         else return getGUID(getCcuId().toString());
     }
-
     public ArrayList<Schedule> getSystemSchedule(boolean vacation)
     {
         ArrayList<Schedule> schedules = new ArrayList<>();
@@ -1965,5 +1985,10 @@ public class CCUHsApi
             Equip updatedEquip = new Equip.Builder().setHashMap(equip).setTz(newTz).build();
             updateEquip(updatedEquip, updatedEquip.getId());
         }
+    }
+
+    public String getCCUUserName() {
+        String ccuGuid = getGlobalCcuId();
+        return ccuGuid == null ? Tags.CCU : Tags.CCU+"_"+ccuGuid;
     }
 }

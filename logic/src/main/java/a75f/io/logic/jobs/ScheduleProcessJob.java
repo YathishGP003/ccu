@@ -1350,7 +1350,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                                                  .withDayOfWeek(day.getDay() + 1)
                                                  .withSecondOfMinute(0);
     
-                CCUHsApi.getInstance().pointWrite(HRef.copy(point.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "ccu", HNum.make(val), HNum.make(overrideExpiry.getMillis()
+                CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(point.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, HNum.make(val), HNum.make(overrideExpiry.getMillis()
                                                                                                                                                      - System.currentTimeMillis(), "ms"));
                 setAppOverrideExpiry(point, overrideExpiry.getMillis());
                 
@@ -1370,7 +1370,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     return;
                 }
                 double dur = Double.parseDouble(overrideLevel.get("duration").toString());
-                CCUHsApi.getInstance().pointWrite(HRef.copy(point.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "ccu", HNum.make(Double.parseDouble(overrideLevel.get("val").toString())), HNum.make(dur == 0 ? forcedOccupiedMins * 60 * 1000 : dur - System.currentTimeMillis(), "ms"));
+                CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(point.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, HNum.make(Double.parseDouble(overrideLevel.get("val").toString())), HNum.make(dur == 0 ? forcedOccupiedMins * 60 * 1000 : dur - System.currentTimeMillis(), "ms"));
                 //Write to level 9/10
                 ArrayList values = CCUHsApi.getInstance().readPoint(point.getId());
                 if (values != null && values.size() > 0)
@@ -1384,7 +1384,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                             long d = (long) Double.parseDouble(valMap.get("duration").toString());
                             if (d == 0)
                             {
-                                CCUHsApi.getInstance().pointWrite(HRef.copy(point.getId()), l, "ccu", HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(dur == 0 ? forcedOccupiedMins * 60 * 1000 : dur - System.currentTimeMillis(), "ms"));
+                                CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(point.getId()), l, HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(dur == 0 ? forcedOccupiedMins * 60 * 1000 : dur - System.currentTimeMillis(), "ms"));
                             }
                         }
                     }
@@ -1429,17 +1429,17 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                                                  .withSecondOfMinute(0);
 
                 if((coolpoint != null) && (coolval != 0)) {
-                    CCUHsApi.getInstance().pointWrite(HRef.copy(coolpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "ccu", HNum.make(coolval), HNum.make(overrideExpiry.getMillis()
+                    CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(coolpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, HNum.make(coolval), HNum.make(overrideExpiry.getMillis()
                             - System.currentTimeMillis(), "ms"));
                     setAppOverrideExpiry(coolpoint, overrideExpiry.getMillis());
                 }
                 if((heatpoint != null) && (heatval != 0)){
-                    CCUHsApi.getInstance().pointWrite(HRef.copy(heatpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "ccu", HNum.make(heatval), HNum.make(overrideExpiry.getMillis()
+                    CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(heatpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, HNum.make(heatval), HNum.make(overrideExpiry.getMillis()
                             - System.currentTimeMillis(), "ms"));
                     setAppOverrideExpiry(heatpoint, overrideExpiry.getMillis());
                 }
                 if(avgpoint != null){
-                    CCUHsApi.getInstance().pointWrite(HRef.copy(avgpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "ccu", HNum.make(avgval), HNum.make(overrideExpiry.getMillis()
+                    CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(avgpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, HNum.make(avgval), HNum.make(overrideExpiry.getMillis()
                             - System.currentTimeMillis(), "ms"));
                     setAppOverrideExpiry(avgpoint, overrideExpiry.getMillis());
                 }
@@ -1472,7 +1472,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     long d = (long) Double.parseDouble(valMap.get("duration").toString());
                     if (d == 0)
                     {
-                        CCUHsApi.getInstance().pointWrite(HRef.copy(point.getId()), l, "ccu", HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(dur == 0 ? forcedOccupiedMins * 60 * 1000 : dur - System.currentTimeMillis(), "ms"));
+                        CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(point.getId()), l, HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(dur == 0 ? forcedOccupiedMins * 60 * 1000 : dur - System.currentTimeMillis(), "ms"));
                     }
                 }
             }
@@ -1523,7 +1523,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     long d = (long) Double.parseDouble(valMap.get("duration").toString());
                     if (d == 0)
                     {
-                        CCUHsApi.getInstance().pointWrite(HRef.copy(point.getId()), l, "ccu", HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(overrRideExpiry - System.currentTimeMillis(), "ms"));
+                        CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(point.getId()), l, HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(overrRideExpiry - System.currentTimeMillis(), "ms"));
                     }
                 }
             }
@@ -1539,7 +1539,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (l != 8 && valMap.get("duration") != null && valMap.get("val") != null)
                 {
-                    CCUHsApi.getInstance().pointWrite(HRef.copy(id), l, "ccu", HNum.make(0), HNum.make(1, "ms"));
+                    CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id), l, HNum.make(0), HNum.make(1, "ms"));
                 }
             }
         }

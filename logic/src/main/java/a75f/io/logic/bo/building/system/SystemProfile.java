@@ -812,20 +812,20 @@ public abstract class SystemProfile
         if(!verifyPointsAvailability("userIntent and prePurge and enabled",equipref)) {
             Point smartPrePurgePoint = new Point.Builder().setDisplayName(equipDis + "-" + "systemPrePurgeEnabled").setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("prePurge").addMarker("enabled").setEnums("false,true").setTz(tz).build();
             String smartPrePurgePointId = CCUHsApi.getInstance().addPoint(smartPrePurgePoint);
-            CCUHsApi.getInstance().writePoint(smartPrePurgePointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
+            CCUHsApi.getInstance().writePointForCcuUser(smartPrePurgePointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
             CCUHsApi.getInstance().writeHisValById(smartPrePurgePointId, 0.0);
         }
         if(!verifyPointsAvailability("userIntent and postPurge and enabled",equipref)) {
             Point smartPostPurgePoint = new Point.Builder().setDisplayName(equipDis + "-" + "systemPostPurgeEnabled").setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("postPurge").addMarker("enabled").setEnums("false,true").setTz(tz).build();
             String smartPostPurgePointId = CCUHsApi.getInstance().addPoint(smartPostPurgePoint);
-            CCUHsApi.getInstance().writePoint(smartPostPurgePointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
+            CCUHsApi.getInstance().writePointForCcuUser(smartPostPurgePointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
             CCUHsApi.getInstance().writeHisValById(smartPostPurgePointId, 0.0);
         }
 
         if(!verifyPointsAvailability("userIntent and enhanced and ventilation and enabled",equipref)) {
             Point enhancedVentilationPoint = new Point.Builder().setDisplayName(equipDis + "-" + "systemEnhancedVentilationEnabled").setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("enhanced").addMarker("ventilation").addMarker("enabled").setEnums("false,true").setTz(tz).build();
             String enhancedVentilationPointId = CCUHsApi.getInstance().addPoint(enhancedVentilationPoint);
-            CCUHsApi.getInstance().writePoint(enhancedVentilationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
+            CCUHsApi.getInstance().writePointForCcuUser(enhancedVentilationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
             CCUHsApi.getInstance().writeHisValById(enhancedVentilationPointId, 0.0);
         }
     }

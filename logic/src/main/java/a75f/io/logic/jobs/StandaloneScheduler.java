@@ -221,7 +221,7 @@ public class StandaloneScheduler {
 
                         if (marker.equals("writable")) {
                             CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val " + p.getDisplayName() + ": " + val);
-                            CCUHsApi.getInstance().pointWrite(HRef.copy(id), TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", HNum.make(val), HNum.make(0));
+                            CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id), TunerConstants.UI_DEFAULT_VAL_LEVEL, HNum.make(val), HNum.make(0));
                         }
                     }
 

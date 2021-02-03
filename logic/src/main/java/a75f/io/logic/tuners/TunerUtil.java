@@ -110,7 +110,7 @@ public class TunerUtil
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.pointWrite(HRef.copy(id), TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", HNum.make(val), HNum.make(0,"ms"));
+        hayStack.pointWriteForCcuUser(HRef.copy(id), TunerConstants.UI_DEFAULT_VAL_LEVEL, HNum.make(val), HNum.make(0,"ms"));
         hayStack.writeHisValById(id, val);
     }
 
@@ -122,7 +122,7 @@ public class TunerUtil
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, level, "ccu", dbVal, 0);
+        hayStack.writePointForCcuUser(id, level, dbVal, 0);
 
     }
     
@@ -230,7 +230,7 @@ public class TunerUtil
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, level, "ccu", dbVal, 0);
+        hayStack.writePointForCcuUser(id, level, dbVal, 0);
         
     }
     
@@ -271,7 +271,7 @@ public class TunerUtil
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, level, "ccu", dbVal, 0);
+        hayStack.writePointForCcuUser(id, level, dbVal, 0);
         
     }
     
@@ -300,7 +300,7 @@ public class TunerUtil
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, level, "ccu", pgVal, 0);
+        hayStack.writePointForCcuUser(id, level, pgVal, 0);
         
     }
     
@@ -329,7 +329,7 @@ public class TunerUtil
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, level, "ccu", igVal, 0);
+        hayStack.writePointForCcuUser(id, level, igVal, 0);
         
     }
     
@@ -358,7 +358,7 @@ public class TunerUtil
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, level, "ccu", psVal, 0);
+        hayStack.writePointForCcuUser(id, level, psVal, 0);
         
     }
     
@@ -387,7 +387,7 @@ public class TunerUtil
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, level, "ccu", itVal, 0);
+        hayStack.writePointForCcuUser(id, level, itVal, 0);
         
     }
     public static double getMinCoolingDamperPos(String equipRef) {
@@ -415,7 +415,7 @@ public class TunerUtil
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, level, "ccu", dVal, 0);
+        hayStack.writePointForCcuUser(id, level, dVal, 0);
         
     }
     
@@ -444,7 +444,7 @@ public class TunerUtil
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, level, "ccu", dVal, 0);
+        hayStack.writePointForCcuUser(id, level, dVal, 0);
         
     }
     
@@ -473,7 +473,7 @@ public class TunerUtil
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, level, "ccu", dVal, 0);
+        hayStack.writePointForCcuUser(id, level, dVal, 0);
         
     }
     
@@ -502,7 +502,7 @@ public class TunerUtil
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, level, "ccu", dVal, 0);
+        hayStack.writePointForCcuUser(id, level, dVal, 0);
         
     }
 }

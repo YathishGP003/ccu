@@ -34,8 +34,10 @@ public class UpdatePointHandler
         }
     
         String luid = CCUHsApi.getInstance().getLUID("@" + pointGuid);
+        Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(luid)).build();
         if (HSUtil.isSystemConfigOutputPoint(luid, CCUHsApi.getInstance())) {
-            ConfigPointUpdateHandler.updateConfigPoint(msgObject);
+            ConfigPointUpdateHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
+            updatePoints(localPoint);
             return;
         }
         
@@ -68,8 +70,7 @@ public class UpdatePointHandler
                     }
         
                     //CcuLog.d(L.TAG_CCU_PUBNUB+" LOCAL ARRAY: ", HZincWriter.gridToString(CCUHsApi.getInstance().readPointGrid(luid)));
-        
-                    Point p = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(luid)).build();
+                    
                     ArrayList values = CCUHsApi.getInstance().readPoint(luid);
                     if (values != null && values.size() > 0)
                     {
@@ -79,7 +80,7 @@ public class UpdatePointHandler
                             if (valMap.get("val") != null)
                             {
                                 Double duration = Double.parseDouble(valMap.get("duration").toString());
-                                CcuLog.d(L.TAG_CCU_PUBNUB, "Updated point " + p.getDisplayName() + " , level: " + l + " , val :" + Double.parseDouble(valMap.get("val").toString())
+                                CcuLog.d(L.TAG_CCU_PUBNUB, "Updated point " + localPoint.getDisplayName() + " , level: " + l + " , val :" + Double.parseDouble(valMap.get("val").toString())
                                                            + " duration " + (duration > 0 ? duration - System.currentTimeMillis() : duration));
                             }
                         }
@@ -87,7 +88,7 @@ public class UpdatePointHandler
         
                     try {
                         Thread.sleep(100);
-                        updatePoints(p,luid);
+                        updatePoints(localPoint);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -100,7 +101,8 @@ public class UpdatePointHandler
         }}).start();
     }
 
-    private static void updatePoints(Point p, String luid){
+    private static void updatePoints(Point p){
+        String luid = p.getId();
         if (p.getMarkers().contains("his"))
         {
             CCUHsApi.getInstance().writeHisValById(luid, CCUHsApi.getInstance().readPointPriorityVal(luid));
@@ -134,10 +136,6 @@ public class UpdatePointHandler
             if (modbusDataInterface != null) {
                 modbusDataInterface.refreshScreen(luid);
             }
-        }
-        
-        if (HSUtil.isSystemConfigOutputPoint(luid, CCUHsApi.getInstance())) {
-            ConfigPointUpdateHandler.updateConfigPoint();
         }
     }
 

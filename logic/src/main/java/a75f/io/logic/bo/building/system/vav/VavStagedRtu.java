@@ -350,9 +350,9 @@ public class VavStagedRtu extends VavSystemProfile
         if (stageStatus[COOLING_1.ordinal()] > 0 || stageStatus[HEATING_1.ordinal()] > 0) {
             int fanStatus = isStageEnabled(FAN_1) ? 1 : 0;
             tempStatus[FAN_1.ordinal()] = fanStatus;
-            /*if (fanStatus != getCmdSignal("fan and stage1")) {
+            if (fanStatus != getCmdSignal("fan and stage1")) {
                 setCmdSignal("fan and stage1", fanStatus);
-            }*/
+            }
         }
         
         for (int stageIndex = FAN_1.ordinal(); stageIndex < DEHUMIDIFIER.ordinal(); stageIndex++) {
@@ -361,8 +361,6 @@ public class VavStagedRtu extends VavSystemProfile
             for (Integer relay : relaySet) {
                 ControlMote.setRelayState("relay" + relay, stageStatus[stageIndex]);
             }
-            Stage stage = Stage.values()[stageIndex];
-            setStageStatus(stage, tempStatus[stage.ordinal()]);
         }
     }
     
@@ -377,21 +375,6 @@ public class VavStagedRtu extends VavSystemProfile
             double currState = getCmdSignal("heating and stage" + (stage.ordinal() - COOLING_5.ordinal()));
             if (currState != relayState) {
                 setCmdSignal("heating and stage" + (stage.ordinal() - COOLING_5.ordinal()), relayState);
-            }
-        }  else if (stage.getValue() >= FAN_1.getValue() && stage.getValue() <= FAN_5.getValue()) {
-            double currState = getCmdSignal("fan and stage" + (stage.ordinal() - HEATING_5.ordinal()));
-            if (currState != relayState) {
-                setCmdSignal("fan and stage" + (stage.ordinal() - HEATING_5.ordinal()), relayState);
-            }
-        } else if (stage.getValue() == HUMIDIFIER.getValue()) {
-            double currState = getCmdSignal("humidifier");
-            if (currState != relayState) {
-                setCmdSignal("humidifier", relayState);
-            }
-        }  else if (stage.getValue() == DEHUMIDIFIER.getValue()) {
-            double currState = getCmdSignal("dehumidifier");
-            if (currState != relayState) {
-                setCmdSignal("dehumidifier", relayState);
             }
         }
     }

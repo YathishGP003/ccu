@@ -21,4 +21,19 @@ public class Tags
     public static final String DIS = "dis";
     public static final String MARKER = "marker";
     public static final String CCU = "ccu";
+    
+    
+    
+    
+    public static final String ENABLED = "enabled";
+    public static final String ASSOCIATION = "association";
+    
+    public static final String RELAY1 = "relay1";
+    public static final String RELAY2 = "relay2";
+    public static final String RELAY3 = "relay3";
+    public static final String RELAY4 = "relay4";
+    public static final String RELAY5 = "relay5";
+    public static final String RELAY6 = "relay6";
+    public static final String RELAY7 = "relay7";
+    
 }

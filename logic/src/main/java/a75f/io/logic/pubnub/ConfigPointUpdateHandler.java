@@ -1,26 +1,54 @@
 package a75f.io.logic.pubnub;
 
-import android.content.DialogInterface;
-
 import com.google.gson.JsonObject;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.SystemProfile;
+import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
+import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.tuners.TunerUtil;
 
 class ConfigPointUpdateHandler {
     
-    public static void updateConfigPoint(JsonObject msgObject) {
-        /**
-         * There could more handling required as part of reconfiguration here.
-         * Startng with updating the conditioning-mode
-         */
-        updateConditioningMode();
+    public static void updateConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
     
+        CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint "+msgObject.toString());
+        //TODO- Tags definition should be moved to Tags.java after merging the related ticket.
+        if (configPoint.getMarkers().contains(Tags.ENABLED)) {
+            updateConfigEnabled(msgObject, configPoint, hayStack);
+        } else if (configPoint.getMarkers().contains(Tags.ASSOCIATION)) {
+            updateConfigAssociation(msgObject, configPoint, hayStack);
+        }
+    }
+    
+    private static void updateConfigEnabled(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
+        CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigEnabled "+configPoint.getDisplayName());
+        writePointFromJson(configPoint.getId(), msgObject, hayStack);
+        updateConditioningMode();
+    }
+    
+    private static void updateConfigAssociation(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
+        CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigAssociation "+configPoint.getDisplayName());
+        
+        String relayType = getRelayTagFromConfig(configPoint);
+        if (relayType == null) {
+            CcuLog.e(L.TAG_CCU_PUBNUB, "Invalid config point update "+configPoint.toString());
+        }
+        
+        SystemProfile systemProfile = L.ccu().systemProfile;
+        double val = msgObject.get("val").getAsDouble();
+        if (systemProfile instanceof DabStagedRtu) {
+            ((DabStagedRtu) systemProfile).setConfigAssociation(relayType, val);
+        } else if (systemProfile instanceof VavStagedRtu) {
+            ((VavStagedRtu) systemProfile).setConfigAssociation(relayType, val);
+        }
+        writePointFromJson(configPoint.getId(), msgObject, hayStack);
     }
     
     /***
@@ -43,7 +71,31 @@ class ConfigPointUpdateHandler {
         }
     }
     
-    public static void updateConfigAssociation() {
+    private static void writePointFromJson(String id, JsonObject msgObject, CCUHsApi hayStack) {
+        String who = msgObject.get("who").getAsString();
+        double val = msgObject.get("val").getAsDouble();
+        int duration = msgObject.get("duration").getAsInt();
+        int level = msgObject.get("level").getAsInt();
+        hayStack.writePointLocal(id, level, who, val, duration);
+    }
     
+    private static String getRelayTagFromConfig(Point configPoint) {
+        
+        if (configPoint.getMarkers().contains(Tags.RELAY1)) {
+            return Tags.RELAY1;
+        } if (configPoint.getMarkers().contains(Tags.RELAY2)) {
+            return Tags.RELAY2;
+        } if (configPoint.getMarkers().contains(Tags.RELAY3)) {
+            return Tags.RELAY3;
+        } if (configPoint.getMarkers().contains(Tags.RELAY4)) {
+            return Tags.RELAY4;
+        } if (configPoint.getMarkers().contains(Tags.RELAY5)) {
+            return Tags.RELAY5;
+        } if (configPoint.getMarkers().contains(Tags.RELAY6)) {
+            return Tags.RELAY6;
+        } if (configPoint.getMarkers().contains(Tags.RELAY7)) {
+            return Tags.RELAY7;
+        }
+        return null;
     }
 }

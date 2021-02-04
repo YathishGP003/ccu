@@ -763,8 +763,15 @@ public class VavStagedRtu extends VavSystemProfile
         return hayStack.readPointPriorityVal(configPoint.get("id").toString());
     }
     public void setConfigAssociation(String config, double val) {
-
-        Stage curstage = Stage.values()[(int) getConfigAssociation(config)];
+    
+        double curConfigVal = getConfigAssociation(config);
+        if (curConfigVal == val) {
+            CcuLog.d(L.TAG_CCU_SYSTEM, "setConfigAssociation not changed cur:"+curConfigVal+" new:"+val);
+            return;
+        }
+    
+        Stage curstage = Stage.values()[(int)curConfigVal];
+    
         HashMap cmd = null;
         Point newCmdPoint = null;
         Point oldPoint = null;

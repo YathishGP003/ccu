@@ -10,14 +10,16 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.SystemProfile;
+import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
+import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.tuners.TunerUtil;
 
 class ConfigPointUpdateHandler {
     
     public static void updateConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
-    
+        
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint "+msgObject.toString());
         //TODO- Tags definition should be moved to Tags.java after merging the related ticket.
         if (configPoint.getMarkers().contains(Tags.ENABLED)) {
@@ -43,8 +45,13 @@ class ConfigPointUpdateHandler {
         
         SystemProfile systemProfile = L.ccu().systemProfile;
         double val = msgObject.get("val").getAsDouble();
-        if (systemProfile instanceof DabStagedRtu) {
+        
+        if (systemProfile instanceof DabFullyModulatingRtu) {
+            ((DabFullyModulatingRtu) systemProfile).setConfigEnabled(relayType, val);
+        } else if (systemProfile instanceof DabStagedRtu) {
             ((DabStagedRtu) systemProfile).setConfigAssociation(relayType, val);
+        } else if (systemProfile instanceof VavFullyModulatingRtu) {
+            ((VavFullyModulatingRtu) systemProfile).setConfigEnabled(relayType, val);
         } else if (systemProfile instanceof VavStagedRtu) {
             ((VavStagedRtu) systemProfile).setConfigAssociation(relayType, val);
         }
@@ -99,3 +106,4 @@ class ConfigPointUpdateHandler {
         return null;
     }
 }
+

@@ -93,7 +93,7 @@
             android:fontFamily="@font/lato_regular"
             android:gravity="center_vertical|center_horizontal"
             android:padding="5sp"
-            android:text="@string/tuner_save"
+            android:text="@string/ok"
             android:textColor="@color/grey_select"
             android:textSize="19.5sp" />
     </LinearLayout>

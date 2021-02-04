@@ -45,7 +45,8 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
         HashMap priorityMap = getPriorityLevelMap(priorityArrayList);
 
         holder.textViewCurrentValue.setOnClickListener(v -> priorityItemClickListener.priorityClicked(position));
-        holder.textViewPriority.setText(priorityItem.get("level").toString());
+        double level = Double.parseDouble(priorityItem.get("level").toString());
+        holder.textViewPriority.setText(String.valueOf((int)level));
         setBlackTextColor(holder.textViewName);
         holder.imgBtnTunerUndo.setVisibility(View.GONE);
         if (priorityMap != null && priorityMap.size() > 0) {

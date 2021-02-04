@@ -48,7 +48,17 @@ public class TunerExpandableLayoutHelper implements TunerGroupChangeListener {
     public void addSection(String section, List<HashMap> items) {
         TunerGroupItem newSection;
         mSectionMap.put(section, (newSection = new TunerGroupItem(section)));
-        mSectionDataMap.put(newSection, items);
+        ArrayList<HashMap> sectionList = new ArrayList<>();
+        ArrayList<String> nameList = new ArrayList<>();
+
+        for (HashMap p: items){
+            String dis = p.get("dis").toString();
+            if (!nameList.contains(dis.substring(dis.lastIndexOf("-") + 1))){
+                nameList.add(dis.substring(dis.lastIndexOf("-") + 1));
+                sectionList.add(p);
+            }
+        }
+        mSectionDataMap.put(newSection, sectionList);
     }
 
     public void addItem(String section, HashMap item) {

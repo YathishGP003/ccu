@@ -94,18 +94,10 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                         holder.itemTextValueView.setText("-");
                     }
                 }
-                if (tunerGroupType.equals("Zone")){
-                    if (tunerItem.containsKey("unit")) {
-                        holder.itemTextView.setText(tunerName.substring(tunerName.indexOf("-") + 1) + " (" + tunerItem.get("unit").toString().toUpperCase() + ")");
-                    } else {
-                        holder.itemTextView.setText(tunerName.substring(tunerName.indexOf("-") + 1));
-                    }
+                if (tunerItem.containsKey("unit")) {
+                    holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1) + " (" + tunerItem.get("unit").toString().toUpperCase() + ")");
                 } else {
-                    if (tunerItem.containsKey("unit")) {
-                        holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1) + " (" + tunerItem.get("unit").toString().toUpperCase() + ")");
-                    } else {
-                        holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
-                    }
+                    holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
                 }
 
                 if (childIndexPosition % 2 == 0) {

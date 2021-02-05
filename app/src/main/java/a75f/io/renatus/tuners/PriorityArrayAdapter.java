@@ -72,6 +72,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                             } else {
                                 if (getTunerValue(tunerItemSelected.get("id").toString()) != 0){
                                     holder.textViewCurrentValue.setText("-");
+                                    holder.imgBtnTunerUndo.setVisibility(View.VISIBLE);
                                     holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
                                 } else {
                                     holder.textViewCurrentValue.setText("-");
@@ -100,6 +101,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                             } else {
                                 if (getTunerValue(tunerItemSelected.get("id").toString()) != 0){
                                     holder.textViewCurrentValue.setText("-");
+                                    holder.imgBtnTunerUndo.setVisibility(View.VISIBLE);
                                     holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
                                 } else {
                                     holder.textViewCurrentValue.setText("-");
@@ -128,6 +130,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                             } else {
                                 if (getTunerValue(tunerItemSelected.get("id").toString()) != 0){
                                     holder.textViewCurrentValue.setText("-");
+                                    holder.imgBtnTunerUndo.setVisibility(View.VISIBLE);
                                     holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
                                 } else {
                                     holder.textViewCurrentValue.setText("-");
@@ -156,6 +159,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                             } else {
                                 if (getTunerValue(tunerItemSelected.get("id").toString()) != 0){
                                     holder.textViewCurrentValue.setText("-");
+                                    holder.imgBtnTunerUndo.setVisibility(View.VISIBLE);
                                     holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
                                 } else {
                                     holder.textViewCurrentValue.setText("-");
@@ -198,14 +202,23 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
         }
 
         holder.imgBtnTunerUndo.setOnClickListener(v -> {
-            final HashMap priorityValMap = getPriorityLevelMap(priorityArrayList);
-            undoClickListener.onUndoClick(tunerItemSelected);
+            if (!holder.textViewCurrentValue.getText().toString().equals("-")) {
+                HashMap priorityValMap = getPriorityLevelMap(priorityArrayList);
+                undoClickListener.onUndoClick(tunerItemSelected);
 
-            if (priorityValMap.containsKey("val")) {
-                holder.textViewCurrentValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
-                setOrangeTextColor(holder.textViewCurrentValue);
+                if (priorityValMap.containsKey("val")) {
+                    holder.textViewCurrentValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
+                    setOrangeTextColor(holder.textViewCurrentValue);
+                    holder.imgBtnTunerUndo.setVisibility(View.GONE);
+                }
+            } else {
                 holder.imgBtnTunerUndo.setVisibility(View.GONE);
+                tunerItemSelected.put("reset", true);
+                tunerItemSelected.put("newValue", null);
+                tunerItemSelected.put("newLevel", priorityMap.get("level").toString());
+                undoClickListener.onUndoClick(tunerItemSelected);
             }
+
         });
     }
 

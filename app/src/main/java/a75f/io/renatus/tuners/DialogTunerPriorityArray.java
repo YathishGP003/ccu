@@ -54,6 +54,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
 
     PriorityArrayAdapter priorityArrayAdapter;
     ArrayList<HashMap> priorityList;
+    HashMap revertMap = new HashMap();
 
     public DialogTunerPriorityArray() {
     }
@@ -148,6 +149,10 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         recyclerViewPriority.setAdapter(priorityArrayAdapter);
 
         buttonSaveTuner.setOnClickListener(v -> {
+            if (revertMap.containsKey("newValue")) {
+                selectedTunerValue = null;
+                selectedTunerLevel = revertMap.get("newLevel").toString();
+            }
             Intent tunerValue = new Intent()
                     .putExtra("Tuner_HashMap_Selected", (Serializable) tunerItemSelected)
                     .putExtra("Tuner_Group_Selected", (Serializable) tunerGroupSelected)
@@ -350,7 +355,13 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
 
     @Override
     public void onUndoClick(HashMap item) {
-        buttonSaveTuner.setEnabled(false);
-        buttonSaveTuner.setTextColor(getActivity().getColor(R.color.grey_select));
+        if (!item.containsKey("reset")) {
+            buttonSaveTuner.setEnabled(false);
+            buttonSaveTuner.setTextColor(getActivity().getColor(R.color.grey_select));
+        } else {
+            buttonSaveTuner.setEnabled(true);
+            buttonSaveTuner.setTextColor(getActivity().getColor(R.color.orange_75f));
+            revertMap = item;
+        }
     }
 }

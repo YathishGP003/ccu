@@ -84,8 +84,13 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
 
                 holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
                 if (tunerItem.containsKey("newValue")) {
-                    holder.itemTextValueView.setText(tunerItem.get("newValue").toString());
-                    holder.imgBtnUndo.setVisibility(View.VISIBLE);
+                    if (tunerItem.get("newValue") == null){
+                        holder.itemTextValueView.setText("-");
+                        holder.imgBtnUndo.setVisibility(View.GONE);
+                    } else {
+                        holder.itemTextValueView.setText(tunerItem.get("newValue").toString());
+                        holder.imgBtnUndo.setVisibility(View.VISIBLE);
+                    }
                 } else {
                     holder.imgBtnUndo.setVisibility(View.GONE);
                     if (getTunerValue(tunerItem.get("id").toString()) != 0){

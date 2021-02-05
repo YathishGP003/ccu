@@ -28,7 +28,19 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.renovo.bacnet4j.type.primitive.Null;
+
 import org.apache.commons.lang3.StringUtils;
+import org.projecthaystack.HBool;
+import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
+import org.projecthaystack.HGridBuilder;
+import org.projecthaystack.HNA;
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
+import org.projecthaystack.HStr;
+import org.projecthaystack.HVal;
+import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,6 +54,8 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
+import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
@@ -277,7 +291,11 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                         textView_level.setText("Level " + newTunerValueItem.get("newLevel").toString() + " : ");
                         textView_newLevel.setText("Level : " + newTunerValueItem.get("newLevel").toString());
                         textView_oldValue.setText(getTunerValue(newTunerValueItem.get("id").toString(),newTunerValueItem.get("newLevel").toString()));
-                        textView_newValue.setText(newTunerValueItem.get("newValue").toString());
+                        if (newTunerValueItem.get("newValue") != null){
+                            textView_newValue.setText(newTunerValueItem.get("newValue").toString());
+                        } else {
+                            textView_newValue.setText("-");
+                        }
                     } else {
                         textView_level.setText("(Tuner is not applicable)");
                         textView_newLevel.setVisibility(View.GONE);
@@ -289,7 +307,11 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     textView_level.setText("Level " + newTunerValueItem.get("newLevel").toString() + " : ");
                     textView_newLevel.setText("Level : " + newTunerValueItem.get("newLevel").toString());
                     textView_oldValue.setText(getTunerValue(newTunerValueItem.get("id").toString(),newTunerValueItem.get("newLevel").toString()));
-                    textView_newValue.setText(newTunerValueItem.get("newValue").toString());
+                   if (newTunerValueItem.get("newValue") != null){
+                       textView_newValue.setText(newTunerValueItem.get("newValue").toString());
+                   } else {
+                       textView_newValue.setText("-");
+                   }
                 }
                 linearLayoutBody.addView(tunerItemViewBody);
             }
@@ -316,7 +338,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                             String systemTunerDis = systemTunersMap.get("dis").toString();
                           //  if (!systemTunerDis.contains("Building")) {
                              if (!newTunerValueItem.get("id").toString().equals(systemTunersMap.get("id").toString()) && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(systemTunersMap.get("tunerGroup").toString()) && buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(systemTunerDis.substring(systemTunerDis.lastIndexOf("-") + 1))){
-                                 setTuner(systemTunersMap.get("id").toString(), 16, Double.parseDouble(newTunerValueItem.get("newValue").toString()));
+                                 setTuner(systemTunersMap.get("id").toString(), 16, newTunerValueItem.get("newValue") == null ? 0: Double.parseDouble(newTunerValueItem.get("newValue").toString()));
                              }
                            // }
                         }
@@ -331,17 +353,6 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
                         for (Zone z: zoneArrayList) {
                             equipArrayList.addAll(HSUtil.getEquips(z.getId()));
-
-                            ArrayList<HashMap> zoneTuners = CCUHsApi.getInstance().readAll("tuner and roomRef == \"" + z.getId() + "\"");
-
-                            for (HashMap zoneTunersMap : zoneTuners) {
-                                if (!zoneTunersMap.get("roomRef").toString().equals("SYSTEM")) {
-                                    String zoneTunerDis = zoneTunersMap.get("dis").toString();
-                                    if (!newTunerValueItem.get("id").toString().equals(zoneTunersMap.get("id").toString()) && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(zoneTunersMap.get("tunerGroup").toString()) && buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(zoneTunerDis.substring(zoneTunerDis.lastIndexOf("-") + 1))) {
-                                        setTuner(zoneTunersMap.get("id").toString(), 16, Double.parseDouble(newTunerValueItem.get("newValue").toString()));
-                                    }
-                                }
-                            }
                         }
 
                         //Update linked module tuner
@@ -352,7 +363,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                                 if (!moduleTunerMap.get("roomRef").toString().equals("SYSTEM")) {
                                     String moduleTunerDis = moduleTunerMap.get("dis").toString();
                                     if (!newTunerValueItem.get("id").toString().equals(moduleTunerMap.get("id").toString()) && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(moduleTunerMap.get("tunerGroup").toString()) && buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(moduleTunerDis.substring(moduleTunerDis.lastIndexOf("-") + 1))) {
-                                        setTuner(moduleTunerMap.get("id").toString(), 16, Double.parseDouble(newTunerValueItem.get("newValue").toString()));
+                                        setTuner(moduleTunerMap.get("id").toString(), 16, newTunerValueItem.get("newValue") == null ? 0:Double.parseDouble(newTunerValueItem.get("newValue").toString()));
                                     }
                                 }
                             }
@@ -365,19 +376,8 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
                     if (newTunerValueItem.get("newLevel").toString().equals("14")){
 
-                        //Update linked building tuner
-                        ArrayList<HashMap> buildingTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and roomRef == \""+ "SYSTEM" +"\"");
-                        String sysTunerDis = newTunerValueItem.get("dis").toString();
-                        for (HashMap buildingTunerMap : buildingTuners) {
-                            String buildingTunerDis = buildingTunerMap.get("dis").toString();
-                            if (buildingTunerMap.get("dis").toString().contains("Building")) {
-                                if (!newTunerValueItem.get("id").toString().equals(buildingTunerMap.get("id").toString()) && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(buildingTunerMap.get("tunerGroup").toString()) && sysTunerDis.substring(sysTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1))) {
-                                    setTuner(buildingTunerMap.get("id").toString(), 14, Double.parseDouble(newTunerValueItem.get("newValue").toString()));
-                                }
-                            }
-                        }
-
                         //Update linked zone tuner
+                        String sysTunerDis = newTunerValueItem.get("dis").toString();
                         ArrayList<Zone> zoneArrayList = new ArrayList<>();
                         ArrayList<Equip> equipArrayList = new ArrayList<>();
 
@@ -387,17 +387,6 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
                         for (Zone z: zoneArrayList) {
                             equipArrayList.addAll(HSUtil.getEquips(z.getId()));
-
-                            ArrayList<HashMap> zoneTuners = CCUHsApi.getInstance().readAll("tuner and roomRef == \"" + z.getId() + "\"");
-
-                            for (HashMap zoneTunersMap : zoneTuners) {
-                                if (!zoneTunersMap.get("roomRef").toString().equals("SYSTEM")) {
-                                    String zoneTunerDis = zoneTunersMap.get("dis").toString();
-                                    if (!newTunerValueItem.get("id").toString().equals(zoneTunersMap.get("id").toString()) && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(zoneTunersMap.get("tunerGroup").toString()) && sysTunerDis.substring(sysTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(zoneTunerDis.substring(zoneTunerDis.lastIndexOf("-") + 1))) {
-                                        setTuner(zoneTunersMap.get("id").toString(), 14, Double.parseDouble(newTunerValueItem.get("newValue").toString()));
-                                    }
-                                }
-                            }
                         }
 
                         //Update linked module tuner
@@ -408,7 +397,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                                 if (!moduleTunerMap.get("roomRef").toString().equals("SYSTEM")) {
                                     String moduleTunerDis = moduleTunerMap.get("dis").toString();
                                     if (!newTunerValueItem.get("id").toString().equals(moduleTunerMap.get("id").toString()) && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(moduleTunerMap.get("tunerGroup").toString()) && sysTunerDis.substring(sysTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(moduleTunerDis.substring(moduleTunerDis.lastIndexOf("-") + 1))) {
-                                        setTuner(moduleTunerMap.get("id").toString(), 14, Double.parseDouble(newTunerValueItem.get("newValue").toString()));
+                                        setTuner(moduleTunerMap.get("id").toString(), 14, newTunerValueItem.get("newValue") == null ? 0:Double.parseDouble(newTunerValueItem.get("newValue").toString()));
                                     }
                                 }
                             }
@@ -427,13 +416,13 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                                 if (!zoneTunersMap.get("roomRef").toString().equals("SYSTEM")) {
                                     String zoneTunerDis = zoneTunersMap.get("dis").toString();
                                     if (!newTunerValueItem.get("id").toString().equals(zoneTunersMap.get("id").toString()) && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(zoneTunersMap.get("tunerGroup").toString()) && newZoneTunerDis.substring(newZoneTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(zoneTunerDis.substring(zoneTunerDis.lastIndexOf("-") + 1))) {
-                                        setTuner(zoneTunersMap.get("id").toString(), 10, Double.parseDouble(newTunerValueItem.get("newValue").toString()));
+                                        setTuner(zoneTunersMap.get("id").toString(), 10, newTunerValueItem.get("newValue") == null ? 0:Double.parseDouble(newTunerValueItem.get("newValue").toString()));
                                     }
                                 }
                             }
                     }
 
-                    setTuner(newTunerValueItem.get("id").toString(), Integer.parseInt(newTunerValueItem.get("newLevel").toString()), Double.parseDouble(newTunerValueItem.get("newValue").toString()));
+                    setTuner(newTunerValueItem.get("id").toString(), Integer.parseInt(newTunerValueItem.get("newLevel").toString()), newTunerValueItem.get("newValue") == null ? 0:Double.parseDouble(newTunerValueItem.get("newValue").toString()));
                 }
                 Toast.makeText(getActivity(), "Tuner Values Updated Successfully", Toast.LENGTH_SHORT).show();
                 updatedTunerValues.clear();
@@ -553,11 +542,24 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     }
 
     public void setTuner(String id, int level, double val) {
+
         new AsyncTask<String, Void, Void>() {
             @Override
             protected Void doInBackground(final String... params) {
-                CCUHsApi.getInstance().writePointForCcuUser(id, level, val, 0);
-                CCUHsApi.getInstance().writeHisValById(id, val);
+                if (val == 0){
+
+                    HDictBuilder b = new HDictBuilder()
+                            .add("id", HRef.copy(CCUHsApi.getInstance().getGUID(id)))
+                            .add("level",level)
+                            .add("who","ccu")
+                            .add("val", (HVal) null);
+                    HDict[] dictArr = {b.toDict()};
+                    HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+
+                } else {
+                    CCUHsApi.getInstance().writePointForCcuUser(id, level, val, 0);
+                    CCUHsApi.getInstance().writeHisValById(id, val);
+                }
                 return null;
             }
 

@@ -41,6 +41,12 @@ public class UpdatePointHandler
             return;
         }
     
+        if (HSUtil.isSystemConfigHumidifierType(luid, CCUHsApi.getInstance())) {
+            ConfigPointUpdateHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
+            updatePoints(localPoint);
+            return;
+        }
+    
         if (luid != null && luid != "")
         {
             HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote("@" + pointGuid);

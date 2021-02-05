@@ -639,7 +639,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                     CCUHsApi.getInstance().deleteEntityTree(cmd.get("id").toString());
                     CCUHsApi.getInstance().addPoint(cmdPoint);
                     //CCUHsApi.getInstance().updatePoint(cmdPoint, cmdPoint.getId());
-                    CCUHsApi.getInstance().syncEntityTree();
+                    CCUHsApi.getInstance().scheduleSync();
                 }
             } else {//humidifier
                 HashMap cmd = CCUHsApi.getInstance().read("point and system and cmd and dehumidifier");
@@ -650,8 +650,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                     CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + cmdPoint.getDisplayName());
                     CCUHsApi.getInstance().deleteEntityTree(cmd.get("id").toString());
                     CCUHsApi.getInstance().addPoint(cmdPoint);
-                    //CCUHsApi.getInstance().updatePoint(cmdPoint, cmdPoint.getId());
-                    CCUHsApi.getInstance().syncEntityTree();
+                    CCUHsApi.getInstance().scheduleSync();
                 }
 
             }

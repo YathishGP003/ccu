@@ -24,7 +24,8 @@ class ConfigPointUpdateHandler {
         //TODO- Tags definition should be moved to Tags.java after merging the related ticket.
         if (configPoint.getMarkers().contains(Tags.ENABLED)) {
             updateConfigEnabled(msgObject, configPoint, hayStack);
-        } else if (configPoint.getMarkers().contains(Tags.ASSOCIATION)) {
+        } else if ((configPoint.getMarkers().contains(Tags.ASSOCIATION) )
+            || configPoint.getMarkers().contains(Tags.HUMIDIFIER)) {
             updateConfigAssociation(msgObject, configPoint, hayStack);
         }
     }
@@ -47,11 +48,11 @@ class ConfigPointUpdateHandler {
         double val = msgObject.get("val").getAsDouble();
         
         if (systemProfile instanceof DabFullyModulatingRtu) {
-            ((DabFullyModulatingRtu) systemProfile).setConfigEnabled(relayType, val);
+            ((DabFullyModulatingRtu) systemProfile).setHumidifierConfigVal(relayType+" and humidifier and type", val);
         } else if (systemProfile instanceof DabStagedRtu) {
             ((DabStagedRtu) systemProfile).setConfigAssociation(relayType, val);
         } else if (systemProfile instanceof VavFullyModulatingRtu) {
-            ((VavFullyModulatingRtu) systemProfile).setConfigEnabled(relayType, val);
+            ((VavFullyModulatingRtu) systemProfile).setConfigEnabled(relayType+" and humidifier and type", val);
         } else if (systemProfile instanceof VavStagedRtu) {
             ((VavStagedRtu) systemProfile).setConfigAssociation(relayType, val);
         }

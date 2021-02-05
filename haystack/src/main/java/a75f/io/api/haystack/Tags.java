@@ -27,6 +27,7 @@ public class Tags
     
     public static final String ENABLED = "enabled";
     public static final String ASSOCIATION = "association";
+    public static final String HUMIDIFIER = "humidifier";
     
     public static final String RELAY1 = "relay1";
     public static final String RELAY2 = "relay2";

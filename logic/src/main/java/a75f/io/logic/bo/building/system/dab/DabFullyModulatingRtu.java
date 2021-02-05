@@ -590,8 +590,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                     CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + cmdPoint.getDisplayName()+","+cmdPoint.getMarkers().toString()+","+cmd.get("id").toString()+","+cmdPoint.getId());
                     CCUHsApi.getInstance().deleteEntityTree(cmd.get("id").toString());
                     CCUHsApi.getInstance().addPoint(cmdPoint);
-                    //CCUHsApi.getInstance().updatePoint(cmdPoint, cmdPoint.getId());
-                    CCUHsApi.getInstance().syncEntityTree();
+                    CCUHsApi.getInstance().scheduleSync();
                 }
 
 
@@ -604,8 +603,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                     CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + cmdPoint.getDisplayName()+","+cmdPoint.getMarkers().toString()+","+cmd.get("id").toString()+","+cmdPoint.getId());
                     CCUHsApi.getInstance().deleteEntityTree(cmd.get("id").toString());
                     CCUHsApi.getInstance().addPoint(cmdPoint);
-                    //CCUHsApi.getInstance().updatePoint(cmdPoint, cmdPoint.getId());
-                    CCUHsApi.getInstance().syncEntityTree();
+                    CCUHsApi.getInstance().scheduleSync();
                 }
 
             }
@@ -620,6 +618,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     }
 
     public void setConfigEnabled(String tags, double val) {
+        CcuLog.i(L.TAG_CCU_SYSTEM, "setConfigEnabled "+tags+" val "+val);
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap configPoint = hayStack.read("point and system and config and output and enabled and "+tags);
         Point configEnabledPt = new Point.Builder().setHashMap(configPoint).build();
@@ -765,7 +764,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                     break;
             }
 
-            CCUHsApi.getInstance().syncEntityTree();
+            CCUHsApi.getInstance().scheduleSync();
         }
     }
 }

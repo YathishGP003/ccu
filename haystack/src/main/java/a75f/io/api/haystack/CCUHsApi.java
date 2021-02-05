@@ -1998,4 +1998,9 @@ public class CCUHsApi
         String ccuGuid = getGlobalCcuId();
         return ccuGuid == null ? Tags.CCU : Tags.CCU+"_"+ccuGuid;
     }
+    
+    public String getTimeZone() {
+        HashMap siteMap = read(Tags.SITE);
+        return siteMap.get("tz").toString();
+    }
 }

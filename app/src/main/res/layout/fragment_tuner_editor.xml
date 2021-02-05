@@ -50,8 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:checked="true"
-            android:enabled="true"
+            android:visibility="gone"
             android:text="@string/title_building"
             android:textAppearance="@style/label_values" />
 
@@ -61,6 +60,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="10dp"
+            android:checked="true"
+            android:enabled="true"
             android:text="@string/txt_tunersSystem"
             android:textAppearance="@style/label_values" />
 

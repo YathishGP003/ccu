@@ -274,9 +274,9 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 }
                 if (newTunerValueItem.get("newLevel").toString().equals("16") && newTunerValueItem.get("tunerGroup").toString().contains("VAV") || newTunerValueItem.get("tunerGroup").toString().contains("DAB") ){
                     if ( newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(getSystemProfileType())){
-                        textView_level.setText("Level " + getTunerLevelValue(newTunerValueItem.get("id").toString()) + " : ");
+                        textView_level.setText("Level " + newTunerValueItem.get("newLevel").toString() + " : ");
                         textView_newLevel.setText("Level : " + newTunerValueItem.get("newLevel").toString());
-                        textView_oldValue.setText(String.valueOf(getTunerValue(newTunerValueItem.get("id").toString())));
+                        textView_oldValue.setText(getTunerValue(newTunerValueItem.get("id").toString(),newTunerValueItem.get("newLevel").toString()));
                         textView_newValue.setText(newTunerValueItem.get("newValue").toString());
                     } else {
                         textView_level.setText("(Tuner is not applicable)");
@@ -286,9 +286,9 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                         imageViewArrow.setVisibility(View.GONE);
                     }
                 } else {
-                    textView_level.setText("Level " + getTunerLevelValue(newTunerValueItem.get("id").toString()) + " : ");
+                    textView_level.setText("Level " + newTunerValueItem.get("newLevel").toString() + " : ");
                     textView_newLevel.setText("Level : " + newTunerValueItem.get("newLevel").toString());
-                    textView_oldValue.setText(String.valueOf(getTunerValue(newTunerValueItem.get("id").toString())));
+                    textView_oldValue.setText(getTunerValue(newTunerValueItem.get("id").toString(),newTunerValueItem.get("newLevel").toString()));
                     textView_newValue.setText(newTunerValueItem.get("newValue").toString());
                 }
                 linearLayoutBody.addView(tunerItemViewBody);
@@ -315,7 +315,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                         for (HashMap systemTunersMap : systemTuners) {
                             String systemTunerDis = systemTunersMap.get("dis").toString();
                           //  if (!systemTunerDis.contains("Building")) {
-                             if (newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(systemTunersMap.get("tunerGroup").toString()) && buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(systemTunerDis.substring(systemTunerDis.lastIndexOf("-") + 1))){
+                             if (!newTunerValueItem.get("id").toString().equals(systemTunersMap.get("id").toString()) && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(systemTunersMap.get("tunerGroup").toString()) && buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(systemTunerDis.substring(systemTunerDis.lastIndexOf("-") + 1))){
                                  setTuner(systemTunersMap.get("id").toString(), 16, Double.parseDouble(newTunerValueItem.get("newValue").toString()));
                              }
                            // }
@@ -337,7 +337,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                             for (HashMap zoneTunersMap : zoneTuners) {
                                 if (!zoneTunersMap.get("roomRef").toString().equals("SYSTEM")) {
                                     String zoneTunerDis = zoneTunersMap.get("dis").toString();
-                                    if (newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(zoneTunersMap.get("tunerGroup").toString()) && buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(zoneTunerDis.substring(zoneTunerDis.lastIndexOf("-") + 1))) {
+                                    if (!newTunerValueItem.get("id").toString().equals(zoneTunersMap.get("id").toString()) && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(zoneTunersMap.get("tunerGroup").toString()) && buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(zoneTunerDis.substring(zoneTunerDis.lastIndexOf("-") + 1))) {
                                         setTuner(zoneTunersMap.get("id").toString(), 16, Double.parseDouble(newTunerValueItem.get("newValue").toString()));
                                     }
                                 }
@@ -351,7 +351,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                             for (HashMap moduleTunerMap : moduleTuners) {
                                 if (!moduleTunerMap.get("roomRef").toString().equals("SYSTEM")) {
                                     String moduleTunerDis = moduleTunerMap.get("dis").toString();
-                                    if (newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(moduleTunerMap.get("tunerGroup").toString()) && buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(moduleTunerDis.substring(moduleTunerDis.lastIndexOf("-") + 1))) {
+                                    if (!newTunerValueItem.get("id").toString().equals(moduleTunerMap.get("id").toString()) && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(moduleTunerMap.get("tunerGroup").toString()) && buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(moduleTunerDis.substring(moduleTunerDis.lastIndexOf("-") + 1))) {
                                         setTuner(moduleTunerMap.get("id").toString(), 16, Double.parseDouble(newTunerValueItem.get("newValue").toString()));
                                     }
                                 }
@@ -371,7 +371,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                         for (HashMap buildingTunerMap : buildingTuners) {
                             String buildingTunerDis = buildingTunerMap.get("dis").toString();
                             if (buildingTunerMap.get("dis").toString().contains("Building")) {
-                                if (newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(buildingTunerMap.get("tunerGroup").toString()) && sysTunerDis.substring(sysTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1))) {
+                                if (!newTunerValueItem.get("id").toString().equals(buildingTunerMap.get("id").toString()) && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(buildingTunerMap.get("tunerGroup").toString()) && sysTunerDis.substring(sysTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1))) {
                                     setTuner(buildingTunerMap.get("id").toString(), 14, Double.parseDouble(newTunerValueItem.get("newValue").toString()));
                                 }
                             }
@@ -393,7 +393,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                             for (HashMap zoneTunersMap : zoneTuners) {
                                 if (!zoneTunersMap.get("roomRef").toString().equals("SYSTEM")) {
                                     String zoneTunerDis = zoneTunersMap.get("dis").toString();
-                                    if (newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(zoneTunersMap.get("tunerGroup").toString()) && sysTunerDis.substring(sysTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(zoneTunerDis.substring(zoneTunerDis.lastIndexOf("-") + 1))) {
+                                    if (!newTunerValueItem.get("id").toString().equals(zoneTunersMap.get("id").toString()) && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(zoneTunersMap.get("tunerGroup").toString()) && sysTunerDis.substring(sysTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(zoneTunerDis.substring(zoneTunerDis.lastIndexOf("-") + 1))) {
                                         setTuner(zoneTunersMap.get("id").toString(), 14, Double.parseDouble(newTunerValueItem.get("newValue").toString()));
                                     }
                                 }
@@ -407,7 +407,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                             for (HashMap moduleTunerMap : moduleTuners) {
                                 if (!moduleTunerMap.get("roomRef").toString().equals("SYSTEM")) {
                                     String moduleTunerDis = moduleTunerMap.get("dis").toString();
-                                    if (newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(moduleTunerMap.get("tunerGroup").toString()) && sysTunerDis.substring(sysTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(moduleTunerDis.substring(moduleTunerDis.lastIndexOf("-") + 1))) {
+                                    if (!newTunerValueItem.get("id").toString().equals(moduleTunerMap.get("id").toString()) && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(moduleTunerMap.get("tunerGroup").toString()) && sysTunerDis.substring(sysTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(moduleTunerDis.substring(moduleTunerDis.lastIndexOf("-") + 1))) {
                                         setTuner(moduleTunerMap.get("id").toString(), 14, Double.parseDouble(newTunerValueItem.get("newValue").toString()));
                                     }
                                 }
@@ -421,26 +421,16 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
                     if (newTunerValueItem.get("newLevel").toString().equals("10")){
                         String newZoneTunerDis = newTunerValueItem.get("dis").toString();
-
-                        ArrayList<Zone> zoneArrayList = new ArrayList<>();
-                        for(Floor f: HSUtil.getFloors()){
-                            zoneArrayList.addAll(HSUtil.getZones(f.getId()));
-                        }
-
-                        for (Zone z: zoneArrayList) {
-
-                            ArrayList<HashMap> zoneTuners = CCUHsApi.getInstance().readAll("tuner and roomRef == \"" + z.getId() + "\"");
+                            ArrayList<HashMap> zoneTuners = CCUHsApi.getInstance().readAll("tuner and roomRef == \"" + newTunerValueItem.get("roomRef") + "\"");
 
                             for (HashMap zoneTunersMap : zoneTuners) {
                                 if (!zoneTunersMap.get("roomRef").toString().equals("SYSTEM")) {
                                     String zoneTunerDis = zoneTunersMap.get("dis").toString();
-                                    if (newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(zoneTunersMap.get("tunerGroup").toString()) && newZoneTunerDis.substring(newZoneTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(zoneTunerDis.substring(zoneTunerDis.lastIndexOf("-") + 1))) {
+                                    if (!newTunerValueItem.get("id").toString().equals(zoneTunersMap.get("id").toString()) && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(zoneTunersMap.get("tunerGroup").toString()) && newZoneTunerDis.substring(newZoneTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(zoneTunerDis.substring(zoneTunerDis.lastIndexOf("-") + 1))) {
                                         setTuner(zoneTunersMap.get("id").toString(), 10, Double.parseDouble(newTunerValueItem.get("newValue").toString()));
                                     }
                                 }
                             }
-                        }
-
                     }
 
                     setTuner(newTunerValueItem.get("id").toString(), Integer.parseInt(newTunerValueItem.get("newLevel").toString()), Double.parseDouble(newTunerValueItem.get("newValue").toString()));
@@ -698,18 +688,18 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         }
     }
 
-    public double getTunerValue(String id) {
+    public String getTunerValue(String id, String level) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList values = hayStack.readPoint(id);
         if (values != null && values.size() > 0) {
             for (int l = 1; l <= values.size(); l++) {
                 HashMap valMap = ((HashMap) values.get(l - 1));
-                if (valMap.get("val") != null) {
-                    return Double.parseDouble(valMap.get("val").toString());
+                if (valMap.get("level") != null && level.equals(valMap.get("level").toString()) && valMap.get("val") != null) {
+                    return valMap.get("val").toString();
                 }
             }
         }
-        return 0;
+        return "-";
     }
 
     public String getTunerLevelValue(String id) {

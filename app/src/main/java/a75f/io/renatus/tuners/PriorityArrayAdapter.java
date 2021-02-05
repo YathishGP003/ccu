@@ -89,6 +89,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                             }
                             holder.textViewCurrentValue.setText("");
                             setBlackTextColor(holder.textViewName);
+                            setBlackTextColor(holder.textViewValue);
                         }
                     } else if (tunerGroupType.contains("Zone")) {
                         if (position == 9) {
@@ -116,6 +117,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                             }
                             holder.textViewCurrentValue.setText("");
                             setBlackTextColor(holder.textViewName);
+                            setBlackTextColor(holder.textViewValue);
                         }
                     } else if (tunerGroupType.contains("System")) {
                         if (position == 13) {
@@ -143,6 +145,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                             }
                             holder.textViewCurrentValue.setText("");
                             setBlackTextColor(holder.textViewName);
+                            setBlackTextColor(holder.textViewValue);
                         }
                     } else if (tunerGroupType.contains("Building")) {
                         if (position == 15) {
@@ -170,6 +173,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                             }
                             holder.textViewCurrentValue.setText("");
                             setBlackTextColor(holder.textViewName);
+                            setBlackTextColor(holder.textViewValue);
                         }
                     }
                 }

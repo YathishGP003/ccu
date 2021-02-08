@@ -1,7 +1,7 @@
 package a75f.io.logic.cloudservice
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.logic.BuildConfig
+import a75f.io.logic.cloud.RenatusServicesEnvironment
 import okhttp3.Interceptor
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
@@ -34,13 +34,20 @@ interface FileStorageService {
 
 /**
  * Creates the Retrofit services.
+ *
+ * Since this depends on the RenatusServicesEnvironment Urls, which could change
+ * during runtime, this must be re-initialized, retrofit re-created, every time t
+ * hose base URLs change.
+ * Currently, this is created only when (and every time) the Upload logs feature is used,
+ * but more generally we might use this for all our networking.  Then, this could
+ * be recreated right from RenatusServicesEnvironment.
  */
 class ServiceGenerator(
-   haystack: CCUHsApi
+   ccuHsApi: CCUHsApi
 ) {
 
    private val retrofit: Retrofit =
-      createRetrofit(haystack.jwt)
+      createRetrofit(ccuHsApi.jwt)
 
 
    fun provideFileStorageService(): FileStorageService =
@@ -51,6 +58,8 @@ class ServiceGenerator(
       val okhttpLogging = HttpLoggingInterceptor().apply {
          level = HttpLoggingInterceptor.Level.HEADERS
       }
+
+      val remoteStorageUrl = RenatusServicesEnvironment.instance.urls.remoteStorageUrl
 
       val okHttpClient = OkHttpClient.Builder().apply {
          addInterceptor(
@@ -65,7 +74,7 @@ class ServiceGenerator(
       }.build()
 
       return Retrofit.Builder()
-         .baseUrl(BuildConfig.FILE_STORAGE_API_BASE)
+         .baseUrl(remoteStorageUrl)
          .client(okHttpClient)
          .build()
    }

@@ -44,6 +44,8 @@
     <color name="thummb_outer_orange">#E46B43</color>
     <color name="background_holo_light">#f3f3f3</color>
     <color name="floor_plan_rect">#8080ff80</color>
+    <color name="safe_status">#00A000</color>
+    <color name="danger_status">#C00000</color>
 
 
     <color name="buttonTextColor">#666666</color>

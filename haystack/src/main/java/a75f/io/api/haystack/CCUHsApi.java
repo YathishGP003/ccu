@@ -67,8 +67,8 @@ public class CCUHsApi
     
     Context context;
     
-    String hayStackUrl = "";
-    String careTakerUrl ="";
+    private String hayStackUrl = null;
+    private String careTakerUrl = null;
     
     HRef tempWeatherRef = null;
     HRef humidityWeatherRef = null;
@@ -82,13 +82,15 @@ public class CCUHsApi
         return instance;
     }
 
-    public CCUHsApi(Context c)
+    public CCUHsApi(Context c, String hayStackUrl, String careTakerUrl)
     {
         if (instance != null)
         {
             throw new IllegalStateException("Api instance already created , use getInstance()");
         }
         context = c;
+        this.hayStackUrl = hayStackUrl;
+        this.careTakerUrl = careTakerUrl;
         hsClient = new AndroidHSClient();
         tagsDb = (CCUTagsDb) hsClient.db();
         tagsDb.init(context);
@@ -112,16 +114,17 @@ public class CCUHsApi
         hisSyncHandler = new HisSyncHandler(this);
     }
 
+    public void resetBaseUrls(String hayStackUrl, String careTakerUrl) {
+        this.hayStackUrl = hayStackUrl;
+        this.careTakerUrl = careTakerUrl;
+    }
+
     public HClient getHSClient()
     {
         return hsClient;
     }
     
     public String getHSUrl() {
-        if (hayStackUrl.equals(""))
-        {
-            hayStackUrl = BuildConfig.HAYSTACK_API_BASE;
-        }
         Log.d("Haystack URL: ","url="+hayStackUrl);
         return hayStackUrl;
     }
@@ -150,10 +153,6 @@ public class CCUHsApi
     }
 
     public String getAuthenticationUrl() {
-        if (careTakerUrl.equals(""))
-        {
-            careTakerUrl = BuildConfig.CARETAKER_API_BASE;
-        }
         Log.d("Authentication URL: ","url="+careTakerUrl);
         return careTakerUrl;
     }

@@ -1,6 +1,7 @@
 package a75f.io.logic;
 
 import android.content.Context;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -45,6 +46,8 @@ import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
+import a75f.io.logic.cloud.RenatusServicesEnvironment;
+import a75f.io.logic.cloud.RenatusServicesUrls;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
@@ -159,7 +162,11 @@ public class Globals {
         testHarness = getApplicationContext().getResources().getBoolean(R.bool.test_harness);
 
 
-        CCUHsApi ccuHsApi = new CCUHsApi(this.mApplicationContext);
+        RenatusServicesEnvironment servicesEnv = RenatusServicesEnvironment.createWithSharedPrefs(
+                PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
+        RenatusServicesUrls urls = servicesEnv.getUrls();
+
+        CCUHsApi ccuHsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl());
         ccuHsApi.testHarnessEnabled = testHarness;
 
         //set SN address band
@@ -167,7 +174,6 @@ public class Globals {
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
         
         importTunersAndScheduleJobs();
-        
     }
     
     

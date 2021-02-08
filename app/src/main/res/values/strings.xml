@@ -797,6 +797,8 @@
 
     <string name="txt_mb_restart_prompt">Changes in config requires Application restart</string>
     <string name="txt_restart">Restart Now</string>
+   <string name="local_sandbox">Local Sandbox</string>
+    <string name="change_ip_address">Change IP Address</string>
     <string-array name="mb_config_baudrate_array">
         <item>  9600 </item>
         <item>  19200 </item>

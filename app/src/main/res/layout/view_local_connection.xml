@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+   xmlns:app="http://schemas.android.com/apk/res-auto"
+   xmlns:tools="http://schemas.android.com/tools"
+   android:layout_width="match_parent"
+   android:layout_height="wrap_content"
+   tools:parentTag="android.support.constraint.ConstraintLayout">
+
+   <!-- When we migrate to androidx, we can use constrainlayout.helper.Flow here -->
+   <!-- to layout the three main components.  Then, the button will   -->
+   <!-- wrap down to the next line when/if constrained in Portrait layout-->
+
+   <LinearLayout
+      android:id="@+id/firstColumn"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent">
+
+      <TextView
+         android:id="@+id/usingLocalSandboxText"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:textSize="22sp"
+         android:text="@string/local_sandbox"
+         android:textStyle="bold|italic" />
+
+      <TextView
+         android:id="@+id/ipAddressValue"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_marginTop="4dp"
+         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+         android:textColor="@color/black"
+         tools:text="http://192.168.0.122" />
+
+   </LinearLayout>
+
+   <TextView
+      android:id="@+id/networkStatus"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="52dp"
+      android:layout_marginTop="6dp"
+      android:textStyle="bold"
+      app:layout_constraintStart_toEndOf="@+id/firstColumn"
+      app:layout_constraintTop_toTopOf="@+id/firstColumn"
+      tools:text="Connected"
+      tools:textColor="@color/my_green" />
+
+   <Button
+      android:id="@+id/changeIpButton"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="52dp"
+      android:text="@string/change_ip_address"
+      app:layout_constraintHorizontal_bias="0.5"
+      app:layout_constraintStart_toEndOf="@+id/networkStatus"
+      app:layout_constraintTop_toTopOf="parent" />
+
+
+</merge>

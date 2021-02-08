@@ -24,13 +24,18 @@ public class HttpUtil
 
     public static final String HTTP_SCHEME = "http";
 
+    // A puppy dies with this approach, but it seemed the least invasive until we
+    // introduce DI to alerts and refactor.
+    // This is set from logic module, RenatusServiceEnv#setupUrls()
+    public static String alertsApiBase = null;
+
     public static String sendRequest(String endpoint, String postData, String apiKey) {
         URL url;
         HttpURLConnection connection = null;
         if (StringUtils.isNotBlank(apiKey)) {
             try {
                 //Create connection
-                url = new URL(BuildConfig.ALERTS_API_BASE +  endpoint);
+                url = new URL(alertsApiBase +  endpoint);
 
                 if (StringUtils.equals(url.getProtocol(), HTTP_SCHEME)) {
                     connection = (HttpURLConnection)url.openConnection();

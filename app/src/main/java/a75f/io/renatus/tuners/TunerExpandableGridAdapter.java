@@ -84,28 +84,33 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
 
                 holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
                 if (tunerItem.containsKey("newValue")) {
-                    holder.itemTextValueView.setText(tunerItem.get("newValue").toString());
-                    holder.imgBtnUndo.setVisibility(View.VISIBLE);
+                    if (tunerItem.get("newValue") == null){
+                        holder.itemTextValueView.setText("-");
+                        if (tunerItem.containsKey("reset")){
+                            holder.imgBtnUndo.setVisibility(View.VISIBLE);
+                        } else {
+                            holder.imgBtnUndo.setVisibility(View.GONE);
+                        }
+                    } else {
+                        holder.itemTextValueView.setText(tunerItem.get("newValue").toString());
+                        if (tunerItem.containsKey("hideRefresh")){
+                            holder.imgBtnUndo.setVisibility(View.GONE);
+                        } else {
+                            holder.imgBtnUndo.setVisibility(View.VISIBLE);
+                        }
+                    }
                 } else {
                     holder.imgBtnUndo.setVisibility(View.GONE);
-                    if (getTunerValue(tunerItem.get("id").toString()) != 0){
+                    if (getTunerValue(tunerItem.get("id").toString()) != null){
                         holder.itemTextValueView.setText(String.valueOf(getTunerValue(tunerItem.get("id").toString())));
                     } else {
                         holder.itemTextValueView.setText("-");
                     }
                 }
-                if (tunerGroupType.equals("Zone")){
-                    if (tunerItem.containsKey("unit")) {
-                        holder.itemTextView.setText(tunerName.substring(tunerName.indexOf("-") + 1) + " (" + tunerItem.get("unit").toString().toUpperCase() + ")");
-                    } else {
-                        holder.itemTextView.setText(tunerName.substring(tunerName.indexOf("-") + 1));
-                    }
+                if (tunerItem.containsKey("unit")) {
+                    holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1) + " (" + tunerItem.get("unit").toString().toUpperCase() + ")");
                 } else {
-                    if (tunerItem.containsKey("unit")) {
-                        holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1) + " (" + tunerItem.get("unit").toString().toUpperCase() + ")");
-                    } else {
-                        holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
-                    }
+                    holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
                 }
 
                 if (childIndexPosition % 2 == 0) {
@@ -118,7 +123,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                     holder.imgBtnUndo.setVisibility(View.GONE);
                     tunerItem.remove("newValue");
                     tunerItem.remove("newLevel");
-                    if (getTunerValue(tunerItem.get("id").toString()) != 0){
+                    if (getTunerValue(tunerItem.get("id").toString()) != null){
                         holder.itemTextValueView.setText(String.valueOf(getTunerValue(tunerItem.get("id").toString())));
                     } else {
                         holder.itemTextValueView.setText("-");
@@ -210,7 +215,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
         }
     }
 
-    public double getTunerValue(String id) {
+    public Double getTunerValue(String id) {
         int level = 17;
         if (tunerGroupType.equalsIgnoreCase("Building")){
             level = 16;
@@ -232,7 +237,22 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                 }
             }
         }
-        return 0;
+        return null;
+    }
+
+    public void refreshData(){
+        for (Object object: mDataArrayList){
+            if (!(object instanceof TunerGroupItem)){
+                HashMap tunerItem = (HashMap) object;
+                if (tunerItem.get("reset") == null && tunerItem.containsKey("newValue")){
+                    tunerItem.put("hideRefresh",true);
+                }
+                if (tunerItem.containsKey("reset")){
+                    tunerItem.remove("reset");
+                }
+            }
+        }
+        notifyDataSetChanged();
     }
 }
 

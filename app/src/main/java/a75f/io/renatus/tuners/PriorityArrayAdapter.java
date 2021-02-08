@@ -53,7 +53,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
             if (priorityMap.get("level") != null) {
                 if (priorityItem.get("newValue") != null && !priorityItem.get("newValue").toString().equals("")) {
                     holder.textViewCurrentValue.setText(priorityItem.get("newValue").toString());
-                    if (getTunerValue(tunerItemSelected.get("id").toString()) != 0){
+                    if (getTunerValue(tunerItemSelected.get("id").toString()) != null){
                         holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
                     } else {
                         holder.textViewValue.setText("");
@@ -70,7 +70,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                                 holder.textViewCurrentValue.setText(priorityMap.get("newValue").toString());
                                 holder.textViewValue.setText(priorityMap.get("val").toString());
                             } else {
-                                if (getTunerValue(tunerItemSelected.get("id").toString()) != 0){
+                                if (getTunerValue(tunerItemSelected.get("id").toString()) != null){
                                     holder.textViewCurrentValue.setText("-");
                                     holder.imgBtnTunerUndo.setVisibility(View.VISIBLE);
                                     holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
@@ -99,7 +99,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                                 holder.textViewCurrentValue.setText(priorityMap.get("newValue").toString());
                                 holder.textViewValue.setText(priorityMap.get("val").toString());
                             } else {
-                                if (getTunerValue(tunerItemSelected.get("id").toString()) != 0){
+                                if (getTunerValue(tunerItemSelected.get("id").toString()) != null){
                                     holder.textViewCurrentValue.setText("-");
                                     holder.imgBtnTunerUndo.setVisibility(View.VISIBLE);
                                     holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
@@ -128,7 +128,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                                 holder.textViewCurrentValue.setText(priorityMap.get("newValue").toString());
                                 holder.textViewValue.setText(priorityMap.get("val").toString());
                             } else {
-                                if (getTunerValue(tunerItemSelected.get("id").toString()) != 0){
+                                if (getTunerValue(tunerItemSelected.get("id").toString()) != null){
                                     holder.textViewCurrentValue.setText("-");
                                     holder.imgBtnTunerUndo.setVisibility(View.VISIBLE);
                                     holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
@@ -157,7 +157,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                                 holder.textViewCurrentValue.setText(priorityMap.get("newValue").toString());
                                 holder.textViewValue.setText(priorityMap.get("val").toString());
                             } else {
-                                if (getTunerValue(tunerItemSelected.get("id").toString()) != 0){
+                                if (getTunerValue(tunerItemSelected.get("id").toString()) != null){
                                     holder.textViewCurrentValue.setText("-");
                                     holder.imgBtnTunerUndo.setVisibility(View.VISIBLE);
                                     holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
@@ -215,7 +215,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                 holder.imgBtnTunerUndo.setVisibility(View.GONE);
                 tunerItemSelected.put("reset", true);
                 tunerItemSelected.put("newValue", null);
-                tunerItemSelected.put("newLevel", priorityMap.get("level").toString());
+                tunerItemSelected.put("newLevel", getSelectedTunerLevel());
                 undoClickListener.onUndoClick(tunerItemSelected);
             }
 
@@ -235,7 +235,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
         return null;
     }
 
-    public double getTunerValue(String id) {
+    public Double getTunerValue(String id) {
         int level = 17;
         if (tunerGroupType.equalsIgnoreCase("Building")){
             level = 16;
@@ -257,7 +257,21 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                 }
             }
         }
-        return 0;
+        return null;
+    }
+
+    public int getSelectedTunerLevel(){
+        int level = 17;
+        if (tunerGroupType.equalsIgnoreCase("Building")){
+            level = 16;
+        } else if (tunerGroupType.equalsIgnoreCase("System")){
+            level = 14;
+        } else if (tunerGroupType.equalsIgnoreCase("Zone")){
+            level = 10;
+        }else if (tunerGroupType.equalsIgnoreCase("Module")){
+            level = 8;
+        }
+        return level;
     }
 
     public void setOrangeTextColor(TextView textView) {

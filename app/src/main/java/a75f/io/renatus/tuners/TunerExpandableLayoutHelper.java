@@ -45,6 +45,10 @@ public class TunerExpandableLayoutHelper implements TunerGroupChangeListener {
         mSectionedExpandableGridAdapter.notifyDataSetChanged();
     }
 
+    public void notifyDataSaveChanged() {
+        mSectionedExpandableGridAdapter.refreshData();
+    }
+
     public void addSection(String section, List<HashMap> items) {
         TunerGroupItem newSection;
         mSectionMap.put(section, (newSection = new TunerGroupItem(section)));

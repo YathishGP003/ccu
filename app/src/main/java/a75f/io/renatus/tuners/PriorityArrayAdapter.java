@@ -207,7 +207,11 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                 undoClickListener.onUndoClick(tunerItemSelected);
 
                 if (priorityValMap.containsKey("val")) {
-                    holder.textViewCurrentValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
+                    if (getTunerValue(tunerItemSelected.get("id").toString()) != null){
+                        holder.textViewCurrentValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
+                    } else {
+                        holder.textViewCurrentValue.setText("--");
+                    }
                     setOrangeTextColor(holder.textViewCurrentValue);
                     holder.imgBtnTunerUndo.setVisibility(View.GONE);
                 }

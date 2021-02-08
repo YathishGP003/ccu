@@ -43,6 +43,7 @@ import org.projecthaystack.HVal;
 import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -599,6 +600,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
            }
         }
 
+        Collections.reverse(moduleTuners);
         tuners.addAll(moduleTuners);
 
         Map<String, List<HashMap>> groupByTuner = tuners.stream().collect(Collectors.groupingBy(p -> p.get("tunerGroup").toString()));

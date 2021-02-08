@@ -52,7 +52,7 @@ class ConfigPointUpdateHandler {
         } else if (systemProfile instanceof DabStagedRtu) {
             ((DabStagedRtu) systemProfile).setConfigAssociation(relayType, val);
         } else if (systemProfile instanceof VavFullyModulatingRtu) {
-            ((VavFullyModulatingRtu) systemProfile).setConfigEnabled(relayType+" and humidifier and type", val);
+            ((VavFullyModulatingRtu) systemProfile).setHumidifierConfigVal(relayType+" and humidifier and type", val);
         } else if (systemProfile instanceof VavStagedRtu) {
             ((VavStagedRtu) systemProfile).setConfigAssociation(relayType, val);
         }

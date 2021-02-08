@@ -23,6 +23,8 @@ android {
             }
         }
 
+        // Default base IP is empty string.  We only need it for local env, where we overwrite it.
+        buildConfigField "String", 'API_BASE_IP', '\"\"'
     }
 
     packagingOptions {
@@ -47,26 +49,44 @@ android {
     useLibrary 'org.apache.http.legacy'
 
     buildTypes {
+
         local {
             minifyEnabled false
-            buildConfigField "String", 'FILE_STORAGE_API_BASE', properties.getProperty("filestorage.api.base", "")
+            buildConfigField "String", 'API_BASE_IP', properties.getProperty("api.base.ip", "")
+            // The rest here are not used in local, but we have them here so the app compiles.
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"\"'
+            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"\"'
+            buildConfigField "String", 'ALERTS_API_BASE', '\"\"'
         }
         dev {
             minifyEnabled false
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://haystack-75f-service-dev.azurewebsites.net/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-dev.azurewebsites.net/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-dev.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts-75f-service-dev.azurewebsites.net/\"'
         }
         prod {
             minifyEnabled false
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://haystack-75f-service.azurewebsites.net/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service.azurewebsites.net/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts-75f-service.azurewebsites.net/\"'
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
         }
         qa {
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://haystack-75f-service-qa.azurewebsites.net/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-qa.azurewebsites.net/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-qa.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts-75f-service-qa.azurewebsites.net/\"'
             minifyEnabled false
         }
         staging {
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://haystack-75f-service-staging.azurewebsites.net/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-staging.azurewebsites.net/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-staging.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts-75f-service-staging.azurewebsites.net/\"'
             minifyEnabled false
         }
     }
@@ -96,6 +116,9 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.7.0'
+
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
+    implementation 'io.reactivex.rxjava3:rxjava:3.0.0'
 
     implementation 'info.guardianproject.netcipher:netcipher:1.2'
     implementation project(':haystack')

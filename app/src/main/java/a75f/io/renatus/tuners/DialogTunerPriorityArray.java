@@ -247,6 +247,12 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             } else {
                 levelName = "Module";
             }
+            if (tunerItemSelected.containsKey("hideRefresh")){
+                tunerItemSelected.remove("hideRefresh");
+            }
+            if (tunerItemSelected.containsKey("reset")){
+                tunerItemSelected.remove("reset");
+            }
             String text = "Level "+(position +1)+" "+levelName;
             text = text.replaceAll("System","<font color='#E24301'>System</font>");
             text = text.replaceAll(getString(R.string.txt_tunersModule),"<font color='#E24301'>Module</font>");

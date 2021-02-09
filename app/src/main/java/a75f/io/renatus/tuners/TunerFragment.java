@@ -2,6 +2,7 @@ package a75f.io.renatus.tuners;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -28,17 +30,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.renovo.bacnet4j.type.primitive.Null;
-
 import org.apache.commons.lang3.StringUtils;
-import org.projecthaystack.HBool;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGridBuilder;
-import org.projecthaystack.HNA;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
-import org.projecthaystack.HStr;
 import org.projecthaystack.HVal;
 import org.projecthaystack.io.HZincWriter;
 
@@ -56,7 +53,6 @@ import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.HttpUtil;
-import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
@@ -432,6 +428,9 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 saveTunerValues.setEnabled(false);
                 saveTunerValues.setTextColor(getActivity().getColor(R.color.tuner_group));
                 tunerExpandableLayoutHelper.notifyDataSaveChanged();
+                //close soft keyboard
+                InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                mgr.hideSoftInputFromWindow(editChangeReason.getWindowToken(), 0);
             });
             buttonCancelTuners.setOnClickListener(dialogV -> {
                 saveTunerValues.setEnabled(true);
@@ -549,11 +548,11 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             @Override
             protected Void doInBackground(final String... params) {
                 if (val == null){
-
+                    CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(id), (int) level, CCUHsApi.getInstance().getCCUUserName(), HNum.make(getTuner(id)), HNum.make(1));
                     HDictBuilder b = new HDictBuilder()
                             .add("id", HRef.copy(CCUHsApi.getInstance().getGUID(id)))
                             .add("level",level)
-                            .add("who","ccu")
+                            .add("who",CCUHsApi.getInstance().getCCUUserName())
                             .add("duration", HNum.make(0, "ms"))
                             .add("val", (HVal) null);
                     HDict[] dictArr = {b.toDict()};

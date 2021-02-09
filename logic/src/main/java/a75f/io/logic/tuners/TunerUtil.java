@@ -9,6 +9,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logic.L;
 
 import static a75f.io.api.haystack.HayStackConstants.DEFAULT_INIT_VAL_LEVEL;
@@ -504,5 +505,12 @@ public class TunerUtil
         }
         hayStack.writePointForCcuUser(id, level, dVal, 0);
         
+    }
+    
+    public static double getDefaultTunerVal(String tags) {
+        if (tags.contains(Tags.DAB)) {
+            return DabTuners.getDefaultTunerVal(tags);
+        }
+        return 0;
     }
 }

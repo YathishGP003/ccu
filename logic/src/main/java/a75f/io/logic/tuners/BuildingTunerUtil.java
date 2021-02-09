@@ -23,11 +23,12 @@ class BuildingTunerUtil {
     public static void updateTunerLevels(String tunerPointId, String zoneRef, CCUHsApi hayStack) {
     
         Point tunerPoint = new Point.Builder()
-                               .setHashMap(hayStack.readMapById(tunerPointId))
-                               .build();
+                                   .setHashMap(hayStack.readMapById(tunerPointId))
+                                   .build();
         String queryString = HSUtil.getHQueryFromMarkers(tunerPoint.getMarkers());
-        
-        //If all the level are successfully copied from a zone tuner, no need to go futher.
+    
+        CcuLog.e(L.TAG_CCU_TUNER, "updateTunerLevels : "+tunerPoint.getDisplayName());
+        //If all the level are successfully copied from a zone tuner, no need to go further.
         if (copyFromZoneTuner(tunerPoint.getId(), zoneRef, queryString, hayStack)) {
             return;
         }
@@ -43,8 +44,8 @@ class BuildingTunerUtil {
     }
     
     private static boolean copyFromZoneTuner(String dstPointId, String zoneRef, String queryString, CCUHsApi hayStack) {
-    
-        String equipQuery = queryString+" and zoneRef == \""+zoneRef+"\"";
+        CcuLog.e(L.TAG_CCU_TUNER, " copyFromZoneTuner : ");
+        String equipQuery = queryString+" and roomRef == \""+zoneRef+"\"";
         HashMap zoneTunerPoint = hayStack.read(equipQuery);
         
         if (zoneTunerPoint.isEmpty()) {
@@ -52,7 +53,6 @@ class BuildingTunerUtil {
         }
         
         ArrayList<HashMap> zoneTunerPointArray = hayStack.readPoint(zoneTunerPoint.get("id").toString());
-        
         if (copyTunerLevel(dstPointId, zoneTunerPointArray, TUNER_ZONE_VAL_LEVEL, hayStack)
             && copyTunerLevel(dstPointId, zoneTunerPointArray, TUNER_SYSTEM_VAL_LEVEL, hayStack)
             && copyTunerLevel(dstPointId, zoneTunerPointArray, TUNER_BUILDING_VAL_LEVEL, hayStack)
@@ -64,7 +64,7 @@ class BuildingTunerUtil {
     }
     
     private static boolean copyFromSystemTuner(String dstPointId, String queryString, CCUHsApi hayStack) {
-    
+        CcuLog.e(L.TAG_CCU_TUNER, " copyFromSystemTuner : ");
         HashMap systemTunerPoint = hayStack.read(queryString);
         if (systemTunerPoint.isEmpty()) {
             return false;
@@ -82,7 +82,7 @@ class BuildingTunerUtil {
     }
     
     private static boolean copyFromBuildingTuner(String dstPointId, String queryString, CCUHsApi hayStack) {
-    
+        CcuLog.e(L.TAG_CCU_TUNER, " copyFromBuildingTuner : ");
         String buildingQuery = HSUtil.appendMarkerToQuery(queryString, Tags.DEFAULT);
         HashMap buildingTunerPoint = hayStack.read(buildingQuery);
         if (buildingTunerPoint.isEmpty()) {
@@ -90,9 +90,11 @@ class BuildingTunerUtil {
         }
     
         ArrayList<HashMap> buildingTunerPointArray = hayStack.readPoint(buildingTunerPoint.get("id").toString());
+    
+        copyTunerLevel(dstPointId, buildingTunerPointArray, TUNER_BUILDING_VAL_LEVEL, hayStack);
         
-        if (copyTunerLevel(dstPointId, buildingTunerPointArray, TUNER_BUILDING_VAL_LEVEL, hayStack)
-            && copyTunerLevel(dstPointId, buildingTunerPointArray, DEFAULT_VAL_LEVEL, hayStack))  {
+        //Should always succeed. Otherwise indicates some bug.
+        if (copyTunerLevel(dstPointId, buildingTunerPointArray, DEFAULT_VAL_LEVEL, hayStack))  {
             return true;
         }
     
@@ -100,8 +102,10 @@ class BuildingTunerUtil {
     }
     
     private static boolean copyTunerLevel(String dstPointId, ArrayList<HashMap> srcArray, int level, CCUHsApi hayStack) {
+        
         HashMap levelMap = srcArray.get(level - 1 );
         if (levelMap != null && levelMap.get("val") != null) {
+            CcuLog.e(L.TAG_CCU_TUNER, " copyTunerLevel : "+levelMap);
             hayStack.pointWrite(HRef.copy(dstPointId), level,
                                 levelMap.get("who").toString(), HNum.make(Double.parseDouble(levelMap.get("val").toString())), HNum.make(0));
             return true;

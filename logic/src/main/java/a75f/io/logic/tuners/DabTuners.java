@@ -2,20 +2,16 @@ package a75f.io.logic.tuners;
 
 import android.util.Log;
 
-import org.projecthaystack.HNum;
-import org.projecthaystack.HRef;
-
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-
-import static a75f.io.logic.tuners.TunerConstants.TUNER_SYSTEM_VAL_LEVEL;
-import static a75f.io.logic.tuners.TunerConstants.TUNER_ZONE_VAL_LEVEL;
 
 public class DabTuners {
     
@@ -327,15 +323,7 @@ public class DabTuners {
                                            .setTz(tz)
                                            .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
-        HashMap zonePriorityMultiplierPoint = hayStack.read("point and tuner and default and dab and zone and priority and multiplier");
-        ArrayList<HashMap> zonePrioritySpreadMultiplierArr = hayStack.readPoint(zonePriorityMultiplierPoint.get("id").toString());
-        for (HashMap valMap : zonePrioritySpreadMultiplierArr) {
-            if (valMap.get("val") != null)
-            {
-                System.out.println(valMap);
-                hayStack.pointWrite(HRef.copy(zonePriorityMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(zonePriorityMultiplierId, roomRef, hayStack);
         hayStack.writeHisValById(zonePriorityMultiplierId, HSUtil.getPriorityVal(zonePriorityMultiplierId));
 
         Point coolingDb = new Point.Builder()
@@ -351,15 +339,7 @@ public class DabTuners {
                               .setUnit("\u00B0F")
                               .build();
         String coolingDbId = hayStack.addPoint(coolingDb);
-        HashMap defCdbPoint = hayStack.read("point and tuner and default and dab and cooling and deadband and base");
-        ArrayList<HashMap> cdbDefPointArr = hayStack.readPoint(defCdbPoint.get("id").toString());
-        for (HashMap valMap : cdbDefPointArr) {
-            if (valMap.get("val") != null)
-            {
-                System.out.println(valMap);
-                hayStack.pointWrite(HRef.copy(coolingDbId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(coolingDbId, roomRef, hayStack);
         hayStack.writeHisValById(coolingDbId, HSUtil.getPriorityVal(coolingDbId));
 
         Point coolingDbMultiplier = new Point.Builder()
@@ -374,15 +354,7 @@ public class DabTuners {
                                         .setTz(tz)
                                         .build();
         String coolingDbMultiplierId = hayStack.addPoint(coolingDbMultiplier);
-        HashMap coolingDbMultiplierPoint = hayStack.read("point and tuner and default and dab and cooling and deadband and multiplier");
-        ArrayList<HashMap> coolingDbMultiplierPointArr = hayStack.readPoint(coolingDbMultiplierPoint.get("id").toString());
-        for (HashMap valMap : coolingDbMultiplierPointArr) {
-            if (valMap.get("val") != null)
-            {
-                System.out.println(valMap);
-                hayStack.pointWrite(HRef.copy(coolingDbMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(coolingDbMultiplierId, roomRef, hayStack);
         hayStack.writeHisValById(coolingDbMultiplierId, HSUtil.getPriorityVal(coolingDbMultiplierId));
 
         Point heatingDb = new Point.Builder()
@@ -398,14 +370,7 @@ public class DabTuners {
                               .setUnit("\u00B0F")
                               .build();
         String heatingDbId = hayStack.addPoint(heatingDb);
-        HashMap defHdbPoint = hayStack.read("point and tuner and default and dab and heating and deadband and base");
-        ArrayList<HashMap> hdbDefPointArr = hayStack.readPoint(defHdbPoint.get("id").toString());
-        for (HashMap valMap : hdbDefPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(heatingDbId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(heatingDbId, roomRef, hayStack);
         hayStack.writeHisValById(heatingDbId, HSUtil.getPriorityVal(heatingDbId));
 
         Point heatingDbMultiplier = new Point.Builder()
@@ -420,14 +385,7 @@ public class DabTuners {
                                         .setTz(tz)
                                         .build();
         String heatingDbMultiplierId = hayStack.addPoint(heatingDbMultiplier);
-        HashMap heatingDbMultiplierPoint = hayStack.read("point and tuner and default and dab and heating and deadband and multiplier");
-        ArrayList<HashMap> heatingDbMultiplierPointArr = hayStack.readPoint(heatingDbMultiplierPoint.get("id").toString());
-        for (HashMap valMap : heatingDbMultiplierPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(heatingDbMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(heatingDbMultiplierId, roomRef, hayStack);
         hayStack.writeHisValById(heatingDbMultiplierId, HSUtil.getPriorityVal(heatingDbMultiplierId));
 
         Point propGain = new Point.Builder()
@@ -442,14 +400,7 @@ public class DabTuners {
                              .setTz(tz)
                              .build();
         String pgainId = hayStack.addPoint(propGain);
-        HashMap defPgainPoint = hayStack.read("point and tuner and default and dab and pgain");
-        ArrayList<HashMap> pgainDefPointArr = hayStack.readPoint(defPgainPoint.get("id").toString());
-        for (HashMap valMap : pgainDefPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(pgainId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(pgainId, roomRef, hayStack);
         hayStack.writeHisValById(pgainId, HSUtil.getPriorityVal(pgainId));
 
         Point integralGain = new Point.Builder()
@@ -464,14 +415,7 @@ public class DabTuners {
                                  .setTz(tz)
                                  .build();
         String igainId = hayStack.addPoint(integralGain);
-        HashMap defIgainPoint = hayStack.read("point and tuner and default and dab and igain");
-        ArrayList<HashMap> igainDefPointArr = hayStack.readPoint(defIgainPoint.get("id").toString());
-        for (HashMap valMap : igainDefPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(igainId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(igainId, roomRef, hayStack);
         hayStack.writeHisValById(igainId, HSUtil.getPriorityVal(igainId));
 
         Point propSpread = new Point.Builder()
@@ -486,14 +430,7 @@ public class DabTuners {
                                .setTz(tz)
                                .build();
         String pSpreadId = hayStack.addPoint(propSpread);
-        HashMap defPSpreadPoint = hayStack.read("point and tuner and default and dab and pspread");
-        ArrayList<HashMap> pspreadDefPointArr = hayStack.readPoint(defPSpreadPoint.get("id").toString());
-        for (HashMap valMap : pspreadDefPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(pSpreadId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(pSpreadId, roomRef, hayStack);
         hayStack.writeHisValById(pSpreadId, HSUtil.getPriorityVal(pSpreadId));
 
         Point integralTimeout = new Point.Builder()
@@ -509,14 +446,7 @@ public class DabTuners {
                                     .setTz(tz)
                                     .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
-        HashMap defITPoint = hayStack.read("point and tuner and default and dab and itimeout");
-        ArrayList<HashMap> iTDefPointArr = hayStack.readPoint(defITPoint.get("id").toString());
-        for (HashMap valMap : iTDefPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(iTimeoutId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(iTimeoutId, roomRef, hayStack);
         hayStack.writeHisValById(iTimeoutId, HSUtil.getPriorityVal(iTimeoutId));
 
         Point zoneCO2Target = new Point.Builder()
@@ -532,14 +462,7 @@ public class DabTuners {
                                   .setTz(tz)
                                   .build();
         String zoneCO2TargetId = hayStack.addPoint(zoneCO2Target);
-        HashMap zoneCO2TargetPoint = hayStack.read("point and tuner and default and dab and zone and co2 and target");
-        ArrayList<HashMap> zoneCO2TargetPointArr = hayStack.readPoint(zoneCO2TargetPoint.get("id").toString());
-        for (HashMap valMap : zoneCO2TargetPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(zoneCO2TargetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(zoneCO2TargetId, roomRef, hayStack);
         hayStack.writeHisValById(zoneCO2TargetId, HSUtil.getPriorityVal(zoneCO2TargetId));
 
         Point zoneCO2Threshold = new Point.Builder()
@@ -555,14 +478,7 @@ public class DabTuners {
                                      .setTz(tz)
                                      .build();
         String zoneCO2ThresholdId = hayStack.addPoint(zoneCO2Threshold);
-        HashMap zoneCO2ThresholdPoint = hayStack.read("point and tuner and default and dab and zone and co2 and threshold");
-        ArrayList<HashMap> zoneCO2ThresholdPointArr = hayStack.readPoint(zoneCO2ThresholdPoint.get("id").toString());
-        for (HashMap valMap : zoneCO2ThresholdPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(zoneCO2ThresholdId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(zoneCO2ThresholdId, roomRef, hayStack);
         hayStack.writeHisValById(zoneCO2ThresholdId, HSUtil.getPriorityVal(zoneCO2ThresholdId));
 
         Point zoneVOCTarget = new Point.Builder()
@@ -578,14 +494,7 @@ public class DabTuners {
                                   .setTz(tz)
                                   .build();
         String zoneVOCTargetId = hayStack.addPoint(zoneVOCTarget);
-        HashMap zoneVOCTargetPoint = hayStack.read("point and tuner and default and dab and zone and voc and target");
-        ArrayList<HashMap> zoneVOCTargetPointArr = hayStack.readPoint(zoneVOCTargetPoint.get("id").toString());
-        for (HashMap valMap : zoneVOCTargetPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(zoneVOCTargetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(zoneVOCTargetId, roomRef, hayStack);
         hayStack.writeHisValById(zoneVOCTargetId, HSUtil.getPriorityVal(zoneVOCTargetId));
 
         Point zoneVOCThreshold = new Point.Builder()
@@ -601,14 +510,53 @@ public class DabTuners {
                                      .setTz(tz)
                                      .build();
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
-        HashMap zoneVOCThresholdPoint = hayStack.read("point and tuner and default and dab and zone and voc and threshold");
-        ArrayList<HashMap> zoneVOCThresholdPointArr = hayStack.readPoint(zoneVOCThresholdPoint.get("id").toString());
-        for (HashMap valMap : zoneVOCThresholdPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(zoneVOCThresholdId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(zoneVOCThresholdId, roomRef, hayStack);
         hayStack.writeHisValById(zoneVOCThresholdId, HSUtil.getPriorityVal(zoneVOCThresholdId));
     }
+
+    /***
+     * When BuildingTuner fails to fetch a point from remote , it should fall back to below values
+     * on non-primary CCUs.
+     * @param tags
+     * @return
+     */
+    public static double getDefaultTunerVal(String tags) {
+
+        List<String> tagList = Arrays.asList(tags.split(HSUtil.QUERY_JOINER));
+        Optional<Double> defaultVal = getDefaultTagsValMap().entrySet().stream()
+                                                            .filter(m -> {
+                                                                for (String tag : tagList) {
+                                                                    if (!m.getKey().contains(tag)) {
+                                                                        return false;
+                                                                    }
+                                                                }
+                                                                return true;
+                                                            })
+                                                            .map(m -> m.getValue())
+                                                            .findFirst();
+        return defaultVal.isPresent() ? defaultVal.get() : 0;
+    }
+
+
+    public static HashMap<String, Double> getDefaultTagsValMap() {
+        HashMap<String, Double> tagsValMap = new HashMap<>();
+        tagsValMap.put("priority,spread",TunerConstants.ZONE_PRIORITY_SPREAD);
+        tagsValMap.put("priority,multiplier",TunerConstants.ZONE_PRIORITY_MULTIPLIER);
+        tagsValMap.put("cooling,deadband",TunerConstants.VAV_COOLING_DB);
+        tagsValMap.put("cooling,deadband,multiplier",TunerConstants.VAV_COOLING_DB_MULTPLIER);
+        tagsValMap.put("heating,deadband",TunerConstants.VAV_HEATING_DB);
+        tagsValMap.put("heating,deadband,multiplier",TunerConstants.VAV_HEATING_DB_MULTIPLIER);
+        tagsValMap.put("pgain",TunerConstants.VAV_PROPORTIONAL_GAIN);
+        tagsValMap.put("pspread",TunerConstants.VAV_PROPORTIONAL_SPREAD);
+        tagsValMap.put("igain",TunerConstants.VAV_INTEGRAL_GAIN);
+        tagsValMap.put("itimeout",TunerConstants.VAV_INTEGRAL_TIMEOUT);
+        tagsValMap.put("zone,co2,target",TunerConstants.ZONE_CO2_TARGET);
+        tagsValMap.put("zone,co2,threshold",TunerConstants.ZONE_CO2_THRESHOLD);
+        tagsValMap.put("zone,voc,target",TunerConstants.ZONE_VOC_TARGET);
+        tagsValMap.put("zone,voc,threshold",TunerConstants.ZONE_VOC_THRESHOLD);
+        return tagsValMap;
+    }
+
+
+
 }

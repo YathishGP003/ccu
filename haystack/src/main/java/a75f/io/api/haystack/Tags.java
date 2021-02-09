@@ -24,6 +24,13 @@ public class Tags
     
     
     
+    public static final String DAB = "dab";
+    public static final String VAV = "vav";
+    public static final String OAO = "oao";
+    public static final String PID = "pid";
+    public static final String ALERT = "alert";
+    public static final String DUALDUCT = "dualDuct";
+    public static final String STANDALONE = "standalone";
     
     public static final String ENABLED = "enabled";
     public static final String ASSOCIATION = "association";

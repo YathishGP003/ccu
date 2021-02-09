@@ -196,6 +196,10 @@ public class HSUtil
         return queryString;
     }
 
+    public static String appendMarkerToQuery(String query, String marker) {
+        return query+QUERY_JOINER+marker;
+    }
+
     public static boolean isBuildingTuner(String entityId, CCUHsApi hayStack) {
         HashMap<Object, Object> entityMap = hayStack.readMapById(entityId);
         if (!entityMap.containsKey(Tags.TUNER)) {

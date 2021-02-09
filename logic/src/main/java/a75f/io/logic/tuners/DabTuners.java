@@ -14,11 +14,14 @@ import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 
+import static a75f.io.logic.tuners.TunerConstants.TUNER_SYSTEM_VAL_LEVEL;
+import static a75f.io.logic.tuners.TunerConstants.TUNER_ZONE_VAL_LEVEL;
+
 public class DabTuners {
     
     public static void addDefaultDabTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,
                                            String tz){
-
+    
         HashMap tuner = CCUHsApi.getInstance().read("point and tuner and default and dab");
         if (tuner != null && tuner.size() > 0) {
             CcuLog.d(L.TAG_CCU_SYSTEM,"Default DAB Tuner points already exist");
@@ -309,16 +312,7 @@ public class DabTuners {
                                        .setTz(tz)
                                        .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
-        HashMap
-            zonePrioritySpreadPoint = hayStack.read("point and tuner and default and dab and zone and priority and spread");
-        ArrayList<HashMap> zonePrioritySpreadPointArr = hayStack.readPoint(zonePrioritySpreadPoint.get("id").toString());
-        for (HashMap valMap : zonePrioritySpreadPointArr) {
-            if (valMap.get("val") != null)
-            {
-                System.out.println(valMap);
-                hayStack.pointWrite(HRef.copy(zonePrioritySpreadId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(zonePrioritySpreadId, roomRef, hayStack);
         hayStack.writeHisValById(zonePrioritySpreadId, HSUtil.getPriorityVal(zonePrioritySpreadId));
 
         Point zonePriorityMultiplier = new Point.Builder()

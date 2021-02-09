@@ -87,7 +87,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     EditText editTunerSearch;
     Spinner spinnerSelection;
     ArrayList<HashMap> tuners = new ArrayList<>();
-    String tunerGroupType = "System";
+    String tunerGroupType = "Building";
     public TunerFragment() {
     }
 
@@ -120,9 +120,9 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         saveTunerValues.setEnabled(false);
         //Default Show System Tuners
         //TODO: revert building tuners
-        radioGroupTuners.check(R.id.radioBtnSystem);
-       // getBuildingTuners();
-        getSystemTuners();
+        radioGroupTuners.check(R.id.radioBtnBuilding);
+        getBuildingTuners();
+        //getSystemTuners();
 
         reasonLabel = view.findViewById(R.id.textReasonLabel);
         String text = "<font color=#E24301>*</font> <font color=#999999>Reason for Change</font>";

@@ -3,39 +3,42 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:weightSum="5">
+    android:weightSum="6">
 
     <LinearLayout
-        android:layout_width="0sp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="3.5"
+        android:layout_weight="4"
         android:background="@drawable/border_grey"
-        android:weightSum="3">
+        android:minWidth="400dp"
+        android:weightSum="4">
 
         <TextView
             android:id="@+id/textPriority"
-            android:layout_width="0sp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_weight="1"
             android:layout_marginStart="15dp"
+            android:layout_weight="1.5"
             android:elevation="1sp"
             android:gravity="center_vertical|start"
-            android:textSize="17sp"
+            android:minWidth="200dp"
             android:minHeight="15dp"
-            android:textAppearance="@style/tuner_text_label_black" />
+            android:textAppearance="@style/tuner_text_label_black"
+            android:textSize="17sp" />
 
         <TextView
             android:id="@+id/textCurrentValue"
-            android:layout_width="0sp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_weight="1"
+            android:layout_weight="1.5"
             android:elevation="1sp"
-            android:minHeight="15dp"
             android:gravity="center"
-            android:textSize="17sp"
-            android:textAppearance="@style/tuner_text_label_black" />
+            android:minWidth="100dp"
+            android:minHeight="15dp"
+            android:textAppearance="@style/tuner_text_label_black"
+            android:textSize="17sp" />
 
 
         <ImageButton
@@ -51,40 +54,19 @@
             android:visibility="gone" />
     </LinearLayout>
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/textLevelName"
         android:layout_width="0sp"
         android:layout_height="wrap_content"
-        android:layout_weight="1.5">
-
-        <TextView
-            android:id="@+id/textDefaultValue"
-            android:layout_width="0sp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1.5"
-            android:background="@drawable/border_grey"
-            android:elevation="1sp"
-            android:fontFamily="@font/lato_regular"
-            android:gravity="center_vertical|center_horizontal"
-            android:minHeight="15dp"
-            android:textSize="17sp"
-            android:textAllCaps="false"
-            android:textColor="@color/black" />
-
-
-        <TextView
-            android:id="@+id/textTunerValue"
-            android:layout_width="0sp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="2"
-            android:visibility="gone"
-            android:background="@drawable/border_grey"
-            android:elevation="1sp"
-            android:gravity="center_vertical|center_horizontal"
-            android:minHeight="15dp"
-            android:textSize="17sp"
-            android:textAppearance="@style/tuner_text_label_black" />
-
-    </LinearLayout>
+        android:layout_gravity="center_vertical"
+        android:layout_weight="2"
+        android:background="@drawable/border_grey"
+        android:elevation="1sp"
+        android:fontFamily="@font/lato_regular"
+        android:gravity="center_vertical|center_horizontal"
+        android:minWidth="200dp"
+        android:minHeight="15dp"
+        android:textAllCaps="false"
+        android:textColor="@color/black"
+        android:textSize="17sp" />
 </LinearLayout>

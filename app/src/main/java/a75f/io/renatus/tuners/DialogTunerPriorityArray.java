@@ -13,17 +13,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -48,14 +51,13 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     TextView textTunerGroupTitle;
     TextView textTunerName;
     TextView textTunerDefaultValue;
-    TextView textLabelBuilding;
-    TextView textLabelCCU;
     Button buttonSaveTuner;
     Button buttonCancel;
     String selectedTunerValue;
     String selectedTunerLevel;
     String tunerGroupType;
     LinearLayout viewStub;
+    LinearLayout layoutTitle;
 
     PriorityArrayAdapter priorityArrayAdapter;
     ArrayList<HashMap> priorityList;
@@ -114,8 +116,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         textTunerDefaultValue = view.findViewById(R.id.textTunerDefaultValue);
         buttonSaveTuner = view.findViewById(R.id.buttonSaveTuner);
         buttonCancel = view.findViewById(R.id.buttonCancelTuner);
-        textLabelBuilding = view.findViewById(R.id.textLabelBuilding);
-        textLabelCCU = view.findViewById(R.id.textLabelCCU);
+        layoutTitle = view.findViewById(R.id.layoutTitle);
         recyclerViewPriority.setLayoutManager(new LinearLayoutManager(getActivity()));
         buttonSaveTuner.setEnabled(false);
 
@@ -152,18 +153,18 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     }
                 }
             }
-
+            Collections.reverse(equips);
             if (equips.size() > 0) {
                 for (HashMap equip : equips) {
                     View columnView = inflater.inflate(R.layout.tuner_priority_column, viewStub, false);
                     ((TextView) columnView.findViewById(R.id.textLabelBuilding)).setText(ccu.get("dis").toString());
-                    ((TextView) columnView.findViewById(R.id.textLabelZone)).setText(HSUtil.getDis(tunerItemSelected.get("roomRef").toString()));
+                    ((TextView) columnView.findViewById(R.id.textLabelZone)).setText(HSUtil.getDis(equip.get("roomRef").toString()));
                     ((TextView) columnView.findViewById(R.id.textLabelModule)).setText(HSUtil.getDis(equip.get("equipRef").toString()).substring(HSUtil.getDis(equip.get("equipRef").toString()).indexOf("-") + 1));
-                    ((TextView) columnView.findViewById(R.id.textRow8)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "8"));
-                    ((TextView) columnView.findViewById(R.id.textRow10)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "10"));
-                    ((TextView) columnView.findViewById(R.id.textRow14)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "14"));
-                    ((TextView) columnView.findViewById(R.id.textRow16)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "16"));
-                    ((TextView) columnView.findViewById(R.id.textRow17)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "17"));
+                    ((TextView) columnView.findViewById(R.id.textRow8)).setText(getTunerValue(equip.get("id").toString(), "8"));
+                    ((TextView) columnView.findViewById(R.id.textRow10)).setText(getTunerValue(equip.get("id").toString(), "10"));
+                    ((TextView) columnView.findViewById(R.id.textRow14)).setText(getTunerValue(equip.get("id").toString(), "14"));
+                    ((TextView) columnView.findViewById(R.id.textRow16)).setText(getTunerValue(equip.get("id").toString(), "16"));
+                    ((TextView) columnView.findViewById(R.id.textRow17)).setText(getTunerValue(equip.get("id").toString(), "17"));
                     viewStub.addView(columnView);
                 }
 
@@ -214,17 +215,17 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                             }
                         }
                     }
-
+                    Collections.reverse(equipsFinal);
                     for (HashMap moduleTuner : equipsFinal) {
                         View columnView = inflater.inflate(R.layout.tuner_priority_column, viewStub, false);
                         ((TextView) columnView.findViewById(R.id.textLabelBuilding)).setText(ccu.get("dis").toString());
                         ((TextView) columnView.findViewById(R.id.textLabelZone)).setText(HSUtil.getDis(moduleTuner.get("roomRef").toString()));
                         ((TextView) columnView.findViewById(R.id.textLabelModule)).setText(HSUtil.getDis(moduleTuner.get("equipRef").toString()).substring(HSUtil.getDis(moduleTuner.get("equipRef").toString()).indexOf("-") + 1));
-                        ((TextView) columnView.findViewById(R.id.textRow8)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "8"));
-                        ((TextView) columnView.findViewById(R.id.textRow10)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "10"));
-                        ((TextView) columnView.findViewById(R.id.textRow14)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "14"));
-                        ((TextView) columnView.findViewById(R.id.textRow16)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "16"));
-                        ((TextView) columnView.findViewById(R.id.textRow17)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "17"));
+                        ((TextView) columnView.findViewById(R.id.textRow8)).setText(getTunerValue(moduleTuner.get("id").toString(), "8"));
+                        ((TextView) columnView.findViewById(R.id.textRow10)).setText(getTunerValue(moduleTuner.get("id").toString(), "10"));
+                        ((TextView) columnView.findViewById(R.id.textRow14)).setText(getTunerValue(moduleTuner.get("id").toString(), "14"));
+                        ((TextView) columnView.findViewById(R.id.textRow16)).setText(getTunerValue(moduleTuner.get("id").toString(), "16"));
+                        ((TextView) columnView.findViewById(R.id.textRow17)).setText(getTunerValue(moduleTuner.get("id").toString(), "17"));
                         viewStub.addView(columnView);
                     }
                     break;
@@ -234,16 +235,24 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     ((TextView) columnView.findViewById(R.id.textLabelBuilding)).setText(ccu.get("dis").toString());
                     ((TextView) columnView.findViewById(R.id.textLabelZone)).setText(HSUtil.getDis(moduleTuner.get("roomRef").toString()));
                     ((TextView) columnView.findViewById(R.id.textLabelModule)).setText(HSUtil.getDis(moduleTuner.get("equipRef").toString()).substring(HSUtil.getDis(moduleTuner.get("equipRef").toString()).indexOf("-") + 1));
-                    ((TextView) columnView.findViewById(R.id.textRow8)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "8"));
-                    ((TextView) columnView.findViewById(R.id.textRow10)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "10"));
-                    ((TextView) columnView.findViewById(R.id.textRow14)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "14"));
-                    ((TextView) columnView.findViewById(R.id.textRow16)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "16"));
-                    ((TextView) columnView.findViewById(R.id.textRow17)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "17"));
+                    ((TextView) columnView.findViewById(R.id.textRow8)).setText(getTunerValue(moduleTuner.get("id").toString(), "8"));
+                    ((TextView) columnView.findViewById(R.id.textRow10)).setText(getTunerValue(moduleTuner.get("id").toString(), "10"));
+                    ((TextView) columnView.findViewById(R.id.textRow14)).setText(getTunerValue(moduleTuner.get("id").toString(), "14"));
+                    ((TextView) columnView.findViewById(R.id.textRow16)).setText(getTunerValue(moduleTuner.get("id").toString(), "16"));
+                    ((TextView) columnView.findViewById(R.id.textRow17)).setText(getTunerValue(moduleTuner.get("id").toString(), "17"));
                     viewStub.addView(columnView);
                     break;
                 }
             }
         }
+
+        ((TableRow) viewStub.findViewById(R.id.header)).getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                layoutTitle.setMinimumHeight(((TableRow) viewStub.findViewById(R.id.header)).getHeight());
+                ((TableRow) viewStub.findViewById(R.id.header)).getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            }
+        });
 
     }
 
@@ -258,18 +267,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             textTunerName.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
             textTunerDefaultValue.setText("" + getTunerDefaultValue(tunerItemSelected.get("id").toString()));
         }
-        HashMap site = CCUHsApi.getInstance().read("site");
-        HashMap ccu = CCUHsApi.getInstance().read("ccu");
-        if (tunerGroupType.contains("Zone")) {
-            textLabelBuilding.setText(ccu.get("dis").toString());
-            textLabelCCU.setText(HSUtil.getDis(tunerItemSelected.get("roomRef").toString()));
-        } else if (tunerGroupType.contains("Module")) {
-            textLabelBuilding.setText(ccu.get("dis").toString());
-            textLabelCCU.setText(HSUtil.getDis(tunerItemSelected.get("equipRef").toString()));
-        } else {
-            textLabelBuilding.setText(site.get("dis").toString());
-            textLabelCCU.setText(ccu.get("dis").toString());
-        }
+
         textTunerGroupTitle.setText(tunerGroupSelected.getName());
         priorityList = new ArrayList<>();
         priorityList = CCUHsApi.getInstance().readPoint(tunerItemSelected.get("id").toString());

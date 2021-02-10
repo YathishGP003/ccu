@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/tunerPriorityColumn"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <TableLayout
         android:id="@+id/simpleTableLayout"
-        android:layout_width="200dp"
+        android:layout_width="wrap_content"
+        android:minWidth="200dp"
         android:layout_height="wrap_content">
 
         <TableRow
@@ -29,7 +31,10 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
                     android:layout_marginEnd="5dp"
-                    android:text="CCU Name"
+                    tools:text="CCU Name"
+                    android:textSize="18sp"
+                    android:ellipsize="end"
+                    android:singleLine="true"
                     android:textAppearance="@style/tuner_text_label_black" />
 
                 <TextView
@@ -39,7 +44,9 @@
                     android:layout_marginStart="5dp"
                     android:layout_marginEnd="5dp"
                     android:gravity="center"
-                    android:text="zone1"
+                    tools:text="zone 1"
+                    android:ellipsize="end"
+                    android:singleLine="true"
                     android:textSize="16sp" />
 
                 <TextView
@@ -49,7 +56,9 @@
                     android:layout_marginStart="5dp"
                     android:layout_marginEnd="5dp"
                     android:gravity="center"
-                    android:text="12345678123456789"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    tools:text="12345678123456789"
                     android:textSize="14sp" />
             </LinearLayout>
         </TableRow>

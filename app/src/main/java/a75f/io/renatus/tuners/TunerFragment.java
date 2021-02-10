@@ -616,7 +616,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         tuners.clear();
         tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, this,2, tunerGroupType);
 
-        ArrayList<HashMap> buildingTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and roomRef == \""+ "SYSTEM" +"\"");
+        ArrayList<HashMap> buildingTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup");
         for (HashMap m : buildingTuners) {
             if (m.get("dis").toString().contains("Building")) {
                 tuners.add(m);

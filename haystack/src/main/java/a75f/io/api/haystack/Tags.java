@@ -31,6 +31,7 @@ public class Tags
     public static final String ALERT = "alert";
     public static final String DUALDUCT = "dualDuct";
     public static final String STANDALONE = "standalone";
+    public static final String TI = "ti";
     
     public static final String ENABLED = "enabled";
     public static final String ASSOCIATION = "association";

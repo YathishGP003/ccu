@@ -5,6 +5,7 @@ import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Optional;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
@@ -44,15 +45,18 @@ class BuildingTunerUtil {
     }
     
     private static boolean copyFromZoneTuner(String dstPointId, String zoneRef, String queryString, CCUHsApi hayStack) {
-        CcuLog.e(L.TAG_CCU_TUNER, " copyFromZoneTuner : ");
         String equipQuery = queryString+" and roomRef == \""+zoneRef+"\"";
-        HashMap zoneTunerPoint = hayStack.read(equipQuery);
+        ArrayList<HashMap> zoneTunerPoints = hayStack.readAll(equipQuery);
         
-        if (zoneTunerPoint.isEmpty()) {
+        Optional<HashMap> zoneTunerPoint = zoneTunerPoints.stream()
+                                                          .filter(point -> !point.get("id").toString().equals(dstPointId))
+                                                          .findFirst();
+        if (!zoneTunerPoint.isPresent())
             return false;
-        }
+    
+        CcuLog.e(L.TAG_CCU_TUNER, " copyFromZoneTuner : "+zoneTunerPoint);
         
-        ArrayList<HashMap> zoneTunerPointArray = hayStack.readPoint(zoneTunerPoint.get("id").toString());
+        ArrayList<HashMap> zoneTunerPointArray = hayStack.readPoint(zoneTunerPoint.get().get("id").toString());
         if (copyTunerLevel(dstPointId, zoneTunerPointArray, TUNER_ZONE_VAL_LEVEL, hayStack)
             && copyTunerLevel(dstPointId, zoneTunerPointArray, TUNER_SYSTEM_VAL_LEVEL, hayStack)
             && copyTunerLevel(dstPointId, zoneTunerPointArray, TUNER_BUILDING_VAL_LEVEL, hayStack)
@@ -64,12 +68,12 @@ class BuildingTunerUtil {
     }
     
     private static boolean copyFromSystemTuner(String dstPointId, String queryString, CCUHsApi hayStack) {
-        CcuLog.e(L.TAG_CCU_TUNER, " copyFromSystemTuner : ");
-        HashMap systemTunerPoint = hayStack.read(queryString);
+        String systemQuery = HSUtil.appendMarkerToQuery(queryString, "not "+Tags.DEFAULT);
+        HashMap systemTunerPoint = hayStack.read(systemQuery);
         if (systemTunerPoint.isEmpty()) {
             return false;
         }
-        
+        CcuLog.e(L.TAG_CCU_TUNER, " copyFromSystemTuner : "+systemTunerPoint);
         ArrayList<HashMap> systemTunerPointArray = hayStack.readPoint(systemTunerPoint.get("id").toString());
     
         if (copyTunerLevel(dstPointId, systemTunerPointArray, TUNER_SYSTEM_VAL_LEVEL, hayStack)

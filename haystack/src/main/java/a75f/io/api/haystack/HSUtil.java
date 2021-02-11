@@ -255,4 +255,25 @@ public class HSUtil
         }
         return 0;
     }
+    
+    public  static String getEquipTag(ArrayList<String> markers) {
+        if (markers.contains(Tags.DAB)) {
+            return Tags.DAB;
+        } else if (markers.contains(Tags.VAV)) {
+            return Tags.VAV;
+        } else if (markers.contains(Tags.PID)) {
+            return Tags.PID;
+        } else if (markers.contains(Tags.OAO)) {
+            return Tags.OAO;
+        } else if (markers.contains(Tags.STANDALONE)) {
+            return Tags.STANDALONE;
+        } else if (markers.contains(Tags.DUALDUCT)) {
+            return Tags.DUALDUCT;
+        } else if (markers.contains(Tags.TI)) {
+            return Tags.TI;
+        } else if (markers.contains(Tags.VAV)) {
+            return Tags.VAV;
+        }
+        return null;
+    }
 }

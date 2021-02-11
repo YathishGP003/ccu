@@ -72,14 +72,7 @@ public class PlcTuners {
                              .setTz(tz)
                              .build();
         String pgainId = hayStack.addPoint(propGain);
-        HashMap defPgainPoint = hayStack.read("point and tuner and default and pid and pgain");
-        ArrayList<HashMap> pgainDefPointArr = hayStack.readPoint(defPgainPoint.get("id").toString());
-        for (HashMap valMap : pgainDefPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(pgainId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(pgainId, roomRef, hayStack);
         hayStack.writeHisValById(pgainId, HSUtil.getPriorityVal(pgainId));
         
         Point integralGain = new Point.Builder()
@@ -94,14 +87,7 @@ public class PlcTuners {
                                  .setTz(tz)
                                  .build();
         String igainId = hayStack.addPoint(integralGain);
-        HashMap defIgainPoint = hayStack.read("point and tuner and default and pid and igain");
-        ArrayList<HashMap> igainDefPointArr = hayStack.readPoint(defIgainPoint.get("id").toString());
-        for (HashMap valMap : igainDefPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(igainId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(igainId, roomRef, hayStack);
         hayStack.writeHisValById(igainId, HSUtil.getPriorityVal(igainId));
         
         Point integralTimeout = new Point.Builder()
@@ -117,14 +103,7 @@ public class PlcTuners {
                                     .setTz(tz)
                                     .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
-        HashMap defITPoint = hayStack.read("point and tuner and default and pid and itimeout");
-        ArrayList<HashMap> iTDefPointArr = hayStack.readPoint(defITPoint.get("id").toString());
-        for (HashMap valMap : iTDefPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(iTimeoutId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(iTimeoutId, roomRef, hayStack);
         hayStack.writeHisValById(iTimeoutId, HSUtil.getPriorityVal(iTimeoutId));
     }
     

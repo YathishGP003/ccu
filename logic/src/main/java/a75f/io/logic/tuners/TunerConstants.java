@@ -63,6 +63,19 @@ public class TunerConstants
     public static final double ZONE_HEATING_USERLIMIT_MAX = 67;
     public static final double ZONE_COOLING_USERLIMIT_MIN = 72;
     public static final double ZONE_COOLING_USERLIMIT_MAX = 77;
+    public static final double ZONE_DEAD_TIME = 15;
+    public static final double ZONE_AUTO_AWAY_TIME = 60;
+    public static final double ZONE_FORCED_OCCUPIED_TIME = 120;
+    
+    
+    public static final double ADR_COOLING_DEADBAND = 3;
+    public static final double ADR_HEATING_DEADBAND = 3;
+    
+    public static final double SN_COOLING_AIRFLOW_TEMP = 60;
+    public static final double SN_HEATING_AIRFLOW_TEMP = 105;
+    
+    public static final double CONSTANT_TEMP_ALERT_TIME = 40;
+    public static final double ABNORMAL_TEMP_RISE_TRIGGER = 4;
 
     
     public static final double SYSTEM_PRECONDITION_RATE = 15.0;
@@ -143,5 +156,31 @@ public class TunerConstants
     public static final double DEFAULT_MODE_CHANGEOVER_HYSTERESIS = 0.5;
     public static final double DEFAULT_STAGE_UP_TIMER_COUNTER = 5;
     public static final double DEFAULT_STAGE_DOWN_TIMER_COUNTER = 2;
+    
+    public static final double TR_IGNORE_REQUEST = 2.0;
+    public static final double TR_TIME_DELAY = 2.0;
+    public static final double TR_TIME_INTERVAL = 2.0;
+    
+    public static final double TR_SP_INIT_CO2 = 800.0;
+    public static final double TR_SP_MAX_CO2 = 1000.0;
+    public static final double TR_SP_MIN_CO2 = 800.0;
+    public static final double TR_SP_RES_CO2 = -10.0;
+    public static final double TR_SP_RESMAX_CO2 = -30.0;
+    public static final double TR_SP_TRIM_CO2 = 20.0;
+    
+    public static final double TR_SP_INIT_SAT = 65;
+    public static final double TR_SP_MAX_SAT = 65;
+    public static final double TR_SP_MIN_SAT = 55;
+    public static final double TR_SP_RES_SAT = -0.3;
+    public static final double TR_SP_RESMAX_SAT = -1.0;
+    public static final double TR_SP_TRIM_SAT = 0.2;
+    
+    public static final double TR_SP_INIT_SP = 0.2;
+    public static final double TR_SP_MAX_SP = 1.0;
+    public static final double TR_SP_MIN_SP = 0.2;
+    public static final double TR_SP_RES_SP = 0.05;
+    public static final double TR_SP_RESMAX_SP = 1.0;
+    public static final double TR_SP_TRIM_SP = -0.02;
+    
 
 }

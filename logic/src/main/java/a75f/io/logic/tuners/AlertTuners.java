@@ -32,8 +32,9 @@ class AlertTuners {
                                            .setTz(tz)
                                            .build();
         String constantTempAlertTimeId = hayStack.addPoint(constantTempAlertTime);
-        hayStack.writePoint(constantTempAlertTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 40.0, 0);
-        hayStack.writeHisValById(constantTempAlertTimeId, 40.0);
+        hayStack.writePointForCcuUser(constantTempAlertTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                                      TunerConstants.CONSTANT_TEMP_ALERT_TIME, 0);
+        hayStack.writeHisValById(constantTempAlertTimeId, TunerConstants.CONSTANT_TEMP_ALERT_TIME);
     
         Point abnormalCurTempRiseTrigger  = new Point.Builder()
                                                 .setDisplayName(equipDis+"-"+"abnormalCurTempRiseTrigger")
@@ -46,8 +47,9 @@ class AlertTuners {
                                                 .setTz(tz)
                                                 .build();
         String abnormalCurTempRiseTriggerId = hayStack.addPoint(abnormalCurTempRiseTrigger);
-        hayStack.writePoint(abnormalCurTempRiseTriggerId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 4.0, 0);
-        hayStack.writeHisValById(abnormalCurTempRiseTriggerId, 4.0);
+        hayStack.writePointForCcuUser(abnormalCurTempRiseTriggerId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                                      TunerConstants.ABNORMAL_TEMP_RISE_TRIGGER, 0);
+        hayStack.writeHisValById(abnormalCurTempRiseTriggerId, TunerConstants.ABNORMAL_TEMP_RISE_TRIGGER);
     
         Point airflowSampleWaitTime  = new Point.Builder()
                                            .setDisplayName(equipDis+"-"+"airflowSampleWaitTime")

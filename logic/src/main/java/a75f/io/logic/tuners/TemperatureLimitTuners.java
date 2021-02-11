@@ -21,7 +21,7 @@ class TemperatureLimitTuners {
         String userLimitSpreadId = hayStack.addPoint(userLimitSpread);
         hayStack.writePoint(userLimitSpreadId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.USER_LIMIT_SPREAD, 0);
         hayStack.writeHisValById(userLimitSpreadId, TunerConstants.USER_LIMIT_SPREAD);
-        
+
         Point adrCoolingDeadband  = new Point.Builder()
                                         .setDisplayName(equipDis+"-"+"adrCoolingDeadband")
                                         .setSiteRef(siteRef)
@@ -33,8 +33,8 @@ class TemperatureLimitTuners {
                                         .setTz(tz)
                                         .build();
         String adrCoolingDeadbandId = hayStack.addPoint(adrCoolingDeadband);
-        hayStack.writePoint(adrCoolingDeadbandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 3.0, 0);
-        hayStack.writeHisValById(adrCoolingDeadbandId, 3.0);
+        hayStack.writePointForCcuUser(adrCoolingDeadbandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ADR_COOLING_DEADBAND, 0);
+        hayStack.writeHisValById(adrCoolingDeadbandId, TunerConstants.ADR_COOLING_DEADBAND);
     
         Point adrHeatingDeadband  = new Point.Builder()
                                         .setDisplayName(equipDis+"-"+"adrHeatingDeadband")
@@ -47,8 +47,8 @@ class TemperatureLimitTuners {
                                         .setTz(tz)
                                         .build();
         String adrHeatingDeadbandId = hayStack.addPoint(adrHeatingDeadband);
-        hayStack.writePoint(adrHeatingDeadbandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 3.0, 0);
-        hayStack.writeHisValById(adrHeatingDeadbandId, 3.0);
+        hayStack.writePointForCcuUser(adrHeatingDeadbandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ADR_HEATING_DEADBAND, 0);
+        hayStack.writeHisValById(adrHeatingDeadbandId, TunerConstants.ADR_HEATING_DEADBAND);
     
         Point snCoolingAirflowTemperature  = new Point.Builder()
                                                  .setDisplayName(equipDis+"-"+"snCoolingAirflowTemp")
@@ -61,8 +61,9 @@ class TemperatureLimitTuners {
                                                  .setTz(tz)
                                                  .build();
         String snCoolingAirflowTemperatureId = hayStack.addPoint(snCoolingAirflowTemperature);
-        hayStack.writePoint(snCoolingAirflowTemperatureId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 60.0, 0);
-        hayStack.writeHisValById(snCoolingAirflowTemperatureId, 60.0);
+        hayStack.writePointForCcuUser(snCoolingAirflowTemperatureId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                                      TunerConstants.SN_COOLING_AIRFLOW_TEMP, 0);
+        hayStack.writeHisValById(snCoolingAirflowTemperatureId, TunerConstants.SN_COOLING_AIRFLOW_TEMP);
     
         Point snHeatingAirflowTemperature  = new Point.Builder()
                                                  .setDisplayName(equipDis+"-"+"snHeatingAirflowTemp")
@@ -75,8 +76,9 @@ class TemperatureLimitTuners {
                                                  .setTz(tz)
                                                  .build();
         String snHeatingAirflowTemperatureId = hayStack.addPoint(snHeatingAirflowTemperature);
-        hayStack.writePoint(snHeatingAirflowTemperatureId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 105.0, 0);
-        hayStack.writeHisValById(snHeatingAirflowTemperatureId, 105.0);
+        hayStack.writePointForCcuUser(snHeatingAirflowTemperatureId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                                      TunerConstants.SN_HEATING_AIRFLOW_TEMP, 0);
+        hayStack.writeHisValById(snHeatingAirflowTemperatureId, TunerConstants.SN_HEATING_AIRFLOW_TEMP);
         
     }
 }

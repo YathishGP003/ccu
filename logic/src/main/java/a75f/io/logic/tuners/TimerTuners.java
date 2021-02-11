@@ -19,8 +19,9 @@ class TimerTuners {
                                   .setTz(tz)
                                   .build();
         String zoneDeadTimeId = hayStack.addPoint(zoneDeadTime);
-        hayStack.writePoint(zoneDeadTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 15.0, 0);
-        hayStack.writeHisValById(zoneDeadTimeId, 15.0);
+        hayStack.writePointForCcuUser(zoneDeadTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_DEAD_TIME,
+                                      0);
+        hayStack.writeHisValById(zoneDeadTimeId, TunerConstants.ZONE_DEAD_TIME);
     
         Point autoAwayTime  = new Point.Builder()
                                   .setDisplayName(equipDis+"-"+"autoAwayTime")

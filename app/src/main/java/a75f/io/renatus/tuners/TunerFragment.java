@@ -327,10 +327,19 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     * */
 
                     if (newTunerValueItem.get("newLevel").toString().equals("16")){
+                        String buildingTunerDis = newTunerValueItem.get("dis").toString();
+
+                        //update dualDuct building tuners
+                        ArrayList<HashMap> dualDuctBuildingTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and dualDuct");
+                        for (HashMap hashMap : dualDuctBuildingTuners) {
+                            String hashMapDis = hashMap.get("dis").toString();
+                            if (!newTunerValueItem.get("id").toString().equals(hashMap.get("id").toString()) && hashMapDis.contains("Building")&& newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(hashMap.get("tunerGroup").toString()) && buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(hashMapDis.substring(hashMapDis.lastIndexOf("-") + 1))) {
+                                setTuner(hashMap.get("id").toString(), 16, newTunerValueItem.get("newValue") == null ? null: Double.parseDouble(newTunerValueItem.get("newValue").toString()));
+                            }
+                        }
 
                         //Update linked system tuner
                         ArrayList<HashMap> systemTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and system and roomRef == \""+ "SYSTEM" +"\"");
-                        String buildingTunerDis = newTunerValueItem.get("dis").toString();
                         for (HashMap systemTunersMap : systemTuners) {
                             String systemTunerDis = systemTunersMap.get("dis").toString();
                           //  if (!systemTunerDis.contains("Building")) {
@@ -616,7 +625,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         tuners.clear();
         tunerExpandableLayoutHelper = new TunerExpandableLayoutHelper(getActivity(), recyclerViewTuner, this, this,2, tunerGroupType);
 
-        ArrayList<HashMap> buildingTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup");
+        ArrayList<HashMap> buildingTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and not dualDuct");
         for (HashMap m : buildingTuners) {
             if (m.get("dis").toString().contains("Building")) {
                 tuners.add(m);

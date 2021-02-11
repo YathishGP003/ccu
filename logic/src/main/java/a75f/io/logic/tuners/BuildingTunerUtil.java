@@ -69,12 +69,18 @@ class BuildingTunerUtil {
     
     private static boolean copyFromSystemTuner(String dstPointId, String queryString, CCUHsApi hayStack) {
         String systemQuery = HSUtil.appendMarkerToQuery(queryString, "not "+Tags.DEFAULT);
-        HashMap systemTunerPoint = hayStack.read(systemQuery);
-        if (systemTunerPoint.isEmpty()) {
+    
+        ArrayList<HashMap> systemTunerPoints = hayStack.readAll(systemQuery);
+    
+        Optional<HashMap> systemTunerPoint = systemTunerPoints.stream()
+                                                          .filter(point -> !point.get("id").toString().equals(dstPointId))
+                                                          .findFirst();
+    
+        if (!systemTunerPoint.isPresent())
             return false;
-        }
+        
         CcuLog.e(L.TAG_CCU_TUNER, " copyFromSystemTuner : "+systemTunerPoint);
-        ArrayList<HashMap> systemTunerPointArray = hayStack.readPoint(systemTunerPoint.get("id").toString());
+        ArrayList<HashMap> systemTunerPointArray = hayStack.readPoint(systemTunerPoint.get().get("id").toString());
     
         if (copyTunerLevel(dstPointId, systemTunerPointArray, TUNER_SYSTEM_VAL_LEVEL, hayStack)
             && copyTunerLevel(dstPointId, systemTunerPointArray, TUNER_BUILDING_VAL_LEVEL, hayStack)

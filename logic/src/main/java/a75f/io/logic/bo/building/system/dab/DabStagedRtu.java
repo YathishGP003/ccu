@@ -271,9 +271,6 @@ public class DabStagedRtu extends DabSystemProfile
         if (stageStatus[COOLING_1.ordinal()] > 0 || stageStatus[HEATING_1.ordinal()] > 0) {
             int fanStatus = isStageEnabled(FAN_1) ? 1 : 0;
             tempStatus[FAN_1.ordinal()] = fanStatus;
-            /*if (fanStatus != getCmdSignal("fan and stage1")) {
-                setCmdSignal("fan and stage1", fanStatus);
-            }*/
         }
     
         for (int stageIndex = FAN_1.ordinal(); stageIndex <= DEHUMIDIFIER.ordinal(); stageIndex++) {
@@ -382,8 +379,6 @@ public class DabStagedRtu extends DabSystemProfile
                     } else {
                         relayState = 0;
                     }
-                    if (relayState != getCmdSignal("fan and stage1"))
-                        setCmdSignal("fan and stage1", relayState);
                     break;
                 case FAN_2:
                     if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU) {
@@ -391,8 +386,6 @@ public class DabStagedRtu extends DabSystemProfile
                     } else {
                         relayState = systemFanLoopOp > 0 ? 1 : 0;
                     }
-                    if (relayState != getCmdSignal("fan and stage2"))
-                        setCmdSignal("fan and stage2", relayState);
                     break;
                 case FAN_3:
                 case FAN_4:
@@ -404,8 +397,6 @@ public class DabStagedRtu extends DabSystemProfile
                     } else {
                         relayState = systemFanLoopOp > (stageThreshold - relayDeactHysteresis) ? 1 : 0;
                     }
-                    if (currState != relayState)
-                        setCmdSignal("fan and stage" + (stage.ordinal() - HEATING_5.ordinal()), relayState);
                     break;
                 case HUMIDIFIER:
                 case DEHUMIDIFIER:
@@ -413,10 +404,6 @@ public class DabStagedRtu extends DabSystemProfile
                         ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED ||
                         ScheduleProcessJob.getSystemOccupancy() == Occupancy.VACATION) {
                         relayState = 0;
-                        if (stage == HUMIDIFIER)
-                            setCmdSignal("humidifier", relayState);
-                        else if (stage == DEHUMIDIFIER)
-                            setCmdSignal("dehumidifier", relayState);
                     } else {
                         double humidity = getSystemController().getAverageSystemHumidity();
                         double targetMinHumidity = TunerUtil.readSystemUserIntentVal(
@@ -435,8 +422,6 @@ public class DabStagedRtu extends DabSystemProfile
                             } else {
                                 relayState = currState;
                             }
-                            if (currState != relayState)
-                                setCmdSignal("humidifier", relayState);
                         } else {
                             currState = getCmdSignal("dehumidifier");
                             //Dehumidification
@@ -447,8 +432,6 @@ public class DabStagedRtu extends DabSystemProfile
                             } else {
                                 relayState = currState;
                             }
-                            if (currState != relayState)
-                                setCmdSignal("dehumidifier", relayState);
                         }
                         CcuLog.d(L.TAG_CCU_SYSTEM, "humidity :" + humidity + " targetMinHumidity: " + targetMinHumidity +
                                                    " humidityHysteresis: " + humidityHysteresis + " targetMaxHumidity: " +

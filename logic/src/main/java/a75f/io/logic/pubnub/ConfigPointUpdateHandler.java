@@ -21,7 +21,6 @@ class ConfigPointUpdateHandler {
     public static void updateConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
         
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint "+msgObject.toString());
-        //TODO- Tags definition should be moved to Tags.java after merging the related ticket.
         if (configPoint.getMarkers().contains(Tags.ENABLED)) {
             updateConfigEnabled(msgObject, configPoint, hayStack);
         } else if ((configPoint.getMarkers().contains(Tags.ASSOCIATION) )

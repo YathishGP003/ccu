@@ -26,6 +26,11 @@ public class PbMessageHandler
     private HandlerThread handlerThread;
     private Handler       messageHandler;
     
+    /**
+     * Handler thread makes sure that the pubnub messages are processed sequentially on the CCU.
+     * Concurrent handling can lead to unexpected behaviour when one of the messages is a command to reboot
+     * the tablet.
+     */
     private PbMessageHandler() {
         
         handlerThread = new HandlerThread("UpdatePointHandlerThread"){
@@ -37,7 +42,7 @@ public class PbMessageHandler
         };
         
         handlerThread.start();
-    
+        
         messageHandler = new Handler(handlerThread.getLooper()){
             @Override
             public void handleMessage(Message msg) {

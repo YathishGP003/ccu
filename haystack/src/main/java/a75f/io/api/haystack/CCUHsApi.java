@@ -400,6 +400,18 @@ public class CCUHsApi
     {
         pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, getCCUUserName(), HNum.make(val), HNum.make(0));
     }
+    
+    /**
+     * Write local point array without remote sync.
+     * @param id
+     * @param level
+     * @param who
+     * @param val
+     * @param duration
+     */
+    public void writePointLocal(String id, int level, String who, Double val, int duration) {
+        hsClient.pointWrite(HRef.copy(id), level, who, HNum.make(val), HNum.make(duration));
+    }
 
     /**
      * Write to the first 'writable' point fetched using query
@@ -468,7 +480,7 @@ public class CCUHsApi
             }
         }
     }
-
+    
     /**
      * Write to a 'writable' point
      * with default level  - 9
@@ -1984,5 +1996,10 @@ public class CCUHsApi
     public String getCCUUserName() {
         String ccuGuid = getGlobalCcuId();
         return ccuGuid == null ? Tags.CCU : Tags.CCU+"_"+ccuGuid;
+    }
+    
+    public String getTimeZone() {
+        HashMap siteMap = read(Tags.SITE);
+        return siteMap.get("tz").toString();
     }
 }

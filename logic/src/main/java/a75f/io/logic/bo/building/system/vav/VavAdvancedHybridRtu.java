@@ -146,9 +146,9 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         } else {
             signal = 0;
         }
-    
-        if (systemCoolingLoopOp != getCmdSignal("cooling and modulating")) {
-            setCmdSignal("cooling and modulating", systemCoolingLoopOp);
+        
+        if (signal != getCmdSignal("cooling and modulating")) {
+            setCmdSignal("cooling and modulating", signal);
         }
         ControlMote.setAnalogOut("analog1", signal);
         
@@ -171,9 +171,9 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         } else {
             signal = 0;
         }
-    
-        if (systemFanLoopOp != getCmdSignal("fan and modulating")) {
-            setCmdSignal("fan and modulating", systemFanLoopOp);
+
+        if (signal != getCmdSignal("fan and modulating")) {
+            setCmdSignal("fan and modulating", signal);
         }
         ControlMote.setAnalogOut("analog2", signal);
         
@@ -195,9 +195,9 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         } else  {
             signal = 0;
         }
-    
-        if (systemHeatingLoopOp != getCmdSignal("heating and modulating")) {
-            setCmdSignal("heating and modulating", systemHeatingLoopOp);
+        
+        if (signal != getCmdSignal("heating and modulating")) {
+            setCmdSignal("heating and modulating", signal);
         }
         ControlMote.setAnalogOut("analog3", signal);
         

@@ -183,8 +183,17 @@ public class HSUtil
     //To update after merging Tuner branch.
     public static boolean isSystemConfigOutputPoint(String id, CCUHsApi hayStack) {
         HashMap pointEntity = hayStack.readMapById(id);
-        return pointEntity.containsKey("system") && pointEntity.containsKey("config") && pointEntity.containsKey(
-            "output");
+        return pointEntity.containsKey("system")
+               && pointEntity.containsKey("config")
+               && pointEntity.containsKey("output");
+    }
+    
+    public static boolean isSystemConfigHumidifierType(String id, CCUHsApi hayStack) {
+        HashMap pointEntity = hayStack.readMapById(id);
+        return pointEntity.containsKey("system")
+               && pointEntity.containsKey("config")
+               && pointEntity.containsKey("humidifier")
+               && pointEntity.containsKey("type");
     }
     
     public static double getSystemUserIntentVal(String tags)

@@ -350,9 +350,6 @@ public class VavStagedRtu extends VavSystemProfile
         if (stageStatus[COOLING_1.ordinal()] > 0 || stageStatus[HEATING_1.ordinal()] > 0) {
             int fanStatus = isStageEnabled(FAN_1) ? 1 : 0;
             tempStatus[FAN_1.ordinal()] = fanStatus;
-            if (fanStatus != getCmdSignal("fan and stage1")) {
-                setCmdSignal("fan and stage1", fanStatus);
-            }
         }
         
         for (int stageIndex = FAN_1.ordinal(); stageIndex < DEHUMIDIFIER.ordinal(); stageIndex++) {
@@ -361,6 +358,8 @@ public class VavStagedRtu extends VavSystemProfile
             for (Integer relay : relaySet) {
                 ControlMote.setRelayState("relay" + relay, stageStatus[stageIndex]);
             }
+            Stage stage = Stage.values()[stageIndex];
+            setStageStatus(stage, tempStatus[stage.ordinal()]);
         }
     }
     
@@ -375,6 +374,21 @@ public class VavStagedRtu extends VavSystemProfile
             double currState = getCmdSignal("heating and stage" + (stage.ordinal() - COOLING_5.ordinal()));
             if (currState != relayState) {
                 setCmdSignal("heating and stage" + (stage.ordinal() - COOLING_5.ordinal()), relayState);
+            }
+        } else if (stage.getValue() >= FAN_1.getValue() && stage.getValue() <= FAN_5.getValue()) {
+            double currState = getCmdSignal("fan and stage" + (stage.ordinal() - HEATING_5.ordinal()));
+            if (currState != relayState) {
+                setCmdSignal("fan and stage" + (stage.ordinal() - HEATING_5.ordinal()), relayState);
+            }
+        } else if (stage.getValue() == HUMIDIFIER.getValue()) {
+            double currState = getCmdSignal("humidifier");
+            if (currState != relayState) {
+                setCmdSignal("humidifier", relayState);
+            }
+        }  else if (stage.getValue() == DEHUMIDIFIER.getValue()) {
+            double currState = getCmdSignal("dehumidifier");
+            if (currState != relayState) {
+                setCmdSignal("dehumidifier", relayState);
             }
         }
     }
@@ -399,8 +413,7 @@ public class VavStagedRtu extends VavSystemProfile
         if (getConfigEnabled("relay"+ relayNum) == 0) {
             relayState = 0;
         } else {
-            switch (stage)
-            {
+            switch (stage) {
                 case COOLING_1:
                 case COOLING_2:
                 case COOLING_3:
@@ -445,8 +458,6 @@ public class VavStagedRtu extends VavSystemProfile
                     } else {
                         relayState = 0;
                     }
-                    if(relayState != getCmdSignal("fan and stage1"))
-                        setCmdSignal("fan and stage1", relayState);
                     break;
                 case FAN_2:
                     if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU) {
@@ -454,77 +465,48 @@ public class VavStagedRtu extends VavSystemProfile
                     } else {
                         relayState = systemFanLoopOp > 0 ? 1 : 0;
                     }
-                    if(relayState != getCmdSignal("fan and stage2"))
-                        setCmdSignal("fan and stage2", relayState);
                     break;
                 case FAN_3:
                 case FAN_4:
                 case FAN_5:
                     currState = getCmdSignal("fan and stage" + (stage.ordinal() - HEATING_5.ordinal()));
                     stageThreshold = 100 * (stage.ordinal() - FAN_2.ordinal()) / (fanStages - 1);
-                    if (currState == 0)
-                    {
+                    if (currState == 0) {
                         relayState = systemFanLoopOp >= stageThreshold ? 1: 0;
-                    }
-                    else
-                    {
+                    } else {
                         relayState = systemFanLoopOp > (stageThreshold - relayDeactHysteresis) ? 1 : 0;
                     }
-                    if(currState != relayState)
-                        setCmdSignal("fan and stage"+(stage.ordinal() - HEATING_5.ordinal()), relayState);
                     break;
                 case HUMIDIFIER:
                 case DEHUMIDIFIER:
                     if (systemMode == SystemMode.OFF || ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED
                         || ScheduleProcessJob.getSystemOccupancy() == Occupancy.VACATION) {
                         relayState = 0;
-                        if(stage == HUMIDIFIER)
-                            setCmdSignal("humidifier", relayState);
-                        else if(stage == DEHUMIDIFIER)
-                            setCmdSignal("dehumidifier", relayState);
-                    } else
-                    {
+                    } else {
                         double humidity = VavSystemController.getInstance().getAverageSystemHumidity();
                         double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");
                         double targetMaxHumidity = TunerUtil.readSystemUserIntentVal("target and max and inside and humidity");
                         double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis", getSystemEquipRef());
-                        if (stage == HUMIDIFIER)
-                        {
+                        if (stage == HUMIDIFIER) {
                             currState = getCmdSignal("humidifier");
                             //Humidification
-                            if (humidity < targetMinHumidity)
-                            {
+                            if (humidity < targetMinHumidity) {
                                 relayState = 1;
-                            }
-                            else if (humidity > (targetMinHumidity + humidityHysteresis))
-                            {
+                            } else if (humidity > (targetMinHumidity + humidityHysteresis)) {
                                 relayState = 0;
-                            }
-                            else
-                            {
+                            } else {
                                 relayState = currState;
                             }
-                            if(currState != relayState)
-                                setCmdSignal("humidifier", relayState);
-                        }
-                        else
-                        {
+                        } else {
                             currState = getCmdSignal("dehumidifier");
                             //Dehumidification
-                            if (humidity > targetMaxHumidity)
-                            {
+                            if (humidity > targetMaxHumidity) {
                                 relayState = 1;
-                            }
-                            else if (humidity < (targetMaxHumidity - humidityHysteresis))
-                            {
+                            } else if (humidity < (targetMaxHumidity - humidityHysteresis)) {
                                 relayState = 0;
-                            }
-                            else
-                            {
+                            } else {
                                 relayState = currState;
                             }
-                            if(currState != relayState)
-                                setCmdSignal("dehumidifier", relayState);
                         }
                         CcuLog.d(L.TAG_CCU_SYSTEM, "humidity :" + humidity + " targetMinHumidity: " + targetMinHumidity + " humidityHysteresis: " + humidityHysteresis + " targetMaxHumidity: " + targetMaxHumidity);
                     }
@@ -763,8 +745,15 @@ public class VavStagedRtu extends VavSystemProfile
         return hayStack.readPointPriorityVal(configPoint.get("id").toString());
     }
     public void setConfigAssociation(String config, double val) {
-
-        Stage curstage = Stage.values()[(int) getConfigAssociation(config)];
+    
+        double curConfigVal = getConfigAssociation(config);
+        if (curConfigVal == val) {
+            CcuLog.d(L.TAG_CCU_SYSTEM, "setConfigAssociation not changed cur:"+curConfigVal+" new:"+val);
+            return;
+        }
+    
+        Stage curstage = Stage.values()[(int)curConfigVal];
+    
         HashMap cmd = null;
         Point newCmdPoint = null;
         Point oldPoint = null;
@@ -836,36 +825,35 @@ public class VavStagedRtu extends VavSystemProfile
                     oldPoint = new Point.Builder().setHashMap(cmd).build();
                     break;
             }
-
+    
+            String timeZone = CCUHsApi.getInstance().getTimeZone();
+            
             if (val <= Stage.COOLING_5.ordinal() && val >= COOLING_1.ordinal()) {
                 newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system")
-                        .addMarker("cmd").addMarker("cooling").addMarker("stage" + newStageNum).addMarker("his").addMarker("runtime").setTz(oldPoint.getTz()).build();
-                //CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + newCmdPoint.getDisplayName() + "," + newCmdPoint.getMarkers().toString()  + "," + oldPoint.getId());
+                        .addMarker("cmd").addMarker("cooling").addMarker("stage" + newStageNum).addMarker("his").addMarker("runtime").setTz(timeZone).build();
             } else if (val >= Stage.HEATING_1.ordinal() && val <= HEATING_5.ordinal()) {
                 newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system")
-                        .addMarker("cmd").addMarker("heating").addMarker("stage" + newStageNum).addMarker("his").addMarker("runtime").setTz(oldPoint.getTz()).build();
-                //CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + newCmdPoint.getDisplayName() + "," + newCmdPoint.getMarkers().toString() + "," + oldPoint.getId());
+                        .addMarker("cmd").addMarker("heating").addMarker("stage" + newStageNum).addMarker("his").addMarker("runtime").setTz(timeZone).build();
             } else if (val >= Stage.FAN_1.ordinal() && val <= Stage.FAN_5.ordinal()) {
                 newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system")
-                        .addMarker("cmd").addMarker("fan").addMarker("stage" + newStageNum).addMarker("his").addMarker("runtime").setTz(oldPoint.getTz()).build();
-                //CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + newCmdPoint.getDisplayName() + "," + newCmdPoint.getMarkers().toString() + "," + oldPoint.getId());
+                        .addMarker("cmd").addMarker("fan").addMarker("stage" + newStageNum).addMarker("his").addMarker("runtime").setTz(timeZone).build();
             } else if (val == HUMIDIFIER.ordinal()) {
                 newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system")
-                        .addMarker("cmd").addMarker("humidifier").addMarker("his").setEnums("off,on").setTz(oldPoint.getTz()).build();
-                //CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + newCmdPoint.getDisplayName() + "," + newCmdPoint.getMarkers().toString()  + "," + oldPoint.getId());
+                        .addMarker("cmd").addMarker("humidifier").addMarker("his").setEnums("off,on").setTz(timeZone).build();
             } else if (val == DEHUMIDIFIER.ordinal()) {
                 newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system")
-                        .addMarker("cmd").addMarker("dehumidifier").addMarker("his").setEnums("off,on").setTz(oldPoint.getTz()).build();
-                //CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point " + newCmdPoint.getDisplayName() + "," + newCmdPoint.getMarkers().toString()  + "," + oldPoint.getId());
+                        .addMarker("cmd").addMarker("dehumidifier").addMarker("his").setEnums("off,on").setTz(timeZone).build();
             }
-            if(oldPoint != null && oldPoint.getId() != null)CCUHsApi.getInstance().deleteEntity(oldPoint.getId());
+            if(oldPoint != null && oldPoint.getId() != null) {
+                CCUHsApi.getInstance().deleteEntity(oldPoint.getId());
+            }
             if(newCmdPoint != null){
                 String newCmdPointId = CCUHsApi.getInstance().addPoint(newCmdPoint);
                 CCUHsApi.getInstance().writeHisValById(newCmdPointId, 0.0);
             }
 
             CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and association and " + config, val);
-            CCUHsApi.getInstance().syncPointEntityTree();
+            CCUHsApi.getInstance().scheduleSync();
         }
         
     }

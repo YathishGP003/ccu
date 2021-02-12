@@ -1,6 +1,9 @@
 package a75f.io.logic.pubnub;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Message;
 import android.util.Log;
 
 import com.google.gson.JsonElement;
@@ -19,20 +22,67 @@ public class PbMessageHandler
     public static final String CM_RESET = "CM RESET";
     public static final String PRE_DEF_ALERT = "predefinedAlertDefinition";
     
-    public static void handlePunubMessage(JsonElement receivedMessageObject, Long timeToken, Context appContext) {
+    private static PbMessageHandler instance = null;
+    private HandlerThread handlerThread;
+    private Handler       messageHandler;
+    
+    /**
+     * Handler thread makes sure that the pubnub messages are processed sequentially on the CCU.
+     * Concurrent handling can lead to unexpected behaviour when one of the messages is a command to reboot
+     * the tablet.
+     */
+    private PbMessageHandler() {
+        
+        handlerThread = new HandlerThread("UpdatePointHandlerThread"){
+            @Override
+            protected void onLooperPrepared() {
+                super.onLooperPrepared();
+                CcuLog.i(L.TAG_CCU_PUBNUB,"UpdatePointHandler : Ready");
+            }
+        };
+        
+        handlerThread.start();
+        
+        messageHandler = new Handler(handlerThread.getLooper()){
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                PbMessage pbMessage = (PbMessage) msg.obj;
+                handlePbMessage( pbMessage.msg, pbMessage.cxt);
+            }
+        };
+        
+    }
+    public static PbMessageHandler getInstance() {
+        if (instance == null) {
+            synchronized(UpdatePointHandler.class) {
+                if (instance == null) {
+                    instance = new PbMessageHandler();
+                }
+            }
+        }
+        return instance;
+    }
+    
+    public void handlePunubMessage(JsonElement receivedMessageObject, Long timeToken, Context appContext) {
         
         CcuLog.d(L.TAG_CCU_PUBNUB, "handlePunubMessage: " + receivedMessageObject.toString());
-        
+        Message message = messageHandler.obtainMessage();
+        PbMessage pbMessage = new PbMessage();
         try {
-            PbMessageHandler.handleMessage(receivedMessageObject.getAsJsonObject(), appContext);
+            pbMessage.msg = receivedMessageObject.getAsJsonObject();
+            pbMessage.cxt = appContext;
+            message.obj = pbMessage;
+            messageHandler.sendMessage(message);
+            //PbMessageHandler.handlePbMessage(, appContext);
         } catch (NumberFormatException e) {
-            Log.d(L.TAG_CCU_PUBNUB, "Invalid data format, igoring PubNub Message " + e.getMessage());
+            Log.d(L.TAG_CCU_PUBNUB, "Invalid data format, ignoring PubNub Message " + e.getMessage());
         }
     
         PbPreferences.setLastHandledTimeToken(timeToken, appContext);
     }
     
-    public static void handleMessage(JsonObject msg, Context context){
+    private void handlePbMessage(JsonObject msg, Context context){
         String cmd = msg.get("command") != null ? msg.get("command").getAsString(): "";
         switch (cmd) {
             case UpdatePointHandler.CMD:
@@ -66,5 +116,10 @@ public class PbMessageHandler
                 
         }
         
+    }
+    
+    class PbMessage {
+        JsonObject msg;
+        Context cxt;
     }
 }

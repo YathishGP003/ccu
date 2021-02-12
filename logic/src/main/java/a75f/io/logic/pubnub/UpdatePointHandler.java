@@ -8,6 +8,7 @@ import org.projecthaystack.HGrid;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
+import org.projecthaystack.HVal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,7 +66,8 @@ public class UpdatePointHandler
                 try {
                     double level = Double.parseDouble(r.get("level").toString());
                     double val = Double.parseDouble(r.get("val").toString());
-                    double duration = Double.parseDouble(r.get("dur").toString());
+                    HVal durHVal = r.get("duration", false);
+                    double duration = durHVal == null ? 0d : Double.parseDouble(durHVal.toString());
                     //If duration shows it has already expired, then just write 1ms to force-expire it locally.
                     double dur = (duration == 0 ? 0 : (duration - System.currentTimeMillis() ) > 0 ? (duration - System.currentTimeMillis()) : 1);
                     CcuLog.d(L.TAG_CCU_PUBNUB, "Remote point:  level " + level + " val " + val + " who " + who + " duration "+duration+" dur "+dur);
@@ -74,7 +76,7 @@ public class UpdatePointHandler
                     e.printStackTrace();
                 }
             }
-        
+
             //TODO- Should be removed one pubnub is stable
             logPointArray(localPoint);
         

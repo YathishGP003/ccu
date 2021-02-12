@@ -136,12 +136,12 @@ public class Point extends Entity
         private String tunerGroup;
         private String hisInterpolate;
         private String shortDis;
-        public Builder setKind(String kind)
+        public Builder setKind(Kind kind)
         {
             this.kind = kind;
             return this;
         }
-        private String kind;
+        private Kind kind;
         private String id;
         public Builder setGroup(String group)
         {
@@ -246,7 +246,7 @@ public class Point extends Entity
             p.floorRef = this.floorRef;
             p.group = this.group;
             p.id = this.id;
-            p.kind = this.kind;
+            p.kind = this.kind != null ? this.kind.getValue() : Kind.NUMBER.getValue();
             p.enums = this.enums;
             p.minVal = this.minVal;
             p.maxVal = this.maxVal;
@@ -302,7 +302,15 @@ public class Point extends Entity
                 }
                 else if (pair.getKey().equals("kind"))
                 {
-                    this.kind = pair.getValue().toString();
+                    String value = pair.getValue().toString();
+
+                    // support old values if needed for migration.
+                    if (value.equals("string") || value.equals("String")) {
+                        this.kind = Kind.STRING;
+                    }
+                    else {
+                        this.kind = Kind.parse(value);
+                    }
                 }
                 else if (pair.getKey().equals("tz"))
                 {

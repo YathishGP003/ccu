@@ -50,8 +50,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import a75f.io.logger.CcuLog;
-import a75f.io.api.haystack.MyObjectBox;
-import a75f.io.api.haystack.HisItem_;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.DebugFlags;
@@ -69,7 +67,7 @@ public class CCUTagsDb extends HServer {
     private static final String PREFS_ID_MAP = "idMap";
     private static final String PREFS_REMOVE_ID_MAP = "removeIdMap";
     private static final String PREFS_UPDATE_ID_MAP = "updateIdMap";
-    private static final String TAG = "CCUTagsDb";
+    private static final String TAG_CCU_HS = "CCU_HS";
 
     public ConcurrentHashMap<String, HDict> tagsMap;
     public ConcurrentHashMap<String, WriteArray>      writeArrays;
@@ -179,15 +177,13 @@ public class CCUTagsDb extends HServer {
         for(int i = 0; i < hGrid.numRows(); i++)
         {
             HRow val = hGrid.row(i);
-            Log.i(TAG, "Zinc: " + val.toZinc());
+            CcuLog.d(TAG_CCU_HS, "Zinc: " + val.toZinc());
             if(!val.has("nosync")) {
                 String key = val.get("id").toString().replace("@", "");
-                CcuLog.d("CCU_HS", "ID: " + key);
                 tagsMap.put(key, val);
             }
         }
     }
-
 
     public void saveTags() {
 
@@ -328,7 +324,7 @@ public class CCUTagsDb extends HServer {
         for (Iterator it = iterator(); it.hasNext(); ) {
             i++;
             HDict rec = (HDict) it.next();
-            CcuLog.d("CCU_HS","Rec " + i + ":" + rec.toString());
+            CcuLog.d(TAG_CCU_HS,"Rec " + i + ":" + rec.toString());
         }
     }
 
@@ -473,7 +469,7 @@ public class CCUTagsDb extends HServer {
                 .add("port", p.getPort())
                 .add("analogType", p.getType())
                 .add("kind", p.getKind() == null ? "Number" : p.getKind())
-                .add("enabled",p.getEnabled() ? "true":"false")
+                .add("portEnabled",p.getEnabled() ? HBool.TRUE : HBool.FALSE)
                 .add("tz", p.getTz());
         if (p.getUnit() != null) b.add("unit", p.getUnit());
         if (p.getShortDis() != null) b.add("shortDis",p.getShortDis());
@@ -507,7 +503,7 @@ public class CCUTagsDb extends HServer {
                 .add("port", p.getPort())
                 .add("analogType", p.getType())
                 .add("kind", p.getKind() == null ? "Number" : p.getKind())
-                .add("enabled",p.getEnabled() ? "true":"false")
+                .add("portEnabled",p.getEnabled() ? HBool.TRUE : HBool.FALSE)
                 .add("tz", p.getTz());
         if (p.getUnit() != null) b.add("unit", p.getUnit());
         if (p.getShortDis() != null) b.add("shortDis",p.getShortDis());
@@ -808,7 +804,7 @@ public class CCUTagsDb extends HServer {
     }
 
     protected void onPointWrite(HDict rec, int level, HVal val, String who, HNum dur, HDict opts) {
-        CcuLog.d("CCU_HS","onPointWrite: " + rec.dis() + "  " + val + " @ " + level + " [" + who + "]"+", duration: "+dur.millis());
+        CcuLog.d(TAG_CCU_HS,"onPointWrite: " + rec.dis() + "  " + val + " @ " + level + " [" + who + "]"+", duration: "+dur.millis());
         CCUTagsDb.WriteArray array = (CCUTagsDb.WriteArray) writeArrays.get(rec.id().toVal());
         if (array == null) writeArrays.put(rec.id().toVal(), array = new CCUTagsDb.WriteArray());
         array.val[level - 1] = val;
@@ -897,7 +893,7 @@ public class CCUTagsDb extends HServer {
             hisItem.setRec(rec.get("id").toString());
             hisItem.setVal(Double.parseDouble(item.val.toString()));
             hisItem.setSyncStatus(syncItems);
-            CcuLog.d(TAG,"Write historized value to local DB for point ID " + rec.get("id").toString() + "; description " + rec.get("dis").toString() + "; value "  + item.val.toString());
+            CcuLog.d(TAG_CCU_HS,"Write historized value to local DB for point ID " + rec.get("id").toString() + "; description " + rec.get("dis").toString() + "; value "  + item.val.toString());
             hisBox.put(hisItem);
             HisItemCache.getInstance().add(rec.get("id").toString(), hisItem);
         }
@@ -908,7 +904,7 @@ public class CCUTagsDb extends HServer {
     //////////////////////////////////////////////////////////////////////////
 
     public HGrid onInvokeAction(HDict rec, String action, HDict args) {
-        CcuLog.d("CCU_HS","-- invokeAction \"" + rec.dis() + "." + action + "\" " + args);
+        CcuLog.d(TAG_CCU_HS,"-- invokeAction \"" + rec.dis() + "." + action + "\" " + args);
         return HGrid.EMPTY;
     }
 
@@ -919,7 +915,7 @@ public class CCUTagsDb extends HServer {
         hisQuery.equal(HisItem_.rec, pointId)
                 .equal(HisItem_.syncStatus, false)
                 .orderDesc(HisItem_.date);
-        CcuLog.d("CCU_HS", "Finding unsynced items for point ID " + pointId);
+        CcuLog.d(TAG_CCU_HS, "Finding unsynced items for point ID " + pointId);
         List<HisItem> hisItems = hisQuery.build().find();
 
         // TODO Matt Rudd - This shouldn't be necessary, but I was seeing null items in the collection; need to investigate

@@ -554,9 +554,10 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                             .add("id", HRef.copy(CCUHsApi.getInstance().getGUID(id)))
                             .add("level",level)
                             .add("who","ccu")
+                            .add("duration", HNum.make(0, "ms"))
                             .add("val", (HVal) null);
                     HDict[] dictArr = {b.toDict()};
-                    HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+                    HttpUtil.executePost(CCUHsApi.getInstance().pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
 
                 } else {
                     CCUHsApi.getInstance().writePointForCcuUser(id, level, val, 0);

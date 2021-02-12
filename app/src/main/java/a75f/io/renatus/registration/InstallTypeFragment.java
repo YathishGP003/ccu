@@ -15,6 +15,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.renatus.ENGG.LocalConnectionViewKt;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
 
@@ -166,6 +167,8 @@ public class InstallTypeFragment extends Fragment {
             CCUHsApi.getInstance().syncEntityTree();
             L.saveCCUState();
         }
+
+        LocalConnectionViewKt.checkForIpEntryOnLocalBuild(requireContext());
 
         return root_view;
     }

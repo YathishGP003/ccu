@@ -73,7 +73,7 @@ public class HttpUtil
                     String responseStr = response.body().string();
                     CcuLog.i("CCU_HS","executePostAsync Succeeded : "+responseStr);
                 } else {
-                    CcuLog.i("CCU_HS","executePostAsync Failed : ");
+                    CcuLog.i("CCU_HS","executePostAsync Failed : " + response.message());
                 }
             }
         });
@@ -121,6 +121,18 @@ public class HttpUtil
                 int responseCode = connection.getResponseCode();
                 CcuLog.i("CCU_HS","HttpResponse: responseCode "+responseCode);
 
+                if (responseCode >= 400) {
+
+                    BufferedReader rde = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+                    String linee;
+                    StringBuffer responsee = new StringBuffer();
+                    while((linee = rde.readLine()) != null) {
+                        responsee.append(linee);
+                        responsee.append('\n');
+                    }
+                    CcuLog.i("CCU_HS","Response error stream: " + responsee.toString());
+                }
+
                 //Get Response
                 BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String line;
@@ -130,9 +142,12 @@ public class HttpUtil
                     response.append('\n');
                 }
 
+
                 return responseCode == 200 ? response.toString() : null;
 
             } catch (Exception e) {
+                CcuLog.i("CCU_HS","Exception reading stream: " + e.getLocalizedMessage());
+
                 if(connection != null) {
                     connection.disconnect();
                 }
@@ -197,6 +212,18 @@ public class HttpUtil
 
                 int responseCode = connection.getResponseCode();
                 CcuLog.i("CCU_HS","HttpResponse: responseCode "+responseCode);
+
+                if (responseCode >= 400) {
+
+                    BufferedReader rde = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+                    String linee;
+                    StringBuffer responsee = new StringBuffer();
+                    while((linee = rde.readLine()) != null) {
+                        responsee.append(linee);
+                        responsee.append('\n');
+                    }
+                    CcuLog.i("CCU_HS","Response error stream: " + responsee.toString());
+                }
 
                 //Get Response
                 BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));

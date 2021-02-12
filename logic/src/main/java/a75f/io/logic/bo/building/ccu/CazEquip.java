@@ -9,6 +9,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.Occupancy;
@@ -174,7 +175,7 @@ public class CazEquip
                 .addMarker("status").addMarker("message").addMarker("ti").addMarker("writable").addMarker("logical").addMarker("zone")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
-                .setKind("string")
+                .setKind(Kind.STRING)
                 .build();
         String equipStatusMessageLd = CCUHsApi.getInstance().addPoint(equipStatusMessage);
         Point equipScheduleStatus = new Point.Builder()
@@ -187,7 +188,7 @@ public class CazEquip
                 .addMarker("scheduleStatus").addMarker("logical").addMarker("ti").addMarker("zone").addMarker("writable").addMarker("his")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
-                .setKind("string")
+                .setKind(Kind.STRING)
                 .build();
         String equipScheduleStatusId = CCUHsApi.getInstance().addPoint(equipScheduleStatus);
 

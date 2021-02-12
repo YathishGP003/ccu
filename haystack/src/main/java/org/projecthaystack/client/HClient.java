@@ -555,12 +555,16 @@ public class HClient extends HProj
     return postString(uriStr, req, null);
   }
 
+  // Assuming this old, alternate code is only for Haystack calls since it attaches Haystack API key
   private String postString(String uriStr, String req, String mimeType) {
     String bearerToken = CCUHsApi.getInstance().getJwt();
     String apiKey = BuildConfig.HAYSTACK_API_KEY;
 
     if (StringUtils.isNotBlank(bearerToken) || StringUtils.isNotBlank(apiKey)) {
       try {
+        Log.d("CCU_HCLIENT", "Request to " + uriStr);
+        Log.d("CCU_HCLIENT", "Request body: " + req);
+
         Log.i("CCU_HCLIENT","Client Token: " + bearerToken);
         URL url = new URL(uriStr);
         HttpURLConnection c = openHttpConnection(url, "POST");
@@ -568,7 +572,7 @@ public class HClient extends HProj
           c.setDoOutput(true);
           c.setDoInput(true);
           c.setRequestProperty("Connection", "Close");
-          c.setRequestProperty("Content-Type", mimeType == null ? "text/plain; charset=utf-8": mimeType);
+          c.setRequestProperty("Content-Type", mimeType == null ? "text/zinc": mimeType);
           if (StringUtils.isNotBlank(bearerToken)) {
             c.setRequestProperty("Authorization", "Bearer " + bearerToken);
           } else {

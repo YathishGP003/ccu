@@ -45,6 +45,7 @@ import a75f.io.api.haystack.sync.EntityParser;
 import a75f.io.api.haystack.sync.EntitySyncHandler;
 import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.api.haystack.util.MigrateToStr;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
@@ -56,6 +57,7 @@ public class CCUHsApi
 
     public static boolean CACHED_HIS_QUERY = false ;
     private static CCUHsApi instance;
+    private static final String PREFS_HAS_MIGRATED_TO_SILO = "hasMigratedToSilo";
 
     public AndroidHSClient hsClient;
     public CCUTagsDb       tagsDb;
@@ -97,8 +99,28 @@ public class CCUHsApi
         instance = this;
         entitySyncHandler = new EntitySyncHandler();
         hisSyncHandler = new HisSyncHandler(this);
+        checkSiloMigration(c);                  // remove after all sites migrated, post Jan 20 2021
     }
-    
+
+    // Check whether we've migrated kind: "string" to kind: "Str".  If not, run the migration.
+    private void checkSiloMigration(Context context) {
+        boolean hasMigratedToSilo = PreferenceManager.getDefaultSharedPreferences(context)
+                                             .getBoolean(PREFS_HAS_MIGRATED_TO_SILO, false);
+//        if (!hasMigratedToSilo) {
+
+            CcuLog.i("CCU_HS", "TC: Migrating tags database to Silo.");
+            CcuLog.i("CCU_HS", "TC: Tags db before migration: " + tagsDb.tagsString);
+
+            MigrateToStr.migrateTabsDb(tagsDb);
+            CcuLog.i("CCU_HS", "TC: Tags db after migration: " + tagsDb.tagsString);
+
+            syncEntityTree();       // used during dev; can remove otherwise if desired.
+            PreferenceManager.getDefaultSharedPreferences(context).edit()
+                      .putBoolean(PREFS_HAS_MIGRATED_TO_SILO, true)
+                      .apply();
+//        }
+    }
+
     //For Unit test
     public CCUHsApi()
     {
@@ -326,6 +348,17 @@ public class CCUHsApi
         return map;
     }
 
+    /**
+     * Normally, we use Hashmap from our query but this was needed for proper serialization by
+     * EquipSyncAdapter#syncSystemEquip.
+     *
+     * @param query
+     * @return an HDict from a query, or null if the result is empty
+     */
+    public @Nullable HDict readAsHdict(String query) {
+        return hsClient.read(query, false);
+    }
+
     public HashMap readMapById(String id)
     {
 
@@ -475,12 +508,22 @@ public class CCUHsApi
                 HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
                 HDict[] dictArr  = {b.toDict()};
                 CcuLog.d("CCU_HS", "PointWrite- "+id+" : "+val);
-                HttpUtil.executePostAsync(getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
-                
+                HttpUtil.executePostAsync(pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
             }
         }
     }
-    
+
+    // Feb-08-2021 /pointWrite and /pointWriteMany need to hit silo /v2/.  All other calls needs to stay on v1.
+    // todo: This is a temporary workaround.  Resolve this backend.  Do all v1 or all v2, or create two base URLs, one for silo-1, one for silo-2
+    public String pointWriteTarget() {
+        return getHSUrl().replace("v1/", "v2/") + "pointWrite";
+    }
+
+    // Feb-08-2021 /pointWrite and /pointWriteMany need to hit silo /v2/.  All other calls needs to stay on v1.
+    public String pointWriteManyTarget() {
+        return getHSUrl().replace("v1/", "v2/") + "pointWriteMany";
+    }
+
     /**
      * Write to a 'writable' point
      * with default level  - 9
@@ -586,7 +629,7 @@ public class CCUHsApi
     public HGrid readPointArrRemote(String id) {
         HDictBuilder b = new HDictBuilder().add("id", HRef.copy(id));
         HDict[] dictArr  = {b.toDict()};
-        String response = HttpUtil.executePost(getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+        String response = HttpUtil.executePost(pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
         CcuLog.d("CCU_HS", "Response : "+response);
       
         return response == null ? null : new HZincReader(response).readGrid();
@@ -1115,15 +1158,15 @@ public class CCUHsApi
                     HDict pid = new HDictBuilder().add("id", HRef.copy(id))
                             .add("level", Integer.parseInt(level))
                             .add("who", who)
-                            .add("val", kind.equals("string") ? HStr.make(val.toString()) : val).toDict();
+                            .add("val", kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val).toDict();
                     hDictList.add(pid);
 
                     //save his data to local cache
                     HDict rec = hsClient.readById(HRef.copy(getLUID(id)));
-                    tagsDb.saveHisItemsToCache(rec, new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), kind.equals("string") ? HStr.make(val.toString()) : val)}, true);
+                    tagsDb.saveHisItemsToCache(rec, new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val)}, true);
 
                     //save points on tagsDb
-                    tagsDb.onPointWrite(rec, Integer.parseInt(level), kind.equals("string") ? HStr.make(val.toString()) : val, who, HNum.make(0), rec);
+                    tagsDb.onPointWrite(rec, Integer.parseInt(level), kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val, who, HNum.make(0), rec);
                 }
 
             }

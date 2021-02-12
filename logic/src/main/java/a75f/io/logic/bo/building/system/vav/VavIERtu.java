@@ -11,6 +11,7 @@ import java.util.HashMap;
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
@@ -501,7 +502,7 @@ public class VavIERtu extends VavSystemProfile
                                       .setEquipRef(equipref)
                                       .addMarker("system").addMarker("config").addMarker("ie").addMarker("ip")
                                       .addMarker("address").addMarker("writable").addMarker("sp")
-                                      .setKind("string")
+                                      .setKind(Kind.STRING)
                                       .setTz(tz)
                                       .build();
         String equipmentIPId = hayStack.addPoint(equipmentIP);

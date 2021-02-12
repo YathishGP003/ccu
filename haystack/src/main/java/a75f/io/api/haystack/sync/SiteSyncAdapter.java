@@ -67,6 +67,7 @@ public class SiteSyncAdapter extends EntitySyncAdapter {
                     siteGuid = siteCreationResponseJson.getString("id");
 
                     if (StringUtils.isNotBlank(siteGuid)) {
+                        CcuLog.d(LOG_PREFIX, "Got site guid: " + siteGuid);
                         CCUHsApi.getInstance().putUIDMap(siteLuid, siteGuid);
                         synced = true;
                     }

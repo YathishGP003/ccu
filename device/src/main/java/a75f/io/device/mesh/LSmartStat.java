@@ -89,7 +89,7 @@ public class LSmartStat {
                     if (device != null && device.size() > 0) {
                         ArrayList<HashMap> physicalOpPoints = hayStack.readAll("point and physical and cmd and deviceRef == \"" + device.get("id") + "\"");
                         for (HashMap opPoint : physicalOpPoints) {
-                            if (opPoint.get("enabled").toString().equals("true")) {
+                            if (opPoint.get("portEnabled").toString().equals("true")) {
                                 RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
                                 HashMap logicalOpPoint = hayStack.read("point and id == " + p.getPointRef());
                                 if (logicalOpPoint.get("id") != null) {
@@ -222,7 +222,7 @@ public class LSmartStat {
         if (device != null && device.size() > 0) {
             ArrayList<HashMap> physicalOpPoints = hayStack.readAll("point and physical and cmd and deviceRef == \"" + device.get("id") + "\"");
             for (HashMap opPoint : physicalOpPoints) {
-                if (opPoint.get("enabled").toString().equals("true")) {
+                if (opPoint.get("portEnabled").toString().equals("true")) {
                     RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
                     HashMap logicalOpPoint = hayStack.read("point and id == " + p.getPointRef());
                     Log.d("LSmartStat", "getCtrlMsgs=" + p.getDisplayName() + "," + p.getPointRef() + "," + logicalOpPoint.get("id") + "," + p.getType());
@@ -301,7 +301,7 @@ public class LSmartStat {
         if (device != null && device.size() > 0) {
             ArrayList<HashMap> physicalOpPoints = hayStack.readAll("point and physical and deviceRef == \"" + device.get("id") + "\" and port == \""+relays+"\"");
             for (HashMap opPoint : physicalOpPoints) {
-                if (opPoint.get("enabled").toString().equals("true")) {
+                if (opPoint.get("portEnabled").toString().equals("true")) {
                     return 1;
 
                 }else

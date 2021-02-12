@@ -27,7 +27,7 @@ private const val HTTP = "http://"
 
 private const val ALERTS_EXT = ":5000"
 private const val CARETAKER_EXT = ":3100/api/v1/"
-private const val HAYSTACK_EXT = ":8080/"   // = ":8085/v1/" for Silo
+private const val HAYSTACK_EXT = ":8085/v1/"
 private const val FILESTORAGE_EXT = ":8081"
 
 private const val PREF_LOCAL_BASE_IP_VALUE = "pref_local_base_ip_value"
@@ -123,7 +123,7 @@ class RenatusServicesEnvironment(
    fun getIpListForPrepopulate(): List<String> =
       sharedPreferences.getStringSet(PREF_LOCAL_BASE_IP_ALL_VALUES, emptySet())?.toList() ?: emptyList()
 
-   private fun getLocalBaseIp() =
+   fun getLocalBaseIp() =
       sharedPreferences.getString(PREF_LOCAL_BASE_IP_VALUE, BuildConfig.API_BASE_IP) ?: "missing"
 
    private fun addToPrepopulateList(ipAddress: String) {

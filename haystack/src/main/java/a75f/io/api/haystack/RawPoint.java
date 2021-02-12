@@ -381,8 +381,9 @@ public class RawPoint extends Entity
                 {
                     this.kind = pair.getValue().toString();
                 }
-                else if (pair.getKey().equals("enabled"))
+                else if (pair.getKey().equals("portEnabled"))
                 {
+                    // we could/should say = pair.getValue == HBool.TRUE, but will hold off for now (warroom & keep code consistent)
                     this.enabled = Boolean.parseBoolean(pair.getValue().toString());
                 }
                 else if (pair.getKey().equals("tz"))

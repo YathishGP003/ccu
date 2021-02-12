@@ -23,9 +23,10 @@ public class BuildingTunerUpdateHandler {
         String buildingTunerDis = newTunerValueItem.get("dis").toString();
 
         ArrayList<HashMap> dualDuctBuildingTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and dualDuct");
+        String buildingTunerShortDis = buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1).trim();
         for (HashMap hashMap : dualDuctBuildingTuners) {
             String hashMapDis = hashMap.get("dis").toString();
-            if (!newTunerValueItem.get("id").toString().equals(hashMap.get("id").toString()) && hashMapDis.contains("Building") && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(hashMap.get("tunerGroup").toString()) && buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(hashMapDis.substring(hashMapDis.lastIndexOf("-") + 1))) {
+            if (!newTunerValueItem.get("id").toString().equals(hashMap.get("id").toString()) && hashMapDis.contains("Building") && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(hashMap.get("tunerGroup").toString()) && buildingTunerShortDis.equalsIgnoreCase(hashMapDis.substring(hashMapDis.lastIndexOf("-") + 1).trim())) {
                 setTuner(hashMap.get("id").toString(), 16, getBuildingTunerValue(newTunerValueItem.get("id").toString()));
             }
         }
@@ -34,7 +35,7 @@ public class BuildingTunerUpdateHandler {
         ArrayList<HashMap> systemTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and system and roomRef == \"" + "SYSTEM" + "\"");
         for (HashMap systemTunersMap : systemTuners) {
             String systemTunerDis = systemTunersMap.get("dis").toString();
-            if (!newTunerValueItem.get("id").toString().equals(systemTunersMap.get("id").toString()) && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(systemTunersMap.get("tunerGroup").toString()) && buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(systemTunerDis.substring(systemTunerDis.lastIndexOf("-") + 1))) {
+            if (!newTunerValueItem.get("id").toString().equals(systemTunersMap.get("id").toString()) && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(systemTunersMap.get("tunerGroup").toString()) && buildingTunerShortDis.equalsIgnoreCase(systemTunerDis.substring(systemTunerDis.lastIndexOf("-") + 1).trim())) {
                 setTuner(systemTunersMap.get("id").toString(), 16, getBuildingTunerValue(newTunerValueItem.get("id").toString()));
             }
         }
@@ -58,7 +59,7 @@ public class BuildingTunerUpdateHandler {
             for (HashMap moduleTunerMap : moduleTuners) {
                 if (!moduleTunerMap.get("roomRef").toString().equals("SYSTEM")) {
                     String moduleTunerDis = moduleTunerMap.get("dis").toString();
-                    if (!newTunerValueItem.get("id").toString().equals(moduleTunerMap.get("id").toString()) && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(moduleTunerMap.get("tunerGroup").toString()) && buildingTunerDis.substring(buildingTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(moduleTunerDis.substring(moduleTunerDis.lastIndexOf("-") + 1))) {
+                    if (!newTunerValueItem.get("id").toString().equals(moduleTunerMap.get("id").toString()) && newTunerValueItem.get("tunerGroup").toString().equalsIgnoreCase(moduleTunerMap.get("tunerGroup").toString()) && buildingTunerShortDis.equalsIgnoreCase(moduleTunerDis.substring(moduleTunerDis.lastIndexOf("-") + 1).trim())) {
                         setTuner(moduleTunerMap.get("id").toString(), 16, getBuildingTunerValue(newTunerValueItem.get("id").toString()));
                     }
                 }

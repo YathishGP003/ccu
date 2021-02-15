@@ -235,11 +235,11 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     ((TextView) columnView.findViewById(R.id.textLabelBuilding)).setText(ccu.get("dis").toString());
                     ((TextView) columnView.findViewById(R.id.textLabelZone)).setText(HSUtil.getDis(moduleTuner.get("roomRef").toString()));
                     ((TextView) columnView.findViewById(R.id.textLabelModule)).setText(HSUtil.getDis(moduleTuner.get("equipRef").toString()).substring(HSUtil.getDis(moduleTuner.get("equipRef").toString()).indexOf("-") + 1));
-                    ((TextView) columnView.findViewById(R.id.textRow8)).setText(getTunerValue(moduleTuner.get("id").toString(), "8"));
-                    ((TextView) columnView.findViewById(R.id.textRow10)).setText(getTunerValue(moduleTuner.get("id").toString(), "10"));
-                    ((TextView) columnView.findViewById(R.id.textRow14)).setText(getTunerValue(moduleTuner.get("id").toString(), "14"));
-                    ((TextView) columnView.findViewById(R.id.textRow16)).setText(getTunerValue(moduleTuner.get("id").toString(), "16"));
-                    ((TextView) columnView.findViewById(R.id.textRow17)).setText(getTunerValue(moduleTuner.get("id").toString(), "17"));
+                    ((TextView) columnView.findViewById(R.id.textRow8)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "8"));
+                    ((TextView) columnView.findViewById(R.id.textRow10)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "10"));
+                    ((TextView) columnView.findViewById(R.id.textRow14)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "14"));
+                    ((TextView) columnView.findViewById(R.id.textRow16)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "16"));
+                    ((TextView) columnView.findViewById(R.id.textRow17)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "17"));
                     viewStub.addView(columnView);
                     break;
                 }

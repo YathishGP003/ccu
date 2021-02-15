@@ -1,0 +1,1255 @@
+{
+  "modbusEquipId (_id)": "5f1f30ad18b11f4f1d9a266",   
+  "name":  "UPS - Fuji Consulneowatt 7000X",
+  "description":" This document contains the configuration necessary to UPS - Fuji Consulneowatt 7000X",
+  "equipType": "UPS150K",                    
+  "vendor": "Fuji Consul Neowatt",
+  "model": [
+    "150 kVA UPS"  
+  ],
+  "registers": [
+  {
+      "registerAddress": 2001,
+      "registerNumber": "42001",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2166",
+          "name": "Main Input Voltage Phase A",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "input"
+            },
+            {
+              "tagName": "voltage"
+            },
+            {
+              "tagName": "main"
+            },
+            {
+              "tagName": " phaseA"
+            },
+	    {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+  {
+      "registerAddress": 2002,
+      "registerNumber": "42002",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2167",
+          "name": "Main Input Voltage Phase B",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "input"
+            },
+            {
+              "tagName": "voltage"
+            },
+            {
+              "tagName": "main"
+            },
+            {
+              "tagName": " phaseB"
+            },
+	    {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+  {
+      "registerAddress": 2003,
+      "registerNumber": "42003",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2168",
+          "name": "Main Input Voltage Phase C",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "input"
+            },
+            {
+              "tagName": "voltage"
+            },
+            {
+              "tagName": "main"
+            },
+            {
+              "tagName": " phaseC"
+            },
+	    {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+  {
+      "registerAddress": 2004,
+      "registerNumber": "42004",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2169",
+          "name": "Main Input Current Phase A",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "input"
+            },
+            {
+              "tagName": "current"
+            },
+            {
+              "tagName": "main"
+            },
+            {
+              "tagName": " phaseA"
+            },
+	    {
+              "tagName": "unit",
+              "value": "A"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+  {
+      "registerAddress": 2005,
+      "registerNumber": "42005",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2170",
+          "name": "Main Input Current Phase B",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "input"
+            },
+            {
+              "tagName": "current"
+            },
+            {
+              "tagName": "main"
+            },
+            {
+              "tagName": " phaseB"
+            },
+	    {
+              "tagName": "unit",
+              "value": "A"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+  {
+      "registerAddress": 2006,
+      "registerNumber": "42006",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2171",
+          "name": "Main Input Current Phase C",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "input"
+            },
+            {
+              "tagName": "current"
+            },
+            {
+              "tagName": "main"
+            },
+            {
+              "tagName": " phaseC"
+            },
+	    {
+              "tagName": "unit",
+              "value": "A"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+  {
+      "registerAddress": 2007,
+      "registerNumber": "42007",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2172",
+          "name": "Main Input Frequency Phase A",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "input"
+            },
+            {
+              "tagName": "frequency"
+            },
+            {
+              "tagName": "main"
+            },
+            {
+              "tagName": " phaseA"
+            },
+	    {
+              "tagName": "unit",
+              "value": "Hz"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+  {
+      "registerAddress": 2008,
+      "registerNumber": "42008",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2173",
+          "name": "Main Input Frequency Phase B",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "input"
+            },
+            {
+              "tagName": "frequency"
+            },
+            {
+              "tagName": "main"
+            },
+            {
+              "tagName": " phaseB"
+            },
+	    {
+              "tagName": "unit",
+              "value": "Hz"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+  {
+      "registerAddress": 2009,
+      "registerNumber": "42009",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2174",
+          "name": "Main Input Frequency Phase C",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "input"
+            },
+            {
+              "tagName": "frequency"
+            },
+            {
+              "tagName": "main"
+            },
+            {
+              "tagName": " phaseC"
+            },
+	    {
+              "tagName": "unit",
+              "value": "Hz"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+  {
+      "registerAddress": 2010,
+      "registerNumber": "42010",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2175",
+          "name": "Input PF Phase A",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "input"
+            },
+            {
+              "tagName": "pf"
+            },
+            {
+              "tagName": " phaseA"
+            },
+	    {
+              "tagName": "unit",
+              "value": "% (x100)"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+  {
+      "registerAddress": 2011,
+      "registerNumber": "42011",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2176",
+          "name": "Input PF Phase B",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "input"
+            },
+            {
+              "tagName": "pf"
+            },
+            {
+              "tagName": " phaseB"
+            },
+	    {
+              "tagName": "unit",
+              "value": "% (x100)"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+  {
+      "registerAddress": 2012,
+      "registerNumber": "42012",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2177",
+          "name": "Input PF Phase C",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "input"
+            },
+            {
+              "tagName": "pf"
+            },
+            {
+              "tagName": " phaseC"
+            },
+	    {
+              "tagName": "unit",
+              "value": "% (x100)"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+ {
+      "registerAddress": 2013,
+      "registerNumber": "42013",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2178",
+          "name": "Postive DC Bus Voltage",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "positive"
+            },
+            {
+              "tagName": "DC"
+            },
+            {
+              "tagName": "bus"
+            },
+           {
+              "tagName": "voltage"
+            },
+           {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+ {
+      "registerAddress": 2014,
+      "registerNumber": "42014",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2179",
+          "name": "Negative DC Bus Voltage",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "negative"
+            },
+            {
+              "tagName": "DC"
+            },
+            {
+              "tagName": "bus"
+            },
+           {
+              "tagName": "voltage"
+            },
+           {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+ {
+      "registerAddress": 2015,
+      "registerNumber": "42015",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2180",
+          "name": "Postive Battery String Voltage",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "positive"
+            },
+            {
+              "tagName": "string"
+            },
+            {
+              "tagName": "battery"
+            },
+           {
+              "tagName": "voltage"
+            },
+           {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+ {
+      "registerAddress": 2016,
+      "registerNumber": "42016",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2181",
+          "name": "Negative Battery String Voltage",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "negative"
+            },
+            {
+              "tagName": "string"
+            },
+            {
+              "tagName": "battery"
+            },
+           {
+              "tagName": "voltage"
+            },
+           {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+ {
+      "registerAddress": 2017,
+      "registerNumber": "42017",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2182",
+          "name": "Postive Charger Voltage",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "positive"
+            },
+            {
+              "tagName": "charger"
+            },
+           {
+              "tagName": "voltage"
+            },
+           {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+ {
+      "registerAddress": 2018,
+      "registerNumber": "42018",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2183",
+          "name": "Negative Charger Voltage",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "negative"
+            },
+            {
+              "tagName": "charger"
+            },
+           {
+              "tagName": "voltage"
+            },
+           {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+	{
+      "registerAddress": 2019,
+      "registerNumber": "42019",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2184",
+          "name": "Postive Charger Current",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "positive"
+            },
+            {
+              "tagName": "charger"
+            },
+           {
+              "tagName": "current"
+            },
+           {
+              "tagName": "unit",
+              "value": "A"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+ {
+      "registerAddress": 2020,
+      "registerNumber": "42020",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2185",
+          "name": "Negative Charger Current",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "negative"
+            },
+            {
+              "tagName": "charger"
+            },
+           {
+              "tagName": "current"
+            },
+           {
+              "tagName": "unit",
+              "value": "A"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+ {
+      "registerAddress": 2021,
+      "registerNumber": "42021",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2186",
+          "name": "Postive Discharge Current",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "positive"
+            },
+            {
+              "tagName": "discharge"
+            },
+           {
+              "tagName": "current"
+            },
+           {
+              "tagName": "unit",
+              "value": "A"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+ {
+      "registerAddress": 2022,
+      "registerNumber": "42022",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2187",
+          "name": "Negative Discharge Current",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "negative"
+            },
+            {
+              "tagName": "discharge"
+            },
+           {
+              "tagName": "current"
+            },
+           {
+              "tagName": "unit",
+              "value": "A"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+ {
+      "registerAddress": 2023,
+      "registerNumber": "42023",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2188",
+          "name":  "Invertor Voltage Phase A",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "invertor"
+            },
+            {
+              "tagName": "voltage"
+            },
+           {
+              "tagName": "phaseA"
+            },
+           {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+ {
+      "registerAddress": 2024,
+      "registerNumber": "42024",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2189",
+          "name": "Invertor Voltage Phase B",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "invertor"
+            },
+            {
+              "tagName": "voltage"
+            },
+           {
+              "tagName": "phaseB"
+            },
+           {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+ {
+      "registerAddress": 2025,
+      "registerNumber": "42025",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2190",
+          "name": "Invertor Voltage Phase C",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "invertor"
+            },
+            {
+              "tagName": "voltage"
+            },
+           {
+              "tagName": "phaseC"
+            },
+           {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+ {
+      "registerAddress": 2026,
+      "registerNumber": "42026",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2191",
+          "name": "Output Current Phase A",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "output"
+            },
+            {
+              "tagName": "current"
+            },
+           {
+              "tagName": "phaseA"
+            },
+           {
+              "tagName": "unit",
+              "value": "A"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+ {
+      "registerAddress": 2027,
+      "registerNumber": "42027",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2192",
+          "name": "Output Current Phase B",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "output"
+            },
+            {
+              "tagName": "current"
+            },
+           {
+              "tagName": "phaseB"
+            },
+           {
+              "tagName": "unit",
+              "value": "A"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+ {
+      "registerAddress": 2028,
+      "registerNumber": "42028",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18b12f4f1d9a2193",
+          "name": "Output Current Phase C",
+          "startBit": 0,
+          "endBit": 15,
+              "logicalPointTags": [
+            {
+              "tagName": "ups"
+            },
+            {
+              "tagName": "output"
+            },
+            {
+              "tagName": "current"
+            },
+           {
+              "tagName": "phaseC"
+            },
+           {
+              "tagName": "unit",
+              "value": "A"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

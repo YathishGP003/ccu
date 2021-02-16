@@ -95,7 +95,7 @@ public class BuildingTuners
         StandAloneTuners.addDefaultStandaloneTuners(hayStack, siteRef, equipRef, equipDis, tz);
         DabTuners.addDefaultDabTuners(hayStack, siteRef, equipRef, equipDis, tz);
         TITuners.addDefaultTiTuners(hayStack, siteRef, equipRef, equipDis, tz);
-        OAOTuners.addDefaultTuners(hayStack, equipDis, siteRef, equipRef, tz);
+        OAOTuners.addDefaultTuners(hayStack, siteRef, equipRef, equipDis, tz);
         DualDuctTuners.addDefaultTuners(hayStack, siteRef, equipRef, equipDis, tz);
         AlertTuners.addDefaultAlertTuners(hayStack, siteRef, equipRef, equipDis, tz);
         TemperatureLimitTuners.addDefaultTempLimitTuners(hayStack, siteRef, equipRef, equipDis, tz);

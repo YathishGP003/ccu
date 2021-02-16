@@ -194,6 +194,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
             holder.textViewName.setText("Building");
         } else if (position == 16) {
             holder.textViewName.setText("Default");
+            holder.textViewValue.setText(getTunerDefaultValue(tunerItemSelected.get("id").toString()));
         } else {
             holder.textViewName.setText("");
             holder.textViewCurrentValue.setText("");
@@ -276,6 +277,20 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
             level = 8;
         }
         return level;
+    }
+
+    public String getTunerDefaultValue(String id) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        ArrayList values = hayStack.readPoint(id);
+        if (values != null && values.size() > 0) {
+            for (int l = 1; l <= values.size(); l++) {
+                HashMap valMap = ((HashMap) values.get(l - 1));
+                if (valMap.get("level").toString().equals("17") && valMap.get("val") != null) {
+                    return valMap.get("val").toString();
+                }
+            }
+        }
+        return "0";
     }
 
     public void setOrangeTextColor(TextView textView) {

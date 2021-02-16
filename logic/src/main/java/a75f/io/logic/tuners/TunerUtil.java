@@ -33,7 +33,7 @@ public class TunerUtil
                 }
             }
         }
-        return 0;
+        return BuildingTunerFallback.getDefaultTunerVal(query);
     }
     
     public static double readTunerValByQuery(String query, String equipRef) {
@@ -50,7 +50,7 @@ public class TunerUtil
                 }
             }
         }
-        return 0;
+        return BuildingTunerFallback.getDefaultTunerVal(query);
     }
     public static double readBuildingTunerValByQuery(String query) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
@@ -66,7 +66,7 @@ public class TunerUtil
                 }
             }
         }
-        return 0;
+        return BuildingTunerFallback.getDefaultTunerVal(query);
     }
     public static String readTunerStrByQuery(String query) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
@@ -505,12 +505,5 @@ public class TunerUtil
         }
         hayStack.writePointForCcuUser(id, level, dVal, 0);
         
-    }
-    
-    public static double getDefaultTunerVal(String tags) {
-        if (tags.contains(Tags.DAB)) {
-            return DabTuners.getDefaultTunerVal(tags);
-        }
-        return 0;
     }
 }

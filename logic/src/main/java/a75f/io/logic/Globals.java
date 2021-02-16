@@ -207,7 +207,7 @@ public class Globals {
                     if (!CCUHsApi.getInstance().isPrimaryCcu()) {
                         CCUHsApi.getInstance().importBuildingTuners();
                     }
-                    BuildingTuners.getInstance().updateBuildingTuners();
+                    //BuildingTuners.getInstance().updateBuildingTuners();
                     CCUHsApi.getInstance().syncEntityTree();
                 }
             

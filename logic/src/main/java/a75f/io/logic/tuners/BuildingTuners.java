@@ -995,7 +995,7 @@ public class BuildingTuners
                                         .setEquipRef(equipRef).setHisInterpolate("cov")
                                         .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("his")
                                         .addMarker("valve").addMarker("start").addMarker("damper").addMarker("sp")
-                                        .setMinVal("1").setMaxVal("100").setIncrementVal("5").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                        .setMinVal("0").setMaxVal("100").setIncrementVal("5").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                         .setTz(tz)
                                         .build();
         String valveStartDamperId = hayStack.addPoint(valveStartDamper);

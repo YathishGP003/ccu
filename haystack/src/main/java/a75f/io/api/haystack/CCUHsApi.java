@@ -412,6 +412,10 @@ public class CCUHsApi
     public void writePointLocal(String id, int level, String who, Double val, int duration) {
         hsClient.pointWrite(HRef.copy(id), level, who, HNum.make(val), HNum.make(duration));
     }
+    
+    public void writePointStrValLocal(String id, int level, String who, String val, int duration) {
+        hsClient.pointWrite(HRef.copy(id), level, who, HStr.make(val), HNum.make(duration));
+    }
 
     /**
      * Write to the first 'writable' point fetched using query

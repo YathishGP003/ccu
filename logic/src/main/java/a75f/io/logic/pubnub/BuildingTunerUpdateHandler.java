@@ -20,6 +20,11 @@ public class BuildingTunerUpdateHandler {
 
         //update dualDuct building tuners
         HashMap newTunerValueItem = CCUHsApi.getInstance().readMapById(id);
+
+        if (newTunerValueItem == null) {
+            return;
+        }
+
         String buildingTunerDis = newTunerValueItem.get("dis").toString();
 
         ArrayList<HashMap> dualDuctBuildingTuners = CCUHsApi.getInstance().readAll("tuner and tunerGroup and dualDuct");

@@ -18,6 +18,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
@@ -182,10 +183,10 @@ public class DiagEquip
                 .setDisplayName(equipDis+"-appVersion")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef).setHisInterpolate("cov")
-                .addMarker("diag").addMarker("app").addMarker("version").addMarker("his").addMarker("writable")
+                .addMarker("diag").addMarker("app").addMarker("version").addMarker("writable")
                 .setUnit("")
-                .setKind("string")
                 .setTz(tz)
+                .setKind(Kind.STRING)
                 .build();
         hsApi.addPoint(appVersion);
     }
@@ -256,7 +257,6 @@ public class DiagEquip
             String hisVersion = pi.versionName.substring(pi.versionName.lastIndexOf('_')+1);
             Log.d("DiagEquip","version ="+version+","+pi.versionName+","+pi.versionName.substring(pi.versionName.lastIndexOf('_')+1)+",prevVer="+prevVersion+prevVersion.equals( hisVersion));
             if(!prevVersion.equals( hisVersion)) {
-                setDiagHisVal("app and version",Double.parseDouble(version));
                 CCUHsApi.getInstance().writeDefaultVal("point and diag and app and version", hisVersion);
             }
 

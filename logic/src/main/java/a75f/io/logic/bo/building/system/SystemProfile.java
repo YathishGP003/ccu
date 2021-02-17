@@ -15,6 +15,7 @@ import a75.io.algos.tr.TRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.Globals;
@@ -753,7 +754,7 @@ public abstract class SystemProfile
                 .addMarker("message")
                 .addMarker("writable")
                 .setTz(tz)
-                .setKind("string").build();
+                .setKind(Kind.STRING).build();
         CCUHsApi.getInstance().addPoint(systemStatusMessage);
         Point systemScheduleStatus = new Point.Builder()
                 .setDisplayName(equipDis + "-ScheduleStatus")
@@ -762,7 +763,7 @@ public abstract class SystemProfile
                 .addMarker("scheduleStatus")
                 .addMarker("writable")
                 .setTz(tz)
-                .setKind("string").build();
+                .setKind(Kind.STRING).build();
         CCUHsApi.getInstance().addPoint(systemScheduleStatus);
         
         Point outsideTemperature = new Point.Builder().setDisplayName(equipDis + "-" + "outsideTemperature").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("outside").addMarker("temp").addMarker("his").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();

@@ -121,7 +121,7 @@ public class LSmartNode
                     
                     for (HashMap opPoint : physicalOpPoints)
                     {
-                        if (opPoint.get("enabled").toString().equals("true"))
+                        if (opPoint.get("portEnabled").toString().equals("true"))
                         {
                             RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
                             HashMap logicalOpPoint = hayStack.read("point and id == " + p.getPointRef());
@@ -276,7 +276,7 @@ public class LSmartNode
 
             for (HashMap opPoint : physicalOpPoints)
             {
-                if (opPoint.get("enabled").toString().equals("true"))
+                if (opPoint.get("portEnabled").toString().equals("true"))
                 {
                     RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
                     HashMap logicalOpPoint = hayStack.read("point and id == " + p.getPointRef());

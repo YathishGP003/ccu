@@ -3,23 +3,24 @@ package a75f.io.renatus.ENGG
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.cloud.RenatusServicesEnvironment
+import a75f.io.logic.cloud.RenatusServicesEnvironment.Companion.createWithSharedPrefs
+import a75f.io.renatus.BuildConfig
 import a75f.io.renatus.R
 import android.annotation.SuppressLint
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
+import android.preference.PreferenceManager
 import android.support.constraint.ConstraintLayout
 import android.support.v4.app.FragmentActivity
 import android.support.v7.app.AlertDialog
 import android.text.InputType.TYPE_CLASS_NUMBER
 import android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
 import android.util.AttributeSet
-import android.util.Log
 import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
-import android.widget.Toast
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -109,51 +110,91 @@ class LocalConnectionView @JvmOverloads constructor(
    }
 
    private fun openIpDialog() {
-      val editText = AutoCompleteTextView(context).apply {
-         setRawInputType(TYPE_CLASS_NUMBER.or(TYPE_NUMBER_FLAG_DECIMAL))
-         savedPrepopulateValues?.let {
-            setAdapter(ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, it))
-         }
-      }
 
-      fun processText(text: String) {
-         if (text.isNotEmpty()) {
-            if (Patterns.IP_ADDRESS.matcher(text).matches()) {
-               disposables.add(
-                  viewModel.setIpAddress(text)
-                     .subscribeOn(Schedulers.io())
-                     .observeOn(AndroidSchedulers.mainThread())
-                     .subscribe(
-                        { _: Boolean -> { } },  // no further action on success
-                        { error: Throwable ->
-                           val msg = "Error trying to reach new IP: ${error.message}"
-                           CcuLog.e(L.TAG_CCU, msg, error)
-                           showErrorDialog(msg)
-                        }
-                     )
+      val message = "Enter new IP address for your local Renatus sandbox.  E.g.: \"129.144.50.56\""
+
+      ipEntryPopup(context, message, savedPrepopulateValues) { text ->
+         disposables.add(
+            viewModel.setIpAddress(text)
+               .subscribeOn(Schedulers.io())
+               .observeOn(AndroidSchedulers.mainThread())
+               .subscribe(
+                  { _: Boolean -> { } },  // no further action on success
+                  { error: Throwable ->
+                     val msg = "Error trying to reach new IP: ${error.message}"
+                     CcuLog.e(L.TAG_CCU, msg, error)
+                     showErrorDialog(msg, context)
+                  }
                )
-            } else {
-               showErrorDialog("Improper IP address format: $text. ")
-            }
+         )
+      }
+   }
+}
+
+fun ipEntryPopup(context: Context,
+                 message: String,
+                 autoCompleteValues: List<String>? = null,
+                 callback: (String) -> Unit) {
+
+   val editText = AutoCompleteTextView(context).apply {
+      setRawInputType(TYPE_CLASS_NUMBER.or(TYPE_NUMBER_FLAG_DECIMAL))
+      autoCompleteValues?.let {
+         setAdapter(ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, it))
+      }
+   }
+
+   fun processText(text: String) {
+      if (text.isNotEmpty()) {
+         if (Patterns.IP_ADDRESS.matcher(text).matches()) {
+            callback(text)
+         } else {
+            showErrorDialog("Improper IP address format: $text. ", context)
          }
       }
-
-      val dialog = AlertDialog.Builder(context)
-         .setTitle("Local Env IP Address")
-         .setMessage("Enter new IP address for your local Renatus sandbox.  E.g.: \"129.144.50.56\"")
-         .setView(editText)
-         .setPositiveButton("Done") { _, _ -> processText(editText.text.toString().trim()) }
-         .create()
-      dialog.show()
    }
 
-   // Shows a simple error dialog for the given message.  (We should have a general tool for this.)
-   private fun showErrorDialog(msg: String) {
-      AlertDialog.Builder(context)
-         .setTitle("Error")
-         .setIcon(R.drawable.ic_alert)
-         .setMessage(msg)
-         .show()
-   }
-
+   val dialog = AlertDialog.Builder(context)
+      .setTitle("Local Env IP Address")
+      .setMessage(message)
+      .setView(editText)
+      .setPositiveButton("Done") { _, _ -> processText(editText.text.toString().trim()) }
+      .create()
+   dialog.show()
 }
+
+// Shows a simple error dialog for the given message.  (We should have a general tool for this.)
+fun showErrorDialog(msg: String, context: Context) {
+   AlertDialog.Builder(context)
+      .setTitle("Error")
+      .setIcon(R.drawable.ic_alert)
+      .setMessage(msg)
+      .show()
+}
+
+@JvmOverloads
+fun checkForIpEntryOnLocalBuild(
+   context: Context,
+   disposables: CompositeDisposable? = null
+) {
+   if (BuildConfig.BUILD_TYPE == "local") {
+      val servicesEnvironment = createWithSharedPrefs(
+         PreferenceManager.getDefaultSharedPreferences(context))
+      val message = "Override existing IP address " + servicesEnvironment.getLocalBaseIp() + " with new IP address, or dismiss to leave as is."
+      ipEntryPopup(context, message) { text ->
+         val disposable =
+            servicesEnvironment.setLocalBaseIpAddress(text)
+               .subscribeOn(Schedulers.io())
+               .observeOn(AndroidSchedulers.mainThread())
+               .subscribe(
+                  { isReachable -> if (!isReachable) showErrorDialog("New Ip address $text is not reachable.  Back out and try again", context) },  // no further action on success
+                  { error: Throwable ->
+                     val msg = "Error trying to reach new IP: ${error.message}"
+                     CcuLog.e(L.TAG_CCU, msg, error)
+                     showErrorDialog(msg, context)
+                  }
+               )
+         disposables?.add(disposable)
+      }
+   }
+}
+

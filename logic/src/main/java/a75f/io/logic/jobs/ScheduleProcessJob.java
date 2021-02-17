@@ -711,7 +711,6 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             if (!hisZoneStatus.equals(currentZoneStatus))
             {
                 CCUHsApi.getInstance().writeDefaultValById(id, currentZoneStatus);
-                CCUHsApi.getInstance().writeHisValById(id, (double) zoneOccupancy.ordinal());
                 if(scheduleDataInterface !=null){
                     String zoneId = Schedule.getZoneIdByEquipId(equip.getId());
                     scheduleDataInterface.refreshScreenbySchedule(equip.getGroup(),equip.getId(),zoneId);

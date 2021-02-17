@@ -1,5 +1,6 @@
 package a75f.io.renatus.registration;
 
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -52,6 +53,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
@@ -446,7 +448,32 @@ public class CreateNewSite extends Fragment {
             }
         });
 
+        checkDebugPrepopulate();
+
         return rootView;
+    }
+
+    //1650 W 82nd St #200, Bloomington, MN 55431
+    @SuppressLint("SetTextI18n")
+    private void checkDebugPrepopulate() {
+        //noinspection ConstantConditions
+        if ((BuildConfig.BUILD_TYPE.equals("local") || BuildConfig.BUILD_TYPE.equals("dev"))
+                && !BuildConfig.DEBUG_USER.isEmpty()) {
+
+            String user = BuildConfig.DEBUG_USER;
+            int index = user.indexOf('@');
+            @SuppressWarnings("ConstantConditions")
+            String ccuName = index > 0 ? user.substring(0, index) + " CCU" : "My CCU";
+            mSiteCCU.setText(ccuName);
+            mStreetAdd.setText("1650 W 82nd St #200");
+            mSiteCity.setText("Bloomington");
+            mSiteState.setText("MN");
+            mSiteCountry.setText("USA");
+            mSiteZip.setText("55431");
+            mSiteOrg.setText("75F Dev");
+            mSiteEmailId.setText(user);
+            mSiteInstallerEmailId.setText(user);
+        }
     }
 
     private void setCompoundDrawableColor(TextView textView, int color) {
@@ -760,7 +787,7 @@ public class CreateNewSite extends Fragment {
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         String localSiteId = ccuHsApi.addSite(s75f);
         CCUHsApi.getInstance().setPrimaryCcu(true);
-        Log.i(TAG, "LocalSiteID: " + localSiteId + " tz " + s75f.getTz());
+        Log.i(TAG, "TC: LocalSiteID: " + localSiteId + " tz " + s75f.getTz());
         BuildingTuners.getInstance().updateBuildingTuners();
         //SystemEquip.getInstance();
         Log.i(TAG, "LocalSiteID: " + localSiteId);

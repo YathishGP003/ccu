@@ -61,14 +61,14 @@ android {
         }
         dev {
             minifyEnabled false
-            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://haystack-75f-service-dev.azurewebsites.net/\"'
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo-75f-service-dev.azurewebsites.net/v1/\"'
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-dev.azurewebsites.net/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-dev.azurewebsites.net/\"'
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts-75f-service-dev.azurewebsites.net/\"'
         }
         prod {
             minifyEnabled false
-            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://haystack-75f-service.azurewebsites.net/\"'
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo-75f-service.azurewebsites.net/v1/\"'
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service.azurewebsites.net/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service.azurewebsites.net/\"'
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts-75f-service.azurewebsites.net/\"'
@@ -76,14 +76,14 @@ android {
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
         }
         qa {
-            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://haystack-75f-service-qa.azurewebsites.net/\"'
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo-75f-service-qa.azurewebsites.net/v1/\"'
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-qa.azurewebsites.net/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-qa.azurewebsites.net/\"'
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts-75f-service-qa.azurewebsites.net/\"'
             minifyEnabled false
         }
         staging {
-            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://haystack-75f-service-staging.azurewebsites.net/\"'
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo-75f-service-staging.azurewebsites.net/v1/\"'
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-staging.azurewebsites.net/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-staging.azurewebsites.net/\"'
             buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts-75f-service-staging.azurewebsites.net/\"'

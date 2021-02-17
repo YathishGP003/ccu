@@ -141,7 +141,7 @@ public class Pulse
 						break;
 					case TH2_IN:
 						val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput2.get();
-						isTh2Enabled = phyPoint.get("enabled").toString().equals("true");
+						isTh2Enabled = phyPoint.get("portEnabled").toString().equals("true");
 						if(isTh2Enabled && isSse) {
 							th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
 							th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
@@ -467,7 +467,7 @@ public class Pulse
 						break;
 					case TH2_IN:
 						val = cmRegularUpdateMessage_t.thermistor2.get();
-						isTh2Enabled = phyPoint.get("enabled").toString().equals("true");
+						isTh2Enabled = phyPoint.get("portEnabled").toString().equals("true");
 						if (isTh2Enabled) {
 							th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
 							th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
@@ -643,7 +643,7 @@ public class Pulse
 						break;
 					case TH2_IN:
 						val = smartStatRegularUpdateMessage_t.update.externalThermistorInput2.get();
-						isTh2Enabled = phyPoint.get("enabled").toString().equals("true");
+						isTh2Enabled = phyPoint.get("portEnabled").toString().equals("true");
 						if(isTh2Enabled && !is2pfcu){
 							th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
 							th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);

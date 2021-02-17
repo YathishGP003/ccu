@@ -9,6 +9,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
@@ -408,7 +409,7 @@ public class ConventionalUnitLogicalMap {
                                     .addMarker("status").addMarker("message").addMarker("cpu").addMarker("writable").addMarker("zone")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setTz(tz)
-                                    .setKind("string")
+                                    .setKind(Kind.STRING)
                                     .build();
         String equipStatusMessageLd = CCUHsApi.getInstance().addPoint(equipStatusMessage);
 
@@ -421,7 +422,7 @@ public class ConventionalUnitLogicalMap {
                                     .addMarker("scheduleStatus").addMarker("cpu").addMarker("logical").addMarker("zone").addMarker("writable").addMarker("his")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setTz(tz)
-                                    .setKind("string")
+                                    .setKind(Kind.STRING)
                                     .build();
         String equipScheduleStatusId = CCUHsApi.getInstance().addPoint(equipScheduleStatus);
     

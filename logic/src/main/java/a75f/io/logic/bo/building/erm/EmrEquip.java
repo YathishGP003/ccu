@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -90,7 +91,7 @@ public class EmrEquip
                                            .addMarker("status").addMarker("message").addMarker("emr").addMarker("writable").addMarker("logical").addMarker("zone")
                                            .setGroup(String.valueOf(nodeAddr))
                                            .setTz(tz)
-                                           .setKind("string")
+                                           .setKind(Kind.STRING)
                                            .build();
         String equipStatusMessageLd = CCUHsApi.getInstance().addPoint(equipStatusMessage);
         hayStack.writeDefaultValById(equipStatusMessageLd, "Total Energy Consumed 0kWh Current Rate 0kW");

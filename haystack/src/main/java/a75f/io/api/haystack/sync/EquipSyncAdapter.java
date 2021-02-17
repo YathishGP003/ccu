@@ -1,6 +1,7 @@
 package a75f.io.api.haystack.sync;
 
 import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HRef;
@@ -115,22 +116,27 @@ public class EquipSyncAdapter extends EntitySyncAdapter
         }
         return true;
     }
-    
+
     private boolean syncSystemEquip(String siteRef) {
         CcuLog.i("CCU_HS_SYNC", "SyncSystemEquip");
-        HashMap systemEquip = CCUHsApi.getInstance().read("equip and system");
-        if (systemEquip == null || systemEquip.size() == 0) {
+        HDict systemEquip = CCUHsApi.getInstance().readAsHdict("equip and system");
+        if (systemEquip == null) {
             CcuLog.d("CCU_HS_SYNC","Abort System, System Equip does not exist");
             return false;
         }
-        String equipLUID = systemEquip.remove("id").toString();
+
+        HDictBuilder builder = new HDictBuilder();
+        builder.add(systemEquip);
+        builder.add("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteRef)));
+
+        String equipLUID = builder.remove("id").toString();
+
         if (CCUHsApi.getInstance().getGUID(equipLUID) != null) {
             return true;
         }
         
         ArrayList<HDict> entities = new ArrayList<>();
-        systemEquip.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteRef)));
-        entities.add(HSUtil.mapToHDict(systemEquip));
+        entities.add(builder.toDict());
     
         HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
         String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "addEntity", HZincWriter.gridToString(grid));

@@ -17,6 +17,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
@@ -519,7 +520,7 @@ public class VAVLogicalMap
                                     .addMarker("writable").addMarker("zone")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setTz(tz)
-                                    .setKind("string")
+                                    .setKind(Kind.STRING)
                                     .build();
         String equipStatusMessageLd = CCUHsApi.getInstance().addPoint(equipStatusMessage);
         Point equipScheduleStatus = new Point.Builder()
@@ -532,7 +533,7 @@ public class VAVLogicalMap
                                     .addMarker("zone").addMarker("writable").addMarker("his")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setTz(tz)
-                                    .setKind("string")
+                                    .setKind(Kind.STRING)
                                     .build();
         String equipScheduleStatusId = CCUHsApi.getInstance().addPoint(equipScheduleStatus);
     

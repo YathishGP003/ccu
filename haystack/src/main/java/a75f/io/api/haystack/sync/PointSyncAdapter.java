@@ -182,7 +182,7 @@ public class PointSyncAdapter extends EntitySyncAdapter
                                          .add("who", valMap.get("who").toString())
                                          .add("val", isDouble? HNum.make(val) : HStr.make(valMap.get("val").toString()));
                 HDict[] dictArr = {b.toDict()};
-                String r = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+                String r = HttpUtil.executePost(CCUHsApi.getInstance().pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
                 CcuLog.d("CCU_HS","Response: \n" + r);
             }
         }
@@ -206,7 +206,7 @@ public class PointSyncAdapter extends EntitySyncAdapter
         }
         if (pointValList.size() > 0)
         {
-            String r = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "pointWriteMany",
+            String r = HttpUtil.executePost(CCUHsApi.getInstance().pointWriteManyTarget(),
                                                 HZincWriter.gridToString(HGridBuilder.dictsToGrid(pointValList.toArray(new HDict[pointValList.size()]))));
             CcuLog.d("CCU_HS", "Response: \n" + r);
         }
@@ -229,10 +229,19 @@ public class PointSyncAdapter extends EntitySyncAdapter
                 {
                     CcuLog.d("CCU_HS", "Writable Val is not Double " + valMap.get("val").toString());
                 }
+
+                HNum dur = valMap.get("duration") == null
+                        ? HNum.make(0, "ms")
+                        : (HNum) valMap.get("duration");
+
+                if (dur.unit == null) {
+                    dur = HNum.make(dur.val ,"ms");
+                }
                 
                 HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid))
-                                                   .add("level", (int) Double.parseDouble(valMap.get("level").toString()))
+                                                   .add("level", Integer.parseInt(valMap.get("level").toString()))
                                                    .add("who", valMap.get("who").toString())
+                                                   .add("duration", dur)
                                                    .add("val", isDouble? HNum.make(val) : HStr.make(valMap.get("val").toString()));
                 dictArr.add(b.toDict());
             }

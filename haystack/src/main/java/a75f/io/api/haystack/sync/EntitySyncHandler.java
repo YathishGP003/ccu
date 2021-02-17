@@ -130,7 +130,7 @@ public class EntitySyncHandler
                     return;
                 }
                 HDict nosyncMeta = new HDictBuilder().add("nosync").toDict();
-                String r = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "pointWriteMany",
+                String r = HttpUtil.executePost(CCUHsApi.getInstance().pointWriteManyTarget(),
                                         HZincWriter.gridToString(HGridBuilder.dictsToGrid(nosyncMeta,equipDict.toArray(new HDict[equipDict.size()]))));
                 CcuLog.d("CCU_HS", "Response: \n" + r);
             }

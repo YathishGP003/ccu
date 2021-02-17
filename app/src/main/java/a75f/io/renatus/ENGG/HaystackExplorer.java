@@ -31,6 +31,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.EquipTempExpandableListAdapter;
 import a75f.io.renatus.FloorPlanFragment;
 import a75f.io.renatus.FragmentDABDualDuctConfiguration;
@@ -48,8 +49,9 @@ public class HaystackExplorer extends Fragment
     HashMap<String, String> tunerMap = new HashMap();
     HashMap<String, String> equipMap = new HashMap();
     int lastExpandedPosition;
-    
-    private boolean passCodeValidationRequired = true;
+
+    // require pass code for environments QA and up.
+    private boolean passCodeValidationRequired = !(BuildConfig.BUILD_TYPE.equals("local") || BuildConfig.BUILD_TYPE.equals("dev"));
     
     public HaystackExplorer()
     {
@@ -124,7 +126,10 @@ public class HaystackExplorer extends Fragment
         expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             @Override
             public void onGroupExpand(int groupPosition) {
-                updateAllData();
+                // This is breaking HaystackExplorer for me since the second time we grab data here, the order
+                // of the groups changes in the backing data, but not in the UI.  I'm unable to programmatically force the UI to update.
+                // Recommend not updating data after UI drawn, unless we can get the expandable list to redraw.
+                // updateAllData();
                 for (int g = 0; g < expandableListAdapter.getGroupCount(); g++) {
                     if (g != groupPosition) {
                         expandableListView.collapseGroup(g);

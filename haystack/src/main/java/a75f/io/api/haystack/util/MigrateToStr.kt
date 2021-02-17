@@ -53,16 +53,39 @@ fun migrateTabsDb(tagsDb: CCUTagsDb) {
          addIdToUpdateMap(it.key, updateIdMap, localToGlobalIdMapping)
       }
 
+   // This time remove his tag from appVersion
    tagsMap.entries
       .filter { it.value.get("diag",false) != null
              && it.value.get("app",false) != null
              && it.value.get("version",false) != null
              && it.value.get("his",false) != null }
       .forEach {
-         CcuLog.i("CCU_HS", "Found the app version tag! : ${it.value}" )
          val hBuilder = it.value.mutate()
          hBuilder.remove("his")
          tagsMap[it.key] = hBuilder.toDict()
+         addIdToUpdateMap(it.key, updateIdMap, localToGlobalIdMapping)
+      }
+
+   // This time remove his tag from scheduleStatus tag in dual duct
+   tagsMap.entries
+      .filter { it.value.get("scheduleStatus",false) != null
+         && it.value.get("dualDuct",false) != null
+         && it.value.get("his",false) != null }
+      .forEach {
+         val hBuilder = it.value.mutate()
+         hBuilder.remove("his")
+         tagsMap[it.key] = hBuilder.toDict()
+         addIdToUpdateMap(it.key, updateIdMap, localToGlobalIdMapping)
+      }
+
+   // replace kind:Str from all other his tags in dualDuct with kind:Number
+   tagsMap.entries
+      .filter { it.value.get("dualDuct",false) != null
+         && it.value.get("his",false) != null
+         && (it.value.get("kind", false)?.toString()?.equals("Str") ?: false)
+      }
+      .forEach {
+         tagsMap[it.key] = it.value.mutate().swap("kind", "Number")
          addIdToUpdateMap(it.key, updateIdMap, localToGlobalIdMapping)
       }
 

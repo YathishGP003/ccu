@@ -311,7 +311,6 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                         }
                     }
                 }
-                Log.i("TunersUI", " currentValPos:" + currentValPos + " value:" + valueList.get(currentValPos) + " valueList:" + valueList);
                 npTunerRange.setDisplayedValues(valueList.toArray(new String[valueList.size()]));
                 npTunerRange.setMinValue(0);
                 npTunerRange.setMaxValue(valueList.size() -1);

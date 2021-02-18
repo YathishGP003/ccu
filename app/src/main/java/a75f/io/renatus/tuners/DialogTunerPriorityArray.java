@@ -131,7 +131,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         HashMap site = CCUHsApi.getInstance().read("site");
 
         String selectedTunerDis = tunerItemSelected.get("dis").toString();
-        if (!tunerItemSelected.get("roomRef").toString().equals("SYSTEM") && (tunerGroupType.equals("Building") || tunerGroupType.equals("System"))) {
+        if (tunerGroupType.equals("Building") || tunerGroupType.equals("System")) {
             ArrayList<Floor> floorList = HSUtil.getFloors();
             ArrayList<Zone> zoneList = new ArrayList<>();
             ArrayList<Equip> equipsList = new ArrayList<>();
@@ -147,7 +147,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 for (HashMap moduleTunerMap : moduleTuners) {
                     if (!moduleTunerMap.get("roomRef").toString().equals("SYSTEM")) {
                         String moduleTunerDis = moduleTunerMap.get("dis").toString();
-                        if (selectedTunerDis.substring(selectedTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(moduleTunerDis.substring(moduleTunerDis.lastIndexOf("-") + 1))) {
+                        if (tunerItemSelected.get("tunerGroup").toString().equalsIgnoreCase(moduleTunerMap.get("tunerGroup").toString()) && selectedTunerDis.substring(selectedTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(moduleTunerDis.substring(moduleTunerDis.lastIndexOf("-") + 1))) {
                             equips.add(moduleTunerMap);
                         }
                     }

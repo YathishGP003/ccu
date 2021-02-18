@@ -50,8 +50,6 @@ import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
 
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
-
 public class CCUHsApi
 {
     
@@ -1151,24 +1149,29 @@ public class CCUHsApi
 
                 if (data instanceof HList && ((HList) data).size() > 0) {
                     HList dataList = (HList) data;
-                    HDict dataElement = (HDict) dataList.get(0);
 
-                    String who = dataElement.getStr("who");
-                    String level = dataElement.get("level").toString();
-                    HVal val = dataElement.get("val");
+                    for (int i = 0; i < dataList.size(); i++) {
+                        HDict dataElement = (HDict) dataList.get(i);
 
-                    HDict pid = new HDictBuilder().add("id", HRef.copy(id))
-                            .add("level", Integer.parseInt(level))
-                            .add("who", who)
-                            .add("val", kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val).toDict();
-                    hDictList.add(pid);
+                        String who = dataElement.getStr("who");
+                        String level = dataElement.get("level").toString();
+                        HVal val = dataElement.get("val");
 
-                    //save his data to local cache
-                    HDict rec = hsClient.readById(HRef.copy(getLUID(id)));
-                    tagsDb.saveHisItemsToCache(rec, new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val)}, true);
+                        HDict pid = new HDictBuilder().add("id", HRef.copy(id))
+                                .add("level", Integer.parseInt(level))
+                                .add("who", who)
+                                .add("val", kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val).toDict();
+                        hDictList.add(pid);
 
-                    //save points on tagsDb
-                    tagsDb.onPointWrite(rec, Integer.parseInt(level), kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val, who, HNum.make(0), rec);
+                        //save his data to local cache
+                        HDict rec = hsClient.readById(HRef.copy(getLUID(id)));
+                        tagsDb.saveHisItemsToCache(rec, new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val)}, true);
+
+                        //save points on tagsDb
+                        tagsDb.onPointWrite(rec, Integer.parseInt(level), kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val, who, HNum.make(0), rec);
+
+                    }
+
                 }
 
             }
@@ -1242,7 +1245,6 @@ public class CCUHsApi
 
 
         CCUHsApi hsApi = CCUHsApi.getInstance();
-        ArrayList<String> pointsForUpdate = new ArrayList<>();
         for (Equip q : equips) {
             if (q.getMarkers().contains("tuner"))
             {
@@ -1270,7 +1272,6 @@ public class CCUHsApi
                             p.setEquipRef(equipLuid);
                             String pointLuid = hsApi.addPoint(p);
                             hsApi.putUIDMap(pointLuid, p.getId());
-                            pointsForUpdate.add(pointLuid);
                         } else {
                             CcuLog.i(TAG, "Point already imported "+p.getId());
                         }
@@ -1278,9 +1279,6 @@ public class CCUHsApi
                     }
                 }
             }
-        }
-        if (pointsForUpdate.size() > 0) {
-            fetchPointArrays(pointsForUpdate);
         }
         CcuLog.i(TAG," importBuildingTuners Completed");
     }
@@ -1294,32 +1292,6 @@ public class CCUHsApi
         }
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         importBuildingTuners(siteId, hClient);
-    }
-
-    private void fetchPointArrays(ArrayList<String> luidList) {
-    
-        for (String pointLuid: luidList) {
-            String pointGuid = getGUID(pointLuid);
-            HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote(pointGuid);
-            if (pointGrid == null) {
-                CcuLog.e(TAG, "Failed to read remote point : " + pointGuid);
-                return;
-            }
-            Iterator it = pointGrid.iterator();
-            while (it.hasNext()) {
-                try {
-                    HRow r = (HRow) it.next();
-                    String who = r.get("who").toString();
-                    int level = Integer.parseInt(r.get("level").toString());
-                    HVal val = (HVal)r.get("val");
-                    HNum duration = (HNum)r.get("dur");
-                    hsClient.pointWrite(HRef.copy(pointLuid), level, who, val, duration);
-                    CcuLog.i(TAG, " Fetched Building Tuner: "+HZincWriter.gridToString(pointGrid));
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
     }
     
     public HGrid getRemoteSiteDetails(String siteId)

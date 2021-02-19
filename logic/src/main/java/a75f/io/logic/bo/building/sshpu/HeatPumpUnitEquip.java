@@ -26,6 +26,7 @@ import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
 import a75f.io.logic.bo.building.definitions.SmartStatHeatPumpChangeOverType;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.tuners.TunerConstants;
 
 public class HeatPumpUnitEquip{
@@ -73,7 +74,8 @@ public class HeatPumpUnitEquip{
         b.addMarker(profile);
         String equipRef = CCUHsApi.getInstance().addEquip(b.build());
 
-        BuildingTuners.getInstance().addEquipStandaloneTuners(siteDis+"-HPU-"+nodeAddr, equipRef, room, floor);
+        StandAloneTuners.addEquipStandaloneTuners( CCUHsApi.getInstance(), siteRef,siteDis + "-HPU-" + nodeAddr,
+                                                   equipRef, room, floor, tz);
 
         createHeatPumpConfigPoints(config, equipRef,floor,room);
 

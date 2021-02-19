@@ -19,6 +19,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.tuners.TITuners;
 
 /**
  * Created by Anilkumar on 8/19/19.
@@ -70,10 +71,9 @@ public class CazEquip
                 .setTz(tz)
                 .setGroup(String.valueOf(nodeAddr));
         equipRef = CCUHsApi.getInstance().addEquip(b.build());
-        BuildingTuners.getInstance().addEquipTiTuners(siteDis + "-TI-" + nodeAddr, equipRef, roomRef, floorRef);
+        TITuners.addEquipTiTuners( CCUHsApi.getInstance(), siteRef,siteDis + "-TI-" + nodeAddr, equipRef, roomRef,
+                                   floorRef, tz);
         createCcuConfigPoints(config, equipRef);
-
-
 
         Point currentTemp = new Point.Builder()
                 .setDisplayName(siteDis+"-TI-"+nodeAddr+"-currentTemp")

@@ -16,8 +16,8 @@ import a75f.io.logic.L;
 
 public class DualDuctTuners {
     
-    public static void addDefaultTuners(String siteRef, String equipRef, String equipDis, String tz){
-        CCUHsApi hayStack = CCUHsApi.getInstance();
+    public static void addDefaultTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis, String tz){
+        
         HashMap tuner = hayStack.read("point and tuner and default and dualDuct");
         if (tuner != null && tuner.size() > 0) {
             CcuLog.d(L.TAG_CCU_SYSTEM, "Default DualDuct Tuner points already exist");
@@ -216,13 +216,12 @@ public class DualDuctTuners {
     }
     
     
-    public static void addEquipTuners(String siteRef, String equipdis, String equipref, String roomRef,
-                                       String floorRef, String tz) {
+    public static void addEquipTuners(CCUHsApi hayStack, String siteRef, String equipdis, String equipref,
+                                      String roomRef, String floorRef, String tz) {
         
         Log.d("CCU", "addEquipDualDuctTuners for " + equipdis);
-        CCUHsApi hayStack = CCUHsApi.getInstance();
         
-        ZoneTuners.addZoneTunersForEquip(siteRef, equipdis, equipref, roomRef, floorRef, tz);
+        ZoneTuners.addZoneTunersForEquip(hayStack, siteRef, equipdis, equipref, roomRef, floorRef, tz);
     
         Point zonePrioritySpread = new Point.Builder()
                                        .setDisplayName(equipdis+"-"+"zonePrioritySpread")
@@ -236,16 +235,7 @@ public class DualDuctTuners {
                                        .setTz(tz)
                                        .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
-        HashMap zonePrioritySpreadPoint = hayStack.read("point and tuner and default and dualDuct and zone and priority and" +
-                                                        " spread");
-        ArrayList<HashMap> zonePrioritySpreadPointArr = hayStack.readPoint(zonePrioritySpreadPoint.get("id").toString());
-        for (HashMap valMap : zonePrioritySpreadPointArr) {
-            if (valMap.get("val") != null)
-            {
-                System.out.println(valMap);
-                hayStack.pointWrite(HRef.copy(zonePrioritySpreadId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(zonePrioritySpreadId, roomRef, hayStack);
         hayStack.writeHisValById(zonePrioritySpreadId, HSUtil.getPriorityVal(zonePrioritySpreadId));
     
         Point zonePriorityMultiplier = new Point.Builder()
@@ -260,16 +250,7 @@ public class DualDuctTuners {
                                            .setTz(tz)
                                            .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
-        HashMap zonePriorityMultiplierPoint = hayStack.read("point and tuner and default and dualDuct and zone and priority " +
-                                                            "and multiplier");
-        ArrayList<HashMap> zonePrioritySpreadMultiplierArr = hayStack.readPoint(zonePriorityMultiplierPoint.get("id").toString());
-        for (HashMap valMap : zonePrioritySpreadMultiplierArr) {
-            if (valMap.get("val") != null)
-            {
-                System.out.println(valMap);
-                hayStack.pointWrite(HRef.copy(zonePriorityMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(zonePriorityMultiplierId, roomRef, hayStack);
         hayStack.writeHisValById(zonePriorityMultiplierId, HSUtil.getPriorityVal(zonePriorityMultiplierId));
     
         
@@ -286,15 +267,7 @@ public class DualDuctTuners {
                               .setUnit("\u00B0F")
                               .build();
         String coolingDbId = hayStack.addPoint(coolingDb);
-        HashMap defCdbPoint = hayStack.read("point and tuner and default and dualDuct and cooling and deadband and base");
-        ArrayList<HashMap> cdbDefPointArr = hayStack.readPoint(defCdbPoint.get("id").toString());
-        for (HashMap valMap : cdbDefPointArr) {
-            if (valMap.get("val") != null)
-            {
-                System.out.println(valMap);
-                hayStack.pointWrite(HRef.copy(coolingDbId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(coolingDbId, roomRef, hayStack);
         hayStack.writeHisValById(coolingDbId, HSUtil.getPriorityVal(coolingDbId));
         
         Point coolingDbMultiplier = new Point.Builder()
@@ -309,15 +282,7 @@ public class DualDuctTuners {
                                         .setTz(tz)
                                         .build();
         String coolingDbMultiplierId = hayStack.addPoint(coolingDbMultiplier);
-        HashMap coolingDbMultiplierPoint = hayStack.read("point and tuner and default and dualDuct and cooling and deadband and multiplier");
-        ArrayList<HashMap> coolingDbMultiplierPointArr = hayStack.readPoint(coolingDbMultiplierPoint.get("id").toString());
-        for (HashMap valMap : coolingDbMultiplierPointArr) {
-            if (valMap.get("val") != null)
-            {
-                System.out.println(valMap);
-                hayStack.pointWrite(HRef.copy(coolingDbMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(coolingDbMultiplierId, roomRef, hayStack);
         hayStack.writeHisValById(coolingDbMultiplierId, HSUtil.getPriorityVal(coolingDbMultiplierId));
         
         Point heatingDb = new Point.Builder()
@@ -333,14 +298,7 @@ public class DualDuctTuners {
                               .setUnit("\u00B0F")
                               .build();
         String heatingDbId = hayStack.addPoint(heatingDb);
-        HashMap defHdbPoint = hayStack.read("point and tuner and default and dualDuct and heating and deadband and base");
-        ArrayList<HashMap> hdbDefPointArr = hayStack.readPoint(defHdbPoint.get("id").toString());
-        for (HashMap valMap : hdbDefPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(heatingDbId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(heatingDbId, roomRef, hayStack);
         hayStack.writeHisValById(heatingDbId, HSUtil.getPriorityVal(heatingDbId));
         
         Point heatingDbMultiplier = new Point.Builder()
@@ -355,14 +313,7 @@ public class DualDuctTuners {
                                         .setTz(tz)
                                         .build();
         String heatingDbMultiplierId = hayStack.addPoint(heatingDbMultiplier);
-        HashMap heatingDbMultiplierPoint = hayStack.read("point and tuner and default and dualDuct and heating and deadband and multiplier");
-        ArrayList<HashMap> heatingDbMultiplierPointArr = hayStack.readPoint(heatingDbMultiplierPoint.get("id").toString());
-        for (HashMap valMap : heatingDbMultiplierPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(heatingDbMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(heatingDbMultiplierId, roomRef, hayStack);
         hayStack.writeHisValById(heatingDbMultiplierId, HSUtil.getPriorityVal(heatingDbMultiplierId));
         
         Point propGain = new Point.Builder()
@@ -377,14 +328,7 @@ public class DualDuctTuners {
                              .setTz(tz)
                              .build();
         String pgainId = hayStack.addPoint(propGain);
-        HashMap defPgainPoint = hayStack.read("point and tuner and default and dualDuct and pgain");
-        ArrayList<HashMap> pgainDefPointArr = hayStack.readPoint(defPgainPoint.get("id").toString());
-        for (HashMap valMap : pgainDefPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(pgainId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(pgainId, roomRef, hayStack);
         hayStack.writeHisValById(pgainId, HSUtil.getPriorityVal(pgainId));
         
         Point integralGain = new Point.Builder()
@@ -399,14 +343,7 @@ public class DualDuctTuners {
                                  .setTz(tz)
                                  .build();
         String igainId = hayStack.addPoint(integralGain);
-        HashMap defIgainPoint = hayStack.read("point and tuner and default and dualDuct and igain");
-        ArrayList<HashMap> igainDefPointArr = hayStack.readPoint(defIgainPoint.get("id").toString());
-        for (HashMap valMap : igainDefPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(igainId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(igainId, roomRef, hayStack);
         hayStack.writeHisValById(igainId, HSUtil.getPriorityVal(igainId));
         
         Point propSpread = new Point.Builder()
@@ -421,14 +358,7 @@ public class DualDuctTuners {
                                .setTz(tz)
                                .build();
         String pSpreadId = hayStack.addPoint(propSpread);
-        HashMap defPSpreadPoint = hayStack.read("point and tuner and default and dualDuct and pspread");
-        ArrayList<HashMap> pspreadDefPointArr = hayStack.readPoint(defPSpreadPoint.get("id").toString());
-        for (HashMap valMap : pspreadDefPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(pSpreadId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(pSpreadId, roomRef, hayStack);
         hayStack.writeHisValById(pSpreadId, HSUtil.getPriorityVal(pSpreadId));
         
         Point integralTimeout = new Point.Builder()
@@ -444,14 +374,7 @@ public class DualDuctTuners {
                                     .setTz(tz)
                                     .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
-        HashMap defITPoint = hayStack.read("point and tuner and default and dualDuct and itimeout");
-        ArrayList<HashMap> iTDefPointArr = hayStack.readPoint(defITPoint.get("id").toString());
-        for (HashMap valMap : iTDefPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(iTimeoutId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(iTimeoutId, roomRef, hayStack);
         hayStack.writeHisValById(iTimeoutId, HSUtil.getPriorityVal(iTimeoutId));
         
         Point zoneCO2Target = new Point.Builder()
@@ -467,14 +390,7 @@ public class DualDuctTuners {
                                   .setTz(tz)
                                   .build();
         String zoneCO2TargetId = hayStack.addPoint(zoneCO2Target);
-        HashMap zoneCO2TargetPoint = hayStack.read("point and tuner and default and dualDuct and zone and co2 and target");
-        ArrayList<HashMap> zoneCO2TargetPointArr = hayStack.readPoint(zoneCO2TargetPoint.get("id").toString());
-        for (HashMap valMap : zoneCO2TargetPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(zoneCO2TargetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(zoneCO2TargetId, roomRef, hayStack);
         hayStack.writeHisValById(zoneCO2TargetId, HSUtil.getPriorityVal(zoneCO2TargetId));
         
         Point zoneCO2Threshold = new Point.Builder()
@@ -490,14 +406,7 @@ public class DualDuctTuners {
                                      .setTz(tz)
                                      .build();
         String zoneCO2ThresholdId = hayStack.addPoint(zoneCO2Threshold);
-        HashMap zoneCO2ThresholdPoint = hayStack.read("point and tuner and default and dualDuct and zone and co2 and threshold");
-        ArrayList<HashMap> zoneCO2ThresholdPointArr = hayStack.readPoint(zoneCO2ThresholdPoint.get("id").toString());
-        for (HashMap valMap : zoneCO2ThresholdPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(zoneCO2ThresholdId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(zoneCO2ThresholdId, roomRef, hayStack);
         hayStack.writeHisValById(zoneCO2ThresholdId, HSUtil.getPriorityVal(zoneCO2ThresholdId));
         
         Point zoneVOCTarget = new Point.Builder()
@@ -513,14 +422,7 @@ public class DualDuctTuners {
                                   .setTz(tz)
                                   .build();
         String zoneVOCTargetId = hayStack.addPoint(zoneVOCTarget);
-        HashMap zoneVOCTargetPoint = hayStack.read("point and tuner and default and dualDuct and zone and voc and target");
-        ArrayList<HashMap> zoneVOCTargetPointArr = hayStack.readPoint(zoneVOCTargetPoint.get("id").toString());
-        for (HashMap valMap : zoneVOCTargetPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(zoneVOCTargetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(zoneVOCTargetId, roomRef, hayStack);
         hayStack.writeHisValById(zoneVOCTargetId, HSUtil.getPriorityVal(zoneVOCTargetId));
         
         Point zoneVOCThreshold = new Point.Builder()
@@ -536,14 +438,7 @@ public class DualDuctTuners {
                                      .setTz(tz)
                                      .build();
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
-        HashMap zoneVOCThresholdPoint = hayStack.read("point and tuner and default and dualDuct and zone and voc and threshold");
-        ArrayList<HashMap> zoneVOCThresholdPointArr = hayStack.readPoint(zoneVOCThresholdPoint.get("id").toString());
-        for (HashMap valMap : zoneVOCThresholdPointArr) {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(zoneVOCThresholdId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-            }
-        }
+        BuildingTunerUtil.updateTunerLevels(zoneVOCThresholdId, roomRef, hayStack);
         hayStack.writeHisValById(zoneVOCThresholdId, HSUtil.getPriorityVal(zoneVOCThresholdId));
     }
 }

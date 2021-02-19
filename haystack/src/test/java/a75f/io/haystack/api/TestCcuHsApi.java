@@ -4,16 +4,20 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
+import java.util.Optional;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.logger.CcuLog;
 
 public class TestCcuHsApi {
     
@@ -112,8 +116,9 @@ public class TestCcuHsApi {
                                .setSiteRef(siteRef)
                                .setRoomRef(zoneRef)
                                .setFloorRef(floorRef)
-                               .addMarker("discharge").addMarker("logical")
+                               .addMarker("discharge").addMarker("logical").addMarker("his").addMarker("sp").addMarker("zone")
                                .addMarker("air").addMarker("temp2").addMarker("sensor").addMarker("writable")
+                               .addMarker("dab")
                                .setGroup(String.valueOf(nodeAddr))
                                .setTz("Chicago")
                                .setUnit("\u00B0F")
@@ -147,10 +152,43 @@ public class TestCcuHsApi {
         hayStack.addPoint(testRawPoint);
 
         
-        ArrayList<HashMap<Object, Object>> data = hayStack.readAllEntities("point");
+        /*ArrayList<HashMap<Object, Object>> temp2 = hayStack.readAllEntities("temp2");
         for (HashMap m : data) {
             System.out.println(m);
+        }*/
+    
+        /*HashMap temp2 = hayStack.read("temp2");
+        System.out.println(temp2);
+        
+        Point p = new Point.Builder().setHashMap(temp2).build();
+    
+        ArrayList<String> markerList = p.getMarkers();
+        String equipMarker = HSUtil.getEquipTag(markerList);
+        if (equipMarker != null) {
+            markerList.remove(equipMarker);
         }
+        String queryString = HSUtil.getHQueryFromMarkers(markerList);
+    
+        String equipQuery = queryString+" and roomRef == \""+zoneRef+"\"";*/
+        ArrayList<HashMap> zoneTunerPoints = hayStack.readAll("point");
+        System.out.println(zoneTunerPoints.size() + testPoint2Id);
+        Optional<HashMap> zoneTunerPoint = zoneTunerPoints.stream()
+                                                          .filter(pt -> Objects.equals(pt.get("id"), testPoint2Id))
+                                                          .findFirst();
+        
+        //String systemQuery = HSUtil.appendMarkerToQuery(queryString, "roomRef == \""+zoneRef+"\"");
+        
+        //System.out.println(systemQuery);
+        //HashMap systemTunerPoint = hayStack.read(systemQuery);
+    
+        System.out.println(zoneTunerPoint);
+        System.out.println("$$$$$");
+        for (HashMap m : zoneTunerPoints) {
+            if (m.get("id").toString().equals(testPoint1Id)) {
+                System.out.println(m);
+            }
+        }
+        
 
     /*System.out.println(hayStack.read("site"));
     Site s1 = new Site.Builder().setHashMap(hayStack.read("site")).build();

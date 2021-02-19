@@ -33,7 +33,8 @@ public class OAOEquip
         if (equipMap != null && equipMap.size() > 0)
         {
             equipRef = equipMap.get("id").toString();
-            OAOTuners.updateOaoSystemTuners(equipMap.get("siteRef").toString(), equipRef, equipMap.get("dis").toString(),equipMap.get("tz").toString(),getSystemProfileType());
+            OAOTuners.updateOaoSystemTuners(hayStack, equipMap.get("siteRef").toString(), equipRef,
+                                            equipMap.get("dis").toString(),equipMap.get("tz").toString(),getSystemProfileType());
             updateNewConfigParams(equipMap.get("siteRef").toString(), equipRef, equipMap.get("dis").toString(),equipMap.get("tz").toString());
         } else {
             throw new IllegalStateException("Equip should be created before init");
@@ -57,7 +58,8 @@ public class OAOEquip
         Equip.Builder b = new Equip.Builder().setSiteRef(siteRef).setDisplayName(equipDis).setRoomRef(roomRef).setFloorRef(floorRef).setProfile(profileType.name()).addMarker("equip").addMarker("oao").setAhuRef(ahuRef).setTz(tz).setGroup(String.valueOf(nodeAddr));
         equipRef = hayStack.addEquip(b.build());
         
-        OAOTuners.updateOaoSystemTuners( siteRef, equipRef,siteDis + "-OAO-" + nodeAddr, tz,getSystemProfileType());
+        OAOTuners.updateOaoSystemTuners( hayStack, siteRef, equipRef,siteDis + "-OAO-" + nodeAddr, tz,
+                                         getSystemProfileType());
         
         createConfigPoints(config, equipRef);
     

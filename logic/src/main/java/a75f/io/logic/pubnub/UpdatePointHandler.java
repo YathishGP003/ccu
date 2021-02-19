@@ -30,24 +30,32 @@ public class UpdatePointHandler
     public static void handleMessage(final JsonObject msgObject) {
         String src = msgObject.get("who").getAsString();
         String pointGuid = msgObject.get("id").getAsString();
-        if (canIgnorePointUpdate(src, pointGuid)) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+
+        if (canIgnorePointUpdate(src, pointGuid, hayStack)) {
             return;
         }
-    
-        String luid = CCUHsApi.getInstance().getLUID("@" + pointGuid);
+
+        String luid = hayStack.getLUID("@" + pointGuid);
+
+        if (HSUtil.isBuildingTuner(luid, hayStack)) {
+            TunerUpdateHandler.updateBuildingTuner(msgObject, CCUHsApi.getInstance());
+            return;
+        }
+
         Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(luid)).build();
         if (HSUtil.isSystemConfigOutputPoint(luid, CCUHsApi.getInstance())) {
             ConfigPointUpdateHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
             updatePoints(localPoint);
             return;
         }
-    
+
         if (HSUtil.isSystemConfigHumidifierType(luid, CCUHsApi.getInstance())) {
             ConfigPointUpdateHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
             updatePoints(localPoint);
             return;
         }
-    
+
         if (luid != null && luid != "")
         {
             HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote("@" + pointGuid);
@@ -62,7 +70,7 @@ public class UpdatePointHandler
             {
                 HRow r = (HRow) it.next();
                 String who = r.get("who").toString();
-            
+
                 try {
                     double level = Double.parseDouble(r.get("level").toString());
                     double val = Double.parseDouble(r.get("val").toString());
@@ -93,7 +101,7 @@ public class UpdatePointHandler
             CcuLog.d(L.TAG_CCU_PUBNUB, "Received for invalid local point : " + luid);
         }
     }
-    
+
     private static void logPointArray(Point localPoint) {
         ArrayList values = CCUHsApi.getInstance().readPoint(localPoint.getId());
         if (values != null && values.size() > 0) {
@@ -107,8 +115,8 @@ public class UpdatePointHandler
             }
         }
     }
-    
-    
+
+
     private static void updatePoints(Point p){
         String luid = p.getId();
         if (p.getMarkers().contains("his"))
@@ -146,7 +154,7 @@ public class UpdatePointHandler
             }
         }
 
-        if (HSUtil.isBuildingTuner(luid, CCUHsApi.getInstance())) {
+        if (HSUtil.isBuildingTunerPoint(luid, CCUHsApi.getInstance())) {
             BuildingTunerUpdateHandler.updateZoneModuleSystemPoints(luid);
         }
     }
@@ -155,12 +163,12 @@ public class UpdatePointHandler
     public static void setModbusDataInterface(ModbusDataInterface in) { modbusDataInterface = in; }
     public static void setSystemDataInterface(ZoneDataInterface in) { zoneDataInterface = in; }
     
-    private static boolean canIgnorePointUpdate(String pbSource, String pointGuid) {
-        HashMap ccu = CCUHsApi.getInstance().read("ccu");
+    private static boolean canIgnorePointUpdate(String pbSource, String pointGuid, CCUHsApi hayStack) {
+        HashMap ccu = hayStack.read("ccu");
         String ccuName = ccu.get("dis").toString();
     
         //Notification for update from the same CCU by using ccu_deviceId format..
-        if (pbSource.equals(CCUHsApi.getInstance().getCCUUserName())) {
+        if (pbSource.equals(hayStack.getCCUUserName())) {
             CcuLog.d(L.TAG_CCU_PUBNUB, "PubNub received for CCU write : Ignore "+pbSource);
             return true;
         }
@@ -174,7 +182,7 @@ public class UpdatePointHandler
         }
         
         //Point does not exist on this CCU.
-        String luid = CCUHsApi.getInstance().getLUID("@" + pointGuid);
+        String luid = hayStack.getLUID("@" + pointGuid);
         if (luid == null) {
             return true;
         }

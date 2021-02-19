@@ -45,11 +45,11 @@ import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
 import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
-import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.watchdog.Watchdog;
@@ -88,9 +88,10 @@ public class Globals {
     private CCUApplication mCCUApplication;
     private boolean isSimulation = false;
     private boolean testHarness = true;
-    
+
     private boolean _siteAlreadyCreated;
-    
+
+    private Long curPubNubMsgTimeToken;
     private Globals() {
     }
 
@@ -151,7 +152,7 @@ public class Globals {
     public void initilize() {
         
         taskExecutor = Executors.newScheduledThreadPool(NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES);
-        
+
         //mHeartBeatJob = new HeartBeatJob();
         //5 seconds after application initializes start heart beat
         
@@ -172,7 +173,7 @@ public class Globals {
         //set SN address band
         String addrBand = getSmartNodeBand();
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
-        
+
         importTunersAndScheduleJobs();
     }
     
@@ -211,9 +212,9 @@ public class Globals {
             
                 mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
                                                 TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);
-                
+
                 BearerTokenManager.getInstance().scheduleJob();
-            
+
                 mAlertProcessJob = new AlertProcessJob(mApplicationContext);
                 getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
             
@@ -384,7 +385,7 @@ public class Globals {
                             mbProfile.addMbEquip(Short.valueOf(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
                             L.ccu().zoneProfiles.add(mbProfile);
                             break;
-                            
+
                     }
                 }
             }

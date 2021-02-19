@@ -23,6 +23,7 @@ import a75f.io.logic.bo.building.hvac.SSEStage;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.tuners.StandAloneTuners;
 
 public class SingleStageEquip {
 
@@ -70,7 +71,9 @@ public class SingleStageEquip {
                 .setGroup(String.valueOf(nodeAddr));
         equipRef = CCUHsApi.getInstance().addEquip(b.build());
 
-        BuildingTuners.getInstance().addEquipStandaloneTuners(siteDis+"-SSE-"+nodeAddr, equipRef, roomRef, floorRef);
+        StandAloneTuners.addEquipStandaloneTuners( CCUHsApi.getInstance(), siteRef, siteDis + "-SSE-" + nodeAddr,
+                                                   equipRef, roomRef, floorRef
+            , tz);
         createSSEConfigPoints(config, equipRef,floorRef,roomRef);
 
 

@@ -35,7 +35,7 @@ public class StandAloneTuners {
                                       .setEquipRef(equipRef).setHisInterpolate("cov")
                                       .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
                                       .addMarker("cooling").addMarker("deadband").addMarker("sp")
-                                      .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                                      .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                       .setUnit("\u00B0F")
                                       .setTz(tz)
                                       .build();
@@ -301,7 +301,7 @@ public class StandAloneTuners {
                                       .setFloorRef(floorRef).setHisInterpolate("cov")
                                       .addMarker("tuner").addMarker("base").addMarker("writable").addMarker("his")
                                       .addMarker("standalone").addMarker("heating").addMarker("deadband").addMarker("sp")
-                                      .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                                      .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                       .setUnit("\u00B0F")
                                       .setTz(tz)
                                       .build();
@@ -317,7 +317,7 @@ public class StandAloneTuners {
                                       .setFloorRef(floorRef).setHisInterpolate("cov")
                                       .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
                                       .addMarker("cooling").addMarker("deadband").addMarker("sp")
-                                      .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                                      .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                       .setUnit("\u00B0F")
                                       .setTz(tz)
                                       .build();
@@ -333,7 +333,7 @@ public class StandAloneTuners {
                                        .setFloorRef(floorRef).setHisInterpolate("cov")
                                        .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
                                        .addMarker("stage1").addMarker("hysteresis").addMarker("sp")
-                                       .setMinVal("0.5").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                                       .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                        .setUnit("%")
                                        .setTz(tz)
                                        .build();

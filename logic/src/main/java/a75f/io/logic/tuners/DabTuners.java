@@ -43,7 +43,7 @@ public class DabTuners {
                                            .setEquipRef(equipRef).setHisInterpolate("cov")
                                            .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
                                            .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
-                                           .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                           .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                            .setTz(tz)
                                            .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
@@ -56,7 +56,7 @@ public class DabTuners {
                               .setEquipRef(equipRef).setHisInterpolate("cov")
                               .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
                               .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
-                              .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                              .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                               .setUnit("\u00B0F")
                               .setTz(tz)
                               .build();
@@ -83,7 +83,7 @@ public class DabTuners {
                               .setEquipRef(equipRef).setHisInterpolate("cov")
                               .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his")
                               .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
-                              .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                              .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                               .setUnit("\u00B0F")
                               .setTz(tz)
                               .build();
@@ -319,7 +319,7 @@ public class DabTuners {
                                            .setFloorRef(floorRef).setHisInterpolate("cov")
                                            .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
                                            .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
-                                           .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                           .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                            .setTz(tz)
                                            .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
@@ -334,7 +334,7 @@ public class DabTuners {
                               .setFloorRef(floorRef).setHisInterpolate("cov")
                               .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
                               .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
-                              .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                              .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                               .setTz(tz)
                               .setUnit("\u00B0F")
                               .build();
@@ -365,7 +365,7 @@ public class DabTuners {
                               .setFloorRef(floorRef).setHisInterpolate("cov")
                               .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")
                               .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
-                              .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                              .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                               .setTz(tz)
                               .setUnit("\u00B0F")
                               .build();

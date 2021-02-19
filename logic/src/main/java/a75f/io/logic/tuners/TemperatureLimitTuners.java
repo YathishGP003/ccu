@@ -28,7 +28,7 @@ class TemperatureLimitTuners {
                                         .setEquipRef(equipRef).setHisInterpolate("cov")
                                         .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
                                         .addMarker("adr").addMarker("cooling").addMarker("deadband").addMarker("sp")
-                                        .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                                        .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                                         .setUnit("\u00B0F")
                                         .setTz(tz)
                                         .build();
@@ -42,7 +42,7 @@ class TemperatureLimitTuners {
                                         .setEquipRef(equipRef).setHisInterpolate("cov")
                                         .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
                                         .addMarker("adr").addMarker("heating").addMarker("deadband").addMarker("sp")
-                                        .setMinVal("0.1").setMaxVal("5.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                                        .setMinVal("0").setMaxVal("10.0").setIncrementVal("0.5").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                                         .setUnit("\u00B0F")
                                         .setTz(tz)
                                         .build();
@@ -71,7 +71,7 @@ class TemperatureLimitTuners {
                                                  .setEquipRef(equipRef).setHisInterpolate("cov")
                                                  .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
                                                  .addMarker("sn").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("sp")
-                                                 .setMinVal("80").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
+                                                 .setMinVal("65").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                                                  .setUnit("\u00B0F")
                                                  .setTz(tz)
                                                  .build();

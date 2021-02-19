@@ -26,6 +26,7 @@ import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
 import a75f.io.logic.bo.building.definitions.SmartStatHeatPumpChangeOverType;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.tuners.TunerConstants;
 
 public class HeatPumpUnitEquip{

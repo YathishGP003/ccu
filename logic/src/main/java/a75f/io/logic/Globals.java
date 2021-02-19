@@ -4,22 +4,6 @@ import android.content.Context;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.pubnub.api.PNConfiguration;
-import com.pubnub.api.PubNub;
-import com.pubnub.api.callbacks.PNCallback;
-import com.pubnub.api.callbacks.SubscribeCallback;
-import com.pubnub.api.enums.PNStatusCategory;
-import com.pubnub.api.models.consumer.PNPublishResult;
-import com.pubnub.api.models.consumer.PNStatus;
-import com.pubnub.api.models.consumer.history.PNHistoryItemResult;
-import com.pubnub.api.models.consumer.history.PNHistoryResult;
-import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
-import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -61,11 +45,11 @@ import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
 import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
-import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.watchdog.Watchdog;
@@ -207,7 +191,7 @@ public class Globals {
                     if (!CCUHsApi.getInstance().isPrimaryCcu()) {
                         CCUHsApi.getInstance().importBuildingTuners();
                     }
-                    //BuildingTuners.getInstance().updateBuildingTuners();
+                    BuildingTuners.getInstance().updateBuildingTuners();
                     CCUHsApi.getInstance().syncEntityTree();
                 }
             

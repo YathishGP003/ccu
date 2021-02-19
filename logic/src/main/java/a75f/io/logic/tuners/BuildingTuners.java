@@ -1,19 +1,17 @@
 package a75f.io.logic.tuners;
 
-import android.util.Log;
-
-import org.projecthaystack.HNum;
-import org.projecthaystack.HRef;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_MODE_CHANGEOVER_HYSTERESIS;
@@ -85,8 +83,34 @@ public class BuildingTuners
         OAOTuners.updateNewTuners(hayStack, siteRef,equipRef, equipDis,tz,false);
         updateDabBuildingTuners();
         updateVavBuildingTuners();
+        checkForTunerMigration();
     }
-    
+
+    private void checkForTunerMigration() {
+        PackageManager manager = Globals.getInstance().getApplicationContext().getPackageManager();
+        try {
+            PackageInfo info = manager.getPackageInfo(Globals.getInstance().getApplicationContext().getPackageName(), 0);
+            String tunerVersion = info.versionName + "." + info.versionCode;
+
+            if (!CCUHsApi.getInstance().getTunerVersion().equals(tunerVersion)) {
+                CCUHsApi.getInstance().setTunerVersion(tunerVersion);
+                doTunerMigrationJob();
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void doTunerMigrationJob() {
+        ArrayList<HashMap> tunersList = CCUHsApi.getInstance().readAll("tuner and tunerGroup");
+
+        for (HashMap tunerMap : tunersList) {
+            String tunerMapDis = tunerMap.get("dis").toString();
+            String tunerMapShortDis = tunerMapDis.substring(tunerMapDis.lastIndexOf("-") + 1).trim();
+            TunerMigration.migrateTunerIfRequired(tunerMap.get("id").toString(), tunerMapShortDis);
+        }
+    }
+
     public void addDefaultBuildingTuners() {
     
         GenericTuners.addDefaultGenericTuners(hayStack, siteRef, equipRef, equipDis, tz);

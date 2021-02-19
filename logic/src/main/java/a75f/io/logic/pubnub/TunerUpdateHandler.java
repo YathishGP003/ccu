@@ -69,7 +69,7 @@ class TunerUpdateHandler {
     private static void writePointFromJson(String id, int level, JsonObject msgObject, CCUHsApi hayStack) {
         String who = msgObject.get(HayStackConstants.WRITABLE_ARRAY_WHO).getAsString();
         double val = msgObject.get(HayStackConstants.WRITABLE_ARRAY_VAL).getAsDouble();
-        int duration = msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION).getAsInt();
+        int duration = msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION) != null ? msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION).getAsInt() : 0;
         hayStack.writePoint(id, level, who, val, duration);
     }
 }

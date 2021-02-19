@@ -43,7 +43,6 @@ public class UpdatePointHandler
             return;
         }
 
-        String luid = CCUHsApi.getInstance().getLUID("@" + pointGuid);
         Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(luid)).build();
         if (HSUtil.isSystemConfigOutputPoint(luid, CCUHsApi.getInstance())) {
             ConfigPointUpdateHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
@@ -155,7 +154,7 @@ public class UpdatePointHandler
             }
         }
 
-        if (HSUtil.isBuildingTuner(luid, CCUHsApi.getInstance())) {
+        if (HSUtil.isBuildingTunerPoint(luid, CCUHsApi.getInstance())) {
             BuildingTunerUpdateHandler.updateZoneModuleSystemPoints(luid);
         }
     }

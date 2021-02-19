@@ -206,7 +206,7 @@ public class HSUtil
             return false;
         }
 
-        HashMap<Object, Object> tunerEquip = hayStack.readMapById("tuner and equip");
+        HashMap<Object, Object> tunerEquip = hayStack.read("tuner and equip");
         if (!tunerEquip.get(Tags.ID).equals(entityMap.get(Tags.EQUIPREF))) {
             return false;
         }
@@ -232,7 +232,7 @@ public class HSUtil
 
 
     //is building tuner.
-    public static boolean isBuildingTuner(String id, CCUHsApi hayStack) {
+    public static boolean isBuildingTunerPoint(String id, CCUHsApi hayStack) {
         HashMap pointMap = hayStack.readMapById(id);
         return pointMap.get("dis").toString().contains("Building");
     }

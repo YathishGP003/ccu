@@ -94,7 +94,7 @@ class ConfigPointUpdateHandler {
     
     private static void writePointStrValFromJson(String id, JsonObject msgObject, CCUHsApi hayStack) {
         String who = msgObject.get("who").getAsString();
-        String val = msgObject.get("val").getAsString();
+        String val = msgObject.get("val").getAsString().replaceAll("\"", "").trim();
         int duration = msgObject.get("duration") != null ? msgObject.get("duration").getAsInt() : 0;
         int level = msgObject.get("level").getAsInt();
         hayStack.writePointStrValLocal(id, level, who, val, duration);

@@ -188,10 +188,17 @@ public class Globals {
                 //If site already exists , import building tuners from backend before initializing building tuner equip.
                 HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                 if (!site.isEmpty()) {
-                    if (!CCUHsApi.getInstance().isPrimaryCcu()) {
+                    if (CCUHsApi.getInstance().isPrimaryCcu()) {
+                        /* Only primary CCUs shall create new tuners created in the upgrade releases and
+                        non-primary CCUs should fetch in the next app start up.*/
+                        BuildingTuners.getInstance().updateBuildingTuners();
+                    } else {
+                        /*If a non-primary tuner fails to load all the  building tuners, it should
+                        fall back hard-coded constant tuner values. Creating new tuner instances here will result in
+                        multiple CCUs having duplicate instances of tuners. */
                         CCUHsApi.getInstance().importBuildingTuners();
                     }
-                    BuildingTuners.getInstance().updateBuildingTuners();
+                    
                     CCUHsApi.getInstance().syncEntityTree();
                 }
             

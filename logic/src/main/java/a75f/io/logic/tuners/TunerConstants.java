@@ -50,6 +50,7 @@ public class TunerConstants
     public static final double HUMIDITY_HYSTERESIS_PERCENT = 5;
     public static final double VALVE_START_DAMPER = 50;
     public static final double RELAY_DEACTIVATION_HYSTERESIS = 10;
+    public static final double REBALANCE_HOLD_TIME = 20;
     
     public static final double ZONE_CO2_TARGET = 1000;
     public static final double ZONE_CO2_THRESHOLD = 800;
@@ -66,7 +67,7 @@ public class TunerConstants
     public static final double ZONE_DEAD_TIME = 15;
     public static final double ZONE_AUTO_AWAY_TIME = 60;
     public static final double ZONE_FORCED_OCCUPIED_TIME = 120;
-    
+    public static final double CM_RESET_CMD_TIME = 90;
     
     public static final double ADR_COOLING_DEADBAND = 3;
     public static final double ADR_HEATING_DEADBAND = 3;
@@ -156,6 +157,7 @@ public class TunerConstants
     public static final double DEFAULT_MODE_CHANGEOVER_HYSTERESIS = 0.5;
     public static final double DEFAULT_STAGE_UP_TIMER_COUNTER = 5;
     public static final double DEFAULT_STAGE_DOWN_TIMER_COUNTER = 2;
+    public static final double DEFAULT_FAN_ON_CONTROL_DELAY = 1;
     
     public static final double TR_IGNORE_REQUEST = 2.0;
     public static final double TR_TIME_DELAY = 2.0;

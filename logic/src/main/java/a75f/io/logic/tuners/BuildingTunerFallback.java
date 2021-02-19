@@ -40,6 +40,7 @@ class BuildingTunerFallback {
         tagsValMap.put("dead,time",TunerConstants.ZONE_DEAD_TIME);
         tagsValMap.put("auto,away,time",TunerConstants.ZONE_AUTO_AWAY_TIME);
         tagsValMap.put("forced,occupied,time",TunerConstants.ZONE_FORCED_OCCUPIED_TIME);
+        tagsValMap.put("reset,command,time",TunerConstants.CM_RESET_CMD_TIME);
         tagsValMap.put("adr,cooling,deadband",TunerConstants.ADR_COOLING_DEADBAND);
         tagsValMap.put("adr,heating,deadband",TunerConstants.ADR_HEATING_DEADBAND);
         tagsValMap.put("sn,cooling,airflow",TunerConstants.SN_COOLING_AIRFLOW_TEMP);
@@ -81,7 +82,7 @@ class BuildingTunerFallback {
         tagsValMap.put("standalone,cooling,threshold,pipe2,fcu",TunerConstants.STANDALONE_COOLING_THRESHOLD_2PFCU_DEFAULT);
     
         tagsValMap.put("valve,start,damper",TunerConstants.VALVE_START_DAMPER);
-    
+        
         tagsValMap.put("tr,co2,ignoreRequest",TunerConstants.TR_IGNORE_REQUEST);
         tagsValMap.put("tr,co2,spinit",TunerConstants.TR_SP_INIT_CO2);
         tagsValMap.put("tr,co2,spmax",TunerConstants.TR_SP_MAX_CO2);
@@ -107,11 +108,24 @@ class BuildingTunerFallback {
         tagsValMap.put("tr,staticPressure,spmax",TunerConstants.TR_SP_MAX_SP);
         tagsValMap.put("tr,staticPressure,spmin",TunerConstants.TR_SP_MIN_SP);
         tagsValMap.put("tr,staticPressure,spres",TunerConstants.TR_SP_RES_SP);
-        tagsValMap.put("tr,staticPressure,spresmax",TunerConstants.TR_SP_RESMAX_SAT);
+        tagsValMap.put("tr,staticPressure,spresmax",TunerConstants.TR_SP_RESMAX_SP);
         tagsValMap.put("tr,staticPressure,sptrim",TunerConstants.TR_SP_TRIM_SP);
         tagsValMap.put("tr,staticPressure,timeDelay",TunerConstants.TR_TIME_DELAY);
         tagsValMap.put("tr,staticPressure,timeInterval",TunerConstants.TR_TIME_INTERVAL);
+    
+        //System Tuners
+        tagsValMap.put("mode,changeover,hysteresis",TunerConstants.DEFAULT_MODE_CHANGEOVER_HYSTERESIS);
+        tagsValMap.put("stageUp,timer,counter",TunerConstants.DEFAULT_STAGE_UP_TIMER_COUNTER);
+        tagsValMap.put("stageDown,timer,counter",TunerConstants.DEFAULT_STAGE_DOWN_TIMER_COUNTER);
+        tagsValMap.put("fan,control,delay",TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY);
         
+        tagsValMap.put("target,cumulative,damper",TunerConstants.TARGET_CUMULATIVE_DAMPER);
+        tagsValMap.put("analog,fan,speed,multiplier",TunerConstants.ANALOG_FANSPEED_MULTIPLIER);
+        tagsValMap.put("humidity,hysteresis",TunerConstants.HUMIDITY_HYSTERESIS_PERCENT);
+        tagsValMap.put("relay,deactivation,hysteresis",TunerConstants.RELAY_DEACTIVATION_HYSTERESIS);
+        tagsValMap.put("rebalance,hold,time",TunerConstants.REBALANCE_HOLD_TIME);
+    
+        tagsValMap.put("target,cumulative,damper",TunerConstants.TARGET_CUMULATIVE_DAMPER);
         
         return tagsValMap;
     }

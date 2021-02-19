@@ -14,6 +14,9 @@ import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 
+import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_DOWN_TIMER_COUNTER;
+import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_UP_TIMER_COUNTER;
+
 public class VavTuners {
     
     public static void addDefaultVavTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,
@@ -604,6 +607,24 @@ public class VavTuners {
         hayStack.writePoint(staticPressureTimeIntervalId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",2.0 ,0);
         hayStack.writeHisValById(staticPressureTimeIntervalId,2.0);
         addDefaultVavSystemTuners(hayStack, siteRef, equipRef, equipDis, tz);
+    
+        Point fanControlOnFixedTimeDelay  = new Point.Builder()
+                                                .setDisplayName(equipDis + "-VAV-"+"fanControlOnFixedTimeDelay ")
+                                                .setSiteRef(siteRef)
+                                                .setEquipRef(equipRef)
+                                                .setHisInterpolate("cov")
+                                                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his")
+                                                .addMarker("fan").addMarker("control").addMarker("time").addMarker("delay").addMarker("sp")
+                                                .setMinVal("0")
+                                                .setMaxVal("10")
+                                                .setIncrementVal("1")
+                                                .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                                .setUnit("m")
+                                                .setTz(tz)
+                                                .build();
+        String fanControlOnFixedTimeDelayId = CCUHsApi.getInstance().addPoint(fanControlOnFixedTimeDelay);
+        CCUHsApi.getInstance().writeDefaultValById(fanControlOnFixedTimeDelayId, TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY);
+        CCUHsApi.getInstance().writeHisValById(fanControlOnFixedTimeDelayId, TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY);
     }
     
     public static void addDefaultVavSystemTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,
@@ -663,7 +684,46 @@ public class VavTuners {
         String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
         hayStack.writePoint(relayDeactivationHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.RELAY_DEACTIVATION_HYSTERESIS, 0);
         hayStack.writeHisValById(relayDeactivationHysteresisId, TunerConstants.RELAY_DEACTIVATION_HYSTERESIS);
-        
+    
+        Point stageUpTimerCounter = new Point.Builder().setDisplayName(equipDis + "-VAV-" + "stageUpTimerCounter")
+                                                       .setSiteRef(siteRef)
+                                                       .setEquipRef(equipRef)
+                                                       .setHisInterpolate("cov")
+                                                       .addMarker("tuner").addMarker("vav")
+                                                       .addMarker("default").addMarker("writable").addMarker("his")
+                                                       .addMarker("stageUp")
+                                                       .addMarker("timer").addMarker("counter").addMarker("sp")
+                                                       .setMinVal("0")
+                                                       .setMaxVal("30")
+                                                       .setIncrementVal("1")
+                                                       .setUnit("m")
+                                                       .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                                       .setTz(tz)
+                                                       .build();
+        String stageUpTimerCounterId = hayStack.addPoint(stageUpTimerCounter);
+        hayStack.writePointForCcuUser(stageUpTimerCounterId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,
+                                      DEFAULT_STAGE_UP_TIMER_COUNTER, 0);
+        hayStack.writeHisValById(stageUpTimerCounterId, DEFAULT_STAGE_UP_TIMER_COUNTER);
+    
+        Point stageDownTimerCounter = new Point.Builder().setDisplayName(equipDis + "-VAV-" + "stageDownTimerCounter")
+                                                         .setSiteRef(siteRef)
+                                                         .setEquipRef(equipRef)
+                                                         .setHisInterpolate("cov")
+                                                         .addMarker("tuner").addMarker("vav")
+                                                         .addMarker("default").addMarker("writable").addMarker("his")
+                                                         .addMarker("stageDown")
+                                                         .addMarker("timer").addMarker("counter").addMarker("sp")
+                                                         .setMinVal("0")
+                                                         .setMaxVal("30")
+                                                         .setIncrementVal("1")
+                                                         .setUnit("m")
+                                                         .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                                         .setTz(tz)
+                                                         .build();
+        String stageDownTimerCounterId = hayStack.addPoint(stageDownTimerCounter);
+        hayStack.writePointForCcuUser(stageDownTimerCounterId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,
+                                      DEFAULT_STAGE_DOWN_TIMER_COUNTER, 0);
+        hayStack.writeHisValById(stageDownTimerCounterId, DEFAULT_STAGE_DOWN_TIMER_COUNTER);
     }
     
     public static void addVavEquipTuners(CCUHsApi hayStack, String siteRef, String equipdis, String equipref,

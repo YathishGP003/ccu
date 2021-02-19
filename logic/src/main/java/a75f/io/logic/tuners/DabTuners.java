@@ -13,6 +13,10 @@ import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 
+import static a75f.io.logic.tuners.TunerConstants.DEFAULT_MODE_CHANGEOVER_HYSTERESIS;
+import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_DOWN_TIMER_COUNTER;
+import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_UP_TIMER_COUNTER;
+
 public class DabTuners {
     
     public static void addDefaultDabTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,
@@ -286,8 +290,68 @@ public class DabTuners {
                                       .setTz(tz)
                                       .build();
         String rebalanceHoldTimeId = hayStack.addPoint(rebalanceHoldTime);
-        hayStack.writePoint(rebalanceHoldTimeId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", 20.0, 0);
-        hayStack.writeHisValById(rebalanceHoldTimeId, 20.0);
+        hayStack.writePoint(rebalanceHoldTimeId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.REBALANCE_HOLD_TIME, 0);
+        hayStack.writeHisValById(rebalanceHoldTimeId, TunerConstants.REBALANCE_HOLD_TIME);
+    
+        Point modeChangeoverHysteresis = new Point.Builder().setDisplayName(equipDis + "-DAB-" + "modeChangeoverHysteresis")
+                                                .setSiteRef(siteRef)
+                                                .setEquipRef(equipRef)
+                                                .setHisInterpolate("cov")
+                                                .addMarker("tuner").addMarker("dab")
+                                                .addMarker("default").addMarker("writable").addMarker("his")
+                                                .addMarker("his").addMarker("mode").addMarker("changeover")
+                                                .addMarker("hysteresis").addMarker("sp")
+                                                .setMinVal("0")
+                                                .setMaxVal("5")
+                                                .setIncrementVal("0.5")
+                                                .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                                .setTz(tz)
+                                                .build();
+        String modeChangeoverHysteresisId = hayStack.addPoint(modeChangeoverHysteresis);
+        hayStack.writePointForCcuUser(modeChangeoverHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,
+                                      DEFAULT_MODE_CHANGEOVER_HYSTERESIS, 0);
+        hayStack.writeHisValById(modeChangeoverHysteresisId, DEFAULT_MODE_CHANGEOVER_HYSTERESIS);
+    
+        Point stageUpTimerCounter = new Point.Builder().setDisplayName(equipDis + "-DAB-" + "stageUpTimerCounter")
+                                                       .setSiteRef(siteRef)
+                                                       .setEquipRef(equipRef)
+                                                       .setHisInterpolate("cov")
+                                                       .addMarker("tuner").addMarker("dab")
+                                                       .addMarker("default").addMarker("writable").addMarker("his")
+                                                       .addMarker("stageUp")
+                                                       .addMarker("timer").addMarker("counter").addMarker("sp")
+                                                       .setMinVal("0")
+                                                       .setMaxVal("30")
+                                                       .setIncrementVal("1")
+                                                       .setUnit("m")
+                                                       .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                                       .setTz(tz)
+                                                       .build();
+        String stageUpTimerCounterId = hayStack.addPoint(stageUpTimerCounter);
+        hayStack.writePointForCcuUser(stageUpTimerCounterId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,
+                                      DEFAULT_STAGE_UP_TIMER_COUNTER, 0);
+        hayStack.writeHisValById(stageUpTimerCounterId, DEFAULT_STAGE_UP_TIMER_COUNTER);
+    
+        Point stageDownTimerCounter = new Point.Builder().setDisplayName(equipDis + "-DAB-" +
+                                                                         "stageDownTimerCounter")
+                                                         .setSiteRef(siteRef)
+                                                         .setEquipRef(equipRef)
+                                                         .setHisInterpolate("cov")
+                                                         .addMarker("tuner").addMarker("dab")
+                                                         .addMarker("default").addMarker("writable").addMarker("his")
+                                                         .addMarker("stageDown")
+                                                         .addMarker("timer").addMarker("counter").addMarker("sp")
+                                                         .setMinVal("0")
+                                                         .setMaxVal("30")
+                                                         .setIncrementVal("1")
+                                                         .setUnit("m")
+                                                         .setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                                         .setTz(tz)
+                                                         .build();
+        String stageDownTimerCounterId = hayStack.addPoint(stageDownTimerCounter);
+        hayStack.writePointForCcuUser(stageDownTimerCounterId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,
+                                      DEFAULT_STAGE_DOWN_TIMER_COUNTER, 0);
+        hayStack.writeHisValById(stageDownTimerCounterId, DEFAULT_STAGE_DOWN_TIMER_COUNTER);
     }
     
     public static void addEquipDabTuners(CCUHsApi hayStack, String siteRef, String equipdis, String equipref,

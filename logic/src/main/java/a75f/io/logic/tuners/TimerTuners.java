@@ -34,8 +34,8 @@ class TimerTuners {
                                   .setTz(tz)
                                   .build();
         String autoAwayTimeId = hayStack.addPoint(autoAwayTime);
-        hayStack.writePoint(autoAwayTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 60.0, 0);
-        hayStack.writeHisValById(autoAwayTimeId, 60.0);
+        hayStack.writePoint(autoAwayTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_AUTO_AWAY_TIME, 0);
+        hayStack.writeHisValById(autoAwayTimeId, TunerConstants.ZONE_AUTO_AWAY_TIME);
     
         Point forcedOccupiedTime  = new Point.Builder()
                                         .setDisplayName(equipDis+"-"+"forcedOccupiedTime")
@@ -48,8 +48,8 @@ class TimerTuners {
                                         .setTz(tz)
                                         .build();
         String forcedOccupiedTimeId = hayStack.addPoint(forcedOccupiedTime);
-        hayStack.writePoint(forcedOccupiedTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 120.0, 0);
-        hayStack.writeHisValById(forcedOccupiedTimeId, 120.0);
+        hayStack.writePoint(forcedOccupiedTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_FORCED_OCCUPIED_TIME, 0);
+        hayStack.writeHisValById(forcedOccupiedTimeId, TunerConstants.ZONE_FORCED_OCCUPIED_TIME);
     
         Point cmResetCommand  = new Point.Builder()
                                     .setDisplayName(equipDis+"-"+"cmResetCommandTimer")
@@ -62,8 +62,9 @@ class TimerTuners {
                                     .setTz(tz)
                                     .build();
         String cmResetCommandId = hayStack.addPoint(cmResetCommand);
-        hayStack.writePoint(cmResetCommandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 90.0, 0);
-        hayStack.writeHisValById(cmResetCommandId, 90.0);
+        hayStack.writePoint(cmResetCommandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",
+                            TunerConstants.CM_RESET_CMD_TIME, 0);
+        hayStack.writeHisValById(cmResetCommandId, TunerConstants.CM_RESET_CMD_TIME);
     
     
     }

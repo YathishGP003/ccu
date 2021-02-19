@@ -53,14 +53,8 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
             if (priorityMap.get("level") != null) {
                 if (priorityItem.get("newValue") != null && !priorityItem.get("newValue").toString().equals("")) {
                     holder.textViewCurrentValue.setText(priorityItem.get("newValue").toString());
-                    if (getTunerValue(tunerItemSelected.get("id").toString()) != null){
-                        holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
-                    } else {
-                        holder.textViewValue.setText("");
-                    }
                     setOrangeTextColor(holder.textViewCurrentValue);
                     setOrangeTextColor(holder.textViewName);
-                    setOrangeTextColor(holder.textViewValue);
                     holder.imgBtnTunerUndo.setVisibility(View.VISIBLE);
                 } else {
                     if (tunerGroupType.contains("Module")) {
@@ -68,116 +62,76 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
                             holder.textViewName.setText(context.getText(R.string.txt_tunersModule));
                             if (priorityItem.get("newValue") != null) {
                                 holder.textViewCurrentValue.setText(priorityMap.get("newValue").toString());
-                                holder.textViewValue.setText(priorityMap.get("val").toString());
                             } else {
                                 if (getTunerValue(tunerItemSelected.get("id").toString()) != null){
                                     holder.textViewCurrentValue.setText("-");
                                     holder.imgBtnTunerUndo.setVisibility(View.VISIBLE);
-                                    holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
                                 } else {
                                     holder.textViewCurrentValue.setText("-");
-                                    holder.textViewValue.setText("");
                                 }
                             }
                             setOrangeTextColor(holder.textViewCurrentValue);
                             setOrangeTextColor(holder.textViewName);
-                            setOrangeTextColor(holder.textViewValue);
                         } else {
-                            if (priorityItem.get("val") != null && !priorityItem.get("val").toString().equals("")) {
-                                holder.textViewValue.setText(priorityItem.get("val").toString());
-                            } else {
-                                holder.textViewValue.setText("");
-                            }
                             holder.textViewCurrentValue.setText("");
                             setBlackTextColor(holder.textViewName);
-                            setBlackTextColor(holder.textViewValue);
                         }
                     } else if (tunerGroupType.contains("Zone")) {
                         if (position == 9) {
                             holder.textViewName.setText("Zone");
                             if (priorityItem.get("newValue") != null) {
                                 holder.textViewCurrentValue.setText(priorityMap.get("newValue").toString());
-                                holder.textViewValue.setText(priorityMap.get("val").toString());
                             } else {
                                 if (getTunerValue(tunerItemSelected.get("id").toString()) != null){
                                     holder.textViewCurrentValue.setText("-");
                                     holder.imgBtnTunerUndo.setVisibility(View.VISIBLE);
-                                    holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
                                 } else {
                                     holder.textViewCurrentValue.setText("-");
-                                    holder.textViewValue.setText("");
                                 }
                             }
                             setOrangeTextColor(holder.textViewCurrentValue);
                             setOrangeTextColor(holder.textViewName);
-                            setOrangeTextColor(holder.textViewValue);
                         } else {
-                            if (priorityItem.get("val") != null) {
-                                holder.textViewValue.setText(priorityItem.get("val").toString());
-                            } else {
-                                holder.textViewValue.setText("");
-                            }
                             holder.textViewCurrentValue.setText("");
                             setBlackTextColor(holder.textViewName);
-                            setBlackTextColor(holder.textViewValue);
                         }
                     } else if (tunerGroupType.contains("System")) {
                         if (position == 13) {
                             holder.textViewName.setText("System");
                             if (priorityItem.get("newValue") != null) {
                                 holder.textViewCurrentValue.setText(priorityMap.get("newValue").toString());
-                                holder.textViewValue.setText(priorityMap.get("val").toString());
                             } else {
                                 if (getTunerValue(tunerItemSelected.get("id").toString()) != null){
                                     holder.textViewCurrentValue.setText("-");
                                     holder.imgBtnTunerUndo.setVisibility(View.VISIBLE);
-                                    holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
                                 } else {
                                     holder.textViewCurrentValue.setText("-");
-                                    holder.textViewValue.setText("");
                                 }
                             }
                             setOrangeTextColor(holder.textViewCurrentValue);
                             setOrangeTextColor(holder.textViewName);
-                            setOrangeTextColor(holder.textViewValue);
                         } else {
-                            if (priorityItem.get("val") != null && !priorityItem.get("val").toString().equals("")) {
-                                holder.textViewValue.setText(priorityItem.get("val").toString());
-                            } else {
-                                holder.textViewValue.setText("");
-                            }
                             holder.textViewCurrentValue.setText("");
                             setBlackTextColor(holder.textViewName);
-                            setBlackTextColor(holder.textViewValue);
                         }
                     } else if (tunerGroupType.contains("Building")) {
                         if (position == 15) {
                             holder.textViewName.setText("Building");
                             if (priorityItem.get("newValue") != null) {
                                 holder.textViewCurrentValue.setText(priorityMap.get("newValue").toString());
-                                holder.textViewValue.setText(priorityMap.get("val").toString());
                             } else {
                                 if (getTunerValue(tunerItemSelected.get("id").toString()) != null){
                                     holder.textViewCurrentValue.setText("-");
                                     holder.imgBtnTunerUndo.setVisibility(View.VISIBLE);
-                                    holder.textViewValue.setText(String.valueOf(getTunerValue(tunerItemSelected.get("id").toString())));
                                 } else {
                                     holder.textViewCurrentValue.setText("-");
-                                    holder.textViewValue.setText("");
                                 }
                             }
                             setOrangeTextColor(holder.textViewCurrentValue);
                             setOrangeTextColor(holder.textViewName);
-                            setOrangeTextColor(holder.textViewValue);
                         } else {
-                            if (priorityItem.get("val") != null && !priorityItem.get("val").toString().equals("")) {
-                                holder.textViewValue.setText(priorityItem.get("val").toString());
-                            } else {
-                                holder.textViewValue.setText("");
-                            }
                             holder.textViewCurrentValue.setText("");
                             setBlackTextColor(holder.textViewName);
-                            setBlackTextColor(holder.textViewValue);
                         }
                     }
                 }
@@ -197,7 +151,6 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
         } else {
             holder.textViewName.setText("");
             holder.textViewCurrentValue.setText("");
-            holder.textViewValue.setText("");
             setBlackTextColor(holder.textViewName);
         }
 
@@ -294,16 +247,14 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
     class PriorityViewHolder extends RecyclerView.ViewHolder {
         TextView textViewPriority;
         TextView textViewName;
-        TextView textViewValue;
         TextView textViewCurrentValue;
         ImageButton imgBtnTunerUndo;
 
         public PriorityViewHolder(View itemView) {
             super(itemView);
             textViewPriority = itemView.findViewById(R.id.textPriority);
-            textViewValue = itemView.findViewById(R.id.textTunerValue);
             textViewCurrentValue = itemView.findViewById(R.id.textCurrentValue);
-            textViewName = itemView.findViewById(R.id.textDefaultValue);
+            textViewName = itemView.findViewById(R.id.textLevelName);
             imgBtnTunerUndo = itemView.findViewById(R.id.imgBtnTunerUndo);
         }
     }

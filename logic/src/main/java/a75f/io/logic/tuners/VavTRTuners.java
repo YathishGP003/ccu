@@ -383,7 +383,7 @@ public class VavTRTuners
                                   .setEquipRef(equipRef).setHisInterpolate("cov")
                                   .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
                                   .addMarker("staticPressure").addMarker("sptrim").addMarker("writable").addMarker("his")
-                                  .setMaxVal("-0.01").setMinVal("-0.5").setIncrementVal("0.01").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                  .setMinVal("-0.5").setMaxVal("-0.01").setIncrementVal("0.01").setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                   .setUnit("inch wc")
                                   .setTz(tz)
                                   .build();

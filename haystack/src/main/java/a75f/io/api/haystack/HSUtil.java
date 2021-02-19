@@ -195,6 +195,13 @@ public class HSUtil
                && pointEntity.containsKey("humidifier")
                && pointEntity.containsKey("type");
     }
+
+
+    //is building tuner.
+    public static boolean isBuildingTuner(String id, CCUHsApi hayStack) {
+        HashMap pointMap = hayStack.readMapById(id);
+        return pointMap.get("dis").toString().contains("Building");
+    }
     
     public static double getSystemUserIntentVal(String tags)
     {

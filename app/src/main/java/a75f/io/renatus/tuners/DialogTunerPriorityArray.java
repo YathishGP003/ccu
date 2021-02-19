@@ -13,20 +13,27 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.NumberPicker;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Zone;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.TunerNumberPicker;
@@ -44,13 +51,13 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     TextView textTunerGroupTitle;
     TextView textTunerName;
     TextView textTunerDefaultValue;
-    TextView textLabelBuilding;
-    TextView textLabelCCU;
     Button buttonSaveTuner;
     Button buttonCancel;
     String selectedTunerValue;
     String selectedTunerLevel;
     String tunerGroupType;
+    LinearLayout viewStub;
+    LinearLayout layoutTitle;
 
     PriorityArrayAdapter priorityArrayAdapter;
     ArrayList<HashMap> priorityList;
@@ -80,8 +87,8 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         super.onStart();
         Dialog dialog = getDialog();
         if (dialog != null) {
-            int width = 1165;//ViewGroup.LayoutParams.WRAP_CONTENT;
-            int height = 672;//ViewGroup.LayoutParams.WRAP_CONTENT;
+            int width = ViewGroup.LayoutParams.MATCH_PARENT;//;
+            int height = ViewGroup.LayoutParams.MATCH_PARENT;//
             dialog.getWindow().setLayout(width, height);
         }
     }
@@ -109,12 +116,144 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         textTunerDefaultValue = view.findViewById(R.id.textTunerDefaultValue);
         buttonSaveTuner = view.findViewById(R.id.buttonSaveTuner);
         buttonCancel = view.findViewById(R.id.buttonCancelTuner);
-        textLabelBuilding = view.findViewById(R.id.textLabelBuilding);
-        textLabelCCU = view.findViewById(R.id.textLabelCCU);
-
+        layoutTitle = view.findViewById(R.id.layoutTitle);
         recyclerViewPriority.setLayoutManager(new LinearLayoutManager(getActivity()));
         buttonSaveTuner.setEnabled(false);
+
+        setUpTunerColumns(view, inflater);
         return view;
+    }
+
+    private void setUpTunerColumns(View view, LayoutInflater inflater) {
+
+        viewStub = view.findViewById(R.id.viewStub);
+        HashMap ccu = CCUHsApi.getInstance().read("ccu");
+        HashMap site = CCUHsApi.getInstance().read("site");
+
+        String selectedTunerDis = tunerItemSelected.get("dis").toString();
+        if (tunerGroupType.equals("Building") || tunerGroupType.equals("System")) {
+            ArrayList<Floor> floorList = HSUtil.getFloors();
+            ArrayList<Zone> zoneList = new ArrayList<>();
+            ArrayList<Equip> equipsList = new ArrayList<>();
+            for (Floor floor : floorList) {
+                zoneList.addAll(HSUtil.getZones(floor.getId()));
+            }
+            for (Zone zone : zoneList) {
+                equipsList.addAll(HSUtil.getEquips(zone.getId()));
+            }
+            ArrayList<HashMap> equips = new ArrayList<>();
+            for (Equip equip : equipsList){
+                ArrayList<HashMap> moduleTuners = CCUHsApi.getInstance().readAll("tuner and equipRef == \""+equip.getId()+"\"");
+                for (HashMap moduleTunerMap : moduleTuners) {
+                    if (!moduleTunerMap.get("roomRef").toString().equals("SYSTEM")) {
+                        String moduleTunerDis = moduleTunerMap.get("dis").toString();
+                        if (tunerItemSelected.get("tunerGroup").toString().equalsIgnoreCase(moduleTunerMap.get("tunerGroup").toString()) && selectedTunerDis.substring(selectedTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(moduleTunerDis.substring(moduleTunerDis.lastIndexOf("-") + 1))) {
+                            equips.add(moduleTunerMap);
+                        }
+                    }
+                }
+            }
+            Collections.reverse(equips);
+            if (equips.size() > 0) {
+                for (HashMap equip : equips) {
+                    View columnView = inflater.inflate(R.layout.tuner_priority_column, viewStub, false);
+                    ((TextView) columnView.findViewById(R.id.textLabelBuilding)).setText(ccu.get("dis").toString());
+                    ((TextView) columnView.findViewById(R.id.textLabelZone)).setText(HSUtil.getDis(equip.get("roomRef").toString()));
+                    ((TextView) columnView.findViewById(R.id.textLabelModule)).setText(HSUtil.getDis(equip.get("equipRef").toString()).substring(HSUtil.getDis(equip.get("equipRef").toString()).indexOf("-") + 1));
+                    ((TextView) columnView.findViewById(R.id.textRow8)).setText(getTunerValue(equip.get("id").toString(), "8"));
+                    ((TextView) columnView.findViewById(R.id.textRow10)).setText(getTunerValue(equip.get("id").toString(), "10"));
+                    ((TextView) columnView.findViewById(R.id.textRow14)).setText(getTunerValue(equip.get("id").toString(), "14"));
+                    ((TextView) columnView.findViewById(R.id.textRow16)).setText(getTunerValue(equip.get("id").toString(), "16"));
+                    ((TextView) columnView.findViewById(R.id.textRow17)).setText(getTunerValue(equip.get("id").toString(), "17"));
+                    viewStub.addView(columnView);
+                }
+
+            } else {
+                View columnView = inflater.inflate(R.layout.tuner_priority_column, viewStub, false);
+                ((TextView) columnView.findViewById(R.id.textLabelBuilding)).setText(site.get("dis").toString());
+                ((TextView) columnView.findViewById(R.id.textLabelZone)).setText(ccu.get("dis").toString());
+                ((TextView) columnView.findViewById(R.id.textLabelModule)).setVisibility(View.GONE);
+                ((TextView) columnView.findViewById(R.id.textRow8)).setText(getTunerValue(tunerItemSelected.get("id").toString(),"8"));
+                ((TextView) columnView.findViewById(R.id.textRow10)).setText(getTunerValue(tunerItemSelected.get("id").toString(),"10"));
+                ((TextView) columnView.findViewById(R.id.textRow14)).setText(getTunerValue(tunerItemSelected.get("id").toString(),"14"));
+                ((TextView) columnView.findViewById(R.id.textRow16)).setText(getTunerValue(tunerItemSelected.get("id").toString(),"16"));
+                ((TextView) columnView.findViewById(R.id.textRow17)).setText(getTunerValue(tunerItemSelected.get("id").toString(),"17"));
+                viewStub.addView(columnView);
+            }
+
+        } else {
+
+            switch (tunerGroupType) {
+                case "Building":
+                case "System": {
+
+                    View columnView = inflater.inflate(R.layout.tuner_priority_column, viewStub, false);
+                    ((TextView) columnView.findViewById(R.id.textLabelBuilding)).setText(site.get("dis").toString());
+                    ((TextView) columnView.findViewById(R.id.textLabelZone)).setText(ccu.get("dis").toString());
+                    ((TextView) columnView.findViewById(R.id.textLabelModule)).setVisibility(View.GONE);
+                    ((TextView) columnView.findViewById(R.id.textRow8)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "8"));
+                    ((TextView) columnView.findViewById(R.id.textRow10)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "10"));
+                    ((TextView) columnView.findViewById(R.id.textRow14)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "14"));
+                    ((TextView) columnView.findViewById(R.id.textRow16)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "16"));
+                    ((TextView) columnView.findViewById(R.id.textRow17)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "17"));
+                    viewStub.addView(columnView);
+                    break;
+                }
+                case "Zone":
+
+                    ArrayList<Equip> equipsList = new ArrayList<>();
+                    equipsList.addAll(HSUtil.getEquips(tunerItemSelected.get("roomRef").toString()));
+                    ArrayList<HashMap> equipsFinal = new ArrayList<>();
+                    for (Equip equip : equipsList) {
+                        ArrayList<HashMap> moduleTuners = CCUHsApi.getInstance().readAll("tuner and equipRef == \"" + equip.getId() + "\"");
+                        for (HashMap moduleTunerMap : moduleTuners) {
+                            if (!moduleTunerMap.get("roomRef").toString().equals("SYSTEM")) {
+                                String moduleTunerDis = moduleTunerMap.get("dis").toString();
+                                if (selectedTunerDis.substring(selectedTunerDis.lastIndexOf("-") + 1).equalsIgnoreCase(moduleTunerDis.substring(moduleTunerDis.lastIndexOf("-") + 1))) {
+                                    equipsFinal.add(moduleTunerMap);
+                                }
+                            }
+                        }
+                    }
+                    Collections.reverse(equipsFinal);
+                    for (HashMap moduleTuner : equipsFinal) {
+                        View columnView = inflater.inflate(R.layout.tuner_priority_column, viewStub, false);
+                        ((TextView) columnView.findViewById(R.id.textLabelBuilding)).setText(ccu.get("dis").toString());
+                        ((TextView) columnView.findViewById(R.id.textLabelZone)).setText(HSUtil.getDis(moduleTuner.get("roomRef").toString()));
+                        ((TextView) columnView.findViewById(R.id.textLabelModule)).setText(HSUtil.getDis(moduleTuner.get("equipRef").toString()).substring(HSUtil.getDis(moduleTuner.get("equipRef").toString()).indexOf("-") + 1));
+                        ((TextView) columnView.findViewById(R.id.textRow8)).setText(getTunerValue(moduleTuner.get("id").toString(), "8"));
+                        ((TextView) columnView.findViewById(R.id.textRow10)).setText(getTunerValue(moduleTuner.get("id").toString(), "10"));
+                        ((TextView) columnView.findViewById(R.id.textRow14)).setText(getTunerValue(moduleTuner.get("id").toString(), "14"));
+                        ((TextView) columnView.findViewById(R.id.textRow16)).setText(getTunerValue(moduleTuner.get("id").toString(), "16"));
+                        ((TextView) columnView.findViewById(R.id.textRow17)).setText(getTunerValue(moduleTuner.get("id").toString(), "17"));
+                        viewStub.addView(columnView);
+                    }
+                    break;
+                case "Module": {
+                    HashMap moduleTuner = CCUHsApi.getInstance().read("tuner and equipRef == \"" + tunerItemSelected.get("equipRef").toString() + "\"");
+                    View columnView = inflater.inflate(R.layout.tuner_priority_column, viewStub, false);
+                    ((TextView) columnView.findViewById(R.id.textLabelBuilding)).setText(ccu.get("dis").toString());
+                    ((TextView) columnView.findViewById(R.id.textLabelZone)).setText(HSUtil.getDis(moduleTuner.get("roomRef").toString()));
+                    ((TextView) columnView.findViewById(R.id.textLabelModule)).setText(HSUtil.getDis(moduleTuner.get("equipRef").toString()).substring(HSUtil.getDis(moduleTuner.get("equipRef").toString()).indexOf("-") + 1));
+                    ((TextView) columnView.findViewById(R.id.textRow8)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "8"));
+                    ((TextView) columnView.findViewById(R.id.textRow10)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "10"));
+                    ((TextView) columnView.findViewById(R.id.textRow14)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "14"));
+                    ((TextView) columnView.findViewById(R.id.textRow16)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "16"));
+                    ((TextView) columnView.findViewById(R.id.textRow17)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "17"));
+                    viewStub.addView(columnView);
+                    break;
+                }
+            }
+        }
+
+        ((TableRow) viewStub.findViewById(R.id.header)).getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                layoutTitle.setMinimumHeight(((TableRow) viewStub.findViewById(R.id.header)).getHeight());
+                ((TableRow) viewStub.findViewById(R.id.header)).getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            }
+        });
+
     }
 
     @Override
@@ -128,18 +267,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             textTunerName.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
             textTunerDefaultValue.setText("" + getTunerDefaultValue(tunerItemSelected.get("id").toString()));
         }
-        HashMap site = CCUHsApi.getInstance().read("site");
-        HashMap ccu = CCUHsApi.getInstance().read("ccu");
-        if (tunerGroupType.contains("Zone")) {
-            textLabelBuilding.setText(ccu.get("dis").toString());
-            textLabelCCU.setText(HSUtil.getDis(tunerItemSelected.get("roomRef").toString()));
-        } else if (tunerGroupType.contains("Module")) {
-            textLabelBuilding.setText(ccu.get("dis").toString());
-            textLabelCCU.setText(HSUtil.getDis(tunerItemSelected.get("equipRef").toString()));
-        } else {
-            textLabelBuilding.setText(site.get("dis").toString());
-            textLabelCCU.setText(ccu.get("dis").toString());
-        }
+
         textTunerGroupTitle.setText(tunerGroupSelected.getName());
         priorityList = new ArrayList<>();
         priorityList = CCUHsApi.getInstance().readPoint(tunerItemSelected.get("id").toString());
@@ -218,6 +346,20 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         return 0;
     }
 
+    public String getTunerValue(String id, String level) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        ArrayList values = hayStack.readPoint(id);
+        if (values != null && values.size() > 0) {
+            for (int l = 1; l <= values.size(); l++) {
+                HashMap valMap = ((HashMap) values.get(l - 1));
+                if (valMap.get("level").toString().equals(level) && valMap.get("val") != null) {
+                    return valMap.get("val").toString();
+                }
+            }
+        }
+        return "";
+    }
+
     @Override
     public void priorityClicked(int position) {
         if (position == 7 || position == 9 || position == 13 ||position == 15) {
@@ -246,6 +388,12 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 levelName = "Zone";
             } else {
                 levelName = "Module";
+            }
+            if (tunerItemSelected.containsKey("hideRefresh")){
+                tunerItemSelected.remove("hideRefresh");
+            }
+            if (tunerItemSelected.containsKey("reset")){
+                tunerItemSelected.remove("reset");
             }
             String text = "Level "+(position +1)+" "+levelName;
             text = text.replaceAll("System","<font color='#E24301'>System</font>");
@@ -305,7 +453,6 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                         }
                     }
                 }
-                Log.i("TunersUI", " currentValPos:" + currentValPos + " value:" + valueList.get(currentValPos) + " valueList:" + valueList);
                 npTunerRange.setDisplayedValues(valueList.toArray(new String[valueList.size()]));
                 npTunerRange.setMinValue(0);
                 npTunerRange.setMaxValue(valueList.size() -1);

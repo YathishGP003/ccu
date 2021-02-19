@@ -1149,24 +1149,29 @@ public class CCUHsApi
 
                 if (data instanceof HList && ((HList) data).size() > 0) {
                     HList dataList = (HList) data;
-                    HDict dataElement = (HDict) dataList.get(0);
 
-                    String who = dataElement.getStr("who");
-                    String level = dataElement.get("level").toString();
-                    HVal val = dataElement.get("val");
+                    for (int i = 0; i < dataList.size(); i++) {
+                        HDict dataElement = (HDict) dataList.get(i);
 
-                    HDict pid = new HDictBuilder().add("id", HRef.copy(id))
-                            .add("level", Integer.parseInt(level))
-                            .add("who", who)
-                            .add("val", kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val).toDict();
-                    hDictList.add(pid);
+                        String who = dataElement.getStr("who");
+                        String level = dataElement.get("level").toString();
+                        HVal val = dataElement.get("val");
 
-                    //save his data to local cache
-                    HDict rec = hsClient.readById(HRef.copy(getLUID(id)));
-                    tagsDb.saveHisItemsToCache(rec, new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val)}, true);
+                        HDict pid = new HDictBuilder().add("id", HRef.copy(id))
+                                .add("level", Integer.parseInt(level))
+                                .add("who", who)
+                                .add("val", kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val).toDict();
+                        hDictList.add(pid);
 
-                    //save points on tagsDb
-                    tagsDb.onPointWrite(rec, Integer.parseInt(level), kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val, who, HNum.make(0), rec);
+                        //save his data to local cache
+                        HDict rec = hsClient.readById(HRef.copy(getLUID(id)));
+                        tagsDb.saveHisItemsToCache(rec, new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val)}, true);
+
+                        //save points on tagsDb
+                        tagsDb.onPointWrite(rec, Integer.parseInt(level), kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) : val, who, HNum.make(0), rec);
+
+                    }
+
                 }
 
             }
@@ -1265,7 +1270,8 @@ public class CCUHsApi
                             p.setFloorRef("@SYSTEM");
                             p.setRoomRef("@SYSTEM");
                             p.setEquipRef(equipLuid);
-                            hsApi.putUIDMap(hsApi.addPoint(p), p.getId());
+                            String pointLuid = hsApi.addPoint(p);
+                            hsApi.putUIDMap(pointLuid, p.getId());
                         } else {
                             CcuLog.i(TAG, "Point already imported "+p.getId());
                         }
@@ -1287,7 +1293,7 @@ public class CCUHsApi
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         importBuildingTuners(siteId, hClient);
     }
-
+    
     public HGrid getRemoteSiteDetails(String siteId)
     {
         /* Sync a site*/

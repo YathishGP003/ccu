@@ -1,6 +1,7 @@
 package a75f.io.haystack.api;
 
 import org.apache.commons.lang3.RandomUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.projecthaystack.HStr;
 
@@ -20,7 +21,7 @@ public class ObjectboxPerformanceTest {
     
     private static final int ITEM_COUNT_DB = 10;
     
-    @Test
+    @Test @Ignore("an experiment rather than a unit test")
     public void testHisReadPerformance() {
         CCUHsApi hayStack = new CCUHsApi();
     

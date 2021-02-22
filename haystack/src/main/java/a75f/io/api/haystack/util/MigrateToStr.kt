@@ -22,11 +22,11 @@ import java.util.concurrent.ConcurrentHashMap
  * @author Tony Case
  * Created on 1/15/21.
  */
-fun migrateTabsDb(tagsDb: CCUTagsDb) {
+fun migrateTagsDb(tagsDb: CCUTagsDb) {
 
-   val tagsMap = tagsDb.tagsMap
-   val updateIdMap = tagsDb.updateIdMap
-   val localToGlobalIdMapping = tagsDb.idMap
+   val tagsMap = tagsDb.getTagsMap()
+   val updateIdMap = tagsDb.getUpdateIdMap()
+   val localToGlobalIdMapping = tagsDb.getIdMap()
 
    CcuLog.i("CCU_HS", "tags map migration" )
    printTagsMap(tagsMap)

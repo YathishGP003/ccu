@@ -1,5 +1,6 @@
 package a75f.io.haystack.api;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ import a75f.io.api.haystack.Zone;
 
 public class TestCcuHsApi {
     
-    @Test
+    @Test @Ignore("Not a unit test; only for visualizing data with printlns")
     public void testSite()
     {
         CCUHsApi hayStack = new CCUHsApi();

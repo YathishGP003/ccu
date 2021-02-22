@@ -34,7 +34,7 @@ class TimerTuners {
                                   .setTz(tz)
                                   .build();
         String autoAwayTimeId = hayStack.addPoint(autoAwayTime);
-        hayStack.writePoint(autoAwayTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_AUTO_AWAY_TIME, 0);
+        hayStack.writePointForCcuUser(autoAwayTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_AUTO_AWAY_TIME, 0);
         hayStack.writeHisValById(autoAwayTimeId, TunerConstants.ZONE_AUTO_AWAY_TIME);
     
         Point forcedOccupiedTime  = new Point.Builder()
@@ -48,7 +48,7 @@ class TimerTuners {
                                         .setTz(tz)
                                         .build();
         String forcedOccupiedTimeId = hayStack.addPoint(forcedOccupiedTime);
-        hayStack.writePoint(forcedOccupiedTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_FORCED_OCCUPIED_TIME, 0);
+        hayStack.writePointForCcuUser(forcedOccupiedTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.ZONE_FORCED_OCCUPIED_TIME, 0);
         hayStack.writeHisValById(forcedOccupiedTimeId, TunerConstants.ZONE_FORCED_OCCUPIED_TIME);
     
         Point cmResetCommand  = new Point.Builder()
@@ -62,7 +62,7 @@ class TimerTuners {
                                     .setTz(tz)
                                     .build();
         String cmResetCommandId = hayStack.addPoint(cmResetCommand);
-        hayStack.writePoint(cmResetCommandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",
+        hayStack.writePointForCcuUser(cmResetCommandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
                             TunerConstants.CM_RESET_CMD_TIME, 0);
         hayStack.writeHisValById(cmResetCommandId, TunerConstants.CM_RESET_CMD_TIME);
     

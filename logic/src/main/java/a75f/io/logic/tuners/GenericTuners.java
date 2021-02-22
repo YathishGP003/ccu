@@ -17,7 +17,7 @@ class GenericTuners {
                                               .setTz(tz)
                                               .build();
         String heatingPreconditioingRateId = hayStack.addPoint(heatingPreconditioingRate);
-        hayStack.writePoint(heatingPreconditioingRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.SYSTEM_PRECONDITION_RATE, 0);
+        hayStack.writePointForCcuUser(heatingPreconditioingRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.SYSTEM_PRECONDITION_RATE, 0);
         hayStack.writeHisValById(heatingPreconditioingRateId, TunerConstants.SYSTEM_PRECONDITION_RATE);
     
         Point coolingPreconditioingRate = new Point.Builder()
@@ -30,7 +30,7 @@ class GenericTuners {
                                               .setTz(tz)
                                               .build();
         String coolingPreconditioingRateId = hayStack.addPoint(coolingPreconditioingRate);
-        hayStack.writePoint(coolingPreconditioingRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.SYSTEM_PRECONDITION_RATE, 0);
+        hayStack.writePointForCcuUser(coolingPreconditioingRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.SYSTEM_PRECONDITION_RATE, 0);
         hayStack.writeHisValById(coolingPreconditioingRateId, TunerConstants.SYSTEM_PRECONDITION_RATE);
     
         Point buildingLimitMin = new Point.Builder()
@@ -44,7 +44,7 @@ class GenericTuners {
                                      .setTz(tz)
                                      .build();
         String buildingLimitMinId = hayStack.addPoint(buildingLimitMin);
-        hayStack.writePoint(buildingLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.BUILDING_LIMIT_MIN, 0);
+        hayStack.writePointForCcuUser(buildingLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.BUILDING_LIMIT_MIN, 0);
         hayStack.writeHisValById(buildingLimitMinId, TunerConstants.BUILDING_LIMIT_MIN);
     
         Point buildingLimitMax = new Point.Builder()
@@ -58,7 +58,7 @@ class GenericTuners {
                                      .setTz(tz)
                                      .build();
         String buildingLimitMaxId = hayStack.addPoint(buildingLimitMax);
-        hayStack.writePoint(buildingLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.BUILDING_LIMIT_MAX, 0);
+        hayStack.writePointForCcuUser(buildingLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.BUILDING_LIMIT_MAX, 0);
         hayStack.writeHisValById(buildingLimitMaxId, TunerConstants.BUILDING_LIMIT_MAX);
     
         Point buildingToZoneDifferential = new Point.Builder()
@@ -71,7 +71,7 @@ class GenericTuners {
                                                .setTz(tz)
                                                .build();
         String buildingToZoneDifferentialId = hayStack.addPoint(buildingToZoneDifferential);
-        hayStack.writePoint(buildingToZoneDifferentialId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.BUILDING_TO_ZONE_DIFFERENTIAL, 0);
+        hayStack.writePointForCcuUser(buildingToZoneDifferentialId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.BUILDING_TO_ZONE_DIFFERENTIAL, 0);
         hayStack.writeHisValById(buildingToZoneDifferentialId, TunerConstants.BUILDING_TO_ZONE_DIFFERENTIAL);
     
         Point zoneTemperatureDeadLeeway = new Point.Builder()
@@ -85,7 +85,7 @@ class GenericTuners {
                                               .setTz(tz)
                                               .build();
         String zoneTemperatureDeadLeewayId = hayStack.addPoint(zoneTemperatureDeadLeeway);
-        hayStack.writePoint(zoneTemperatureDeadLeewayId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_TEMP_DEAD_LEEWAY, 0);
+        hayStack.writePointForCcuUser(zoneTemperatureDeadLeewayId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.ZONE_TEMP_DEAD_LEEWAY, 0);
         hayStack.writeHisValById(zoneTemperatureDeadLeewayId, TunerConstants.ZONE_TEMP_DEAD_LEEWAY);
     
     
@@ -100,7 +100,7 @@ class GenericTuners {
                                            .setTz(tz)
                                            .build();
         String unoccupiedZoneSetbackId = hayStack.addPoint(unoccupiedZoneSetback);
-        hayStack.writePoint(unoccupiedZoneSetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_UNOCCUPIED_SETBACK, 0);
+        hayStack.writePointForCcuUser(unoccupiedZoneSetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.ZONE_UNOCCUPIED_SETBACK, 0);
         hayStack.writeHisValById(unoccupiedZoneSetbackId, TunerConstants.ZONE_UNOCCUPIED_SETBACK);
     
         Point heatingUserLimitMin  = new Point.Builder()
@@ -114,7 +114,7 @@ class GenericTuners {
                                          .setTz(tz)
                                          .build();
         String heatingUserLimitMinId = hayStack.addPoint(heatingUserLimitMin);
-        hayStack.writePoint(heatingUserLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_HEATING_USERLIMIT_MIN, 0);
+        hayStack.writePointForCcuUser(heatingUserLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.ZONE_HEATING_USERLIMIT_MIN, 0);
         hayStack.writeHisValById(heatingUserLimitMinId, TunerConstants.ZONE_HEATING_USERLIMIT_MIN);
     
         Point heatingUserLimitMax  = new Point.Builder()
@@ -128,7 +128,7 @@ class GenericTuners {
                                          .setTz(tz)
                                          .build();
         String heatingUserLimitMaxId = hayStack.addPoint(heatingUserLimitMax);
-        hayStack.writePoint(heatingUserLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_HEATING_USERLIMIT_MAX, 0);
+        hayStack.writePointForCcuUser(heatingUserLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.ZONE_HEATING_USERLIMIT_MAX, 0);
         hayStack.writeHisValById(heatingUserLimitMaxId, TunerConstants.ZONE_HEATING_USERLIMIT_MAX);
     
         Point coolingUserLimitMin  = new Point.Builder()
@@ -143,7 +143,7 @@ class GenericTuners {
                                          .setTz(tz)
                                          .build();
         String coolingUserLimitMinId = hayStack.addPoint(coolingUserLimitMin);
-        hayStack.writePoint(coolingUserLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_COOLING_USERLIMIT_MIN, 0);
+        hayStack.writePointForCcuUser(coolingUserLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.ZONE_COOLING_USERLIMIT_MIN, 0);
         hayStack.writeHisValById(coolingUserLimitMinId, TunerConstants.ZONE_COOLING_USERLIMIT_MIN);
     
         Point coolingUserLimitMax  = new Point.Builder()
@@ -157,7 +157,7 @@ class GenericTuners {
                                          .setTz(tz)
                                          .build();
         String coolingUserLimitMaxId = hayStack.addPoint(coolingUserLimitMax);
-        hayStack.writePoint(coolingUserLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_COOLING_USERLIMIT_MAX, 0);
+        hayStack.writePointForCcuUser(coolingUserLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.ZONE_COOLING_USERLIMIT_MAX, 0);
         hayStack.writeHisValById(coolingUserLimitMaxId, TunerConstants.ZONE_COOLING_USERLIMIT_MAX);
         Point humidityCompensationOffset = new Point.Builder()
                                                .setDisplayName(equipDis+"-"+"humidityCompensationOffset")
@@ -169,7 +169,7 @@ class GenericTuners {
                                                .setTz(tz)
                                                .build();
         String humidityCompensationOffsetId = hayStack.addPoint(humidityCompensationOffset);
-        hayStack.writePoint(humidityCompensationOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
+        hayStack.writePointForCcuUser(humidityCompensationOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,0.0, 0);
         hayStack.writeHisValById(humidityCompensationOffsetId, 0.0);
     
         Point percentOfDeadZonesAllowed = new Point.Builder()
@@ -182,7 +182,7 @@ class GenericTuners {
                                               .setTz(tz)
                                               .build();
         String percentOfDeadZonesAllowedId = hayStack.addPoint(percentOfDeadZonesAllowed);
-        hayStack.writePoint(percentOfDeadZonesAllowedId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.CM_TEMP_INFLU_PERCENTILE_ZONE_DEAD, 0);
+        hayStack.writePointForCcuUser(percentOfDeadZonesAllowedId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,TunerConstants.CM_TEMP_INFLU_PERCENTILE_ZONE_DEAD, 0);
         hayStack.writeHisValById(percentOfDeadZonesAllowedId, TunerConstants.CM_TEMP_INFLU_PERCENTILE_ZONE_DEAD);
     
         Point ccuAlarmVolumeLevel  = new Point.Builder()
@@ -195,7 +195,7 @@ class GenericTuners {
                                          .setTz(tz)
                                          .build();
         String ccuAlarmVolumeLevelId = hayStack.addPoint(ccuAlarmVolumeLevel);
-        hayStack.writePoint(ccuAlarmVolumeLevelId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
+        hayStack.writePointForCcuUser(ccuAlarmVolumeLevelId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,0.0, 0);
         hayStack.writeHisValById(ccuAlarmVolumeLevelId, 0.0);
     
         Point cmHeartBeatInterval  = new Point.Builder()
@@ -209,7 +209,7 @@ class GenericTuners {
                                          .setTz(tz)
                                          .build();
         String cmHeartBeatIntervalId = hayStack.addPoint(cmHeartBeatInterval);
-        hayStack.writePoint(cmHeartBeatIntervalId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 1.0, 0);
+        hayStack.writePointForCcuUser(cmHeartBeatIntervalId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,1.0, 0);
         hayStack.writeHisValById(cmHeartBeatIntervalId, 1.0);
     
         Point heartBeatsToSkip  = new Point.Builder()
@@ -222,7 +222,7 @@ class GenericTuners {
                                       .setTz(tz)
                                       .build();
         String heartBeatsToSkipId = hayStack.addPoint(heartBeatsToSkip);
-        hayStack.writePoint(heartBeatsToSkipId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 5.0, 0);
+        hayStack.writePointForCcuUser(heartBeatsToSkipId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,5.0, 0);
         hayStack.writeHisValById(heartBeatsToSkipId, 5.0);
     
         Point clockUpdateInterval  = new Point.Builder()
@@ -236,7 +236,7 @@ class GenericTuners {
                                          .setTz(tz)
                                          .build();
         String clockUpdateIntervalId = hayStack.addPoint(clockUpdateInterval);
-        hayStack.writePoint(clockUpdateIntervalId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 15.0, 0);
+        hayStack.writePointForCcuUser(clockUpdateIntervalId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,15.0, 0);
         hayStack.writeHisValById(clockUpdateIntervalId, 15.0);
     
         Point perDegreeHumidityFactor  = new Point.Builder()
@@ -250,7 +250,7 @@ class GenericTuners {
                                              .setTz(tz)
                                              .build();
         String perDegreeHumidityFactorId = hayStack.addPoint(perDegreeHumidityFactor);
-        hayStack.writePoint(perDegreeHumidityFactorId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 10.0, 0);
+        hayStack.writePointForCcuUser(perDegreeHumidityFactorId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,10.0, 0);
         hayStack.writeHisValById(perDegreeHumidityFactorId, 10.0);
     
     }

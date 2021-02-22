@@ -79,7 +79,7 @@ public class UpdatePointHandler
                     //If duration shows it has already expired, then just write 1ms to force-expire it locally.
                     double dur = (duration == 0 ? 0 : (duration - System.currentTimeMillis() ) > 0 ? (duration - System.currentTimeMillis()) : 1);
                     CcuLog.d(L.TAG_CCU_PUBNUB, "Remote point:  level " + level + " val " + val + " who " + who + " duration "+duration+" dur "+dur);
-                    CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(luid), (int) level, who, HNum.make(val), HNum.make(dur));
+                    CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(luid), (int) level, CCUHsApi.getInstance().getCCUUserName(), HNum.make(val), HNum.make(dur));
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }

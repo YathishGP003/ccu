@@ -34,7 +34,7 @@ public class TITuners {
                                        .setTz(tz)
                                        .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
-        hayStack.writePoint(zonePrioritySpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_PRIORITY_SPREAD, 0);
+        hayStack.writePointForCcuUser(zonePrioritySpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.ZONE_PRIORITY_SPREAD, 0);
         hayStack.writeHisValById(zonePrioritySpreadId, TunerConstants.ZONE_PRIORITY_SPREAD);
         
         Point zonePriorityMultiplier = new Point.Builder()
@@ -47,7 +47,7 @@ public class TITuners {
                                            .setTz(tz)
                                            .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
-        hayStack.writePoint(zonePriorityMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_PRIORITY_MULTIPLIER, 0);
+        hayStack.writePointForCcuUser(zonePriorityMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.ZONE_PRIORITY_MULTIPLIER, 0);
         hayStack.writeHisValById(zonePriorityMultiplierId, TunerConstants.ZONE_PRIORITY_MULTIPLIER);
         
         Point coolingDb = new Point.Builder()
@@ -61,7 +61,7 @@ public class TITuners {
                               .setTz(tz)
                               .build();
         String coolingDbId = hayStack.addPoint(coolingDb);
-        hayStack.writePoint(coolingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_COOLING_DB, 0);
+        hayStack.writePointForCcuUser(coolingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.VAV_COOLING_DB, 0);
         hayStack.writeHisValById(coolingDbId, TunerConstants.VAV_COOLING_DB);
         
         Point coolingDbMultiplier = new Point.Builder()
@@ -74,7 +74,7 @@ public class TITuners {
                                         .setTz(tz)
                                         .build();
         String coolingDbMultiplierId = hayStack.addPoint(coolingDbMultiplier);
-        hayStack.writePoint(coolingDbMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_COOLING_DB_MULTPLIER, 0);
+        hayStack.writePointForCcuUser(coolingDbMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_COOLING_DB_MULTPLIER, 0);
         hayStack.writeHisValById(coolingDbMultiplierId, TunerConstants.VAV_COOLING_DB_MULTPLIER);
         
         Point heatingDb = new Point.Builder()
@@ -88,7 +88,7 @@ public class TITuners {
                               .setTz(tz)
                               .build();
         String heatingDbId = hayStack.addPoint(heatingDb);
-        hayStack.writePoint(heatingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_HEATING_DB, 0);
+        hayStack.writePointForCcuUser(heatingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.VAV_HEATING_DB, 0);
         hayStack.writeHisValById(heatingDbId, TunerConstants.VAV_HEATING_DB);
         
         Point heatingDbMultiplier = new Point.Builder()
@@ -101,7 +101,7 @@ public class TITuners {
                                         .setTz(tz)
                                         .build();
         String heatingDbMultiplierId = hayStack.addPoint(heatingDbMultiplier);
-        hayStack.writePoint(heatingDbMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_HEATING_DB_MULTIPLIER, 0);
+        hayStack.writePointForCcuUser(heatingDbMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.VAV_HEATING_DB_MULTIPLIER, 0);
         hayStack.writeHisValById(heatingDbMultiplierId, TunerConstants.VAV_HEATING_DB_MULTIPLIER);
         
         Point propGain = new Point.Builder()
@@ -114,7 +114,7 @@ public class TITuners {
                              .setTz(tz)
                              .build();
         String pgainId = hayStack.addPoint(propGain);
-        hayStack.writePoint(pgainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_PROPORTIONAL_GAIN, 0);
+        hayStack.writePointForCcuUser(pgainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.VAV_PROPORTIONAL_GAIN, 0);
         hayStack.writeHisValById(pgainId, TunerConstants.VAV_PROPORTIONAL_GAIN);
         
         Point integralGain = new Point.Builder()
@@ -127,7 +127,7 @@ public class TITuners {
                                  .setTz(tz)
                                  .build();
         String igainId = hayStack.addPoint(integralGain);
-        hayStack.writePoint(igainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_INTEGRAL_GAIN, 0);
+        hayStack.writePointForCcuUser(igainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_INTEGRAL_GAIN, 0);
         hayStack.writeHisValById(igainId, TunerConstants.VAV_INTEGRAL_GAIN);
         
         Point propSpread = new Point.Builder()
@@ -140,7 +140,7 @@ public class TITuners {
                                .setTz(tz)
                                .build();
         String pSpreadId = hayStack.addPoint(propSpread);
-        hayStack.writePoint(pSpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_PROPORTIONAL_SPREAD, 0);
+        hayStack.writePointForCcuUser(pSpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.VAV_PROPORTIONAL_SPREAD, 0);
         hayStack.writeHisValById(pSpreadId, TunerConstants.VAV_PROPORTIONAL_SPREAD);
         
         Point integralTimeout = new Point.Builder()
@@ -154,7 +154,7 @@ public class TITuners {
                                     .setTz(tz)
                                     .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
-        hayStack.writePoint(iTimeoutId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_INTEGRAL_TIMEOUT, 0);
+        hayStack.writePointForCcuUser(iTimeoutId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.VAV_INTEGRAL_TIMEOUT, 0);
         hayStack.writeHisValById(iTimeoutId, TunerConstants.VAV_INTEGRAL_TIMEOUT);
         
     }

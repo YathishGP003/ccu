@@ -18,7 +18,7 @@ class AlertTuners {
                                              .setTz(tz)
                                              .build();
         String buildingLimitAlertTimerId = hayStack.addPoint(buildingLimitAlertTimer);
-        hayStack.writePoint(buildingLimitAlertTimerId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 45.0, 0);
+        hayStack.writePointForCcuUser(buildingLimitAlertTimerId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,45.0, 0);
         hayStack.writeHisValById(buildingLimitAlertTimerId, 45.0);
     
         Point constantTempAlertTime  = new Point.Builder()
@@ -62,7 +62,7 @@ class AlertTuners {
                                            .setTz(tz)
                                            .build();
         String airflowSampleWaitTimeId = hayStack.addPoint(airflowSampleWaitTime);
-        hayStack.writePoint(airflowSampleWaitTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 5.0, 0);
+        hayStack.writePointForCcuUser(airflowSampleWaitTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 5.0, 0);
         hayStack.writeHisValById(airflowSampleWaitTimeId, 5.0);
     
         Point stage1CoolingAirflowTempLowerOffset  = new Point.Builder()
@@ -76,7 +76,7 @@ class AlertTuners {
                                                          .setTz(tz)
                                                          .build();
         String stage1CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage1CoolingAirflowTempLowerOffset);
-        hayStack.writePoint(stage1CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -20.0, 0);
+        hayStack.writePointForCcuUser(stage1CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,-20.0, 0);
         hayStack.writeHisValById(stage1CoolingAirflowTempLowerOffsetId, -20.0);
     
         Point stage1CoolingAirflowTempUpperOffset  = new Point.Builder()
@@ -90,7 +90,7 @@ class AlertTuners {
                                                          .setTz(tz)
                                                          .build();
         String stage1CoolingAirflowTempUpperOffsetId = hayStack.addPoint(stage1CoolingAirflowTempUpperOffset);
-        hayStack.writePoint(stage1CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -8.0, 0);
+        hayStack.writePointForCcuUser(stage1CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,-8.0, 0);
         hayStack.writeHisValById(stage1CoolingAirflowTempUpperOffsetId, -8.0);
     
         Point stage1HeatingAirflowTempUpperOffset  = new Point.Builder()
@@ -104,7 +104,7 @@ class AlertTuners {
                                                          .setTz(tz)
                                                          .build();
         String stage1HeatingAirflowTempUpperOffsetId = hayStack.addPoint(stage1HeatingAirflowTempUpperOffset);
-        hayStack.writePoint(stage1HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 40.0, 0);
+        hayStack.writePointForCcuUser(stage1HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,40.0, 0);
         hayStack.writeHisValById(stage1HeatingAirflowTempUpperOffsetId, 40.0);
     
         Point stage1HeatingAirflowTempLowerOffset  = new Point.Builder()
@@ -118,7 +118,7 @@ class AlertTuners {
                                                          .setTz(tz)
                                                          .build();
         String stage1HeatingAirflowTempLowerOffsetId = hayStack.addPoint(stage1HeatingAirflowTempLowerOffset);
-        hayStack.writePoint(stage1HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 25.0, 0);
+        hayStack.writePointForCcuUser(stage1HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,25.0, 0);
         hayStack.writeHisValById(stage1HeatingAirflowTempLowerOffsetId, 25.0);
     
         Point stage2CoolingAirflowTempLowerOffset  = new Point.Builder()
@@ -132,7 +132,7 @@ class AlertTuners {
                                                          .setTz(tz)
                                                          .build();
         String stage2CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage2CoolingAirflowTempLowerOffset);
-        hayStack.writePoint(stage2CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -25.0, 0);
+        hayStack.writePointForCcuUser(stage2CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,-25.0, 0);
         hayStack.writeHisValById(stage2CoolingAirflowTempLowerOffsetId, -25.0);
     
         Point stage2CoolingAirflowTempUpperOffset  = new Point.Builder()
@@ -146,7 +146,7 @@ class AlertTuners {
                                                          .setTz(tz)
                                                          .build();
         String stage2CoolingAirflowTempUpperOffsetId = hayStack.addPoint(stage2CoolingAirflowTempUpperOffset);
-        hayStack.writePoint(stage2CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -12.0, 0);
+        hayStack.writePointForCcuUser(stage2CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,-12.0, 0);
         hayStack.writeHisValById(stage2CoolingAirflowTempUpperOffsetId, -12.0);
     
         Point stage2HeatingAirflowTempUpperOffset  = new Point.Builder()
@@ -160,7 +160,7 @@ class AlertTuners {
                                                          .setTz(tz)
                                                          .build();
         String stage2HeatingAirflowTempUpperOffsetId = hayStack.addPoint(stage2HeatingAirflowTempUpperOffset);
-        hayStack.writePoint(stage2HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 50.0, 0);
+        hayStack.writePointForCcuUser(stage2HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,50.0, 0);
         hayStack.writeHisValById(stage2HeatingAirflowTempUpperOffsetId, 50.0);
     
         Point stage2HeatingAirflowTempLowerOffset  = new Point.Builder()
@@ -174,7 +174,7 @@ class AlertTuners {
                                                          .setTz(tz)
                                                          .build();
         String stage2HeatingAirflowTempLowerOffsetId = hayStack.addPoint(stage2HeatingAirflowTempLowerOffset);
-        hayStack.writePoint(stage2HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 35.0, 0);
+        hayStack.writePointForCcuUser(stage2HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,35.0, 0);
         hayStack.writeHisValById(stage2HeatingAirflowTempLowerOffsetId, 35.0);
     
         Point stage3CoolingAirflowTempLowerOffset  = new Point.Builder()
@@ -188,7 +188,7 @@ class AlertTuners {
                                                          .setTz(tz)
                                                          .build();
         String stage3CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage3CoolingAirflowTempLowerOffset);
-        hayStack.writePoint(stage3CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -25.0, 0);
+        hayStack.writePointForCcuUser(stage3CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,-25.0, 0);
         hayStack.writeHisValById(stage3CoolingAirflowTempLowerOffsetId, -25.0);
     
         Point stage3CoolingAirflowTempUpperOffset  = new Point.Builder()
@@ -202,7 +202,7 @@ class AlertTuners {
                                                          .setTz(tz)
                                                          .build();
         String stage3CoolingAirflowTempUpperOffsetId = hayStack.addPoint(stage3CoolingAirflowTempUpperOffset);
-        hayStack.writePoint(stage3CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -12.0, 0);
+        hayStack.writePointForCcuUser(stage3CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,-12.0, 0);
         hayStack.writeHisValById(stage3CoolingAirflowTempUpperOffsetId, -12.0);
     
         Point stage3HeatingAirflowTempUpperOffset  = new Point.Builder()
@@ -216,7 +216,7 @@ class AlertTuners {
                                                          .setTz(tz)
                                                          .build();
         String stage3HeatingAirflowTempUpperOffsetId = hayStack.addPoint(stage3HeatingAirflowTempUpperOffset);
-        hayStack.writePoint(stage3HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 50.0, 0);
+        hayStack.writePointForCcuUser(stage3HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,50.0, 0);
         hayStack.writeHisValById(stage3HeatingAirflowTempUpperOffsetId, 50.0);
     
         Point stage3HeatingAirflowTempLowerOffset  = new Point.Builder()
@@ -230,7 +230,7 @@ class AlertTuners {
                                                          .setTz(tz)
                                                          .build();
         String stage3HeatingAirflowTempLowerOffsetId = hayStack.addPoint(stage3HeatingAirflowTempLowerOffset);
-        hayStack.writePoint(stage3HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 35.0, 0);
+        hayStack.writePointForCcuUser(stage3HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,35.0, 0);
         hayStack.writeHisValById(stage3HeatingAirflowTempLowerOffsetId, 35.0);
     
         Point stage4CoolingAirflowTempLowerOffset  = new Point.Builder()
@@ -244,7 +244,7 @@ class AlertTuners {
                                                          .setTz(tz)
                                                          .build();
         String stage4CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage4CoolingAirflowTempLowerOffset);
-        hayStack.writePoint(stage4CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -25.0, 0);
+        hayStack.writePointForCcuUser(stage4CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,-25.0, 0);
         hayStack.writeHisValById(stage1CoolingAirflowTempLowerOffsetId, -25.0);
     
         Point stage4CoolingAirflowTempUpperOffset  = new Point.Builder()
@@ -258,7 +258,7 @@ class AlertTuners {
                                                          .setTz(tz)
                                                          .build();
         String stage4CoolingAirflowTempUpperOffsetId = hayStack.addPoint(stage4CoolingAirflowTempUpperOffset);
-        hayStack.writePoint(stage4CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -12.0, 0);
+        hayStack.writePointForCcuUser(stage4CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,-12.0, 0);
         hayStack.writeHisValById(stage4CoolingAirflowTempUpperOffsetId, -12.0);
     
         Point stage4HeatingAirflowTempUpperOffset  = new Point.Builder()
@@ -272,7 +272,7 @@ class AlertTuners {
                                                          .setTz(tz)
                                                          .build();
         String stage4HeatingAirflowTempUpperOffsetId = hayStack.addPoint(stage4HeatingAirflowTempUpperOffset);
-        hayStack.writePoint(stage4HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 50.0, 0);
+        hayStack.writePointForCcuUser(stage4HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,50.0, 0);
         hayStack.writeHisValById(stage4HeatingAirflowTempUpperOffsetId, 50.0);
     
         Point stage4HeatingAirflowTempLowerOffset  = new Point.Builder()
@@ -286,7 +286,7 @@ class AlertTuners {
                                                          .setTz(tz)
                                                          .build();
         String stage4HeatingAirflowTempLowerOffsetId = hayStack.addPoint(stage4HeatingAirflowTempLowerOffset);
-        hayStack.writePoint(stage4HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 35.0, 0);
+        hayStack.writePointForCcuUser(stage4HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,35.0, 0);
         hayStack.writeHisValById(stage4HeatingAirflowTempLowerOffsetId, 35.0);
     
         Point stage5CoolingAirflowTempLowerOffset  = new Point.Builder()
@@ -300,7 +300,7 @@ class AlertTuners {
                                                          .setTz(tz)
                                                          .build();
         String stage5CoolingAirflowTempLowerOffsetId = hayStack.addPoint(stage5CoolingAirflowTempLowerOffset);
-        hayStack.writePoint(stage5CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -25.0, 0);
+        hayStack.writePointForCcuUser(stage5CoolingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,-25.0, 0);
         hayStack.writeHisValById(stage5CoolingAirflowTempLowerOffsetId, -25.0);
     
         Point stage5CoolingAirflowTempUpperOffset  = new Point.Builder()
@@ -314,7 +314,7 @@ class AlertTuners {
                                                          .setTz(tz)
                                                          .build();
         String stage5CoolingAirflowTempUpperOffsetId = hayStack.addPoint(stage5CoolingAirflowTempUpperOffset);
-        hayStack.writePoint(stage5CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", -12.0, 0);
+        hayStack.writePointForCcuUser(stage5CoolingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,-12.0, 0);
         hayStack.writeHisValById(stage5CoolingAirflowTempUpperOffsetId, -12.0);
     
         Point stage5HeatingAirflowTempUpperOffset  = new Point.Builder()
@@ -328,7 +328,7 @@ class AlertTuners {
                                                          .setTz(tz)
                                                          .build();
         String stage5HeatingAirflowTempUpperOffsetId = hayStack.addPoint(stage5HeatingAirflowTempUpperOffset);
-        hayStack.writePoint(stage5HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 50.0, 0);
+        hayStack.writePointForCcuUser(stage5HeatingAirflowTempUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,50.0, 0);
         hayStack.writeHisValById(stage5HeatingAirflowTempUpperOffsetId, 50.0);
     
         Point stage5HeatingAirflowTempLowerOffset  = new Point.Builder()
@@ -342,7 +342,7 @@ class AlertTuners {
                                                          .setTz(tz)
                                                          .build();
         String stage5HeatingAirflowTempLowerOffsetId = hayStack.addPoint(stage5HeatingAirflowTempLowerOffset);
-        hayStack.writePoint(stage5HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 35.0, 0);
+        hayStack.writePointForCcuUser(stage5HeatingAirflowTempLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,35.0, 0);
         hayStack.writeHisValById(stage5HeatingAirflowTempLowerOffsetId, 35.0);
     
     }

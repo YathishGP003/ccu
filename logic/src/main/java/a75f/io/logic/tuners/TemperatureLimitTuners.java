@@ -19,7 +19,7 @@ class TemperatureLimitTuners {
                                     .setTz(tz)
                                     .build();
         String userLimitSpreadId = hayStack.addPoint(userLimitSpread);
-        hayStack.writePoint(userLimitSpreadId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.USER_LIMIT_SPREAD, 0);
+        hayStack.writePointForCcuUser(userLimitSpreadId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.USER_LIMIT_SPREAD, 0);
         hayStack.writeHisValById(userLimitSpreadId, TunerConstants.USER_LIMIT_SPREAD);
 
         Point adrCoolingDeadband  = new Point.Builder()

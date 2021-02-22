@@ -70,6 +70,6 @@ class TunerUpdateHandler {
         String who = msgObject.get(HayStackConstants.WRITABLE_ARRAY_WHO).getAsString();
         double val = msgObject.get(HayStackConstants.WRITABLE_ARRAY_VAL).getAsDouble();
         int duration = msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION) != null ? msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION).getAsInt() : 0;
-        hayStack.writePoint(id, level, who, val, duration);
+        hayStack.writePoint(id, level, CCUHsApi.getInstance().getCCUUserName(), val, duration);
     }
 }

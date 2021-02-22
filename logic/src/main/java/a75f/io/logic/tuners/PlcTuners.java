@@ -25,7 +25,7 @@ public class PlcTuners {
                              .setTz(tz)
                              .build();
         String pgainId = hayStack.addPoint(propGain);
-        hayStack.writePoint(pgainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_PROPORTIONAL_GAIN, 0);
+        hayStack.writePointForCcuUser(pgainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.VAV_PROPORTIONAL_GAIN, 0);
         hayStack.writeHisValById(pgainId, TunerConstants.VAV_PROPORTIONAL_GAIN);
         
         Point integralGain = new Point.Builder()
@@ -38,7 +38,7 @@ public class PlcTuners {
                                  .setTz(tz)
                                  .build();
         String igainId = hayStack.addPoint(integralGain);
-        hayStack.writePoint(igainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_INTEGRAL_GAIN, 0);
+        hayStack.writePointForCcuUser(igainId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_INTEGRAL_GAIN, 0);
         hayStack.writeHisValById(igainId, TunerConstants.VAV_INTEGRAL_GAIN);
         
         Point integralTimeout = new Point.Builder()
@@ -52,7 +52,7 @@ public class PlcTuners {
                                     .setTz(tz)
                                     .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
-        hayStack.writePoint(iTimeoutId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_INTEGRAL_TIMEOUT, 0);
+        hayStack.writePointForCcuUser(iTimeoutId, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.VAV_INTEGRAL_TIMEOUT, 0);
         hayStack.writeHisValById(iTimeoutId, TunerConstants.VAV_INTEGRAL_TIMEOUT);
     }
     

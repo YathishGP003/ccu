@@ -44,20 +44,14 @@ public class UpdatePointHandler
         }
 
         Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(luid)).build();
-        if (HSUtil.isSystemConfigOutputPoint(luid, CCUHsApi.getInstance())) {
+        if (HSUtil.isSystemConfigOutputPoint(luid, CCUHsApi.getInstance())
+                            || HSUtil.isSystemConfigHumidifierType(luid, CCUHsApi.getInstance())) {
             ConfigPointUpdateHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
             updatePoints(localPoint);
             return;
         }
 
-        if (HSUtil.isSystemConfigHumidifierType(luid, CCUHsApi.getInstance())) {
-            ConfigPointUpdateHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
-            updatePoints(localPoint);
-            return;
-        }
-
-        if (luid != null && luid != "")
-        {
+        if (luid != null && luid != "") {
             HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote("@" + pointGuid);
             if (pointGrid == null) {
                 CcuLog.d(L.TAG_CCU_PUBNUB, "Failed to read remote point point : " + pointGuid);
@@ -66,8 +60,7 @@ public class UpdatePointHandler
             //CcuLog.d(L.TAG_CCU_PUBNUB+ " REMOTE ARRAY: ", HZincWriter.gridToString(pointGrid));
             CCUHsApi.getInstance().deletePointArray(luid);
             Iterator it = pointGrid.iterator();
-            while (it.hasNext())
-            {
+            while (it.hasNext()) {
                 HRow r = (HRow) it.next();
                 String who = r.get("who").toString();
 
@@ -95,9 +88,7 @@ public class UpdatePointHandler
                 e.printStackTrace();
             }
         
-        }
-        else
-        {
+        } else {
             CcuLog.d(L.TAG_CCU_PUBNUB, "Received for invalid local point : " + luid);
         }
     }

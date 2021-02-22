@@ -25,7 +25,7 @@ class TunerUpdateHandler {
         int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();
         
         String pointLuid = CCUHsApi.getInstance().getLUID("@" + pointGuid);
-        writePointFromJson(pointLuid, level, msgObject, hayStack);
+        writePointFromJson(pointLuid, level, msgObject, hayStack, true);
         
         if (level == TunerConstants.TUNER_BUILDING_VAL_LEVEL) {
             CcuLog.i(L.TAG_CCU_PUBNUB, "Building Level updated for point : " + pointGuid);
@@ -63,13 +63,19 @@ class TunerUpdateHandler {
         Observable.fromIterable(equipTuners)
                   .subscribeOn(Schedulers.io())
                   .map(map -> map.get(Tags.ID).toString())
-                  .subscribe(id -> writePointFromJson(id, level, msgObject, hayStack));
+                  .subscribe(id -> writePointFromJson(id, level, msgObject, hayStack, false));
     }
     
-    private static void writePointFromJson(String id, int level, JsonObject msgObject, CCUHsApi hayStack) {
+    private static void writePointFromJson(String id, int level, JsonObject msgObject, CCUHsApi hayStack,
+                                           boolean local) {
         String who = msgObject.get(HayStackConstants.WRITABLE_ARRAY_WHO).getAsString();
         double val = msgObject.get(HayStackConstants.WRITABLE_ARRAY_VAL).getAsDouble();
         int duration = msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION) != null ? msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION).getAsInt() : 0;
-        hayStack.writePoint(id, level, CCUHsApi.getInstance().getCCUUserName(), val, duration);
+        if (local) {
+            hayStack.writePointLocal(id, level, who, val, duration);
+        } else {
+            hayStack.writePoint(id, level, CCUHsApi.getInstance().getCCUUserName(), val, duration);
+        }
+        hayStack.writeHisValById(id , val);
     }
 }

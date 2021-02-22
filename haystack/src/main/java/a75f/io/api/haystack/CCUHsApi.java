@@ -1259,7 +1259,6 @@ public class CCUHsApi
 
 
         CCUHsApi hsApi = CCUHsApi.getInstance();
-        ArrayList<String> pointsForUpdate = new ArrayList<>();
         for (Equip q : equips) {
             if (q.getMarkers().contains("tuner"))
             {
@@ -1287,7 +1286,6 @@ public class CCUHsApi
                             p.setEquipRef(equipLuid);
                             String pointLuid = hsApi.addPoint(p);
                             hsApi.putUIDMap(pointLuid, p.getId());
-                            pointsForUpdate.add(pointLuid);
                         } else {
                             CcuLog.i(TAG, "Point already imported "+p.getId());
                         }
@@ -1295,9 +1293,6 @@ public class CCUHsApi
                     }
                 }
             }
-        }
-        if (pointsForUpdate.size() > 0) {
-            fetchPointArrays(pointsForUpdate);
         }
         CcuLog.i(TAG," importBuildingTuners Completed");
     }
@@ -1311,32 +1306,6 @@ public class CCUHsApi
         }
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         importBuildingTuners(siteId, hClient);
-    }
-
-    private void fetchPointArrays(ArrayList<String> luidList) {
-
-        for (String pointLuid: luidList) {
-            String pointGuid = getGUID(pointLuid);
-            HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote(pointGuid);
-            if (pointGrid == null) {
-                CcuLog.e(TAG, "Failed to read remote point : " + pointGuid);
-                return;
-            }
-            Iterator it = pointGrid.iterator();
-            while (it.hasNext()) {
-                try {
-                    HRow r = (HRow) it.next();
-                    String who = r.get("who").toString();
-                    int level = Integer.parseInt(r.get("level").toString());
-                    HVal val = (HVal)r.get("val");
-                    HNum duration = (HNum)r.get("dur");
-                    hsClient.pointWrite(HRef.copy(pointLuid), level, who, val, duration);
-                    CcuLog.i(TAG, " Fetched Building Tuner: "+HZincWriter.gridToString(pointGrid));
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
     }
 
     public HGrid getRemoteSiteDetails(String siteId)

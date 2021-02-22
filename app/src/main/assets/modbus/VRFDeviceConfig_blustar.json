@@ -1,5 +1,5 @@
 {
-  "modbusEquipId (_id)": "5f1f30ad18bcbf4f1d9a1891",
+  "modbusEquipId (_id)": "5f1f30ad18bcbf4f1d11a1ef0",
   "name": "Bluestar IDU",
   "description": "This document contains the configuration necessary to manage a Bluestar IDU.",
   "equipType": "VRF",
@@ -15,7 +15,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d11a1de4",
+          "parameterId": "5f1f30ad18bcbf4f1d11a1ef1",
           "name": "Unit Status",
           "startBit": 0,
           "endBit": 15,
@@ -56,7 +56,7 @@
             },
             {
               "tagName": "maxVal",
-              "value": 1
+              "value": 16
             },
             {
               "tagName": "incrementVal",
@@ -96,7 +96,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a1deo",
+          "parameterId": "5f1f30ad18bcbf4f1d11a1ef2",
           "name": "Operation Mode",
           "startBit": 0,
           "endBit": 15,
@@ -195,7 +195,7 @@
       "parameterDefinitionType": "range",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a1dff",
+          "parameterId": "5f1f30ad18bcbf4f1d11a1ef3",
           "name": "Set Temperature",
           "startBit": 0,
           "endBit": 15,
@@ -216,7 +216,7 @@
             },
             {
               "tagName": "maxVal",
-              "value": 30
+              "value": 32
             },
             {
               "tagName": "incrementVal",
@@ -281,14 +281,14 @@
         }
       ]
     },
-       {
-      "registerAddress": 5,
+    {
+      "registerAddress": 4,
       "registerNumber": "30005",
       "registerType": "inputRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18123bf4f1d9a1df5",
+          "parameterId": "5f1f30ad18bcbf4f1d11a1ef4",
           "name": "Room Temperature (Return Air Temp)",
           "startBit": 0,
           "endBit": 15,
@@ -325,7 +325,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a1dk9",
+          "parameterId": "5f1f30ad18bcbf4f1d11a1ef5",
           "name": "Indoor Unit Fan status",
           "startBit": 0,
           "endBit": 15,
@@ -369,11 +369,11 @@
             },
             {
               "tagName": "minVal",
-              "value": 0
+              "value": 1
             },
             {
               "tagName": "maxVal",
-              "value": 5
+              "value": 8
             },
             {
               "tagName": "incrementVal",

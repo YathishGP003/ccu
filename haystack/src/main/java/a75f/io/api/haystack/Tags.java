@@ -37,4 +37,8 @@ public class Tags
     public static final String RELAY6 = "relay6";
     public static final String RELAY7 = "relay7";
     
+    
+    
+    public static final String IE = "ie";
+    public static final String ADDRESS = "address";
 }

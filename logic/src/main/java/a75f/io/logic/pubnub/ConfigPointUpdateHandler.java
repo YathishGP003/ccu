@@ -26,6 +26,8 @@ class ConfigPointUpdateHandler {
         } else if ((configPoint.getMarkers().contains(Tags.ASSOCIATION) )
             || configPoint.getMarkers().contains(Tags.HUMIDIFIER)) {
             updateConfigAssociation(msgObject, configPoint, hayStack);
+        } else if (configPoint.getMarkers().contains(Tags.ADDRESS)) {
+            updateIEAddress(msgObject, configPoint, hayStack);
         }
     }
     
@@ -58,6 +60,10 @@ class ConfigPointUpdateHandler {
         writePointFromJson(configPoint.getId(), msgObject, hayStack);
     }
     
+    private static void updateIEAddress(JsonObject msgObject, Point configPoint, CCUHsApi haystack) {
+        writePointStrValFromJson(configPoint.getId(), msgObject, haystack );
+    }
+    
     /***
      * When cooling/heating is disabled remotely via reconfiguration, and the system cannot operate any more
      * in the selected conditioning mode, we should turn off the system.
@@ -84,6 +90,14 @@ class ConfigPointUpdateHandler {
         int duration = msgObject.get("duration") != null ? msgObject.get("duration").getAsInt() : 0;
         int level = msgObject.get("level").getAsInt();
         hayStack.writePointLocal(id, level, who, val, duration);
+    }
+    
+    private static void writePointStrValFromJson(String id, JsonObject msgObject, CCUHsApi hayStack) {
+        String who = msgObject.get("who").getAsString();
+        String val = msgObject.get("val").getAsString().replaceAll("\"", "").trim();
+        int duration = msgObject.get("duration") != null ? msgObject.get("duration").getAsInt() : 0;
+        int level = msgObject.get("level").getAsInt();
+        hayStack.writePointStrValLocal(id, level, who, val, duration);
     }
     
     private static String getRelayTagFromConfig(Point configPoint) {

@@ -203,6 +203,20 @@ public class HSUtil
         return pointMap.get("dis").toString().contains("Building");
     }
     
+    public static boolean isSystemConfigIEAddress(String id, CCUHsApi hayStack) {
+        HashMap pointEntity = hayStack.readMapById(id);
+        return pointEntity.containsKey("system")
+               && pointEntity.containsKey("config")
+               && pointEntity.containsKey("ie")
+               && pointEntity.containsKey("address");
+    }
+    
+    public static boolean isSystemConfig(String id, CCUHsApi hayStack) {
+        HashMap pointEntity = hayStack.readMapById(id);
+        return pointEntity.containsKey("system")
+               && pointEntity.containsKey("config");
+    }
+    
     public static double getSystemUserIntentVal(String tags)
     {
         CCUHsApi hayStack = CCUHsApi.getInstance();

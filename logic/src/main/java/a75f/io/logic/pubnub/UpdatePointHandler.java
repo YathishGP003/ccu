@@ -36,17 +36,15 @@ public class UpdatePointHandler
     
         String luid = CCUHsApi.getInstance().getLUID("@" + pointGuid);
         Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(luid)).build();
-        if (HSUtil.isSystemConfigOutputPoint(luid, CCUHsApi.getInstance())) {
+        
+        if (HSUtil.isSystemConfigOutputPoint(luid, CCUHsApi.getInstance())
+                || HSUtil.isSystemConfigHumidifierType(luid, CCUHsApi.getInstance())
+                || HSUtil.isSystemConfigIEAddress(luid, CCUHsApi.getInstance())) {
             ConfigPointUpdateHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
             updatePoints(localPoint);
             return;
         }
-    
-        if (HSUtil.isSystemConfigHumidifierType(luid, CCUHsApi.getInstance())) {
-            ConfigPointUpdateHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
-            updatePoints(localPoint);
-            return;
-        }
+        
     
         if (luid != null && luid != "")
         {

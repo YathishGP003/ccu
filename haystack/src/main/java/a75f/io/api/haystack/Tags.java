@@ -22,7 +22,9 @@ public class Tags
     public static final String MARKER = "marker";
     public static final String CCU = "ccu";
     
-    
+    public static final String WRITABLE = "writable";
+    public static final String HIS = "his";
+    public static final String SP = "sp";
     
     public static final String DAB = "dab";
     public static final String VAV = "vav";

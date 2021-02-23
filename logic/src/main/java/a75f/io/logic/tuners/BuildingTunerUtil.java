@@ -26,7 +26,10 @@ class BuildingTunerUtil {
         Point tunerPoint = new Point.Builder()
                                    .setHashMap(hayStack.readMapById(tunerPointId))
                                    .build();
-        String queryString = HSUtil.getHQueryFromMarkers(tunerPoint.getMarkers());
+        
+        ArrayList<String> markersFiltered = tunerPoint.getMarkers();
+        removeGenericTagsForTunerQuery(markersFiltered);
+        String queryString = HSUtil.getHQueryFromMarkers(markersFiltered);
     
         CcuLog.e(L.TAG_CCU_TUNER, "updateTunerLevels : "+tunerPoint.getDisplayName());
         //If all the level are successfully copied from a zone tuner, no need to go further.
@@ -96,7 +99,8 @@ class BuildingTunerUtil {
         String buildingQuery = HSUtil.appendMarkerToQuery(queryString, Tags.DEFAULT);
 
         //building tuners like forcedOccupiedTime,adrCoolingDeadband,adrHeatingDeadband don't have zone marker,so try one more time without zone marker
-        HashMap buildingTunerPoint = hayStack.read(buildingQuery).isEmpty() ? hayStack.read(buildingQuery.replace("and zone", "").trim()) : hayStack.read(buildingQuery);
+        HashMap buildingTunerPoint = hayStack.read(buildingQuery);
+        
         if (buildingTunerPoint.isEmpty()) {
             return false;
         }
@@ -123,5 +127,13 @@ class BuildingTunerUtil {
             return true;
         }
         return false;
+    }
+    
+    private static ArrayList<String> removeGenericTagsForTunerQuery(ArrayList<String> markers) {
+        markers.remove(Tags.ZONE);
+        markers.remove(Tags.WRITABLE);
+        markers.remove(Tags.HIS);
+        markers.remove(Tags.SP);
+        return markers;
     }
 }

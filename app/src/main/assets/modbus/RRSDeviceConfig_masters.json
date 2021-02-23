@@ -1,354 +1,335 @@
 {
-   "modbusEquipId (_id)": "5f1f30ad18bcbf4f1d9a1dz9",
-   "name": "Rodent Repellent System-Masers ",
-   "description": "This document contains the configuration necessary to manage a maser- Rodent Repellent System.",
-   "equipType": "RRS",
-   "vendor": "Masers",
-   "model": [
-    " RRS Masers  "                      
-   ],
-   "registers": [
-   {
-       "registerAddress": 3000,                    
-       "registerNumber": "30001",
-       "registerType": "inputRegister",
-       "parameterDefinitionType": "decimal",
-       "parameters": [
+  "modbusEquipId (_id)": "5f1f30ad18bcbf4f1d9a1dz9",
+  "name": "Rodent Repellent System-Masers ",
+  "description": "This document contains the configuration necessary to manage a maser- Rodent Repellent System.",
+  "equipType": "RRS",
+  "vendor": "Masers",
+  "model": [
+    " RRS Masers  "
+  ],
+  "registers": [
+    {
+      "registerAddress": 0,
+      "registerNumber": "30001",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a1dj7",
-           "name": "Wave Speed",
-            "startBit": 0,
-            "endBit": 15,
-                "logicalPointTags": [
-              {
-                "tagName": "rrs"
-               },
-               {
-                 "tagName": "wave"
-               },
-               {
-                  "tagName": "speed"
-               },
-               {
-                  "tagName": "kind",
-                  "value": "Number"
-               },
-               {
-                   "tagName": "his"
-               },
-              {
-                    "tagName": "hisInterpolate",
-                     "value": "cov"
-               }
-             ]
-           }
-         ]
-      },
-     {
-        "registerAddress": 3001,                   
-         "registerNumber": "30002",
-         "registerType": "inputRegister",
-         "parameterDefinitionType": "decimal",
-         "parameters": [
-          {
-              "parameterId": "5f1f30ad18bcbf4f1d9a1dj8",
-               "name": "Wave density",
-               "startBit": 0,
-               "endBit": 15,
-               "logicalPointTags": [
-                {
-                "tagName": "rrs"
-                },
-               {
-                "tagName": "wave"
-                },
-                {
-                 "tagName": "density"
-                },
-                {
-                 "tagName": "kind",
-                  "value": "Number"
-                  },
-                  {
-                   "tagName": "his"
-                   },
-                   {
-                    "tagName": "hisInterpolate",
-                     "value": "cov"
-                     }
-                  ]
-               }
-            ]
-        },
+          "name": "Wave Speed",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "rrs"
+            },
+            {
+              "tagName": "wave"
+            },
+            {
+              "tagName": "speed"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 1,
+      "registerNumber": "30002",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
         {
-            "registerAddress": 3002,                 
-            "registerNumber": "30003",
-            "registerType": "holdingRegister",
-            "parameterDefinitionType": "decimal",
-            "parameters": [
-                {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1dj9",
-                    "name": "Band A time",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "logicalPointTags": [
-                        {
-                            "tagName": "rrs"
-                        },
-                        {
-                            "tagName": "bandA"
-                        },
-                        {
-                            "tagName": "time"
-                        },
-                        {
-                            "tagName": "kind",
-                            "value": "Number"
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
-                         }
-                      ]
-                   }
-                ]
-             },
+          "parameterId": "5f1f30ad18bcbf4f1d9a1dj8",
+          "name": "Wave density",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "rrs"
+            },
+            {
+              "tagName": "wave"
+            },
+            {
+              "tagName": "density"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 2,
+      "registerNumber": "30003",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
         {
-            "registerAddress": 3003,                    
-            "registerNumber": "30004",
-            "registerType": "inputRegister",
-            "parameterDefinitionType": "decimal",
-            "parameters": [
-                {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1dk2",
-                    "name": "Band B time",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "logicalPointTags": [
-                        {
-                            "tagName": "rrs"
-                        },
-                        {
-                            "tagName": "bandB"
-                        },
-                        {
-                            "tagName": "time"
-                        },
-                        {
-                            "tagName": "kind",
-                            "value": "Number"
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
-                         }
-                      ]
-                   }
-                ]
-             },
+          "parameterId": "5f1f30ad18bcbf4f1d9a1dj9",
+          "name": "Band A time",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "rrs"
+            },
+            {
+              "tagName": "bandA"
+            },
+            {
+              "tagName": "time"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 3,
+      "registerNumber": "30004",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
         {
-            "registerAddress": 3004,            
-            "registerNumber": "30005",
-            "registerType": "inputRegister",
-            "parameterDefinitionType": "decimal",
-            "parameters": [
-                {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1dk3",
-                    "name": "Band C time",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "logicalPointTags": [
-                        {
-                            "tagName": "rrs"
-                        },
-                        {
-                            "tagName": "bandC"
-                        },
-                        {
-                            "tagName": "time"
-                        },
-                        {
-                            "tagName": "kind",
-                            "value": "Number"
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
-                         }
-                      ]
-                   }
-                ]
-             },
+          "parameterId": "5f1f30ad18bcbf4f1d9a1dk2",
+          "name": "Band B time",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "rrs"
+            },
+            {
+              "tagName": "bandB"
+            },
+            {
+              "tagName": "time"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 4,
+      "registerNumber": "30005",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
         {
-            "registerAddress": 3005,      
-            "registerNumber": "30006",
-            "registerType": "inputRegister",
-            "parameterDefinitionType": "decimal",
-            "parameters": [
-                {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1dk4",
-                    "name": "Band D time",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "logicalPointTags": [
-                        {
-                            "tagName": "rrs"
-                        },
-                        {
-                            "tagName": "bandD"
-                        },
-                        {
-                            "tagName": "time"
-                        },
-                        {
-                            "tagName": "kind",
-                            "value": "Number"
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
-                         }
-                      ]
-                   }
-                ]
-             },
+          "parameterId": "5f1f30ad18bcbf4f1d9a1dk3",
+          "name": "Band C time",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "rrs"
+            },
+            {
+              "tagName": "bandC"
+            },
+            {
+              "tagName": "time"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 5,
+      "registerNumber": "30006",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
         {
-            "registerAddress": 3006,                 
-            "registerNumber": "30007",
-            "registerType": "inputRegister",
-            "parameterDefinitionType": "decimal",
-            "parameters": [
-                {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1dk5",
-                    "name": "Band E time",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "logicalPointTags": [
-                        {
-                            "tagName": "rrs"
-                        },
-                        {
-                            "tagName": "bandE"
-                        },
-                        {
-                            "tagName": "time"
-                        },
-                        {
-                            "tagName": "kind",
-                            "value": "Number"
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
-                         }
-                      ]
-                   }
-                ]
-             },
+          "parameterId": "5f1f30ad18bcbf4f1d9a1dk4",
+          "name": "Band D time",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "rrs"
+            },
+            {
+              "tagName": "bandD"
+            },
+            {
+              "tagName": "time"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 6,
+      "registerNumber": "30007",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
         {
-            "registerAddress": 3007,    
-            "registerNumber": "30008",
-            "registerType": "inputRegister",
-            "parameterDefinitionType": "decimal",
-            "parameters": [
-                {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1dk6",
-                    "name": "Current band",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "logicalPointTags": [
-                        {
-                            "tagName": "rrs"
-                        },
-                        {
-                            "tagName": "current"
-                        },
-                        {
-                            "tagName": "band"
-                        },
-                        {
-                            "tagName": "kind",
-                            "value": "Number"
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
-                         }
-                      ],
-                        "commands": [
-                        {
-                            "name": "A",
-                            "bitValues": "0"
-                        },
-                        {
-                            "name": "B",
-                            "bitValues": "1"
-                        },
-                        {
-                            "name": "C",
-                            "bitValues": "2"
-                        },
-                        {
-                            "name": "D",
-                            "bitValues": "3"
-                        },
-                        {
-                            "name": "E",
-                            "bitValues": "4"
-                        }
-                     ]
-                   }
-                ]
-             },
+          "parameterId": "5f1f30ad18bcbf4f1d9a1dk5",
+          "name": "Band E time",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "rrs"
+            },
+            {
+              "tagName": "bandE"
+            },
+            {
+              "tagName": "time"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 7,
+      "registerNumber": "30008",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
         {
-            "registerAddress": 3008,              
-            "registerNumber": "30009",
-            "registerType": "inputRegister",
-            "parameterDefinitionType": "decimal",
-            "parameters": [
-                {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1dk7",
-                    "name": "Mode",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "logicalPointTags": [
-                        {
-                            "tagName": "rrs"
-                        },
-                        {
-                            "tagName": "mode"
-                        },
-                        {
-                            "tagName": "kind",
-                            "value": "Number"
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
-                         }
-                      ],
-            "userIntentPointTags": [
+          "parameterId": "5f1f30ad18bcbf4f1d9a1dk6",
+          "name": "Current band",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "rrs"
+            },
+            {
+              "tagName": "current"
+            },
+            {
+              "tagName": "band"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ],
+          "conditions": [
+            {
+              "name": "A",
+              "bitValues": "0"
+            },
+            {
+              "name": "B",
+              "bitValues": "1"
+            },
+            {
+              "name": "C",
+              "bitValues": "2"
+            },
+            {
+              "name": "D",
+              "bitValues": "3"
+            },
+            {
+              "name": "E",
+              "bitValues": "4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 8,
+      "registerNumber": "30009",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a1dk7",
+          "name": "Mode",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
             {
               "tagName": "rrs"
             },
@@ -359,7 +340,26 @@
               "tagName": "kind",
               "value": "Number"
             },
-             {
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ],
+          "userIntentPointTags": [
+            {
+              "tagName": "rrs"
+            },
+            {
+              "tagName": "mode"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
               "tagName": "his"
             },
             {
@@ -368,169 +368,159 @@
             },
             {
               "tagName": "writable"
+            },
+            {
+              "tagName": "sp"
             }
           ],
           "commands": [
             {
-              "name": "Off",
+              "name": "Auto",
               "bitValues": "0"
             },
             {
-              "name": "On",
+              "name": "Manual",
               "bitValues": "1"
             }
-            ],
-                        "commands": [
-                        {
-                            "name": "Auto",
-                            "bitValues": "0"
-                        },
-                        {
-                            "name": "Manual",
-                            "bitValues": "1"
-                        }
-                     ]
-                   }
-                ]
-             },
-        {
-            "registerAddress": 3009,      
-            "registerNumber": "30010",
-            "registerType": "inputRegister",
-            "parameterDefinitionType": "decimal",
-            "parameters": [
-                {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1dk8",
-                    "name": "Loopback/Drv Test",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "logicalPointTags": [
-                        {
-                            "tagName": "rrs"
-                        },
-                        {
-                            "tagName": "loopback"
-                        },
-                        {
-                            "tagName": "drv"
-                        },
-                        {
-                            "tagName": "test"
-                        },
-                        {
-                            "tagName": "kind",
-                            "value": "Number"
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
-                         }
-                      ],
-                        "commands": [
-                        {
-                            "name": "not tested",
-                            "bitValues": "0"
-                        },
-                        {
-                            "name": "LB_err",
-                            "bitValues": "1"
-                        },
-                        {
-                            "name": " LB_ok ",
-                            "bitValues": "2"
-                        },
-                        {
-                            "name": " DRV_err",
-                            "bitValues": "3"
-                        },
-                        {
-                            "name": "DRV_ok",
-                            "bitValues": "4"
-                        }
-                     ]
-                   }
-                ]
-             },
-    {
-            "registerAddress": 3010,             
-            "registerNumber": "30011",
-            "registerType": "inputRegister",
-            "parameterDefinitionType": "decimal",
-            "parameters": [
-                {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1dk9",
-                    "name": "Total faulty transducers",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "logicalPointTags": [
-                        {
-                            "tagName": "rrs"
-                        },
-                        {
-                            "tagName": "total"
-                        },
-                        {
-                            "tagName": "faulty"
-                        },
-                        {
-                            "tagName": "transducers"
-                        },
-                        {
-                            "tagName": "kind",
-                            "value": "Number"
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
-                         }
-                      ]
-                   }
-                ]
-             },
-        {
-            "registerAddress": 3011,           
-            "registerNumber": "30012",
-            "registerType": "inputRegister",
-            "parameterDefinitionType": "decimal",
-            "parameters": [
-                {
-                    "parameterId": "5f1f30ad18bcbf4f1d9a1dl9",
-                    "name": "Total transducers",
-                    "startBit": 0,
-                    "endBit": 15,
-                    "logicalPointTags": [
-                        {
-                            "tagName": "rrs"
-                        },
-                        {
-                            "tagName": "total"
-                        },
-                        {
-                            "tagName": "transducers"
-                        },
-                        {
-                            "tagName": "kind",
-                            "value": "Number"
-                        },
-                        {
-                            "tagName": "his"
-                        },
-                        {
-                            "tagName": "hisInterpolate",
-                            "value": "cov"
-                         }
-                      ]
-                   }
-                ]
-             }
           ]
-       }
-  
-
-
+        }
+      ]
+    },
+    {
+      "registerAddress": 9,
+      "registerNumber": "30010",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a1dk8",
+          "name": "Loopback/Drv Test",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "rrs"
+            },
+            {
+              "tagName": "loopback"
+            },
+            {
+              "tagName": "drv"
+            },
+            {
+              "tagName": "test"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ],
+          "conditions": [
+            {
+              "name": "not tested",
+              "bitValues": "0"
+            },
+            {
+              "name": "LB_err",
+              "bitValues": "1"
+            },
+            {
+              "name": " LB_ok ",
+              "bitValues": "2"
+            },
+            {
+              "name": " DRV_err",
+              "bitValues": "3"
+            },
+            {
+              "name": "DRV_ok",
+              "bitValues": "4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 10,
+      "registerNumber": "30011",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a1dk9",
+          "name": "Total faulty transducers",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "rrs"
+            },
+            {
+              "tagName": "total"
+            },
+            {
+              "tagName": "faulty"
+            },
+            {
+              "tagName": "transducers"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 11,
+      "registerNumber": "30012",
+      "registerType": "inputRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a1dl9",
+          "name": "Total transducers",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "rrs"
+            },
+            {
+              "tagName": "total"
+            },
+            {
+              "tagName": "transducers"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,17 +1,17 @@
 {
-  "modbusEquipId (_id)": "5f1f30ad18b11f4f1d9a266",   
+  "modbusEquipId (_id)": "5f1f30ad18b11f4f1d9a266",
   "name":  "UPS - Fuji Consulneowatt 7000X",
   "description":" This document contains the configuration necessary to UPS - Fuji Consulneowatt 7000X",
-  "equipType": "UPS150K",                    
+  "equipType": "UPS150K",
   "vendor": "Fuji Consul Neowatt",
   "model": [
-    "150 kVA UPS"  
+    "150 kVA UPS"
   ],
   "registers": [
-  {
-      "registerAddress": 2001,
+    {
+      "registerAddress": 2000,
       "registerNumber": "42001",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -19,7 +19,7 @@
           "name": "Main Input Voltage Phase A",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -35,7 +35,7 @@
             {
               "tagName": " phaseA"
             },
-	    {
+            {
               "tagName": "unit",
               "value": "V"
             },
@@ -54,10 +54,10 @@
         }
       ]
     },
-  {
-      "registerAddress": 2002,
+    {
+      "registerAddress": 2001,
       "registerNumber": "42002",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -65,7 +65,7 @@
           "name": "Main Input Voltage Phase B",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -81,7 +81,7 @@
             {
               "tagName": " phaseB"
             },
-	    {
+            {
               "tagName": "unit",
               "value": "V"
             },
@@ -100,10 +100,10 @@
         }
       ]
     },
-  {
-      "registerAddress": 2003,
+    {
+      "registerAddress": 2002,
       "registerNumber": "42003",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -111,7 +111,7 @@
           "name": "Main Input Voltage Phase C",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -127,7 +127,7 @@
             {
               "tagName": " phaseC"
             },
-	    {
+            {
               "tagName": "unit",
               "value": "V"
             },
@@ -146,10 +146,10 @@
         }
       ]
     },
-  {
-      "registerAddress": 2004,
+    {
+      "registerAddress": 2003,
       "registerNumber": "42004",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -157,7 +157,7 @@
           "name": "Main Input Current Phase A",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -173,7 +173,7 @@
             {
               "tagName": " phaseA"
             },
-	    {
+            {
               "tagName": "unit",
               "value": "A"
             },
@@ -192,10 +192,10 @@
         }
       ]
     },
-  {
-      "registerAddress": 2005,
+    {
+      "registerAddress": 2004,
       "registerNumber": "42005",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -203,7 +203,7 @@
           "name": "Main Input Current Phase B",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -219,7 +219,7 @@
             {
               "tagName": " phaseB"
             },
-	    {
+            {
               "tagName": "unit",
               "value": "A"
             },
@@ -238,10 +238,10 @@
         }
       ]
     },
-  {
-      "registerAddress": 2006,
+    {
+      "registerAddress": 2005,
       "registerNumber": "42006",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -249,7 +249,7 @@
           "name": "Main Input Current Phase C",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -265,7 +265,7 @@
             {
               "tagName": " phaseC"
             },
-	    {
+            {
               "tagName": "unit",
               "value": "A"
             },
@@ -284,10 +284,10 @@
         }
       ]
     },
-  {
-      "registerAddress": 2007,
+    {
+      "registerAddress": 2006,
       "registerNumber": "42007",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -295,7 +295,7 @@
           "name": "Main Input Frequency Phase A",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -311,7 +311,7 @@
             {
               "tagName": " phaseA"
             },
-	    {
+            {
               "tagName": "unit",
               "value": "Hz"
             },
@@ -330,10 +330,10 @@
         }
       ]
     },
-  {
-      "registerAddress": 2008,
+    {
+      "registerAddress": 2007,
       "registerNumber": "42008",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -341,7 +341,7 @@
           "name": "Main Input Frequency Phase B",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -357,7 +357,7 @@
             {
               "tagName": " phaseB"
             },
-	    {
+            {
               "tagName": "unit",
               "value": "Hz"
             },
@@ -376,10 +376,10 @@
         }
       ]
     },
-  {
-      "registerAddress": 2009,
+    {
+      "registerAddress": 2008,
       "registerNumber": "42009",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -387,7 +387,7 @@
           "name": "Main Input Frequency Phase C",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -403,7 +403,7 @@
             {
               "tagName": " phaseC"
             },
-	    {
+            {
               "tagName": "unit",
               "value": "Hz"
             },
@@ -422,10 +422,10 @@
         }
       ]
     },
-  {
-      "registerAddress": 2010,
+    {
+      "registerAddress": 2009,
       "registerNumber": "42010",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -433,7 +433,7 @@
           "name": "Input PF Phase A",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -446,7 +446,7 @@
             {
               "tagName": " phaseA"
             },
-	    {
+            {
               "tagName": "unit",
               "value": "% (x100)"
             },
@@ -465,10 +465,10 @@
         }
       ]
     },
-  {
-      "registerAddress": 2011,
+    {
+      "registerAddress": 2010,
       "registerNumber": "42011",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -476,7 +476,7 @@
           "name": "Input PF Phase B",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -489,7 +489,7 @@
             {
               "tagName": " phaseB"
             },
-	    {
+            {
               "tagName": "unit",
               "value": "% (x100)"
             },
@@ -508,10 +508,10 @@
         }
       ]
     },
-  {
-      "registerAddress": 2012,
+    {
+      "registerAddress": 2011,
       "registerNumber": "42012",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -519,7 +519,7 @@
           "name": "Input PF Phase C",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -532,7 +532,7 @@
             {
               "tagName": " phaseC"
             },
-	    {
+            {
               "tagName": "unit",
               "value": "% (x100)"
             },
@@ -551,10 +551,10 @@
         }
       ]
     },
- {
-      "registerAddress": 2013,
+    {
+      "registerAddress": 2012,
       "registerNumber": "42013",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -562,7 +562,7 @@
           "name": "Postive DC Bus Voltage",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -575,10 +575,10 @@
             {
               "tagName": "bus"
             },
-           {
+            {
               "tagName": "voltage"
             },
-           {
+            {
               "tagName": "unit",
               "value": "V"
             },
@@ -597,10 +597,10 @@
         }
       ]
     },
- {
-      "registerAddress": 2014,
+    {
+      "registerAddress": 2013,
       "registerNumber": "42014",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -608,7 +608,7 @@
           "name": "Negative DC Bus Voltage",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -621,10 +621,10 @@
             {
               "tagName": "bus"
             },
-           {
+            {
               "tagName": "voltage"
             },
-           {
+            {
               "tagName": "unit",
               "value": "V"
             },
@@ -643,10 +643,10 @@
         }
       ]
     },
- {
-      "registerAddress": 2015,
+    {
+      "registerAddress": 2014,
       "registerNumber": "42015",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -654,7 +654,7 @@
           "name": "Postive Battery String Voltage",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -667,10 +667,10 @@
             {
               "tagName": "battery"
             },
-           {
+            {
               "tagName": "voltage"
             },
-           {
+            {
               "tagName": "unit",
               "value": "V"
             },
@@ -689,10 +689,10 @@
         }
       ]
     },
- {
-      "registerAddress": 2016,
+    {
+      "registerAddress": 2015,
       "registerNumber": "42016",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -700,7 +700,7 @@
           "name": "Negative Battery String Voltage",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -713,10 +713,10 @@
             {
               "tagName": "battery"
             },
-           {
+            {
               "tagName": "voltage"
             },
-           {
+            {
               "tagName": "unit",
               "value": "V"
             },
@@ -735,10 +735,10 @@
         }
       ]
     },
- {
-      "registerAddress": 2017,
+    {
+      "registerAddress": 2016,
       "registerNumber": "42017",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -746,7 +746,7 @@
           "name": "Postive Charger Voltage",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -756,10 +756,10 @@
             {
               "tagName": "charger"
             },
-           {
+            {
               "tagName": "voltage"
             },
-           {
+            {
               "tagName": "unit",
               "value": "V"
             },
@@ -778,10 +778,10 @@
         }
       ]
     },
- {
-      "registerAddress": 2018,
+    {
+      "registerAddress": 2017,
       "registerNumber": "42018",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -789,7 +789,7 @@
           "name": "Negative Charger Voltage",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -799,10 +799,10 @@
             {
               "tagName": "charger"
             },
-           {
+            {
               "tagName": "voltage"
             },
-           {
+            {
               "tagName": "unit",
               "value": "V"
             },
@@ -821,10 +821,10 @@
         }
       ]
     },
-	{
-      "registerAddress": 2019,
+    {
+      "registerAddress": 2018,
       "registerNumber": "42019",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -832,7 +832,7 @@
           "name": "Postive Charger Current",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -842,10 +842,10 @@
             {
               "tagName": "charger"
             },
-           {
+            {
               "tagName": "current"
             },
-           {
+            {
               "tagName": "unit",
               "value": "A"
             },
@@ -864,10 +864,10 @@
         }
       ]
     },
- {
-      "registerAddress": 2020,
+    {
+      "registerAddress": 2019,
       "registerNumber": "42020",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -875,7 +875,7 @@
           "name": "Negative Charger Current",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -885,10 +885,10 @@
             {
               "tagName": "charger"
             },
-           {
+            {
               "tagName": "current"
             },
-           {
+            {
               "tagName": "unit",
               "value": "A"
             },
@@ -907,10 +907,10 @@
         }
       ]
     },
- {
-      "registerAddress": 2021,
+    {
+      "registerAddress": 2020,
       "registerNumber": "42021",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -918,7 +918,7 @@
           "name": "Postive Discharge Current",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -928,10 +928,10 @@
             {
               "tagName": "discharge"
             },
-           {
+            {
               "tagName": "current"
             },
-           {
+            {
               "tagName": "unit",
               "value": "A"
             },
@@ -950,10 +950,10 @@
         }
       ]
     },
- {
-      "registerAddress": 2022,
+    {
+      "registerAddress": 2021,
       "registerNumber": "42022",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -961,7 +961,7 @@
           "name": "Negative Discharge Current",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -971,10 +971,10 @@
             {
               "tagName": "discharge"
             },
-           {
+            {
               "tagName": "current"
             },
-           {
+            {
               "tagName": "unit",
               "value": "A"
             },
@@ -993,10 +993,10 @@
         }
       ]
     },
- {
-      "registerAddress": 2023,
+    {
+      "registerAddress": 2022,
       "registerNumber": "42023",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -1004,7 +1004,7 @@
           "name":  "Invertor Voltage Phase A",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -1014,10 +1014,10 @@
             {
               "tagName": "voltage"
             },
-           {
+            {
               "tagName": "phaseA"
             },
-           {
+            {
               "tagName": "unit",
               "value": "V"
             },
@@ -1036,10 +1036,10 @@
         }
       ]
     },
- {
-      "registerAddress": 2024,
+    {
+      "registerAddress": 2023,
       "registerNumber": "42024",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -1047,7 +1047,7 @@
           "name": "Invertor Voltage Phase B",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -1057,10 +1057,10 @@
             {
               "tagName": "voltage"
             },
-           {
+            {
               "tagName": "phaseB"
             },
-           {
+            {
               "tagName": "unit",
               "value": "V"
             },
@@ -1079,10 +1079,10 @@
         }
       ]
     },
- {
-      "registerAddress": 2025,
+    {
+      "registerAddress": 2024,
       "registerNumber": "42025",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -1090,7 +1090,7 @@
           "name": "Invertor Voltage Phase C",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -1100,10 +1100,10 @@
             {
               "tagName": "voltage"
             },
-           {
+            {
               "tagName": "phaseC"
             },
-           {
+            {
               "tagName": "unit",
               "value": "V"
             },
@@ -1122,10 +1122,10 @@
         }
       ]
     },
- {
-      "registerAddress": 2026,
+    {
+      "registerAddress": 2025,
       "registerNumber": "42026",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -1133,7 +1133,7 @@
           "name": "Output Current Phase A",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -1143,10 +1143,10 @@
             {
               "tagName": "current"
             },
-           {
+            {
               "tagName": "phaseA"
             },
-           {
+            {
               "tagName": "unit",
               "value": "A"
             },
@@ -1165,10 +1165,10 @@
         }
       ]
     },
- {
-      "registerAddress": 2027,
+    {
+      "registerAddress": 2026,
       "registerNumber": "42027",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -1176,7 +1176,7 @@
           "name": "Output Current Phase B",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -1186,10 +1186,10 @@
             {
               "tagName": "current"
             },
-           {
+            {
               "tagName": "phaseB"
             },
-           {
+            {
               "tagName": "unit",
               "value": "A"
             },
@@ -1208,10 +1208,10 @@
         }
       ]
     },
- {
-      "registerAddress": 2028,
+    {
+      "registerAddress": 2027,
       "registerNumber": "42028",
-      "registerType": "inputRegister",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -1219,7 +1219,7 @@
           "name": "Output Current Phase C",
           "startBit": 0,
           "endBit": 15,
-              "logicalPointTags": [
+          "logicalPointTags": [
             {
               "tagName": "ups"
             },
@@ -1229,10 +1229,10 @@
             {
               "tagName": "current"
             },
-           {
+            {
               "tagName": "phaseC"
             },
-           {
+            {
               "tagName": "unit",
               "value": "A"
             },

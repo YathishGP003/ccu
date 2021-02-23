@@ -94,7 +94,9 @@ class BuildingTunerUtil {
     private static boolean copyFromBuildingTuner(String dstPointId, String queryString, CCUHsApi hayStack) {
         CcuLog.e(L.TAG_CCU_TUNER, " copyFromBuildingTuner : ");
         String buildingQuery = HSUtil.appendMarkerToQuery(queryString, Tags.DEFAULT);
-        HashMap buildingTunerPoint = hayStack.read(buildingQuery);
+
+        //building tuners like forcedOccupiedTime,adrCoolingDeadband,adrHeatingDeadband don't have zone marker,so try one more time without zone marker
+        HashMap buildingTunerPoint = hayStack.read(buildingQuery).isEmpty() ? hayStack.read(buildingQuery.replace("and zone", "").trim()) : hayStack.read(buildingQuery);
         if (buildingTunerPoint.isEmpty()) {
             return false;
         }

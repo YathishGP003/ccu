@@ -28,7 +28,7 @@ class BuildingTunerUtil {
                                    .build();
         
         ArrayList<String> markersFiltered = tunerPoint.getMarkers();
-        removeGenericTagsForTunerQuery(markersFiltered);
+        HSUtil.removeGenericMarkerTags(markersFiltered);
         String queryString = HSUtil.getHQueryFromMarkers(markersFiltered);
     
         CcuLog.e(L.TAG_CCU_TUNER, "updateTunerLevels : "+tunerPoint.getDisplayName());
@@ -129,11 +129,4 @@ class BuildingTunerUtil {
         return false;
     }
     
-    private static ArrayList<String> removeGenericTagsForTunerQuery(ArrayList<String> markers) {
-        markers.remove(Tags.ZONE);
-        markers.remove(Tags.WRITABLE);
-        markers.remove(Tags.HIS);
-        markers.remove(Tags.SP);
-        return markers;
-    }
 }

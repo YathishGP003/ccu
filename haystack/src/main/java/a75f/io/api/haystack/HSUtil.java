@@ -276,4 +276,12 @@ public class HSUtil
         }
         return null;
     }
+    
+    public static ArrayList<String> removeGenericMarkerTags(ArrayList<String> markers) {
+        markers.remove(Tags.ZONE);
+        markers.remove(Tags.WRITABLE);
+        markers.remove(Tags.HIS);
+        markers.remove(Tags.SP);
+        return markers;
+    }
 }

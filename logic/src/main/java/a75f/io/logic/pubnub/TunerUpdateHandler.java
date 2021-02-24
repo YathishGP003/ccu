@@ -23,58 +23,56 @@ class TunerUpdateHandler {
         
         String pointGuid = msgObject.get(HayStackConstants.ID).getAsString();
         int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();
-        
-        String pointLuid = CCUHsApi.getInstance().getLUID("@" + pointGuid);
-        writePointFromJson(pointLuid, level, msgObject, hayStack, true);
-        
-        if (level == TunerConstants.TUNER_BUILDING_VAL_LEVEL) {
-            CcuLog.i(L.TAG_CCU_PUBNUB, "Building Level updated for point : " + pointGuid);
+    
+        CcuLog.i(L.TAG_CCU_PUBNUB, "BuildingTuner level "+level+" update received for point : " + pointGuid);
+        if (level != TunerConstants.TUNER_BUILDING_VAL_LEVEL) {
             return;
         }
         
-        HashMap pointMap = CCUHsApi.getInstance().readMapById(pointLuid);
-        Point tunerPoint = new Point.Builder().setHashMap(pointMap).build();
+        String pointLuid = CCUHsApi.getInstance().getLUID("@" + pointGuid);
         
-        //Tuner value is propagated to different equips based on what level has been updated.
-        if (level == TunerConstants.TUNER_EQUIP_VAL_LEVEL ||
-                                    level == TunerConstants.TUNER_ZONE_VAL_LEVEL ) {
-            propagateTuner(tunerPoint, msgObject, hayStack, level, Tags.ZONE);
-        } else if (level == TunerConstants.TUNER_SYSTEM_VAL_LEVEL) {
-            propagateTuner(tunerPoint, msgObject, hayStack, level, Tags.SYSTEM);
-        }
+        //Do a local write to building level of BuildingTuner equip point
+        writePointFromJson(pointLuid, msgObject, hayStack, true);
+    
+        //Propagate the updated tuner value to building level of corresponding system/zone equips
+        propagateTuner(pointLuid, msgObject, hayStack);
         
     }
     
     /**
-     * Building tuner updates for equip/zone/system level has to be propagated to corresponding
-     * equip/system level points.
+     * Building tuner updates for building level has to be propagated to corresponding
+     * equip/system tuner points.
      */
-    private static void propagateTuner(Point tunerPoint, JsonObject msgObject, CCUHsApi hayStack, int level,
-                                                    String typeTag) {
+    private static void propagateTuner(String pointId, JsonObject msgObject, CCUHsApi hayStack) {
+    
+        HashMap pointMap = CCUHsApi.getInstance().readMapById(pointId);
+        Point tunerPoint = new Point.Builder().setHashMap(pointMap).build();
         
-        CcuLog.i(L.TAG_CCU_PUBNUB, "Propagate tuners for point : "+tunerPoint.getDisplayName()+" "+typeTag);
         tunerPoint.getMarkers().remove(Tags.DEFAULT);
-        tunerPoint.getMarkers().add(typeTag);
-        
+        HSUtil.removeGenericMarkerTags(tunerPoint.getMarkers());
         String tunerQuery = HSUtil.getHQueryFromMarkers(tunerPoint.getMarkers());
+        tunerQuery = HSUtil.appendMarkerToQuery(tunerQuery, "not "+Tags.DEFAULT);
+        
         ArrayList<HashMap<Object, Object>> equipTuners = CCUHsApi.getInstance()
                                                                 .readAllEntities(tunerQuery);
     
+        CcuLog.i(L.TAG_CCU_PUBNUB,
+                 "Propagate tuners for point : "+tunerPoint.getDisplayName()+" to "+equipTuners.size()+" equips");
         Observable.fromIterable(equipTuners)
                   .subscribeOn(Schedulers.io())
                   .map(map -> map.get(Tags.ID).toString())
-                  .subscribe(id -> writePointFromJson(id, level, msgObject, hayStack, false));
+                  .subscribe(id -> writePointFromJson(id, msgObject, hayStack, false));
     }
     
-    private static void writePointFromJson(String id, int level, JsonObject msgObject, CCUHsApi hayStack,
+    private static void writePointFromJson(String id, JsonObject msgObject, CCUHsApi hayStack,
                                            boolean local) {
         String who = msgObject.get(HayStackConstants.WRITABLE_ARRAY_WHO).getAsString();
         double val = msgObject.get(HayStackConstants.WRITABLE_ARRAY_VAL).getAsDouble();
         int duration = msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION) != null ? msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION).getAsInt() : 0;
         if (local) {
-            hayStack.writePointLocal(id, level, who, val, duration);
+            hayStack.writePointLocal(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL, who, val, duration);
         } else {
-            hayStack.writePoint(id, level, CCUHsApi.getInstance().getCCUUserName(), val, duration);
+            hayStack.writePoint(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL, CCUHsApi.getInstance().getCCUUserName(), val, duration);
         }
         hayStack.writeHisValById(id , val);
     }

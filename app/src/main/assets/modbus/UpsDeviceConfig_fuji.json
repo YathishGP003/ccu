@@ -33,7 +33,7 @@
               "tagName": "main"
             },
             {
-              "tagName": " phaseA"
+              "tagName": "phaseA"
             },
             {
               "tagName": "unit",
@@ -79,7 +79,7 @@
               "tagName": "main"
             },
             {
-              "tagName": " phaseB"
+              "tagName": "phaseB"
             },
             {
               "tagName": "unit",
@@ -125,7 +125,7 @@
               "tagName": "main"
             },
             {
-              "tagName": " phaseC"
+              "tagName": "phaseC"
             },
             {
               "tagName": "unit",
@@ -171,7 +171,7 @@
               "tagName": "main"
             },
             {
-              "tagName": " phaseA"
+              "tagName": "phaseA"
             },
             {
               "tagName": "unit",
@@ -217,7 +217,7 @@
               "tagName": "main"
             },
             {
-              "tagName": " phaseB"
+              "tagName": "phaseB"
             },
             {
               "tagName": "unit",
@@ -263,7 +263,7 @@
               "tagName": "main"
             },
             {
-              "tagName": " phaseC"
+              "tagName": "phaseC"
             },
             {
               "tagName": "unit",
@@ -309,7 +309,7 @@
               "tagName": "main"
             },
             {
-              "tagName": " phaseA"
+              "tagName": "phaseA"
             },
             {
               "tagName": "unit",
@@ -355,7 +355,7 @@
               "tagName": "main"
             },
             {
-              "tagName": " phaseB"
+              "tagName": "phaseB"
             },
             {
               "tagName": "unit",
@@ -401,7 +401,7 @@
               "tagName": "main"
             },
             {
-              "tagName": " phaseC"
+              "tagName": "phaseC"
             },
             {
               "tagName": "unit",
@@ -444,7 +444,7 @@
               "tagName": "pf"
             },
             {
-              "tagName": " phaseA"
+              "tagName": "phaseA"
             },
             {
               "tagName": "unit",
@@ -487,7 +487,7 @@
               "tagName": "pf"
             },
             {
-              "tagName": " phaseB"
+              "tagName": "phaseB"
             },
             {
               "tagName": "unit",
@@ -530,7 +530,7 @@
               "tagName": "pf"
             },
             {
-              "tagName": " phaseC"
+              "tagName": "phaseC"
             },
             {
               "tagName": "unit",
@@ -567,10 +567,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "positive"
-            },
-            {
-              "tagName": "DC"
+              "tagName": "positiveDC"
             },
             {
               "tagName": "bus"
@@ -613,10 +610,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "negative"
-            },
-            {
-              "tagName": "DC"
+              "tagName": "negativeDC"
             },
             {
               "tagName": "bus"

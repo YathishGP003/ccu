@@ -66,14 +66,19 @@ class TunerUpdateHandler {
     
     private static void writePointFromJson(String id, JsonObject msgObject, CCUHsApi hayStack,
                                            boolean local) {
-        String who = msgObject.get(HayStackConstants.WRITABLE_ARRAY_WHO).getAsString();
-        double val = msgObject.get(HayStackConstants.WRITABLE_ARRAY_VAL).getAsDouble();
-        int duration = msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION) != null ? msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION).getAsInt() : 0;
-        if (local) {
-            hayStack.writePointLocal(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL, who, val, duration);
-        } else {
-            hayStack.writePoint(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL, CCUHsApi.getInstance().getCCUUserName(), val, duration);
+        try {
+            String who = msgObject.get(HayStackConstants.WRITABLE_ARRAY_WHO).getAsString();
+            double val = msgObject.get(HayStackConstants.WRITABLE_ARRAY_VAL).getAsDouble();
+            int duration = msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION) != null ? msgObject.get(
+                HayStackConstants.WRITABLE_ARRAY_DURATION).getAsInt() : 0;
+            if (local) {
+                hayStack.writePointLocal(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL, who, val, duration);
+            } else {
+                hayStack.writePoint(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL, CCUHsApi.getInstance().getCCUUserName(), val, duration);
+            }
+            hayStack.writeHisValById(id, val);
+        } catch (Exception e) {
+            CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to parse tuner value : "+msgObject+" ; "+e.getMessage());
         }
-        hayStack.writeHisValById(id , val);
     }
 }

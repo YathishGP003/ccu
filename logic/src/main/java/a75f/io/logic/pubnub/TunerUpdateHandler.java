@@ -50,7 +50,7 @@ class TunerUpdateHandler {
         
         tunerPoint.getMarkers().remove(Tags.DEFAULT);
         HSUtil.removeGenericMarkerTags(tunerPoint.getMarkers());
-        String tunerQuery = HSUtil.getHQueryFromMarkers(tunerPoint.getMarkers());
+        String tunerQuery = HSUtil.getQueryFromMarkers(tunerPoint.getMarkers());
         tunerQuery = HSUtil.appendMarkerToQuery(tunerQuery, "not "+Tags.DEFAULT);
         
         ArrayList<HashMap<Object, Object>> equipTuners = CCUHsApi.getInstance()
@@ -70,7 +70,7 @@ class TunerUpdateHandler {
             String val = msgObject.get(HayStackConstants.WRITABLE_ARRAY_VAL).getAsString();
             
             if (val.isEmpty()) {
-                //When a level is deleted, it currently ends up in a pubnub with value empty.
+                //When a level is deleted, it currently ends up in a pubnub with empty value.
                 hayStack.deletePointArrayLevel(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL);
                 return;
             }

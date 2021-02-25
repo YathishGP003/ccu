@@ -3,6 +3,7 @@ package a75f.io.haystack.api;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
@@ -150,6 +151,12 @@ public class TestCcuHsApi {
                                     .build();
         
         hayStack.addPoint(testRawPoint);
+        
+        ArrayList<HashMap> p = hayStack.readAll("point and temp or temp2 and logical");
+        System.out.println(p.size());
+        for(HashMap m:p) {
+            System.out.println(m);
+        }
 
     /*System.out.println(hayStack.read("site"));
     Site s1 = new Site.Builder().setHashMap(hayStack.read("site")).build();

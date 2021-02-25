@@ -182,7 +182,7 @@ public class HSUtil
         return null;
     }
 
-    public static String getHQueryFromMarkers(ArrayList<String> markers) {
+    public static String getQueryFromMarkers(ArrayList<String> markers) {
         StringBuilder builder = new StringBuilder();
         for(String marker : markers) {
             builder.append(marker);

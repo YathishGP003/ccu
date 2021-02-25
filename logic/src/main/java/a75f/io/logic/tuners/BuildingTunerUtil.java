@@ -29,11 +29,11 @@ class BuildingTunerUtil {
         
         ArrayList<String> markersFiltered = tunerPoint.getMarkers();
         HSUtil.removeGenericMarkerTags(markersFiltered);
-        String queryString = HSUtil.getHQueryFromMarkers(markersFiltered);
+        String queryString = HSUtil.getQueryFromMarkers(markersFiltered);
     
         CcuLog.e(L.TAG_CCU_TUNER, "updateTunerLevels : "+tunerPoint.getDisplayName());
         //If all the level are successfully copied from a zone tuner, no need to go further.
-        if (copyFromZoneTuner(tunerPoint.getId(), zoneRef, queryString, hayStack)) {
+        if (copyFromZoneTuner(tunerPoint.getId(), zoneRef, markersFiltered, hayStack)) {
             return;
         }
     
@@ -47,8 +47,14 @@ class BuildingTunerUtil {
         CcuLog.e(L.TAG_CCU_TUNER, " Tuner initialization is not complete : "+tunerPoint.getDisplayName());
     }
     
-    private static boolean copyFromZoneTuner(String dstPointId, String zoneRef, String queryString, CCUHsApi hayStack) {
-        String equipQuery = queryString+" and roomRef == \""+zoneRef+"\"";
+    private static boolean copyFromZoneTuner(String dstPointId, String zoneRef, ArrayList<String> markers,
+                                             CCUHsApi hayStack) {
+        
+        String equipTag = HSUtil.getEquipTag(markers);
+        if (equipTag != null)
+            markers.remove(equipTag);
+        
+        String equipQuery = HSUtil.getQueryFromMarkers(markers)+" and roomRef == \""+zoneRef+"\"";
         ArrayList<HashMap> zoneTunerPoints = hayStack.readAll(equipQuery);
         
         Optional<HashMap> zoneTunerPoint = zoneTunerPoints.stream()

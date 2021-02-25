@@ -1767,6 +1767,11 @@ public class CCUHsApi
         tagsDb.deletePointArray(HRef.copy(id));
     }
     
+    
+    public void deletePointArrayLevel(String id, int level) {
+        tagsDb.deletePointArrayLevel(HRef.copy(id), level);
+    }
+    
     public void deleteHistory() {
         ArrayList<HashMap> points = readAll("point and his");
         if (points.size() == 0) {

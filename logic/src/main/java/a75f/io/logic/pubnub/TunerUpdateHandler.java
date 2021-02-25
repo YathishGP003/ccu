@@ -67,16 +67,25 @@ class TunerUpdateHandler {
     private static void writePointFromJson(String id, JsonObject msgObject, CCUHsApi hayStack,
                                            boolean local) {
         try {
-            String who = msgObject.get(HayStackConstants.WRITABLE_ARRAY_WHO).getAsString();
-            double val = msgObject.get(HayStackConstants.WRITABLE_ARRAY_VAL).getAsDouble();
-            int duration = msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION) != null ? msgObject.get(
-                HayStackConstants.WRITABLE_ARRAY_DURATION).getAsInt() : 0;
-            if (local) {
-                hayStack.writePointLocal(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL, who, val, duration);
-            } else {
-                hayStack.writePoint(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL, CCUHsApi.getInstance().getCCUUserName(), val, duration);
+            String val = msgObject.get(HayStackConstants.WRITABLE_ARRAY_VAL).getAsString();
+            
+            if (val.isEmpty()) {
+                //When a level is deleted, it currently ends up in a pubnub with value empty.
+                hayStack.deletePointArrayLevel(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL);
+                return;
             }
-            hayStack.writeHisValById(id, val);
+    
+            String who = msgObject.get(HayStackConstants.WRITABLE_ARRAY_WHO).getAsString();
+            double value = Double.parseDouble(val);
+            int duration = msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION) != null ? msgObject.get(
+                                        HayStackConstants.WRITABLE_ARRAY_DURATION).getAsInt() : 0;
+            if (local) {
+                hayStack.writePointLocal(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL, who, value, duration);
+            } else {
+                hayStack.writePoint(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL,
+                                    CCUHsApi.getInstance().getCCUUserName(), value, duration);
+            }
+            hayStack.writeHisValById(id, value);
         } catch (Exception e) {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to parse tuner value : "+msgObject+" ; "+e.getMessage());
         }

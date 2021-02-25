@@ -816,6 +816,18 @@ public class CCUTagsDb extends HServer {
         writeArrays.remove(id.toVal());
     }
     
+    public void deletePointArrayLevel(HRef id, int level) {
+        CCUTagsDb.WriteArray array = (CCUTagsDb.WriteArray) writeArrays.get(id.toVal());
+        if (array != null) {
+            array.val[level - 1] = null;
+            array.who[level - 1] = null;
+            array.duration[level-1] = 0;
+        } else {
+            CcuLog.d(TAG_CCU_HS," Invalid point array delete command "+id);
+        }
+        
+    }
+    
     public HDict getConfig() {
         if (!tagsMap.containsKey("config")) {
             HDict hDict = new HDictBuilder().add("nosync").add("localconfig").toDict();

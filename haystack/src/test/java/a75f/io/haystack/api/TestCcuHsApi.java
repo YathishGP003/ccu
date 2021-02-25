@@ -151,45 +151,6 @@ public class TestCcuHsApi {
         
         hayStack.addPoint(testRawPoint);
 
-        
-        /*ArrayList<HashMap<Object, Object>> temp2 = hayStack.readAllEntities("temp2");
-        for (HashMap m : data) {
-            System.out.println(m);
-        }*/
-    
-        /*HashMap temp2 = hayStack.read("temp2");
-        System.out.println(temp2);
-        
-        Point p = new Point.Builder().setHashMap(temp2).build();
-    
-        ArrayList<String> markerList = p.getMarkers();
-        String equipMarker = HSUtil.getEquipTag(markerList);
-        if (equipMarker != null) {
-            markerList.remove(equipMarker);
-        }
-        String queryString = HSUtil.getHQueryFromMarkers(markerList);
-    
-        String equipQuery = queryString+" and roomRef == \""+zoneRef+"\"";*/
-        ArrayList<HashMap> zoneTunerPoints = hayStack.readAll("point");
-        System.out.println(zoneTunerPoints.size() + testPoint2Id);
-        Optional<HashMap> zoneTunerPoint = zoneTunerPoints.stream()
-                                                          .filter(pt -> Objects.equals(pt.get("id"), testPoint2Id))
-                                                          .findFirst();
-        
-        //String systemQuery = HSUtil.appendMarkerToQuery(queryString, "roomRef == \""+zoneRef+"\"");
-        
-        //System.out.println(systemQuery);
-        //HashMap systemTunerPoint = hayStack.read(systemQuery);
-    
-        System.out.println(zoneTunerPoint);
-        System.out.println("$$$$$");
-        for (HashMap m : zoneTunerPoints) {
-            if (m.get("id").toString().equals(testPoint1Id)) {
-                System.out.println(m);
-            }
-        }
-        
-
     /*System.out.println(hayStack.read("site"));
     Site s1 = new Site.Builder().setHashMap(hayStack.read("site")).build();
     s1.setSyncStatus(true);

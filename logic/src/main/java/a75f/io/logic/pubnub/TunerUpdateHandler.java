@@ -19,6 +19,8 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 
 class TunerUpdateHandler {
     
+    public static final int FORCE_EXPIRY_TIME_MILLIS = 10;
+    
     public static void updateBuildingTuner(final JsonObject msgObject, CCUHsApi hayStack) {
         
         String pointGuid = msgObject.get(HayStackConstants.ID).getAsString();
@@ -71,7 +73,8 @@ class TunerUpdateHandler {
             
             if (val.isEmpty()) {
                 //When a level is deleted, it currently ends up in a pubnub with empty value.
-                hayStack.deletePointArrayLevel(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL);
+                //hayStack.deletePointArrayLevel(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL);
+                hayStack.writePointForCcuUser(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL, 0.0, FORCE_EXPIRY_TIME_MILLIS);
                 return;
             }
     

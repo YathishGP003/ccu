@@ -45,6 +45,10 @@ public class UpdatePointHandler
             return;
         }
         
+        if (HSUtil.isSSEConfig(luid, CCUHsApi.getInstance())) {
+            SSEConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
+            return;
+        }
     
         if (luid != null && luid != "")
         {

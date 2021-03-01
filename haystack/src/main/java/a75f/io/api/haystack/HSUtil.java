@@ -217,6 +217,11 @@ public class HSUtil
                && pointEntity.containsKey("config");
     }
     
+    public static boolean isSSEConfig(String id, CCUHsApi hayStack) {
+        HashMap pointEntity = hayStack.readMapById(id);
+        return pointEntity.containsKey("sse")
+               && pointEntity.containsKey("config");
+    }
     public static double getSystemUserIntentVal(String tags)
     {
         CCUHsApi hayStack = CCUHsApi.getInstance();

@@ -2,6 +2,14 @@ package a75f.io.logic.pubnub;
 
 import com.google.gson.JsonObject;
 
+import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
+import org.projecthaystack.HGridBuilder;
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
+import org.projecthaystack.HVal;
+import org.projecthaystack.io.HZincWriter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -10,6 +18,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.TunerConstants;
@@ -19,7 +28,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 
 class TunerUpdateHandler {
     
-    public static final int FORCE_EXPIRY_TIME_MILLIS = 10;
+    public static final int FORCE_EXPIRY_TIME_MILLIS = 1;
     
     public static void updateBuildingTuner(final JsonObject msgObject, CCUHsApi hayStack) {
         
@@ -72,9 +81,9 @@ class TunerUpdateHandler {
             String val = msgObject.get(HayStackConstants.WRITABLE_ARRAY_VAL).getAsString();
             
             if (val.isEmpty()) {
-                //When a level is deleted, it currently ends up in a pubnub with empty value.
-                //hayStack.deletePointArrayLevel(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL);
-                hayStack.writePointForCcuUser(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL, 0.0, FORCE_EXPIRY_TIME_MILLIS);
+                //When a level is deleted, it currently generates a pubnub with empty value.
+                //Handle it here.
+                hayStack.clearPointArrayLevel(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL);
                 return;
             }
     

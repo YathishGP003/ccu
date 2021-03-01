@@ -526,6 +526,22 @@ public class CCUHsApi
             }
         }
     }
+    
+    public void clearPointArrayLevel(String id, int level) {
+        CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(id), level,
+                                                        CCUHsApi.getInstance().getCCUUserName(),
+                                                        HNum.make(0), HNum.make(1));
+        HDictBuilder b = new HDictBuilder()
+                             .add("id", HRef.copy(CCUHsApi.getInstance().getGUID(id)))
+                             .add("level",level)
+                             .add("who",CCUHsApi.getInstance().getCCUUserName())
+                             .add("duration", HNum.make(0, "ms"))
+                             .add("val", (HVal) null);
+        HDict[] dictArr = {b.toDict()};
+        HttpUtil.executePost(CCUHsApi.getInstance().pointWriteTarget(), HZincWriter.gridToString(
+            HGridBuilder.dictsToGrid(dictArr)));
+    
+    }
 
     // Feb-08-2021 /pointWrite and /pointWriteMany need to hit silo /v2/.  All other calls needs to stay on v1.
     // todo: This is a temporary workaround.  Resolve this backend.  Do all v1 or all v2, or create two base URLs, one for silo-1, one for silo-2

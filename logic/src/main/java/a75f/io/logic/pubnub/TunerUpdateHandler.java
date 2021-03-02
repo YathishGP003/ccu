@@ -83,7 +83,7 @@ class TunerUpdateHandler {
             if (val.isEmpty()) {
                 //When a level is deleted, it currently generates a pubnub with empty value.
                 //Handle it here.
-                hayStack.clearPointArrayLevel(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL);
+                hayStack.clearPointArrayLevel(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL, local);
                 return;
             }
     

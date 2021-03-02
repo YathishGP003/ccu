@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.building;
+package a75f.io.logic.bo.building.sensors;
 
 import a75f.io.logic.bo.building.definitions.Port;
 

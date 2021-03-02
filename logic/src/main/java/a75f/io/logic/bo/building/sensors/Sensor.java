@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.building;
+package a75f.io.logic.bo.building.sensors;
 
 import java.util.ArrayList;
 import java.util.List;

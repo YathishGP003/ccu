@@ -22,6 +22,7 @@ import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.logic.tuners.TunerUtil;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
@@ -84,6 +85,7 @@ class TunerUpdateHandler {
                 //When a level is deleted, it currently generates a pubnub with empty value.
                 //Handle it here.
                 hayStack.clearPointArrayLevel(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL, local);
+                hayStack.writeHisValById(id, HSUtil.getPriorityVal(id));
                 return;
             }
     
@@ -97,7 +99,7 @@ class TunerUpdateHandler {
                 hayStack.writePoint(id, TunerConstants.TUNER_BUILDING_VAL_LEVEL,
                                     CCUHsApi.getInstance().getCCUUserName(), value, duration);
             }
-            hayStack.writeHisValById(id, value);
+            hayStack.writeHisValById(id, HSUtil.getPriorityVal(id));
         } catch (Exception e) {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to parse tuner value : "+msgObject+" ; "+e.getMessage());
         }

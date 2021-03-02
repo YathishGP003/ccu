@@ -492,7 +492,17 @@ public class SingleStageEquip {
         SmartNode.setPointEnabled(nodeAddr, Port.RELAY_TWO.name(), config.isOpConfigured(Port.RELAY_TWO) );
         SmartNode.setPointEnabled(nodeAddr, Port.TH2_IN.name(), config.enableThermistor2);
         SmartNode.setPointEnabled(nodeAddr, Port.TH1_IN.name(), config.enableThermistor1);
-        HashMap equipHash = CCUHsApi.getInstance().read("equip and group == \"" + config.getNodeAddress() + "\"");
+    
+        HashMap enableRelay1Map =
+            CCUHsApi.getInstance().read("point and config and enable and relay1 and group == \""+nodeAddr+ "\"");
+        Point enableRelay1 = new Point.Builder().setHashMap(enableRelay1Map).build();
+        SingleStageEquipUtil.updateRelay1Config(config.enableRelay1, enableRelay1);
+    
+        HashMap enableRelay2Map =
+            CCUHsApi.getInstance().read("point and config and enable and relay2 and group == \""+nodeAddr+ "\"");
+        Point enableRelay2 = new Point.Builder().setHashMap(enableRelay2Map).build();
+        SingleStageEquipUtil.updateRelay2Config(config.enableRelay2, enableRelay2);
+        /*HashMap equipHash = CCUHsApi.getInstance().read("equip and group == \"" + config.getNodeAddress() + "\"");
         Equip equip = new Equip.Builder().setHashMap(equipHash).build();
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
@@ -556,7 +566,7 @@ public class SingleStageEquip {
                     break;
 
             }
-        }
+        }*/
 
         CCUHsApi.getInstance().syncPointEntityTree();
 		setConfigNumVal("enable and relay1",config.isOpConfigured(Port.RELAY_ONE) ? (double)config.enableRelay1 : 0);

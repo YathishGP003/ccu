@@ -21,10 +21,11 @@ public class SingleStageEquipUtil {
         double curConfig = getConfigNumVal("enable and relay1", nodeAddr);
         
         if (configVal == curConfig) {
-            CcuLog.d(L.TAG_CCU_ZONE, "SSE Config Update - No Action required.");
+            CcuLog.d(L.TAG_CCU_ZONE, "SSE updateRelay1Config - No Action required.");
             return;
         }
-        SSEStage configStage = SSEStage.values()[(int)curConfig];
+        CcuLog.d(L.TAG_CCU_ZONE, "SSE updateRelay1Config : "+configVal);
+        SSEStage configStage = SSEStage.values()[configVal];
         switch (configStage) {
             case COOLING:
             
@@ -33,7 +34,7 @@ public class SingleStageEquipUtil {
                 if (!heatingPt.isEmpty())
                     CCUHsApi.getInstance().deleteEntity(heatingPt.get("id").toString());
             
-                createCoolingStagePoint(configPoint, equip, nodeAddr);
+                createCoolingStagePoint(equip );
                 CcuLog.d(L.TAG_CCU_ZONE, "SSE Config Update - createCoolingStagePoint");
                 break;
             case HEATING:
@@ -42,7 +43,7 @@ public class SingleStageEquipUtil {
                 if (!coolingPt.isEmpty())
                     CCUHsApi.getInstance().deleteEntity(coolingPt.get("id").toString());
             
-                createHeatingStagePoint(configPoint, equip, nodeAddr);
+                createHeatingStagePoint(equip );
                 CcuLog.d(L.TAG_CCU_ZONE, "SSE Config Update - createHeatingStagePoint");
                 break;
             case NOT_INSTALLED:
@@ -61,26 +62,51 @@ public class SingleStageEquipUtil {
         }
         CCUHsApi.getInstance().syncPointEntityTree();
     }
-    private static void createCoolingStagePoint(Point configPoint, Equip equip, String nodeAddr) {
+    
+    public static void updateRelay2Config(int configVal, Point configPoint) {
+        
+        HashMap equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+        String nodeAddr = equip.getGroup();
+        double curConfig = getConfigNumVal("enable and relay2", nodeAddr);
+        if (configVal == curConfig) {
+            CcuLog.d(L.TAG_CCU_ZONE, "SSE updateRelay2Config - No Action required.");
+            return;
+        }
+        CcuLog.d(L.TAG_CCU_ZONE, "SSE updateRelay2Config : " + configVal);
+        HashMap fanPt = CCUHsApi.getInstance().read("point and standalone and fan and stage1 and " +
+                                                    " sse and equipRef== \"" + configPoint.getEquipRef() + "\"");
+        if (configVal > 0) {
+            if (fanPt.isEmpty()) {
+                createFanStagePoint(equip);
+            }
+        } else {
+            if (!fanPt.isEmpty())
+                CCUHsApi.getInstance().deleteEntity(fanPt.get("id").toString());
+        }
+        CCUHsApi.getInstance().syncPointEntityTree();
+    }
+    
+    private static void createCoolingStagePoint(Equip equip) {
         
         Point coolingStage = new Point.Builder()
                                  .setDisplayName(equip.getDisplayName() + "-coolingStage1")
-                                 .setEquipRef(configPoint.getEquipRef())
-                                 .setSiteRef(configPoint.getSiteRef())
+                                 .setEquipRef(equip.getId())
+                                 .setSiteRef(equip.getSiteRef())
                                  .setRoomRef(equip.getRoomRef())
                                  .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
                                  .addMarker("standalone").addMarker("cooling").addMarker("stage1").addMarker("his").addMarker("zone")
                                  .addMarker("logical").addMarker("sse").addMarker("cmd")
                                  .setEnums("off,on")
-                                 .setGroup(nodeAddr)
-                                 .setTz(configPoint.getTz())
+                                 .setGroup(equip.getGroup())
+                                 .setTz(CCUHsApi.getInstance().getTimeZone())
                                  .build();
         String r1coolID = CCUHsApi.getInstance().addPoint(coolingStage);
         CCUHsApi.getInstance().writeHisValById(r1coolID, 0.0);
-        SmartNode.updatePhysicalPointRef(Integer.parseInt(nodeAddr), Port.RELAY_ONE.name(), r1coolID);
+        SmartNode.updatePhysicalPointRef(Integer.parseInt(equip.getGroup()), Port.RELAY_ONE.name(), r1coolID);
     }
     
-    private static void createHeatingStagePoint(Point configPoint, Equip equip, String nodeAddr) {
+    private static void createHeatingStagePoint(Equip equip) {
         Point heatingStage = new Point.Builder()
                                  .setDisplayName(equip.getDisplayName() + "-heatingStage1")
                                  .setEquipRef(equip.getId())
@@ -90,12 +116,30 @@ public class SingleStageEquipUtil {
                                  .addMarker("standalone").addMarker("heating").addMarker("stage1").addMarker("his").addMarker("zone")
                                  .addMarker("logical").addMarker("sse").addMarker("cmd")
                                  .setEnums("off,on")
-                                 .setGroup(String.valueOf(nodeAddr))
-                                 .setTz(configPoint.getTz())
+                                 .setGroup(String.valueOf(equip.getGroup()))
+                                 .setTz(CCUHsApi.getInstance().getTimeZone())
                                  .build();
         String r1heatID = CCUHsApi.getInstance().addPoint(heatingStage);
         CCUHsApi.getInstance().writeHisValById(r1heatID, 0.0);
-        SmartNode.updatePhysicalPointRef(Integer.parseInt(nodeAddr),Port.RELAY_ONE.name(),r1heatID);
+        SmartNode.updatePhysicalPointRef(Integer.parseInt(equip.getGroup()),Port.RELAY_ONE.name(),r1heatID);
+    }
+    
+    private static void createFanStagePoint(Equip equip) {
+        Point fanStage1 = new Point.Builder()
+                              .setDisplayName(equip.getDisplayName()+"-fanStage1")
+                              .setEquipRef(equip.getId())
+                              .setSiteRef(equip.getSiteRef())
+                              .setRoomRef(equip.getRoomRef())
+                              .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
+                              .addMarker("standalone").addMarker("fan").addMarker("stage1").addMarker("his").addMarker("zone")
+                              .addMarker("logical").addMarker("sse").addMarker("cmd")
+                              .setEnums("off,on")
+                              .setGroup(String.valueOf(equip.getGroup()))
+                              .setTz(CCUHsApi.getInstance().getTimeZone())
+                              .build();
+        String r2ID = CCUHsApi.getInstance().addPoint(fanStage1);
+        CCUHsApi.getInstance().writeHisValById(r2ID, 0.0);
+        SmartNode.updatePhysicalPointRef(Integer.parseInt(equip.getGroup()),Port.RELAY_TWO.name(),r2ID);
     }
     
     public static double getConfigNumVal(String tags, String nodeAddr) {

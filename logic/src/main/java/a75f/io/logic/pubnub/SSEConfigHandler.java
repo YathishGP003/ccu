@@ -13,16 +13,12 @@ class SSEConfigHandler {
     
     public static void updateConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateSSEConfigPoint " + msgObject.toString());
-        
+    
+        int val = msgObject.get("val").getAsInt();
         if (configPoint.getMarkers().contains(Tags.RELAY1)) {
-            updateRelay1ConfigHandler(msgObject, configPoint);
+            SingleStageEquipUtil.updateRelay1Config( val, configPoint);
+        } else if (configPoint.getMarkers().contains(Tags.RELAY1)) {
+            SingleStageEquipUtil.updateRelay2Config( val, configPoint);
         }
     }
-    
-    private static void updateRelay1ConfigHandler(JsonObject msgObject, Point configPoint) {
-        int val = msgObject.get("val").getAsInt();
-        SingleStageEquipUtil.updateRelay1Config( val, configPoint);
-    }
-    
-    
 }

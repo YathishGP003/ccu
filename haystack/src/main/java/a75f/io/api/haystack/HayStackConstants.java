@@ -15,4 +15,9 @@ public class HayStackConstants
     public static final String USER = "User";
     public static final String ID = "id";
     public static final String CUR_CCU = "currentCCU";
+    
+    public static final String WRITABLE_ARRAY_LEVEL = "level";
+    public static final String WRITABLE_ARRAY_VAL = "val";
+    public static final String WRITABLE_ARRAY_WHO = "who";
+    public static final String WRITABLE_ARRAY_DURATION = "duration";
 }

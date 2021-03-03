@@ -206,6 +206,9 @@ public class VavTRSystem extends TRSystem
             case "timeInterval":
             case "timeDelay":
                 return 2.0;
+            case "spresmax":
+                return -1.0;
+            
         }
         return 0;
         //throw new IllegalStateException("Tuner not initialized");

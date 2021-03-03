@@ -23,6 +23,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.tuners.TunerConstants;
 
 public class ConventionalUnitLogicalMap {
@@ -72,7 +73,8 @@ public class ConventionalUnitLogicalMap {
             b.addMarker("cpu");
             profile = "cpu";
         String equipRef = CCUHsApi.getInstance().addEquip(b.build());
-        BuildingTuners.getInstance().addEquipStandaloneTuners(siteDis+"-CPU-"+nodeAddr, equipRef, room, floor);
+        StandAloneTuners.addEquipStandaloneTuners( CCUHsApi.getInstance(), siteRef, siteDis + "-CPU-" + nodeAddr,
+                                                   equipRef, room, floor, tz);
 
         createConventionalConfigPoints(config, equipRef,floor,room);
 

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logic.L;
 
 import static a75f.io.api.haystack.HayStackConstants.DEFAULT_INIT_VAL_LEVEL;
@@ -32,7 +33,7 @@ public class TunerUtil
                 }
             }
         }
-        return 0;
+        return BuildingTunerFallback.getDefaultTunerVal(query);
     }
     
     public static double readTunerValByQuery(String query, String equipRef) {
@@ -49,7 +50,7 @@ public class TunerUtil
                 }
             }
         }
-        return 0;
+        return BuildingTunerFallback.getDefaultTunerVal(query);
     }
     public static double readBuildingTunerValByQuery(String query) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
@@ -65,7 +66,7 @@ public class TunerUtil
                 }
             }
         }
-        return 0;
+        return BuildingTunerFallback.getDefaultTunerVal(query);
     }
     public static String readTunerStrByQuery(String query) {
         CCUHsApi hayStack = CCUHsApi.getInstance();

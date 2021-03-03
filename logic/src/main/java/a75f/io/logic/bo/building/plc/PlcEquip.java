@@ -581,8 +581,9 @@ public class PlcEquip {
 
         p.analog1AtMaxOutput = hayStack.readDefaultVal("point and config and analog1 and max and output and equipRef == \"" + equipRef + "\"");
         p.expectZeroErrorAtMidpoint = hayStack.readDefaultVal("point and config and enabled and zero and error and midpoint and equipRef == \"" + equipRef + "\"") > 0;
-
-
+        p.onboardSensorInput =
+            hayStack.readDefaultVal("point and config and onboard and input and sensor and equipRef == \"" + equipRef + "\"").intValue();
+    
         return p;
     }
 

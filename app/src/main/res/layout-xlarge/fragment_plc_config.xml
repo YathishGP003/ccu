@@ -108,6 +108,32 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="20dp">
+                        <TextView
+                            android:id="@+id/textOnbordSensor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:layout_centerVertical="true"
+                            android:layout_toStartOf="@+id/onboardSensor"
+                            android:textSize="@dimen/text_small_xlarge"
+                            android:text="@string/label_onboard_sensor"
+                            android:textAppearance="@style/title_normal" />
+
+                        <Spinner
+                            android:id="@+id/onboardSensor"
+                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            android:layout_width="260dp"
+                            android:layout_height="?android:attr/listPreferredItemHeight"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            tools:listitem="@layout/spinner_dropdown_item"/>
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
                         android:layout_marginTop="20dp">
                         <TextView
                             android:id="@+id/textUseAnalog2"

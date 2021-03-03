@@ -115,7 +115,21 @@ public class PlcEquip {
                 .build();
         String th1InputSensorId = hayStack.addPoint(th1InputSensor);
         hayStack.writeDefaultValById(th1InputSensorId, (double) config.th1InputSensor);
-
+    
+        Point onboardInputSensor = new Point.Builder()
+                                   .setDisplayName(equipDis + "-th1InputSensor")
+                                   .setEquipRef(equipRef)
+                                   .setSiteRef(siteRef)
+                                   .setRoomRef(roomRef)
+                                   .setFloorRef(floorRef)
+                                   .addMarker("config").addMarker("pid").addMarker("zone").addMarker("writable")
+                                   .addMarker("onboard").addMarker("input").addMarker("sensor")
+                                   .setGroup(String.valueOf(nodeAddr))
+                                   .setTz(tz)
+                                   .build();
+        String onboardInputSensorId = hayStack.addPoint(onboardInputSensor);
+        hayStack.writeDefaultValById(onboardInputSensorId, (double) config.onboardSensorInput);
+        
         Point analog1AtMinOutput = new Point.Builder()
                 .setDisplayName(equipDis + "-analog1AtMinOutput")
                 .setEquipRef(equipRef)

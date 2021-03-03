@@ -560,7 +560,7 @@
     <string name="label_targetvalue">Target Value</string>
     <string name="label_expectedError">Expected Error Range</string>
     <string name="label_setpointsensor">Setpoint Sensor Offset</string>
-
+    <string name="label_onboard_sensor">Onboard Sensor Input</string>
 
     <!--ENERGY METER SCREEN-->
     <string name="label_eminstruction">This profile allows monitoring and graphing of energy usage via Modbus energy meter\nconnected to the Smart Node. Please wire up the meter as shown below.</string>

@@ -38,7 +38,7 @@ import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
-import a75f.io.logic.bo.building.SensorType;
+import a75f.io.logic.bo.building.sensors.SensorType;
 import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.tuners.TunerUtil;
 

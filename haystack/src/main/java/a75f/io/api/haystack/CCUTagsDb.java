@@ -166,7 +166,21 @@ public class CCUTagsDb extends HServer {
     public BoxStore getBoxStore() {
         return boxStore;
     }
-    
+
+    // These three methods created for Testing, since we can't generally mock fields, only methods
+    // And, it's good Java practice.
+
+    public ConcurrentHashMap<String, HDict> getTagsMap() {
+        return tagsMap;
+    }
+
+    public ConcurrentHashMap<String, String> getIdMap() {
+        return idMap;
+    }
+
+    public ConcurrentHashMap<String, String> getUpdateIdMap() {
+        return updateIdMap;
+    }
 
     private void loadGrid(String tagsString) {
 

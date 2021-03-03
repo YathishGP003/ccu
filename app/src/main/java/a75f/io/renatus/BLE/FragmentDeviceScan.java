@@ -10,7 +10,6 @@ import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -20,7 +19,6 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -28,9 +26,9 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import a75f.io.device.serial.SerialConsts;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.device.serial.SerialConsts;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
 import butterknife.BindView;
@@ -49,7 +47,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
     
     public static final  String ID                = "scan_dialog";
     static final         int    REQUEST_ENABLE_BT = 1;
-    private static final long SCAN_PERIOD = 60000;
+    private static final long SCAN_PERIOD = 180000;
     private static final String PROFILE_TYPE      = "profile_type";
     @BindView(R.id.ble_device_list_list_view)
     ListView mBLEDeviceListListView;
@@ -108,6 +106,11 @@ public class FragmentDeviceScan extends BaseDialogFragment
         {
             getFragmentManager().popBackStack();
             return;
+        } else if (requestCode == REQUEST_ENABLE_BT && resultCode == Activity.RESULT_OK){
+
+            if (mBluetoothLeScanner == null) {
+                mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
+            }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -147,15 +150,17 @@ public class FragmentDeviceScan extends BaseDialogFragment
                 else
                 {
                     // Initializes list view adapter.
-                    mLeDeviceListAdapter = new LeDeviceListAdapter();
-                    setListViewEmptyView();
-                    mBLEDeviceListListView.setAdapter(mLeDeviceListAdapter);
-                    mBLEDeviceListListView.setOnItemClickListener((adapterView, view, position, id) -> {
-                        final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
-                        finish(device);
-                        scanLeDevice(false);
-                    });
-                    scanLeDevice(true);
+                  getActivity().runOnUiThread(() -> {
+                      mLeDeviceListAdapter = new LeDeviceListAdapter();
+                      setListViewEmptyView();
+                      mBLEDeviceListListView.setAdapter(mLeDeviceListAdapter);
+                      mBLEDeviceListListView.setOnItemClickListener((adapterView, view, position, id) -> {
+                          final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
+                          finish(device);
+                          scanLeDevice(false);
+                      });
+                      scanLeDevice(true);
+                  });
                 }
             }
         }).start();

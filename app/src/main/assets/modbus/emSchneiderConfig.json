@@ -424,7 +424,7 @@
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2fqq",
-          "name": "Summation of kWh",
+          "name": "Summation of Wh",
           "startBit": 0,
           "endBit": 15,
           "logicalPointTags": [
@@ -436,7 +436,7 @@
             },
             {
               "tagName": "unit",
-              "value": "kWh"
+              "value": "Wh"
             },
             {
               "tagName": "kind",

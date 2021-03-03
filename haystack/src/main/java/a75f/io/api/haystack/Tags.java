@@ -52,4 +52,8 @@ public class Tags
     public static final String DEFAULT = "default";
     public static final String TUNER = "tuner";
     public static final String EQUIPREF = "equipRef";
+    
+    public static final String IE = "ie";
+    public static final String ADDRESS = "address";
+
 }

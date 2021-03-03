@@ -108,19 +108,19 @@ public class CCUHsApi
     private void checkSiloMigration(Context context) {
         boolean hasMigratedToSilo = PreferenceManager.getDefaultSharedPreferences(context)
                                              .getBoolean(PREFS_HAS_MIGRATED_TO_SILO, false);
-//        if (!hasMigratedToSilo) {
+        if (!hasMigratedToSilo) {
 
-            CcuLog.i("CCU_HS", "TC: Migrating tags database to Silo.");
-            CcuLog.i("CCU_HS", "TC: Tags db before migration: " + tagsDb.tagsString);
+            CcuLog.i("CCU_HS", "Migrating tags database to Silo.");
 
-            MigrateToStr.migrateTabsDb(tagsDb);
-            CcuLog.i("CCU_HS", "TC: Tags db after migration: " + tagsDb.tagsString);
+            MigrateToStr.migrateTagsDb(tagsDb);
 
             syncEntityTree();       // used during dev; can remove otherwise if desired.
             PreferenceManager.getDefaultSharedPreferences(context).edit()
                       .putBoolean(PREFS_HAS_MIGRATED_TO_SILO, true)
                       .apply();
-//        }
+        } else {
+            CcuLog.i("CCU_HS", "Already migrated tags database to Silo!");
+        }
     }
 
     //For Unit test
@@ -458,6 +458,10 @@ public class CCUHsApi
      */
     public void writePointLocal(String id, int level, String who, Double val, int duration) {
         hsClient.pointWrite(HRef.copy(id), level, who, HNum.make(val), HNum.make(duration));
+    }
+    
+    public void writePointStrValLocal(String id, int level, String who, String val, int duration) {
+        hsClient.pointWrite(HRef.copy(id), level, who, HStr.make(val), HNum.make(duration));
     }
 
     /**

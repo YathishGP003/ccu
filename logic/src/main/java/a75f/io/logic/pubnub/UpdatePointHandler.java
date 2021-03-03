@@ -35,7 +35,7 @@ public class UpdatePointHandler
         if (canIgnorePointUpdate(src, pointGuid, hayStack)) {
             return;
         }
-
+        
         String luid = hayStack.getLUID("@" + pointGuid);
 
         if (HSUtil.isBuildingTuner(luid, hayStack)) {
@@ -44,14 +44,17 @@ public class UpdatePointHandler
         }
 
         Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(luid)).build();
+        
         if (HSUtil.isSystemConfigOutputPoint(luid, CCUHsApi.getInstance())
-                            || HSUtil.isSystemConfigHumidifierType(luid, CCUHsApi.getInstance())) {
+                || HSUtil.isSystemConfigHumidifierType(luid, CCUHsApi.getInstance())
+                || HSUtil.isSystemConfigIEAddress(luid, CCUHsApi.getInstance())) {
+            
             ConfigPointUpdateHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
             updatePoints(localPoint);
             return;
         }
-
         if (luid != null && luid != "") {
+ 
             HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote("@" + pointGuid);
             if (pointGrid == null) {
                 CcuLog.d(L.TAG_CCU_PUBNUB, "Failed to read remote point point : " + pointGuid);

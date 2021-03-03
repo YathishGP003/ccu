@@ -130,6 +130,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 case MODBUS_EM:
                 case MODBUS_EMS:
                 case MODBUS_ATS:
+                case MODBUS_UPS150:
                     modbusProfile = (ModbusProfile) L.getProfile(curSelectedSlaveId);
                     if(modbusProfile != null){
                         curSelectedSlaveId = modbusProfile.getSlaveId();
@@ -369,6 +370,15 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 CcuLog.d(L.TAG_CCU_UI, "Set modbus Config: MB Profiles - " + L.ccu().zoneProfiles.size() + "," + L.getProfile((short) curSelectedSlaveId) + "," + curSelectedSlaveId);
                 if (L.getProfile((short) curSelectedSlaveId) == null) {
                     modbusProfile.addMbEquip((short) curSelectedSlaveId, floorRef, zoneRef, equipmentDevice, recyclerModbusParamAdapter.modbusParam, ProfileType.MODBUS_VRF);
+                    L.ccu().zoneProfiles.add(modbusProfile);
+                    equipRef = modbusProfile.getEquip().getId();
+                } else
+                    equipRef = updateModbusProfile(curSelectedSlaveId);
+                break;
+            case UPS150K:
+                CcuLog.d(L.TAG_CCU_UI, "Set modbus Config: MB Profiles - " + L.ccu().zoneProfiles.size() + "," + L.getProfile((short) curSelectedSlaveId) + "," + curSelectedSlaveId);
+                if (L.getProfile((short) curSelectedSlaveId) == null) {
+                    modbusProfile.addMbEquip((short) curSelectedSlaveId, floorRef, zoneRef, equipmentDevice, recyclerModbusParamAdapter.modbusParam, ProfileType.MODBUS_UPS150);
                     L.ccu().zoneProfiles.add(modbusProfile);
                     equipRef = modbusProfile.getEquip().getId();
                 } else

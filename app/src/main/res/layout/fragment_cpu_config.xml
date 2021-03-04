@@ -270,7 +270,7 @@
                     android:text="@string/label_cpuheatstage2"
                     android:textAppearance="@style/text_appearance" />
 
-                <android.support.v7.widget.AppCompatSpinner
+                <androidx.appcompat.widget.AppCompatSpinner
                     android:id="@+id/spinnerCpuFanHigh"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

@@ -224,7 +224,7 @@
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp" />
 
-            <android.support.v7.widget.SwitchCompat
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/ignoreSetpoint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -250,7 +250,7 @@
                 android:paddingRight="0dp"
                 android:paddingTop="20dp" >
 
-                <android.support.v7.widget.SwitchCompat
+                <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/useOccupancyDetection"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

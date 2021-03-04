@@ -251,7 +251,7 @@
                     android:text="@string/label_auxheat"
                     android:textAppearance="@style/text_appearance" />
 
-                <android.support.v7.widget.AppCompatSpinner
+                <androidx.appcompat.widget.AppCompatSpinner
                     android:id="@+id/spinnerFanHigh"
                     android:layout_width="224dp"
                     android:layout_height="wrap_content"
@@ -269,7 +269,7 @@
                     android:text="@string/label_pumpchange"
                     android:textAppearance="@style/text_appearance" />
 
-                <android.support.v7.widget.AppCompatSpinner
+                <androidx.appcompat.widget.AppCompatSpinner
                     android:id="@+id/spinnerPumpChange"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

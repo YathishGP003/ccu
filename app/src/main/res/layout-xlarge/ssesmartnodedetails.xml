@@ -58,7 +58,7 @@
                 android:text="Force Test"
                 android:layout_marginLeft="30dp"
                 android:textSize="@dimen/text_large_xlarge" />
-            <android.support.v7.widget.SwitchCompat
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/sseRelay1Switch"
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
@@ -107,7 +107,7 @@
                 android:layout_gravity="center"
                 android:layout_weight="1"
                 android:id="@+id/sseRelay1ForceTestBtn" />-->
-            <android.support.v7.widget.SwitchCompat
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/sseRelay2Switch"
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"

@@ -70,6 +70,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
+import a75f.io.logic.bo.building.hvac.SSEConditioningMode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.pubnub.UpdatePointHandler;
@@ -2371,11 +2372,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
 
         if(p2FCUPoints.containsKey("condEnabled")){
-            if(p2FCUPoints.get("condEnabled").toString().contains("Cool Only"))
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly, R.layout.spinner_zone_item);
-            else if(p2FCUPoints.get("condEnabled").toString().contains("Heat Only"))
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly, R.layout.spinner_zone_item);
-            if(p2FCUPoints.get("condEnabled").toString().contains("Off")) {
+            if(p2FCUPoints.get("condEnabled").toString().contains("Cool Only")) {
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly,
+                                                                 R.layout.spinner_zone_item);
+                if (conditionMode == SSEConditioningMode.COOL_ONLY.ordinal()) {
+                    conditionMode = conModeAdapter.getCount() - 1; //Select the last item.
+                }
+            } else if(p2FCUPoints.get("condEnabled").toString().contains("Heat Only")) {
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
+                                                                 R.layout.spinner_zone_item);
+                if (conditionMode == SSEConditioningMode.HEAT_ONLY.ordinal()) {
+                    conditionMode = conModeAdapter.getCount() - 1; //Select the last item
+                }
+            } if(p2FCUPoints.get("condEnabled").toString().contains("Off")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
                 conditionMode = 0;
             }
@@ -2504,11 +2513,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
                 getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
         if(p4FCUPoints.containsKey("condEnabled")){
-            if(p4FCUPoints.get("condEnabled").toString().contains("Cool Only"))
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly, R.layout.spinner_zone_item);
-            else if(p4FCUPoints.get("condEnabled").toString().contains("Heat Only"))
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly, R.layout.spinner_zone_item);
-            if(p4FCUPoints.get("condEnabled").toString().contains("Off")) {
+            if(p4FCUPoints.get("condEnabled").toString().contains("Cool Only")) {
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly,
+                                                                 R.layout.spinner_zone_item);
+                if (conditionMode == SSEConditioningMode.COOL_ONLY.ordinal()) {
+                    conditionMode = conModeAdapter.getCount() - 1; //Select the last item.
+                }
+            } else if(p4FCUPoints.get("condEnabled").toString().contains("Heat Only")) {
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
+                                                                 R.layout.spinner_zone_item);
+                if (conditionMode == SSEConditioningMode.COOL_ONLY.ordinal()) {
+                    conditionMode = conModeAdapter.getCount() - 1; //Select the last item.
+                }
+            } if(p4FCUPoints.get("condEnabled").toString().contains("Off")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
                 conditionMode = 0;
             }

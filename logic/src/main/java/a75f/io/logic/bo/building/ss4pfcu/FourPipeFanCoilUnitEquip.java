@@ -20,6 +20,9 @@ import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.hvac.SSEConditioningMode;
+import a75f.io.logic.bo.building.hvac.SSEFanStage;
+import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitConfiguration;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.StandAloneTuners;
@@ -732,7 +735,7 @@ public class FourPipeFanCoilUnitEquip  {
         CCUHsApi.getInstance().writeDefaultValById(enableRelay6Id, (double)(config.enableRelay6 == true? 1.0 : 0));
 
 
-        addUserIntentPoints(equipRef,equipDis,room,floor);
+        addUserIntentPoints(equipRef,equipDis,room,floor, config);
 
         setConfigNumVal("enable and relay1",config.enableRelay1 == true ? 1.0 : 0);
         setConfigNumVal("enable and relay2",config.enableRelay2 == true ? 1.0 : 0);
@@ -1034,7 +1037,8 @@ public class FourPipeFanCoilUnitEquip  {
     {
         CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \""+nodeAddr+"\"", status);
     }
-    protected void addUserIntentPoints(String equipref, String equipDis, String room, String floor) {
+    protected void addUserIntentPoints(String equipref, String equipDis, String room, String floor,
+                                       FourPipeFanCoilUnitConfiguration config) {
 
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = siteMap.get("id").toString();
@@ -1052,8 +1056,10 @@ public class FourPipeFanCoilUnitEquip  {
                 .setTz(tz)
                 .build();
         String fanOpModeId = CCUHsApi.getInstance().addPoint(fanOpMode);
-        CCUHsApi.getInstance().writePointForCcuUser(fanOpModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_DEFAULT_FAN_OPERATIONAL_MODE, 0);
-        CCUHsApi.getInstance().writeHisValById(fanOpModeId, TunerConstants.STANDALONE_DEFAULT_FAN_OPERATIONAL_MODE);
+        SSEFanStage defaultFanMode = getDefaultFanSpeed(config);
+        CCUHsApi.getInstance().writePointForCcuUser(fanOpModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL,
+                                                    (double) defaultFanMode.ordinal(), 0);
+        CCUHsApi.getInstance().writeHisValById(fanOpModeId, (double) defaultFanMode.ordinal());
 
         Point operationalMode = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"ConditioningMode")
@@ -1067,9 +1073,30 @@ public class FourPipeFanCoilUnitEquip  {
                 .setTz(tz)
                 .build();
         String operationalModeId = CCUHsApi.getInstance().addPoint(operationalMode);
-        CCUHsApi.getInstance().writePointForCcuUser(operationalModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_DEFAULT_CONDITIONAL_MODE, 0);
-        CCUHsApi.getInstance().writeHisValById(operationalModeId, TunerConstants.STANDALONE_DEFAULT_CONDITIONAL_MODE);
+        SSEConditioningMode defaultConditioningMode = getDefaultConditioningMode(config);
+        CCUHsApi.getInstance().writePointForCcuUser(operationalModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, (double) defaultConditioningMode.ordinal(), 0);
+        CCUHsApi.getInstance().writeHisValById(operationalModeId, (double) defaultConditioningMode.ordinal());
 
+    }
+    
+    private SSEFanStage getDefaultFanSpeed(FourPipeFanCoilUnitConfiguration config) {
+        if (config.enableRelay1 || config.enableRelay2 || config.enableRelay3) {
+            return SSEFanStage.AUTO;
+        } else {
+            return SSEFanStage.OFF;
+        }
+    }
+    
+    private SSEConditioningMode getDefaultConditioningMode(FourPipeFanCoilUnitConfiguration config) {
+        if (config.enableRelay4 && config.enableRelay6) {
+            return SSEConditioningMode.AUTO;
+        } else if (config.enableRelay4){
+            return SSEConditioningMode.HEAT_ONLY;
+        } else if (config.enableRelay6) {
+            return SSEConditioningMode.COOL_ONLY;
+        } else {
+            return SSEConditioningMode.OFF;
+        }
     }
 }
 

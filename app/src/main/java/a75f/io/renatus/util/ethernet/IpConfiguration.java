@@ -3,7 +3,7 @@ package a75f.io.renatus.util.ethernet;
 import android.net.ProxyInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.util.Objects;
 /**

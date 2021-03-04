@@ -3,17 +3,22 @@ package a75f.io.haystack.api;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Objects;
+import java.util.Optional;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.logger.CcuLog;
 
 public class TestCcuHsApi {
     
@@ -112,8 +117,9 @@ public class TestCcuHsApi {
                                .setSiteRef(siteRef)
                                .setRoomRef(zoneRef)
                                .setFloorRef(floorRef)
-                               .addMarker("discharge").addMarker("logical")
+                               .addMarker("discharge").addMarker("logical").addMarker("his").addMarker("sp").addMarker("zone")
                                .addMarker("air").addMarker("temp2").addMarker("sensor").addMarker("writable")
+                               .addMarker("dab")
                                .setGroup(String.valueOf(nodeAddr))
                                .setTz("Chicago")
                                .setUnit("\u00B0F")
@@ -145,10 +151,10 @@ public class TestCcuHsApi {
                                     .build();
         
         hayStack.addPoint(testRawPoint);
-
         
-        ArrayList<HashMap<Object, Object>> data = hayStack.readAllEntities("point");
-        for (HashMap m : data) {
+        ArrayList<HashMap> p = hayStack.readAll("point and temp or temp2 and logical");
+        System.out.println(p.size());
+        for(HashMap m:p) {
             System.out.println(m);
         }
 

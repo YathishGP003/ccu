@@ -28,6 +28,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.tuners.DabTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -113,7 +114,7 @@ public class DabEquip
                                   .setTz(tz)
                                   .setGroup(String.valueOf(nodeAddr));
         equipRef = CCUHsApi.getInstance().addEquip(b.build());
-        BuildingTuners.getInstance().addEquipDabTuners(siteDis + "-DAB-" + nodeAddr, equipRef, roomRef, floorRef);
+        DabTuners.addEquipDabTuners( hayStack, siteRef, siteDis + "-DAB-" + nodeAddr, equipRef, roomRef, floorRef, tz);
         createDabConfigPoints(config, equipRef);
     
         Point damper1Pos = new Point.Builder()

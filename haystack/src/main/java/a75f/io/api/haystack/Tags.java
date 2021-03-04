@@ -22,8 +22,18 @@ public class Tags
     public static final String MARKER = "marker";
     public static final String CCU = "ccu";
     
+    public static final String WRITABLE = "writable";
+    public static final String HIS = "his";
+    public static final String SP = "sp";
     
-    
+    public static final String DAB = "dab";
+    public static final String VAV = "vav";
+    public static final String OAO = "oao";
+    public static final String PID = "pid";
+    public static final String ALERT = "alert";
+    public static final String DUALDUCT = "dualDuct";
+    public static final String STANDALONE = "standalone";
+    public static final String TI = "ti";
     
     public static final String ENABLED = "enabled";
     public static final String ASSOCIATION = "association";
@@ -37,9 +47,15 @@ public class Tags
     public static final String RELAY6 = "relay6";
     public static final String RELAY7 = "relay7";
     
-    
     public static final String SSE = "sse";
+
+    public static final String ZONE = "zone";
+    public static final String SYSTEM = "system";
+    public static final String DEFAULT = "default";
+    public static final String TUNER = "tuner";
+    public static final String EQUIPREF = "equipRef";
     
     public static final String IE = "ie";
     public static final String ADDRESS = "address";
+
 }

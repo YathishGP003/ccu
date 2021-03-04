@@ -14,6 +14,7 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.tuners.PlcTuners;
 import a75f.io.logic.tuners.TunerUtil;
 
 /**
@@ -85,7 +86,7 @@ public class PlcEquip {
                 .setGroup(String.valueOf(nodeAddr)).build();
 
         equipRef = hayStack.addEquip(b);
-        BuildingTuners.getInstance().addPlcEquipTuners(siteDis + "-PID-" + nodeAddr, equipRef, roomRef, floorRef);
+        PlcTuners.addPlcEquipTuners(hayStack, siteRef, siteDis + "-PID-" + nodeAddr, equipRef, roomRef, floorRef, tz);
 
         Point analog1InputSensor = new Point.Builder()
                 .setDisplayName(equipDis + "-analog1InputSensor")

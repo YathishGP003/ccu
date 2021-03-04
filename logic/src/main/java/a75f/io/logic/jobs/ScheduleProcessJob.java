@@ -512,7 +512,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     }
 
     public static void updateSystemOccupancy() {
-        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT) {
+        if (L.ccu().systemProfile == null || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT) {
             Log.d(TAG_CCU_JOB, " Skip updateSystemOccupancy for Default System Profile ");
             return;
         }

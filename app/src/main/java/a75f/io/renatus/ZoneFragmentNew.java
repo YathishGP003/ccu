@@ -8,6 +8,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+
+import a75f.io.logic.bo.building.hvac.SSEFanStage;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -2395,11 +2397,18 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
                 getActivity(), R.array.smartstat_2pfcu_fanmode, R.layout.spinner_zone_item);
         if(p2FCUPoints.containsKey("fanEnabled")) {
-            if (p2FCUPoints.get("fanEnabled").toString().contains("No High Fan"))
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_medium, R.layout.spinner_zone_item);
-            else if (p2FCUPoints.get("fanEnabled").toString().contains("No Medium High Fan"))
+            if (p2FCUPoints.get("fanEnabled").toString().contains("No High Fan")) {
+                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_medium,
+                                                                 R.layout.spinner_zone_item);
+                if (fanMode > fanModeAdapter.getCount()) {
+                    fanMode = SSEFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
+                }
+            }else if (p2FCUPoints.get("fanEnabled").toString().contains("No Medium High Fan")) {
                 fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_low, R.layout.spinner_zone_item);
-            else if (p2FCUPoints.get("fanEnabled").toString().contains("No Fan")) {
+                if (fanMode > fanModeAdapter.getCount()) {
+                    fanMode = SSEFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
+                }
+            }else if (p2FCUPoints.get("fanEnabled").toString().contains("No Fan")) {
                 fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_off, R.layout.spinner_zone_item);
                 fanMode = 0;
             }
@@ -2538,11 +2547,18 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 getActivity(), R.array.smartstat_2pfcu_fanmode, R.layout.spinner_zone_item);
 
         if(p4FCUPoints.containsKey("fanEnabled")) {
-            if (p4FCUPoints.get("fanEnabled").toString().contains("No High Fan"))
-                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_medium, R.layout.spinner_zone_item);
-            else if (p4FCUPoints.get("fanEnabled").toString().contains("No Medium High Fan"))
+            if (p4FCUPoints.get("fanEnabled").toString().contains("No High Fan")) {
+                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_medium,
+                                                                 R.layout.spinner_zone_item);
+                if (fanMode > fanModeAdapter.getCount()) {
+                    fanMode = SSEFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
+                }
+            } else if (p4FCUPoints.get("fanEnabled").toString().contains("No Medium High Fan")) {
                 fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_low, R.layout.spinner_zone_item);
-            else if (p4FCUPoints.get("fanEnabled").toString().contains("No Fan")) {
+                if (fanMode > fanModeAdapter.getCount()) {
+                    fanMode = SSEFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
+                }
+            } else if (p4FCUPoints.get("fanEnabled").toString().contains("No Fan")) {
                 fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_off, R.layout.spinner_zone_item);
                 fanMode = 0;
             }

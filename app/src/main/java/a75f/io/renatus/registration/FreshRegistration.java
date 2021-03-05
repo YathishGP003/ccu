@@ -1,7 +1,6 @@
 package a75f.io.renatus.registration;
 
 import android.app.AlertDialog;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,6 +14,7 @@ import android.preference.PreferenceManager;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.util.TypedValue;
@@ -53,6 +53,7 @@ import a75f.io.renatus.VavStagedRtuProfile;
 import a75f.io.renatus.VavStagedRtuWithVfdProfile;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import androidx.fragment.app.FragmentTransaction;
 
 public class FreshRegistration extends AppCompatActivity implements VerticalTabAdapter.OnItemClickListener, SwitchFragment {
     VerticalTabAdapter verticalTabAdapter;
@@ -420,7 +421,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             fragment = new StartCCUFragment();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
             textView_title.setVisibility(View.GONE);
@@ -436,7 +437,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             fragment = new InstallTypeFragment();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
             verticalTabAdapter.setCurrentSelected(0);
@@ -467,7 +468,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             fragment = new WifiFragment();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
             verticalTabAdapter.setCurrentSelected(1);
@@ -495,7 +496,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             fragment = new CreateNewSite();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
             verticalTabAdapter.setCurrentSelected(2);
@@ -523,7 +524,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             fragment = new InstallerOptions();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
             verticalTabAdapter.setCurrentSelected(3);
@@ -552,7 +553,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             fragment = new Security();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
 
@@ -582,7 +583,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             fragment = new AddtoExisting();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
 
@@ -612,7 +613,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             fragment = new PreConfigCCU();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
             verticalTabAdapter.setCurrentSelected(2);
@@ -641,7 +642,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             fragment = new ReplaceCCU();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
 
@@ -674,7 +675,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             fragment.setArguments(data);
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
             ConstraintLayout.LayoutParams headerparams = (ConstraintLayout.LayoutParams) rl_Header.getLayoutParams();
@@ -713,7 +714,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
 
@@ -754,7 +755,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
             ConstraintLayout.LayoutParams headerparams = (ConstraintLayout.LayoutParams) rl_Header.getLayoutParams();
@@ -794,7 +795,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
 
@@ -833,7 +834,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
 
@@ -872,7 +873,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
 
@@ -911,7 +912,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
             ConstraintLayout.LayoutParams headerparams = (ConstraintLayout.LayoutParams) rl_Header.getLayoutParams();
@@ -950,7 +951,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
             ConstraintLayout.LayoutParams headerparams = (ConstraintLayout.LayoutParams) rl_Header.getLayoutParams();
             headerparams.topMargin = 70;
@@ -989,7 +990,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
             ConstraintLayout.LayoutParams headerparams = (ConstraintLayout.LayoutParams) rl_Header.getLayoutParams();
@@ -1029,7 +1030,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
             ConstraintLayout.LayoutParams headerparams = (ConstraintLayout.LayoutParams) rl_Header.getLayoutParams();
@@ -1069,7 +1070,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
 
@@ -1109,7 +1110,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
 
@@ -1150,7 +1151,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             fragment = new CongratsFragment();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
-                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
             showIcons(false);

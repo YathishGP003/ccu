@@ -144,27 +144,27 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/buttonCancel"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:theme="@style/Theme.MaterialComponents.Light"
+                    style="@style/tunerButton"
                     android:layout_width="100sp"
                     android:layout_height="50sp"
                     android:layout_marginRight="5sp"
                     android:padding="5sp"
                     android:text="@string/cancel"
-                    android:textAppearance="@style/tunerButton_Enabled"
-                    android:theme="@style/tunerButton_Enabled"
+                    android:textAppearance="@style/tunerButton"
                     app:strokeColor="@color/orange_75f" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/buttonSave"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:theme="@style/Theme.MaterialComponents.Light"
+                    style="@style/tunerButton"
                     android:layout_width="100sp"
                     android:layout_height="50sp"
                     android:layout_marginLeft="5sp"
                     android:enabled="false"
                     android:padding="5sp"
                     android:text="@string/tuner_save"
-                    android:textAppearance="@style/tunerButton_Enabled"
-                    android:theme="@style/tunerButton_Enabled"
+                    android:textAppearance="@style/tunerButton"
                     app:strokeColor="@color/orange_75f" />
 
 

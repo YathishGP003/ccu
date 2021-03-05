@@ -355,21 +355,14 @@
         <item name="android:fontFamily">@font/lato_bold</item>
         <item name="android:gravity">center_vertical</item>
     </style>
+    <style name="tunerButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textColor">@color/tuner_button_text_selector</item>
+        <item name="android:textSize">19.5sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:gravity">center</item>
+        <item name="android:strokeColor">@color/tuner_button_text_selector</item>
+        <item name="rippleColor">@color/material_button_ripple</item>
+    </style>
 
-    <style name="tunerButton_Disabled" parent="Widget.MaterialComponents.Button.OutlinedButton">
-        <item name="android:textColor">@color/tuner_group</item>
-        <item name="android:textSize">19.5sp</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:fontFamily">@font/lato_regular</item>
-        <item name="android:gravity">center_vertical</item>
-        <item name="android:strokeColor">@color/tuner_group</item>
-    </style>
-    <style name="tunerButton_Enabled" parent="Widget.MaterialComponents.Button.OutlinedButton">
-        <item name="android:textColor">@color/orange_75f</item>
-        <item name="android:textSize">19.5sp</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:fontFamily">@font/lato_regular</item>
-        <item name="android:gravity">center_vertical</item>
-        <item name="android:strokeColor">@color/orange_75f</item>
-    </style>
 </resources>

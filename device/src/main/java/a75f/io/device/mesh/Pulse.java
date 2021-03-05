@@ -37,6 +37,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.sensors.Sensor;
+import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.logic.bo.building.sensors.SensorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
@@ -324,7 +325,7 @@ public class Pulse
 		try
 		{
 			int index = (int)Double.parseDouble(pp.get("analogType").toString());
-			analogSensor = Sensor.getSensorList().get(index);
+			analogSensor = SensorManager.getInstance().getExternalSensorList().get(index);
 		}catch (NumberFormatException e) {
 			e.printStackTrace();
 			return analogVal;

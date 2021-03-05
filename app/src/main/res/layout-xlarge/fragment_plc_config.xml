@@ -116,13 +116,13 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentLeft="true"
                             android:layout_centerVertical="true"
-                            android:layout_toStartOf="@+id/onboardSensor"
+                            android:layout_toStartOf="@+id/nativeSensor"
                             android:textSize="@dimen/text_small_xlarge"
                             android:text="@string/label_onboard_sensor"
                             android:textAppearance="@style/title_normal" />
 
                         <Spinner
-                            android:id="@+id/onboardSensor"
+                            android:id="@+id/nativeSensor"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="260dp"
                             android:layout_height="?android:attr/listPreferredItemHeight"

@@ -1,12 +1,17 @@
 package a75f.io.logic.bo.building.sensors;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class SensorManager {
     
     private static SensorManager instance = null;
     
-    public static ArrayList<OnboardSensor> onBoardSensors = null;
+    public ArrayList<NativeSensor> nativeSensors = null;
+    public ArrayList<Sensor> externalSensors = null;
+    
+    private SensorManager() {
+    }
     
     public static SensorManager getInstance() {
         if (instance == null) {
@@ -106,30 +111,51 @@ public class SensorManager {
      *
      *
      *
-     * Onboard sensors are defined as per the above spec.
+     * Native sensors are defined as per the above spec.
      */
     
-    public ArrayList<OnboardSensor> getOnboardSensorList() {
-        if (onBoardSensors != null) {
-            return onBoardSensors;
+    public ArrayList<NativeSensor> getNativeSensorList() {
+        if (nativeSensors != null) {
+            return nativeSensors;
         }
-        onBoardSensors = new ArrayList<>();
+        nativeSensors = new ArrayList<>();
     
-        onBoardSensors.add(new OnboardSensor("Current Temp","F",-10,150,0.5));
-        onBoardSensors.add(new OnboardSensor("Humidity","%",0,100,0.5));
-        onBoardSensors.add(new OnboardSensor("CO2","ppm",0,2000,100));
-        onBoardSensors.add(new OnboardSensor("CO","ppm",0,100,1));
-        onBoardSensors.add(new OnboardSensor("NO2","ppm",0,5,0.1));
-        onBoardSensors.add(new OnboardSensor("VOC","ppb",0,60000,1000));
-        onBoardSensors.add(new OnboardSensor("Pressure Sensor","inches wc",0,2,0.1));
-        onBoardSensors.add(new OnboardSensor("Sound","dB",0,140,1));
-        onBoardSensors.add(new OnboardSensor("Native Occupancy","",0,1,1));
-        onBoardSensors.add(new OnboardSensor("Illuminance","lux",0,2000,10));
-        onBoardSensors.add(new OnboardSensor("Co2 Equivalent","ppm",400,60000,10));
-        onBoardSensors.add(new OnboardSensor("UVIndex","",0,10,0.1));
-        onBoardSensors.add(new OnboardSensor("PM2P5","ug/m3",0,1000,10));
-        onBoardSensors.add(new OnboardSensor("PM10","ug/m3",0,1000,10));
+        nativeSensors.add(new NativeSensor("Native-Temperature", "\u00B0F", -10, 150, 0.5));
+        nativeSensors.add(new NativeSensor("Native-Humidity", "%", 0, 100, 0.5));
+        nativeSensors.add(new NativeSensor("Native-CO2", "ppm", 0, 2000, 100));
+        nativeSensors.add(new NativeSensor("Native-CO", "ppm", 0, 100, 1));
+        nativeSensors.add(new NativeSensor("Native-NO2", "ppm", 0, 5, 0.1));
+        nativeSensors.add(new NativeSensor("Native-VOC", "ppb", 0, 60000, 1000));
+        nativeSensors.add(new NativeSensor("Native-Pressure", "inches wc", 0, 2, 0.1));
+        nativeSensors.add(new NativeSensor("Native-Sound", "dB", 0, 140, 1));
+        nativeSensors.add(new NativeSensor("Native-Occupancy", "", 0, 1, 1));
+        nativeSensors.add(new NativeSensor("Native-Illuminance", "lux", 0, 2000, 10));
+        nativeSensors.add(new NativeSensor("Native-Co2 Equivalent", "ppm", 400, 60000, 10));
+        nativeSensors.add(new NativeSensor("Native-UVIndex", "", 0, 10, 0.1));
+        nativeSensors.add(new NativeSensor("Native-PM2P5", "ug/m3", 0, 1000, 10));
+        nativeSensors.add(new NativeSensor("Native-PM10", "ug/m3", 0, 1000, 10));
         
-        return onBoardSensors;
+        return nativeSensors;
+    }
+    
+    
+    public List<Sensor> getExternalSensorList() {
+        if (externalSensors != null) {
+            return externalSensors;
+        }
+        externalSensors = new ArrayList<>();
+    
+        externalSensors.add(new Sensor("Generic 0-10","V", 0, 10,0,10,0.1));
+        externalSensors.add(new Sensor("0-2 in. Pressure Sensor","inches wc",0,10,0,2,0.1));
+        externalSensors.add(new Sensor("0-0.25 Differential Pressure Sensor","inches wc",0,10,-0.25,0.25,0.01));
+        externalSensors.add(new Sensor("Airflow Sensor","CFM",0,10,0,1000,10.0));
+        externalSensors.add(new Sensor("Humidity","%",0,10,0,100,1.0));
+        externalSensors.add(new Sensor("CO2","ppm",0,10,0,2000,10.0));
+        externalSensors.add(new Sensor("CO","ppm",0,10,0,100,1.0));
+        externalSensors.add(new Sensor("NO2","ppm",0,10,0,5,0.1));
+        externalSensors.add(new Sensor("CT 0-10","amps",0,10,0,10,0.1));
+        externalSensors.add(new Sensor("CT 0-20","amps",0,10,0,20,0.1));
+        externalSensors.add(new Sensor("CT 0-50","amps",0,10,0,50,0.1));
+        return externalSensors;
     }
 }

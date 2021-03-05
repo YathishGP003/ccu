@@ -20,5 +20,5 @@ public class PlcProfileConfiguration extends BaseProfileConfiguration
     public double setpointSensorOffset;
     
     public boolean expectZeroErrorAtMidpoint;
-    public int onboardSensorInput;
+    public int nativeSensorInput;
 }

@@ -28,7 +28,7 @@ import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
-import a75f.io.logic.bo.building.sensors.OnboardSensor;
+import a75f.io.logic.bo.building.sensors.NativeSensor;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
@@ -60,8 +60,8 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
     @BindView(R.id.th1InSensor)
     Spinner th1InSensorSp;
     
-    @BindView(R.id.onboardSensor)
-    Spinner onboardSensor;
+    @BindView(R.id.nativeSensor)
+    Spinner nativeSensor;
     
     @BindView(R.id.errorRange)
     Spinner errorRangeSp;
@@ -198,7 +198,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         
         ArrayList<String> analog1InArr = new ArrayList<>();
         analog1InArr.add("Not Used");
-        for (Sensor r : Sensor.getSensorList()) {
+        for (Sensor r : SensorManager.getInstance().getExternalSensorList()) {
             analog1InArr.add(r.sensorName+" "+r.engineeringUnit);
         }
         ArrayList<String> th1InArr = new ArrayList<>();
@@ -220,7 +220,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                     return;
                 }
                 ArrayList<Double> targetVal = new ArrayList<Double>();
-                Sensor r = Sensor.getSensorList().get(i-1);
+                Sensor r = SensorManager.getInstance().getExternalSensorList().get(i-1);
                 for (int pos = (int)(100*r.minEngineeringValue); pos <= (100*r.maxEngineeringValue); pos+=(100*r.incrementEgineeringValue)) {
                     targetVal.add(pos /100.0);
                 }
@@ -234,7 +234,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                     targetValSp.setSelection(targetValAdapter.getPosition(5.0), false);
                 }
                 th1InSensorSp.setSelection(0, false);
-                onboardSensor.setSelection(0, false);
+                nativeSensor.setSelection(0, false);
                 
             }
             @Override
@@ -271,7 +271,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                     targetValSp.setSelection(targetValAdapter.getPosition(5.0), false);
                 }
                 analog1InSensorSp.setSelection(0, false);
-                onboardSensor.setSelection(0, false);
+                nativeSensor.setSelection(0, false);
             }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView)
@@ -296,7 +296,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         errorRangeSp.setAdapter(errRangeAdapter);
         
         ArrayList<String> analog2InArr = new ArrayList<>();
-        for (Sensor r : Sensor.getSensorList()) {
+        for (Sensor r : SensorManager.getInstance().getExternalSensorList()) {
             analog2InArr.add(r.sensorName+" "+r.engineeringUnit);
         }
         ArrayAdapter<String> analgo2InAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, analog2InArr);
@@ -309,7 +309,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             {
                 Log.d("CCU_UI"," analog2InSensorSp Selected : "+i);
                 ArrayList<Double> targetVal = new ArrayList<Double>();
-                Sensor r = Sensor.getSensorList().get(i);
+                Sensor r = SensorManager.getInstance().getExternalSensorList().get(i);
                 for (int pos = (int)(100 * (r.minEngineeringValue < 0 ? r.minEngineeringValue : -1*r.maxEngineeringValue)); pos <= (100* r.maxEngineeringValue); pos+= (100 * r.incrementEgineeringValue)) {
                     targetVal.add(pos /100.0);
                 }
@@ -443,7 +443,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
     
         ArrayList<String> onboardSensorInArr = new ArrayList<>();
         onboardSensorInArr.add("Not Used");//TODO-
-        for (OnboardSensor sensor : SensorManager.getInstance().getOnboardSensorList()) {
+        for (NativeSensor sensor : SensorManager.getInstance().getNativeSensorList()) {
             onboardSensorInArr.add(sensor.sensorName+" "+sensor.engineeringUnit);
         }
         
@@ -451,11 +451,11 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                                                                       android.R.layout.simple_spinner_item,
                                                                       onboardSensorInArr);
         sensorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        onboardSensor.setAdapter(sensorAdapter);
+        nativeSensor.setAdapter(sensorAdapter);
         if (mProfileConfig != null) {
             targetValSelection = (int)mProfileConfig.pidTargetValue;
         }
-        onboardSensor.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        nativeSensor.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
                 Log.d("CCU_UI"," onboardSensor Selected : "+position);
@@ -463,7 +463,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                     return;
                 }
                 ArrayList<Double> targetVal = new ArrayList<>();
-                OnboardSensor sensor = SensorManager.getInstance().getOnboardSensorList().get(position-1);
+                NativeSensor sensor = SensorManager.getInstance().getNativeSensorList().get(position - 1);
                 for (int pos = (int)(100.0*sensor.minEngineeringValue); pos <= (100.0*sensor.maxEngineeringValue); pos+=(100.0*sensor.incrementEgineeringValue)) {
                     targetVal.add(pos/100.0);
                 }
@@ -505,7 +505,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         p.analog1AtMinOutput = Double.parseDouble(analogout1AtMinSp.getSelectedItem().toString());
         p.analog1AtMaxOutput = Double.parseDouble(analogout1AtMaxSp.getSelectedItem().toString());
         p.setpointSensorOffset = Double.parseDouble(sensorOffsetSp.getSelectedItem().toString());
-        p.onboardSensorInput = onboardSensor.getSelectedItemPosition();
+        p.nativeSensorInput = nativeSensor.getSelectedItemPosition();
         mPlcProfile.getProfileConfiguration().put(mSmartNodeAddress, p);
 
         String processVariableTag = analog1InSensorSp.getSelectedItem().toString();

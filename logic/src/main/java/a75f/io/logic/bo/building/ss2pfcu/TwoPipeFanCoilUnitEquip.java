@@ -1097,7 +1097,10 @@ public class TwoPipeFanCoilUnitEquip {
     }
     
     private SSEConditioningMode getDefaultConditioningMode(TwoPipeFanCoilUnitConfiguration config) {
-        if (config.enableRelay4 && config.enableRelay6) {
+    
+        return SSEConditioningMode.AUTO;
+        
+        /*if (config.enableRelay4 && config.enableRelay6) {
             return SSEConditioningMode.AUTO;
         } else if (config.enableRelay4){
             return SSEConditioningMode.HEAT_ONLY;
@@ -1105,6 +1108,6 @@ public class TwoPipeFanCoilUnitEquip {
             return SSEConditioningMode.COOL_ONLY;
         } else {
             return SSEConditioningMode.OFF;
-        }
+        }*/
     }
 }

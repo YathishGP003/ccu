@@ -2155,11 +2155,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
                 getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
         if(hpuEquipPoints.containsKey("condEnabled")){
-            if(hpuEquipPoints.get("condEnabled").toString().contains("Cool Only"))
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly, R.layout.spinner_zone_item);
-            else if(hpuEquipPoints.get("condEnabled").toString().contains("Heat Only"))
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly, R.layout.spinner_zone_item);
-            else if(hpuEquipPoints.get("condEnabled").toString().contains("Off")) {
+            if(hpuEquipPoints.get("condEnabled").toString().contains("Cool Only")) {
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly,
+                                                                 R.layout.spinner_zone_item);
+                if (conditionMode == SSEConditioningMode.COOL_ONLY.ordinal()) {
+                    conditionMode = conModeAdapter.getCount() - 1;
+                }
+            } else if(hpuEquipPoints.get("condEnabled").toString().contains("Heat Only")) {
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
+                                                                 R.layout.spinner_zone_item);
+                if (conditionMode == SSEConditioningMode.HEAT_ONLY.ordinal()) {
+                    conditionMode = conModeAdapter.getCount() - 1; //Select the last item.
+                }
+            } else if(hpuEquipPoints.get("condEnabled").toString().contains("Off")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
                 conditionMode = 0;
             }

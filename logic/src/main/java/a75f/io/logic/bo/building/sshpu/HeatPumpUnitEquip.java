@@ -24,6 +24,9 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
 import a75f.io.logic.bo.building.definitions.SmartStatHeatPumpChangeOverType;
+import a75f.io.logic.bo.building.hvac.SSEConditioningMode;
+import a75f.io.logic.bo.building.hvac.SSEFanStage;
+import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitConfiguration;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.StandAloneTuners;
@@ -792,7 +795,7 @@ public class HeatPumpUnitEquip{
                 .build();
         String relay5FanTypeId = CCUHsApi.getInstance().addPoint(relay5FanType);
         CCUHsApi.getInstance().writeDefaultValById(relay5FanTypeId, (double)config.fanRelay5Type);
-        addUserIntentPoints(equipRef,equipDis,room,floor);
+        addUserIntentPoints(equipRef,equipDis,room,floor, config);
 
 
         setConfigNumVal("enable and relay1",config.enableRelay1 == true ? 1.0 : 0);
@@ -1235,7 +1238,8 @@ public class HeatPumpUnitEquip{
     {
         CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \""+nodeAddr+"\"", status);
     }
-    protected void addUserIntentPoints(String equipref, String equipDis, String room, String floor) {
+    protected void addUserIntentPoints(String equipref, String equipDis, String room, String floor,
+                                       HeatPumpUnitConfiguration config) {
 
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = siteMap.get("id").toString();
@@ -1268,8 +1272,10 @@ public class HeatPumpUnitEquip{
                 .setTz(tz)
                 .build();
         String conditionalModeId = CCUHsApi.getInstance().addPoint(conditionalMode);
-        CCUHsApi.getInstance().writePointForCcuUser(conditionalModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_DEFAULT_CONDITIONAL_MODE, 0);
-        CCUHsApi.getInstance().writeHisValById(conditionalModeId, TunerConstants.STANDALONE_DEFAULT_CONDITIONAL_MODE);
+        SSEConditioningMode defaultConditioning = getDefaultConditioningMode(config);
+        CCUHsApi.getInstance().writePointForCcuUser(conditionalModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL,
+                                                    (double) defaultConditioning.ordinal(), 0);
+        CCUHsApi.getInstance().writeHisValById(conditionalModeId, (double)defaultConditioning.ordinal());
 
 
         Point targetDehumidifier = new Point.Builder()
@@ -1288,5 +1294,21 @@ public class HeatPumpUnitEquip{
         String targetHumidtyId = CCUHsApi.getInstance().addPoint(targetHumidty);
         CCUHsApi.getInstance().writePointForCcuUser(targetHumidtyId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_TARGET_HUMIDITY, 0);
         CCUHsApi.getInstance().writeHisValById(targetHumidtyId, TunerConstants.STANDALONE_TARGET_HUMIDITY);
+    }
+    
+    private SSEFanStage getDefaultFanSpeed(HeatPumpUnitConfiguration config) {
+        if (config.enableRelay1 || config.enableRelay2 || config.enableRelay3) {
+            return SSEFanStage.AUTO;
+        } else {
+            return SSEFanStage.OFF;
+        }
+    }
+    
+    private SSEConditioningMode getDefaultConditioningMode(HeatPumpUnitConfiguration config) {
+        if (config.enableRelay1 || config.enableRelay2) {
+            return SSEConditioningMode.AUTO;
+        } else {
+            return SSEConditioningMode.OFF;
+        }
     }
 }

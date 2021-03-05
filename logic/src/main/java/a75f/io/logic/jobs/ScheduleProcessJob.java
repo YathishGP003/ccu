@@ -867,12 +867,16 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         } else {
             p2FCUPoints.put("Discharge Airflow", 0 + " \u2109");
         }
-        if(isCoolingOn && !isHeatingOn)
+        /*f(isCoolingOn && !isHeatingOn)
             p2FCUPoints.put("condEnabled","Cool Only");
         else if(!isCoolingOn && isHeatingOn)
             p2FCUPoints.put("condEnabled","Heat Only");
         else if(!isCoolingOn && !isHeatingOn)
+            p2FCUPoints.put("condEnabled","Off");*/
+    
+        if(!isCoolingOn)
             p2FCUPoints.put("condEnabled","Off");
+        
         if(isFanLowEnabled && isFanMediumEnabled && !isFanHighEnabled)
             p2FCUPoints.put("fanEnabled","No High Fan");
         else if(isFanLowEnabled && !isFanMediumEnabled)
@@ -1041,11 +1045,14 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             hpuPoints.put("Fan High Humidity",0);
         }
 
-        if(!isCompressor1On && !isCompressor1On && (isChangeOverOn == 1.0))
+        /*if(!isCompressor1On && !isCompressor1On && (isChangeOverOn == 1.0))
             hpuPoints.put("condEnabled","Cool Only");
         else if(!isCompressor1On && !isCompressor1On && ((isChangeOverOn == 2.0) || isAuxHeatingOn))
             hpuPoints.put("condEnabled","Heat Only");
         else if(!isCompressor1On && !isCompressor1On && (isChangeOverOn == 0) && !isAuxHeatingOn)
+            hpuPoints.put("condEnabled","Off");*/
+    
+        if(!isCompressor1On && !isCompressor2On)
             hpuPoints.put("condEnabled","Off");
 
         if(isFanLowEnabled && !isFanHighEnabled)

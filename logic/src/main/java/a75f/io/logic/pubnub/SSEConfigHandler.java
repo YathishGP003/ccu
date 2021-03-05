@@ -17,7 +17,7 @@ class SSEConfigHandler {
         int val = msgObject.get("val").getAsInt();
         if (configPoint.getMarkers().contains(Tags.RELAY1)) {
             SingleStageEquipUtil.updateRelay1Config( val, configPoint);
-        } else if (configPoint.getMarkers().contains(Tags.RELAY1)) {
+        } else if (configPoint.getMarkers().contains(Tags.RELAY2)) {
             SingleStageEquipUtil.updateRelay2Config( val, configPoint);
         }
     }

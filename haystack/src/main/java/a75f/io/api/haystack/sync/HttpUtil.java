@@ -2,6 +2,7 @@ package a75f.io.api.haystack.sync;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.constants.HttpConstants;
+
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -34,55 +35,53 @@ import okhttp3.Response;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class HttpUtil
-{
+public class HttpUtil {
 
     public static String executePost(String targetURL, String urlParameters) {
         return executePost(targetURL, urlParameters, CCUHsApi.getInstance().getJwt()); // TODO Matt Rudd - I hate this hack, but the executePost needs a complete rewrite
     }
-    
-    
+
+
     public static final MediaType ZINC = MediaType.get("text/zinc; charset=utf-8");
     private static OkHttpClient client = new OkHttpClient();
-    
+
     private static Call post(String url, String params, String token, Callback callback) {
         RequestBody body = RequestBody.create(params, ZINC);
         Request request = new Request.Builder()
-                              .url(url)
-                              .addHeader("Content-Length", "" + params.getBytes(StandardCharsets.UTF_8).length)
-                              .addHeader("Content-Language", "en-US")
-                              .addHeader("Authorization", " Bearer " + token)
-                              .post(body)
-                              .build();
+                .url(url)
+                .addHeader("Content-Length", "" + params.getBytes(StandardCharsets.UTF_8).length)
+                .addHeader("Content-Language", "en-US")
+                .addHeader("Authorization", " Bearer " + token)
+                .post(body)
+                .build();
         Call call = client.newCall(request);
         call.enqueue(callback);
         return call;
     }
-    
+
     public static void executePostAsync(String targetURL, String urlParameters) {
-        
+
         post(targetURL, urlParameters, CCUHsApi.getInstance().getJwt(), new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                CcuLog.i("CCU_HS","executePostAsync Failed : "+e.getMessage());
+                CcuLog.i("CCU_HS", "executePostAsync Failed : " + e.getMessage());
             }
-        
+
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     String responseStr = response.body().string();
-                    CcuLog.i("CCU_HS","executePostAsync Succeeded : "+responseStr);
+                    CcuLog.i("CCU_HS", "executePostAsync Succeeded : " + responseStr);
                 } else {
-                    CcuLog.i("CCU_HS","executePostAsync Failed : " + response.message());
+                    CcuLog.i("CCU_HS", "executePostAsync Failed : " + response.message());
                 }
             }
         });
     }
-    
-    
-    public static String executePost(String targetURL, String urlParameters, String bearerToken)
-    {
-        CcuLog.i("CCU_HS","Client Token: " + bearerToken);
+
+
+    public static String executePost(String targetURL, String urlParameters, String bearerToken) {
+        CcuLog.i("CCU_HS", "Client Token: " + bearerToken);
 
         if (StringUtils.isNotBlank(bearerToken)) {
             URL url;
@@ -91,7 +90,7 @@ public class HttpUtil
                 url = new URL(targetURL);
 
                 if (StringUtils.equals(url.getProtocol(), HttpConstants.HTTP_PROTOCOL)) {
-                    connection = (HttpURLConnection)url.openConnection();
+                    connection = (HttpURLConnection) url.openConnection();
                 } else {
                     connection = NetCipher.getHttpsURLConnection(url);
                 }
@@ -100,7 +99,7 @@ public class HttpUtil
                 connection.setRequestProperty("Content-Type",
                         "text/zinc");
 
-                CcuLog.i("CCU_HS",url.toString());
+                CcuLog.i("CCU_HS", url.toString());
                 final int chunkSize = 2048;
                 for (int i = 0; i < urlParameters.length(); i += chunkSize) {
                     Log.d("CCU_HS", urlParameters.substring(i, Math.min(urlParameters.length(), i + chunkSize)));
@@ -109,35 +108,35 @@ public class HttpUtil
                 connection.setRequestProperty("Content-Length", "" + urlParameters.getBytes(StandardCharsets.UTF_8).length);
                 connection.setRequestProperty("Content-Language", "en-US");
                 connection.setRequestProperty("Authorization", " Bearer " + bearerToken);
-                connection.setUseCaches (false);
+                connection.setUseCaches(false);
                 connection.setDoInput(true);
                 connection.setDoOutput(true);
 
                 //Send request
-                DataOutputStream wr = new DataOutputStream (connection.getOutputStream());
-                wr.write (urlParameters.getBytes(StandardCharsets.UTF_8));
-                wr.flush ();
+                DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
+                wr.write(urlParameters.getBytes(StandardCharsets.UTF_8));
+                wr.flush();
 
                 int responseCode = connection.getResponseCode();
-                CcuLog.i("CCU_HS","HttpResponse: responseCode "+responseCode);
+                CcuLog.i("CCU_HS", "HttpResponse: responseCode " + responseCode);
 
                 if (responseCode >= 400) {
 
                     BufferedReader rde = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
                     String linee;
                     StringBuffer responsee = new StringBuffer();
-                    while((linee = rde.readLine()) != null) {
+                    while ((linee = rde.readLine()) != null) {
                         responsee.append(linee);
                         responsee.append('\n');
                     }
-                    CcuLog.i("CCU_HS","Response error stream: " + responsee.toString());
+                    CcuLog.i("CCU_HS", "Response error stream: " + responsee.toString());
                 }
 
                 //Get Response
                 BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String line;
                 StringBuffer response = new StringBuffer();
-                while((line = rd.readLine()) != null) {
+                while ((line = rd.readLine()) != null) {
                     response.append(line);
                     response.append('\n');
                 }
@@ -146,17 +145,17 @@ public class HttpUtil
                 return responseCode == 200 ? response.toString() : null;
 
             } catch (Exception e) {
-                CcuLog.i("CCU_HS","Exception reading stream: " + e.getLocalizedMessage());
+                CcuLog.i("CCU_HS", "Exception reading stream: " + e.getLocalizedMessage());
 
-                if(connection != null) {
+                if (connection != null) {
                     connection.disconnect();
                 }
-                e.printStackTrace();
+                //e.printStackTrace();
                 return null;
 
             } finally {
 
-                if(connection != null) {
+                if (connection != null) {
                     connection.disconnect();
                 }
             }
@@ -174,7 +173,7 @@ public class HttpUtil
                 url = new URL(targetUrl);
 
                 if (StringUtils.equals(url.getProtocol(), HttpConstants.HTTP_PROTOCOL)) {
-                    connection = (HttpURLConnection)url.openConnection();
+                    connection = (HttpURLConnection) url.openConnection();
                 } else {
                     connection = NetCipher.getHttpsURLConnection(url);
                 }
@@ -182,7 +181,7 @@ public class HttpUtil
                 connection.setRequestProperty("Content-Type",
                         "application/json");
 
-                CcuLog.i("CCU_HS", Objects.toString(url.toString(),""));
+                CcuLog.i("CCU_HS", Objects.toString(url.toString(), ""));
                 CcuLog.i("CCU_HS", Objects.toString(urlParameters, ""));
 
                 connection.setRequestProperty("Content-Language", "en-US");
@@ -193,43 +192,46 @@ public class HttpUtil
                     connection.setRequestProperty("Authorization", " Bearer " + token);
                 }
 
-                connection.setUseCaches (false);
+                connection.setUseCaches(false);
                 connection.setRequestMethod(httpMethod);
 
                 if (StringUtils.equals(httpMethod, HttpConstants.HTTP_METHOD_GET)) {
                     connection.setDoOutput(false);
-                }
-                else {
+                } else {
                     connection.setDoOutput(true);
                     connection.setRequestProperty(
                             "Content-Length", "" + urlParameters.getBytes(StandardCharsets.UTF_8).length
                     );
                     //Send request
-                    DataOutputStream wr = new DataOutputStream (connection.getOutputStream());
-                    wr.write (urlParameters.getBytes(StandardCharsets.UTF_8));
-                    wr.flush();
+                    try {
+                        DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
+                        wr.write(urlParameters.getBytes(StandardCharsets.UTF_8));
+                        wr.flush();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 int responseCode = connection.getResponseCode();
-                CcuLog.i("CCU_HS","HttpResponse: responseCode "+responseCode);
+                CcuLog.i("CCU_HS", "HttpResponse: responseCode " + responseCode);
 
                 if (responseCode >= 400) {
 
                     BufferedReader rde = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
                     String linee;
                     StringBuffer responsee = new StringBuffer();
-                    while((linee = rde.readLine()) != null) {
+                    while ((linee = rde.readLine()) != null) {
                         responsee.append(linee);
                         responsee.append('\n');
                     }
-                    CcuLog.i("CCU_HS","Response error stream: " + responsee.toString());
+                    CcuLog.i("CCU_HS", "Response error stream: " + responsee.toString());
                 }
 
                 //Get Response
                 BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String line;
                 StringBuffer response = new StringBuffer();
-                while((line = rd.readLine()) != null) {
+                while ((line = rd.readLine()) != null) {
                     response.append(line);
                     response.append('\n');
                 }
@@ -238,13 +240,13 @@ public class HttpUtil
 
             } catch (Exception e) {
 
-                if(connection != null)
+                if (connection != null)
                     connection.disconnect();
                 e.printStackTrace();
                 return null;
 
             } finally {
-                if(connection != null) {
+                if (connection != null) {
                     connection.disconnect();
                 }
             }

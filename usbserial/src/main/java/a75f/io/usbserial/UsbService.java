@@ -19,6 +19,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.felhr.usbserial.CDCSerialDevice;
 import com.felhr.usbserial.UsbSerialDevice;
@@ -469,6 +470,9 @@ public class UsbService extends Service
 		catch (RemoteException e)
 		{
 			e.printStackTrace();
+		}
+		catch (SecurityException e){
+			Toast.makeText(context, "Security exception", Toast.LENGTH_SHORT).show();
 		}
 		return false;
 	}

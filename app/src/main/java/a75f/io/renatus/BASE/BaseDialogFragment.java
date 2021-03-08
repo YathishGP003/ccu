@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 
 /**
  * Created by Yinten isOn 8/11/2017.
@@ -18,6 +19,7 @@ public abstract class BaseDialogFragment extends DialogFragment
 	
 	protected void showDialogFragment(DialogFragment dialogFragment, String id)
 	{
+		Log.i("Dev1", "showDialogFragment: ");
 		FragmentTransaction ft = getFragmentManager().beginTransaction();
 		Fragment prev = getFragmentManager().findFragmentByTag(id);
 		if (prev != null)

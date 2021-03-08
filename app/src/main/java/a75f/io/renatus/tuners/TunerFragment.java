@@ -654,6 +654,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         } else if (radioButtonModule.isChecked()) {
             tunerGroupType = "Module";
         }
+        Log.i("Dev1", "starting fragment");
         DialogTunerPriorityArray tunerPriorityArray = DialogTunerPriorityArray.newInstance(item, tunerGroupType, tunerGroupOpened);
         tunerPriorityArray.setTargetFragment(this, DIALOG_TUNER_PRIORITY);
         showDialogFragment(tunerPriorityArray, DialogTunerPriorityArray.ID);
@@ -661,7 +662,6 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
     @Override
     public void itemClicked(TunerGroupItem section) {
-        //Toast.makeText(getActivity(), "TunerUI-Section: " + section.getName() + " clicked", Toast.LENGTH_SHORT).show();
         tunerGroupOpened = section;
     }
 

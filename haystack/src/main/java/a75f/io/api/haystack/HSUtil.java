@@ -262,7 +262,13 @@ public class HSUtil
         return pointEntity.containsKey(Tags.STANDALONE)
                && pointEntity.containsKey(Tags.CONFIG);
     }
-
+    
+    public static boolean isStandaloneUserIntent(String id, CCUHsApi hayStack) {
+        HashMap pointEntity = hayStack.readMapById(id);
+        return pointEntity.containsKey(Tags.STANDALONE)
+               && pointEntity.containsKey(Tags.USERINTENT);
+    }
+    
     public static double getSystemUserIntentVal(String tags)
     {
         CCUHsApi hayStack = CCUHsApi.getInstance();

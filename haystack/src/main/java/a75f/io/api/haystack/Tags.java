@@ -52,7 +52,8 @@ public class Tags
     
     public static final String SSE = "sse";
     public static final String CONFIG = "config";
-
+    public static final String USERINTENT = "userIntent";
+    
     public static final String ZONE = "zone";
     public static final String SYSTEM = "system";
     public static final String DEFAULT = "default";
@@ -66,5 +67,9 @@ public class Tags
     public static final String OCCUPANCY = "occupancy";
     public static final String DETECTION = "detection";
     public static final String CONTROL = "control";
+    
+    public static final String CONDITIONING = "conditioning";
+    public static final String FAN = "fan";
+    public static final String MODE = "mode";
 
 }

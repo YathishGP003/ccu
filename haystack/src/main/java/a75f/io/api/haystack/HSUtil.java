@@ -259,8 +259,7 @@ public class HSUtil
     
     public static boolean isStandaloneConfig(String id, CCUHsApi hayStack) {
         HashMap pointEntity = hayStack.readMapById(id);
-        return pointEntity.containsKey(Tags.STANDALONE)
-               && pointEntity.containsKey(Tags.CONFIG);
+        return pointEntity.containsKey(Tags.STANDALONE);
     }
     
     public static boolean isStandaloneUserIntent(String id, CCUHsApi hayStack) {

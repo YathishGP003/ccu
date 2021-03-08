@@ -85,6 +85,7 @@ public class SingleStageEquipUtil {
                 break;
                 
         }
+        SmartNode.setPointEnabled(Integer.valueOf(nodeAddr), Port.RELAY_ONE.name(), configVal > 0 ? true : false );
         CCUHsApi.getInstance().syncPointEntityTree();
     }
     
@@ -129,6 +130,7 @@ public class SingleStageEquipUtil {
             if (!fanPt.isEmpty())
                 CCUHsApi.getInstance().deleteEntity(fanPt.get("id").toString());
         }
+        SmartNode.setPointEnabled(Integer.valueOf(nodeAddr), Port.RELAY_TWO.name(), configVal > 0 ? true : false );
         CCUHsApi.getInstance().syncPointEntityTree();
     }
     

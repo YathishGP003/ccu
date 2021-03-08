@@ -183,7 +183,9 @@ public class SingleStageProfile extends ZoneProfile
                     setCmdSignal("fan and stage1", 1.0, (short) sseEquip.nodeAddr);
                 } else
                     setCmdSignal("fan and stage1", 0, (short) sseEquip.nodeAddr);
-                reset((short) sseEquip.nodeAddr);
+                
+                //Fan is already handled. Just update heating/cooling.
+                resetConditioning((short) sseEquip.nodeAddr);
                 state = DEADBAND;
             }
            sseEquip.setStatus(stageStatus, state.ordinal(), (state == HEATING ? buildingLimitMinBreached() : state == COOLING ? buildingLimitMaxBreached() : false));
@@ -216,11 +218,17 @@ public class SingleStageProfile extends ZoneProfile
         CCUHsApi.getInstance().writeHisValByQuery("point and sse and cmd and his and "+cmd+" and group == \"" + node + "\"", val);
     }
     public void reset(short node){
-
         setCmdSignal("cooling and stage1",0,node);
         setCmdSignal("heating and stage1",0,node);
         setCmdSignal("fan and stage1",0,node);
     }
+    
+    public void resetConditioning(short node){
+        //There might be failures here. We need to check if heating/cooling point exists before writing.
+        setCmdSignal("cooling and stage1",0,node);
+        setCmdSignal("heating and stage1",0,node);
+    }
+    
     @Override
     public void reset(){
         if(sseEquip != null){

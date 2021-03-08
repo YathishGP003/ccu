@@ -34,6 +34,9 @@ public class Tags
     public static final String DUALDUCT = "dualDuct";
     public static final String STANDALONE = "standalone";
     public static final String TI = "ti";
+    public static final String FCU = "fcu";
+    public static final String PIPE4 = "pipe4";
+    public static final String PIPE2 = "pipe2";
     
     public static final String ENABLED = "enabled";
     public static final String ASSOCIATION = "association";
@@ -58,5 +61,10 @@ public class Tags
     
     public static final String IE = "ie";
     public static final String ADDRESS = "address";
+    
+    public static final String ENABLE = "enable";
+    public static final String OCCUPANCY = "occupancy";
+    public static final String DETECTION = "detection";
+    public static final String CONTROL = "control";
 
 }

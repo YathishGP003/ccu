@@ -256,6 +256,12 @@ public class HSUtil
         return pointEntity.containsKey(Tags.SSE)
                && pointEntity.containsKey(Tags.CONFIG);
     }
+    
+    public static boolean isStandaloneConfig(String id, CCUHsApi hayStack) {
+        HashMap pointEntity = hayStack.readMapById(id);
+        return pointEntity.containsKey(Tags.STANDALONE)
+               && pointEntity.containsKey(Tags.CONFIG);
+    }
 
     public static double getSystemUserIntentVal(String tags)
     {

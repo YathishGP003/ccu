@@ -18,6 +18,8 @@ import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
+
+
 import android.text.Editable;
 import android.text.InputType;
 import android.text.SpannableString;

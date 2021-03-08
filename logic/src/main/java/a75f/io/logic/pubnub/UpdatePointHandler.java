@@ -53,8 +53,15 @@ public class UpdatePointHandler
             updatePoints(localPoint);
             return;
         }
-        if (luid != null && luid != "") {
- 
+
+        if (HSUtil.isSSEConfig(luid, CCUHsApi.getInstance())) {
+            SSEConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
+            updatePoints(localPoint);
+            return;
+        }
+    
+        if (luid != null && luid != "")
+        {
             HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote("@" + pointGuid);
             if (pointGrid == null) {
                 CcuLog.d(L.TAG_CCU_PUBNUB, "Failed to read remote point point : " + pointGuid);

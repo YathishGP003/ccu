@@ -47,6 +47,9 @@ public class Tags
     public static final String RELAY6 = "relay6";
     public static final String RELAY7 = "relay7";
     
+    public static final String SSE = "sse";
+    public static final String CONFIG = "config";
+
     public static final String ZONE = "zone";
     public static final String SYSTEM = "system";
     public static final String DEFAULT = "default";

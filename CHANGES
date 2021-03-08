@@ -1,68 +1,75 @@
- - Merged PR 413: 5028 Add utility to change local sandbox IP address in app
- - Merged PR 427: Tuner Fixes
- - handle null value
- - fixed comments
- - added revert function
- - fixed level issue at apply tuner
- - fixed for system tuner
- - fixed system tuners
- - Merged PR 416: 4414- Tuner UI, 5059 and Pubnub offline support
- - fix the issue
- - tuner conflict fix
- - tuner branch merge
- - fix conflicts
- - Merge branch 'story/samjith/5059_point_not_updated_reconfig' of ssh.dev.azure.com:v3/75fdevelopment/75F%20Engineering/ccu into story/mahesh/mahesh_sub_master
- - Reconfig support for system profile relay/analog config update
- - update for min, max and incrementval
- - Merged PR 387: Bearer token refresh
- - update all linked tuners
- - Merged PR 395: 4726 - part 2 | CCU Log file upload
- - fix observation
- - update tuners max, incrementVal
- - Incorporated review suggestions
- - Separated reconnection logic
- - fix layout issue in apply tuner dialog
- - fixed issues and crash when updating tuner
- - Update CCU name during pointWrite. We have been using just "ccu" in the who field. It is changing to have ccu_deviceId. A ccu name with device id appended will help differentiating origins of pointWrite when there are many ccus in a site.
- - Pubnub history read implementation
- - search filter ignore case
- - fixes
- - WIP
- - add edit icon
- - remove hint
- - Update the token fetch to use caretaker API
- - Merge branch 'master' into story/samjith/4824_brearer_token_management
- - update zone/module name
- - remove unrelated heap trial
+ - Merged PR 510: Building tuner synchronization
+ - resolve Merge conflicts
+ - default spresmax for sat tuner
+ - Update his val on clearing level
+ - Pubnub in clearing building level - Fix
+ - Clearing levels : updated fix
+ - Clear level not updated in backend - Fix
+ - dual duct fix
+ - Clear building level tuner on non-primary ccus- Fix
+ - Handle exception during tuner value parsing
+ - userLimitSpread incorrect tuner group - fixed
+ - Building level tuner update on second ccu - Fix
+ - Merged PR 491:  story/mahesh/5061_CCU_update_Elmeasure_modbus_profile
+ - ups fuji changes after crash observed at site
+ - Fix for '0' defualt value in some of the building tuners
+ - Merged PR 490: bug/mahesh/5212-CCU_crash_enabling_bluetooth_permission
+ - update ups-fuji and rrs-masers json file
+ - Merged PR 482: Reconfig support for Diakin IE profile
+ - fix for building default query
+ - Merged PR 481: Unit Tests Re-intro
+ - Pubnub loop fix
+ - do ccu user point write
+ - update VRF-blustar
+ - update json for EM Elmeasure
+ - re-init scanner once user allow permission
+ - fetch point array already handled
+ - More tuners added to fallback
+ - Merge branch 'story/samjith/3985_building_tuner_refactor' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/samjith/3985_building_tuner_refactor
+ - handle tuner migration
+ - Merged PR 459: story/mahesh/5106-CCU_tuner_display_all_module_zone_level_column
+ - Fetch point arrays while importing building tuners. Fix OAO tuner crash due to equipDis/siteRef typo.
+ - Start using fallback values
+ - Building tuner fallback handler
+ - System tuner copy fix
+ - Extend build tuner synchronization to more profiles
+ - DAB default tuners
+ - Add building tuner copy util
+ - Propagate building tuner update to zone/system equips
+ - BuildingTuner restructure.
+ - Pubnub history read
+ - Tuner code reorg
+ - fix save default values
+ - rebase fix
+ - fix for module level tuners
+ - add scorllview to see multiple columns in priority pop up
+ - init commit and ui changes for priority array dialog
+ - code fix
+ - update staticPressureSPTrim min, max val
+ - set priority map for building tuners
+ - check for null point
+ - display default value
+ - update tuner min val
+ - trim spaces
+ - handle dual duct building tuners and 2nd ccu
+ - update building tuners query
+ - clean code
+ - building tuner changes
+ - Trim quotes from IE address
+ - Merged PR 457: 5141  Dual duct points are not appearing in Portal Zone UI
+ - Merge branch 'master' into story/samjith/5059_point_not_updated_reconfig
+ - Fix Daikin IE address reconfig issue
+ - Updated JSON fors ups30, ups400, RRSMasters, UpsFuji and VRF Bluestar
+ - Merged PR 389: 2679:  Align CCU "kind" tags to correct data types and move to Silo
+ - Merged PR 418: 5059_Reconfig support on CCU
+ - Vav stages update
+ - Fix modulating profile reconfig crash
+ - Merge branch 'master' into story/samjith/5059_point_not_updated_reconfig
+ - Handle humidifier point udpate Do scheduleSync instead of instant sync.
+ - -Added Modulating profile config support -Pubnub processing moved to a HandlerThread to ensure sequential processing of messages
+ - Fix duration
  - Merge master
- - Added Retrofit Implemented added android service to to fetch token.
- - Merge branch 'story/tcase/4726_ccu_log_file_upload' into story/samjith/4824_brearer_token_management
- - Job scheduler
- - Upload log files using Kotlin and Retrofit
- - fixes and tuner validations
- - clean and simplify
- - implement search and select by zone, module
- - fixes
- - update zone tuners
- - sort building tuners
- - fixes
- - issues fix
- - fix QA observations
- - fix qa comments
- - fixed qa comments
- - fix for crash
- - update on item click for toggle state
- - fix for the negetive val
- - fixNum
- - Updating new value to Tuner Item.
- - Custom Number Picker for Tuner Value to handle negative values.
- - Tuner Number Picker Validation.
- - Confirm Tuner Changes UI
- - Confirm Tuner Changes
- - Confirm Tuner Value Update Alert dialog UI
- - Saving Tuner Values in new UI
- - Tuner Value Box UI and Validations.
- - Priority Array Values UI and Number Picker Validation
- - Tuner Priority Array UI
- - Optimised Tuners Grid for UI
- - 44414_TunerUI_ExpandableGrid
+ - Added support for relay association change from portal
+ - WIP
+ - Merge branch 'story/samjith/41_pubnub_offline_support' into story/samjith/5059_point_not_updated_reconfig
+ - Reconfig support for system profile relay/analog config update

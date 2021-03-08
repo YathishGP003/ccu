@@ -188,7 +188,7 @@ public abstract class SystemProfile
         equipRef = getSystemEquipRef();
     
         Point userLimitSpread = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "userLimitSpread").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("user").addMarker("limit").addMarker("spread").addMarker("sp")
-                .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                 .setTz(tz).build();
 
         String userLimitSpreadId = hayStack.addPoint(userLimitSpread);
@@ -675,7 +675,7 @@ public abstract class SystemProfile
             }
         }
         Point zoneTempDeadLeeway = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "zoneTemperatureDeadLeeway").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("temp").addMarker("dead").addMarker("leeway").addMarker("sp")
-                .setMinVal("0").setMaxVal("20").setIncrementVal("0.5").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP).setUnit("\u00B0F")
+                .setMinVal("0").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP).setUnit("\u00B0F")
                 .setTz(tz).build();
         String zoneTempDeadLeewayId = hayStack.addPoint(zoneTempDeadLeeway);
         HashMap zoneTempDeadLeewayPoint = hayStack.read("point and tuner and default and temp and dead and leeway");

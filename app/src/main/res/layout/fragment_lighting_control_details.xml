@@ -84,7 +84,7 @@
                 android:height="35dp"
                 android:gravity="top|center">
 
-                <android.support.v7.widget.SwitchCompat
+                <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/lcmAnalog1OutSwitch"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -139,7 +139,7 @@
                 android:height="35dp"
                 android:gravity="top|center">
 
-                <android.support.v7.widget.SwitchCompat
+                <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/lcmAnalog2OutSwitch"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -194,7 +194,7 @@
                 android:layout_height="match_parent"
                 android:height="35dp"
                 android:gravity="top|center">
-                <android.support.v7.widget.SwitchCompat
+                <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/lcmRelay1Switch"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -250,7 +250,7 @@
                 android:gravity="top|center"
                 android:minHeight="95dp">
 
-                <android.support.v7.widget.SwitchCompat
+                <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/lcmRelay2Switch"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -307,7 +307,7 @@
                 android:height="35dp"
                 android:gravity="top|center">
 
-                <android.support.v7.widget.SwitchCompat
+                <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/lcmAnalog1InSwitch"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -364,7 +364,7 @@
                 android:gravity="top|center">
 
 
-                <android.support.v7.widget.SwitchCompat
+                <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/lcmAnalog2InSwitch"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"

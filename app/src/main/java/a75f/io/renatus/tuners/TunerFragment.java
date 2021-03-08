@@ -6,9 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.button.MaterialButton;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.Nullable;
+import com.google.android.material.button.MaterialButton;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
@@ -564,7 +564,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                             .add("val", (HVal) null);
                     HDict[] dictArr = {b.toDict()};
                     HttpUtil.executePost(CCUHsApi.getInstance().pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
-
+                    CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
                 } else {
                     CCUHsApi.getInstance().writePointForCcuUser(id, level, val, 0);
                     CCUHsApi.getInstance().writeHisValById(id, val);

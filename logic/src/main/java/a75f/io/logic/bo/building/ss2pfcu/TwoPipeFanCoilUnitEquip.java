@@ -22,6 +22,7 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.tuners.TunerConstants;
 
 public class TwoPipeFanCoilUnitEquip {
@@ -75,8 +76,10 @@ public class TwoPipeFanCoilUnitEquip {
 
         String equipRef = CCUHsApi.getInstance().addEquip(b.build());
 
-        BuildingTuners.getInstance().addEquipStandaloneTuners(siteDis+"-2PFCU-"+nodeAddr, equipRef, room, floor);
-        BuildingTuners.getInstance().addTwoPipeFanEquipStandaloneTuners(siteDis+"-2PFCU-"+nodeAddr, equipRef, room, floor);
+        StandAloneTuners.addEquipStandaloneTuners(CCUHsApi.getInstance(), siteRef,siteDis+"-2PFCU-"+nodeAddr, equipRef
+                                                                                        , room, floor, tz);
+        StandAloneTuners.addTwoPipeFanEquipStandaloneTuners(CCUHsApi.getInstance(), siteRef, siteDis + "-2PFCU-" + nodeAddr,
+                                                            equipRef, room, floor, tz);
 
         createTwoPipeConfigPoints(config, equipRef,floor,room);
 

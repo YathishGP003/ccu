@@ -40,6 +40,7 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.tuners.VavTuners;
 /**
  * Created by samjithsadasivan on 6/21/18.
  */
@@ -200,7 +201,7 @@ public class VAVLogicalMap
         }
         String equipRef = CCUHsApi.getInstance().addEquip(b.build());
         
-        BuildingTuners.getInstance().addVavEquipTuners(siteDis + "-VAV-" + nodeAddr, equipRef, room, floor, fanMarker);
+        VavTuners.addVavEquipTuners( CCUHsApi.getInstance(), siteRef, siteDis + "-VAV-" + nodeAddr, equipRef, room, floor, tz);
     
         createVavConfigPoints(config, equipRef, floor, room);
     
@@ -581,7 +582,7 @@ public class VAVLogicalMap
                 .build();
         String zoneDynamicPriorityPointID = CCUHsApi.getInstance().addPoint(zoneDynamicPriorityPoint);
         CCUHsApi.getInstance().writeHisValById(zoneDynamicPriorityPointID, 10.0);
-        
+
         //Create Physical points and map
         SmartNode device = new SmartNode(nodeAddr, siteRef, floor, room, equipRef);
         device.th1In.setPointRef(datID);
@@ -592,7 +593,7 @@ public class VAVLogicalMap
         //device.analog1Out.setEnabled(true);
         device.analog2Out.setPointRef(rhID);
         device.relay1.setPointRef(rhID);
-        
+
         if (profileType != ProfileType.VAV_REHEAT) {
             createFanTuner(siteDis, equipRef, siteRef, floor, room, tz);
             String fanPointId = createFanOutPoint(siteDis, equipRef, siteRef, floor, room, tz, fanMarker);
@@ -673,7 +674,7 @@ public class VAVLogicalMap
         CCUHsApi.getInstance().writeHisValById(fanId, 0.0);
         return fanId;
     }
-    
+
     private void createFanTuner(String siteDis,
                                    String equipRef,
                                    String siteRef,
@@ -694,7 +695,7 @@ public class VAVLogicalMap
                                                 .setTz(tz)
                                                 .build();
         String fanControlOnFixedTimeDelayId = CCUHsApi.getInstance().addPoint(fanControlOnFixedTimeDelay);
-    
+
         HashMap<Object, Object> fanControlOnFixedTimeDelayPoint = CCUHsApi.getInstance()
                                                                           .read("tuner and default and fan and " +
                                                                                 "control and time and delay");
@@ -709,12 +710,12 @@ public class VAVLogicalMap
                                                        HNum.make(0));
             }
         }
-        
+
         CCUHsApi.getInstance().writeDefaultValById(fanControlOnFixedTimeDelayId, 1.0);
         CCUHsApi.getInstance().writeHisValById(fanControlOnFixedTimeDelayId, 1.0);
         CCUHsApi.getInstance().writeHisValById(fanControlOnFixedTimeDelayId, HSUtil.getPriorityVal(fanControlOnFixedTimeDelayId));
     }
-    
+
     public void createVavConfigPoints(VavProfileConfiguration config, String equipRef, String floor, String room) {
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
@@ -1289,7 +1290,7 @@ public class VAVLogicalMap
         CCUHsApi.getInstance().writeHisValByQuery(type+" and point and fan and cmd and group == \""+nodeAddr+"\"",
                                                   state ? 1.0 : 0);
     }
-    
+
     public double getDischargeSp()
     {
         return dischargeSp;
@@ -1358,9 +1359,9 @@ public class VAVLogicalMap
                 message = (status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" : "Warming Space");
             }
         }
-        
+
         message += getFanStatusMessage();
-        
+
         String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+nodeAddr+"\"");
         if (!curStatus.equals(message))
         {
@@ -1376,7 +1377,7 @@ public class VAVLogicalMap
         }
         return "";
     }
-    
+
     public void setScheduleStatus(String status)
     {
         ArrayList points = CCUHsApi.getInstance().readAll("point and scheduleStatus and group == \""+nodeAddr+"\"");

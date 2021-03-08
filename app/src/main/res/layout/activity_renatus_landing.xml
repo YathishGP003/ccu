@@ -49,7 +49,7 @@
             android:layout_gravity="center_vertical"
             app:srcCompat="@drawable/ic_75f_logo" />
 
-        <android.support.design.widget.TabLayout
+        <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"
             style="@style/RenatusLandingTabStyle"
             android:layout_width="wrap_content"
@@ -74,7 +74,7 @@
             android:visibility="gone"
             app:srcCompat="@drawable/ic_powered_by_75f" />-->
 
-        <android.support.design.widget.TabLayout
+        <com.google.android.material.tabs.TabLayout
             android:id="@+id/btnTabs"
             style="@style/RenatusTabStyle"
             android:layout_width="140dp"
@@ -87,7 +87,7 @@
             app:tabGravity="fill"
             app:tabMode="fixed">
 
-            <android.support.design.widget.TabItem
+            <com.google.android.material.tabs.TabItem
                 android:id="@+id/pageSettingButton"
                 android:layout_width="70dp"
                 android:layout_height="wrap_content"
@@ -95,14 +95,14 @@
                 android:icon="@drawable/ic_settings_orange"
                 android:padding="8dp" />
 
-            <android.support.design.widget.TabItem
+            <com.google.android.material.tabs.TabItem
                 android:id="@+id/pageDashBoardButton"
                 android:layout_width="70dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:icon="@drawable/ic_tachometer"
                 android:padding="8dp" />
-        </android.support.design.widget.TabLayout>
+        </com.google.android.material.tabs.TabLayout>
     </LinearLayout>
 
 

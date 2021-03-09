@@ -148,10 +148,18 @@ public class TwoPipeFanCoilUnitUtil {
         double curFanSpeed = hayStack.readDefaultVal("point and zone and userIntent and fan and " +
                                                          "mode and equipRef == \"" + configPoint.getEquipRef() + "\"");
         CcuLog.i(L.TAG_CCU_PUBNUB, "adjustFCUFanMode "+curFanSpeed+" -> "+maxFanSpeed);
-        if (curFanSpeed > maxFanSpeed.ordinal()) {
+    
+        double fallbackFanSpeed = curFanSpeed;
+        if (curFanSpeed > maxFanSpeed.ordinal() && maxFanSpeed.ordinal() > SSEFanStage.OFF.ordinal()) {
+            fallbackFanSpeed = maxFanSpeed.ordinal();
+        } else if (curFanSpeed > maxFanSpeed.ordinal()) {
+            fallbackFanSpeed = SSEFanStage.OFF.ordinal();
+        }
+        
+        if (curFanSpeed != fallbackFanSpeed) {
             hayStack.writeDefaultVal("point and zone and userIntent and fan and " +
                                     "mode and equipRef == \"" + configPoint.getEquipRef() + "\"",
-                                     (double)maxFanSpeed.ordinal());
+                                     fallbackFanSpeed);
         }
     }
     

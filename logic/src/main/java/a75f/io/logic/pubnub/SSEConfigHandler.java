@@ -23,10 +23,9 @@ class SSEConfigHandler {
         } else if (configPoint.getMarkers().contains(Tags.TH1)
                     || configPoint.getMarkers().contains(Tags.TH2)) {
             SingleStageEquipUtil.updateThermistorConfig( val, configPoint);
-            writePointFromJson(configPoint, msgObject, hayStack);
-        } else {
-            writePointFromJson(configPoint, msgObject, hayStack);
         }
+        writePointFromJson(configPoint, msgObject, hayStack);
+        
         
         
     }

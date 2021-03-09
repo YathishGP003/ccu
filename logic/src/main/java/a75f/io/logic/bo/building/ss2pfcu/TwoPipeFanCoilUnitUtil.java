@@ -134,8 +134,10 @@ public class TwoPipeFanCoilUnitUtil {
         
         SSEFanStage maxFanSpeed = getMaxAvailableFanSpeed(configPoint, hayStack);
         
-        if (configVal > maxFanSpeed.ordinal()) {
+        if (configVal > maxFanSpeed.ordinal() && maxFanSpeed.ordinal() > SSEFanStage.OFF.ordinal()) {
             configVal = maxFanSpeed.ordinal();
+        } else if (configVal > maxFanSpeed.ordinal()) {
+            configVal = SSEFanStage.OFF.ordinal();
         }
         writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
         hayStack.writeHisValById(configPoint.getId(), configVal);

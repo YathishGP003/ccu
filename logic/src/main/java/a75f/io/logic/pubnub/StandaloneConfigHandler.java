@@ -14,9 +14,8 @@ public class StandaloneConfigHandler {
     public static void updateConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateStandaloneConfigPoint " + msgObject.toString());
         
-        int val = msgObject.get("val").getAsInt();
         if (configPoint.getMarkers().contains(Tags.FCU)) {
-            TwoPipeFanCoilUnitUtil.updateFCUProfile(val, configPoint, msgObject, hayStack);
+            TwoPipeFanCoilUnitUtil.updateFCUProfile(configPoint, msgObject, hayStack);
         }
         //CPU & HPU to come here.
     }

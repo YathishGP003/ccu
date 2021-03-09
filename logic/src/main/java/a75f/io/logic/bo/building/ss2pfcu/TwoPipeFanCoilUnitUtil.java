@@ -18,49 +18,50 @@ import a75f.io.logic.bo.haystack.device.SmartStat;
 
 public class TwoPipeFanCoilUnitUtil {
     
-    public static void updateFCUProfile(int configVal, Point configPoint, JsonObject msgObject,
+    public static void updateFCUProfile(Point configPoint, JsonObject msgObject,
                                              CCUHsApi hayStack) {
-        
-        if (configPoint.getMarkers().contains(Tags.CONFIG)) {
-            updateConfig(configVal, configPoint, msgObject, hayStack);
-        } else if (configPoint.getMarkers().contains(Tags.ENABLE)
-                  && configPoint.getMarkers().contains(Tags.OCCUPANCY)
-                  && configPoint.getMarkers().contains(Tags.CONTROL)) {
-            updateOccupancyPoint(configVal, configPoint, msgObject, hayStack);
-        } else if (configPoint.getMarkers().contains(Tags.USERINTENT)) {
-            updateUserIntent(configVal, configPoint, msgObject, hayStack);
+    
+        try {
+            double configVal = msgObject.get("val").getAsInt();
+            if (configPoint.getMarkers().contains(Tags.CONFIG)) {
+                updateConfig(configVal, configPoint, msgObject, hayStack);
+            } else if (configPoint.getMarkers().contains(Tags.ENABLE) && configPoint.getMarkers().contains(
+                Tags.OCCUPANCY) && configPoint.getMarkers().contains(Tags.CONTROL)) {
+                updateOccupancyPoint(configVal, configPoint, msgObject, hayStack);
+            } else if (configPoint.getMarkers().contains(Tags.USERINTENT)) {
+                updateUserIntent(configVal, configPoint, msgObject, hayStack);
+            }
+        } catch (Exception e) {
+            CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to update : "+configPoint.getDisplayName()+" ; "+msgObject+" "+
+                                                                                                         e.getMessage());
         }
         
     }
-    public static void updateConfig(int configVal, Point configPoint, JsonObject msgObject, CCUHsApi hayStack) {
+    public static void updateConfig(double configVal, Point configPoint, JsonObject msgObject, CCUHsApi hayStack) {
         
         HashMap equipMap = hayStack.readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         String nodeAddr = equip.getGroup();
-        try {
-            CcuLog.i(L.TAG_CCU_PUBNUB,
-                     "updateConfig "+nodeAddr+" "+configPoint);
-            if (configPoint.getMarkers().contains(Tags.RELAY1)) {
-                SmartStat.setPointEnabled(Integer.parseInt(nodeAddr), Port.RELAY_ONE.name(),
-                                          configVal > 0 ? true : false);
-            } else if (configPoint.getMarkers().contains(Tags.RELAY2)) {
-                SmartStat.setPointEnabled(Integer.parseInt(nodeAddr), Port.RELAY_TWO.name(),
-                                          configVal > 0 ? true : false);
-            } else if (configPoint.getMarkers().contains(Tags.RELAY3)) {
-                SmartStat.setPointEnabled(Integer.parseInt(nodeAddr), Port.RELAY_THREE.name(),
-                                          configVal > 0 ? true : false);
-            } else if (configPoint.getMarkers().contains(Tags.RELAY4)) {
-                SmartStat.setPointEnabled(Integer.parseInt(nodeAddr), Port.RELAY_FOUR.name(),
-                                          configVal > 0 ? true : false);
-            } else if (configPoint.getMarkers().contains(Tags.RELAY5)) {
-                SmartStat.setPointEnabled(Integer.parseInt(nodeAddr), Port.RELAY_FIVE.name(),
-                                          configVal > 0 ? true : false);
-            } else if (configPoint.getMarkers().contains(Tags.RELAY6)) {
-                SmartStat.setPointEnabled(Integer.parseInt(nodeAddr), Port.RELAY_SIX.name(),
-                                          configVal > 0 ? true : false);
-            }
-        } catch (Exception e) {
-            CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to update : "+configPoint.getDisplayName()+" ; "+e.getMessage());
+        CcuLog.i(L.TAG_CCU_PUBNUB,
+                 "updateConfig "+nodeAddr+" "+configPoint);
+        if (configPoint.getMarkers().contains(Tags.RELAY1)) {
+            SmartStat.setPointEnabled(Integer.parseInt(nodeAddr), Port.RELAY_ONE.name(),
+                                      configVal > 0 ? true : false);
+        } else if (configPoint.getMarkers().contains(Tags.RELAY2)) {
+            SmartStat.setPointEnabled(Integer.parseInt(nodeAddr), Port.RELAY_TWO.name(),
+                                      configVal > 0 ? true : false);
+        } else if (configPoint.getMarkers().contains(Tags.RELAY3)) {
+            SmartStat.setPointEnabled(Integer.parseInt(nodeAddr), Port.RELAY_THREE.name(),
+                                      configVal > 0 ? true : false);
+        } else if (configPoint.getMarkers().contains(Tags.RELAY4)) {
+            SmartStat.setPointEnabled(Integer.parseInt(nodeAddr), Port.RELAY_FOUR.name(),
+                                      configVal > 0 ? true : false);
+        } else if (configPoint.getMarkers().contains(Tags.RELAY5)) {
+            SmartStat.setPointEnabled(Integer.parseInt(nodeAddr), Port.RELAY_FIVE.name(),
+                                      configVal > 0 ? true : false);
+        } else if (configPoint.getMarkers().contains(Tags.RELAY6)) {
+            SmartStat.setPointEnabled(Integer.parseInt(nodeAddr), Port.RELAY_SIX.name(),
+                                      configVal > 0 ? true : false);
         }
         writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
         hayStack.syncPointEntityTree();
@@ -105,7 +106,7 @@ public class TwoPipeFanCoilUnitUtil {
         writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
     }
     
-    public static void updateUserIntent(int configVal, Point configPoint, JsonObject msgObject, CCUHsApi hayStack) {
+    public static void updateUserIntent(double configVal, Point configPoint, JsonObject msgObject, CCUHsApi hayStack) {
     
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateUserIntent "+configVal+" "+configPoint);
         if (configPoint.getMarkers().contains(Tags.FAN)

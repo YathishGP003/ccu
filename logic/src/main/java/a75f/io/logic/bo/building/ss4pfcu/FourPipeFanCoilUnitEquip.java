@@ -15,6 +15,8 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
@@ -808,6 +810,8 @@ public class FourPipeFanCoilUnitEquip  {
         setConfigNumVal("temperature and offset",config.temperatureOffset);
         setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
         setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
+        
+        updateUserIntentPoints(config, equip.getId());
     }
 
 
@@ -1097,6 +1101,71 @@ public class FourPipeFanCoilUnitEquip  {
         } else {
             return SSEConditioningMode.OFF;
         }
+    }
+    
+    private void updateUserIntentPoints(FourPipeFanCoilUnitConfiguration config, String equipRef) {
+        
+        String fanModePointId = CCUHsApi.getInstance().readId("point and zone and userIntent and fan and " +
+                                                              "mode and equipRef == \"" + equipRef + "\"");
+        if (fanModePointId.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_ZONE, "FanMode point does not exist for equip: " + nodeAddr);
+            return;
+        }
+    
+        double curFanSpeed = CCUHsApi.getInstance().readDefaultValById(fanModePointId);
+    
+        double fallbackFanSpeed = 0;
+    
+        SSEFanStage maxFanSpeed = getMaxAvailableFanSpeed(config);
+    
+        if (curFanSpeed > maxFanSpeed.ordinal() && maxFanSpeed.ordinal() > SSEFanStage.OFF.ordinal()) {
+            fallbackFanSpeed = SSEFanStage.AUTO.ordinal();
+        } else if (curFanSpeed > maxFanSpeed.ordinal()) {
+            fallbackFanSpeed = SSEFanStage.OFF.ordinal();
+        }
+        if (fallbackFanSpeed != curFanSpeed) {
+            CCUHsApi.getInstance().writeDefaultValById(fanModePointId, fallbackFanSpeed);
+            CCUHsApi.getInstance().writeHisValById(fanModePointId, fallbackFanSpeed);
+        }
+    
+    
+        String conditioningModeId = CCUHsApi.getInstance().readId("point and zone and userIntent and conditioning and" +
+                                                                  " mode and equipRef == \"" + equipRef + "\"");
+        if (conditioningModeId.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_ZONE, "ConditioningMode point does not exist for equip: " + nodeAddr);
+            return;
+        }
+        double curCondMode = CCUHsApi.getInstance().readDefaultValById(conditioningModeId);
+    
+        double fallbackMode = 0;
+        if (!config.enableRelay4) {
+            if (curCondMode == SSEConditioningMode.AUTO.ordinal() || curCondMode == SSEConditioningMode.HEAT_ONLY.ordinal() ) {
+                fallbackMode = SSEConditioningMode.OFF.ordinal();
+            }
+        } else if (!config.enableRelay6){
+            if (curCondMode == SSEConditioningMode.AUTO.ordinal() || curCondMode == SSEConditioningMode.COOL_ONLY.ordinal() ) {
+                fallbackMode = SSEConditioningMode.OFF.ordinal();
+            }
+        }
+        
+        if (fallbackMode != curCondMode) {
+            CCUHsApi.getInstance().writeDefaultValById(conditioningModeId, fallbackMode);
+            CCUHsApi.getInstance().writeHisValById(conditioningModeId, fallbackMode);
+        }
+        
+    }
+    
+    private static SSEFanStage getMaxAvailableFanSpeed(FourPipeFanCoilUnitConfiguration config) {
+        
+        SSEFanStage maxFanSpeed = SSEFanStage.OFF;
+        if (config.enableRelay2) {
+            maxFanSpeed = SSEFanStage.HIGH_ALL_TIME;
+        } else if (config.enableRelay1) {
+            maxFanSpeed = SSEFanStage.MEDIUM_ALL_TIME;
+        } else if (config.enableRelay3) {
+            maxFanSpeed = SSEFanStage.LOW_ALL_TIME;
+        }
+        return maxFanSpeed;
     }
 }
 

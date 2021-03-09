@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.ss2pfcu;
 
 import com.google.gson.JsonObject;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -16,11 +17,10 @@ import a75f.io.logic.bo.building.hvac.SSEConditioningMode;
 import a75f.io.logic.bo.building.hvac.SSEFanStage;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 
-public class TwoPipeFanCoilUnitUtil {
+public class FanCoilUnitUtil {
     
     public static void updateFCUProfile(Point configPoint, JsonObject msgObject,
                                              CCUHsApi hayStack) {
-    
         try {
             double configVal = msgObject.get("val").getAsDouble();
             if (configPoint.getMarkers().contains(Tags.CONFIG)) {
@@ -30,6 +30,8 @@ public class TwoPipeFanCoilUnitUtil {
                 updateOccupancyPoint(configVal, configPoint, msgObject, hayStack);
             } else if (configPoint.getMarkers().contains(Tags.USERINTENT)) {
                 updateUserIntent(configVal, configPoint, msgObject, hayStack);
+            } else {
+                writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
             }
         } catch (Exception e) {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to update : "+configPoint.getDisplayName()+" ; "+msgObject+" "+
@@ -42,8 +44,7 @@ public class TwoPipeFanCoilUnitUtil {
         HashMap equipMap = hayStack.readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         String nodeAddr = equip.getGroup();
-        CcuLog.i(L.TAG_CCU_PUBNUB,
-                 "updateConfig "+nodeAddr+" "+configPoint);
+        CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfig " + nodeAddr + " " + configPoint);
         if (configPoint.getMarkers().contains(Tags.RELAY1)) {
             SmartStat.setPointEnabled(Integer.parseInt(nodeAddr), Port.RELAY_ONE.name(),
                                       configVal > 0 ? true : false);
@@ -72,6 +73,9 @@ public class TwoPipeFanCoilUnitUtil {
         writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
         hayStack.syncPointEntityTree();
         adjustFCUFanMode(configPoint,hayStack);
+        if (configPoint.getMarkers().contains(Tags.PIPE4)) {
+            adjust4PFCUConditioningMode(configPoint, hayStack);
+        }
     }
     
     private static void updateOccupancyPoint(double configVal, Point configPoint,
@@ -148,10 +152,13 @@ public class TwoPipeFanCoilUnitUtil {
         double curFanSpeed = hayStack.readDefaultVal("point and zone and userIntent and fan and " +
                                                          "mode and equipRef == \"" + configPoint.getEquipRef() + "\"");
         CcuLog.i(L.TAG_CCU_PUBNUB, "adjustFCUFanMode "+curFanSpeed+" -> "+maxFanSpeed);
-    
+        /**
+         * When currently available fanSpeed configuration is not OFF , set fanSpeed to AUTO
+         * When none of fan configuration is enabled, Set fanSpeed to OFF.
+         */
         double fallbackFanSpeed = curFanSpeed;
         if (curFanSpeed > maxFanSpeed.ordinal() && maxFanSpeed.ordinal() > SSEFanStage.OFF.ordinal()) {
-            fallbackFanSpeed = maxFanSpeed.ordinal();
+            fallbackFanSpeed = SSEFanStage.AUTO.ordinal();
         } else if (curFanSpeed > maxFanSpeed.ordinal()) {
             fallbackFanSpeed = SSEFanStage.OFF.ordinal();
         }
@@ -162,6 +169,40 @@ public class TwoPipeFanCoilUnitUtil {
                                      fallbackFanSpeed);
         }
     }
+    
+    private static void adjust4PFCUConditioningMode(Point configPoint, CCUHsApi hayStack) {
+        
+        String conditioningModeId = CCUHsApi.getInstance().readId("point and zone and userIntent and conditioning and" +
+                                                                  " mode and equipRef == \"" + configPoint.getEquipRef() + "\"");
+        if (conditioningModeId.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_ZONE, "ConditioningMode point does not exist for update : "+configPoint.getDisplayName());
+            return;
+        }
+        double curCondMode = CCUHsApi.getInstance().readDefaultValById(conditioningModeId);
+        
+        double isCoolingOn = hayStack.readDefaultVal("point and zone and config and enable and " +
+                                                     "relay6 and equipRef == \"" + configPoint.getEquipRef() + "\"");
+        double isHeatingOn = hayStack.readDefaultVal("point and zone and config and enable and " +
+                                                     "relay4 and equipRef == \"" + configPoint.getEquipRef() + "\"");
+    
+        double conditioningMode = 0;
+        if (isHeatingOn == 0) {
+            if (curCondMode == SSEConditioningMode.AUTO.ordinal() || curCondMode == SSEConditioningMode.HEAT_ONLY.ordinal() ) {
+                conditioningMode = SSEConditioningMode.OFF.ordinal();
+            }
+        }
+        if (isCoolingOn == 0){
+            if (curCondMode == SSEConditioningMode.AUTO.ordinal() || curCondMode == SSEConditioningMode.COOL_ONLY.ordinal() ) {
+                conditioningMode = SSEConditioningMode.OFF.ordinal();
+            }
+        }
+        CcuLog.i(L.TAG_CCU_PUBNUB, "adjust4PFCUConditioningMode "+curCondMode+" -> "+conditioningMode);
+        if (curCondMode != conditioningMode) {
+            hayStack.writeDefaultValById(conditioningModeId, conditioningMode);
+            hayStack.writeHisValById(conditioningModeId, conditioningMode);
+        }
+    }
+    
     
     private static SSEFanStage getMaxAvailableFanSpeed(Point configPoint, CCUHsApi hayStack) {
         
@@ -225,11 +266,10 @@ public class TwoPipeFanCoilUnitUtil {
     
     private static void writePointFromJson(String id, double val, JsonObject msgObject, CCUHsApi hayStack) {
         try {
-            String who = msgObject.get(HayStackConstants.WRITABLE_ARRAY_WHO).getAsString();
             int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();
             int duration = msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION) != null ? msgObject.get(
                 HayStackConstants.WRITABLE_ARRAY_DURATION).getAsInt() : 0;
-            hayStack.writePointLocal(id, level, who, val, duration);
+            hayStack.writePointForCcuUser(id, level, val, duration);
         } catch (Exception e) {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to parse tuner value : "+msgObject+" ; "+e.getMessage());
         }

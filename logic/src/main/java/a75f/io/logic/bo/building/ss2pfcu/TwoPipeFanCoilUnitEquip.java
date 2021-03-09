@@ -15,6 +15,8 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
@@ -795,6 +797,8 @@ public class TwoPipeFanCoilUnitEquip {
         setConfigNumVal("temperature and offset",config.temperatureOffset);
         setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
         setConfigNumVal("enable and th2",1.0);
+        
+        updateUserIntentPoints(config, equip.getId());
     }
 
 
@@ -1081,7 +1085,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .build();
         String operationalModeId = CCUHsApi.getInstance().addPoint(operationalMode);
         
-        SSEConditioningMode defaultConditioningMode = getDefaultConditioningMode(config);
+        SSEConditioningMode defaultConditioningMode = getDefaultConditioningMode();
         CCUHsApi.getInstance().writePointForCcuUser(operationalModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL,
                                                     (double) defaultConditioningMode.ordinal(), 0);
         CCUHsApi.getInstance().writeHisValById(operationalModeId, (double)defaultConditioningMode.ordinal());
@@ -1096,18 +1100,44 @@ public class TwoPipeFanCoilUnitEquip {
         }
     }
     
-    private SSEConditioningMode getDefaultConditioningMode(TwoPipeFanCoilUnitConfiguration config) {
-    
+    private SSEConditioningMode getDefaultConditioningMode() {
         return SSEConditioningMode.AUTO;
+    }
+    
+    private void updateUserIntentPoints(TwoPipeFanCoilUnitConfiguration config, String equipRef) {
+        String fanModePointId = CCUHsApi.getInstance().readId("point and zone and userIntent and fan and " +
+                                                              "mode and equipRef == \"" + equipRef + "\"");
+        if (fanModePointId.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_ZONE, "FanMode point does not exist for equip: "+nodeAddr);
+            return;
+        }
+    
+        double curFanSpeed = CCUHsApi.getInstance().readDefaultValById(fanModePointId);
+    
+        double fallbackFanSpeed = curFanSpeed;
         
-        /*if (config.enableRelay4 && config.enableRelay6) {
-            return SSEConditioningMode.AUTO;
-        } else if (config.enableRelay4){
-            return SSEConditioningMode.HEAT_ONLY;
-        } else if (config.enableRelay6) {
-            return SSEConditioningMode.COOL_ONLY;
-        } else {
-            return SSEConditioningMode.OFF;
-        }*/
+        SSEFanStage maxFanSpeed = getMaxAvailableFanSpeed(config);
+        
+        if (curFanSpeed > maxFanSpeed.ordinal() && maxFanSpeed.ordinal() > SSEFanStage.OFF.ordinal()) {
+            fallbackFanSpeed = SSEFanStage.AUTO.ordinal();
+        } else if (curFanSpeed > maxFanSpeed.ordinal()) {
+            fallbackFanSpeed = SSEFanStage.OFF.ordinal();
+        }
+        
+        CCUHsApi.getInstance().writeDefaultValById(fanModePointId, fallbackFanSpeed);
+        CCUHsApi.getInstance().writeHisValById(fanModePointId, fallbackFanSpeed);
+    }
+    
+    private static SSEFanStage getMaxAvailableFanSpeed(TwoPipeFanCoilUnitConfiguration config) {
+        
+        SSEFanStage maxFanSpeed = SSEFanStage.OFF;
+        if (config.enableRelay2) {
+            maxFanSpeed = SSEFanStage.HIGH_ALL_TIME;
+        } else if (config.enableRelay1) {
+            maxFanSpeed = SSEFanStage.MEDIUM_ALL_TIME;
+        } else if (config.enableRelay3) {
+            maxFanSpeed = SSEFanStage.LOW_ALL_TIME;
+        }
+        return maxFanSpeed;
     }
 }

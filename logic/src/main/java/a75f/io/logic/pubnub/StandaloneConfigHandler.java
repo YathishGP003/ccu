@@ -7,7 +7,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitUtil;
+import a75f.io.logic.bo.building.ss2pfcu.FanCoilUnitUtil;
 
 public class StandaloneConfigHandler {
     
@@ -15,7 +15,7 @@ public class StandaloneConfigHandler {
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateStandaloneConfigPoint " + msgObject.toString());
         
         if (configPoint.getMarkers().contains(Tags.FCU)) {
-            TwoPipeFanCoilUnitUtil.updateFCUProfile(configPoint, msgObject, hayStack);
+            FanCoilUnitUtil.updateFCUProfile(configPoint, msgObject, hayStack);
         }
         //CPU & HPU to come here.
     }

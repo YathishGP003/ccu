@@ -20,9 +20,15 @@ class SSEConfigHandler {
             SingleStageEquipUtil.updateRelay1Config( val, configPoint);
         } else if (configPoint.getMarkers().contains(Tags.RELAY2)) {
             SingleStageEquipUtil.updateRelay2Config( val, configPoint);
+        } else if (configPoint.getMarkers().contains(Tags.TH1)
+                    || configPoint.getMarkers().contains(Tags.TH2)) {
+            SingleStageEquipUtil.updateThermistorConfig( val, configPoint);
+            writePointFromJson(configPoint, msgObject, hayStack);
         } else {
             writePointFromJson(configPoint, msgObject, hayStack);
         }
+        
+        
     }
     
     private static void writePointFromJson(Point configPoint, JsonObject msgObject, CCUHsApi hayStack) {

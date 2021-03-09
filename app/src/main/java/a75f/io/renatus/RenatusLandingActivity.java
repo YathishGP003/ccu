@@ -18,8 +18,6 @@ import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
-
-
 import android.text.Editable;
 import android.text.InputType;
 import android.text.SpannableString;
@@ -36,10 +34,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.io.IOException;
 import java.util.HashMap;
-
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;

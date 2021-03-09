@@ -846,6 +846,7 @@ public abstract class SystemProfile
                 externalHumidity = CCUHsApi.getInstance().getExternalHumidity();
             }
         } catch (Exception e) {
+            e.printStackTrace();
             externalTemp = CCUHsApi.getInstance().readHisValByQuery("system and outside and temp");
             externalHumidity = CCUHsApi.getInstance().readHisValByQuery("system and outside and humidity");
 

@@ -460,7 +460,6 @@ public class UsbService extends Service
 	{
 		IBinder b = ServiceManager.getService(Context.USB_SERVICE);
 		IUsbManager service = IUsbManager.Stub.asInterface(b);
-		Log.i(TAG, "Try connecting!");
 		// There is a device connected to our Android device. Try to open it as a Serial Port.
 		try
 		{
@@ -470,9 +469,6 @@ public class UsbService extends Service
 		catch (RemoteException e)
 		{
 			e.printStackTrace();
-		}
-		catch (SecurityException e){
-			Toast.makeText(context, "Security exception", Toast.LENGTH_SHORT).show();
 		}
 		return false;
 	}

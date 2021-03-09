@@ -109,7 +109,6 @@ public class SiteSyncAdapter extends EntitySyncAdapter {
 
                 }
             } catch (JSONException e) {
-                //e.printStackTrace();
                 CcuLog.d(LOG_PREFIX, "Unable to sync site due to JSON exception. This is likely unrecoverable.");
             }
         }

@@ -2,14 +2,11 @@ package a75f.io.api.haystack.sync;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.constants.HttpConstants;
-
 import android.text.TextUtils;
 import android.util.Log;
-
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -20,9 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
-
 import javax.net.ssl.HttpsURLConnection;
-
 import a75f.io.logger.CcuLog;
 import info.guardianproject.netcipher.NetCipher;
 import okhttp3.Call;
@@ -32,7 +27,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-
 import org.apache.commons.lang3.StringUtils;
 
 public class HttpUtil {

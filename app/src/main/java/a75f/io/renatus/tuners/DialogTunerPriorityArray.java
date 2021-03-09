@@ -74,20 +74,6 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
 
     }
 
-    /*
-    // Old function
-    public static DialogTunerPriorityArray newInstance(HashMap tunerItem, String tunerGroupType, TunerGroupItem tunerGroupItem) {
-        Log.i("Dev1", "newInstance: ");
-        DialogTunerPriorityArray priorityArrayFragment = new DialogTunerPriorityArray();
-        Bundle bundle = new Bundle();
-        bundle.putSerializable(TUNER_ITEM, tunerItem);
-        bundle.putSerializable(TUNER_GROUP_ITEM, tunerGroupItem);
-        bundle.putSerializable(TUNER_GROUP_TYPE, tunerGroupType);
-        priorityArrayFragment.setArguments(bundle);
-        return priorityArrayFragment;
-    }
-    */
-
     public static DialogTunerPriorityArray newInstance(HashMap tunerItem, String tunerGroupType, TunerGroupItem tunerGroupItem) {
         DialogTunerPriorityArray priorityArrayFragment = new DialogTunerPriorityArray();
         priorityArrayFragment.configureArguments(tunerItem, tunerGroupType, tunerGroupItem);
@@ -96,7 +82,6 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
 
     @Override
     public String getIdString() {
-
         return ID;
     }
 
@@ -104,7 +89,6 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     @Override
     public void onStart() {
         super.onStart();
-
         Dialog dialog = getDialog();
         if (dialog != null) {
             int width = ViewGroup.LayoutParams.MATCH_PARENT;//;
@@ -117,23 +101,12 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
-        if (getArguments() != null && getArguments().containsKey(TUNER_ITEM)) {
-
-            //  tunerItemSelected = (HashMap) getArguments().getSerializable(TUNER_ITEM);
-            tunerGroupSelected = (TunerGroupItem) getArguments().getSerializable(TUNER_GROUP_ITEM);
-            Log.i("Dev1", "onCreate: " + (String) getArguments().getSerializable(TUNER_GROUP_TYPE));
-            tunerGroupType = (String) getArguments().getSerializable(TUNER_GROUP_TYPE);
-        }
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
         View view = inflater.inflate(R.layout.fragment_dialog_tuner_priority, container, false);
-
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         ButterKnife.bind(this, view);
         recyclerViewPriority = view.findViewById(R.id.recyclerPriority);
@@ -145,13 +118,11 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         layoutTitle = view.findViewById(R.id.layoutTitle);
         recyclerViewPriority.setLayoutManager(new LinearLayoutManager(getActivity()));
         buttonSaveTuner.setEnabled(false);
-
         setUpTunerColumns(view, inflater);
         return view;
     }
 
     private void setUpTunerColumns(View view, LayoutInflater inflater) {
-
 
         viewStub = view.findViewById(R.id.viewStub);
         HashMap ccu = CCUHsApi.getInstance().read("ccu");
@@ -284,9 +255,8 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        Log.i("Dev1", "onViewCreated: ");
 
-        String tunerName = tunerItemSelected.get("dis").toString();
+         String tunerName = tunerItemSelected.get("dis").toString();
         if (tunerItemSelected.containsKey("unit")) {
             textTunerName.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1) + " (" + tunerItemSelected.get("unit").toString().toUpperCase() + ")");
             textTunerDefaultValue.setText(getTunerDefaultValue(tunerItemSelected.get("id").toString()) + " (" + tunerItemSelected.get("unit").toString().toUpperCase() + ")");

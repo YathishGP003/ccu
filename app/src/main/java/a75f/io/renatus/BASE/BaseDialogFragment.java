@@ -18,7 +18,6 @@ public abstract class BaseDialogFragment extends DialogFragment
 	
 	protected void showDialogFragment(DialogFragment dialogFragment, String id)
 	{
-
 		FragmentTransaction ft = getFragmentManager().beginTransaction();
 		Fragment prev = getFragmentManager().findFragmentByTag(id);
 		if (prev != null)

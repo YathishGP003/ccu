@@ -22,7 +22,7 @@ public class TwoPipeFanCoilUnitUtil {
                                              CCUHsApi hayStack) {
     
         try {
-            double configVal = msgObject.get("val").getAsInt();
+            double configVal = msgObject.get("val").getAsDouble();
             if (configPoint.getMarkers().contains(Tags.CONFIG)) {
                 updateConfig(configVal, configPoint, msgObject, hayStack);
             } else if (configPoint.getMarkers().contains(Tags.ENABLE) && configPoint.getMarkers().contains(
@@ -61,6 +61,12 @@ public class TwoPipeFanCoilUnitUtil {
                                       configVal > 0 ? true : false);
         } else if (configPoint.getMarkers().contains(Tags.RELAY6)) {
             SmartStat.setPointEnabled(Integer.parseInt(nodeAddr), Port.RELAY_SIX.name(),
+                                      configVal > 0 ? true : false);
+        } else if (configPoint.getMarkers().contains(Tags.TH1)) {
+            SmartStat.setPointEnabled(Integer.parseInt(nodeAddr), Port.TH1_IN.name(),
+                                      configVal > 0 ? true : false);
+        } else if (configPoint.getMarkers().contains(Tags.TH2)) {
+            SmartStat.setPointEnabled(Integer.parseInt(nodeAddr), Port.TH2_IN.name(),
                                       configVal > 0 ? true : false);
         }
         writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);

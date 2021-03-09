@@ -234,7 +234,9 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         floorMenu.setVisibility(View.GONE);
         mViewPager.setOffscreenPageLimit(1);
 
-        mViewPager.setAdapter(mSettingPagerAdapter);
+        mViewPager.setAdapter(mStatusPagerAdapter);
+        btnTabs.getTabAt(1).select();
+
         mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
 
 

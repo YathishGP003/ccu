@@ -22,11 +22,9 @@ import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.hvac.SSEConditioningMode;
-import a75f.io.logic.bo.building.hvac.SSEFanStage;
-import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitConfiguration;
+import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.haystack.device.SmartStat;
-import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.tuners.TunerConstants;
 
@@ -1060,7 +1058,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setTz(tz)
                 .build();
         String fanOpModeId = CCUHsApi.getInstance().addPoint(fanOpMode);
-        SSEFanStage defaultFanMode = getDefaultFanSpeed(config);
+        StandaloneFanStage defaultFanMode = getDefaultFanSpeed(config);
         CCUHsApi.getInstance().writePointForCcuUser(fanOpModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL,
                                                     (double) defaultFanMode.ordinal(), 0);
         CCUHsApi.getInstance().writeHisValById(fanOpModeId, (double) defaultFanMode.ordinal());
@@ -1077,29 +1075,29 @@ public class FourPipeFanCoilUnitEquip  {
                 .setTz(tz)
                 .build();
         String operationalModeId = CCUHsApi.getInstance().addPoint(operationalMode);
-        SSEConditioningMode defaultConditioningMode = getDefaultConditioningMode(config);
+        StandaloneConditioningMode defaultConditioningMode = getDefaultConditioningMode(config);
         CCUHsApi.getInstance().writePointForCcuUser(operationalModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, (double) defaultConditioningMode.ordinal(), 0);
         CCUHsApi.getInstance().writeHisValById(operationalModeId, (double) defaultConditioningMode.ordinal());
 
     }
     
-    private SSEFanStage getDefaultFanSpeed(FourPipeFanCoilUnitConfiguration config) {
+    private StandaloneFanStage getDefaultFanSpeed(FourPipeFanCoilUnitConfiguration config) {
         if (config.enableRelay1 || config.enableRelay2 || config.enableRelay3) {
-            return SSEFanStage.AUTO;
+            return StandaloneFanStage.AUTO;
         } else {
-            return SSEFanStage.OFF;
+            return StandaloneFanStage.OFF;
         }
     }
     
-    private SSEConditioningMode getDefaultConditioningMode(FourPipeFanCoilUnitConfiguration config) {
+    private StandaloneConditioningMode getDefaultConditioningMode(FourPipeFanCoilUnitConfiguration config) {
         if (config.enableRelay4 && config.enableRelay6) {
-            return SSEConditioningMode.AUTO;
+            return StandaloneConditioningMode.AUTO;
         } else if (config.enableRelay4){
-            return SSEConditioningMode.HEAT_ONLY;
+            return StandaloneConditioningMode.HEAT_ONLY;
         } else if (config.enableRelay6) {
-            return SSEConditioningMode.COOL_ONLY;
+            return StandaloneConditioningMode.COOL_ONLY;
         } else {
-            return SSEConditioningMode.OFF;
+            return StandaloneConditioningMode.OFF;
         }
     }
     
@@ -1116,12 +1114,12 @@ public class FourPipeFanCoilUnitEquip  {
     
         double fallbackFanSpeed = 0;
     
-        SSEFanStage maxFanSpeed = getMaxAvailableFanSpeed(config);
+        StandaloneFanStage maxFanSpeed = getMaxAvailableFanSpeed(config);
     
-        if (curFanSpeed > maxFanSpeed.ordinal() && maxFanSpeed.ordinal() > SSEFanStage.OFF.ordinal()) {
-            fallbackFanSpeed = SSEFanStage.AUTO.ordinal();
+        if (curFanSpeed > maxFanSpeed.ordinal() && maxFanSpeed.ordinal() > StandaloneFanStage.OFF.ordinal()) {
+            fallbackFanSpeed = StandaloneFanStage.AUTO.ordinal();
         } else if (curFanSpeed > maxFanSpeed.ordinal()) {
-            fallbackFanSpeed = SSEFanStage.OFF.ordinal();
+            fallbackFanSpeed = StandaloneFanStage.OFF.ordinal();
         }
         if (fallbackFanSpeed != curFanSpeed) {
             CCUHsApi.getInstance().writeDefaultValById(fanModePointId, fallbackFanSpeed);
@@ -1139,12 +1137,12 @@ public class FourPipeFanCoilUnitEquip  {
     
         double fallbackMode = 0;
         if (!config.enableRelay4) {
-            if (curCondMode == SSEConditioningMode.AUTO.ordinal() || curCondMode == SSEConditioningMode.HEAT_ONLY.ordinal() ) {
-                fallbackMode = SSEConditioningMode.OFF.ordinal();
+            if (curCondMode == StandaloneConditioningMode.AUTO.ordinal() || curCondMode == StandaloneConditioningMode.HEAT_ONLY.ordinal() ) {
+                fallbackMode = StandaloneConditioningMode.OFF.ordinal();
             }
         } else if (!config.enableRelay6){
-            if (curCondMode == SSEConditioningMode.AUTO.ordinal() || curCondMode == SSEConditioningMode.COOL_ONLY.ordinal() ) {
-                fallbackMode = SSEConditioningMode.OFF.ordinal();
+            if (curCondMode == StandaloneConditioningMode.AUTO.ordinal() || curCondMode == StandaloneConditioningMode.COOL_ONLY.ordinal() ) {
+                fallbackMode = StandaloneConditioningMode.OFF.ordinal();
             }
         }
         
@@ -1155,15 +1153,15 @@ public class FourPipeFanCoilUnitEquip  {
         
     }
     
-    private static SSEFanStage getMaxAvailableFanSpeed(FourPipeFanCoilUnitConfiguration config) {
+    private static StandaloneFanStage getMaxAvailableFanSpeed(FourPipeFanCoilUnitConfiguration config) {
         
-        SSEFanStage maxFanSpeed = SSEFanStage.OFF;
+        StandaloneFanStage maxFanSpeed = StandaloneFanStage.OFF;
         if (config.enableRelay2) {
-            maxFanSpeed = SSEFanStage.HIGH_ALL_TIME;
+            maxFanSpeed = StandaloneFanStage.HIGH_ALL_TIME;
         } else if (config.enableRelay1) {
-            maxFanSpeed = SSEFanStage.MEDIUM_ALL_TIME;
+            maxFanSpeed = StandaloneFanStage.MEDIUM_ALL_TIME;
         } else if (config.enableRelay3) {
-            maxFanSpeed = SSEFanStage.LOW_ALL_TIME;
+            maxFanSpeed = StandaloneFanStage.LOW_ALL_TIME;
         }
         return maxFanSpeed;
     }

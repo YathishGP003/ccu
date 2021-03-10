@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building.sshpu;
 
-import android.util.Log;
-
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -24,11 +22,9 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
 import a75f.io.logic.bo.building.definitions.SmartStatHeatPumpChangeOverType;
-import a75f.io.logic.bo.building.hvac.SSEConditioningMode;
-import a75f.io.logic.bo.building.hvac.SSEFanStage;
-import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitConfiguration;
+import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.haystack.device.SmartStat;
-import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.tuners.TunerConstants;
 
@@ -1272,7 +1268,7 @@ public class HeatPumpUnitEquip{
                 .setTz(tz)
                 .build();
         String conditionalModeId = CCUHsApi.getInstance().addPoint(conditionalMode);
-        SSEConditioningMode defaultConditioning = getDefaultConditioningMode(config);
+        StandaloneConditioningMode defaultConditioning = getDefaultConditioningMode(config);
         CCUHsApi.getInstance().writePointForCcuUser(conditionalModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL,
                                                     (double) defaultConditioning.ordinal(), 0);
         CCUHsApi.getInstance().writeHisValById(conditionalModeId, (double)defaultConditioning.ordinal());
@@ -1296,19 +1292,19 @@ public class HeatPumpUnitEquip{
         CCUHsApi.getInstance().writeHisValById(targetHumidtyId, TunerConstants.STANDALONE_TARGET_HUMIDITY);
     }
     
-    private SSEFanStage getDefaultFanSpeed(HeatPumpUnitConfiguration config) {
+    private StandaloneFanStage getDefaultFanSpeed(HeatPumpUnitConfiguration config) {
         if (config.enableRelay1 || config.enableRelay2 || config.enableRelay3) {
-            return SSEFanStage.AUTO;
+            return StandaloneFanStage.AUTO;
         } else {
-            return SSEFanStage.OFF;
+            return StandaloneFanStage.OFF;
         }
     }
     
-    private SSEConditioningMode getDefaultConditioningMode(HeatPumpUnitConfiguration config) {
+    private StandaloneConditioningMode getDefaultConditioningMode(HeatPumpUnitConfiguration config) {
         if (config.enableRelay1 || config.enableRelay2) {
-            return SSEConditioningMode.AUTO;
+            return StandaloneConditioningMode.AUTO;
         } else {
-            return SSEConditioningMode.OFF;
+            return StandaloneConditioningMode.OFF;
         }
     }
 }

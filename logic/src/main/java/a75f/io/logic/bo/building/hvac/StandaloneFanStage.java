@@ -15,7 +15,7 @@ package a75f.io.logic.bo.building.hvac;
  *         <item>  Fan High Occupied Period</item>
  *         <item>  Fan High All Times</item>
  */
-public enum SSEFanStage {
+public enum StandaloneFanStage {
     OFF,
     AUTO,
     LOW_CUR_OCC,

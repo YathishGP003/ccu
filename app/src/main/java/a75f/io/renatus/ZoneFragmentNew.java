@@ -9,7 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 
-import a75f.io.logic.bo.building.hvac.SSEFanStage;
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -41,8 +41,6 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.renovo.bacnet4j.type.constructed.LogData;
-
 import org.joda.time.Interval;
 
 import java.math.BigDecimal;
@@ -72,7 +70,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
-import a75f.io.logic.bo.building.hvac.SSEConditioningMode;
+import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.pubnub.UpdatePointHandler;
@@ -2158,13 +2156,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             if(hpuEquipPoints.get("condEnabled").toString().contains("Cool Only")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly,
                                                                  R.layout.spinner_zone_item);
-                if (conditionMode == SSEConditioningMode.COOL_ONLY.ordinal()) {
+                if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1;
                 }
             } else if(hpuEquipPoints.get("condEnabled").toString().contains("Heat Only")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
                                                                  R.layout.spinner_zone_item);
-                if (conditionMode == SSEConditioningMode.HEAT_ONLY.ordinal()) {
+                if (conditionMode == StandaloneConditioningMode.HEAT_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1; //Select the last item.
                 }
             } else if(hpuEquipPoints.get("condEnabled").toString().contains("Off")) {
@@ -2385,13 +2383,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             if(p2FCUPoints.get("condEnabled").toString().contains("Cool Only")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly,
                                                                  R.layout.spinner_zone_item);
-                if (conditionMode == SSEConditioningMode.COOL_ONLY.ordinal()) {
+                if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1; //Select the last item.
                 }
             } else if(p2FCUPoints.get("condEnabled").toString().contains("Heat Only")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
                                                                  R.layout.spinner_zone_item);
-                if (conditionMode == SSEConditioningMode.HEAT_ONLY.ordinal()) {
+                if (conditionMode == StandaloneConditioningMode.HEAT_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1; //Select the last item
                 }
             } if(p2FCUPoints.get("condEnabled").toString().contains("Off")) {
@@ -2409,12 +2407,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_medium,
                                                                  R.layout.spinner_zone_item);
                 if (fanMode > fanModeAdapter.getCount()) {
-                    fanMode = SSEFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
+                    fanMode = StandaloneFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
                 }
             }else if (p2FCUPoints.get("fanEnabled").toString().contains("No Medium High Fan")) {
                 fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_low, R.layout.spinner_zone_item);
                 if (fanMode > fanModeAdapter.getCount()) {
-                    fanMode = SSEFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
+                    fanMode = StandaloneFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
                 }
             }else if (p2FCUPoints.get("fanEnabled").toString().contains("No Fan")) {
                 fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_off, R.layout.spinner_zone_item);
@@ -2533,13 +2531,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             if(p4FCUPoints.get("condEnabled").toString().contains("Cool Only")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly,
                                                                  R.layout.spinner_zone_item);
-                if (conditionMode == SSEConditioningMode.COOL_ONLY.ordinal()) {
+                if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1; //Select the last item.
                 }
             } else if(p4FCUPoints.get("condEnabled").toString().contains("Heat Only")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
                                                                  R.layout.spinner_zone_item);
-                if (conditionMode == SSEConditioningMode.COOL_ONLY.ordinal()) {
+                if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1; //Select the last item.
                 }
             } if(p4FCUPoints.get("condEnabled").toString().contains("Off")) {
@@ -2559,12 +2557,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_medium,
                                                                  R.layout.spinner_zone_item);
                 if (fanMode > fanModeAdapter.getCount()) {
-                    fanMode = SSEFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
+                    fanMode = StandaloneFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
                 }
             } else if (p4FCUPoints.get("fanEnabled").toString().contains("No Medium High Fan")) {
                 fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_low, R.layout.spinner_zone_item);
                 if (fanMode > fanModeAdapter.getCount()) {
-                    fanMode = SSEFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
+                    fanMode = StandaloneFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
                 }
             } else if (p4FCUPoints.get("fanEnabled").toString().contains("No Fan")) {
                 fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_off, R.layout.spinner_zone_item);

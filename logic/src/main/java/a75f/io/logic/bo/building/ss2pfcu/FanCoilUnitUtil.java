@@ -2,7 +2,6 @@ package a75f.io.logic.bo.building.ss2pfcu;
 
 import com.google.gson.JsonObject;
 
-import java.util.Arrays;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -13,12 +12,24 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
-import a75f.io.logic.bo.building.hvac.SSEConditioningMode;
-import a75f.io.logic.bo.building.hvac.SSEFanStage;
+import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 
+/**
+ * Util class to handle configuration changes of FCU profiles via Pubnub (Reconfig)
+ * Config changes from CCU UI are handled in TwoPipeFanCoilUnitEquip.java and FourPipeFanCoilUnitEquip.java classes.
+ * Both 2 Pipe and 4 Pipes are handled here as it mostly the same.
+ */
 public class FanCoilUnitUtil {
     
+    /**
+     * Public method thats is invoked from pubnub handler module.
+     *
+     * @param configPoint -  Point entity thats being updated.
+     * @param msgObject    - The JsonObject extracted from pubnub
+     * @param hayStack
+     */
     public static void updateFCUProfile(Point configPoint, JsonObject msgObject,
                                              CCUHsApi hayStack) {
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateFCUProfile " + configPoint);
@@ -142,13 +153,13 @@ public class FanCoilUnitUtil {
     
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateFCUFanMode "+configVal+" "+configPoint);
         
-        SSEFanStage maxFanSpeed = getMaxAvailableFanSpeed(configPoint, hayStack);
+        StandaloneFanStage maxFanSpeed = getMaxAvailableFanSpeed(configPoint, hayStack);
         
         double fanSpeedVal = configVal;
-        if (configVal > maxFanSpeed.ordinal() && maxFanSpeed.ordinal() > SSEFanStage.OFF.ordinal()) {
+        if (configVal > maxFanSpeed.ordinal() && maxFanSpeed.ordinal() > StandaloneFanStage.OFF.ordinal()) {
             fanSpeedVal = maxFanSpeed.ordinal();
         } else if (configVal > maxFanSpeed.ordinal()) {
-            fanSpeedVal = SSEFanStage.OFF.ordinal();
+            fanSpeedVal = StandaloneFanStage.OFF.ordinal();
         }
         if (fanSpeedVal != configVal) {
             hayStack.writeDefaultVal(configPoint.getId(), fanSpeedVal);
@@ -158,7 +169,7 @@ public class FanCoilUnitUtil {
     }
     
     private static void adjustFCUFanMode(Point configPoint, CCUHsApi hayStack) {
-        SSEFanStage maxFanSpeed = getMaxAvailableFanSpeed(configPoint, hayStack);
+        StandaloneFanStage maxFanSpeed = getMaxAvailableFanSpeed(configPoint, hayStack);
         double curFanSpeed = hayStack.readDefaultVal("point and zone and userIntent and fan and " +
                                                          "mode and equipRef == \"" + configPoint.getEquipRef() + "\"");
         CcuLog.i(L.TAG_CCU_PUBNUB, "adjustFCUFanMode "+curFanSpeed+" -> "+maxFanSpeed);
@@ -167,10 +178,10 @@ public class FanCoilUnitUtil {
          * When none of fan configuration is enabled, Set fanSpeed to OFF.
          */
         double fallbackFanSpeed = curFanSpeed;
-        if (curFanSpeed > maxFanSpeed.ordinal() && maxFanSpeed.ordinal() > SSEFanStage.OFF.ordinal()) {
-            fallbackFanSpeed = SSEFanStage.AUTO.ordinal();
+        if (curFanSpeed > maxFanSpeed.ordinal() && maxFanSpeed.ordinal() > StandaloneFanStage.OFF.ordinal()) {
+            fallbackFanSpeed = StandaloneFanStage.AUTO.ordinal();
         } else if (curFanSpeed > maxFanSpeed.ordinal()) {
-            fallbackFanSpeed = SSEFanStage.OFF.ordinal();
+            fallbackFanSpeed = StandaloneFanStage.OFF.ordinal();
         }
         
         if (curFanSpeed != fallbackFanSpeed) {
@@ -196,14 +207,14 @@ public class FanCoilUnitUtil {
                                                      "relay4 and equipRef == \"" + configPoint.getEquipRef() + "\"");
     
         double conditioningMode = curCondMode;
-        if (isHeatingOn == 0) {
-            if (curCondMode == SSEConditioningMode.AUTO.ordinal() || curCondMode == SSEConditioningMode.HEAT_ONLY.ordinal() ) {
-                conditioningMode = SSEConditioningMode.OFF.ordinal();
+        if (Math.abs(isHeatingOn) < 0.01) {
+            if (curCondMode == StandaloneConditioningMode.AUTO.ordinal() || curCondMode == StandaloneConditioningMode.HEAT_ONLY.ordinal() ) {
+                conditioningMode = StandaloneConditioningMode.OFF.ordinal();
             }
         }
-        if (isCoolingOn == 0){
-            if (curCondMode == SSEConditioningMode.AUTO.ordinal() || curCondMode == SSEConditioningMode.COOL_ONLY.ordinal() ) {
-                conditioningMode = SSEConditioningMode.OFF.ordinal();
+        if (Math.abs(isCoolingOn) < 0.01){
+            if (curCondMode == StandaloneConditioningMode.AUTO.ordinal() || curCondMode == StandaloneConditioningMode.COOL_ONLY.ordinal() ) {
+                conditioningMode = StandaloneConditioningMode.OFF.ordinal();
             }
         }
         CcuLog.i(L.TAG_CCU_PUBNUB, "adjust4PFCUConditioningMode "+curCondMode+" -> "+conditioningMode);
@@ -214,7 +225,7 @@ public class FanCoilUnitUtil {
     }
     
     
-    private static SSEFanStage getMaxAvailableFanSpeed(Point configPoint, CCUHsApi hayStack) {
+    private static StandaloneFanStage getMaxAvailableFanSpeed(Point configPoint, CCUHsApi hayStack) {
         
         double isFanLowEnabled = hayStack.readDefaultVal("point and zone and config and enable and " +
                                                          "relay3 and equipRef == \"" + configPoint.getEquipRef() +
@@ -224,13 +235,13 @@ public class FanCoilUnitUtil {
         double isFanHighEnabled = hayStack.readDefaultVal("point and zone and config and enable and relay2 and equipRef == \"" +
                                                           configPoint.getEquipRef() + "\"");
     
-        SSEFanStage maxFanSpeed = SSEFanStage.OFF;
+        StandaloneFanStage maxFanSpeed = StandaloneFanStage.OFF;
         if (isFanHighEnabled > 0) {
-            maxFanSpeed = SSEFanStage.HIGH_ALL_TIME;
+            maxFanSpeed = StandaloneFanStage.HIGH_ALL_TIME;
         } else if (isFanMediumEnabled > 0) {
-            maxFanSpeed = SSEFanStage.MEDIUM_ALL_TIME;
+            maxFanSpeed = StandaloneFanStage.MEDIUM_ALL_TIME;
         } else if (isFanLowEnabled > 0) {
-            maxFanSpeed = SSEFanStage.LOW_ALL_TIME;
+            maxFanSpeed = StandaloneFanStage.LOW_ALL_TIME;
         }
         return maxFanSpeed;
     }
@@ -259,13 +270,13 @@ public class FanCoilUnitUtil {
                                                                       "relay4 and equipRef == \"" + configPoint.getEquipRef() + "\"");
     
             double conditioningMode = configVal;
-            if (isHeatingOn == 0) {
-                if (configVal == SSEConditioningMode.AUTO.ordinal() || configVal == SSEConditioningMode.HEAT_ONLY.ordinal() ) {
-                    conditioningMode = SSEConditioningMode.OFF.ordinal();
+            if (Math.abs(isHeatingOn) < 0.01) {
+                if (configVal == StandaloneConditioningMode.AUTO.ordinal() || configVal == StandaloneConditioningMode.HEAT_ONLY.ordinal() ) {
+                    conditioningMode = StandaloneConditioningMode.OFF.ordinal();
                 }
-            } else if (isCoolingOn == 0){
-                if (configVal == SSEConditioningMode.AUTO.ordinal() || configVal == SSEConditioningMode.COOL_ONLY.ordinal() ) {
-                    conditioningMode = SSEConditioningMode.OFF.ordinal();
+            } else if (Math.abs(isCoolingOn) < 0.01){
+                if (configVal == StandaloneConditioningMode.AUTO.ordinal() || configVal == StandaloneConditioningMode.COOL_ONLY.ordinal() ) {
+                    conditioningMode = StandaloneConditioningMode.OFF.ordinal();
                 }
             }
             writePointFromJson(configPoint.getId(), conditioningMode, msgObject, hayStack);

@@ -28,10 +28,10 @@ public class ConventionalPackageUnitUtil {
             } else if (configPoint.getMarkers().contains(Tags.ENABLE) && configPoint.getMarkers().contains(
                 Tags.OCCUPANCY) && configPoint.getMarkers().contains(Tags.CONTROL)) {
                 updateOccupancyPoint(configVal, configPoint, msgObject, hayStack);
-            } else if (configPoint.getMarkers().contains(Tags.USERINTENT)) {
-                //updateUserIntent(configVal, configPoint, msgObject, hayStack);
-            } else {
-                writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
+            } /*else if (configPoint.getMarkers().contains(Tags.USERINTENT)) {
+                updateUserIntent(configVal, configPoint, msgObject, hayStack);
+            } */else {
+                writePointFromJson(true, configPoint.getId(), configVal, msgObject, hayStack);
             }
         } catch (Exception e) {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to update : " + configPoint.getDisplayName() + " ; " + msgObject + " " +
@@ -71,7 +71,7 @@ public class ConventionalPackageUnitUtil {
             SmartStat.setPointEnabled(Integer.parseInt(nodeAddr), Port.TH2_IN.name(),
                                       configVal > 0 ? true : false);
         }
-        writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
+        writePointFromJson(true, configPoint.getId(), configVal, msgObject, hayStack);
         hayStack.syncPointEntityTree();
         adjustCPUFanMode(equip,hayStack);
         adjustConditioningMode(equip, hayStack);
@@ -110,7 +110,7 @@ public class ConventionalPackageUnitUtil {
             if (!occDetPoint.isEmpty())
                 hayStack.deleteEntityTree(occDetPoint.get("id").toString());
         }
-        writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
+        writePointFromJson(true, configPoint.getId(), configVal, msgObject, hayStack);
     }
     
     private static void updateRelay6Config(double configVal, Point configPoint, CCUHsApi hayStack) {
@@ -127,7 +127,7 @@ public class ConventionalPackageUnitUtil {
                 manageRelay6AssociatedPoints(configVal, equip);
             }
         }
-        
+        hayStack.syncPointEntityTree();
     }
     
     private static void manageRelay6AssociatedPoints(double configVal, Equip equip ) {
@@ -295,12 +295,18 @@ public class ConventionalPackageUnitUtil {
     }
     
     
-    private static void writePointFromJson(String id, double val, JsonObject msgObject, CCUHsApi hayStack) {
+    private static void writePointFromJson(boolean local, String id, double val, JsonObject msgObject,
+                                           CCUHsApi hayStack) {
         try {
             int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();
             int duration = msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION) != null ? msgObject.get(
                 HayStackConstants.WRITABLE_ARRAY_DURATION).getAsInt() : 0;
-            hayStack.writePointForCcuUser(id, level, val, duration);
+            
+            if (local) {
+                hayStack.writePointLocal(id, level, hayStack.getCCUUserName(), val, duration);
+            } else {
+                hayStack.writePointForCcuUser(id, level, val, duration);
+            }
         } catch (Exception e) {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to parse tuner value : "+msgObject+" ; "+e.getMessage());
         }

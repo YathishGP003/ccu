@@ -11,12 +11,9 @@ package org.projecthaystack;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-
 import javax.crypto.*;
 import javax.crypto.spec.*;
-
 import java.security.*;
-
 import org.projecthaystack.*;
 import org.projecthaystack.io.*;
 
@@ -26,7 +23,8 @@ import org.projecthaystack.io.*;
  *
  * @see <a href='http://project-haystack.org/doc/TagModel'>Project Haystack</a>
  */
-public abstract class HProj {
+public abstract class HProj
+{
 
 //////////////////////////////////////////////////////////////////////////
 // Operations
@@ -44,7 +42,8 @@ public abstract class HProj {
     /**
      * Convenience for "readById(id, true)"
      */
-    public final HDict readById(HRef id) {
+    public final HDict readById(HRef id)
+    {
         return readById(id, true);
     }
 
@@ -53,7 +52,8 @@ public abstract class HProj {
      * If not found then return null or throw an UnknownRecException based
      * on checked.
      */
-    public final HDict readById(HRef id, boolean checked) {
+    public final HDict readById(HRef id, boolean checked)
+    {
         HDict rec = onReadById(id);
         if (rec != null) return rec;
         if (checked) throw new UnknownRecException(id);
@@ -63,7 +63,8 @@ public abstract class HProj {
     /**
      * Convenience for "readByIds(ids, true)"
      */
-    public final HGrid readByIds(HRef[] ids) {
+    public final HGrid readByIds(HRef[] ids)
+    {
         return readByIds(ids, true);
     }
 
@@ -75,10 +76,12 @@ public abstract class HProj {
      * not resolved.  If checked is false, then each id not found has a
      * row where every cell is null.
      */
-    public final HGrid readByIds(HRef[] ids, boolean checked) {
+    public final HGrid readByIds(HRef[] ids, boolean checked)
+    {
         HGrid grid = onReadByIds(ids);
-        if (checked) {
-            for (int i = 0; i < grid.numRows(); ++i)
+        if (checked)
+        {
+            for (int i=0; i<grid.numRows(); ++i)
                 if (grid.row(i).missing("id")) throw new UnknownRecException(ids[i]);
         }
         return grid;
@@ -102,7 +105,8 @@ public abstract class HProj {
     /**
      * Convenience for "read(filter, true)".
      */
-    public final HDict read(String filter) {
+    public final HDict read(String filter)
+    {
         return read(filter, true);
     }
 
@@ -112,7 +116,8 @@ public abstract class HProj {
      * returned.  If there are no matches than return null or raise
      * UnknownRecException based on checked flag.
      */
-    public final HDict read(String filter, boolean checked) {
+    public final HDict read(String filter, boolean checked)
+    {
         HGrid grid = readAll(filter, 1);
         if (grid.numRows() > 0) return grid.row(0);
         if (checked) throw new UnknownRecException(filter);
@@ -122,7 +127,8 @@ public abstract class HProj {
     /**
      * Convenience for "readAll(filter, max)".
      */
-    public final HGrid readAll(String filter) {
+    public final HGrid readAll(String filter)
+    {
         return readAll(filter, Integer.MAX_VALUE);
     }
 
@@ -130,7 +136,8 @@ public abstract class HProj {
      * Call "read" to query every entity record that matches given filter.
      * Clip number of results by "limit" parameter.
      */
-    public final HGrid readAll(String filter, int limit) {
+    public final HGrid readAll(String filter, int limit)
+    {
         return onReadAll(filter, limit);
     }
 
@@ -158,9 +165,7 @@ public abstract class HProj {
     /**
      * Convenience for "watch(id, true)"
      */
-    public final HWatch watch(String id) {
-        return watch(id, true);
-    }
+    public final HWatch watch(String id) { return watch(id, true); }
 
     /**
      * Lookup a watch by its unique identifier.  If not found then

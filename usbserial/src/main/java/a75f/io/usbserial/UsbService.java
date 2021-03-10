@@ -19,7 +19,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.felhr.usbserial.CDCSerialDevice;
 import com.felhr.usbserial.UsbSerialDevice;
@@ -411,7 +410,7 @@ public class UsbService extends Service
 				Log.i(TAG, "USB Device VID: " + deviceVID);
 				Log.i(TAG, "USB Device PID: " + devicePID);
 				if (deviceVID == 0x0403 || deviceVID == 1003 ||
-				                    (deviceVID == DEVICE_ID_FTDI && UsbUtils.isBiskitMode(getApplicationContext())))
+						(deviceVID == DEVICE_ID_FTDI && UsbUtils.isBiskitMode(getApplicationContext())))
 				{
 					boolean success = grantRootPermissionToUSBDevice(device);
 					connection = usbManager.openDevice(device);
@@ -460,6 +459,7 @@ public class UsbService extends Service
 	{
 		IBinder b = ServiceManager.getService(Context.USB_SERVICE);
 		IUsbManager service = IUsbManager.Stub.asInterface(b);
+		Log.i(TAG, "Try connecting!");
 		// There is a device connected to our Android device. Try to open it as a Serial Port.
 		try
 		{

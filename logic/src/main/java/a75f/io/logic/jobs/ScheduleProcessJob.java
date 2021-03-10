@@ -848,7 +848,6 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         double condtionModePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and temp and mode and conditioning and equipRef == \""+equipID+"\"");
 
         boolean isCoolingOn = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay6 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
-        boolean isHeatingOn = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay4 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
         boolean isFanLowEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay3 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
         boolean isFanMediumEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay1 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
         boolean isFanHighEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay2 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
@@ -867,13 +866,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         } else {
             p2FCUPoints.put("Discharge Airflow", 0 + " \u2109");
         }
-        /*f(isCoolingOn && !isHeatingOn)
-            p2FCUPoints.put("condEnabled","Cool Only");
-        else if(!isCoolingOn && isHeatingOn)
-            p2FCUPoints.put("condEnabled","Heat Only");
-        else if(!isCoolingOn && !isHeatingOn)
-            p2FCUPoints.put("condEnabled","Off");*/
-    
+        
+        //We not dont consider auxiliary heating selection for determining available conditioning modes.
         if(!isCoolingOn)
             p2FCUPoints.put("condEnabled","Off");
         
@@ -1045,14 +1039,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             hpuPoints.put("Fan High Humidity",0);
         }
 
-        /*if(!isCompressor1On && !isCompressor1On && (isChangeOverOn == 1.0))
+        if(!isCompressor1On && !isCompressor1On && (isChangeOverOn == 1.0))
             hpuPoints.put("condEnabled","Cool Only");
         else if(!isCompressor1On && !isCompressor1On && ((isChangeOverOn == 2.0) || isAuxHeatingOn))
             hpuPoints.put("condEnabled","Heat Only");
         else if(!isCompressor1On && !isCompressor1On && (isChangeOverOn == 0) && !isAuxHeatingOn)
-            hpuPoints.put("condEnabled","Off");*/
-    
-        if(!isCompressor1On && !isCompressor2On)
             hpuPoints.put("condEnabled","Off");
 
         if(isFanLowEnabled && !isFanHighEnabled)

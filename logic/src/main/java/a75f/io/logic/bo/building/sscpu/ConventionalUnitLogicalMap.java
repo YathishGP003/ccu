@@ -21,8 +21,6 @@ import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
-import a75f.io.logic.bo.building.hvac.SSEConditioningMode;
-import a75f.io.logic.bo.building.hvac.SSEFanStage;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.StandAloneTuners;
@@ -818,7 +816,7 @@ public class ConventionalUnitLogicalMap {
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis + "-CPU-" + nodeAddr;
-        if(config.enableRelay6) {
+        if(config.enableRelay5) {
             if ((int) prevFanType != config.relay6Type) {
                 SmartStatFanRelayType fanRelayType = SmartStatFanRelayType.values()[config.relay6Type];
                 switch (fanRelayType) {
@@ -1183,9 +1181,8 @@ public class ConventionalUnitLogicalMap {
                 .setTz(tz)
                 .build();
         String fanOpModeId = CCUHsApi.getInstance().addPoint(fanOpMode);
-        double fanModeDefaultVal = config.enableRelay3 ? TunerConstants.STANDALONE_DEFAULT_FAN_OPERATIONAL_MODE : 0;
-        CCUHsApi.getInstance().writePointForCcuUser(fanOpModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, fanModeDefaultVal, 0);
-        CCUHsApi.getInstance().writeHisValById(fanOpModeId, fanModeDefaultVal);
+        CCUHsApi.getInstance().writePointForCcuUser(fanOpModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_DEFAULT_FAN_OPERATIONAL_MODE, 0);
+        CCUHsApi.getInstance().writeHisValById(fanOpModeId, TunerConstants.STANDALONE_DEFAULT_FAN_OPERATIONAL_MODE);
 
         Point operationalMode = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"ConditioningMode")
@@ -1199,10 +1196,8 @@ public class ConventionalUnitLogicalMap {
                 .setTz(tz)
                 .build();
         String operationalModeId = CCUHsApi.getInstance().addPoint(operationalMode);
-        SSEConditioningMode defaultCondMode = getDefaultConditioningMode(config);
-        CCUHsApi.getInstance().writePointForCcuUser(operationalModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL,
-                                                    (double)defaultCondMode.ordinal(), 0);
-        CCUHsApi.getInstance().writeHisValById(operationalModeId, (double) defaultCondMode.ordinal());
+        CCUHsApi.getInstance().writePointForCcuUser(operationalModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_DEFAULT_CONDITIONAL_MODE, 0);
+        CCUHsApi.getInstance().writeHisValById(operationalModeId, TunerConstants.STANDALONE_DEFAULT_CONDITIONAL_MODE);
 
 
         Point targetDehumidifier = new Point.Builder()
@@ -1221,13 +1216,5 @@ public class ConventionalUnitLogicalMap {
         String targetHumidtyId = CCUHsApi.getInstance().addPoint(targetHumidty);
         CCUHsApi.getInstance().writePointForCcuUser(targetHumidtyId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_TARGET_HUMIDITY, 0);
         CCUHsApi.getInstance().writeHisValById(targetHumidtyId, TunerConstants.STANDALONE_TARGET_HUMIDITY);
-    }
-    
-    private static SSEConditioningMode getDefaultConditioningMode(ConventionalUnitConfiguration config) {
-        if (config.enableRelay1 && config.enableRelay4) {
-            return SSEConditioningMode.AUTO;
-        } else {
-            return SSEConditioningMode.OFF;
-        }
     }
 }

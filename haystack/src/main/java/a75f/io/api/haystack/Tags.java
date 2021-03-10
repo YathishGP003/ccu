@@ -74,5 +74,7 @@ public class Tags
     public static final String CONDITIONING = "conditioning";
     public static final String FAN = "fan";
     public static final String MODE = "mode";
+    
+    public static final String TYPE = "type";
 
 }

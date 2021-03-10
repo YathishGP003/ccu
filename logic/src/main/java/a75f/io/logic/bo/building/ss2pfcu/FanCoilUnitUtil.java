@@ -185,7 +185,7 @@ public class FanCoilUnitUtil {
         double isHeatingOn = hayStack.readDefaultVal("point and zone and config and enable and " +
                                                      "relay4 and equipRef == \"" + configPoint.getEquipRef() + "\"");
     
-        double conditioningMode = 0;
+        double conditioningMode = curCondMode;
         if (isHeatingOn == 0) {
             if (curCondMode == SSEConditioningMode.AUTO.ordinal() || curCondMode == SSEConditioningMode.HEAT_ONLY.ordinal() ) {
                 conditioningMode = SSEConditioningMode.OFF.ordinal();

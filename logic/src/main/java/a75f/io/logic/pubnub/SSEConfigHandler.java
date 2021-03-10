@@ -13,7 +13,7 @@ import a75f.io.logic.bo.building.sse.SingleStageEquipUtil;
 class SSEConfigHandler {
     
     public static void updateConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
-        CcuLog.i(L.TAG_CCU_PUBNUB, "updateSSEConfigPoint " + msgObject.toString());
+        CcuLog.i(L.TAG_CCU_PUBNUB, "updateSSEConfigPoint " + configPoint+" "+msgObject.toString());
     
         int val = msgObject.get("val").getAsInt();
         if (configPoint.getMarkers().contains(Tags.RELAY1)) {

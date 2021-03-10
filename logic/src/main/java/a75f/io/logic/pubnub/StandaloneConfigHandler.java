@@ -8,6 +8,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ss2pfcu.FanCoilUnitUtil;
+import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
 
 public class StandaloneConfigHandler {
     
@@ -16,8 +17,10 @@ public class StandaloneConfigHandler {
         
         if (configPoint.getMarkers().contains(Tags.FCU)) {
             FanCoilUnitUtil.updateFCUProfile(configPoint, msgObject, hayStack);
+        } else if (configPoint.getMarkers().contains(Tags.CPU)) {
+            ConventionalPackageUnitUtil.updateCPUProfile(configPoint, msgObject, hayStack);
         }
-        //CPU & HPU to come here.
+        
     }
     
    

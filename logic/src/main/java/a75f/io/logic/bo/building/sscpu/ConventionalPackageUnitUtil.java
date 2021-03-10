@@ -17,9 +17,9 @@ import a75f.io.logic.bo.building.hvac.SSEConditioningMode;
 import a75f.io.logic.bo.building.hvac.SSEFanStage;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 
-class ConventionalPackageUnitUtil {
+public class ConventionalPackageUnitUtil {
     
-    public static void updateFCUProfile(Point configPoint, JsonObject msgObject,
+    public static void updateCPUProfile(Point configPoint, JsonObject msgObject,
                                         CCUHsApi hayStack) {
         try {
             double configVal = msgObject.get("val").getAsDouble();
@@ -39,7 +39,7 @@ class ConventionalPackageUnitUtil {
         }
         
     }
-    public static void updateConfig(double configVal, Point configPoint, JsonObject msgObject, CCUHsApi hayStack) {
+    private static void updateConfig(double configVal, Point configPoint, JsonObject msgObject, CCUHsApi hayStack) {
         
         HashMap equipMap = hayStack.readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();

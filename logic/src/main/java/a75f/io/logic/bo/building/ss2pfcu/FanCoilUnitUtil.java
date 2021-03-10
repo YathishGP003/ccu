@@ -21,6 +21,7 @@ public class FanCoilUnitUtil {
     
     public static void updateFCUProfile(Point configPoint, JsonObject msgObject,
                                              CCUHsApi hayStack) {
+        CcuLog.i(L.TAG_CCU_PUBNUB, "updateFCUProfile " + configPoint);
         try {
             double configVal = msgObject.get("val").getAsDouble();
             if (configPoint.getMarkers().contains(Tags.CONFIG)) {
@@ -31,7 +32,7 @@ public class FanCoilUnitUtil {
             } else if (configPoint.getMarkers().contains(Tags.USERINTENT)) {
                 updateUserIntent(configVal, configPoint, msgObject, hayStack);
             } else {
-                writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
+                writePointFromJson(true, configPoint.getId(), configVal, msgObject, hayStack);
             }
         } catch (Exception e) {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to update : "+configPoint.getDisplayName()+" ; "+msgObject+" "+
@@ -39,7 +40,7 @@ public class FanCoilUnitUtil {
         }
         
     }
-    public static void updateConfig(double configVal, Point configPoint, JsonObject msgObject, CCUHsApi hayStack) {
+    private static void updateConfig(double configVal, Point configPoint, JsonObject msgObject, CCUHsApi hayStack) {
         
         HashMap equipMap = hayStack.readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
@@ -70,7 +71,7 @@ public class FanCoilUnitUtil {
             SmartStat.setPointEnabled(Integer.parseInt(nodeAddr), Port.TH2_IN.name(),
                                       configVal > 0 ? true : false);
         }
-        writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
+        writePointFromJson(true, configPoint.getId(), configVal, msgObject, hayStack);
         hayStack.syncPointEntityTree();
         adjustFCUFanMode(configPoint,hayStack);
         if (configPoint.getMarkers().contains(Tags.PIPE4)) {
@@ -113,10 +114,10 @@ public class FanCoilUnitUtil {
             if (!occDetPoint.isEmpty())
                 hayStack.deleteEntityTree(occDetPoint.get("id").toString());
         }
-        writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
+        writePointFromJson(true, configPoint.getId(), configVal, msgObject, hayStack);
     }
     
-    public static void updateUserIntent(double configVal, Point configPoint, JsonObject msgObject, CCUHsApi hayStack) {
+    private static void updateUserIntent(double configVal, Point configPoint, JsonObject msgObject, CCUHsApi hayStack) {
     
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateUserIntent "+configVal+" "+configPoint);
         if (configPoint.getMarkers().contains(Tags.FAN)
@@ -138,12 +139,18 @@ public class FanCoilUnitUtil {
         
         SSEFanStage maxFanSpeed = getMaxAvailableFanSpeed(configPoint, hayStack);
         
+        double fanSpeedVal = configVal;
         if (configVal > maxFanSpeed.ordinal() && maxFanSpeed.ordinal() > SSEFanStage.OFF.ordinal()) {
-            configVal = maxFanSpeed.ordinal();
+            fanSpeedVal = maxFanSpeed.ordinal();
         } else if (configVal > maxFanSpeed.ordinal()) {
-            configVal = SSEFanStage.OFF.ordinal();
+            fanSpeedVal = SSEFanStage.OFF.ordinal();
         }
-        writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
+        if (fanSpeedVal == configVal) {
+            writePointFromJson(true, configPoint.getId(), configVal, msgObject, hayStack);
+        } else {
+            writePointFromJson(false, configPoint.getId(), configVal, msgObject, hayStack);
+        }
+        
         hayStack.writeHisValById(configPoint.getId(), configVal);
     }
     
@@ -233,7 +240,7 @@ public class FanCoilUnitUtil {
                                                                              "and relay6 and equipRef == \"" + configPoint.getEquipRef() + "\"");
     
             double conditioningMode = conditioningRelay > 0 ? configVal : 0;
-            writePointFromJson(configPoint.getId(), conditioningRelay, msgObject, hayStack);
+            writePointFromJson(false, configPoint.getId(), conditioningRelay, msgObject, hayStack);
             hayStack.writeHisValById(configPoint.getId(), conditioningMode);
             
         }
@@ -258,18 +265,24 @@ public class FanCoilUnitUtil {
                     conditioningMode = SSEConditioningMode.OFF.ordinal();
                 }
             }
-            writePointFromJson(configPoint.getId(), conditioningMode, msgObject, hayStack);
+            writePointFromJson(false, configPoint.getId(), conditioningMode, msgObject, hayStack);
             hayStack.writeHisValById(configPoint.getId(), conditioningMode);
             
         }
     }
     
-    private static void writePointFromJson(String id, double val, JsonObject msgObject, CCUHsApi hayStack) {
+    private static void writePointFromJson(boolean local, String id, double val, JsonObject msgObject,
+                                           CCUHsApi hayStack) {
         try {
             int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();
             int duration = msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION) != null ? msgObject.get(
                 HayStackConstants.WRITABLE_ARRAY_DURATION).getAsInt() : 0;
-            hayStack.writePointForCcuUser(id, level, val, duration);
+            
+            if (local) {
+                hayStack.writePointLocal(id, level, hayStack.getCCUUserName(), val, duration);
+            } else {
+                hayStack.writePointForCcuUser(id, level, val, duration);
+            }
         } catch (Exception e) {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to parse tuner value : "+msgObject+" ; "+e.getMessage());
         }

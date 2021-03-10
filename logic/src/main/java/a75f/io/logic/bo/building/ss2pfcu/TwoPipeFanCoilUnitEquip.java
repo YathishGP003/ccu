@@ -1047,6 +1047,7 @@ public class TwoPipeFanCoilUnitEquip {
     {
         CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \""+nodeAddr+"\"", status);
     }
+    
     protected void addUserIntentPoints(String equipref, String equipDis, String room, String floor,
                                        TwoPipeFanCoilUnitConfiguration config) {
 

@@ -15,13 +15,16 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.haystack.device.SmartStat;
-import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.tuners.TunerConstants;
 
@@ -732,7 +735,7 @@ public class FourPipeFanCoilUnitEquip  {
         CCUHsApi.getInstance().writeDefaultValById(enableRelay6Id, (double)(config.enableRelay6 == true? 1.0 : 0));
 
 
-        addUserIntentPoints(equipRef,equipDis,room,floor);
+        addUserIntentPoints(equipRef,equipDis,room,floor, config);
 
         setConfigNumVal("enable and relay1",config.enableRelay1 == true ? 1.0 : 0);
         setConfigNumVal("enable and relay2",config.enableRelay2 == true ? 1.0 : 0);
@@ -805,6 +808,8 @@ public class FourPipeFanCoilUnitEquip  {
         setConfigNumVal("temperature and offset",config.temperatureOffset);
         setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
         setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
+        
+        updateUserIntentPoints(config, equip.getId());
     }
 
 
@@ -1034,7 +1039,8 @@ public class FourPipeFanCoilUnitEquip  {
     {
         CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \""+nodeAddr+"\"", status);
     }
-    protected void addUserIntentPoints(String equipref, String equipDis, String room, String floor) {
+    protected void addUserIntentPoints(String equipref, String equipDis, String room, String floor,
+                                       FourPipeFanCoilUnitConfiguration config) {
 
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = siteMap.get("id").toString();
@@ -1052,8 +1058,10 @@ public class FourPipeFanCoilUnitEquip  {
                 .setTz(tz)
                 .build();
         String fanOpModeId = CCUHsApi.getInstance().addPoint(fanOpMode);
-        CCUHsApi.getInstance().writePointForCcuUser(fanOpModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_DEFAULT_FAN_OPERATIONAL_MODE, 0);
-        CCUHsApi.getInstance().writeHisValById(fanOpModeId, TunerConstants.STANDALONE_DEFAULT_FAN_OPERATIONAL_MODE);
+        StandaloneFanStage defaultFanMode = getDefaultFanSpeed(config);
+        CCUHsApi.getInstance().writePointForCcuUser(fanOpModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL,
+                                                    (double) defaultFanMode.ordinal(), 0);
+        CCUHsApi.getInstance().writeHisValById(fanOpModeId, (double) defaultFanMode.ordinal());
 
         Point operationalMode = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"ConditioningMode")
@@ -1067,9 +1075,95 @@ public class FourPipeFanCoilUnitEquip  {
                 .setTz(tz)
                 .build();
         String operationalModeId = CCUHsApi.getInstance().addPoint(operationalMode);
-        CCUHsApi.getInstance().writePointForCcuUser(operationalModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_DEFAULT_CONDITIONAL_MODE, 0);
-        CCUHsApi.getInstance().writeHisValById(operationalModeId, TunerConstants.STANDALONE_DEFAULT_CONDITIONAL_MODE);
+        StandaloneConditioningMode defaultConditioningMode = getDefaultConditioningMode(config);
+        CCUHsApi.getInstance().writePointForCcuUser(operationalModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, (double) defaultConditioningMode.ordinal(), 0);
+        CCUHsApi.getInstance().writeHisValById(operationalModeId, (double) defaultConditioningMode.ordinal());
 
+    }
+    
+    private StandaloneFanStage getDefaultFanSpeed(FourPipeFanCoilUnitConfiguration config) {
+        if (config.enableRelay1 || config.enableRelay2 || config.enableRelay3) {
+            return StandaloneFanStage.AUTO;
+        } else {
+            return StandaloneFanStage.OFF;
+        }
+    }
+    
+    private StandaloneConditioningMode getDefaultConditioningMode(FourPipeFanCoilUnitConfiguration config) {
+        if (config.enableRelay4 && config.enableRelay6) {
+            return StandaloneConditioningMode.AUTO;
+        } else if (config.enableRelay4){
+            return StandaloneConditioningMode.HEAT_ONLY;
+        } else if (config.enableRelay6) {
+            return StandaloneConditioningMode.COOL_ONLY;
+        } else {
+            return StandaloneConditioningMode.OFF;
+        }
+    }
+    
+    private void updateUserIntentPoints(FourPipeFanCoilUnitConfiguration config, String equipRef) {
+        
+        String fanModePointId = CCUHsApi.getInstance().readId("point and zone and userIntent and fan and " +
+                                                              "mode and equipRef == \"" + equipRef + "\"");
+        if (fanModePointId.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_ZONE, "FanMode point does not exist for equip: " + nodeAddr);
+            return;
+        }
+    
+        double curFanSpeed = CCUHsApi.getInstance().readDefaultValById(fanModePointId);
+    
+        double fallbackFanSpeed = 0;
+    
+        StandaloneFanStage maxFanSpeed = getMaxAvailableFanSpeed(config);
+    
+        if (curFanSpeed > maxFanSpeed.ordinal() && maxFanSpeed.ordinal() > StandaloneFanStage.OFF.ordinal()) {
+            fallbackFanSpeed = StandaloneFanStage.AUTO.ordinal();
+        } else if (curFanSpeed > maxFanSpeed.ordinal()) {
+            fallbackFanSpeed = StandaloneFanStage.OFF.ordinal();
+        }
+        if (fallbackFanSpeed != curFanSpeed) {
+            CCUHsApi.getInstance().writeDefaultValById(fanModePointId, fallbackFanSpeed);
+            CCUHsApi.getInstance().writeHisValById(fanModePointId, fallbackFanSpeed);
+        }
+    
+    
+        String conditioningModeId = CCUHsApi.getInstance().readId("point and zone and userIntent and conditioning and" +
+                                                                  " mode and equipRef == \"" + equipRef + "\"");
+        if (conditioningModeId.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_ZONE, "ConditioningMode point does not exist for equip: " + nodeAddr);
+            return;
+        }
+        double curCondMode = CCUHsApi.getInstance().readDefaultValById(conditioningModeId);
+    
+        double fallbackMode = 0;
+        if (!config.enableRelay4) {
+            if (curCondMode == StandaloneConditioningMode.AUTO.ordinal() || curCondMode == StandaloneConditioningMode.HEAT_ONLY.ordinal() ) {
+                fallbackMode = StandaloneConditioningMode.OFF.ordinal();
+            }
+        } else if (!config.enableRelay6){
+            if (curCondMode == StandaloneConditioningMode.AUTO.ordinal() || curCondMode == StandaloneConditioningMode.COOL_ONLY.ordinal() ) {
+                fallbackMode = StandaloneConditioningMode.OFF.ordinal();
+            }
+        }
+        
+        if (fallbackMode != curCondMode) {
+            CCUHsApi.getInstance().writeDefaultValById(conditioningModeId, fallbackMode);
+            CCUHsApi.getInstance().writeHisValById(conditioningModeId, fallbackMode);
+        }
+        
+    }
+    
+    private static StandaloneFanStage getMaxAvailableFanSpeed(FourPipeFanCoilUnitConfiguration config) {
+        
+        StandaloneFanStage maxFanSpeed = StandaloneFanStage.OFF;
+        if (config.enableRelay2) {
+            maxFanSpeed = StandaloneFanStage.HIGH_ALL_TIME;
+        } else if (config.enableRelay1) {
+            maxFanSpeed = StandaloneFanStage.MEDIUM_ALL_TIME;
+        } else if (config.enableRelay3) {
+            maxFanSpeed = StandaloneFanStage.LOW_ALL_TIME;
+        }
+        return maxFanSpeed;
     }
 }
 

@@ -5,11 +5,13 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.hvac.SSEStage;
 import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.bo.haystack.device.SmartStat;
 
 public class SingleStageEquipUtil {
     
@@ -85,6 +87,7 @@ public class SingleStageEquipUtil {
                 break;
                 
         }
+        SmartNode.setPointEnabled(Integer.valueOf(nodeAddr), Port.RELAY_ONE.name(), configVal > 0 ? true : false );
         CCUHsApi.getInstance().syncPointEntityTree();
     }
     
@@ -129,7 +132,22 @@ public class SingleStageEquipUtil {
             if (!fanPt.isEmpty())
                 CCUHsApi.getInstance().deleteEntity(fanPt.get("id").toString());
         }
+        SmartNode.setPointEnabled(Integer.valueOf(nodeAddr), Port.RELAY_TWO.name(), configVal > 0 ? true : false );
         CCUHsApi.getInstance().syncPointEntityTree();
+    }
+    
+    public static void updateThermistorConfig(int configVal, Point configPoint) {
+    
+        HashMap equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
+        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+        String nodeAddr = equip.getGroup();
+        if (configPoint.getMarkers().contains(Tags.TH1)) {
+            SmartStat.setPointEnabled(Integer.parseInt(nodeAddr), Port.TH1_IN.name(),
+                                      configVal > 0 ? true : false);
+        } else if (configPoint.getMarkers().contains(Tags.TH2)) {
+            SmartStat.setPointEnabled(Integer.parseInt(nodeAddr), Port.TH2_IN.name(),
+                                      configVal > 0 ? true : false);
+        }
     }
     
     public static String createCoolingStagePoint(Equip equip) {

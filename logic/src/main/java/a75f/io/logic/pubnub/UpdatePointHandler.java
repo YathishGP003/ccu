@@ -60,6 +60,12 @@ public class UpdatePointHandler
             return;
         }
     
+        if (HSUtil.isStandaloneConfig(luid, CCUHsApi.getInstance())) {
+            StandaloneConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
+            updateUI(localPoint);
+            return;
+        }
+    
         if (luid != null && luid != "")
         {
             HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote("@" + pointGuid);
@@ -157,6 +163,18 @@ public class UpdatePointHandler
 
         if (HSUtil.isBuildingTunerPoint(luid, CCUHsApi.getInstance())) {
             BuildingTunerUpdateHandler.updateZoneModuleSystemPoints(luid);
+        }
+    }
+    
+    /**
+     * Should separate his write from above method.
+     * There are cases where received his val is not valid and should be ignored.
+     *
+     */
+    private static void updateUI(Point updatedPoint) {
+        if (zoneDataInterface != null) {
+            Log.i("PubNub","Zone Data Received Refresh");
+            zoneDataInterface.refreshScreen(updatedPoint.getId());
         }
     }
 

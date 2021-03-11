@@ -580,7 +580,7 @@ public class ConventionalUnitLogicalMap {
         String siteDis = (String) siteMap.get("dis");
         String equipDis = siteDis+"-CPU-"+nodeAddr;
         String tz = siteMap.get("tz").toString();
-        String profile = "cpu";
+        String  profile = "cpu";
         Point enableOccupancyControl = new Point.Builder()
                 .setDisplayName(equipDis + "-enableOccupancyControl")
                 .setEquipRef(equipRef)
@@ -768,7 +768,7 @@ public class ConventionalUnitLogicalMap {
                 .build();
         String relay6TypeId = CCUHsApi.getInstance().addPoint(relay6Type);
         CCUHsApi.getInstance().writeDefaultValById(relay6TypeId, (double)config.relay6Type);
-        addUserIntentPoints(equipRef,equipDis,room,floor);
+        addUserIntentPoints(equipRef,equipDis,room,floor, config);
 
 
         setConfigNumVal("enable and relay1",config.enableRelay1 == true ? 1.0 : 0);
@@ -1162,7 +1162,8 @@ public class ConventionalUnitLogicalMap {
     {
         CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \""+nodeAddr+"\"", status);
     }
-    protected void addUserIntentPoints(String equipref, String equipDis, String room, String floor) {
+    protected void addUserIntentPoints(String equipref, String equipDis, String room, String floor,
+                                       ConventionalUnitConfiguration config) {
 
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = siteMap.get("id").toString();

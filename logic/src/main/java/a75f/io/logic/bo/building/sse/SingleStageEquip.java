@@ -349,9 +349,8 @@ public class SingleStageEquip {
                 .setFloorRef(floorRef)
                 .setRoomRef(roomRef)
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone").addMarker("th2").addMarker("sp")
-                .addMarker("enable").addMarker(profile).addMarker("his")
+                .addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
-                .setUnit("Ohm")
                 .setTz(tz)
                 .build();
         String enableexternal10KProbeTh2Id = CCUHsApi.getInstance().addPoint(external10KProbeTh2);
@@ -400,20 +399,7 @@ public class SingleStageEquip {
                 .build();
         String enableTh1Id = CCUHsApi.getInstance().addPoint(enableTh1);
         CCUHsApi.getInstance().writeDefaultValById(enableTh1Id, (config.enableThermistor1 ? 1.0 : 0));
-        Point enableTh2 = new Point.Builder()
-                .setDisplayName(equipDis+"-enableExternal10KThermistor2")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setFloorRef(floorRef)
-                .setRoomRef(roomRef)
-                .addMarker("config").addMarker("sse").addMarker("writable").addMarker("zone")
-                .addMarker("th2").addMarker("sp").addMarker("enable").addMarker(profile)
-                .setGroup(String.valueOf(nodeAddr))
-                .setEnums("false,true")
-                .setTz(tz)
-                .build();
-        String enableTh2Id = CCUHsApi.getInstance().addPoint(enableTh2);
-        CCUHsApi.getInstance().writeDefaultValById(enableTh2Id, (config.enableThermistor2 ? 1.0 : 0));
+        
         setConfigNumVal("enable and relay1",config.isOpConfigured(Port.RELAY_ONE) ? (double)config.enableRelay1 : 0);
         setConfigNumVal("enable and relay2",config.isOpConfigured(Port.RELAY_TWO) ? (double)config.enableRelay2 : 0);
         setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);

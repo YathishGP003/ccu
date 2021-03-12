@@ -1039,12 +1039,16 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             hpuPoints.put("Fan High Humidity",0);
         }
 
-        if(!isCompressor1On && !isCompressor1On && (isChangeOverOn == 1.0))
+        /*if(!isCompressor1On && !isCompressor1On && (isChangeOverOn == 1.0))
             hpuPoints.put("condEnabled","Cool Only");
         else if(!isCompressor1On && !isCompressor1On && ((isChangeOverOn == 2.0) || isAuxHeatingOn))
             hpuPoints.put("condEnabled","Heat Only");
         else if(!isCompressor1On && !isCompressor1On && (isChangeOverOn == 0) && !isAuxHeatingOn)
+            hpuPoints.put("condEnabled","Off");*/
+        
+        if(!isCompressor1On && !isCompressor2On) {
             hpuPoints.put("condEnabled","Off");
+        }
 
         if(isFanLowEnabled && !isFanHighEnabled)
             hpuPoints.put("fanEnabled","No High Fan");

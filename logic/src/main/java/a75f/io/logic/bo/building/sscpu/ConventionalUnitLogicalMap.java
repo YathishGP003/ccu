@@ -1260,12 +1260,12 @@ public class ConventionalUnitLogicalMap {
         
         double conditioningMode = curCondMode;
         if (!config.enableRelay1 && !config.enableRelay2) {
-            if (curCondMode == StandaloneConditioningMode.AUTO.ordinal() || curCondMode == StandaloneConditioningMode.HEAT_ONLY.ordinal() ) {
+            if (curCondMode == StandaloneConditioningMode.AUTO.ordinal() || curCondMode == StandaloneConditioningMode.COOL_ONLY.ordinal() ) {
                 conditioningMode = StandaloneConditioningMode.OFF.ordinal();
             }
         }
         if (!config.enableRelay4 && !config.enableRelay5){
-            if (curCondMode == StandaloneConditioningMode.AUTO.ordinal() || curCondMode == StandaloneConditioningMode.COOL_ONLY.ordinal() ) {
+            if (curCondMode == StandaloneConditioningMode.AUTO.ordinal() || curCondMode == StandaloneConditioningMode.HEAT_ONLY.ordinal() ) {
                 conditioningMode = StandaloneConditioningMode.OFF.ordinal();
             }
         }

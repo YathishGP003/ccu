@@ -53,8 +53,21 @@ public class UpdatePointHandler
             updatePoints(localPoint);
             return;
         }
-        if (luid != null && luid != "") {
- 
+
+        if (HSUtil.isSSEConfig(luid, CCUHsApi.getInstance())) {
+            SSEConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
+            updatePoints(localPoint);
+            return;
+        }
+    
+        if (HSUtil.isStandaloneConfig(luid, CCUHsApi.getInstance())) {
+            StandaloneConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
+            updateUI(localPoint);
+            return;
+        }
+    
+        if (luid != null && luid != "")
+        {
             HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote("@" + pointGuid);
             if (pointGrid == null) {
                 CcuLog.d(L.TAG_CCU_PUBNUB, "Failed to read remote point point : " + pointGuid);
@@ -150,6 +163,18 @@ public class UpdatePointHandler
 
         if (HSUtil.isBuildingTunerPoint(luid, CCUHsApi.getInstance())) {
             BuildingTunerUpdateHandler.updateZoneModuleSystemPoints(luid);
+        }
+    }
+    
+    /**
+     * Should separate his write from above method.
+     * There are cases where received his val is not valid and should be ignored.
+     *
+     */
+    private static void updateUI(Point updatedPoint) {
+        if (zoneDataInterface != null) {
+            Log.i("PubNub","Zone Data Received Refresh");
+            zoneDataInterface.refreshScreen(updatedPoint.getId());
         }
     }
 

@@ -5,13 +5,12 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -41,6 +40,7 @@ import a75f.io.logic.bo.building.sse.SingleStageProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import androidx.annotation.Nullable;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
@@ -182,10 +182,28 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
                 getActivity(), R.array.sse_relay1_mode, R.layout.spinner_dropdown_item);
         sseRelay1TypeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         sseRelay1Actuator.setAdapter(sseRelay1TypeAdapter);
+        
         ArrayAdapter<CharSequence> sseRelay2TypeAdapter = ArrayAdapter.createFromResource(
                 getActivity(), R.array.sse_relay2_mode, R.layout.spinner_dropdown_item);
         sseRelay2TypeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         sseRelay2Actuator.setAdapter(sseRelay2TypeAdapter);
+    
+        sseRelay2Actuator.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+        {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l)
+            {
+                //When Fan status is disabled or  "Not Used" (index - 0), relay2 should be disabled.
+                //And when Fan status is Enabled ( index -1 ) - relay2 should be enabled.
+                switchFanR2.setChecked(position > 0 ? true : false);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView)
+            {
+            }
+        });
+        
+        
         setButton = (Button) view.findViewById(R.id.setBtn);
 
         if (mProfileConfig != null) {
@@ -208,7 +226,7 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
                 }
             }
         }else{
-            sseRelay2Actuator.setSelection(1,false);
+            sseRelay2Actuator.setSelection(0,false);
         }
         
         setButton.setOnClickListener(new View.OnClickListener(){
@@ -308,7 +326,8 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
     }
 
     @Override
-    @OnCheckedChanged({R.id.sseRelay1ForceTestBtn,R.id.sseRelay2ForceTestBtn})
+    @OnCheckedChanged({R.id.sseRelay1ForceTestBtn,R.id.sseRelay2ForceTestBtn,
+                       R.id.sseRelay2Switch})
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         switch (buttonView.getId())
         {
@@ -316,6 +335,9 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
             case R.id.sseRelay2ForceTestBtn:
                 sendRelayActivationTestSignal();
                 break;
+            case R.id.sseRelay2Switch:
+                //Always enable fan when relay is ON and disable when OFF.
+                sseRelay2Actuator.setSelection(isChecked ? 1 : 0);
         }
     }
 

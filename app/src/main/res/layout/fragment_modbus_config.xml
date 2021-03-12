@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.NestedScrollView
+<androidx.core.widget.NestedScrollView
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
-<android.support.constraint.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -36,7 +36,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textTitleFragment" />
 
-    <android.support.v7.widget.AppCompatSpinner
+    <androidx.appcompat.widget.AppCompatSpinner
         android:id="@+id/spEquipmentType"
         style="@style/Widget.AppCompat.Spinner.Underlined"
         android:layout_width="219dp"
@@ -62,7 +62,7 @@
         app:layout_constraintStart_toEndOf="@+id/spEquipmentType"
         app:layout_constraintTop_toBottomOf="@+id/textTitleFragment" />
 
-    <android.support.v7.widget.AppCompatSpinner
+    <androidx.appcompat.widget.AppCompatSpinner
         android:id="@+id/spAddress"
         style="@style/Widget.AppCompat.Spinner.Underlined"
         android:layout_width="219dp"
@@ -76,7 +76,7 @@
         app:layout_constraintTop_toBottomOf="@+id/textTitleFragment"
         tools:listitem="@layout/spinner_item_custom" />
 
-    <android.support.v7.widget.AppCompatEditText
+    <androidx.appcompat.widget.AppCompatEditText
         android:id="@+id/editSlaveId"
         android:layout_width="219dp"
         android:layout_height="45dp"
@@ -162,7 +162,7 @@
         </LinearLayout>
     </LinearLayout>
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerParams"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -461,5 +461,5 @@
         android:textSize="19.5sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/recyclerParams" />
-</android.support.constraint.ConstraintLayout>
-</android.support.v4.widget.NestedScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

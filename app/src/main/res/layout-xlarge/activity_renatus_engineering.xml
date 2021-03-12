@@ -23,7 +23,7 @@
             android:background="@color/grey_select"
             android:src="@drawable/x75f_new"/>
 
-        <android.support.design.widget.TabLayout
+        <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -34,7 +34,7 @@
     </LinearLayout>
 
 
-    <android.support.v4.view.ViewPager
+    <androidx.viewpager.widget.ViewPager
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

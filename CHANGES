@@ -1,68 +1,34 @@
- - Merged PR 413: 5028 Add utility to change local sandbox IP address in app
- - Merged PR 427: Tuner Fixes
- - handle null value
- - fixed comments
- - added revert function
- - fixed level issue at apply tuner
- - fixed for system tuner
- - fixed system tuners
- - Merged PR 416: 4414- Tuner UI, 5059 and Pubnub offline support
- - fix the issue
- - tuner conflict fix
- - tuner branch merge
- - fix conflicts
- - Merge branch 'story/samjith/5059_point_not_updated_reconfig' of ssh.dev.azure.com:v3/75fdevelopment/75F%20Engineering/ccu into story/mahesh/mahesh_sub_master
- - Reconfig support for system profile relay/analog config update
- - update for min, max and incrementval
- - Merged PR 387: Bearer token refresh
- - update all linked tuners
- - Merged PR 395: 4726 - part 2 | CCU Log file upload
- - fix observation
- - update tuners max, incrementVal
- - Incorporated review suggestions
- - Separated reconnection logic
- - fix layout issue in apply tuner dialog
- - fixed issues and crash when updating tuner
- - Update CCU name during pointWrite. We have been using just "ccu" in the who field. It is changing to have ccu_deviceId. A ccu name with device id appended will help differentiating origins of pointWrite when there are many ccus in a site.
- - Pubnub history read implementation
- - search filter ignore case
- - fixes
- - WIP
- - add edit icon
- - remove hint
- - Update the token fetch to use caretaker API
- - Merge branch 'master' into story/samjith/4824_brearer_token_management
- - update zone/module name
- - remove unrelated heap trial
+ - Updated ci.config adding extra config parameters
+ - Merged PR 548: Reconfiguration Support for SSE, 2PFCU, 4PFCU
+ - Merged PR 515: SSE Config points refactor
+ - Review suggestion incorporated
+ - Remove remote write for unchanged conditioning mode and fan mode
+ - CPU multiwrite fix
+ - CCU multi-point write 2PFCU fix
+ - CPU profile reconfig support : WIP
+ - Update 4PFCU conditioning mode on relay change
+ - Update Fanmode on reconfig
+ - Update SSE thermistor physical point status
+ - Change fallback mode to AUTO when selected mode is not available
+ - Remove unused SSE points
+ - Update thermistor status on reconfig
+ - Fix crash issue
+ - SSE dual write issue fan mode
+ - SSE config updates for relays and thermistors
+ - FCU update modes based on reconfig
+ - FCU reconfig support
+ - Merge branch 'story/samjith/5315_sse_reconfig' into story/samjith/5464_reconfig_standalone_profiles
+ - Changes to 2PFCU and HPU mode availability as per the new requirement
+ - Merge branch 'master' into story/samjith/5315_sse_reconfig
+ - Merge branch 'master' into story/samjith/5464_reconfig_standalone_profiles
+ - Merged PR 520: JDI:  Fix for migration issues
+ - Merge branch 'master' into story/samjith/5315_sse_reconfig
+ - Correct relay tag as per review comment
+ - Add fanMode support
+ - Merge branch 'master' into story/samjith/5464_reconfig_standalone_profiles
+ - Refactor SSE stage points creation refactor.
+ - Merged PR 513: 5171   Androidx migration
  - Merge master
- - Added Retrofit Implemented added android service to to fetch token.
- - Merge branch 'story/tcase/4726_ccu_log_file_upload' into story/samjith/4824_brearer_token_management
- - Job scheduler
- - Upload log files using Kotlin and Retrofit
- - fixes and tuner validations
- - clean and simplify
- - implement search and select by zone, module
- - fixes
- - update zone tuners
- - sort building tuners
- - fixes
- - issues fix
- - fix QA observations
- - fix qa comments
- - fixed qa comments
- - fix for crash
- - update on item click for toggle state
- - fix for the negetive val
- - fixNum
- - Updating new value to Tuner Item.
- - Custom Number Picker for Tuner Value to handle negative values.
- - Tuner Number Picker Validation.
- - Confirm Tuner Changes UI
- - Confirm Tuner Changes
- - Confirm Tuner Value Update Alert dialog UI
- - Saving Tuner Values in new UI
- - Tuner Value Box UI and Validations.
- - Priority Array Values UI and Number Picker Validation
- - Tuner Priority Array UI
- - Optimised Tuners Grid for UI
- - 44414_TunerUI_ExpandableGrid
+ - Reconfig support for 2pfcu and 4pfcu profiles
+ - Relay 2 support
+ - WIP

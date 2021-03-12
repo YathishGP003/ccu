@@ -247,8 +247,29 @@ public class HSUtil
     
     public static boolean isSystemConfig(String id, CCUHsApi hayStack) {
         HashMap pointEntity = hayStack.readMapById(id);
-        return pointEntity.containsKey("system")
-               && pointEntity.containsKey("config");
+        return pointEntity.containsKey(Tags.SYSTEM)
+               && pointEntity.containsKey(Tags.CONFIG);
+    }
+    
+    public static boolean isSSEConfig(String id, CCUHsApi hayStack) {
+        HashMap pointEntity = hayStack.readMapById(id);
+        return pointEntity.containsKey(Tags.SSE)
+               && pointEntity.containsKey(Tags.CONFIG);
+    }
+    
+    /**
+     * Currently checks only FCU type. Will be made generic after other profies
+     * support is handled.
+     */
+    public static boolean isStandaloneConfig(String id, CCUHsApi hayStack) {
+        HashMap pointEntity = hayStack.readMapById(id);
+        return pointEntity.containsKey(Tags.STANDALONE) && pointEntity.containsKey(Tags.FCU);
+    }
+    
+    public static boolean isStandaloneUserIntent(String id, CCUHsApi hayStack) {
+        HashMap pointEntity = hayStack.readMapById(id);
+        return pointEntity.containsKey(Tags.STANDALONE)
+               && pointEntity.containsKey(Tags.USERINTENT);
     }
 
     public static double getSystemUserIntentVal(String tags)

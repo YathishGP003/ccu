@@ -74,8 +74,6 @@ public class SingleStageEquip {
         StandAloneTuners.addEquipStandaloneTuners( CCUHsApi.getInstance(), siteRef, siteDis + "-SSE-" + nodeAddr,
                                                    equipRef, roomRef, floorRef
             , tz);
-        createSSEConfigPoints(config, equipRef,floorRef,roomRef);
-
 
         Point currentTemp = new Point.Builder()
                 .setDisplayName(siteDis+"-SSE-"+nodeAddr+"-currentTemp")
@@ -174,21 +172,7 @@ public class SingleStageEquip {
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(desiredTempHeating);
-
-
-        Point fanStage1 = new Point.Builder()
-                .setDisplayName(equipDis+"-fanStage1")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("standalone").addMarker("fan").addMarker("stage1").addMarker("his").addMarker("zone")
-                .addMarker("logical").addMarker("sse").addMarker("cmd")
-                .setEnums("off,on")
-                .setGroup(String.valueOf(nodeAddr))
-                .setTz(tz)
-                .build();
-        String r2ID = CCUHsApi.getInstance().addPoint(fanStage1);
+        
         Point equipStatus = new Point.Builder()
                 .setDisplayName(siteDis+"-SSE-"+nodeAddr+"-equipStatus")
                 .setEquipRef(equipRef)
@@ -294,55 +278,12 @@ public class SingleStageEquip {
         device.th1In.setEnabled(config.enableThermistor1);
         device.th2In.setPointRef(eatID);
         device.th2In.setEnabled(config.enableThermistor2);
-        //device.relay1.setPointRef(r1coolID);
-        device.relay2.setPointRef(r2ID);
-
         device.relay1.setEnabled(config.enableRelay1 > 0 ? true : false);
         device.relay2.setEnabled(config.enableRelay1 > 0 ? true : false);
 
         device.addSensor(Port.SENSOR_RH, humidityId);
         device.addSensor(Port.SENSOR_CO2, co2Id);
         device.addSensor(Port.SENSOR_VOC, vocId);
-
-        SSEStage sseStage = SSEStage.values()[config.enableRelay1];
-        switch (sseStage){
-            case COOLING:
-                Point coolingStage = new Point.Builder()
-                        .setDisplayName(equipDis+"-coolingStage1")
-                        .setEquipRef(equipRef)
-                        .setSiteRef(siteRef)
-                        .setRoomRef(roomRef)
-                        .setFloorRef(floorRef).setHisInterpolate("cov")
-                        .addMarker("standalone").addMarker("cooling").addMarker("stage1").addMarker("his").addMarker("zone")
-                        .addMarker("logical").addMarker("sse").addMarker("cmd")
-                        .setEnums("off,on")
-                        .setGroup(String.valueOf(nodeAddr))
-                        .setTz(tz)
-                        .build();
-                String r1coolID = CCUHsApi.getInstance().addPoint(coolingStage);
-
-                CCUHsApi.getInstance().writeHisValById(r1coolID, 0.0);
-                device.relay1.setPointRef(r1coolID);
-                break;
-            case HEATING:
-                Point heatingStage = new Point.Builder()
-                        .setDisplayName(equipDis+"-heatingStage1")
-                        .setEquipRef(equipRef)
-                        .setSiteRef(siteRef)
-                        .setRoomRef(roomRef)
-                        .setFloorRef(floorRef).setHisInterpolate("cov")
-                        .addMarker("standalone").addMarker("heating").addMarker("stage1").addMarker("his").addMarker("zone")
-                        .addMarker("logical").addMarker("sse").addMarker("cmd")
-                        .setEnums("off,on")
-                        .setGroup(String.valueOf(nodeAddr))
-                        .setTz(tz)
-                        .build();
-                String r1heatID = CCUHsApi.getInstance().addPoint(heatingStage);
-                    CCUHsApi.getInstance().writeHisValById(r1heatID, 0.0);
-                device.relay1.setPointRef(r1heatID);
-                break;
-
-        }
         device.addPointsToDb();
 
 
@@ -354,7 +295,9 @@ public class SingleStageEquip {
         setHumidity(0);
         setCO2(0);
         setVOC(0);
-
+    
+        createSSEConfigPoints(config, equipRef,floorRef,roomRef);
+        
         CCUHsApi.getInstance().syncEntityTree();
 
 
@@ -406,9 +349,8 @@ public class SingleStageEquip {
                 .setFloorRef(floorRef)
                 .setRoomRef(roomRef)
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone").addMarker("th2").addMarker("sp")
-                .addMarker("enable").addMarker(profile).addMarker("his")
+                .addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
-                .setUnit("Ohm")
                 .setTz(tz)
                 .build();
         String enableexternal10KProbeTh2Id = CCUHsApi.getInstance().addPoint(external10KProbeTh2);
@@ -457,25 +399,15 @@ public class SingleStageEquip {
                 .build();
         String enableTh1Id = CCUHsApi.getInstance().addPoint(enableTh1);
         CCUHsApi.getInstance().writeDefaultValById(enableTh1Id, (config.enableThermistor1 ? 1.0 : 0));
-        Point enableTh2 = new Point.Builder()
-                .setDisplayName(equipDis+"-enableExternal10KThermistor2")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setFloorRef(floorRef)
-                .setRoomRef(roomRef)
-                .addMarker("config").addMarker("sse").addMarker("writable").addMarker("zone")
-                .addMarker("th2").addMarker("sp").addMarker("enable").addMarker(profile)
-                .setGroup(String.valueOf(nodeAddr))
-                .setEnums("false,true")
-                .setTz(tz)
-                .build();
-        String enableTh2Id = CCUHsApi.getInstance().addPoint(enableTh2);
-        CCUHsApi.getInstance().writeDefaultValById(enableTh2Id, (config.enableThermistor2 ? 1.0 : 0));
+        
         setConfigNumVal("enable and relay1",config.isOpConfigured(Port.RELAY_ONE) ? (double)config.enableRelay1 : 0);
         setConfigNumVal("enable and relay2",config.isOpConfigured(Port.RELAY_TWO) ? (double)config.enableRelay2 : 0);
         setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
         setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
         setConfigNumVal("temperature and offset",config.temperaturOffset);
+        
+        SingleStageEquipUtil.createRelay1Config(config.enableRelay1, enableRelay1);
+        SingleStageEquipUtil.createRelay2Config(config.enableRelay2, enableRelay2);
     }
 
     public void setProfilePoint(String tags, double val) {
@@ -495,78 +427,24 @@ public class SingleStageEquip {
         SmartNode.setPointEnabled(nodeAddr, Port.RELAY_TWO.name(), config.isOpConfigured(Port.RELAY_TWO) );
         SmartNode.setPointEnabled(nodeAddr, Port.TH2_IN.name(), config.enableThermistor2);
         SmartNode.setPointEnabled(nodeAddr, Port.TH1_IN.name(), config.enableThermistor1);
-        HashMap equipHash = CCUHsApi.getInstance().read("equip and group == \"" + config.getNodeAddress() + "\"");
-        Equip equip = new Equip.Builder().setHashMap(equipHash).build();
-        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-        String siteRef = (String) siteMap.get(Tags.ID);
-        String siteDis = (String) siteMap.get("dis");
-        String tz = siteMap.get("tz").toString();
-        String equipDis = siteDis + "-SSE-" + nodeAddr;
-        double prevConfigR1Val = getConfigNumVal("enable and relay1");
-        SSEStage ssePrevStage = SSEStage.values()[(int)prevConfigR1Val];
-        SSEStage sseStage = SSEStage.values()[(int)config.enableRelay1];
-        if(ssePrevStage != sseStage) {
-            switch (sseStage) {
-                case COOLING:
-
-                    HashMap heatingPt = CCUHsApi.getInstance().read("point and standalone and heating and stage1 and  sse and equipRef== \"" + equip.getId() + "\"");
-                    if ((heatingPt != null) && (heatingPt.size() > 0))
-                        CCUHsApi.getInstance().deleteEntity(heatingPt.get("id").toString());
-                    Point coolingStage = new Point.Builder()
-                            .setDisplayName(equipDis + "-coolingStage1")
-                            .setEquipRef(equipRef)
-                            .setSiteRef(siteRef)
-                            .setRoomRef(equip.getRoomRef())
-                            .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                            .addMarker("standalone").addMarker("cooling").addMarker("stage1").addMarker("his").addMarker("zone")
-                            .addMarker("logical").addMarker("sse").addMarker("cmd")
-                            .setEnums("off,on")
-                            .setGroup(String.valueOf(nodeAddr))
-                            .setTz(tz)
-                            .build();
-                    String r1coolID = CCUHsApi.getInstance().addPoint(coolingStage);
-                    CCUHsApi.getInstance().writeHisValById(r1coolID, 0.0);
-                    SmartNode.updatePhysicalPointRef(nodeAddr,Port.RELAY_ONE.name(),r1coolID);
-                    break;
-                case HEATING:
-					HashMap coolingPt = CCUHsApi.getInstance().read("point and standalone and cooling and stage1 and  sse and equipRef== \"" + equip.getId() + "\"");
-                    if ((coolingPt != null) && (coolingPt.size() > 0))
-                        CCUHsApi.getInstance().deleteEntity(coolingPt.get("id").toString());
-                    Point heatingStage = new Point.Builder()
-                            .setDisplayName(equipDis + "-heatingStage1")
-                            .setEquipRef(equipRef)
-                            .setSiteRef(siteRef)
-                            .setRoomRef(equip.getRoomRef())
-                            .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                            .addMarker("standalone").addMarker("heating").addMarker("stage1").addMarker("his").addMarker("zone")
-                            .addMarker("logical").addMarker("sse").addMarker("cmd")
-                            .setEnums("off,on")
-                            .setGroup(String.valueOf(nodeAddr))
-                            .setTz(tz)
-                            .build();
-                    String r1heatID = CCUHsApi.getInstance().addPoint(heatingStage);
-                    CCUHsApi.getInstance().writeHisValById(r1heatID, 0.0);
-                    SmartNode.updatePhysicalPointRef(nodeAddr,Port.RELAY_ONE.name(),r1heatID);
-                    break;
-                case NOT_INSTALLED:
-                    HashMap heatPt = CCUHsApi.getInstance().read("point and standalone and heating and stage1 and  sse and equipRef== \"" + equip.getId() + "\"");
-                    if ((heatPt != null) && (heatPt.size() > 0))
-                        CCUHsApi.getInstance().deleteEntity(heatPt.get("id").toString());
-
-                    HashMap coolPt = CCUHsApi.getInstance().read("point and standalone and cooling and stage1 and  sse and equipRef== \"" + equip.getId() + "\"");
-                    if ((coolPt != null) && (coolPt.size() > 0))
-                        CCUHsApi.getInstance().deleteEntity(coolPt.get("id").toString());
-                    break;
-
-            }
-        }
-
-        CCUHsApi.getInstance().syncPointEntityTree();
+    
+        HashMap enableRelay1Map =
+            CCUHsApi.getInstance().read("point and config and enable and relay1 and group == \""+nodeAddr+ "\"");
+        Point enableRelay1 = new Point.Builder().setHashMap(enableRelay1Map).build();
+        SingleStageEquipUtil.updateRelay1Config(config.enableRelay1, enableRelay1);
+    
+        HashMap enableRelay2Map =
+            CCUHsApi.getInstance().read("point and config and enable and relay2 and group == \""+nodeAddr+ "\"");
+        Point enableRelay2 = new Point.Builder().setHashMap(enableRelay2Map).build();
+        SingleStageEquipUtil.updateRelay2Config(config.enableRelay2, enableRelay2);
+        
 		setConfigNumVal("enable and relay1",config.isOpConfigured(Port.RELAY_ONE) ? (double)config.enableRelay1 : 0);
         setConfigNumVal("enable and relay2",config.isOpConfigured(Port.RELAY_TWO) ? (double)config.enableRelay2 : 0);
         setConfigNumVal("temperature and offset",config.temperaturOffset);
         setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
         setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
+    
+        CCUHsApi.getInstance().syncPointEntityTree();
     }
 
 

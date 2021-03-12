@@ -23,7 +23,7 @@
         android:text="@string/txt_tunersTitle"
         android:textAppearance="@style/label_orange" />
 
-    <android.support.v7.widget.AppCompatSpinner
+    <androidx.appcompat.widget.AppCompatSpinner
         android:id="@+id/spinnerSelection"
         style="@style/Widget.AppCompat.Spinner.Underlined"
         android:layout_width="wrap_content"
@@ -97,7 +97,7 @@
         android:singleLine="true"
         android:textSize="18sp" />
 
-    <android.support.v4.widget.NestedScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/spinnerSelection">
@@ -106,7 +106,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <android.support.v7.widget.RecyclerView
+            <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerTuner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -142,33 +142,33 @@
                 android:layout_alignParentRight="true"
                 android:orientation="horizontal">
 
-                <android.support.design.button.MaterialButton
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/buttonCancel"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:theme="@style/Theme.MaterialComponents.Light"
+                    style="@style/tunerButton"
                     android:layout_width="100sp"
                     android:layout_height="50sp"
                     android:layout_marginRight="5sp"
                     android:padding="5sp"
                     android:text="@string/cancel"
-                    android:textAppearance="@style/tunerButton_Enabled"
-                    android:theme="@style/tunerButton_Enabled"
+                    android:textAppearance="@style/tunerButton"
                     app:strokeColor="@color/orange_75f" />
 
-                <android.support.design.button.MaterialButton
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/buttonSave"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:theme="@style/Theme.MaterialComponents.Light"
+                    style="@style/tunerButton"
                     android:layout_width="100sp"
                     android:layout_height="50sp"
                     android:layout_marginLeft="5sp"
                     android:enabled="false"
                     android:padding="5sp"
                     android:text="@string/tuner_save"
-                    android:textAppearance="@style/tunerButton_Enabled"
-                    android:theme="@style/tunerButton_Enabled"
+                    android:textAppearance="@style/tunerButton"
                     app:strokeColor="@color/orange_75f" />
 
 
             </LinearLayout>
         </RelativeLayout>
-    </android.support.v4.widget.NestedScrollView>
+    </androidx.core.widget.NestedScrollView>
 </RelativeLayout>

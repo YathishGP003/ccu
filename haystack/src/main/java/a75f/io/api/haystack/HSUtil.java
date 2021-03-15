@@ -276,6 +276,11 @@ public class HSUtil
         HashMap equipMap = hayStack.readMapById(id);
         return equipMap.containsKey(Tags.CPU);
     }
+    
+    public static boolean isHPUEquip(String id, CCUHsApi hayStack) {
+        HashMap equipMap = hayStack.readMapById(id);
+        return equipMap.containsKey(Tags.HPU);
+    }
 
     public static double getSystemUserIntentVal(String tags)
     {

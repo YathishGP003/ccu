@@ -10,6 +10,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ss2pfcu.FanCoilUnitUtil;
 import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
+import a75f.io.logic.bo.building.sshpu.HeatPumpPackageUnitUtil;
 
 public class StandaloneConfigHandler {
     
@@ -21,6 +22,9 @@ public class StandaloneConfigHandler {
         } else if (HSUtil.isCPUEquip(configPoint.getId(), hayStack)) {
             //CPU config points do not seem to have 'cpu' tag. Hence checking the equip type to identify profile.
             ConventionalPackageUnitUtil.updateCPUProfile(configPoint, msgObject, hayStack);
+        } else if (HSUtil.isHPUEquip(configPoint.getId(), hayStack)) {
+            //HPU config points do not seem to have 'cpu' tag. Hence checking the equip type to identify profile.
+            HeatPumpPackageUnitUtil.updateHPUProfile(configPoint, msgObject, hayStack);
         }
         
     }

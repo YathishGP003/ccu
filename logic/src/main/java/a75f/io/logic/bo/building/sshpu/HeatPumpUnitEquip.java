@@ -26,6 +26,7 @@ import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
 import a75f.io.logic.bo.building.definitions.SmartStatHeatPumpChangeOverType;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
+import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitConfiguration;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.tuners.StandAloneTuners;
@@ -472,7 +473,8 @@ public class HeatPumpUnitEquip{
         switch (fanRelayType){
             case FAN_STAGE2:
                 Point fanStage2 = new Point.Builder().setDisplayName(equipDis+"-fanStage2").setEquipRef(equipRef).setSiteRef(siteRef).setRoomRef(room).setFloorRef(floor).setHisInterpolate("cov")
-                        .addMarker("standalone").addMarker("fan").addMarker("stage2").addMarker("his").addMarker("zone").addMarker("logical").addMarker(profile).addMarker("cmd").addMarker("runtime")
+                        .addMarker("standalone").addMarker("fan").addMarker("stage2").addMarker("his").addMarker("zone")
+                        .addMarker("logical").addMarker(profile).addMarker("cmd").addMarker("runtime").addMarker("hpu")
                         .setGroup(String.valueOf(nodeAddr))
                         .setTz(tz)
                         .build();
@@ -482,7 +484,7 @@ public class HeatPumpUnitEquip{
                 break;
             case HUMIDIFIER:
                 Point humidifier = new Point.Builder().setDisplayName(equipDis+"-humidifier").setEquipRef(equipRef).setSiteRef(siteRef).setRoomRef(room).setFloorRef(floor).setHisInterpolate("cov")
-                        .addMarker("standalone").addMarker("humidifier").addMarker("his").addMarker("zone").addMarker("logical").addMarker(profile).addMarker("cmd")
+                        .addMarker("standalone").addMarker("humidifier").addMarker("his").addMarker("zone").addMarker("logical").addMarker(profile).addMarker("cmd").addMarker("hpu")
                         .setEnums("off,on")
                         .setGroup(String.valueOf(nodeAddr))
                         .setTz(tz)
@@ -493,7 +495,7 @@ public class HeatPumpUnitEquip{
                 break;
             case DE_HUMIDIFIER:
                 Point dehumidifier = new Point.Builder().setDisplayName(equipDis+"-deHumidifier").setEquipRef(equipRef).setSiteRef(siteRef).setRoomRef(room).setFloorRef(floor).setHisInterpolate("cov")
-                        .addMarker("standalone").addMarker("dehumidifier").addMarker("his").addMarker("zone").addMarker("logical").addMarker(profile).addMarker("cmd")
+                        .addMarker("standalone").addMarker("dehumidifier").addMarker("his").addMarker("zone").addMarker("logical").addMarker(profile).addMarker("cmd").addMarker("hpu")
                         .setEnums("off,on")
                         .setGroup(String.valueOf(nodeAddr))
                         .setTz(tz)
@@ -833,167 +835,25 @@ public class HeatPumpUnitEquip{
         SmartStat.setPointEnabled(nodeAddr, Port.RELAY_SIX.name(), config.isOpConfigured(Port.RELAY_SIX) );
         SmartStat.setPointEnabled(nodeAddr, Port.TH1_IN.name(),config.enableThermistor1);
         SmartStat.setPointEnabled(nodeAddr, Port.TH2_IN.name(), config.enableThermistor2);
-
-
-
-        double prevFanType = getConfigNumVal("relay5 and type");
-        double prevChOvrType = getConfigNumVal("changeover and type");
+    
+    
+    
         HashMap equipHash = CCUHsApi.getInstance().read("equip and group == \"" + config.getNodeAddress() + "\"");
         Equip equip = new Equip.Builder().setHashMap(equipHash).build();
-        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-        String siteRef = (String) siteMap.get(Tags.ID);
-        String siteDis = (String) siteMap.get("dis");
-        String tz = siteMap.get("tz").toString();
-        String equipDis = siteDis + "-HPU-" + nodeAddr;
-        if(config.enableRelay5) {
-            if ((int) prevFanType != config.fanRelay5Type) {
-                SmartStatFanRelayType fanRelayType = SmartStatFanRelayType.values()[config.fanRelay5Type];
-                switch (fanRelayType) {
-                    case FAN_STAGE2:
-                        HashMap humidifierPt = CCUHsApi.getInstance().read("point and standalone and humidifier and hpu and  cmd and his and equipRef== \"" + equip.getId() + "\"");
-                        if ((humidifierPt != null) && (humidifierPt.size() > 0))
-                            CCUHsApi.getInstance().deleteEntityTree(humidifierPt.get("id").toString());
-                        HashMap dehumidifierPt = CCUHsApi.getInstance().read("point and standalone and dehumidifier and hpu and  cmd and his and equipRef== \"" + equip.getId() + "\"");
-                        if ((dehumidifierPt != null) && (dehumidifierPt.size() > 0))
-                            CCUHsApi.getInstance().deleteEntityTree(dehumidifierPt.get("id").toString());
-                        Point fanStage2 = new Point.Builder().setDisplayName(equip.getDisplayName() + "-fanStage2").setEquipRef(equip.getId()).setSiteRef(siteRef).setRoomRef(equip.getRoomRef()).setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                                .addMarker("standalone").addMarker("fan").addMarker("stage2").addMarker("his").addMarker("zone").addMarker("logical").addMarker("hpu").addMarker("cmd").addMarker("runtime")
-                                .setGroup(String.valueOf(nodeAddr))
-                                .setTz(equip.getTz())
-                                .build();
-                        String r5ID = CCUHsApi.getInstance().addPoint(fanStage2);
-                        CCUHsApi.getInstance().writeHisValById(r5ID, 0.0);
-                        SmartStat.updatePhysicalPointRef(nodeAddr, Port.RELAY_FIVE.name(), r5ID);
-                        break;
-                    case HUMIDIFIER:
-                        HashMap dehumidifierPoint = CCUHsApi.getInstance().read("point and standalone and dehumidifier and hpu and  cmd and his and equipRef== \"" + equip.getId() + "\"");
-                        if ((dehumidifierPoint != null) && (dehumidifierPoint.size() > 0))
-                            CCUHsApi.getInstance().deleteEntityTree(dehumidifierPoint.get("id").toString());
-                        HashMap fnStg2Pt = CCUHsApi.getInstance().read("point and standalone and fan and stage2 and hpu and  cmd and his and equipRef== \"" + equip.getId() + "\"");
-                        if ((fnStg2Pt != null) && (fnStg2Pt.size() > 0))
-                            CCUHsApi.getInstance().deleteEntityTree(fnStg2Pt.get("id").toString());
-                        Point humidifier = new Point.Builder().setDisplayName(equipDis + "-humidifier").setEquipRef(equip.getId()).setSiteRef(siteRef).setRoomRef(equip.getRoomRef()).setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                                .addMarker("standalone").addMarker("humidifier").addMarker("his").addMarker("zone").addMarker("logical").addMarker("hpu").addMarker("cmd")
-                                .setEnums("off,on")
-                                .setGroup(String.valueOf(nodeAddr))
-                                .setTz(tz)
-                                .build();
-                        String r5HumidID = CCUHsApi.getInstance().addPoint(humidifier);
-                        CCUHsApi.getInstance().writeHisValById(r5HumidID, 0.0);
-                        SmartStat.updatePhysicalPointRef(nodeAddr, Port.RELAY_FIVE.name(), r5HumidID);
-                        break;
-                    case DE_HUMIDIFIER:
-                        HashMap humidifierPoint = CCUHsApi.getInstance().read("point and standalone and humidifier and hpu and  cmd and his and equipRef== \"" + equip.getId() + "\"");
-                        if ((humidifierPoint != null) && (humidifierPoint.size() > 0))
-                            CCUHsApi.getInstance().deleteEntityTree(humidifierPoint.get("id").toString());
-                        HashMap fanStage2Pt = CCUHsApi.getInstance().read("point and standalone and fan and stage2 and hpu and  cmd and his and equipRef== \"" + equip.getId() + "\"");
-                        if ((fanStage2Pt != null) && (fanStage2Pt.size() > 0))
-                            CCUHsApi.getInstance().deleteEntityTree(fanStage2Pt.get("id").toString());
-                        Point dehumidifier = new Point.Builder().setDisplayName(equipDis + "-deHumidifier").setEquipRef(equip.getId()).setSiteRef(siteRef).setRoomRef(equip.getRoomRef()).setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                                .addMarker("standalone").addMarker("dehumidifier").addMarker("his").addMarker("zone").addMarker("logical").addMarker("hpu").addMarker("cmd")
-                                .setEnums("off,on")
-                                .setGroup(String.valueOf(nodeAddr))
-                                .setTz(tz)
-                                .build();
-                        String r5DeHumidID = CCUHsApi.getInstance().addPoint(dehumidifier);
-                        CCUHsApi.getInstance().writeHisValById(r5DeHumidID, 0.0);
-                        SmartStat.updatePhysicalPointRef(nodeAddr, Port.RELAY_FIVE.name(), r5DeHumidID);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }else{
-            HashMap dehumidifierPoint = CCUHsApi.getInstance().read("point and standalone and dehumidifier and hpu and  cmd and his and equipRef== \"" + equip.getId() + "\"");
-            if ((dehumidifierPoint != null) && (dehumidifierPoint.size() > 0))
-                CCUHsApi.getInstance().deleteEntityTree(dehumidifierPoint.get("id").toString());
-
-            HashMap humidifierPoint = CCUHsApi.getInstance().read("point and standalone and humidifier and hpu and  cmd and his and equipRef== \"" + equip.getId() + "\"");
-            if ((humidifierPoint != null) && (humidifierPoint.size() > 0))
-                CCUHsApi.getInstance().deleteEntityTree(humidifierPoint.get("id").toString());
-            HashMap fanStage2Pt = CCUHsApi.getInstance().read("point and standalone and fan and stage2 and hpu and  cmd and his and equipRef== \"" + equip.getId() + "\"");
-            if ((fanStage2Pt != null) && (fanStage2Pt.size() > 0))
-                CCUHsApi.getInstance().deleteEntityTree(fanStage2Pt.get("id").toString());
+        double relay5Type = getConfigNumVal("relay5 and type");
+        if (config.enableRelay5 && config.fanRelay5Type != relay5Type) {
+            HeatPumpPackageUnitUtil.manageRelay5AssociatedPoints(config.fanRelay5Type, equip);
         }
-
-        if(config.enableRelay6) {
-            if ((int) prevChOvrType != config.changeOverRelay6Type) {
-                SmartStatHeatPumpChangeOverType changeOverType = SmartStatHeatPumpChangeOverType.values()[config.changeOverRelay6Type];
-                switch (changeOverType) {
-                    case ENERGIZE_IN_COOLING:
-                        HashMap coolCoPoint = CCUHsApi.getInstance().read("point and standalone and heating and changeover and stage1 and hpu and  cmd and his and equipRef== \"" + equip.getId() + "\"");
-                        if ((coolCoPoint != null) && (coolCoPoint.size() > 0))
-                            CCUHsApi.getInstance().deleteEntityTree(coolCoPoint.get("id").toString());
-                        Point heatpumpChangeoverCooling = new Point.Builder()
-                                .setDisplayName(equipDis + "-heatpumpChangeoverCooling").setEquipRef(equip.getId())
-                                .setSiteRef(siteRef)
-                                .setRoomRef(equip.getRoomRef())
-                                .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                                .addMarker("standalone").addMarker("heatpump").addMarker("cooling").addMarker("changeover").addMarker("stage1").addMarker("his").addMarker("zone")
-                                .addMarker("logical").addMarker("hpu").addMarker("cmd")
-                                .setEnums("off,on")
-                                .setGroup(String.valueOf(nodeAddr))
-                                .setTz(tz)
-                                .build();
-                        String r6ID = CCUHsApi.getInstance().addPoint(heatpumpChangeoverCooling);
-                        CCUHsApi.getInstance().writeHisValById(r6ID, 0.0);
-                        SmartStat.updatePhysicalPointRef(nodeAddr, Port.RELAY_SIX.name(), r6ID);
-                        //device.relay6.setPointRef(r6ID);
-                        break;
-                    case ENERGIZE_IN_HEATING:
-                        HashMap heatCoPoint = CCUHsApi.getInstance().read("point and standalone and cooling and changeover and stage1 and hpu and  cmd and his and equipRef== \"" + equip.getId() + "\"");
-                        if ((heatCoPoint != null) && (heatCoPoint.size() > 0))
-                            CCUHsApi.getInstance().deleteEntityTree(heatCoPoint.get("id").toString());
-                        Point heatpumpChangeoverHeating = new Point.Builder()
-                                .setDisplayName(equipDis + "-heatpumpChangeoverHeating")
-                                .setEquipRef(equip.getId())
-                                .setSiteRef(siteRef)
-                                .setRoomRef(equip.getRoomRef())
-                                .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                                .addMarker("standalone").addMarker("heatpump").addMarker("heating").addMarker("changeover").addMarker("stage1").addMarker("his").addMarker("zone")
-                                .addMarker("logical").addMarker("hpu").addMarker("cmd")
-                                .setEnums("off,on")
-                                .setGroup(String.valueOf(nodeAddr))
-                                .setTz(tz)
-                                .build();
-                        String r6HeatID = CCUHsApi.getInstance().addPoint(heatpumpChangeoverHeating);
-                        CCUHsApi.getInstance().writeHisValById(r6HeatID, 0.0);
-                        SmartStat.updatePhysicalPointRef(nodeAddr, Port.RELAY_SIX.name(), r6HeatID);
-                        //device.relay6.setPointRef(r6HeatID);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }else {
-            HashMap coolCoPoint = CCUHsApi.getInstance().read("point and standalone and heating and changeover and stage1 and hpu and  cmd and his and equipRef== \"" + equip.getId() + "\"");
-            if ((coolCoPoint != null) && (coolCoPoint.size() > 0))
-                CCUHsApi.getInstance().deleteEntityTree(coolCoPoint.get("id").toString());
-            HashMap heatCoPoint = CCUHsApi.getInstance().read("point and standalone and cooling and changeover and stage1 and hpu and  cmd and his and equipRef== \"" + equip.getId() + "\"");
-            if ((heatCoPoint != null) && (heatCoPoint.size() > 0))
-                CCUHsApi.getInstance().deleteEntityTree(heatCoPoint.get("id").toString());
-
+    
+        double relay6Type = getConfigNumVal("relay6 and type");
+        if (config.enableRelay6 && config.changeOverRelay6Type != relay6Type) {
+            HeatPumpPackageUnitUtil.manageRelay6AssociatedPoints(config.fanRelay5Type, equip);
         }
-
-        if(config.enableOccupancyControl){
-            Point occupancyDetection = new Point.Builder()
-                    .setDisplayName(equipDis+"-occupancyDetection")
-                    .setEquipRef(equip.getId())
-                    .setSiteRef(siteRef)
-                    .setRoomRef(equip.getRoomRef())
-                    .setFloorRef(equip.getFloorRef()).setHisInterpolate("cov")
-                    .addMarker("occupancy").addMarker("detection").addMarker("hpu").addMarker("his").addMarker("zone")
-                    .setGroup(String.valueOf(nodeAddr))
-                    .setEnums("false,true")
-                    .setTz(tz)
-                    .build();
-            String occupancyDetectionId = CCUHsApi.getInstance().addPoint(occupancyDetection);
-            CCUHsApi.getInstance().writeHisValById(occupancyDetectionId, 0.0);
-        }else {
-            HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and hpu and his and equipRef== \"" + equip.getId() + "\"");
-            if ((occDetPoint != null) && (occDetPoint.size() > 0))
-                CCUHsApi.getInstance().deleteEntityTree(occDetPoint.get("id").toString());
-        }
+        
+        HeatPumpPackageUnitUtil.updateOccupancyPoint(config.enableOccupancyControl ? 1.0 : 0, equip,
+                                                         CCUHsApi.getInstance());
+        
+        
         setConfigNumVal("enable and relay1",config.enableRelay1 == true ? 1.0 : 0);
         setConfigNumVal("enable and relay2",config.enableRelay2 == true ? 1.0 : 0);
         setConfigNumVal("enable and relay3",config.enableRelay3 == true ? 1.0 : 0);

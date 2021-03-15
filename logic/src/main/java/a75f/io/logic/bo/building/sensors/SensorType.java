@@ -21,7 +21,11 @@ public enum SensorType
     SOUND("sound"),
     CO2_EQUIVALENT("co2_equivalent"),
     ILLUMINANCE ("illuminance"),
-    UVI("uvi");
+    UVI("uvi"),
+    NO2("no2"),
+    PM2P5("pm2p5"),
+    PM10("pm10"),
+    TEMPERATURE("temperature");
     String name;
     
     SensorType(String val) {
@@ -61,6 +65,14 @@ public enum SensorType
                 return Port.SENSOR_ILLUMINANCE;
             case UVI:
                 return Port.SENSOR_UVI;
+            case NO2:
+                return Port.SENSOR_NO2;
+            case PM2P5:
+                return Port.SENSOR_PM2P5;
+            case PM10:
+                return Port.SENSOR_PM10;
+            case TEMPERATURE:
+                return Port.SENSOR_NT;
             default:
                 return null;
         }

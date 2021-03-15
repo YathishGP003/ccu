@@ -371,7 +371,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             }
         });
     
-        configureOnboardSensorInputSpinner();
+        configureNativeSensorInputSpinner();
     
         if (mProfileConfig != null) {
             analog1InSensorSp.setSelection(mProfileConfig.analog1InputSensor, false);
@@ -440,7 +440,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         });
     }
     
-    private void configureOnboardSensorInputSpinner() {
+    private void configureNativeSensorInputSpinner() {
     
         ArrayList<String> onboardSensorInArr = new ArrayList<>();
         onboardSensorInArr.add("Not Used");//TODO-
@@ -465,7 +465,9 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 }
                 ArrayList<Double> targetVal = new ArrayList<>();
                 NativeSensor sensor = SensorManager.getInstance().getNativeSensorList().get(position - 1);
-                for (int pos = (int)(100.0*sensor.minEngineeringValue); pos <= (100.0*sensor.maxEngineeringValue); pos+=(100.0*sensor.incrementEgineeringValue)) {
+                
+                //TODO
+                for (int pos = (int)(100.0*sensor.minEngineeringValue); pos <= (100.0*sensor.maxEngineeringValue); pos+=(100.0*sensor.incrementEngineeringValue)) {
                     targetVal.add(pos/100.0);
                 }
                 
@@ -516,6 +518,8 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             processVariableTag = analog1InSensorSp.getSelectedItem().toString();
         } else if(p.th1InputSensor > 0){
             processVariableTag = th1InSensorSp.getSelectedItem().toString();
+        } else if (p.nativeSensorInput > 0) {
+            processVariableTag = nativeSensor.getSelectedItem().toString();
         }
 
         if (mProfileConfig == null) {

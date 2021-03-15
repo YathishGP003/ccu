@@ -12,16 +12,18 @@ public class NativeSensor {
     public String engineeringUnit;// "V"
     public double minEngineeringValue;//: 0
     public double maxEngineeringValue;//: 10
-    public double incrementEgineeringValue;//: 0.1
+    public double incrementEngineeringValue;//: 0.1
     
+    public SensorType sensorType;
     public static ArrayList<Sensor> sensors = null;
     
-    public NativeSensor(String name, String unit, double minEngVal, double maxEngVal, double incVal ) {
+    public NativeSensor(String name, String unit, double minEngVal, double maxEngVal, double incVal, SensorType type ) {
         this.sensorName = name;
         this.engineeringUnit = unit;
         this.minEngineeringValue = minEngVal;
         this.maxEngineeringValue = maxEngVal;
-        this.incrementEgineeringValue = incVal;
+        this.incrementEngineeringValue = incVal;
+        this.sensorType = type;
     }
     
     

@@ -1938,11 +1938,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
 
         if(cpuEquipPoints.containsKey("condEnabled")){
-            if(cpuEquipPoints.get("condEnabled").toString().contains("Cool Only"))
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly, R.layout.spinner_zone_item);
-            else if(cpuEquipPoints.get("condEnabled").toString().contains("Heat Only"))
-                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly, R.layout.spinner_zone_item);
-            if(cpuEquipPoints.get("condEnabled").toString().contains("Off")) {
+            if(cpuEquipPoints.get("condEnabled").toString().contains("Cool Only")) {
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly,
+                                                                 R.layout.spinner_zone_item);
+                if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal()) {
+                    conditionMode = conModeAdapter.getCount() - 1;
+                }
+            } else if(cpuEquipPoints.get("condEnabled").toString().contains("Heat Only")) {
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
+                                                                 R.layout.spinner_zone_item);
+                if (conditionMode == StandaloneConditioningMode.HEAT_ONLY.ordinal()) {
+                    conditionMode = conModeAdapter.getCount() - 1;
+                }
+            } if(cpuEquipPoints.get("condEnabled").toString().contains("Off")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
                 conditionMode = 0;
             }
@@ -2537,7 +2545,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             } else if(p4FCUPoints.get("condEnabled").toString().contains("Heat Only")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
                                                                  R.layout.spinner_zone_item);
-                if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal()) {
+                if (conditionMode == StandaloneConditioningMode.HEAT_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1; //Select the last item.
                 }
             } if(p4FCUPoints.get("condEnabled").toString().contains("Off")) {

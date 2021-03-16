@@ -23,7 +23,7 @@ public class StandaloneConfigHandler {
             //CPU config points do not seem to have 'cpu' tag. Hence checking the equip type to identify profile.
             ConventionalPackageUnitUtil.updateCPUProfile(configPoint, msgObject, hayStack);
         } else if (HSUtil.isHPUEquip(configPoint.getId(), hayStack)) {
-            //HPU config points do not seem to have 'cpu' tag. Hence checking the equip type to identify profile.
+            //HPU config points do not seem to have 'hpu' tag. Hence checking the equip type to identify profile.
             HeatPumpPackageUnitUtil.updateHPUProfile(configPoint, msgObject, hayStack);
         }
         

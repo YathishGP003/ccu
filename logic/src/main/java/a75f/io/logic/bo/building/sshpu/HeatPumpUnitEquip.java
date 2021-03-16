@@ -1102,7 +1102,8 @@ public class HeatPumpUnitEquip{
     }
     protected void addUserIntentPoints(String equipref, String equipDis, String room, String floor,
                                        HeatPumpUnitConfiguration config) {
-
+    
+        CcuLog.i("CCU_HPU", "addUserIntentPoints ");
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = siteMap.get("id").toString();
         String tz = siteMap.get("tz").toString();

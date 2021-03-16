@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
@@ -27,6 +28,17 @@ public class ConventionalPackageUnitUtil {
     public static void updateCPUProfile(Point configPoint, JsonObject msgObject,
                                         CCUHsApi hayStack) {
         try {
+            String val = msgObject.get(HayStackConstants.WRITABLE_ARRAY_VAL).getAsString();
+            if (val.isEmpty()) {
+                int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();
+                CcuLog.e(L.TAG_CCU_PUBNUB, " clearPointArrayLevel "+level);
+                //When a level is deleted, it currently generates a pubnub with empty value.
+                //Handle it here.
+                hayStack.clearPointArrayLevel(configPoint.getId(), level, true);
+                hayStack.writeHisValById(configPoint.getId(), HSUtil.getPriorityVal(configPoint.getId()));
+                return;
+            }
+            
             double configVal = msgObject.get("val").getAsDouble();
             if (configPoint.getMarkers().contains(Tags.CONFIG)) {
                 updateConfig(configVal, configPoint, msgObject, hayStack);
@@ -246,27 +258,40 @@ public class ConventionalPackageUnitUtil {
          * When currently available fanSpeed configuration is not OFF , set fanSpeed to AUTO
          * When none of fan configuration is enabled, Set fanSpeed to OFF.
          */
-        double fanLowEnabled = getConfigNumVal("enable and relay3", equip.getGroup());
-        double fanHighEnabled = getConfigNumVal("enable and relay6", equip.getGroup());
         
-        double fallbackFanSpeed = StandaloneFanStage.OFF.ordinal();
-        if (fanHighEnabled > 0) {
-            double relay6Type = getConfigNumVal("relay6 and type",equip.getGroup());
-            if (relay6Type == SmartStatFanRelayType.FAN_STAGE2.ordinal()) {
-                fallbackFanSpeed = curFanSpeed; //Nothing to do.
-            } else {
-                fallbackFanSpeed = StandaloneFanStage.LOW_ALL_TIME.ordinal();
-            }
+        StandaloneFanStage maxFanSpeed = getMaxAvailableFanSpeed(equip);
+        double fallbackFanSpeed = curFanSpeed;
+        if (curFanSpeed > maxFanSpeed.ordinal() && maxFanSpeed.ordinal() > StandaloneFanStage.OFF.ordinal()) {
+            fallbackFanSpeed = StandaloneFanStage.AUTO.ordinal();
+        } else if (curFanSpeed > maxFanSpeed.ordinal()) {
+            fallbackFanSpeed = StandaloneFanStage.OFF.ordinal();
         }
-        if (fanLowEnabled > 0) {
-            fallbackFanSpeed = StandaloneFanStage.LOW_ALL_TIME.ordinal();
-        }
+        
         CcuLog.i(L.TAG_CCU_PUBNUB, "adjustCPUFanMode "+curFanSpeed+" -> "+fallbackFanSpeed);
-        if (curFanSpeed > fallbackFanSpeed) {
+        if (curFanSpeed != fallbackFanSpeed) {
             hayStack.writeDefaultVal("point and zone and userIntent and fan and " +
                                      "mode and equipRef == \"" + equip.getId() + "\"",
                                      fallbackFanSpeed);
         }
+    }
+    
+    private static StandaloneFanStage getMaxAvailableFanSpeed(Equip equip) {
+    
+        double fanLowEnabled = getConfigNumVal("enable and relay3", equip.getGroup());
+        double fanHighEnabled = getConfigNumVal("enable and relay6", equip.getGroup());
+        
+        StandaloneFanStage maxFanSpeed = StandaloneFanStage.OFF;
+        if (fanHighEnabled > 0) {
+            double relay6Type = getConfigNumVal("relay6 and type",equip.getGroup());
+            if (relay6Type == SmartStatFanRelayType.FAN_STAGE2.ordinal()) {
+                maxFanSpeed = StandaloneFanStage.HIGH_ALL_TIME;
+            } else {
+                maxFanSpeed = StandaloneFanStage.LOW_ALL_TIME;
+            }
+        } else if (fanLowEnabled > 0) {
+            maxFanSpeed = StandaloneFanStage.LOW_ALL_TIME;
+        }
+        return maxFanSpeed;
     }
     
     private static void adjustConditioningMode(Equip equip, CCUHsApi hayStack) {

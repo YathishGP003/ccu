@@ -2,10 +2,12 @@ package a75f.io.logic.bo.building.sshpu;
 
 import com.google.gson.JsonObject;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
@@ -17,6 +19,7 @@ import a75f.io.logic.bo.building.definitions.SmartStatHeatPumpChangeOverType;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.haystack.device.SmartStat;
+import a75f.io.logic.tuners.TunerConstants;
 
 /**
  * Util class to handle remote reconfiguration changes for HPU profile.
@@ -27,7 +30,20 @@ public class HeatPumpPackageUnitUtil {
     
     public static void updateHPUProfile(Point configPoint, JsonObject msgObject,
                                         CCUHsApi hayStack) {
+    
+        CcuLog.e(L.TAG_CCU_PUBNUB, " updateHPUProfile : " + Arrays.toString(configPoint.getMarkers().toArray()));
         try {
+            String val = msgObject.get(HayStackConstants.WRITABLE_ARRAY_VAL).getAsString();
+            if (val.isEmpty()) {
+                int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();
+                CcuLog.e(L.TAG_CCU_PUBNUB, " clearPointArrayLevel "+level);
+                //When a level is deleted, it currently generates a pubnub with empty value.
+                //Handle it here.
+                hayStack.clearPointArrayLevel(configPoint.getId(), level, true);
+                hayStack.writeHisValById(configPoint.getId(), HSUtil.getPriorityVal(configPoint.getId()));
+                return;
+            }
+            
             double configVal = msgObject.get("val").getAsDouble();
             if (configPoint.getMarkers().contains(Tags.CONFIG)) {
                 updateConfig(configVal, configPoint, msgObject, hayStack);
@@ -36,7 +52,10 @@ public class HeatPumpPackageUnitUtil {
                        && configPoint.getMarkers().contains(Tags.CONTROL)) {
                 updateOccupancyPoint(configVal, configPoint, msgObject, hayStack);
             } else {
+                CcuLog.e(L.TAG_CCU_PUBNUB, " writePointFromJson "+configPoint.getDisplayName());
                 writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
+    
+                CcuLog.e(L.TAG_CCU_PUBNUB, " read Point "+hayStack.readDefaultStrValById(configPoint.getId()));
             }
         } catch (Exception e) {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to update : " + configPoint.getDisplayName() + " ; " + msgObject + " " +
@@ -338,26 +357,40 @@ public class HeatPumpPackageUnitUtil {
          * When currently available fanSpeed configuration is not OFF , set fanSpeed to AUTO
          * When none of fan configuration is enabled, Set fanSpeed to OFF.
          */
-        double fanLowEnabled = getConfigNumVal("enable and relay3", equip.getGroup());
-        double fanHighEnabled = getConfigNumVal("enable and relay5", equip.getGroup());
+    
+        StandaloneFanStage maxFanSpeed = getMaxAvailableFanSpeed(equip);
+        double fallbackFanSpeed = curFanSpeed;
+        if (curFanSpeed > maxFanSpeed.ordinal() && maxFanSpeed.ordinal() > StandaloneFanStage.OFF.ordinal()) {
+            fallbackFanSpeed = StandaloneFanStage.AUTO.ordinal();
+        } else if (curFanSpeed > maxFanSpeed.ordinal()) {
+            fallbackFanSpeed = StandaloneFanStage.OFF.ordinal();
+        }
         
-        double fallbackFanSpeed = StandaloneFanStage.OFF.ordinal();
-        if (fanHighEnabled > 0) {
-            double relay5Type = getConfigNumVal("relay5 and type",equip.getGroup());
-            if (relay5Type == SmartStatFanRelayType.FAN_STAGE2.ordinal()) {
-                fallbackFanSpeed = curFanSpeed; //Nothing to do.
-            } else {
-                fallbackFanSpeed = StandaloneFanStage.LOW_ALL_TIME.ordinal();
-            }
-        }
-        if (fanLowEnabled > 0) {
-            fallbackFanSpeed = StandaloneFanStage.LOW_ALL_TIME.ordinal();
-        }
-        CcuLog.i(L.TAG_CCU_PUBNUB, "adjustCPUFanMode "+curFanSpeed+" -> "+fallbackFanSpeed);
-        if (curFanSpeed > fallbackFanSpeed) {
+        CcuLog.i(L.TAG_CCU_PUBNUB, "adjustHPUFanMode "+curFanSpeed+" -> "+fallbackFanSpeed);
+        if (curFanSpeed != fallbackFanSpeed) {
             hayStack.writeDefaultVal("point and zone and userIntent and fan and " +
                                      "mode and equipRef == \"" + equip.getId() + "\"", fallbackFanSpeed);
         }
+    }
+    
+    
+    private static StandaloneFanStage getMaxAvailableFanSpeed(Equip equip) {
+    
+        double fanLowEnabled = getConfigNumVal("enable and relay3", equip.getGroup());
+        double fanHighEnabled = getConfigNumVal("enable and relay5", equip.getGroup());
+        
+        StandaloneFanStage maxFanSpeed = StandaloneFanStage.OFF;
+        if (fanHighEnabled > 0) {
+            double relay5Type = getConfigNumVal("relay5 and type",equip.getGroup());
+            if (relay5Type == SmartStatFanRelayType.FAN_STAGE2.ordinal()) {
+                maxFanSpeed = StandaloneFanStage.HIGH_ALL_TIME;
+            } else {
+                maxFanSpeed = StandaloneFanStage.LOW_ALL_TIME;
+            }
+        } else if (fanLowEnabled > 0) {
+            maxFanSpeed = StandaloneFanStage.LOW_ALL_TIME;
+        }
+        return maxFanSpeed;
     }
     
     private static void adjustConditioningMode(Equip equip, CCUHsApi hayStack) {
@@ -379,7 +412,7 @@ public class HeatPumpPackageUnitUtil {
             conditioningMode = StandaloneConditioningMode.OFF.ordinal();
         }
         
-        CcuLog.i(L.TAG_CCU_PUBNUB, "adjustCPUConditioningMode "+curCondMode+" -> "+conditioningMode);
+        CcuLog.i(L.TAG_CCU_PUBNUB, "adjustHPUConditioningMode "+curCondMode+" -> "+conditioningMode);
         if (curCondMode != conditioningMode) {
             hayStack.writeDefaultValById(conditioningModeId, conditioningMode);
             hayStack.writeHisValById(conditioningModeId, conditioningMode);

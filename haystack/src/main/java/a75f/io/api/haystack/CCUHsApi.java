@@ -210,6 +210,7 @@ public class CCUHsApi
 
     public String addPoint(Point p)
     {
+        CcuLog.i("CCU_HPU", "addPoint "+p.getDisplayName());
         return tagsDb.addPoint(p);
     }
 

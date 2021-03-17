@@ -847,7 +847,7 @@ public class HeatPumpUnitEquip{
     
         double relay6Type = getConfigNumVal("relay6 and type");
         if (config.enableRelay6 && config.changeOverRelay6Type != relay6Type) {
-            HeatPumpPackageUnitUtil.manageRelay6AssociatedPoints(config.fanRelay5Type, equip);
+            HeatPumpPackageUnitUtil.manageRelay6AssociatedPoints(config.changeOverRelay6Type, equip);
         }
         
         HeatPumpPackageUnitUtil.updateOccupancyPoint(config.enableOccupancyControl ? 1.0 : 0, equip,

@@ -36,7 +36,6 @@ public class HeatPumpPackageUnitUtil {
             String val = msgObject.get(HayStackConstants.WRITABLE_ARRAY_VAL).getAsString();
             if (val.isEmpty()) {
                 int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();
-                CcuLog.e(L.TAG_CCU_PUBNUB, " clearPointArrayLevel "+level);
                 //When a level is deleted, it currently generates a pubnub with empty value.
                 //Handle it here.
                 hayStack.clearPointArrayLevel(configPoint.getId(), level, true);
@@ -52,10 +51,7 @@ public class HeatPumpPackageUnitUtil {
                        && configPoint.getMarkers().contains(Tags.CONTROL)) {
                 updateOccupancyPoint(configVal, configPoint, msgObject, hayStack);
             } else {
-                CcuLog.e(L.TAG_CCU_PUBNUB, " writePointFromJson "+configPoint.getDisplayName());
                 writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
-    
-                CcuLog.e(L.TAG_CCU_PUBNUB, " read Point "+hayStack.readDefaultStrValById(configPoint.getId()));
             }
         } catch (Exception e) {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to update : " + configPoint.getDisplayName() + " ; " + msgObject + " " +

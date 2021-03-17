@@ -34,10 +34,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.io.IOException;
 import java.util.HashMap;
-
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -234,7 +232,9 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         floorMenu.setVisibility(View.GONE);
         mViewPager.setOffscreenPageLimit(1);
 
-        mViewPager.setAdapter(mSettingPagerAdapter);
+        mViewPager.setAdapter(mStatusPagerAdapter);
+        btnTabs.getTabAt(1).select();
+
         mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
 
 

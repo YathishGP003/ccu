@@ -62,7 +62,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
     Spinner th1InSensorSp;
     
     @BindView(R.id.nativeSensor)
-    Spinner nativeSensor;
+    Spinner nativeSensorSp;
     
     @BindView(R.id.errorRange)
     Spinner errorRangeSp;
@@ -235,7 +235,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                     targetValSp.setSelection(targetValAdapter.getPosition(5.0), false);
                 }
                 th1InSensorSp.setSelection(0, false);
-                nativeSensor.setSelection(0, false);
+                nativeSensorSp.setSelection(0, false);
                 
             }
             @Override
@@ -272,7 +272,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                     targetValSp.setSelection(targetValAdapter.getPosition(5.0), false);
                 }
                 analog1InSensorSp.setSelection(0, false);
-                nativeSensor.setSelection(0, false);
+                nativeSensorSp.setSelection(0, false);
             }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView)
@@ -391,10 +391,12 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             if (mProfileConfig.useAnalogIn2ForSetpoint) {
                 targetValSp.setEnabled(false);
             }
+            nativeSensorSp.setSelection(mProfileConfig.nativeSensorInput, false);
         } else {
             analogout1AtMaxSp.setSelection(analogAdapter.getPosition(10), false);
             analog1InSensorSp.setSelection(1, false);
             th1InSensorSp.setSelection(0,false);
+            nativeSensorSp.setSelection(0,false);
             analog2InSensorSp.setEnabled(false);
             sensorOffsetSp.setEnabled(false);
             targetValSp.setSelection(targetValAdapter.getPosition(5.0), false);
@@ -408,7 +410,8 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             {
                 if (!analog2DynamicSP.isChecked()
                     && analog1InSensorSp.getSelectedItem().toString().equals("Not Used")
-                    && th1InSensorSp.getSelectedItem().toString().equals("Not Used")) {
+                    && th1InSensorSp.getSelectedItem().toString().equals("Not Used")
+                    && nativeSensorSp.getSelectedItem().toString().equals("Not Used")) {
                     Toast.makeText(getActivity(), "Select an Input Sensor",Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -452,11 +455,11 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                                                                       android.R.layout.simple_spinner_item,
                                                                       onboardSensorInArr);
         sensorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        nativeSensor.setAdapter(sensorAdapter);
+        nativeSensorSp.setAdapter(sensorAdapter);
         if (mProfileConfig != null) {
             targetValSelection = (int)mProfileConfig.pidTargetValue;
         }
-        nativeSensor.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        nativeSensorSp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
                 Log.d("CCU_UI"," onboardSensor Selected : "+position);
@@ -508,7 +511,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         p.analog1AtMinOutput = Double.parseDouble(analogout1AtMinSp.getSelectedItem().toString());
         p.analog1AtMaxOutput = Double.parseDouble(analogout1AtMaxSp.getSelectedItem().toString());
         p.setpointSensorOffset = Double.parseDouble(sensorOffsetSp.getSelectedItem().toString());
-        p.nativeSensorInput = nativeSensor.getSelectedItemPosition();
+        p.nativeSensorInput = nativeSensorSp.getSelectedItemPosition();
         mPlcProfile.getProfileConfiguration().put(mSmartNodeAddress, p);
 
         String processVariableTag = analog1InSensorSp.getSelectedItem().toString();
@@ -519,7 +522,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         } else if(p.th1InputSensor > 0){
             processVariableTag = th1InSensorSp.getSelectedItem().toString();
         } else if (p.nativeSensorInput > 0) {
-            processVariableTag = nativeSensor.getSelectedItem().toString();
+            processVariableTag = nativeSensorSp.getSelectedItem().toString();
         }
 
         if (mProfileConfig == null) {

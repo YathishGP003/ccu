@@ -119,19 +119,19 @@ public class PlcEquip {
         String th1InputSensorId = hayStack.addPoint(th1InputSensor);
         hayStack.writeDefaultValById(th1InputSensorId, (double) config.th1InputSensor);
     
-        Point onboardInputSensor = new Point.Builder()
-                                   .setDisplayName(equipDis + "-th1InputSensor")
+        Point nativeInputSensor = new Point.Builder()
+                                   .setDisplayName(equipDis + "-nativeInputSensor")
                                    .setEquipRef(equipRef)
                                    .setSiteRef(siteRef)
                                    .setRoomRef(roomRef)
                                    .setFloorRef(floorRef)
                                    .addMarker("config").addMarker("pid").addMarker("zone").addMarker("writable")
-                                   .addMarker("onboard").addMarker("input").addMarker("sensor")
+                                   .addMarker("native").addMarker("input").addMarker("sensor")
                                    .setGroup(String.valueOf(nodeAddr))
                                    .setTz(tz)
                                    .build();
-        String onboardInputSensorId = hayStack.addPoint(onboardInputSensor);
-        hayStack.writeDefaultValById(onboardInputSensorId, (double) config.nativeSensorInput);
+        String nativeInputSensorId = hayStack.addPoint(nativeInputSensor);
+        hayStack.writeDefaultValById(nativeInputSensorId, (double) config.nativeSensorInput);
         
         Point analog1AtMinOutput = new Point.Builder()
                 .setDisplayName(equipDis + "-analog1AtMinOutput")
@@ -255,28 +255,28 @@ public class PlcEquip {
 
         if (config.analog1InputSensor > 0) {
             if (!config.useAnalogIn2ForSetpoint) {
-                updateTargetValue(floorRef, roomRef, config);
-                updateProportionalRange(config.pidProportionalRange, floorRef, roomRef, getAnalog1Bundle(config.analog1InputSensor));
+                createTargetValuePoint(floorRef, roomRef, config);
+                createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef, getAnalog1Bundle(config.analog1InputSensor));
             }
-            String processVariableId = updateProcessVariable(floorRef, roomRef, processVar, config);
+            String processVariableId = createProcessVariablePoint(floorRef, roomRef, processVar, config);
             device.analog1In.setPointRef(processVariableId);
             device.analog1In.setEnabled(true);
             device.analog1In.setType(String.valueOf(config.analog1InputSensor - 1));
         } else if(config.th1InputSensor > 0) {
             if (!config.useAnalogIn2ForSetpoint){
-                updateTargetValue(floorRef, roomRef, config);
-                updateProportionalRange(config.pidProportionalRange,floorRef, roomRef,getThermistorBundle(config.th1InputSensor));
+                createTargetValuePoint(floorRef, roomRef, config);
+                createProportionalRangePoint(config.pidProportionalRange,floorRef, roomRef,getThermistorBundle(config.th1InputSensor));
             }
-            String processVariableId = updateProcessVariable(floorRef, roomRef, processVar, config);
+            String processVariableId = createProcessVariablePoint(floorRef, roomRef, processVar, config);
             device.th1In.setPointRef(processVariableId);
             device.th1In.setEnabled(true);
             device.th1In.setType(String.valueOf(config.th1InputSensor - 1));
         } else if (config.nativeSensorInput > 0) {
             if (!config.useAnalogIn2ForSetpoint){
-                updateTargetValue(floorRef, roomRef, config);
-                updateProportionalRange(config.pidProportionalRange,floorRef, roomRef,getNativeSensorBundle(config.nativeSensorInput));
+                createTargetValuePoint(floorRef, roomRef, config);
+                createProportionalRangePoint(config.pidProportionalRange,floorRef, roomRef,getNativeSensorBundle(config.nativeSensorInput));
             }
-            String processVariableId = updateProcessVariable(floorRef, roomRef, processVar, config);
+            String processVariableId = createProcessVariablePoint(floorRef, roomRef, processVar, config);
             NativeSensor sensor =
                 SensorManager.getInstance().getNativeSensorList().get(config.nativeSensorInput - 1);
             
@@ -284,12 +284,12 @@ public class PlcEquip {
         }
 
         if (config.useAnalogIn2ForSetpoint) {
-            String setPointVariableId = updateDynamicTargetInput(config.analog2InputSensor, floorRef, roomRef, dynamicTargetTag);
-            updateProportionalRange(config.pidProportionalRange, floorRef, roomRef, getAnalog2Bundle(config.analog2InputSensor));
+            String setPointVariableId = createDynamicTargetInputPoint(config.analog2InputSensor, floorRef, roomRef, dynamicTargetTag);
+            createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef, getAnalog2Bundle(config.analog2InputSensor));
             device.analog2In.setPointRef(setPointVariableId);
             device.analog2In.setEnabled(true);
             device.analog2In.setType(String.valueOf(config.analog2InputSensor));
-            updateOffsetSensorValue(config.setpointSensorOffset, floorRef, roomRef);
+            createSetpointSensorOffsetPoint(config.setpointSensorOffset, floorRef, roomRef);
         }
 
         device.analog1Out.setPointRef(controlVariableId);
@@ -616,7 +616,7 @@ public class PlcEquip {
         p.analog1AtMaxOutput = hayStack.readDefaultVal("point and config and analog1 and max and output and equipRef == \"" + equipRef + "\"");
         p.expectZeroErrorAtMidpoint = hayStack.readDefaultVal("point and config and enabled and zero and error and midpoint and equipRef == \"" + equipRef + "\"") > 0;
         p.nativeSensorInput =
-            hayStack.readDefaultVal("point and config and onboard and input and sensor and equipRef == \"" + equipRef + "\"").intValue();
+            hayStack.readDefaultVal("point and config and native and input and sensor and equipRef == \"" + equipRef + "\"").intValue();
     
         return p;
     }
@@ -630,7 +630,8 @@ public class PlcEquip {
 
         PlcProfileConfiguration currentConfig = getProfileConfiguration();
         //delete last point
-        if (dynamicTarget != null && dynamicTarget.get("id") != null && (config.useAnalogIn2ForSetpoint && currentConfig.analog2InputSensor != config.analog2InputSensor)) {
+        if (dynamicTarget != null && dynamicTarget.get("id") != null && (config.useAnalogIn2ForSetpoint
+                                                                         && currentConfig.analog2InputSensor != config.analog2InputSensor)) {
             CCUHsApi.getInstance().deleteEntityTree(dynamicTarget.get("id").toString());
         }
 
@@ -651,16 +652,16 @@ public class PlcEquip {
                 id = dynamicTarget.get("id").toString();
             }
             if (id == null || currentConfig.analog2InputSensor != config.analog2InputSensor) {
-                id = updateDynamicTargetInput(config.analog2InputSensor, floorRef, roomRef, dynamicTargetTag);
+                id = createDynamicTargetInputPoint(config.analog2InputSensor, floorRef, roomRef, dynamicTargetTag);
             }
             // add offset sensor point
             if (offsetSensorPoint == null || offsetSensorPoint.get("id") == null){
-                updateOffsetSensorValue(config.setpointSensorOffset, floorRef, roomRef);
+                createSetpointSensorOffsetPoint(config.setpointSensorOffset, floorRef, roomRef);
             }
             // add proportional range point
             if (prangePoint == null || prangePoint.get("id") == null || (currentConfig.analog2InputSensor != config.analog2InputSensor)
             || (currentConfig.useAnalogIn2ForSetpoint != config.useAnalogIn2ForSetpoint)){
-                updateProportionalRange(config.pidProportionalRange,floorRef,roomRef,getAnalog2Bundle(config.analog2InputSensor));
+                createProportionalRangePoint(config.pidProportionalRange,floorRef,roomRef,getAnalog2Bundle(config.analog2InputSensor));
             }
 
             SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_IN_TWO.name(), true);
@@ -674,7 +675,8 @@ public class PlcEquip {
 
         //delete  processVariable last point
         if (processVariable.get("id") != null && (config.analog1InputSensor > 0 && currentConfig.analog1InputSensor != config.analog1InputSensor)
-                || (config.th1InputSensor > 0 && currentConfig.th1InputSensor != config.th1InputSensor)) {
+                || (config.th1InputSensor > 0 && currentConfig.th1InputSensor != config.th1InputSensor)
+                || (config.nativeSensorInput > 0 && currentConfig.nativeSensorInput != config.nativeSensorInput)) {
 
             CCUHsApi.getInstance().deleteEntityTree(processVariable.get("id").toString());
         }
@@ -685,9 +687,11 @@ public class PlcEquip {
                 if (dynamicTarget != null && dynamicTarget.get("id") != null){
                     CCUHsApi.getInstance().deleteEntityTree(dynamicTarget.get("id").toString());
                 }
-                if (prangePoint != null && prangePoint.get("id") != null && ((currentConfig.useAnalogIn2ForSetpoint != config.useAnalogIn2ForSetpoint) || (currentConfig.analog1InputSensor != config.analog1InputSensor))){
+                if (prangePoint != null && prangePoint.get("id") != null
+                    && ((currentConfig.useAnalogIn2ForSetpoint != config.useAnalogIn2ForSetpoint)
+                        || (currentConfig.analog1InputSensor != config.analog1InputSensor))){
                     CCUHsApi.getInstance().deleteEntityTree(prangePoint.get("id").toString());
-                    updateProportionalRange(config.pidProportionalRange, floorRef, roomRef, getAnalog1Bundle(config.analog1InputSensor));
+                    createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef, getAnalog1Bundle(config.analog1InputSensor));
                 }
 
                 if (offsetSensorPoint != null && offsetSensorPoint.get("id") != null){
@@ -695,23 +699,23 @@ public class PlcEquip {
                 }
                 
                 if (targetValuePoint == null || targetValuePoint.get("id") == null){
-                    updateTargetValue(floorRef, roomRef, config);
+                    createTargetValuePoint(floorRef, roomRef, config);
                 }
 
                 if (prangePoint == null || prangePoint.get("id") == null){
-                    updateProportionalRange(config.pidProportionalRange, floorRef, roomRef, getAnalog1Bundle(config.analog1InputSensor));
+                    createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef, getAnalog1Bundle(config.analog1InputSensor));
                 }
             }
 
             String id = processVariable.get("id").toString();
             if (currentConfig.analog1InputSensor != config.analog1InputSensor) {
-                id = updateProcessVariable(floorRef, roomRef, processTag, config);
+                id = createProcessVariablePoint(floorRef, roomRef, processTag, config);
 
                 //delete  and update target values
                 if (targetValuePoint != null && targetValuePoint.get("id") != null){
                     CCUHsApi.getInstance().deleteEntityTree(targetValuePoint.get("id").toString());
                     if (!config.useAnalogIn2ForSetpoint) {
-                        updateTargetValue(floorRef, roomRef, config);
+                        createTargetValuePoint(floorRef, roomRef, config);
                     }
                 }
             }
@@ -734,7 +738,7 @@ public class PlcEquip {
                 if (prangePoint != null && prangePoint.get("id") != null && ((currentConfig.useAnalogIn2ForSetpoint != config.useAnalogIn2ForSetpoint)
                         ||(currentConfig.th1InputSensor != config.th1InputSensor))){
                     CCUHsApi.getInstance().deleteEntityTree(prangePoint.get("id").toString());
-                    updateProportionalRange(config.pidProportionalRange, floorRef, roomRef, getThermistorBundle(config.th1InputSensor));
+                    createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef, getThermistorBundle(config.th1InputSensor));
                 }
 
                 if (offsetSensorPoint != null && offsetSensorPoint.get("id") != null){
@@ -742,22 +746,22 @@ public class PlcEquip {
                 }
 
                 if (targetValuePoint == null || targetValuePoint.get("id") == null){
-                    updateTargetValue(floorRef, roomRef, config);
+                    createTargetValuePoint(floorRef, roomRef, config);
                 }
                 if (prangePoint == null || prangePoint.get("id") == null){
-                    updateProportionalRange(config.pidProportionalRange, floorRef, roomRef, getThermistorBundle(config.th1InputSensor));
+                    createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef, getThermistorBundle(config.th1InputSensor));
                 }
             }
 
             String id = processVariable.get("id").toString();
             if (currentConfig.th1InputSensor != config.th1InputSensor) {
-                id = updateProcessVariable(floorRef, roomRef, processTag, config);
+                id = createProcessVariablePoint(floorRef, roomRef, processTag, config);
 
                 //delete  and update target values
                 if (targetValuePoint != null && targetValuePoint.get("id") != null){
                     CCUHsApi.getInstance().deleteEntityTree(targetValuePoint.get("id").toString());
                     if (!config.useAnalogIn2ForSetpoint) {
-                        updateTargetValue(floorRef, roomRef, config);
+                        createTargetValuePoint(floorRef, roomRef, config);
                     }
                 }
             }
@@ -774,7 +778,9 @@ public class PlcEquip {
         hayStack.writeDefaultVal("point and config and analog1 and input and sensor and equipRef == \"" + equipRef + "\"", (double) config.analog1InputSensor);
 
         hayStack.writeDefaultVal("point and config and th1 and input and sensor and equipRef == \"" + equipRef + "\"", (double) config.th1InputSensor);
-
+    
+        hayStack.writeDefaultVal("point and config and native and input and sensor and equipRef == \"" + equipRef + "\"", (double) config.nativeSensorInput);
+    
         if (!config.useAnalogIn2ForSetpoint){
             hayStack.writeDefaultVal("point and config and target and value and equipRef == \"" + equipRef + "\"", config.pidTargetValue);
             hayStack.writeHisValByQuery("point and config and target and value and equipRef == \"" + equipRef + "\"", config.pidTargetValue);
@@ -816,8 +822,6 @@ public class PlcEquip {
         HashMap offsetSensorPoint = hayStack.read("point and config and setpoint and sensor and offset and equipRef == \"" + equipRef + "\"");
         HashMap prangePoint = hayStack.read("point and config and prange and equipRef == \"" + equipRef + "\"");
     
-        HashMap processVariable = hayStack.read("point and process and variable and equipRef == \"" + equipRef + "\"");
-        
         //add target value points  and offset sensor point if useAnalogIn2ForSetpoint off and analog1InputSensor not used
         if (!config.useAnalogIn2ForSetpoint){
         
@@ -827,7 +831,7 @@ public class PlcEquip {
             if (prangePoint != null && prangePoint.get("id") != null && ((currentConfig.useAnalogIn2ForSetpoint != config.useAnalogIn2ForSetpoint)
                                                                          ||(currentConfig.nativeSensorInput != config.nativeSensorInput))){
                 CCUHsApi.getInstance().deleteEntityTree(prangePoint.get("id").toString());
-                updateProportionalRange(config.pidProportionalRange, floorRef, roomRef,
+                createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef,
                                         getNativeSensorBundle(config.nativeSensorInput));
             }
         
@@ -836,22 +840,22 @@ public class PlcEquip {
             }
         
             if (targetValuePoint == null || targetValuePoint.get("id") == null){
-                updateTargetValue(floorRef, roomRef, config);
+                createTargetValuePoint(floorRef, roomRef, config);
             }
             if (prangePoint == null || prangePoint.get("id") == null){
-                updateProportionalRange(config.pidProportionalRange, floorRef, roomRef,
+                createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef,
                                         getNativeSensorBundle(config.nativeSensorInput));
             }
         }
         
         if (currentConfig.nativeSensorInput != config.nativeSensorInput) {
-            String id = updateProcessVariable(floorRef, roomRef, processTag, config);
+            String id = createProcessVariablePoint(floorRef, roomRef, processTag, config);
         
             //delete  and update target values
             if (targetValuePoint != null && targetValuePoint.get("id") != null){
                 CCUHsApi.getInstance().deleteEntityTree(targetValuePoint.get("id").toString());
                 if (!config.useAnalogIn2ForSetpoint) {
-                    updateTargetValue(floorRef, roomRef, config);
+                    createTargetValuePoint(floorRef, roomRef, config);
                 }
             }
             NativeSensor sensor =
@@ -869,14 +873,11 @@ public class PlcEquip {
     
         SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_IN_ONE.name(), false);
         SmartNode.setPointEnabled(nodeAddr, Port.TH1_IN.name(), false);
-        //SmartNode.updatePhysicalPointRef(nodeAddr, Port.ANALOG_IN_ONE.name(), null);
-        //SmartNode.updatePhysicalPointRef(nodeAddr, Port.TH1_IN.name(), null);
-        //SmartNode.updatePhysicalPointType(nodeAddr, Port.TH1_IN.name(), String.valueOf(config.th1InputSensor - 1));
-       
         
     }
 
-    private String updateProcessVariable(String floorRef, String roomRef, String processTag, PlcProfileConfiguration config) {
+    private String createProcessVariablePoint(String floorRef, String roomRef, String processTag,
+                                    PlcProfileConfiguration config) {
 
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
@@ -889,7 +890,7 @@ public class PlcEquip {
         } else if (config.th1InputSensor > 0){
             bundle = getThermistorBundle(config.th1InputSensor);
         } else if (config.nativeSensorInput > 0) {
-            bundle = getThermistorBundle(config.nativeSensorInput);
+            bundle = getNativeSensorBundle(config.nativeSensorInput);
         }
 
         String shortDis = bundle.getString("shortDis");
@@ -926,7 +927,8 @@ public class PlcEquip {
         return processVariableTagId;
     }
 
-    private String updateDynamicTargetInput(int inputSensor, String floorRef, String roomRef, String dynamicTargetTag) {
+    private String createDynamicTargetInputPoint(int inputSensor, String floorRef, String roomRef,
+                                             String dynamicTargetTag) {
 
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
@@ -972,7 +974,7 @@ public class PlcEquip {
         return dynamicTargetValueTagId;
     }
 
-    private String updateOffsetSensorValue(double spSensorOffset,String floorRef, String roomRef) {
+    private String createSetpointSensorOffsetPoint(double spSensorOffset,String floorRef, String roomRef) {
 
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
@@ -997,7 +999,7 @@ public class PlcEquip {
         return setpointSensorOffsetId;
     }
 
-    private String updateTargetValue(String floorRef, String roomRef, PlcProfileConfiguration config){
+    private String createTargetValuePoint(String floorRef, String roomRef, PlcProfileConfiguration config){
 
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
@@ -1010,7 +1012,7 @@ public class PlcEquip {
         } else if (config.th1InputSensor > 0){
             bundle = getThermistorBundle(config.th1InputSensor);
         } else if (config.nativeSensorInput > 0) {
-            bundle = getThermistorBundle(config.nativeSensorInput);
+            bundle = getNativeSensorBundle(config.nativeSensorInput);
         }
 
         String shortDis = bundle.getString("shortDis");
@@ -1049,7 +1051,8 @@ public class PlcEquip {
         return pidTargetValueId;
     }
 
-    private String updateProportionalRange(double proportionalRange, String floorRef, String roomRef, Bundle bundle){
+    private String createProportionalRangePoint(double proportionalRange, String floorRef, String roomRef,
+                                               Bundle bundle){
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");

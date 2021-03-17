@@ -109,7 +109,7 @@
                         android:layout_centerVertical="true"
                         android:layout_toStartOf="@+id/nativeSensor"
                         android:textSize="@dimen/text_small_xlarge"
-                        android:text="@string/label_onboard_sensor"
+                        android:text="@string/label_native_sensor"
                         android:textAppearance="@style/title_normal" />
 
                     <Spinner

@@ -1,6 +1,5 @@
 package a75f.io.haystack.api;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -113,8 +112,9 @@ public class TestCcuHsApi {
                                .setSiteRef(siteRef)
                                .setRoomRef(zoneRef)
                                .setFloorRef(floorRef)
-                               .addMarker("discharge").addMarker("logical")
+                               .addMarker("discharge").addMarker("logical").addMarker("his").addMarker("sp").addMarker("zone")
                                .addMarker("air").addMarker("temp2").addMarker("sensor").addMarker("writable")
+                               .addMarker("dab")
                                .setGroup(String.valueOf(nodeAddr))
                                .setTz("Chicago")
                                .setUnit("\u00B0F")
@@ -146,10 +146,10 @@ public class TestCcuHsApi {
                                     .build();
         
         hayStack.addPoint(testRawPoint);
-
         
-        ArrayList<HashMap<Object, Object>> data = hayStack.readAllEntities("point");
-        for (HashMap m : data) {
+        ArrayList<HashMap> p = hayStack.readAll("point and temp or temp2 and logical");
+        System.out.println(p.size());
+        for(HashMap m:p) {
             System.out.println(m);
         }
 

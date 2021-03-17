@@ -7,8 +7,8 @@ import a75f.io.logic.cloud.RenatusServicesEnvironment
 import a75f.io.renatus.BuildConfig
 import a75f.io.renatus.ENGG.ConnectionStatus.*
 import a75f.io.renatus.R
-import android.arch.lifecycle.ViewModel
-import android.support.annotation.ColorRes
+import androidx.lifecycle.ViewModel
+import androidx.annotation.ColorRes
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.subjects.BehaviorSubject

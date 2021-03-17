@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building.sshpu;
 
-import android.util.Log;
-
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -24,8 +22,10 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
 import a75f.io.logic.bo.building.definitions.SmartStatHeatPumpChangeOverType;
+import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.haystack.device.SmartStat;
-import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.tuners.TunerConstants;
 
 public class HeatPumpUnitEquip{
@@ -73,7 +73,8 @@ public class HeatPumpUnitEquip{
         b.addMarker(profile);
         String equipRef = CCUHsApi.getInstance().addEquip(b.build());
 
-        BuildingTuners.getInstance().addEquipStandaloneTuners(siteDis+"-HPU-"+nodeAddr, equipRef, room, floor);
+        StandAloneTuners.addEquipStandaloneTuners( CCUHsApi.getInstance(), siteRef,siteDis + "-HPU-" + nodeAddr,
+                                                   equipRef, room, floor, tz);
 
         createHeatPumpConfigPoints(config, equipRef,floor,room);
 
@@ -790,7 +791,7 @@ public class HeatPumpUnitEquip{
                 .build();
         String relay5FanTypeId = CCUHsApi.getInstance().addPoint(relay5FanType);
         CCUHsApi.getInstance().writeDefaultValById(relay5FanTypeId, (double)config.fanRelay5Type);
-        addUserIntentPoints(equipRef,equipDis,room,floor);
+        addUserIntentPoints(equipRef,equipDis,room,floor, config);
 
 
         setConfigNumVal("enable and relay1",config.enableRelay1 == true ? 1.0 : 0);
@@ -1233,7 +1234,8 @@ public class HeatPumpUnitEquip{
     {
         CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \""+nodeAddr+"\"", status);
     }
-    protected void addUserIntentPoints(String equipref, String equipDis, String room, String floor) {
+    protected void addUserIntentPoints(String equipref, String equipDis, String room, String floor,
+                                       HeatPumpUnitConfiguration config) {
 
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = siteMap.get("id").toString();
@@ -1266,8 +1268,10 @@ public class HeatPumpUnitEquip{
                 .setTz(tz)
                 .build();
         String conditionalModeId = CCUHsApi.getInstance().addPoint(conditionalMode);
-        CCUHsApi.getInstance().writePointForCcuUser(conditionalModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_DEFAULT_CONDITIONAL_MODE, 0);
-        CCUHsApi.getInstance().writeHisValById(conditionalModeId, TunerConstants.STANDALONE_DEFAULT_CONDITIONAL_MODE);
+        StandaloneConditioningMode defaultConditioning = getDefaultConditioningMode(config);
+        CCUHsApi.getInstance().writePointForCcuUser(conditionalModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL,
+                                                    (double) defaultConditioning.ordinal(), 0);
+        CCUHsApi.getInstance().writeHisValById(conditionalModeId, (double)defaultConditioning.ordinal());
 
 
         Point targetDehumidifier = new Point.Builder()
@@ -1286,5 +1290,21 @@ public class HeatPumpUnitEquip{
         String targetHumidtyId = CCUHsApi.getInstance().addPoint(targetHumidty);
         CCUHsApi.getInstance().writePointForCcuUser(targetHumidtyId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_TARGET_HUMIDITY, 0);
         CCUHsApi.getInstance().writeHisValById(targetHumidtyId, TunerConstants.STANDALONE_TARGET_HUMIDITY);
+    }
+    
+    private StandaloneFanStage getDefaultFanSpeed(HeatPumpUnitConfiguration config) {
+        if (config.enableRelay1 || config.enableRelay2 || config.enableRelay3) {
+            return StandaloneFanStage.AUTO;
+        } else {
+            return StandaloneFanStage.OFF;
+        }
+    }
+    
+    private StandaloneConditioningMode getDefaultConditioningMode(HeatPumpUnitConfiguration config) {
+        if (config.enableRelay1 || config.enableRelay2) {
+            return StandaloneConditioningMode.AUTO;
+        } else {
+            return StandaloneConditioningMode.OFF;
+        }
     }
 }

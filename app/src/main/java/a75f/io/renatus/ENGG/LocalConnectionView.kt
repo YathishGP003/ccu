@@ -7,12 +7,12 @@ import a75f.io.logic.cloud.RenatusServicesEnvironment.Companion.createWithShared
 import a75f.io.renatus.BuildConfig
 import a75f.io.renatus.R
 import android.annotation.SuppressLint
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProviders
 import android.content.Context
 import android.preference.PreferenceManager
-import android.support.constraint.ConstraintLayout
-import android.support.v4.app.FragmentActivity
-import android.support.v7.app.AlertDialog
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.fragment.app.FragmentActivity
+import androidx.appcompat.app.AlertDialog
 import android.text.InputType.TYPE_CLASS_NUMBER
 import android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
 import android.util.AttributeSet
@@ -47,10 +47,10 @@ class LocalConnectionView @JvmOverloads constructor(
    // Obtain view model.  The usual pattern is to get Viewmodels in Activities or Fragments,
    // but I'd rather not refactor DevSettings at this time, so I'll use this workaround of getting the
    // Viewmodel from this View.
-   private val activity: FragmentActivity by lazy {
-      if (isInEditMode) FragmentActivity()   // this is here so Layout Preview does not crash
+   private val activity: androidx.fragment.app.FragmentActivity by lazy {
+      if (isInEditMode) androidx.fragment.app.FragmentActivity()   // this is here so Layout Preview does not crash
       else try {
-         context as FragmentActivity
+         context as androidx.fragment.app.FragmentActivity
       } catch (exception: ClassCastException) {
          throw ClassCastException("Please ensure that the provided Context is a valid FragmentActivity")
       }

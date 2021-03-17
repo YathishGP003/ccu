@@ -23,6 +23,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.tuners.TunerConstants;
 
 public class ConventionalUnitLogicalMap {
@@ -72,7 +73,8 @@ public class ConventionalUnitLogicalMap {
             b.addMarker("cpu");
             profile = "cpu";
         String equipRef = CCUHsApi.getInstance().addEquip(b.build());
-        BuildingTuners.getInstance().addEquipStandaloneTuners(siteDis+"-CPU-"+nodeAddr, equipRef, room, floor);
+        StandAloneTuners.addEquipStandaloneTuners( CCUHsApi.getInstance(), siteRef, siteDis + "-CPU-" + nodeAddr,
+                                                   equipRef, room, floor, tz);
 
         createConventionalConfigPoints(config, equipRef,floor,room);
 
@@ -578,7 +580,7 @@ public class ConventionalUnitLogicalMap {
         String siteDis = (String) siteMap.get("dis");
         String equipDis = siteDis+"-CPU-"+nodeAddr;
         String tz = siteMap.get("tz").toString();
-        String profile = "cpu";
+        String  profile = "cpu";
         Point enableOccupancyControl = new Point.Builder()
                 .setDisplayName(equipDis + "-enableOccupancyControl")
                 .setEquipRef(equipRef)
@@ -766,7 +768,7 @@ public class ConventionalUnitLogicalMap {
                 .build();
         String relay6TypeId = CCUHsApi.getInstance().addPoint(relay6Type);
         CCUHsApi.getInstance().writeDefaultValById(relay6TypeId, (double)config.relay6Type);
-        addUserIntentPoints(equipRef,equipDis,room,floor);
+        addUserIntentPoints(equipRef,equipDis,room,floor, config);
 
 
         setConfigNumVal("enable and relay1",config.enableRelay1 == true ? 1.0 : 0);
@@ -1160,7 +1162,8 @@ public class ConventionalUnitLogicalMap {
     {
         CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \""+nodeAddr+"\"", status);
     }
-    protected void addUserIntentPoints(String equipref, String equipDis, String room, String floor) {
+    protected void addUserIntentPoints(String equipref, String equipDis, String room, String floor,
+                                       ConventionalUnitConfiguration config) {
 
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = siteMap.get("id").toString();

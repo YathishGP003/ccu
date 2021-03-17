@@ -50,6 +50,8 @@ import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
 
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
+
 public class CCUHsApi
 {
     
@@ -172,6 +174,18 @@ public class CCUHsApi
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("token", jwtToken);
         editor.commit();
+    }
+
+    public String getTunerVersion() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getString("tunerVersion","");
+    }
+
+    public void setTunerVersion(String version) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("tunerVersion", version);
+        editor.apply();
     }
 
     public String getAuthenticationUrl() {
@@ -515,6 +529,23 @@ public class CCUHsApi
                 HttpUtil.executePostAsync(pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
             }
         }
+    }
+    
+    public void clearPointArrayLevel(String id, int level, boolean local) {
+        CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(id), level,
+                                                        CCUHsApi.getInstance().getCCUUserName(),
+                                                        HNum.make(0), HNum.make(1));
+        if (!local) {
+            HDictBuilder b = new HDictBuilder()
+                                 .add("id", HRef.copy(CCUHsApi.getInstance().getGUID(id)))
+                                 .add("level", level)
+                                 .add("who", CCUHsApi.getInstance().getCCUUserName())
+                                 .add("duration", HNum.make(0, "ms"))
+                                 .add("val", (HVal) null);
+            HDict[] dictArr = {b.toDict()};
+            HttpUtil.executePost(CCUHsApi.getInstance().pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+        }
+    
     }
 
     // Feb-08-2021 /pointWrite and /pointWriteMany need to hit silo /v2/.  All other calls needs to stay on v1.
@@ -1297,7 +1328,7 @@ public class CCUHsApi
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         importBuildingTuners(siteId, hClient);
     }
-    
+
     public HGrid getRemoteSiteDetails(String siteId)
     {
         /* Sync a site*/
@@ -1755,6 +1786,11 @@ public class CCUHsApi
     
     public void deletePointArray(String id) {
         tagsDb.deletePointArray(HRef.copy(id));
+    }
+    
+    
+    public void deletePointArrayLevel(String id, int level) {
+        tagsDb.deletePointArrayLevel(HRef.copy(id), level);
     }
     
     public void deleteHistory() {

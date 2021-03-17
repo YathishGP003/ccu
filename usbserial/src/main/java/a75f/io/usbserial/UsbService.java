@@ -410,7 +410,7 @@ public class UsbService extends Service
 				Log.i(TAG, "USB Device VID: " + deviceVID);
 				Log.i(TAG, "USB Device PID: " + devicePID);
 				if (deviceVID == 0x0403 || deviceVID == 1003 ||
-				                    (deviceVID == DEVICE_ID_FTDI && UsbUtils.isBiskitMode(getApplicationContext())))
+						(deviceVID == DEVICE_ID_FTDI && UsbUtils.isBiskitMode(getApplicationContext())))
 				{
 					boolean success = grantRootPermissionToUSBDevice(device);
 					connection = usbManager.openDevice(device);

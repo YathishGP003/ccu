@@ -9,13 +9,15 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.design.widget.TabItem;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AppCompatActivity;
+import com.google.android.material.tabs.TabItem;
+import com.google.android.material.tabs.TabLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.SpannableString;
@@ -32,10 +34,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.io.IOException;
 import java.util.HashMap;
-
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -86,12 +86,12 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     private BroadcastReceiver mConnectionChangeReceiver;
 
     /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
+     * The {@link PagerAdapter} that will provide
      * fragments for each of the sections. We use a
      * {@link FragmentPagerAdapter} derivative, which will keep every
      * loaded fragment in memory. If this becomes too memory intensive, it
      * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
+     * {@link FragmentStatePagerAdapter}.
      */
     private SettingsPagerAdapter mSettingPagerAdapter;
     private StatusPagerAdapter mStatusPagerAdapter;
@@ -232,7 +232,9 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         floorMenu.setVisibility(View.GONE);
         mViewPager.setOffscreenPageLimit(1);
 
-        mViewPager.setAdapter(mSettingPagerAdapter);
+        mViewPager.setAdapter(mStatusPagerAdapter);
+        btnTabs.getTabAt(1).select();
+
         mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
 
 

@@ -997,10 +997,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
         boolean isCompressor1On = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay1 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
         boolean isCompressor2On = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay2 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
-
-        boolean isAuxHeatingOn = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay4 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
-        double isChangeOverOn = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay6 and equipRef == \"" + equipID + "\"");
-
+        
         boolean isFanLowEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay3 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
         boolean isFanHighEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay5 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
         double fanopModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and fan and mode and operation and equipRef == \""+equipID+"\"");
@@ -1038,13 +1035,10 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }else{
             hpuPoints.put("Fan High Humidity",0);
         }
-
-        if(!isCompressor1On && !isCompressor1On && (isChangeOverOn == 1.0))
-            hpuPoints.put("condEnabled","Cool Only");
-        else if(!isCompressor1On && !isCompressor1On && ((isChangeOverOn == 2.0) || isAuxHeatingOn))
-            hpuPoints.put("condEnabled","Heat Only");
-        else if(!isCompressor1On && !isCompressor1On && (isChangeOverOn == 0) && !isAuxHeatingOn)
+        
+        if(!isCompressor1On && !isCompressor2On) {
             hpuPoints.put("condEnabled","Off");
+        }
 
         if(isFanLowEnabled && !isFanHighEnabled)
             hpuPoints.put("fanEnabled","No High Fan");

@@ -20,7 +20,7 @@ import a75f.io.logic.bo.haystack.device.SmartStat;
 
 /**
  * Util class to handle remote reconfiguration changes for CPU profile.
- * The the util class is lot similar in implementation , relay mapping and tags are different.
+ * The the util class is lot similar in implementation to the one for HPU , but relay mapping and tags are different.
  * So separate util class is used.
  */
 public class ConventionalPackageUnitUtil {
@@ -251,9 +251,11 @@ public class ConventionalPackageUnitUtil {
     }
     
     private static void adjustCPUFanMode(Equip equip, CCUHsApi hayStack) {
-        
-        double curFanSpeed = hayStack.readDefaultVal("point and zone and userIntent and fan and " +
+    
+        String fanSpeedPointId = hayStack.readId("point and zone and userIntent and fan and " +
                                                      "mode and equipRef == \"" + equip.getId() + "\"");
+        
+        double curFanSpeed = hayStack.readPointPriorityVal(fanSpeedPointId);
         /**
          * When currently available fanSpeed configuration is not OFF , set fanSpeed to AUTO
          * When none of fan configuration is enabled, Set fanSpeed to OFF.
@@ -269,9 +271,8 @@ public class ConventionalPackageUnitUtil {
         
         CcuLog.i(L.TAG_CCU_PUBNUB, "adjustCPUFanMode "+curFanSpeed+" -> "+fallbackFanSpeed);
         if (curFanSpeed != fallbackFanSpeed) {
-            hayStack.writeDefaultVal("point and zone and userIntent and fan and " +
-                                     "mode and equipRef == \"" + equip.getId() + "\"",
-                                     fallbackFanSpeed);
+            hayStack.writeDefaultVal(fanSpeedPointId, fallbackFanSpeed);
+            hayStack.writeHisValById(fanSpeedPointId, fallbackFanSpeed);
         }
     }
     
@@ -302,7 +303,7 @@ public class ConventionalPackageUnitUtil {
             CcuLog.e(L.TAG_CCU_PUBNUB, "ConditioningMode point does not exist for update : "+equip.getDisplayName());
             return;
         }
-        double curCondMode = CCUHsApi.getInstance().readDefaultValById(conditioningModeId);
+        double curCondMode = CCUHsApi.getInstance().readPointPriorityVal(conditioningModeId);
         
         double coolingStage1 = getConfigNumVal("enable and relay1", equip.getGroup());
         double coolingStage2 = getConfigNumVal("enable and relay2", equip.getGroup());

@@ -211,6 +211,14 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
     }
 
     private void setUpSpinners() {
+        relay1Spinner.setVisibility(View.VISIBLE);
+        relay2Spinner.setVisibility(View.VISIBLE);
+        relay3Spinner.setVisibility(View.VISIBLE);
+        relay4Spinner.setVisibility(View.VISIBLE);
+        relay5Spinner.setVisibility(View.VISIBLE);
+        relay6Spinner.setVisibility(View.VISIBLE);
+        relay7Spinner.setVisibility(View.VISIBLE);
+
         relay1Spinner.setSelection((int)systemProfile.getConfigAssociation("relay1"), false);
         relay2Spinner.setSelection((int)systemProfile.getConfigAssociation("relay2"), false);
         relay3Spinner.setSelection((int)systemProfile.getConfigAssociation("relay3"), false);

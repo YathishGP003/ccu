@@ -125,7 +125,8 @@
                                 android:layout_centerHorizontal="true"
                                 android:layout_centerVertical="true"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item" />
+                                tools:listitem="@layout/spinner_dropdown_item"
+                                android:visibility="gone"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -199,7 +200,8 @@
                                 android:layout_centerHorizontal="true"
                                 android:layout_centerVertical="true"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item" />
+                                tools:listitem="@layout/spinner_dropdown_item"
+                                android:visibility="gone"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -275,7 +277,8 @@
                                 android:layout_centerHorizontal="true"
                                 android:layout_centerVertical="true"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item" />
+                                tools:listitem="@layout/spinner_dropdown_item"
+                                android:visibility="gone"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -351,7 +354,8 @@
                                 android:layout_centerHorizontal="true"
                                 android:layout_centerVertical="true"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item" />
+                                tools:listitem="@layout/spinner_dropdown_item"
+                                android:visibility="gone"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -427,7 +431,8 @@
                                 android:layout_centerHorizontal="true"
                                 android:layout_centerVertical="true"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item" />
+                                tools:listitem="@layout/spinner_dropdown_item"
+                                android:visibility="gone"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -504,7 +509,8 @@
                                 android:layout_centerHorizontal="true"
                                 android:layout_centerVertical="true"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item" />
+                                tools:listitem="@layout/spinner_dropdown_item"
+                                android:visibility="gone"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -582,7 +588,8 @@
                                 android:layout_centerHorizontal="true"
                                 android:layout_centerVertical="true"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item" />
+                                tools:listitem="@layout/spinner_dropdown_item"
+                                android:visibility="gone"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -660,7 +667,7 @@
                                 android:layout_centerVertical="true"
                                 android:text="@string/label_cooling"
                                 android:layout_gravity="center_vertical"
-                                android:textAppearance="@style/text_label" />
+                                android:textAppearance="@style/text_label"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -738,7 +745,7 @@
                                 android:layout_centerVertical="true"
                                 android:text="@string/label_fanspeed"
                                 android:layout_gravity="center_vertical"
-                                android:textAppearance="@style/text_label" />
+                                android:textAppearance="@style/text_label"/>
                         </LinearLayout>
 
                         <LinearLayout

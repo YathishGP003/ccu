@@ -87,7 +87,6 @@
     </string-array>
 
     <string-array name="hvac_stage_selector">
-        <item>  ---- </item>
         <item>  Cooling Stage 1 </item>
         <item>  Cooling Stage 2 </item>
         <item>  Cooling Stage 3 </item>

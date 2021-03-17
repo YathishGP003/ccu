@@ -28,7 +28,7 @@ public class SplashActivity extends Activity {
         setContentView(R.layout.splash);
 
         prefs = new Prefs(this);
-        Log.i(TAG, "Splash");
+        Log.i(TAG, "Splash activity");
         
         registrationThread = new Thread() {
             public void run() {

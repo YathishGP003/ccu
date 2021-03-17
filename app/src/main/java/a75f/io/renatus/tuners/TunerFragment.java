@@ -661,7 +661,6 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
     @Override
     public void itemClicked(TunerGroupItem section) {
-        //Toast.makeText(getActivity(), "TunerUI-Section: " + section.getName() + " clicked", Toast.LENGTH_SHORT).show();
         tunerGroupOpened = section;
     }
 

@@ -274,7 +274,7 @@ public class ConventionalPackageUnitUtil {
         
         CcuLog.i(L.TAG_CCU_PUBNUB, "adjustCPUFanMode "+curFanSpeed+" -> "+fallbackFanSpeed);
         if (curFanSpeed != fallbackFanSpeed) {
-            hayStack.writeDefaultVal(fanSpeedPointId, fallbackFanSpeed);
+            hayStack.writeDefaultValById(fanSpeedPointId, fallbackFanSpeed);
             hayStack.writeHisValById(fanSpeedPointId, fallbackFanSpeed);
         }
     }

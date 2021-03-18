@@ -369,7 +369,7 @@ public class HeatPumpPackageUnitUtil {
         
         CcuLog.i(L.TAG_CCU_PUBNUB, "adjustHPUFanMode "+curFanSpeed+" -> "+fallbackFanSpeed);
         if (curFanSpeed != fallbackFanSpeed) {
-            hayStack.writeDefaultVal(fanSpeedPointId, fallbackFanSpeed);
+            hayStack.writeDefaultValById(fanSpeedPointId, fallbackFanSpeed);
             hayStack.writeHisValById(fanSpeedPointId, fallbackFanSpeed);
         }
     }

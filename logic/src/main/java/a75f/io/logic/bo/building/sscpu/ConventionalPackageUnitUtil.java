@@ -48,6 +48,9 @@ public class ConventionalPackageUnitUtil {
                 updateOccupancyPoint(configVal, configPoint, msgObject, hayStack);
             } else {
                 writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
+                if (configPoint.getMarkers().contains(Tags.HIS)) {
+                    hayStack.writeHisValById(configPoint.getId(), configVal);
+                }
             }
         } catch (Exception e) {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to update : " + configPoint.getDisplayName() + " ; " + msgObject + " " +

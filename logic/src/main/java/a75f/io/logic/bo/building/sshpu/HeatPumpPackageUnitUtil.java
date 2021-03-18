@@ -52,6 +52,9 @@ public class HeatPumpPackageUnitUtil {
                 updateOccupancyPoint(configVal, configPoint, msgObject, hayStack);
             } else {
                 writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
+                if (configPoint.getMarkers().contains(Tags.HIS)) {
+                    hayStack.writeHisValById(configPoint.getId(), configVal);
+                }
             }
         } catch (Exception e) {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to update : " + configPoint.getDisplayName() + " ; " + msgObject + " " +
@@ -367,7 +370,7 @@ public class HeatPumpPackageUnitUtil {
         CcuLog.i(L.TAG_CCU_PUBNUB, "adjustHPUFanMode "+curFanSpeed+" -> "+fallbackFanSpeed);
         if (curFanSpeed != fallbackFanSpeed) {
             hayStack.writeDefaultVal(fanSpeedPointId, fallbackFanSpeed);
-            hayStack.writeHisValByQuery(fanSpeedPointId, fallbackFanSpeed);
+            hayStack.writeHisValById(fanSpeedPointId, fallbackFanSpeed);
         }
     }
     

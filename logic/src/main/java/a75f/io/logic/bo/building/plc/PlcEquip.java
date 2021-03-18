@@ -579,18 +579,30 @@ public class PlcEquip {
         return mBundle;
     }
     
+    /**
+     * Dynamically generates whole bunch of String parameters required for creating NativeSensor related points.
+     */
     private Bundle getNativeSensorBundle(int nativeSensorInput) {
         Bundle mBundle = new Bundle();
         NativeSensor selectedSensor = SensorManager.getInstance().getNativeSensorList().get(nativeSensorInput - 1);
-        String sensorDisplayName = selectedSensor.sensorName.replace("Native-","Target ");
-    
-        //TODO
+        String shortDis = selectedSensor.sensorName;
+        
+        // Gas sensor's description needs to have a suffix 'Level'.
+        if (shortDis.contains("CO") || shortDis.contains("CO2") ||
+            shortDis.contains("NO") || shortDis.contains("NO2")) {
+            shortDis = shortDis+" Level";
+        }
+        
+        //Does the name formatting as it is done with the existing sensor types.
+        //ShortDisTarget to have everything stripped off except the sensor type like (CO2/Sound etc)
+        String shortDisTarget = shortDis.replace("Native-","");
         String marker = selectedSensor.sensorName
                                     .replace("Native-","")
                                     .replaceAll("\\s","").toLowerCase();
         
-        mBundle.putString("shortDis", sensorDisplayName);
-        mBundle.putString("shortDisTarget", sensorDisplayName);
+        
+        mBundle.putString("shortDis", shortDis);
+        mBundle.putString("shortDisTarget", shortDisTarget);
         mBundle.putString("unit", selectedSensor.engineeringUnit);
         mBundle.putString("maxVal", String.valueOf(selectedSensor.maxEngineeringValue));
         mBundle.putString("minVal", String.valueOf(selectedSensor.minEngineeringValue));
@@ -813,10 +825,20 @@ public class PlcEquip {
         isEnabledZeroErrorMidpoint = config.expectZeroErrorAtMidpoint;
     }
     
+    /**
+     *  Handles creation of new points and deletion of some of the existing points based on new profile configuration.
+     *  A lot of this code can be removed if these operations are combined for different types of input sensors.
+     *  We currently handle them separately.
+     * (TODO - Revisit during PI profile reconfiguration)
+     * @param currentConfig
+     * @param config
+     * @param processTag
+     * @param floorRef
+     * @param roomRef
+     */
     private void handleNativeInputSensorUpdate(PlcProfileConfiguration currentConfig, PlcProfileConfiguration config,
                                                String processTag, String floorRef, String roomRef) {
-    
-        //TODO- Optimize reads
+        
         HashMap dynamicTarget = hayStack.read("point and dynamic and target and value and equipRef == \"" + equipRef + "\"");
         HashMap targetValuePoint = hayStack.read("point and config and target and value and equipRef == \"" + equipRef + "\"");
         HashMap offsetSensorPoint = hayStack.read("point and config and setpoint and sensor and offset and equipRef == \"" + equipRef + "\"");
@@ -825,34 +847,36 @@ public class PlcEquip {
         //add target value points  and offset sensor point if useAnalogIn2ForSetpoint off and analog1InputSensor not used
         if (!config.useAnalogIn2ForSetpoint){
         
-            if (dynamicTarget != null && dynamicTarget.get("id") != null){
+            if (!dynamicTarget.isEmpty()){
                 CCUHsApi.getInstance().deleteEntityTree(dynamicTarget.get("id").toString());
             }
-            if (prangePoint != null && prangePoint.get("id") != null && ((currentConfig.useAnalogIn2ForSetpoint != config.useAnalogIn2ForSetpoint)
-                                                                         ||(currentConfig.nativeSensorInput != config.nativeSensorInput))){
-                CCUHsApi.getInstance().deleteEntityTree(prangePoint.get("id").toString());
-                createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef,
-                                        getNativeSensorBundle(config.nativeSensorInput));
-            }
-        
-            if (offsetSensorPoint != null && offsetSensorPoint.get("id") != null){
+            
+            if (!offsetSensorPoint.isEmpty()){
                 CCUHsApi.getInstance().deleteEntityTree(offsetSensorPoint.get("id").toString());
             }
         
-            if (targetValuePoint == null || targetValuePoint.get("id") == null){
+            if (targetValuePoint.isEmpty()){
                 createTargetValuePoint(floorRef, roomRef, config);
             }
-            if (prangePoint == null || prangePoint.get("id") == null){
+            
+            if (prangePoint.isEmpty()){
                 createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef,
                                         getNativeSensorBundle(config.nativeSensorInput));
+                
+            } else if (currentConfig.useAnalogIn2ForSetpoint != config.useAnalogIn2ForSetpoint ||
+                       currentConfig.nativeSensorInput != config.nativeSensorInput) {
+                
+                CCUHsApi.getInstance().deleteEntityTree(prangePoint.get("id").toString());
+                createProportionalRangePoint(config.pidProportionalRange, floorRef, roomRef,
+                                             getNativeSensorBundle(config.nativeSensorInput));
             }
         }
         
         if (currentConfig.nativeSensorInput != config.nativeSensorInput) {
             String id = createProcessVariablePoint(floorRef, roomRef, processTag, config);
         
-            //delete  and update target values
-            if (targetValuePoint != null && targetValuePoint.get("id") != null){
+            //delete and update target values
+            if (!targetValuePoint.isEmpty()){
                 CCUHsApi.getInstance().deleteEntityTree(targetValuePoint.get("id").toString());
                 if (!config.useAnalogIn2ForSetpoint) {
                     createTargetValuePoint(floorRef, roomRef, config);

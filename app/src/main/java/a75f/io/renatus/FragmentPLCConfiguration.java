@@ -355,6 +355,10 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 analog2InSensorSp.setEnabled(b);
                 sensorOffsetSp.setEnabled(b);
                 targetValSp.setEnabled(!b);
+                //Whenever targetVal is enabled while nativeSensor is chosen, initialize the spinner.
+                if (!b && nativeSensorSp.getSelectedItemPosition() > 0) {
+                    targetValSp.setSelection( targetValSp.getAdapter().getCount()/2, false);
+                }
             }
         });
         

@@ -80,7 +80,7 @@ public class VavParallelFanProfile extends VavProfile
             }
             
             SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
-            int loopOp = getLoopOp(conditioning, roomTemp);
+            int loopOp = getLoopOp(conditioning, roomTemp, vavEquip);
             
             SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
             if (systemMode == SystemMode.OFF|| valveController.getControlVariable() == 0) {
@@ -123,7 +123,7 @@ public class VavParallelFanProfile extends VavProfile
         setDamperLimits(node, damper);
     }
     
-    private int getLoopOp(SystemController.State conditioning, double roomTemp) {
+    private int getLoopOp(SystemController.State conditioning, double roomTemp, Equip vavEquip) {
         int loopOp = 0;
         SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
         if (roomTemp > setTempCooling && systemMode != SystemMode.OFF) {
@@ -139,9 +139,13 @@ public class VavParallelFanProfile extends VavProfile
             if (state != HEATING) {
                 handleHeatingChangeOver();
             }
-            loopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
-            if (conditioning == VavSystemController.State.COOLING ) {
-                updateReheatDuringSystemCooling(loopOp);
+            
+            int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
+            if (conditioning == SystemController.State.COOLING) {
+                updateReheatDuringSystemCooling(heatingLoopOp);
+                loopOp =  getGPC36AdjustedHeatingLoopOp(heatingLoopOp, roomTemp, vavDevice.getDischargeTemp(), vavEquip);
+            } else if (conditioning == SystemController.State.HEATING) {
+                loopOp = heatingLoopOp;
             }
         } else {
             //Zone is in deadband

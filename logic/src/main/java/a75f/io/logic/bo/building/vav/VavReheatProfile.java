@@ -115,7 +115,7 @@ public class VavReheatProfile extends VavProfile
                 int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
                 if (conditioning == SystemController.State.COOLING) {
                     updateReheatDuringSystemCooling(heatingLoopOp, roomTemp);
-                    loopOp =  heatingLoopOp <= 50 ? 0 : heatingLoopOp;
+                    loopOp =  getGPC36AdjustedHeatingLoopOp(heatingLoopOp, roomTemp, vavDevice.getDischargeTemp(), vavEquip);
                 } else if (conditioning == SystemController.State.HEATING) {
                     loopOp = heatingLoopOp;
                 }

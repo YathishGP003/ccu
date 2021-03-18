@@ -527,4 +527,21 @@ public abstract class VavProfile extends ZoneProfile
         }
     }
     
+    /**
+     *if the DAT is greater than room temperature plus differential tuner , the heating-loop output shall reset
+     * the airflow set point from the heating minimum airflow set point to the heating maximum airflow set point.
+     */
+    public int getGPC36AdjustedHeatingLoopOp(double heatingLoop, double roomTemp,
+                                                 double dischargeTemp, Equip vavEquip) {
+        double reheatDatDifferential = TunerUtil.readTunerValByQuery("vav and reheat and dat and min and " +
+                                                                     "differential and equipRef == \""+vavEquip.getId()+"\"");
+        
+        //Damper should be at the min position when heatingLoop is less than the threshold
+        //or when dischargeTemp is still within the roomTemp+tuner limit.
+        if (heatingLoop < REHEAT_THRESHOLD_TEMP || dischargeTemp <= (roomTemp + reheatDatDifferential)) {
+            return 0;
+        }
+        
+        return (int)(heatingLoop - REHEAT_THRESHOLD_TEMP) * 2;
+    }
 }

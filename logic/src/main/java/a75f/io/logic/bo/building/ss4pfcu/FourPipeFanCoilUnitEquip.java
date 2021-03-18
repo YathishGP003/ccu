@@ -1112,7 +1112,7 @@ public class FourPipeFanCoilUnitEquip  {
     
         double curFanSpeed = CCUHsApi.getInstance().readDefaultValById(fanModePointId);
     
-        double fallbackFanSpeed = 0;
+        double fallbackFanSpeed = curFanSpeed;
     
         StandaloneFanStage maxFanSpeed = getMaxAvailableFanSpeed(config);
     
@@ -1135,12 +1135,13 @@ public class FourPipeFanCoilUnitEquip  {
         }
         double curCondMode = CCUHsApi.getInstance().readDefaultValById(conditioningModeId);
     
-        double fallbackMode = 0;
+        double fallbackMode = curCondMode;
         if (!config.enableRelay4) {
             if (curCondMode == StandaloneConditioningMode.AUTO.ordinal() || curCondMode == StandaloneConditioningMode.HEAT_ONLY.ordinal() ) {
                 fallbackMode = StandaloneConditioningMode.OFF.ordinal();
             }
-        } else if (!config.enableRelay6){
+        }
+        if (!config.enableRelay6){
             if (curCondMode == StandaloneConditioningMode.AUTO.ordinal() || curCondMode == StandaloneConditioningMode.COOL_ONLY.ordinal() ) {
                 fallbackMode = StandaloneConditioningMode.OFF.ordinal();
             }

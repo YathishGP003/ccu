@@ -15,6 +15,8 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
@@ -24,6 +26,7 @@ import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
 import a75f.io.logic.bo.building.definitions.SmartStatHeatPumpChangeOverType;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
+import a75f.io.logic.bo.building.sscpu.ConventionalUnitConfiguration;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.tuners.TunerConstants;
@@ -1003,6 +1006,9 @@ public class HeatPumpUnitEquip{
         setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
         setConfigNumVal("relay6 and type",config.changeOverRelay6Type);
         setConfigNumVal("relay5 and type",config.fanRelay5Type);
+    
+        updateFanMode(equip, config, CCUHsApi.getInstance());
+        updateConditioningMode(equip, config, CCUHsApi.getInstance());
     }
 
 
@@ -1253,8 +1259,10 @@ public class HeatPumpUnitEquip{
                 .setTz(tz)
                 .build();
         String fanOpModeId = CCUHsApi.getInstance().addPoint(fanOpMode);
-        CCUHsApi.getInstance().writePointForCcuUser(fanOpModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, TunerConstants.STANDALONE_DEFAULT_FAN_OPERATIONAL_MODE, 0);
-        CCUHsApi.getInstance().writeHisValById(fanOpModeId, TunerConstants.STANDALONE_DEFAULT_FAN_OPERATIONAL_MODE);
+        StandaloneFanStage defaultFanStage = getDefaultFanSpeed(config);
+        CCUHsApi.getInstance().writePointForCcuUser(fanOpModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL,
+                                                    (double) defaultFanStage.ordinal(), 0);
+        CCUHsApi.getInstance().writeHisValById(fanOpModeId, (double) defaultFanStage.ordinal());
 
         Point conditionalMode = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"ConditioningMode")
@@ -1293,7 +1301,7 @@ public class HeatPumpUnitEquip{
     }
     
     private StandaloneFanStage getDefaultFanSpeed(HeatPumpUnitConfiguration config) {
-        if (config.enableRelay1 || config.enableRelay2 || config.enableRelay3) {
+        if (config.enableRelay3 || config.enableRelay4|| config.enableRelay5) {
             return StandaloneFanStage.AUTO;
         } else {
             return StandaloneFanStage.OFF;
@@ -1305,6 +1313,56 @@ public class HeatPumpUnitEquip{
             return StandaloneConditioningMode.AUTO;
         } else {
             return StandaloneConditioningMode.OFF;
+        }
+    }
+    
+    private void updateConditioningMode(Equip equip, HeatPumpUnitConfiguration config, CCUHsApi hayStack) {
+        
+        String conditioningModeId = CCUHsApi.getInstance().readId("point and zone and userIntent and conditioning and" +
+                                                                  " mode and equipRef == \"" + equip.getId() + "\"");
+        if (conditioningModeId.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_ZONE, "ConditioningMode point does not exist for update : " + equip.getDisplayName());
+            return;
+        }
+        double curCondMode = CCUHsApi.getInstance().readDefaultValById(conditioningModeId);
+        
+        double conditioningMode = curCondMode;
+        if (!config.enableRelay1 && !config.enableRelay2) {
+            conditioningMode = StandaloneConditioningMode.OFF.ordinal();
+        }
+        
+        CcuLog.i(L.TAG_CCU_ZONE, "adjustHPUConditioningMode " + curCondMode + " -> " + conditioningMode);
+        if (curCondMode != conditioningMode) {
+            hayStack.writeDefaultValById(conditioningModeId, conditioningMode);
+            hayStack.writeHisValById(conditioningModeId, conditioningMode);
+        }
+    }
+    
+    
+    private void updateFanMode(Equip equip, HeatPumpUnitConfiguration config, CCUHsApi hayStack) {
+        
+        double curFanSpeed = hayStack.readDefaultVal("point and zone and userIntent and fan and " +
+                                                     "mode and equipRef == \"" + equip.getId() + "\"");
+        
+        double fallbackFanSpeed = StandaloneFanStage.OFF.ordinal();
+        if (config.enableRelay5) {
+            if (config.fanRelay5Type == SmartStatFanRelayType.FAN_STAGE2.ordinal()) {
+                fallbackFanSpeed = curFanSpeed; //Nothing to do.
+            } else {
+                fallbackFanSpeed = StandaloneFanStage.LOW_ALL_TIME.ordinal();
+            }
+        }
+        if (config.enableRelay3) {
+            fallbackFanSpeed = StandaloneFanStage.LOW_ALL_TIME.ordinal();
+        }
+        CcuLog.i(L.TAG_CCU_ZONE, "adjustHPUFanMode "+curFanSpeed+" -> "+fallbackFanSpeed);
+        if (curFanSpeed > fallbackFanSpeed) {
+            //Fallback to AUTO or OFF depending atleast one fan is available.
+            fallbackFanSpeed = fallbackFanSpeed > StandaloneFanStage.OFF.ordinal() ?
+                                   StandaloneFanStage.AUTO.ordinal() : StandaloneFanStage.OFF.ordinal();
+            hayStack.writeDefaultVal("point and zone and userIntent and fan and " +
+                                     "mode and equipRef == \"" + equip.getId() + "\"",
+                                     fallbackFanSpeed);
         }
     }
 }

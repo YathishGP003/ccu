@@ -259,11 +259,10 @@ public class ConventionalPackageUnitUtil {
                                                      "mode and equipRef == \"" + equip.getId() + "\"");
         
         double curFanSpeed = hayStack.readPointPriorityVal(fanSpeedPointId);
-        /**
-         * When currently available fanSpeed configuration is not OFF , set fanSpeed to AUTO
-         * When none of fan configuration is enabled, Set fanSpeed to OFF.
+        /*
+         When currently available fanSpeed configuration is not OFF , set fanSpeed to AUTO
+         When none of fan configuration is enabled, Set fanSpeed to OFF.
          */
-        
         StandaloneFanStage maxFanSpeed = getMaxAvailableFanSpeed(equip);
         double fallbackFanSpeed = curFanSpeed;
         if (curFanSpeed > maxFanSpeed.ordinal() && maxFanSpeed.ordinal() > StandaloneFanStage.OFF.ordinal()) {
@@ -289,7 +288,7 @@ public class ConventionalPackageUnitUtil {
             double relay6Type = getConfigNumVal("relay6 and type",equip.getGroup());
             if (relay6Type == SmartStatFanRelayType.FAN_STAGE2.ordinal()) {
                 maxFanSpeed = StandaloneFanStage.HIGH_ALL_TIME;
-            } else {
+            } else if (fanLowEnabled > 0) {
                 maxFanSpeed = StandaloneFanStage.LOW_ALL_TIME;
             }
         } else if (fanLowEnabled > 0) {

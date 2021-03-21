@@ -38,8 +38,6 @@ public enum SensorType
     
     public Port getSensorPort() {
         switch (this) {
-            case NONE:
-                return null;
             case HUMIDITY:
                 return Port.SENSOR_RH;
             case CO2:

@@ -595,7 +595,7 @@ public class PlcEquip {
         
         //Does the name formatting as it is done with the existing sensor types.
         //ShortDisTarget to have everything stripped off except the sensor type like (CO2/Sound etc)
-        String shortDisTarget = shortDis.replace("Native-","");
+        String shortDisTarget = shortDis.replace("Native-","Target ");
         String marker = selectedSensor.sensorName
                                     .replace("Native-","")
                                     .replaceAll("\\s","").toLowerCase();

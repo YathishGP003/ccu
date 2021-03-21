@@ -121,7 +121,7 @@ public class SensorManager {
         nativeSensors = new ArrayList<>();
     
         nativeSensors.add(new NativeSensor("Native-Temperature", "\u00B0F", -10, 150, 0.5, SensorType.TEMPERATURE));
-        nativeSensors.add(new NativeSensor("Native-Humidity", "%", 0, 100, 0.5, SensorType.HUMIDITY));
+        nativeSensors.add(new NativeSensor("Native-Humidity", "%", 0, 100, 1, SensorType.HUMIDITY));
         nativeSensors.add(new NativeSensor("Native-CO2", "ppm", 0, 2000, 100, SensorType.CO2));
         nativeSensors.add(new NativeSensor("Native-CO", "ppm", 0, 100, 1, SensorType.CO));
         nativeSensors.add(new NativeSensor("Native-NO2", "ppm", 0, 5, 0.1, SensorType.NO2));

@@ -231,10 +231,13 @@ public class Pulse
 	private static void handleSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr) {
 		SmartNode node = new SmartNode(addr);
 		int emVal = 0;
+		
 		for (SmartNodeSensorReading_t r : sensorReadings) {
+			DLog.LogdStructAsJson(r);
 			SensorType t = SensorType.values()[r.sensorType.get()];
 			Port p = t.getSensorPort();
 			if (p == null) {
+				CcuLog.d(L.TAG_CCU_DEVICE, " Unknown sensor type : "+t.toString());
 				continue;
 			}
 			double val = r.sensorData.get();

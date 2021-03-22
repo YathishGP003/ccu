@@ -85,6 +85,24 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
     @BindView(R.id.zeroErrorAtMp)
     ToggleButton zeroErrorAtMP;
     
+    @BindView(R.id.relay1Toggle)
+    ToggleButton relay1Toggle;
+    
+    @BindView(R.id.relay1OnThreshold)
+    Spinner relay1OnThreshold;
+    
+    @BindView(R.id.relay1OffThreshold)
+    Spinner relay1OffThreshold;
+    
+    @BindView(R.id.relay2Toggle)
+    ToggleButton relay2Toggle;
+    
+    @BindView(R.id.relay2OnThreshold)
+    Spinner relay2OnThreshold;
+    
+    @BindView(R.id.relay2OffThreshold)
+    Spinner relay2OffThreshold;
+    
     @BindView(R.id.setBtn)
     Button setButton;
 
@@ -376,7 +394,9 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         });
     
         configureNativeSensorInputSpinner();
-    
+        configureRelay1();
+        configureRelay2();
+        
         if (mProfileConfig != null) {
             analog1InSensorSp.setSelection(mProfileConfig.analog1InputSensor, false);
             th1InSensorSp.setSelection(mProfileConfig.th1InputSensor, false);
@@ -501,6 +521,42 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
+    }
+    
+    private void configureRelay1() {
+        ArrayAdapter<String> percentAdapter = getPercentageSpinnerAdapter();
+        relay1OnThreshold.setAdapter(percentAdapter);
+        relay1OffThreshold.setAdapter(percentAdapter);
+        
+        relay1Toggle.setOnCheckedChangeListener((compoundButton, b) -> {
+            relay1OnThreshold.setEnabled(b);
+            relay1OffThreshold.setEnabled(b);
+        });
+        
+    }
+    
+    private void configureRelay2() {
+        ArrayAdapter<String> percentAdapter = getPercentageSpinnerAdapter();
+        relay2OnThreshold.setAdapter(percentAdapter);
+        relay2OffThreshold.setAdapter(percentAdapter);
+    
+        relay2Toggle.setOnCheckedChangeListener((compoundButton, b) -> {
+            relay2OnThreshold.setEnabled(b);
+            relay2OffThreshold.setEnabled(b);
+        });
+        
+    }
+    
+    private ArrayAdapter getPercentageSpinnerAdapter() {
+        
+        ArrayList<String> percentArr = new ArrayList<>();
+        for (int percent = 0; percent <= 100; percent+= 1) {
+            percentArr.add(percent+"%");
+        }
+        ArrayAdapter<String> percentAdapter = new ArrayAdapter<String>(getActivity(),
+                                                                       android.R.layout.simple_spinner_item, percentArr);
+        percentAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        return percentAdapter;
     }
     
     public void setupPlcProfile() {

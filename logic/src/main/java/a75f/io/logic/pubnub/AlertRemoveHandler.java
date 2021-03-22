@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 
 public class AlertRemoveHandler
@@ -22,12 +21,12 @@ public class AlertRemoveHandler
             for (JsonElement id : ids) {
                 switch (cmd) {
                     case REM_ALERT_CMD:
-                        AlertManager.getInstance(Globals.getInstance().getApplicationContext()).deleteAlert(id.getAsString());
+                        AlertManager.getInstance().deleteAlertInternal(id.getAsString());
                         CcuLog.d(L.TAG_CCU_PUBNUB," Deleted Alert: "+id);
                         break;
                     case REMOVE_DEF_CMD:
                     case CLR_SITEDEF_CMD:
-                        AlertManager.getInstance(Globals.getInstance().getApplicationContext()).deleteAlertDefinition(id.getAsString());
+                        AlertManager.getInstance().deleteAlertDefinition(id.getAsString());
                         CcuLog.d(L.TAG_CCU_PUBNUB," Deleted Alert Definition: "+id);
                         break;
                 }

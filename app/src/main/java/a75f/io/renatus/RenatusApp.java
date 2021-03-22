@@ -5,6 +5,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+
+import a75f.io.logger.CcuLog;
+import a75f.io.renatus.util.Prefs;
 import androidx.multidex.MultiDex;
 import androidx.appcompat.app.AppCompatDelegate;
 import android.util.Log;
@@ -16,7 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import a75f.io.renatus.util.ActivityLifecycleHandler;
 /**
  * Created by ryanmattison isOn 7/24/17.
  */
@@ -32,7 +34,7 @@ public class RenatusApp extends UtilityApplication
 	{
 		super.onCreate();
 		mContext = getApplicationContext();
-		registerActivityLifecycleCallbacks(new ActivityLifecycleHandler());
+		checkForRestart();
 		AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 		//Fabric.with(this, new Crashlytics());
 	}
@@ -134,5 +136,14 @@ public class RenatusApp extends UtilityApplication
 		NotificationHandler.clearAllNotifications();
 		android.os.Process.killProcess(android.os.Process.myPid());
 		System.exit(0);
+	}
+
+	private void checkForRestart() {
+		Prefs prefs = new Prefs(this);
+		if (prefs.getBoolean("APP_START")){
+			prefs.setBoolean("APP_RESTART", true);
+		} else {
+			prefs.setBoolean("APP_RESTART", false);
+		}
 	}
 }

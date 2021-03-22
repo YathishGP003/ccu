@@ -30,6 +30,11 @@ public class AlertAdapter extends ArrayAdapter<Alert> implements View.OnClickLis
         
     }
 
+    public void resetList(ArrayList<Alert> alerts) {
+        this.alerts = alerts;
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getCount() {
         //display only first 60 alert

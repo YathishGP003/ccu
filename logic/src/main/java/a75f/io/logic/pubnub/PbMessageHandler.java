@@ -109,7 +109,7 @@ public class PbMessageHandler
                 AlertRemoveHandler.handleMessage(cmd, msg);
                 break;
             case PRE_DEF_ALERT:
-                AlertManager.getInstance(Globals.getInstance().getApplicationContext()).fetchPredefinedAlerts();
+                AlertManager.getInstance().fetchPredefinedAlerts();
                 break;
             default:
                 CcuLog.d(L.TAG_CCU_PUBNUB, "UnSupported PubNub Command : "+cmd);

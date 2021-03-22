@@ -799,6 +799,11 @@
     <string name="txt_restart">Restart Now</string>
    <string name="local_sandbox">Local Sandbox</string>
     <string name="change_ip_address">Change IP Address</string>
+   <string name="alert_definitions">Alert Definitions:</string>
+    <string name="active_alerts">Active:</string>
+    <string name="resolved">Resolved:</string>
+    <string name="in_process">In process:</string>
+    <string name="refresh">Refresh</string>
     <string-array name="mb_config_baudrate_array">
         <item>  9600 </item>
         <item>  19200 </item>

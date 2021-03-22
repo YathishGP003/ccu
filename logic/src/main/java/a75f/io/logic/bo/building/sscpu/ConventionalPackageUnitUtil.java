@@ -275,6 +275,7 @@ public class ConventionalPackageUnitUtil {
         if (curFanSpeed != fallbackFanSpeed) {
             hayStack.writeDefaultValById(fanSpeedPointId, fallbackFanSpeed);
             hayStack.writeHisValById(fanSpeedPointId, fallbackFanSpeed);
+            hayStack.clearPointArrayLevel(fanSpeedPointId, HayStackConstants.USER_APP_WRITE_LEVEL, false);
         }
     }
     
@@ -330,6 +331,7 @@ public class ConventionalPackageUnitUtil {
         if (curCondMode != conditioningMode) {
             hayStack.writeDefaultValById(conditioningModeId, conditioningMode);
             hayStack.writeHisValById(conditioningModeId, conditioningMode);
+            hayStack.clearPointArrayLevel(conditioningModeId, HayStackConstants.USER_APP_WRITE_LEVEL, false);
         }
     }
     

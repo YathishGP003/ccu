@@ -246,7 +246,7 @@ public class Point extends Entity
             p.floorRef = this.floorRef;
             p.group = this.group;
             p.id = this.id;
-            p.kind = this.kind != null ? this.kind.getValue() : Kind.NUMBER.getValue();
+//            p.kind = this.kind != null ? this.kind.getValue() : Kind.NUMBER.getValue();
             p.enums = this.enums;
             p.minVal = this.minVal;
             p.maxVal = this.maxVal;

@@ -1,9 +1,5 @@
 package a75f.io.logic.bo.building.vav;
 
-import android.util.Log;
-
-import java.util.HashMap;
-
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
 import a75.io.algos.GenericPIController;
@@ -19,7 +15,6 @@ import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
-import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
 import a75f.io.logic.bo.building.system.SystemController;
@@ -42,7 +37,7 @@ public class VavReheatProfile extends VavProfile
   
     private boolean satCompensationEnabled = false;
     
-    VAVLogicalMap vavDevice;
+    VavEquip    vavDevice;
     ControlLoop coolingLoop;
     ControlLoop heatingLoop;
     CO2Loop co2Loop;
@@ -139,13 +134,9 @@ public class VavReheatProfile extends VavProfile
             if (conditioning == SystemController.State.HEATING && state == HEATING) {
                 updateReheatDuringSystemHeating(vavEquip);
             }
+    
+            logLoopParams(node, roomTemp, loopOp);;
             
-            CcuLog.d(L.TAG_CCU_ZONE,"CoolingLoop "+node +" roomTemp :"+roomTemp+" setTempCooling: "+setTempCooling);
-            coolingLoop.dump();
-            CcuLog.d(L.TAG_CCU_ZONE,"HeatingLoop "+node +" roomTemp :"+roomTemp+" setTempHeating: "+setTempHeating);
-            heatingLoop.dump();
-            
-            CcuLog.d(L.TAG_CCU_ZONE, "System Conditioning :"+conditioning+" ZoneState : "+getState()+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition+", valve:"+valve.currentPosition);
             updateTRResponse(node);
     
             valve.applyLimits();
@@ -161,6 +152,18 @@ public class VavReheatProfile extends VavProfile
         }
     }
     
+    private void logLoopParams(short node, double roomTemp, int loopOp) {
+        
+        CcuLog.d(L.TAG_CCU_ZONE,"CoolingLoop "+node +" roomTemp :"+roomTemp+" setTempCooling: "+setTempCooling+
+                                " Op: "+coolingLoop.getLoopOutput());
+        coolingLoop.dump();
+        CcuLog.d(L.TAG_CCU_ZONE,"HeatingLoop "+node +" roomTemp :"+roomTemp+" setTempHeating: "+setTempHeating+
+                                " Op: "+heatingLoop.getLoopOutput());
+        heatingLoop.dump();
+        CcuLog.d(L.TAG_CCU_ZONE, "STATE :"+state+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition
+                                 +", valve:"+valve.currentPosition);
+    }
+    
     private void updateZoneDead(Short node) {
         
         CcuLog.d(L.TAG_CCU_ZONE,"Zone Temp Dead "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
@@ -169,7 +172,7 @@ public class VavReheatProfile extends VavProfile
         
         if (!curStatus.equals("Zone Temp Dead")) {
             CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
-            VAVLogicalMap vavDevice = vavDeviceMap.get(node);
+            VavEquip vavDevice = vavDeviceMap.get(node);
             SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
             double damperMin = vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "min");
             double damperMax = vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "max");

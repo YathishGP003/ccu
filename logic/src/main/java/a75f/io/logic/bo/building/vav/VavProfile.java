@@ -12,6 +12,7 @@ import a75.io.algos.tr.TrimResponseRequest;
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.ZonePriority;
@@ -39,7 +40,7 @@ public abstract class VavProfile extends ZoneProfile
     public static final int HEATING_LOOP_OFFSET = 20;
     public static final int REHEAT_THRESHOLD_TEMP = 50;
     
-    public HashMap<Short, VAVLogicalMap> vavDeviceMap;
+    public HashMap<Short, VavEquip> vavDeviceMap;
     SatResetListener satResetListener;
     CO2ResetListener co2ResetListener;
     SpResetListener spResetListener;
@@ -88,7 +89,7 @@ public abstract class VavProfile extends ZoneProfile
      * @param addr
      */
     public void addLogicalMap(short addr) {
-        VAVLogicalMap deviceMap = new VAVLogicalMap(getProfileType(), addr);
+        VavEquip deviceMap = new VavEquip(getProfileType(), addr);
         vavDeviceMap.put(addr, deviceMap);
         deviceMap.satResetRequest.setImportanceMultiplier(getPriority().multiplier);
         deviceMap.co2ResetRequest.setImportanceMultiplier(getPriority().multiplier);
@@ -106,7 +107,7 @@ public abstract class VavProfile extends ZoneProfile
      * @param roomRef
      */
     public void addLogicalMapAndPoints(short addr, VavProfileConfiguration config, String floorRef, String roomRef) {
-        VAVLogicalMap deviceMap = new VAVLogicalMap(getProfileType(), addr);
+        VavEquip deviceMap = new VavEquip(getProfileType(), addr);
         deviceMap.createHaystackPoints(config, floorRef, roomRef );
         vavDeviceMap.put(addr, deviceMap);
         deviceMap.satResetRequest.setImportanceMultiplier(getPriority().multiplier);
@@ -117,7 +118,7 @@ public abstract class VavProfile extends ZoneProfile
     }
     
     public void updateLogicalMapAndPoints(short addr, VavProfileConfiguration config) {
-        VAVLogicalMap deviceMap = vavDeviceMap.get(addr);
+        VavEquip deviceMap = vavDeviceMap.get(addr);
         deviceMap.updateHaystackPoints(config);
     
         deviceMap.satResetRequest.setImportanceMultiplier(getPriority().multiplier);

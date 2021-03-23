@@ -68,7 +68,7 @@ public enum SensorType
             case PM10:
                 return Port.SENSOR_PM10;
             case TEMPERATURE:
-                return Port.SENSOR_NT;
+                return Port.SENSOR_RT;
             default:
                 return null;
         }

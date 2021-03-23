@@ -268,6 +268,8 @@ public class Pulse
 				case SOUND:
 				case VOC:
 				case CO2_EQUIVALENT:
+				case PM2P5:
+				case PM10:
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), CCUUtils.roundToOneDecimal(val) );
 					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),CCUUtils.roundToOneDecimal(val));
 					break;

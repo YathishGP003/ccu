@@ -430,6 +430,14 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             }
             nativeSensorSp.setSelection(mProfileConfig.nativeSensorInput, false);
             invertLoop.setChecked(mProfileConfig.controlLoopInversion);
+            relay1Toggle.setChecked(mProfileConfig.relay1ConfigEnabled);
+    
+            ArrayAdapter<Double> percentAdapter = getPercentageSpinnerAdapter();
+            relay1OnThreshold.setSelection((int)mProfileConfig.relay1OnThresholdVal);
+            relay1OffThreshold.setSelection((int)mProfileConfig.relay1OffThresholdVal);
+            relay2Toggle.setChecked(mProfileConfig.relay2ConfigEnabled);
+            relay2OnThreshold.setSelection((int)mProfileConfig.relay2OnThresholdVal);
+            relay2OffThreshold.setSelection((int)mProfileConfig.relay2OffThresholdVal);
         } else {
             analogout1AtMaxSp.setSelection(analogAdapter.getPosition(10), false);
             analog1InSensorSp.setSelection(1, false);
@@ -591,7 +599,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         if (p.relay1ConfigEnabled) {
             p.relay1OnThresholdVal = Double.parseDouble(relay1OnThreshold.getSelectedItem().toString().replace("%",
                                                                                                                ""));
-            p.relay1OffThresholdVal = Double.parseDouble(relay1OnThreshold.getSelectedItem().toString().replace("%",
+            p.relay1OffThresholdVal = Double.parseDouble(relay1OffThreshold.getSelectedItem().toString().replace("%",
                                                                                                                ""));
         }
     
@@ -599,7 +607,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         if (p.relay2ConfigEnabled) {
             p.relay2OnThresholdVal = Double.parseDouble(relay2OnThreshold.getSelectedItem().toString().replace("%",
                                                                                                                ""));
-            p.relay2OffThresholdVal = Double.parseDouble(relay2OnThreshold.getSelectedItem().toString().replace("%",
+            p.relay2OffThresholdVal = Double.parseDouble(relay2OffThreshold.getSelectedItem().toString().replace("%",
                                                                                                                 ""));
         }
         p.controlLoopInversion = invertLoop.isChecked();

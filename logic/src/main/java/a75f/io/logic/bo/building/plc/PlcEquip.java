@@ -310,6 +310,13 @@ public class PlcEquip {
         device.analog1Out.setPointRef(controlVariableId);
         device.analog1Out.setType((int)config.analog1AtMinOutput + "-" + (int)config.analog1AtMaxOutput+"v");
         device.analog1Out.setEnabled(true);
+    
+        HashMap equipHash = CCUHsApi.getInstance().read("equip and group == \"" + nodeAddr + "\"");
+        Equip equip = new Equip.Builder().setHashMap(equipHash).build();
+        
+        PlcRelayConfigHandler.createRelayConfigPoints(equip, config, device, Tags.RELAY1, CCUHsApi.getInstance());
+        PlcRelayConfigHandler.createRelayConfigPoints(equip, config, device, Tags.RELAY2, CCUHsApi.getInstance());
+        
         device.addPointsToDb();
 
         hayStack.syncEntityTree();
@@ -644,6 +651,21 @@ public class PlcEquip {
         p.expectZeroErrorAtMidpoint = hayStack.readDefaultVal("point and config and enabled and zero and error and midpoint and equipRef == \"" + equipRef + "\"") > 0;
         p.nativeSensorInput =
             hayStack.readDefaultVal("point and config and native and input and sensor and equipRef == \"" + equipRef + "\"").intValue();
+        p.relay1ConfigEnabled =
+            hayStack.readDefaultVal("point and config and relay1 and enabled and equipRef == \"" + equipRef + "\"") > 0;
+        p.relay1OnThresholdVal =
+            hayStack.readDefaultVal("point and config and relay1 and on and threshold and equipRef == \"" + equipRef + "\"");
+        p.relay1OffThresholdVal =
+            hayStack.readDefaultVal("point and config and relay1 and off and threshold and equipRef == \"" + equipRef + "\"");
+        p.relay2ConfigEnabled =
+            hayStack.readDefaultVal("point and config and relay2 and enabled and equipRef == \"" + equipRef + "\"") > 0;
+        p.relay2OnThresholdVal =
+            hayStack.readDefaultVal("point and config and relay2 and on and threshold and equipRef == \"" + equipRef + "\"");
+        p.relay2OffThresholdVal =
+            hayStack.readDefaultVal("point and config and relay2 and off and threshold and equipRef == \"" + equipRef + "\"");
+    
+        p.controlLoopInversion =
+            hayStack.readDefaultVal("point and config and control and loop and inversion and equipRef == \"" + equipRef + "\"") > 0;
     
         return p;
     }
@@ -832,12 +854,35 @@ public class PlcEquip {
 
         hayStack.writeDefaultVal("point and config and enabled and zero and error and midpoint and equipRef == \"" + equipRef + "\"", config.expectZeroErrorAtMidpoint ? 1.0 : 0);
         SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_OUT_ONE.toString(), (int) config.analog1AtMinOutput + "-" + (int) config.analog1AtMaxOutput +"v");
-
-
+    
         targetValue = config.pidTargetValue;
         spSensorOffset = config.setpointSensorOffset;
         isEnabledAnalog2InForSp = config.useAnalogIn2ForSetpoint;
         isEnabledZeroErrorMidpoint = config.expectZeroErrorAtMidpoint;
+    
+        hayStack.writeDefaultVal("point and config and control and loop and inversion and equipRef == \"" + equipRef + "\"",
+                                 config.controlLoopInversion ? 1.0 : 0);
+        
+        handleRelayConfigUpdate(config);
+    }
+    
+    private void handleRelayConfigUpdate(PlcProfileConfiguration config) {
+        
+        hayStack.writeDefaultVal("point and config and relay1 and enabled and equipRef == \"" + equipRef + "\"",
+                                 config.relay1ConfigEnabled ? 1.0 : 0);
+        hayStack.writeDefaultVal("point and config and relay1 and on and threshold and equipRef == \"" + equipRef +
+                                 "\"", config.relay1OnThresholdVal);
+        hayStack.writeDefaultVal("point and config and relay1 and off and threshold and equipRef == \"" + equipRef +
+                                 "\"", config.relay1OnThresholdVal);
+        SmartNode.setPointEnabled(nodeAddr, Port.RELAY_ONE.name(), config.relay1ConfigEnabled);
+        
+        hayStack.writeDefaultVal("point and config and relay2 and enabled and equipRef == \"" + equipRef + "\"",
+                                 config.relay2ConfigEnabled ? 1.0 : 0);
+        hayStack.writeDefaultVal("point and config and relay2 and on and threshold and equipRef == \"" + equipRef +
+                                 "\"", config.relay2OnThresholdVal);
+        hayStack.writeDefaultVal("point and config and relay2 and off and threshold and equipRef == \"" + equipRef +
+                                 "\"", config.relay2OnThresholdVal);
+        SmartNode.setPointEnabled(nodeAddr, Port.RELAY_TWO.name(), config.relay2ConfigEnabled);
     }
     
     /**

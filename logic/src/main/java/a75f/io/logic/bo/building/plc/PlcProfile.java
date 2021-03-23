@@ -119,16 +119,19 @@ public class PlcProfile extends ZoneProfile
             return;
         }
         
-        double relay1OnThreshold = plcEquip.getConfigNumVal(relay+" and on and threshold");
-        double relay1OffThreshold = plcEquip.getConfigNumVal(relay+" and off and threshold");
+        double relayOnThreshold = plcEquip.getConfigNumVal(relay+" and on and threshold");
+        double relayOffThreshold = plcEquip.getConfigNumVal(relay+" and off and threshold");
     
         double relayStatus = plcEquip.getCmdVal(relay);
-    
-        if (loopOp > relay1OnThreshold) {
+        Log.d(L.TAG_CCU_ZONE, relay+" status : "+relayStatus);
+        if (loopOp > relayOnThreshold) {
             plcEquip.setCmdVal(relay, 1);
-        } else if (relayStatus > 0 && loopOp < relay1OffThreshold) {
+            Log.d(L.TAG_CCU_ZONE, relay+" ON");
+        } else if (relayStatus > 0 && loopOp < relayOffThreshold) {
             plcEquip.setCmdVal(relay, 0);
+            Log.d(L.TAG_CCU_ZONE, relay+" OFF");
         }
+        
     }
     
     

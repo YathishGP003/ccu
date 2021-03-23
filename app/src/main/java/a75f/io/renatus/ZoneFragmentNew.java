@@ -1962,9 +1962,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
                 getActivity(), R.array.smartstat_fanmode, R.layout.spinner_zone_item);
         if(cpuEquipPoints.containsKey("fanEnabled")) {
-            if (cpuEquipPoints.get("fanEnabled").toString().contains("No High Fan"))
+            if (cpuEquipPoints.get("fanEnabled").toString().contains("No High Fan")) {
                 fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_fanmode_low, R.layout.spinner_zone_item);
-            else if (cpuEquipPoints.get("fanEnabled").toString().contains("No Fan")) {
+                if (fanMode > fanModeAdapter.getCount()) {
+                    fanMode = StandaloneFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
+                }
+            } else if (cpuEquipPoints.get("fanEnabled").toString().contains("No Fan")) {
                 fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_fanmode_off, R.layout.spinner_zone_item);
                 fanMode = 0;
             }
@@ -2185,9 +2188,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 getActivity(), R.array.smartstat_fanmode, R.layout.spinner_zone_item);
 
         if(hpuEquipPoints.containsKey("fanEnabled")) {
-            if (hpuEquipPoints.get("fanEnabled").toString().contains("No High Fan"))
+            if (hpuEquipPoints.get("fanEnabled").toString().contains("No High Fan")) {
                 fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_fanmode_low, R.layout.spinner_zone_item);
-            else if (hpuEquipPoints.get("fanEnabled").toString().contains("No Fan")) {
+                if (fanMode > fanModeAdapter.getCount()) {
+                    fanMode = StandaloneFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
+                }
+            } else if (hpuEquipPoints.get("fanEnabled").toString().contains("No Fan")) {
                 fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_fanmode_off, R.layout.spinner_zone_item);
                 fanMode = 0;
             }

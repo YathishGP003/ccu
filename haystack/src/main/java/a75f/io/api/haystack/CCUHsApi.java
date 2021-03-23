@@ -1531,6 +1531,18 @@ public class CCUHsApi
         return getGUID(siteLuid);
     }
 
+    @Nullable
+    public String getGlobalSiteIdNoAtSign() {
+        String guid = getGlobalSiteId();
+        if (guid == null) return null;
+
+        if (guid.startsWith("@")) {
+            return guid.substring(1);
+        }
+        return guid;
+    }
+
+
     /**
      * This methods returns the Local ccuId, not the global ccuId.
      */

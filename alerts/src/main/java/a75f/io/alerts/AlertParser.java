@@ -14,55 +14,30 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import a75f.io.logger.CcuLog;
+
 /**
  * Created by samjithsadasivan on 4/23/18.
+ *
+ * This class has just two remaining functions, both of which could coneivably go away --
+ *
+ * 1) gets the wifi alert def from assets folder.
+ * 2) A place holder for jackson deserialization.  (I'll also add serialization since we now need it).
  */
-
 public class AlertParser
 {
-    public final String SYSTEM_ALERTS_FILE = "SystemAlerts.json";
-    public final String ZONE_ALERTS_FILE = "ZoneAlerts.json";
-    public final String NODE_ALERTS_FILE = "NodeAlerts.json";
     public final String WIFI_ALERTS_FILE = "WifiSignalAlerts.json";
 
-    public ArrayList<AlertDefinition> parseAllAlerts(Context c) {
-        ArrayList<AlertDefinition> systemAlerts = parseSystemAlerts(c);
-        ArrayList<AlertDefinition> zoneAlerts = parseZoneAlerts(c);
-        ArrayList<AlertDefinition> nodeAlerts = parseNodeAlerts(c);
-    
-        ArrayList<AlertDefinition> allAlerts = new ArrayList<>();
-        
-        if (systemAlerts != null) {
-            allAlerts.addAll(systemAlerts);
-        }
-        if (zoneAlerts != null) {
-            allAlerts.addAll(zoneAlerts);
-        }
-        if (nodeAlerts != null) {
-            allAlerts.addAll(nodeAlerts);
-        }
-        
-        return allAlerts;
-    }
-    
-    public ArrayList<AlertDefinition> parseSystemAlerts(Context c) {
-        
-        String alerts = readFileFromAssets(c, SYSTEM_ALERTS_FILE);
-        return alerts != null ? parseAlertsString(alerts) : null;
-    }
-    
-    public ArrayList<AlertDefinition> parseZoneAlerts(Context c) {
-        
-        String alerts = readFileFromAssets(c, ZONE_ALERTS_FILE);
-        return alerts != null ? parseAlertsString(alerts) : null;
-    }
-    
-    public ArrayList<AlertDefinition> parseNodeAlerts(Context c) {
-        
-        String alerts = readFileFromAssets(c, NODE_ALERTS_FILE);
-        return alerts != null ? parseAlertsString(alerts) : null;
+
+    ObjectMapper objectMapper;
+
+    public AlertParser() {
+        objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
     }
 
+    // called from AlertProcessor.    Check whether this is in predefined alerts on service now.
     public ArrayList<AlertDefinition> parseWifiAlerts(Context c) {
 
         String alerts = readFileFromAssets(c, WIFI_ALERTS_FILE);
@@ -74,9 +49,6 @@ public class AlertParser
         ArrayList<AlertDefinition> alertList = null;
         try
         {
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
             AlertDefinition[] pojos = objectMapper.readValue(json, AlertDefinition[].class);
             alertList = new ArrayList<>(Arrays.asList(pojos));
             
@@ -87,9 +59,26 @@ public class AlertParser
         }
         return alertList;
     }
+
+    /**
+     * Used to create String to write to prefs, using ObjectMapper.
+     */
+    public String alertDefsToString(ArrayList<AlertDefinition> alertDefs) {
+
+        try {
+            AlertDefinition[] alertDefsArray = alertDefs.toArray(new AlertDefinition[alertDefs.size()]);
+            return objectMapper.writeValueAsString(alertDefsArray);
+        }
+        catch (IOException e) {
+            CcuLog.i("CCU_ALERTS", "Error serialzing alert defs.", e);
+
+            // We probably want the app to crash here.  Fail-fast.   (and fix)
+            return null;
+        }
+    }
     
     
-    public String readFileFromAssets(Context ctx, String pathToJson){
+    private String readFileFromAssets(Context ctx, String pathToJson){
         InputStream rawInput;
         ByteArrayOutputStream rawOutput = null;
         try {

@@ -1,5 +1,7 @@
 package a75f.io.api.haystack;
 
+import javax.annotation.Nullable;
+
 import io.objectbox.annotation.Convert;
 import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
@@ -14,7 +16,7 @@ import io.objectbox.converter.PropertyConverter;
 public class Alert
 {
     @Id
-    public long id;
+    public long id;     // like an index (from object box?)
     public String mTitle; //Short message
     public String mMessage; //Details
     public String mNotificationMsg; //Tooltip info message
@@ -30,11 +32,11 @@ public class Alert
     //Backend guid of the alert
     public String _id;
     
-    public String ref;
+    public @Nullable String ref;
     
     public String deviceRef;
-    public String siteRef;
-    
+
+    // true if the alert has been synced (created or updated) with server
     public boolean syncStatus;
     public String mAlertType;
     
@@ -70,14 +72,6 @@ public class Alert
     public void setDeviceRef(String deviceRef)
     {
         this.deviceRef = deviceRef;
-    }
-    public String getSiteRef()
-    {
-        return siteRef;
-    }
-    public void setSiteRef(String siteRef)
-    {
-        this.siteRef = siteRef;
     }
     public long getId()
     {
@@ -152,6 +146,7 @@ public class Alert
     {
         isFixed = fixed;
     }
+    public boolean isActive() { return !isFixed; }
     public String getGuid()
     {
         return _id;
@@ -160,13 +155,13 @@ public class Alert
     {
         this._id = alertId;
     }
-    
+
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
         b.append(" {").append(id).append(", ").append(mTitle).append(",").append(mMessage).append(", ").append(",")
          .append(ref).append(", ").append(startTime).append(", ").append(endTime).append(", ").append(isFixed).append(", ")
-         .append(deviceRef).append(", ").append(siteRef).append(", ").append(syncStatus).append(", ").append(_id).append("}");
+         .append(deviceRef).append(", ").append(syncStatus).append(", ").append(_id).append("}");
         return b.toString();
     }
     public Alert(){

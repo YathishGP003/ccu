@@ -250,7 +250,22 @@ public class PlcEquip {
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
         CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
-
+    
+        Point controlLoopInversion = new Point.Builder()
+                                              .setDisplayName(equipDis + "-controlLoopInversion")
+                                              .setEquipRef(equipRef)
+                                              .setSiteRef(siteRef)
+                                              .setRoomRef(roomRef)
+                                              .setFloorRef(floorRef)
+                                              .addMarker("config").addMarker("pid").addMarker("zone").addMarker("writable")
+                                              .addMarker("control").addMarker("loop").addMarker("inversion")
+                                              .setGroup(String.valueOf(nodeAddr))
+                                              .setEnums("false,true")
+                                              .setTz(tz)
+                                              .build();
+        String controlLoopInversionId = hayStack.addPoint(controlLoopInversion);
+        hayStack.writeDefaultValById(controlLoopInversionId, config.controlLoopInversion ? 1.0 : 0);
+        
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
 
         if (config.analog1InputSensor > 0) {
@@ -1136,6 +1151,22 @@ public class PlcEquip {
     public void setEquipStatus(int signal) {
         hayStack.writeDefaultVal("point and status and message and equipRef == \"" + equipRef + "\"", "Output Loop Signal is " + signal + "%");
 
+    }
+    
+    public void setConfigNumVal(String tags,double val) {
+        CCUHsApi.getInstance().writeDefaultVal("point and config and pid and "+tags+" and group == \""+nodeAddr+"\"", val);
+    }
+    
+    public void setCmdVal(String tags,double val) {
+        CCUHsApi.getInstance().writeHisValByQuery("point and cmd and pid and "+tags+" and group == \""+nodeAddr+"\"", val);
+    }
+    
+    public double getConfigNumVal(String tags) {
+        return CCUHsApi.getInstance().readDefaultVal("point and config and pid and "+tags+" and group == \""+nodeAddr+ "\"");
+    }
+    
+    public double getCmdVal(String tags) {
+        return CCUHsApi.getInstance().readHisValByQuery("point and cmd and pid and "+tags+" and group == \""+nodeAddr+ "\"");
     }
 
     public double getTargetValue() {

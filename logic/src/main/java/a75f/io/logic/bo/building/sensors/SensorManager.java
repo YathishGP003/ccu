@@ -124,7 +124,6 @@ public class SensorManager {
         nativeSensors.add(new NativeSensor("Native-Humidity", "%", 0, 100, 1, SensorType.HUMIDITY));
         nativeSensors.add(new NativeSensor("Native-CO2", "ppm", 0, 2000, 100, SensorType.CO2));
         nativeSensors.add(new NativeSensor("Native-CO", "ppm", 0, 100, 1, SensorType.CO));
-        nativeSensors.add(new NativeSensor("Native-NO2", "ppm", 0, 5, 0.1, SensorType.NO2));
         nativeSensors.add(new NativeSensor("Native-VOC", "ppb", 0, 60000, 1000, SensorType.VOC));
         nativeSensors.add(new NativeSensor("Native-Pressure", "inches wc", 0, 2, 0.1, SensorType.PRESSURE));
         nativeSensors.add(new NativeSensor("Native-Sound", "dB", 0, 140, 1, SensorType.SOUND));

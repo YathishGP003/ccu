@@ -85,6 +85,9 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
     @BindView(R.id.zeroErrorAtMp)
     ToggleButton zeroErrorAtMP;
     
+    @BindView(R.id.invertLoop)
+    ToggleButton invertLoop;
+    
     @BindView(R.id.relay1Toggle)
     ToggleButton relay1Toggle;
     
@@ -329,8 +332,18 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 Log.d("CCU_UI"," analog2InSensorSp Selected : "+i);
                 ArrayList<Double> targetVal = new ArrayList<Double>();
                 Sensor r = SensorManager.getInstance().getExternalSensorList().get(i);
-                for (int pos = (int)(100 * (r.minEngineeringValue < 0 ? r.minEngineeringValue : -1*r.maxEngineeringValue)); pos <= (100* r.maxEngineeringValue); pos+= (100 * r.incrementEgineeringValue)) {
-                    targetVal.add(pos /100.0);
+                Log.d("CCU_UI",r.sensorName);
+                if (r.sensorName.equals("Generic 0-10") ) {
+                    Log.d("CCU_UI"," Gneric 0-10 Selected : "+i);
+                    for (double pos = -100; pos <= 100; pos+=0.5) {
+                        targetVal.add(Math.round(pos * 10) /10.0);
+                    }
+                } else {
+                    for (int pos =
+                         (int) (100 * (r.minEngineeringValue < 0 ? r.minEngineeringValue : -1 * r.maxEngineeringValue));
+                         pos <= (100 * r.maxEngineeringValue); pos += (100 * r.incrementEgineeringValue)) {
+                        targetVal.add(pos / 100.0);
+                    }
                 }
                 ArrayAdapter<Double> offsetAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, targetVal);
                 offsetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -416,6 +429,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 targetValSp.setEnabled(false);
             }
             nativeSensorSp.setSelection(mProfileConfig.nativeSensorInput, false);
+            invertLoop.setChecked(mProfileConfig.controlLoopInversion);
         } else {
             analogout1AtMaxSp.setSelection(analogAdapter.getPosition(10), false);
             analog1InSensorSp.setSelection(1, false);
@@ -572,6 +586,23 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         p.analog1AtMaxOutput = Double.parseDouble(analogout1AtMaxSp.getSelectedItem().toString());
         p.setpointSensorOffset = Double.parseDouble(sensorOffsetSp.getSelectedItem().toString());
         p.nativeSensorInput = nativeSensorSp.getSelectedItemPosition();
+        
+        p.relay1ConfigEnabled = relay1Toggle.isChecked();
+        if (p.relay1ConfigEnabled) {
+            p.relay1OnThresholdVal = Double.parseDouble(relay1OnThreshold.getSelectedItem().toString().replace("%",
+                                                                                                               ""));
+            p.relay1OffThresholdVal = Double.parseDouble(relay1OnThreshold.getSelectedItem().toString().replace("%",
+                                                                                                               ""));
+        }
+    
+        p.relay2ConfigEnabled = relay2Toggle.isChecked();
+        if (p.relay2ConfigEnabled) {
+            p.relay2OnThresholdVal = Double.parseDouble(relay2OnThreshold.getSelectedItem().toString().replace("%",
+                                                                                                               ""));
+            p.relay2OffThresholdVal = Double.parseDouble(relay2OnThreshold.getSelectedItem().toString().replace("%",
+                                                                                                                ""));
+        }
+        p.controlLoopInversion = invertLoop.isChecked();
         mPlcProfile.getProfileConfiguration().put(mSmartNodeAddress, p);
 
         String processVariableTag = analog1InSensorSp.getSelectedItem().toString();

@@ -173,7 +173,7 @@
                             android:textAppearance="@style/title_normal" />
 
                         <ToggleButton
-                            android:id="@+id/invertLoopToggle"
+                            android:id="@+id/invertLoop"
                             android:layout_width="46.12dp"
                             android:layout_height="27.42dp"
                             android:layout_alignParentRight="true"

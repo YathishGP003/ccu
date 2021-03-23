@@ -22,10 +22,10 @@ public enum SensorType
     CO2_EQUIVALENT("co2_equivalent"),
     ILLUMINANCE ("illuminance"),
     UVI("uvi"),
-    NO2("no2"),
     PM2P5("pm2p5"),
     PM10("pm10"),
-    TEMPERATURE("temperature");
+    TEMPERATURE("temperature"); // Temperature is not truly a native sensor and it is sent as part of regular
+    // update message unlike the other native sensors, which are sent as SensorReadings.
     String name;
     
     SensorType(String val) {
@@ -63,8 +63,6 @@ public enum SensorType
                 return Port.SENSOR_ILLUMINANCE;
             case UVI:
                 return Port.SENSOR_UVI;
-            case NO2:
-                return Port.SENSOR_NO2;
             case PM2P5:
                 return Port.SENSOR_PM2P5;
             case PM10:

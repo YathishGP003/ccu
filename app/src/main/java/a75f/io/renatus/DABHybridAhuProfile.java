@@ -125,6 +125,22 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
         if(getArguments() != null) {
             isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
         }
+        /*systemProfile = (DabAdvancedHybridRtu) L.ccu().systemProfile;
+        relay1Tb.setChecked(systemProfile.getConfigEnabled("relay1") > 0);
+        relay2Tb.setChecked(systemProfile.getConfigEnabled("relay2") > 0);
+        relay3Tb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
+        relay4Tb.setChecked(systemProfile.getConfigEnabled("relay4") > 0);
+        relay5Tb.setChecked(systemProfile.getConfigEnabled("relay5") > 0);
+        relay6Tb.setChecked(systemProfile.getConfigEnabled("relay6") > 0);
+        relay7Tb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
+
+        ahuAnalog1Tb.setChecked(systemProfile.getConfigEnabled("analog1") > 0);
+        ahuAnalog2Tb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
+        ahuAnalog3Tb.setChecked(systemProfile.getConfigEnabled("analog3") > 0);
+        ahuAnalog4Tb.setChecked(systemProfile.getConfigEnabled("analog4") > 0);
+
+        setUpCheckBoxes();
+        setUpSpinners();*/
         return rootView;
     }
     
@@ -281,14 +297,14 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
     
     private void setUpSpinners()
     {
-        relay1Spinner.setVisibility(View.VISIBLE);
+        /*relay1Spinner.setVisibility(View.VISIBLE);
         relay2Spinner.setVisibility(View.VISIBLE);
         relay3Spinner.setVisibility(View.VISIBLE);
         relay4Spinner.setVisibility(View.VISIBLE);
         relay5Spinner.setVisibility(View.VISIBLE);
         relay6Spinner.setVisibility(View.VISIBLE);
         relay7Spinner.setVisibility(View.VISIBLE);
-
+*/
         relay1Spinner.setSelection((int) systemProfile.getConfigAssociation("relay1"), false);
         relay2Spinner.setSelection((int) systemProfile.getConfigAssociation("relay2"), false);
         relay3Spinner.setSelection((int) systemProfile.getConfigAssociation("relay3"), false);

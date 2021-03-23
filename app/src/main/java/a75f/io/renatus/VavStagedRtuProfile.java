@@ -29,6 +29,7 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
@@ -90,6 +91,16 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
         if(getArguments() != null) {
             isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
         }
+        systemProfile = (VavStagedRtu) L.ccu().systemProfile;
+        relay1Cb.setChecked(systemProfile.getConfigEnabled("relay1") > 0);
+        relay2Cb.setChecked(systemProfile.getConfigEnabled("relay2") > 0);
+        relay3Cb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
+        relay4Cb.setChecked(systemProfile.getConfigEnabled("relay4") > 0);
+        relay5Cb.setChecked(systemProfile.getConfigEnabled("relay5") > 0);
+        relay6Cb.setChecked(systemProfile.getConfigEnabled("relay6") > 0);
+        relay7Cb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
+        setUpCheckBoxes();
+        setUpSpinners();
         return rootView;
     }
     
@@ -211,13 +222,13 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
     }
 
     private void setUpSpinners() {
-        relay1Spinner.setVisibility(View.VISIBLE);
+        /*relay1Spinner.setVisibility(View.VISIBLE);
         relay2Spinner.setVisibility(View.VISIBLE);
         relay3Spinner.setVisibility(View.VISIBLE);
         relay4Spinner.setVisibility(View.VISIBLE);
         relay5Spinner.setVisibility(View.VISIBLE);
         relay6Spinner.setVisibility(View.VISIBLE);
-        relay7Spinner.setVisibility(View.VISIBLE);
+        relay7Spinner.setVisibility(View.VISIBLE);*/
 
         relay1Spinner.setSelection((int)systemProfile.getConfigAssociation("relay1"), false);
         relay2Spinner.setSelection((int)systemProfile.getConfigAssociation("relay2"), false);

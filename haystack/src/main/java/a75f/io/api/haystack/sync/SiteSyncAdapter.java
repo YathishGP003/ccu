@@ -1,5 +1,7 @@
 package a75f.io.api.haystack.sync;
 
+import android.content.SharedPreferences;
+
 import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.Site;
 import a75f.io.constants.HttpConstants;
@@ -24,6 +26,13 @@ import a75f.io.logger.CcuLog;
 public class SiteSyncAdapter extends EntitySyncAdapter {
 
     private static final String LOG_PREFIX = "CCU_HS_SITESYNC";
+    private static final String NEEDS_SITE_SYNC = "needs_site_sync";
+
+    private final SharedPreferences sharedPreferences;
+
+    public SiteSyncAdapter(SharedPreferences sharedPreferences) {
+        this.sharedPreferences = sharedPreferences;
+    }
 
     @Override
     public synchronized boolean onSync() {
@@ -36,12 +45,29 @@ public class SiteSyncAdapter extends EntitySyncAdapter {
         HDict sDict =  CCUHsApi.getInstance().readHDict("site");
         if (StringUtils.isBlank(siteGuid)) {
             synced = siteCreationSync(sDict);
-        } else {
+        } else if (needsSync()) {
             synced = siteUpdateSync(sDict);
+            if (sharedPreferences != null) {
+                sharedPreferences.edit().putBoolean(NEEDS_SITE_SYNC, !synced).apply();
+            }
+        } else {
+            synced = true;
         }
 
         CcuLog.i(LOG_PREFIX, "<- doSyncSite");
         return synced;
+    }
+
+    public void requireSync() {
+        if (sharedPreferences != null) {
+            sharedPreferences.edit().putBoolean(NEEDS_SITE_SYNC, true).apply();
+        }
+    }
+
+    private boolean needsSync() {
+        if (sharedPreferences == null) return true;  // in unit test
+
+        return sharedPreferences.getBoolean(NEEDS_SITE_SYNC, false);
     }
 
     private boolean siteCreationSync(HDict siteDict) {

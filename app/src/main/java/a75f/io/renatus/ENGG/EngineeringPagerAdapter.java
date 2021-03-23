@@ -3,8 +3,6 @@ package a75f.io.renatus.ENGG;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
-
-import a75f.io.renatus.ENGG.alertdefs.AlertDefsFragment;
 import a75f.io.renatus.ENGG.logger.LogFragment;
 
 /**
@@ -35,10 +33,8 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 				fragment = LogFragment.newInstance();
 				break;
 			case 3:
-				fragment = new AlertDefsFragment();
+				fragment = FieldTestFragment.newInstance();
 				break;
-			//	fragment = FieldTestFragment.newInstance();
-			//	break;
 			//case 3:
 			//	fragment = SerialMessageFragment.newInstance();
 			//	break;
@@ -68,11 +64,12 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 			case 2:
 				return "CcuLog";
 			case 3:
-				return "Alert Defs";
+				return "Field Test";
 			case 4:
 				return "OTA Update";
 			case 5:
 				return "Modbus Test";
+
 		}
 		return null;
 	}

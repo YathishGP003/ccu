@@ -787,6 +787,7 @@ public class CreateNewSite extends Fragment {
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         String localSiteId = ccuHsApi.addSite(s75f);
         CCUHsApi.getInstance().setPrimaryCcu(true);
+        Log.i(TAG, "TC: LocalSiteID: " + localSiteId + " tz " + s75f.getTz());
         BuildingTuners.getInstance().updateBuildingTuners();
         //SystemEquip.getInstance();
         Log.i(TAG, "LocalSiteID: " + localSiteId);

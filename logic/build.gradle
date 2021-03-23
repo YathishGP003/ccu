@@ -53,7 +53,7 @@ android {
         local {
             minifyEnabled false
             buildConfigField "String", 'API_BASE_IP', properties.getProperty("api.base.ip", "")
-            // The base URLs for local are stored in RenatusServicesEnvironment.kt.  So BuildConfig is empty
+            // The rest here are not used in local, but we have them here so the app compiles.
             buildConfigField "String", 'HAYSTACK_API_BASE', '\"\"'
             buildConfigField "String", 'CARETAKER_API_BASE', '\"\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"\"'
@@ -64,30 +64,30 @@ android {
             buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo-75f-service-dev.azurewebsites.net/v1/\"'
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-dev.azurewebsites.net/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-dev.azurewebsites.net/\"'
-            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-dev.azurewebsites.net/\"'
-        }
-        qa {
-            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo-75f-service-qa.azurewebsites.net/v1/\"'
-            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-qa.azurewebsites.net/api/v1/\"'
-            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-qa.azurewebsites.net/\"'
-            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-qa.azurewebsites.net/\"'
-            minifyEnabled false
-        }
-        staging {
-            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo-75f-service-staging.azurewebsites.net/v1/\"'
-            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-staging.azurewebsites.net/api/v1/\"'
-            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-staging.azurewebsites.net/\"'
-            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service-staging.azurewebsites.net/\"'
-            minifyEnabled false
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts-75f-service-dev.azurewebsites.net/\"'
         }
         prod {
             minifyEnabled false
             buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo-75f-service.azurewebsites.net/v1/\"'
             buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service.azurewebsites.net/api/v1/\"'
             buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service.azurewebsites.net/\"'
-            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts-75f-service.azurewebsites.net/\"'
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+        }
+        qa {
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo-75f-service-qa.azurewebsites.net/v1/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-qa.azurewebsites.net/api/v1/\"'
+            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-qa.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts-75f-service-qa.azurewebsites.net/\"'
+            minifyEnabled false
+        }
+        staging {
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo-75f-service-staging.azurewebsites.net/v1/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service-staging.azurewebsites.net/api/v1/\"'
+            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service-staging.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alerts-75f-service-staging.azurewebsites.net/\"'
+            minifyEnabled false
         }
     }
 

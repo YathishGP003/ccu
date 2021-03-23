@@ -2,16 +2,10 @@ package a75f.io.alerts;
 
 import android.content.Context;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import javax.annotation.Nonnull;
-
-import a75f.io.alerts.cloud.AlertsService;
-import a75f.io.alerts.cloud.ServiceGenerator;
 import a75f.io.api.haystack.Alert;
-import a75f.io.logger.CcuLog;
-import io.reactivex.rxjava3.core.Completable;
 /**
  * Created by samjithsadasivan on 4/24/18.
  */
@@ -22,36 +16,20 @@ import io.reactivex.rxjava3.core.Completable;
 
 public class AlertManager
 {
+    private Context mContext;
     private static AlertManager mInstance;
     
+    boolean alertsDefinied;
+    
     AlertProcessor processor;
-
-    // This is set from logic module, RenatusServiceEnv#setupUrls()
-    // This is needed, instead of just injecting an instance RenatusServiceEnv, b/c of the way the modules
-    //   are set up.
-    private AlertsService alertsService = null;
-
-    public void setAlertsApiBase(String alertsApiBase) {
-        this.alertsService = ServiceGenerator.getInstance().updateAlertsUrl(alertsApiBase);
+    
+    private AlertManager(Context c) {
+        processor = new AlertProcessor(c);
     }
-
-    /**
-     * Depending on setAlertsApiBase being called to ensure non-nullness.
-     */
-    public @Nonnull AlertsService getAlertsService() {
-        return alertsService;
-    }
-
-    private AlertManager(Context appContext, String alertsApiBase) {
-        CcuLog.d("CCU_ALERTS", "Instantiating AlertManager");
-        setAlertsApiBase(alertsApiBase);
-
-        processor = new AlertProcessor(appContext, this.alertsService);
-    }
-
-    public static AlertManager getInstance(Context c, String alertsApiBase) {
+    
+    public static AlertManager getInstance(Context c) {
         if (mInstance == null) {
-            mInstance = new AlertManager(c, alertsApiBase);
+            mInstance = new AlertManager(c);
         }
         return mInstance;
     }
@@ -63,6 +41,39 @@ public class AlertManager
             throw new IllegalStateException("No instance found");
         }
         return mInstance;
+    }
+    
+    public void init(Context c) {
+        mContext = c;
+        readAlertDefinitions();
+    }
+    
+    /**
+     * Add list of json alert definitions as string
+     */
+    public void addAlertDefinitions(String alerts) {
+        alertsDefinied = true;
+        //processor.updateAlertDefinitions(alerts);
+        processor.clearAlerts();
+    }
+    
+    /**
+     * Read alert definitions from local assets folder.
+     * This is implicitly done if init is called.
+     */
+    public void readAlertDefinitions() {
+        alertsDefinied = true;
+        //processor.updateAlertDefinitions(mContext);
+        processor.clearAlerts();
+    
+    }
+    
+    public List<Alert> processAlerts(Map<String,Object> timeSeriesMap) {
+        if (alertsDefinied != true) {
+            throw new IllegalStateException("AlertManager not initialized");
+        }
+        //processor.runProcess(timeSeriesMap);
+        return processor.getAllAlerts();
     }
     
     public void processAlerts() {
@@ -89,19 +100,18 @@ public class AlertManager
         return processor.getActiveAlerts();
     }
 
-    public List<Alert> getAllAlertsOldestFirst() {
-        return processor.getAllAlertsOldestFirst();
+    public List<Alert> getAllAlerts() {
+        return processor.getAllAlerts();
     }
-
-    public List<Alert> getAllAlertsNotInternal() {
-        return processor.getAllAlertsNotInternal();
+    
+    public void clearAlerts() {
+        processor.clearAlerts();
     }
-
-    /** Exposed for monitoring */
-    public HashMap<String, Integer> getOffsetCounter() {
-        return processor.offsetCounter;
-    }
-
+    
+    /*public void clearAlertDefinitions() {
+        processor.alertDefinitions.clear();
+    }*/
+    
     public List<AlertDefinition> getAlertDefinitions() {
         return processor.getAlertDefinitions();
     }
@@ -113,13 +123,12 @@ public class AlertManager
     public void fixAlert(Alert a) {
         processor.fixAlert(a);
     }
-
-    public Completable deleteAlert(Alert a) {
-        return processor.deleteAlert(a);
+    public void deleteAlert(Alert a) {
+        processor.deleteAlert(a);
     }
     
-    public void deleteAlertInternal(String id) {
-        processor.deleteAlertInternal(id);
+    public void deleteAlert(String id) {
+        processor.deleteAlert(id);
     }
     public void addAlertDefinition(AlertDefinition alert) {
         processor.addAlertDefinition(alert);
@@ -128,18 +137,23 @@ public class AlertManager
         processor.deleteCustomAlertDefinition(_id);
     }
 
-    // This method seems to mark an alert as fixed if it has been synced, and
-    //  delete the alert if it hasn't
-    public void clearAlertsWhenAppClose(){
+    public Context getApplicationContext() {
+        return mContext;
+    }
 
-        processor.close();
+    public void setApplicationContext(Context mApplicationContext) {
+        if (this.mContext == null) {
+            this.mContext = mApplicationContext;
+        }
+    }
+
+    public void clearAlertsWhenAppClose(){
 
         for (Alert a: getActiveAlerts()){
             if (!a.isFixed() && a.getSyncStatus()){
                fixAlert(a);
             } else if (!a.getSyncStatus()){
-                deleteAlert(a)
-                        .subscribe();
+                deleteAlert(a);
             }
         }
     }

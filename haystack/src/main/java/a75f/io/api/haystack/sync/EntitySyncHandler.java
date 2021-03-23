@@ -1,5 +1,6 @@
 package a75f.io.api.haystack.sync;
 
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import org.projecthaystack.HDict;
@@ -34,7 +35,7 @@ public class EntitySyncHandler
     private static final String TAG = "CCU_HS_SYNC";
     //CCUHsApi hayStack;
     
-    EntitySyncAdapter siteAdapter     = new SiteSyncAdapter();
+    SiteSyncAdapter siteAdapter;
     EntitySyncAdapter floorAdapter    = new FloorSyncAdapter();
     EntitySyncAdapter zoneAdapter     = new ZoneSyncAdapter();
     EntitySyncAdapter equipAdapter    = new EquipSyncAdapter();
@@ -48,8 +49,15 @@ public class EntitySyncHandler
     
     Timer mSyncTimer = new Timer();
     TimerTask mSyncTimerTask = null;
-    
-    
+
+    public EntitySyncHandler(SharedPreferences sharedPreferences) {
+        siteAdapter     = new SiteSyncAdapter(sharedPreferences);
+    }
+
+    public void requestSiteSync() {
+        siteAdapter.requireSync();
+    }
+
     public void sync() {
 
         syncProgress = true;

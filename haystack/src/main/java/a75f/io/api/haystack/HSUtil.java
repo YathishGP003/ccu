@@ -263,13 +263,23 @@ public class HSUtil
      */
     public static boolean isStandaloneConfig(String id, CCUHsApi hayStack) {
         HashMap pointEntity = hayStack.readMapById(id);
-        return pointEntity.containsKey(Tags.STANDALONE) && pointEntity.containsKey(Tags.FCU);
+        return pointEntity.containsKey(Tags.STANDALONE);
     }
     
     public static boolean isStandaloneUserIntent(String id, CCUHsApi hayStack) {
         HashMap pointEntity = hayStack.readMapById(id);
         return pointEntity.containsKey(Tags.STANDALONE)
                && pointEntity.containsKey(Tags.USERINTENT);
+    }
+    
+    public static boolean isCPUEquip(String id, CCUHsApi hayStack) {
+        HashMap equipMap = hayStack.readMapById(id);
+        return equipMap.containsKey(Tags.CPU);
+    }
+    
+    public static boolean isHPUEquip(String id, CCUHsApi hayStack) {
+        HashMap equipMap = hayStack.readMapById(id);
+        return equipMap.containsKey(Tags.HPU);
     }
 
     public static double getSystemUserIntentVal(String tags)

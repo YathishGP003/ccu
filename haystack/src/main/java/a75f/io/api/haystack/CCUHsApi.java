@@ -99,7 +99,7 @@ public class CCUHsApi
         tagsDb = (CCUTagsDb) hsClient.db();
         tagsDb.init(context);
         instance = this;
-        entitySyncHandler = new EntitySyncHandler();
+        entitySyncHandler = new EntitySyncHandler(PreferenceManager.getDefaultSharedPreferences(context));
         hisSyncHandler = new HisSyncHandler(this);
         checkSiloMigration(c);                  // remove after all sites migrated, post Jan 20 2021
     }
@@ -134,7 +134,7 @@ public class CCUHsApi
         tagsDb = (CCUTagsDb) hsClient.db();
         tagsDb.init();
         instance = this;
-        entitySyncHandler = new EntitySyncHandler();
+        entitySyncHandler = new EntitySyncHandler(null);   // null prefs.
         hisSyncHandler = new HisSyncHandler(this);
     }
 
@@ -253,10 +253,7 @@ public class CCUHsApi
     public void updateSite(Site s, String id)
     {
         tagsDb.updateSite(s, id);
-        /*if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
-        }*/
+        entitySyncHandler.requestSiteSync();
     }
 
     public void updateEquip(Equip q, String id)

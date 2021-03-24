@@ -630,7 +630,8 @@ public class VavTuners {
         Point reheatZoneToDATMinDifferential  = createReheatZoneToDATMinDifferentialTuner(true, equipDis, equipRef,
                                                                                           siteRef, tz);
         String reheatZoneToDATMinDifferentialId = CCUHsApi.getInstance().addPoint(reheatZoneToDATMinDifferential);
-        CCUHsApi.getInstance().writeDefaultValById(reheatZoneToDATMinDifferentialId, TunerConstants.DEFAULT_REHEAT_ZONE_DAT_MIN_DIFFERENTIAL);
+        hayStack.writePointForCcuUser(reheatZoneToDATMinDifferentialId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                                      TunerConstants.DEFAULT_REHEAT_ZONE_DAT_MIN_DIFFERENTIAL, 0);
         CCUHsApi.getInstance().writeHisValById(reheatZoneToDATMinDifferentialId, TunerConstants.DEFAULT_REHEAT_ZONE_DAT_MIN_DIFFERENTIAL);
     }
     

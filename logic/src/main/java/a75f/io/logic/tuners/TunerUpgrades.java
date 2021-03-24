@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -45,8 +46,8 @@ public class TunerUpgrades {
                                                                                         tunerEquip.getSiteRef(), hayStack.getTimeZone());
     
         String buildingReheatZoneToDATMinDifferentialId = hayStack.addPoint(buildingTunerPoint);
-        hayStack.writeDefaultValById(buildingReheatZoneToDATMinDifferentialId,
-                                     TunerConstants.DEFAULT_REHEAT_ZONE_DAT_MIN_DIFFERENTIAL);
+        hayStack.writePointForCcuUser(buildingReheatZoneToDATMinDifferentialId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                                      TunerConstants.DEFAULT_REHEAT_ZONE_DAT_MIN_DIFFERENTIAL, 0);
         hayStack.writeHisValById(buildingReheatZoneToDATMinDifferentialId, TunerConstants.DEFAULT_REHEAT_ZONE_DAT_MIN_DIFFERENTIAL);
         
         //Create the tuner point on all vav equips
@@ -57,9 +58,8 @@ public class TunerUpgrades {
                                                                                         vavEquip.getDisplayName(),
                                                                                            vavEquip.getId(), vavEquip.getSiteRef(), hayStack.getTimeZone());
             String reheatZoneToDATMinDifferentialId = hayStack.addPoint(equipTunerPoint);
-            hayStack.writeDefaultValById(reheatZoneToDATMinDifferentialId,
-                                  TunerConstants.DEFAULT_REHEAT_ZONE_DAT_MIN_DIFFERENTIAL);
-            hayStack.writeHisValById(reheatZoneToDATMinDifferentialId, TunerConstants.DEFAULT_REHEAT_ZONE_DAT_MIN_DIFFERENTIAL);
+            BuildingTunerUtil.updateTunerLevels(reheatZoneToDATMinDifferentialId, vavEquip.getRoomRef(), hayStack);
+            hayStack.writeHisValById(reheatZoneToDATMinDifferentialId, HSUtil.getPriorityVal(reheatZoneToDATMinDifferentialId));
         });
     }
 }

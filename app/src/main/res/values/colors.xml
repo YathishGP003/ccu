@@ -47,11 +47,6 @@
     <color name="safe_status">#00A000</color>
     <color name="danger_status">#C00000</color>
 
-    <color name="severity_severe">#D00000</color>
-    <color name="severity_moderate">#D87800</color>
-    <color name="severity_low">#B8B000</color>
-    <color name="severity_info">#009000</color>
-
 
     <color name="buttonTextColor">#666666</color>
     <color name="registerBackground">#DADCD1</color>

@@ -3,8 +3,6 @@ package a75f.io.renatus;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-
-import a75f.io.logger.CcuLog;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
@@ -21,22 +19,23 @@ import java.util.Date;
 import a75f.io.alerts.AlertManager;
 import a75f.io.alerts.AlertSyncHandler;
 import a75f.io.api.haystack.Alert;
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.disposables.Disposable;
-import io.reactivex.rxjava3.functions.Action;
-import io.reactivex.rxjava3.functions.Consumer;
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
  */
 
-public class AlertsFragment extends Fragment
+public class AlertsFragment extends Fragment implements AlertSyncHandler.AlertDeleteListener
 {
 	
 	ArrayList<Alert> alertList;
 	ListView         listView;
 	private static AlertAdapter adapter;
-	private Disposable alertDeleteDisposable;
+	
+	public AlertsFragment()
+	{
+		new AlertSyncHandler(this);
+	}
+	     
 	
 	public static AlertsFragment newInstance()
 	{
@@ -78,7 +77,7 @@ public class AlertsFragment extends Fragment
 				if (!a.isFixed()) {
 					builder.setNegativeButton("Mark-Fixed", new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
-							AlertManager.getInstance().fixAlert(a);
+							AlertManager.getInstance(getActivity()).fixAlert(a);
 							getActivity().runOnUiThread(() -> adapter.notifyDataSetChanged());
 						}
 					});
@@ -94,22 +93,26 @@ public class AlertsFragment extends Fragment
 			
 			public boolean onItemLongClick(AdapterView<?> arg0, View v,
 			                               int position, long arg3) {
-
+				// TODO Auto-generated method stub
+				
 				AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 				builder.setMessage("Delete ?")
 				       .setCancelable(true)
 				       .setIcon(android.R.drawable.ic_dialog_alert)
-				       .setPositiveButton("OK", (dialog, id) -> {
-							Alert alert = alertList.get(position);
-							// Remove item from local list regardless of server response.  Just log failure.
-							alertList.remove(position);
-							adapter.resetList(alertList);
-							alertDeleteDisposable =
-								AlertManager.getInstance().deleteAlert(alert)
-										   .observeOn(AndroidSchedulers.mainThread())
-										   .subscribe( () -> CcuLog.i("CCU_ALERT", "delete success"),
-												throwable -> CcuLog.w("CCU_ALERT", "delete failure", throwable));
-						   })
+				       .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					       public void onClick(DialogInterface dialog, int id) {
+					       	   new Thread(new Runnable()
+					           {
+						           @Override
+						           public void run()
+						           {
+							           AlertManager.getInstance(getActivity()).deleteAlert(alertList.get(position));
+						           }
+					           }).start();
+						       
+						       adapter.notifyDataSetChanged();
+					       }
+				        })
 						.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							//do things
@@ -139,19 +142,24 @@ public class AlertsFragment extends Fragment
 		setAlertList();
 	}
 
-	@Override
-	public void onStop() {
-		if (alertDeleteDisposable != null) {
-			// Common rxjava pattern to not execute call response if fragment is dead or shuting down.
-			alertDeleteDisposable.dispose();
-		}
-		super.onStop();
-	}
 	private void setAlertList() {
-		alertList = new ArrayList<>(AlertManager.getInstance().getAllAlertsNotInternal());
+		alertList = new ArrayList<>(AlertManager.getInstance(getActivity()).getAllAlerts());
 
 		adapter = new AlertAdapter(alertList,getActivity());
 
 		listView.setAdapter(adapter);
+	}
+
+	@Override
+	public void onDeleteSuccess() {
+		if (getActivity() != null && isAdded()) {
+			getActivity().runOnUiThread(() -> {
+				alertList.clear();
+				alertList = new ArrayList<>(AlertManager.getInstance(getActivity()).getAllAlerts());
+				adapter = new AlertAdapter(alertList, getActivity());
+				listView.setAdapter(adapter);
+				adapter.notifyDataSetChanged();
+			});
+		}
 	}
 }

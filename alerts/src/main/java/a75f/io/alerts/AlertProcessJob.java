@@ -39,7 +39,7 @@ public class AlertProcessJob
         }
         try
         {
-            AlertManager.getInstance().processAlerts();
+            AlertManager.getInstance(mContext).processAlerts();
         }catch (Exception e) {
             CcuLog.d("CCU_ALERTS", "AlertProcessJob Exception: "+e.getMessage());
             e.printStackTrace();

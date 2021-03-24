@@ -72,7 +72,7 @@ public class SiteSyncAdapter extends EntitySyncAdapter {
 
     private boolean siteCreationSync(HDict siteDict) {
         boolean synced = false;
-
+        if(siteDict==null) return synced;
         HDictBuilder b = new HDictBuilder().add(siteDict);
         String siteLuid = b.get(SiteFieldConstants.ID).toString();
         JSONObject siteCreationRequestJson = getSiteJsonRequest(siteDict);

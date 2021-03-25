@@ -19,15 +19,17 @@ import a75f.io.logic.L;
  */
 public class TunerUpgrades {
     
-    //There method could handle more tuners in future.
+    /**
+     * Takes care creating new tuners on existing equips during an upgrade.
+     */
     public static void handleTunerUpgrades(CCUHsApi hayStack) {
         upgradeReheatZoneToDATMinDifferential(hayStack);
     }
     
-    /*
+    /**
      * Takes care of upgrades for vav specific tuner reheatZoneToDATMinDifferential
      */
-    public static void upgradeReheatZoneToDATMinDifferential(CCUHsApi hayStack) {
+    private static void upgradeReheatZoneToDATMinDifferential(CCUHsApi hayStack) {
     
         //Make sure the tuner does not exist before creating it. A duplicate tuner if ever created can be hard to
         //track and fix.
@@ -43,7 +45,8 @@ public class TunerUpgrades {
         Equip tunerEquip = new Equip.Builder().setHashMap(buildTuner).build();
         Point buildingTunerPoint = VavTuners.createReheatZoneToDATMinDifferentialTuner(true,
                                                                                        tunerEquip.getDisplayName(), tunerEquip.getId(),
-                                                                                        tunerEquip.getSiteRef(), hayStack.getTimeZone());
+                                                                                        null, tunerEquip.getSiteRef(),
+                                                                                       hayStack.getTimeZone());
     
         String buildingReheatZoneToDATMinDifferentialId = hayStack.addPoint(buildingTunerPoint);
         hayStack.writePointForCcuUser(buildingReheatZoneToDATMinDifferentialId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
@@ -55,8 +58,9 @@ public class TunerUpgrades {
         vavEquips.forEach(equip -> {
             Equip vavEquip = new Equip.Builder().setHashMap(equip).build();
             Point equipTunerPoint = VavTuners.createReheatZoneToDATMinDifferentialTuner(false,
-                                                                                        vavEquip.getDisplayName(),
-                                                                                           vavEquip.getId(), vavEquip.getSiteRef(), hayStack.getTimeZone());
+                                                                                        vavEquip.getDisplayName(), vavEquip.getId(),
+                                                                                        vavEquip.getRoomRef(), vavEquip.getSiteRef(),
+                                                                                        hayStack.getTimeZone());
             String reheatZoneToDATMinDifferentialId = hayStack.addPoint(equipTunerPoint);
             BuildingTunerUtil.updateTunerLevels(reheatZoneToDATMinDifferentialId, vavEquip.getRoomRef(), hayStack);
             hayStack.writeHisValById(reheatZoneToDATMinDifferentialId, HSUtil.getPriorityVal(reheatZoneToDATMinDifferentialId));

@@ -82,7 +82,6 @@ public class BuildingTuners
         DualDuctTuners.addDefaultTuners(hayStack, siteRef, equipRef, equipDis, tz);
         OAOTuners.updateNewTuners(hayStack, siteRef,equipRef, equipDis,tz,false);
         checkForTunerMigration();
-        //TunerUpgrades.handleTunerUpgrades(CCUHsApi.getInstance());
     }
 
     private void checkForTunerMigration() {

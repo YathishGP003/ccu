@@ -34,11 +34,11 @@ import a75f.io.logic.tuners.TunerUtil;
  */
 public abstract class SystemProfile
 {
-   
+
     public Schedule schedule = new Schedule();
-    
+
     public TRSystem trSystem;
-    
+
     public SystemEquip sysEquip;
     private String equipRef = null;
     private String siteRef;
@@ -50,63 +50,63 @@ public abstract class SystemProfile
     public double systemHeatingLoopOp;
     public double systemFanLoopOp;
     public double systemCo2LoopOp;
-    
+
     public abstract void doSystemControl();
-    
+
     public abstract void addSystemEquip();
-    
+
     public abstract void deleteSystemEquip();
-    
+
     //Is Cooling enabled in System Profile
     public abstract boolean isCoolingAvailable();
-    
+
     public abstract boolean isHeatingAvailable();
-    
+
     //Is Cooling stage/signal ON now
     public abstract boolean isCoolingActive();
-    
+
     public abstract boolean isHeatingActive();
-    
+
     public abstract ProfileType getProfileType();
-    
+
     public abstract String getStatusMessage();
-    
+
     public  int getSystemSAT() {
         return 0;
     }
-    
+
     public  int getSystemCO2() {
         return 0;
     }
-    
+
     public  int getSystemOADamper() {
         return 0;
     }
-    
+
     public double getStaticPressure() {
         return 0;
     }
-    
+
     public String getProfileName() {
         return "";
     }
-    
+
     public int getAnalog1Out() {
         return 0;
     }
-    
+
     public int getAnalog2Out() {
         return 0;
     }
-    
+
     public int getAnalog3Out() {
         return 0;
     }
-    
+
     public int getAnalog4Out() {
         return 0;
     }
-    
+
     public double getCoolingLoopOp()
     {
         return systemCoolingLoopOp;
@@ -122,11 +122,11 @@ public abstract class SystemProfile
     public double getCo2LoopOp() {
         return systemCo2LoopOp;
     }
-    
+
     public double getCmd(String tags) {
         return CCUHsApi.getInstance().readHisValByQuery(tags+" and cmd and equipRef == \""+getSystemEquipRef()+"\"");
     }
-    
+
     public SystemController getSystemController() {
         if (this instanceof VavSystemProfile) {
             return VavSystemController.getInstance();
@@ -135,19 +135,19 @@ public abstract class SystemProfile
         }
         return DefaultSystemController.getInstance();
     }
-    
+
     public SystemController.State getConditioning() {
         return getSystemController().getSystemState();
     }
-    
+
     public double getAverageTemp() {
         return getSystemController().getAverageSystemTemperature();
     }
-    
+
     public double getWeightedAverageCO2() {
         return getSystemController().getSystemCO2WA();
     }
-    
+
     public String getSystemEquipRef() {
         if (equipRef == null)
         {
@@ -178,15 +178,15 @@ public abstract class SystemProfile
         CCUHsApi.getInstance().updateDiagGatewayRef(systemEquipId);
         CCUHsApi.getInstance().updateCCUahuRef(systemEquipId);
     }
-    
+
     public void addSystemTuners() {
-        
+
         hayStack = CCUHsApi.getInstance();
         HashMap siteMap = hayStack.read(Tags.SITE);
         siteRef = (String) siteMap.get(Tags.ID);
         tz = siteMap.get("tz").toString();
         equipRef = getSystemEquipRef();
-    
+
         Point userLimitSpread = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "userLimitSpread").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("user").addMarker("limit").addMarker("spread").addMarker("sp")
                 .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.TEMPERATURE_LIMIT)
                 .setTz(tz).build();
@@ -202,7 +202,7 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(userLimitSpreadId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-        
+
         Point heatingPreconditioningRate = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "heatingPreconditioningRate").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("heating").addMarker("precon").addMarker("rate").addMarker("sp")
                 .setMinVal("0").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz).build();
@@ -231,7 +231,6 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(coolingPreconditioningRateId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-
         Point cmTempInfPercentileZonesDead = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "cmTempPercentDeadZonesAllowed").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("zone").addMarker("percent").addMarker("dead").addMarker("influence").addMarker("sp")
                 .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz).build();
@@ -246,7 +245,6 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(cmTempInfPercentileZonesDeadId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-
         Point airflowSampleWaitTime = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "airflowSampleWaitTime").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("airflow").addMarker("sample").addMarker("wait").addMarker("time").addMarker("sp")
                 .setMinVal("1").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("m")
@@ -262,7 +260,6 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(airflowSampleWaitTimeId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-
         Point stage1CoolingAirflowTempLowerOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage1CoolingAirflowTempLowerOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage1").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
                 .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
@@ -278,7 +275,6 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(stage1CoolingAirflowTempLowerOffsetId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-
         Point stage2CoolingAirflowTempLowerOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage2CoolingAirflowTempLowerOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage2").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
                 .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
@@ -294,7 +290,6 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(stage2CoolingAirflowTempLowerOffsetId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-
         Point stage3CoolingAirflowTempLowerOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage3CoolingAirflowTempLowerOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage3").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
                 .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
@@ -342,7 +337,6 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(stage5CoolingAirflowTempLowerOffsetId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-
         Point stage1CoolingAirflowTempUpperOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage1CoolingAirflowTempUpperOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage1").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
                 .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
@@ -374,7 +368,6 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(stage2CoolingAirflowTempUpperOffsetId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-
         Point stage3CoolingAirflowTempUpperOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage3CoolingAirflowTempUpperOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage3").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
                 .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
@@ -406,7 +399,6 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(stage4CoolingAirflowTempUpperOffsetId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-
         Point stage5CoolingAirflowTempUpperOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage5CoolingAirflowTempUpperOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage5").addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
                 .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
@@ -438,7 +430,6 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(stage1HeatingAirflowTempLowerOffsetId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-
         Point stage2HeatingAirflowTempLowerOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage2HeatingAirflowTempLowerOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage2").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
                 .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
@@ -454,7 +445,6 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(stage2HeatingAirflowTempLowerOffsetId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-
         Point stage3HeatingAirflowTempLowerOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage3HeatingAirflowTempLowerOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage3").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
                 .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
@@ -486,7 +476,6 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(stage4HeatingAirflowTempLowerOffsetId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-
         Point stage5HeatingAirflowTempLowerOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage5HeatingAirflowTempLowerOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage5").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
                 .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
@@ -502,7 +491,6 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(stage5HeatingAirflowTempLowerOffsetId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-
         Point stage1HeatingAirflowTempUpperOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage1HeatingAirflowTempUpperOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage1").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
                 .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
@@ -534,7 +522,6 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(stage2HeatingAirflowTempUpperOffsetId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-
         Point stage3HeatingAirflowTempUpperOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage3HeatingAirflowTempUpperOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage3").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
                 .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
@@ -566,7 +553,6 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(stage4HeatingAirflowTempUpperOffsetId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-
         Point stage5HeatingAirflowTempUpperOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "stage5HeatingAirflowTempUpperOffset").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("stage5").addMarker("heating").addMarker("airflow").addMarker("temp").addMarker("upper").addMarker("offset").addMarker("sp")
                 .setMinVal("0").setMaxVal("150").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
                 .setUnit("\u00B0F")
@@ -582,7 +568,6 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(stage5HeatingAirflowTempUpperOffsetId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-
         Point clockUpdateInterval = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "clockUpdateInterval").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("clock").addMarker("update").addMarker("interval").addMarker("sp")
                 .setMinVal("1").setMaxVal("120").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("m")
@@ -598,7 +583,6 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(clockUpdateIntervalId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-
         Point perDegreeHumidityFactor = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "perDegreeHumidityFactor").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("per").addMarker("degree").addMarker("humidity").addMarker("factor").addMarker("sp")
                 .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("%")
@@ -614,7 +598,6 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(perDegreeHumidityFactorId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-
         Point ccuAlarmVolumeLevel = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "ccuAlarmVolumeLevel").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("alarm").addMarker("volume").addMarker("level").addMarker("sp")
                 .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz).build();
@@ -629,7 +612,6 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(ccuAlarmVolumeLevelId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-
         Point cmHeartBeatInterval = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "cmHeartBeatInterval").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("cm").addMarker("heart").addMarker("beat").addMarker("interval").addMarker("level").addMarker("sp")
                 .setMinVal("1").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setUnit("m")
@@ -645,7 +627,6 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(cmHeartBeatIntervalId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
-
         Point heartBeatsToSkip = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "heartBeatsToSkip").setSiteRef(siteRef).setEquipRef(equipRef).setHisInterpolate("cov").addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("heart").addMarker("beats").addMarker("to").addMarker("skip").addMarker("sp")
                 .setMinVal("3").setMaxVal("20").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                 .setTz(tz).build();
@@ -725,7 +706,7 @@ public abstract class SystemProfile
         CCUHsApi.getInstance().updateDiagGatewayRef(systemEquipId);
         CCUHsApi.getInstance().updateCCUahuRef(systemEquipId);
     }
-    
+
     public void addCMPoints(String siteRef, String equipref, String equipDis , String tz) {
         Point cmCoolDesiredTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmCoolingDesiredTemp").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cm").addMarker("cooling").addMarker("desired").addMarker("temp").addMarker("writable").addMarker("his").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
         String cmCoolDesiredTempId = CCUHsApi.getInstance().addPoint(cmCoolDesiredTemp);
@@ -736,8 +717,8 @@ public abstract class SystemProfile
         CCUHsApi.getInstance().writeDefaultValById(cmHeatDesiredTempId, 0.0);
         CCUHsApi.getInstance().writeHisValById(cmHeatDesiredTempId, 0.0);
     }
-    
-    
+
+
     public void addDefaultSystemPoints(String siteRef, String equipref, String equipDis, String tz)
     {
         Point cmCurrentTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmCurrentTemp").setSiteRef(siteRef)
@@ -765,14 +746,14 @@ public abstract class SystemProfile
                 .setTz(tz)
                 .setKind(Kind.STRING).build();
         CCUHsApi.getInstance().addPoint(systemScheduleStatus);
-        
+
         Point outsideTemperature = new Point.Builder().setDisplayName(equipDis + "-" + "outsideTemperature").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("outside").addMarker("temp").addMarker("his").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(outsideTemperature);
-    
+
         Point outsideHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "outsideHumidity").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("outside").addMarker("humidity").addMarker("his").addMarker("sp").setUnit("%").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(outsideHumidity);
     }
-    
+
     //VAV & DAB System profile common points are added here.
     public void addRTUSystemPoints(String siteRef, String equipref, String equipDis, String tz) {
         addDefaultSystemPoints(siteRef, equipref, equipDis, tz);
@@ -856,7 +837,7 @@ public abstract class SystemProfile
         CCUHsApi.getInstance().writeHisValByQuery("system and outside and temp", externalTemp);
         CCUHsApi.getInstance().writeHisValByQuery("system and outside and humidity", externalHumidity);
     }
-    
+
     public void reset() {
     }
 }

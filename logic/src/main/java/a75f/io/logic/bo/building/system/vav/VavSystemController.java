@@ -101,11 +101,20 @@ public class VavSystemController extends SystemController
     
     private VavSystemController()
     {
+        proportionalGain =  TunerUtil.readTunerValByQuery("system and vav and pgain");
+        integralGain = TunerUtil.readTunerValByQuery("system and vav and igain");
+        proportionalSpread = (int)TunerUtil.readTunerValByQuery("system and vav and pspread");
+        integralMaxTimeout = (int)TunerUtil.readTunerValByQuery("system and vav and itimeout");
+    
+        CcuLog.i(L.TAG_CCU_SYSTEM, "proportionalGain "+proportionalGain+" integralGain "+integralGain
+                                   +" proportionalSpread "+proportionalSpread+" integralMaxTimeout "+integralMaxTimeout);
+        
         piController = new SystemPILoopController();
         piController.setIntegralGain(integralGain);
         piController.setProportionalGain(proportionalGain);
         piController.setMaxAllowedError(proportionalSpread);
         piController.setIntegralMaxTimeout(integralMaxTimeout);
+        
     }
     
     public static VavSystemController getInstance() {

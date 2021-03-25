@@ -5,6 +5,7 @@ import android.util.Log;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
@@ -233,6 +234,30 @@ public class OAOProfile
         }
         oaoEquip.setHisVal("economizing and available", economizingAvailable?1:0);
         oaoEquip.setHisVal("economizing and loop and output", economizingLoopOutput);
+    }
+    
+    /*
+     *
+     */
+    private boolean isOutsideWeatherSuitableForEconomizing(double externalTemp, double externalHumidity) {
+        double economizingMinTemp = TunerUtil.readTunerValByQuery("oao and economizing and min and " +
+                                                                              "temp",oaoEquip.equipRef);
+        double economizingMaxTemp = TunerUtil.readTunerValByQuery("oao and economizing and max and " +
+                                                                         "temp",oaoEquip.equipRef);
+        double economizingMinHumidity = TunerUtil.readTunerValByQuery("oao and economizing and min and " +
+                                                                  "humidity",oaoEquip.equipRef);
+        double economizingMaxHumidity = TunerUtil.readTunerValByQuery("oao and economizing and max and " +
+                                                                  "humidity",oaoEquip.equipRef);
+        
+        if (externalTemp > economizingMinTemp
+            && externalTemp < economizingMaxTemp
+            && externalHumidity > economizingMinHumidity
+            && externalHumidity < economizingMaxHumidity) {
+            return true;
+        }
+        CcuLog.d(L.TAG_CCU_OAO, "Outside air not suitable for economizing Temp : "+externalTemp
+                                                                                +"Humidity : "+externalHumidity);
+        return false;
     }
     
     public void doDcvControl(double outsideDamperMinOpen) {

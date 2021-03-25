@@ -16,6 +16,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.logic.bo.building.system.SystemState;
+import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
 
 /**
@@ -153,6 +154,7 @@ public abstract class VavSystemProfile extends SystemProfile
         }
         hayStack.writeHisValById(humidityCompensationOffsetId, HSUtil.getPriorityVal(humidityCompensationOffsetId));*/
         addNewTunerPoints(equipref);
+        SystemTuners.addPITuners(equipref, TunerConstants.VAV_TUNER_GROUP, Tags.VAV, CCUHsApi.getInstance());
     }
     
     protected void addUserIntentPoints(String equipref)

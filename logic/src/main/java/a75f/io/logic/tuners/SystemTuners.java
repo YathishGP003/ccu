@@ -9,7 +9,7 @@ import a75f.io.api.haystack.Point;
 
 public class SystemTuners {
     
-    /*
+    /**
      * When VAV/DAB system equip is created , this will be called to create PI related tuners on the SystemEquip.
      * And then copies all the levels present in BuildingTuner equip.
      */
@@ -76,7 +76,7 @@ public class SystemTuners {
         hayStack.writeHisValById(iTimeoutId, HSUtil.getPriorityVal(iTimeoutId));
     }
     
-    /*
+    /**
      * Creates a hayStack query using point marker tags.
      */
     private static String getQueryString(Point tunerPoint) {

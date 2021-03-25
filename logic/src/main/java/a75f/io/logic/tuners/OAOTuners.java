@@ -138,6 +138,7 @@ public class OAOTuners
         String economizingToMainCoolingLoopMapId = hayStack.addPoint(economizingToMainCoolingLoopMap);
         hayStack.writePointForCcuUser(economizingToMainCoolingLoopMapId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ECONOMIZING_TO_MAIN_COOLING_LOOP_MAP, 0);
         hayStack.writeHisValById(economizingToMainCoolingLoopMapId, TunerConstants.OAO_ECONOMIZING_TO_MAIN_COOLING_LOOP_MAP);
+        
         updateNewTuners(hayStack, siteRef,equipRef, equipDis,tz,true);
     }
 
@@ -299,6 +300,24 @@ public class OAOTuners
             String smartPurgeVavDamperMinOpenMultiplierId = hayStack.addPoint(smartPurgeVavDamperMinOpenMultiplier);
             hayStack.writePointForCcuUser(smartPurgeVavDamperMinOpenMultiplierId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_SMART_PURGE_MIN_DAMPER_OPEN_MULTIPLIER, 0);
             hayStack.writeHisValById(smartPurgeVavDamperMinOpenMultiplierId, TunerConstants.OAO_SMART_PURGE_MIN_DAMPER_OPEN_MULTIPLIER);
+        }
+    
+        if(isNewSite || !verifyPointsAvailability("default","economizing and dry and bulb and threshold",equipRef)) {
+            
+            Point economizingDryBulbThreshold  = new Point.Builder()
+                                                     .setDisplayName(equipDis+"-OAO-"+"economizingDryBulbThreshold")
+                                                     .setSiteRef(siteRef)
+                                                     .setEquipRef(equipRef).setHisInterpolate("cov")
+                                                     .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his")
+                                                     .addMarker("economizing").addMarker("dry").addMarker("bulb").addMarker("threshold")
+                                                     .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                                                     .setUnit("\u00B0F")
+                                                     .setTz(tz)
+                                                     .build();
+            String economizingDryBulbThresholdId = hayStack.addPoint(economizingDryBulbThreshold);
+            hayStack.writePointForCcuUser(economizingDryBulbThresholdId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ECONOMIZING_DRY_BULB_THRESHOLD, 0);
+            hayStack.writeHisValById(economizingDryBulbThresholdId, TunerConstants.OAO_ECONOMIZING_DRY_BULB_THRESHOLD);
+        
         }
 
     }
@@ -731,6 +750,30 @@ public class OAOTuners
         }else if(systemProfile.equals("dab")){
             deleteNonUsableSystemPoints("purge and vav and damper and pos and multiplier and min",equipref);
         }
+    
+        if (!verifyPointsAvailability("not default","economizing and dry and bulb and threshold",equipref)) {
+            Point economizingDryBulbThreshold = new Point.Builder()
+                                                       .setDisplayName(equipdis + "-OAO-" + "economizingDryBulbThreshold")
+                                                       .setSiteRef(siteRef)
+                                                       .setEquipRef(equipref).setHisInterpolate("cov")
+                                                       .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
+                                                       .addMarker("economizing").addMarker("dry").addMarker("bulb").addMarker("threshold").addMarker("system")
+                                                       .setMinVal("0").setMaxVal("10").setIncrementVal("0.1").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                                                       .setTz(tz)
+                                                       .build();
+            String economizingDryBulbThresholdId = hayStack.addPoint(economizingDryBulbThreshold);
+            HashMap economizingDryBulbThresholdPoint = hayStack.read("point and tuner and default and oao and " +
+                                                                        "economizing and dry and bulb and threshold");
+            ArrayList<HashMap> economizingDryBulbThresholdPointArr = hayStack.readPoint(economizingDryBulbThresholdPoint.get("id").toString());
+            for (HashMap valMap : economizingDryBulbThresholdPointArr) {
+                if (valMap.get("val") != null) {
+                    hayStack.pointWrite(HRef.copy(economizingDryBulbThresholdId), (int) Double.parseDouble(valMap.get(
+                        "level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                }
+            }
+            hayStack.writeHisValById(economizingDryBulbThresholdId, HSUtil.getPriorityVal(economizingDryBulbThresholdId));
+        }
+        
     }
     private static void deleteNonUsableSystemPoints(String tags, String equipref){
         HashMap deletablePoint = CCUHsApi.getInstance().read("point and tuner and system and oao and "+tags+" and equipRef == \"" + equipref + "\"");

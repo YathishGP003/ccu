@@ -184,34 +184,16 @@ public class OAOProfile
             e.printStackTrace();
             Log.d(L.TAG_CCU_OAO," Failed to read external Temp or Humidity , Disable Economizing");
             setEconomizingAvailable(false);
-            oaoEquip.setHisVal("outsideWeather and air and temp", 0);
-            oaoEquip.setHisVal("outsideWeather and air and humidity", 0);
-            oaoEquip.setHisVal("inside and enthalpy", 0);
-            oaoEquip.setHisVal("outside and enthalpy", 0);
-            oaoEquip.setHisVal("economizing and available", 0);
-            oaoEquip.setHisVal("economizing and loop and output", 0);
+            resetOAOParams();
             return;
         }
         oaoEquip.setHisVal("outsideWeather and air and temp", externalTemp);
         oaoEquip.setHisVal("outsideWeather and air and humidity", externalHumidity);
         
-        double insideEnthalpy = getAirEnthalpy(L.ccu().systemProfile.getSystemController().getAverageSystemTemperature(),
-                                    L.ccu().systemProfile.getSystemController().getAverageSystemHumidity());
-    
-    
-        double enthalpyDuctCompensationOffset = TunerUtil.readTunerValByQuery("oao and enthalpy and duct and compensation and offset",oaoEquip.equipRef);
-    
-        double outsideEnthalpy = getAirEnthalpy(externalTemp, externalHumidity);
-    
-        double economizingToMainCoolingLoopMap = TunerUtil.readTunerValByQuery("oao and economizing and main and cooling and loop and map", oaoEquip.equipRef);
-    
-        Log.d(L.TAG_CCU_OAO," insideEnthalpy "+insideEnthalpy+", outsideEnthalpy "+outsideEnthalpy);
-    
-        oaoEquip.setHisVal("inside and enthalpy", insideEnthalpy);
-        oaoEquip.setHisVal("outside and enthalpy", outsideEnthalpy);
         
-        if (L.ccu().systemProfile.getSystemController().getSystemState() == SystemController.State.COOLING
-                                && (insideEnthalpy > outsideEnthalpy + enthalpyDuctCompensationOffset)) {
+        double economizingToMainCoolingLoopMap = TunerUtil.readTunerValByQuery("oao and economizing and main and cooling and loop and map", oaoEquip.equipRef);
+        
+        if (canDoEconomizing(externalTemp, externalHumidity)) {
             
             setEconomizingAvailable(true);
             if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_ANALOG_RTU ||
@@ -236,18 +218,81 @@ public class OAOProfile
         oaoEquip.setHisVal("economizing and loop and output", economizingLoopOutput);
     }
     
-    /*
-     *
+    /**
+     * re-initialize OAO specific his points.
+     */
+    private void resetOAOParams() {
+        oaoEquip.setHisVal("outsideWeather and air and temp", 0);
+        oaoEquip.setHisVal("outsideWeather and air and humidity", 0);
+        oaoEquip.setHisVal("inside and enthalpy", 0);
+        oaoEquip.setHisVal("outside and enthalpy", 0);
+        oaoEquip.setHisVal("economizing and available", 0);
+        oaoEquip.setHisVal("economizing and loop and output", 0);
+    }
+    
+    /**
+     * Evaluates outside temperature and humidity to determine if free-cooling can be used.
+     * @param externalTemp
+     * @param externalHumidity
+     * @return
+     */
+    private boolean canDoEconomizing(double externalTemp, double externalHumidity) {
+        
+        if (L.ccu().systemProfile.getSystemController().getSystemState() != SystemController.State.COOLING) {
+            return false;
+        }
+    
+        if (isDryBulbTemperatureGoodForEconomizing(externalTemp, externalHumidity)) {
+            return true;
+        }
+        
+        if (!isOutsideWeatherSuitableForEconomizing(externalTemp, externalHumidity)) {
+            return false;
+        }
+        
+        //If outside enthalpy is lower, do economizing.
+        if (isInsideEnthalpyGreaterThanOutsideEnthalpy(externalTemp, externalHumidity)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     *  Checks the external temp against drybulb threshold tuner.
+     * @param externalTemp
+     * @param externalHumidity
+     * @return
+     */
+    private boolean isDryBulbTemperatureGoodForEconomizing(double externalTemp, double externalHumidity) {
+        double dryBulbTemperatureThreshold = TunerUtil.readTunerValByQuery("oao and economizing and dry and bulb and " +
+                                                                           "threshold", oaoEquip.equipRef);
+        double outsideAirTemp = externalTemp;
+    
+        /* Both the weather parameters may be zero when CCU cant reach remote weather service
+         * Then fallback to Local Outside Air Temp.
+         */
+        if (externalHumidity == 0 && externalTemp == 0) {
+            outsideAirTemp  = oaoEquip.getHisVal("outside and air and temp");
+        }
+        return outsideAirTemp < dryBulbTemperatureThreshold;
+    }
+    
+    /**
+     * Checks if the outside whether is suitable for economizing.
+     * @param externalTemp
+     * @param externalHumidity
+     * @return
      */
     private boolean isOutsideWeatherSuitableForEconomizing(double externalTemp, double externalHumidity) {
         double economizingMinTemp = TunerUtil.readTunerValByQuery("oao and economizing and min and " +
-                                                                              "temp",oaoEquip.equipRef);
+                                                                  "temp",oaoEquip.equipRef);
         double economizingMaxTemp = TunerUtil.readTunerValByQuery("oao and economizing and max and " +
-                                                                         "temp",oaoEquip.equipRef);
+                                                                  "temp",oaoEquip.equipRef);
         double economizingMinHumidity = TunerUtil.readTunerValByQuery("oao and economizing and min and " +
-                                                                  "humidity",oaoEquip.equipRef);
+                                                                      "humidity",oaoEquip.equipRef);
         double economizingMaxHumidity = TunerUtil.readTunerValByQuery("oao and economizing and max and " +
-                                                                  "humidity",oaoEquip.equipRef);
+                                                                      "humidity",oaoEquip.equipRef);
         
         if (externalTemp > economizingMinTemp
             && externalTemp < economizingMaxTemp
@@ -256,8 +301,32 @@ public class OAOProfile
             return true;
         }
         CcuLog.d(L.TAG_CCU_OAO, "Outside air not suitable for economizing Temp : "+externalTemp
-                                                                                +"Humidity : "+externalHumidity);
+                                +"Humidity : "+externalHumidity);
         return false;
+    }
+    
+    /**
+     * Compare the inside vs outside enthalpy.
+     * @param externalTemp
+     * @param externalHumidity
+     * @return
+     */
+    private boolean isInsideEnthalpyGreaterThanOutsideEnthalpy(double externalTemp, double externalHumidity) {
+        double insideEnthalpy = getAirEnthalpy(L.ccu().systemProfile.getSystemController().getAverageSystemTemperature(),
+                                               L.ccu().systemProfile.getSystemController().getAverageSystemHumidity());
+    
+    
+        double enthalpyDuctCompensationOffset = TunerUtil.readTunerValByQuery("oao and enthalpy and duct and compensation and offset",oaoEquip.equipRef);
+    
+        double outsideEnthalpy = getAirEnthalpy(externalTemp, externalHumidity);
+    
+        Log.d(L.TAG_CCU_OAO," insideEnthalpy "+insideEnthalpy+", outsideEnthalpy "+outsideEnthalpy);
+    
+        oaoEquip.setHisVal("inside and enthalpy", insideEnthalpy);
+        oaoEquip.setHisVal("outside and enthalpy", outsideEnthalpy);
+        
+        return insideEnthalpy > outsideEnthalpy + enthalpyDuctCompensationOffset;
+    
     }
     
     public void doDcvControl(double outsideDamperMinOpen) {

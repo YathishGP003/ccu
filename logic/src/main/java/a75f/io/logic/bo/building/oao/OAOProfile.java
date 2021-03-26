@@ -237,16 +237,19 @@ public class OAOProfile
      * @return
      */
     private boolean canDoEconomizing(double externalTemp, double externalHumidity) {
+    
+        double economizingMinTemp = TunerUtil.readTunerValByQuery("oao and economizing and min and " +
+                                                                  "temp",oaoEquip.equipRef);
         
         if (L.ccu().systemProfile.getSystemController().getSystemState() != SystemController.State.COOLING) {
             return false;
         }
     
-        if (isDryBulbTemperatureGoodForEconomizing(externalTemp, externalHumidity)) {
+        if (isDryBulbTemperatureGoodForEconomizing(externalTemp, externalHumidity, economizingMinTemp)) {
             return true;
         }
         
-        if (!isOutsideWeatherSuitableForEconomizing(externalTemp, externalHumidity)) {
+        if (!isOutsideWeatherSuitableForEconomizing(externalTemp, externalHumidity, economizingMinTemp)) {
             return false;
         }
         
@@ -264,7 +267,7 @@ public class OAOProfile
      * @param externalHumidity
      * @return
      */
-    private boolean isDryBulbTemperatureGoodForEconomizing(double externalTemp, double externalHumidity) {
+    private boolean isDryBulbTemperatureGoodForEconomizing(double externalTemp, double externalHumidity, double economizingMinTemp) {
         double dryBulbTemperatureThreshold = TunerUtil.readTunerValByQuery("oao and economizing and dry and bulb and " +
                                                                            "threshold", oaoEquip.equipRef);
         double outsideAirTemp = externalTemp;
@@ -275,7 +278,11 @@ public class OAOProfile
         if (externalHumidity == 0 && externalTemp == 0) {
             outsideAirTemp  = oaoEquip.getHisVal("outside and air and temp");
         }
-        return outsideAirTemp < dryBulbTemperatureThreshold;
+        
+        if (outsideAirTemp > economizingMinTemp) {
+            return outsideAirTemp < dryBulbTemperatureThreshold;
+        }
+        return false;
     }
     
     /**
@@ -284,9 +291,9 @@ public class OAOProfile
      * @param externalHumidity
      * @return
      */
-    private boolean isOutsideWeatherSuitableForEconomizing(double externalTemp, double externalHumidity) {
-        double economizingMinTemp = TunerUtil.readTunerValByQuery("oao and economizing and min and " +
-                                                                  "temp",oaoEquip.equipRef);
+    private boolean isOutsideWeatherSuitableForEconomizing(double externalTemp, double externalHumidity,
+                                                           double economizingMinTemp) {
+        
         double economizingMaxTemp = TunerUtil.readTunerValByQuery("oao and economizing and max and " +
                                                                   "temp",oaoEquip.equipRef);
         double economizingMinHumidity = TunerUtil.readTunerValByQuery("oao and economizing and min and " +

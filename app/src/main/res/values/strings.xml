@@ -415,6 +415,32 @@
     <string name="label_a4minheat">Analog-out4 \nAt Min Heating</string>
     <string name="label_a4maxheat">Analog-out4 \nAt Max Heating</string>
 
+    <!---DCWB Profile-->
+    <string name="label_dcwb_enable">DCWB Enable</string>
+    <string name="label_dcwb_enabled">DCWB Enabled</string>
+
+    <string name="label_btu_meter_status">BTU Meter \nStatus</string>
+    <string name="text_btu_meter_status">BTU meter configured</string>
+    <string name="text_btu_meter_error_status">BTU meter is not configured. DCWB will not work correctly</string>
+    <string name="label_adaptive_delta_t">Adaptive Delta T</string>
+    <string name="label_max_exit_water_temp">Maximized Exit Water Temperature</string>
+
+    <string name="label_chilled_water_target_delta_t">Chilled water target Delta T (F)</string>
+    <string name="label_chilled_water_exit_temp_margin">Chilled water Exit Temperature Margin (F)</string>
+    <string name="label_chilled_water_max_flow_rate">Chilled water Max FLow rate (GPM) </string>
+    <string name="label_analog_in1_at_valve_closed_position">Analog-In 1 at Valve Closed Position </string>
+    <string name="label_analog_in1_at_valve_full_position">Analog-In 1 at Valve Full Position </string>
+    <string name="label_analog_out1_at_min_chw_valve">Analog-out 1 at Min CHW Valve </string>
+    <string name="label_analog_out1_at_max_chw_valve">Analog-out 1 at Max CHW Valve </string>
+    <string name="label_analog_out2_at_min_fan_speed">Analog-out 2 at Min Fan Speed </string>
+    <string name="label_analog_out2_at_max_fan_speed">Analog-out 2 at Max Fan Speed </string>
+    <string name="label_analog_out3_at_min_heating">Analog-out 3 at Min Heating </string>
+    <string name="label_analog_out3_at_max_heating">Analog-out 2 at Max Heating </string>
+    <string name="label_analog_out4_at_min_cooling">Analog-out 2 at Min Cooling Loop </string>
+    <string name="label_analog_out4_at_max_cooling">Analog-out 2 at Max Cooling Loop </string>
+    <string name="label_analog_out4_at_min_co2">Analog-out 2 at Min CO2 </string>
+    <string name="label_analog_out4_at_max_co2">Analog-out 2 at Max CO2 </string>
+
     <!--Heat Pump Input-->
     <string name="title_enable">ENABLE</string>
     <string name="title_testsignal">TEST SIGNAL</string>

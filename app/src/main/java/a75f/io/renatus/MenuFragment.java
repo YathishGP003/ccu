@@ -30,6 +30,8 @@ public class MenuFragment extends Fragment {
     ImageView iconSystemProfile;
     @BindView(R.id.icon_modbus_config)
     ImageView iconModbusConfig;
+    @BindView(R.id.icon_modbus_energy_distribution)
+    ImageView iconModbusEnergyDistribution;
     @BindView(R.id.icon_temporary_override)
     ImageView iconTemporaryOverride;
     @BindView(R.id.icon_about)
@@ -47,6 +49,9 @@ public class MenuFragment extends Fragment {
     TextView textSystemProfile;
     @BindView(R.id.text_modbus_config)
     TextView textModbusConfig;
+
+    @BindView(R.id.text_modbus_energy_distribution)
+    TextView text_modbusEnergyDistribution;
     @BindView(R.id.text_temporary_override)
     TextView textTemporaryOverride;
     @BindView(R.id.text_about)
@@ -64,6 +69,8 @@ public class MenuFragment extends Fragment {
     LinearLayout lilSystemProfile;
     @BindView(R.id.lil_modbus_config)
     LinearLayout lilModbusConfig;
+    @BindView(R.id.lil_modbus_energy_distribution)
+    LinearLayout lilmodbusEnergyDistribution;
     @BindView(R.id.lil_temporary_override)
     LinearLayout lilTemporaryOverride;
     @BindView(R.id.lil_about)
@@ -90,6 +97,8 @@ public class MenuFragment extends Fragment {
                 R.color.black));
         iconModbusConfig.setColorFilter(ContextCompat.getColor(getActivity(),
                 R.color.black));
+        iconModbusEnergyDistribution.setColorFilter(ContextCompat.getColor(getActivity(),
+                R.color.black));
         iconTemporaryOverride.setColorFilter(ContextCompat.getColor(getActivity(),
                 R.color.black));
         iconAbout.setColorFilter(ContextCompat.getColor(getActivity(),
@@ -101,6 +110,7 @@ public class MenuFragment extends Fragment {
         textInstaller.setTextColor(getResources().getColor(R.color.black));
         textSystemProfile.setTextColor(getResources().getColor(R.color.black));
         textModbusConfig.setTextColor(getResources().getColor(R.color.black));
+        text_modbusEnergyDistribution.setTextColor(getResources().getColor(R.color.black));
         textTemporaryOverride.setTextColor(getResources().getColor(R.color.black));
         textAbout.setTextColor(getResources().getColor(R.color.black));
 
@@ -110,6 +120,7 @@ public class MenuFragment extends Fragment {
         lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
         lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
         lilModbusConfig.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+        lilmodbusEnergyDistribution.setBackgroundColor(getResources().getColor(android.R.color.transparent));
         lilTemporaryOverride.setBackgroundColor(getResources().getColor(android.R.color.transparent));
         lilAbout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
 
@@ -431,6 +442,7 @@ public class MenuFragment extends Fragment {
                     R.color.black));
             iconModbusConfig.setColorFilter(ContextCompat.getColor(getActivity(),
                     R.color.black));
+
             iconTemporaryOverride.setColorFilter(ContextCompat.getColor(getActivity(),
                     R.color.black));
             iconAbout.setColorFilter(ContextCompat.getColor(getActivity(),
@@ -456,7 +468,53 @@ public class MenuFragment extends Fragment {
             lilTemporaryOverride.setBackgroundColor(getResources().getColor(android.R.color.transparent));
 
         });
-    
-        
+        lilmodbusEnergyDistribution.setOnClickListener(view1 -> {
+            if (SettingsFragment.SettingFragmentHandler != null) {
+                SettingsFragment.SettingFragmentHandler.sendEmptyMessage(8);
+            }
+
+            iconAccount.setColorFilter(ContextCompat.getColor(getActivity(),
+                    R.color.black));
+            iconSecurity.setColorFilter(ContextCompat.getColor(getActivity(),
+                    R.color.black));
+            iconWifi.setColorFilter(ContextCompat.getColor(getActivity(),
+                    R.color.black));
+            iconInstaller.setColorFilter(ContextCompat.getColor(getActivity(),
+                    R.color.black));
+            iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
+                    R.color.black));
+            iconModbusConfig.setColorFilter(ContextCompat.getColor(getActivity(),
+                    R.color.black));
+            iconModbusEnergyDistribution.setColorFilter(ContextCompat.getColor(getActivity(),
+                    R.color.white));
+            iconTemporaryOverride.setColorFilter(ContextCompat.getColor(getActivity(),
+                    R.color.black));
+            iconAbout.setColorFilter(ContextCompat.getColor(getActivity(),
+                    R.color.black));
+
+            textAccount.setTextColor(getResources().getColor(R.color.black));
+            textSecurity.setTextColor(getResources().getColor(R.color.black));
+            textWifi.setTextColor(getResources().getColor(R.color.black));
+            textInstaller.setTextColor(getResources().getColor(R.color.black));
+            textSystemProfile.setTextColor(getResources().getColor(R.color.black));
+            textModbusConfig.setTextColor(getResources().getColor(R.color.black));
+            text_modbusEnergyDistribution.setTextColor(ContextCompat.getColor(getActivity(),
+                    R.color.white));
+            textTemporaryOverride.setTextColor(getResources().getColor(R.color.black));
+            textAbout.setTextColor(getResources().getColor(R.color.black));
+
+
+            lilAccount.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+            lilmodbusEnergyDistribution.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
+            lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+            liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+            lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+            lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+            lilModbusConfig.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+            lilTemporaryOverride.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+
+        });
+
+
     }
 }

@@ -128,6 +128,10 @@ public class Pulse
 					continue;
 				}
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
+				if (logPoint.isEmpty()) {
+					CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for "+logPoint.get("dis"));
+					continue;
+				}
 				Point logPointInfo = new Point.Builder().setHashMap(logPoint).build();
 				isSse = logPointInfo.getMarkers().contains("sse");
 				double val = 0;
@@ -461,6 +465,12 @@ public class Pulse
 					continue;
 				}
 				HashMap logPoint = hayStack.read("point and id==" + phyPoint.get("pointRef"));
+				
+				if (logPoint.isEmpty()) {
+					CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for "+logPoint.get("dis"));
+					continue;
+				}
+				
 				double val;
 				switch (Port.valueOf(phyPoint.get("port").toString())) {
 					case SENSOR_RT:
@@ -638,6 +648,12 @@ public class Pulse
 					continue;
 				}
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
+				
+				if (logPoint.isEmpty()) {
+					CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for "+logPoint.get("dis"));
+					continue;
+				}
+				
 				double val;
 				switch (Port.valueOf(phyPoint.get("port").toString())){
 					case SENSOR_RT:

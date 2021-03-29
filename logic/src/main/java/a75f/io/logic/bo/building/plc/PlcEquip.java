@@ -433,7 +433,7 @@ public class PlcEquip {
                 markers = new String[]{"current", "transformer"};
                 break;
             case 12:
-                shortDis = "ION Meter 0-1 Million ions/cc";
+                shortDis = "ION Density";
                 shortDisTarget = "Target Ion Density";
                 unit = "ions/cc";
                 maxVal = "1000000";
@@ -618,18 +618,13 @@ public class PlcEquip {
         NativeSensor selectedSensor = SensorManager.getInstance().getNativeSensorList().get(nativeSensorInput - 1);
         String shortDis = selectedSensor.sensorName;
         
-        // Gas sensor's description needs to have a suffix 'Level'.
-        if (shortDis.contains("CO") || shortDis.contains("CO2") ||
-            shortDis.contains("NO") || shortDis.contains("NO2")) {
-            shortDis = shortDis+" Level";
-        }
-        
         //Does the name formatting as it is done with the existing sensor types.
         //ShortDisTarget to have everything stripped off except the sensor type like (CO2/Sound etc)
         String shortDisTarget = shortDis.replace("Native-","Target ");
         String marker = selectedSensor.sensorName
                                     .replace("Native-","")
-                                    .replaceAll("\\s","").toLowerCase();
+                                    .replaceAll("\\s","")
+                                    .toLowerCase();
         
         
         mBundle.putString("shortDis", shortDis);

@@ -432,6 +432,15 @@ public class PlcEquip {
                 incrementVal = "0.1";
                 markers = new String[]{"current", "transformer"};
                 break;
+            case 12:
+                shortDis = "ION Meter 0-1 Million ions/cc";
+                shortDisTarget = "Target Ion Density";
+                unit = "ions/cc";
+                maxVal = "1000000";
+                minVal = "0";
+                incrementVal = "1000";
+                markers = new String[]{"ion", "density"};
+                break;
         }
 
         mBundle.putString("shortDis", shortDis);

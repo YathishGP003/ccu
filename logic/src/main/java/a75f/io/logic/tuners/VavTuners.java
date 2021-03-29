@@ -628,9 +628,10 @@ public class VavTuners {
         CCUHsApi.getInstance().writeHisValById(fanControlOnFixedTimeDelayId, TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY);
     
         Point reheatZoneToDATMinDifferential  = createReheatZoneToDATMinDifferentialTuner(true, equipDis, equipRef,
-                                                                                          siteRef, tz);
+                                                                                          null, siteRef, tz);
         String reheatZoneToDATMinDifferentialId = CCUHsApi.getInstance().addPoint(reheatZoneToDATMinDifferential);
-        CCUHsApi.getInstance().writeDefaultValById(reheatZoneToDATMinDifferentialId, TunerConstants.DEFAULT_REHEAT_ZONE_DAT_MIN_DIFFERENTIAL);
+        hayStack.writePointForCcuUser(reheatZoneToDATMinDifferentialId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,
+                                      TunerConstants.DEFAULT_REHEAT_ZONE_DAT_MIN_DIFFERENTIAL, 0);
         CCUHsApi.getInstance().writeHisValById(reheatZoneToDATMinDifferentialId, TunerConstants.DEFAULT_REHEAT_ZONE_DAT_MIN_DIFFERENTIAL);
     }
     
@@ -973,30 +974,37 @@ public class VavTuners {
         hayStack.writeHisValById(zoneVOCThresholdId, HSUtil.getPriorityVal(zoneVOCThresholdId));
         
         Point reheatZoneToDATMinDifferential  = createReheatZoneToDATMinDifferentialTuner(false, equipdis, equipref,
-                                                                                          siteRef, tz );
+                                                                                          roomRef, siteRef, tz );
         String reheatZoneToDATMinDifferentialId = hayStack.addPoint(reheatZoneToDATMinDifferential);
         BuildingTunerUtil.updateTunerLevels(reheatZoneToDATMinDifferentialId, roomRef, hayStack);
         hayStack.writeHisValById(reheatZoneToDATMinDifferentialId, HSUtil.getPriorityVal(reheatZoneToDATMinDifferentialId));
     }
     
     public static Point createReheatZoneToDATMinDifferentialTuner(boolean defaultTuner, String equipDis,
-                                                                  String equipRef, String siteRef, String tz) {
-        Point reheatZoneToDATMinDifferential  = new Point.Builder()
+                                                                  String equipRef, String roomRef, String siteRef,
+                                                                  String tz) {
+        Point.Builder reheatZoneToDATMinDifferential  = new Point.Builder()
                                                     .setDisplayName(equipDis + "-VAV-"+"reheatZoneToDATMinDifferential ")
                                                     .setSiteRef(siteRef)
                                                     .setEquipRef(equipRef)
                                                     .setHisInterpolate("cov")
-                                                    .addMarker("tuner").addMarker("writable").addMarker("his")
+                                                    .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("vav")
                                                     .addMarker("reheat").addMarker("dat").addMarker("min").addMarker("differential").addMarker("sp")
-                                                    .addMarker(defaultTuner ? Tags.DEFAULT : Tags.VAV)
                                                     .setMinVal("0")
                                                     .setMaxVal("20")
                                                     .setIncrementVal("0.5")
                                                     .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
                                                     .setUnit("\u00B0F")
-                                                    .setTz(tz)
-                                                    .build();
+                                                    .setTz(tz);
+        if (defaultTuner) {
+            reheatZoneToDATMinDifferential.addMarker(Tags.DEFAULT);
+        }
         
-        return reheatZoneToDATMinDifferential;
+        //roomRef is expected to be null for building tuners.
+        if (roomRef != null) {
+            reheatZoneToDATMinDifferential.setRoomRef(roomRef);
+        }
+        
+        return reheatZoneToDATMinDifferential.build();
     }
 }

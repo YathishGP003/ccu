@@ -82,6 +82,7 @@ public class BuildingTuners
         DualDuctTuners.addDefaultTuners(hayStack, siteRef, equipRef, equipDis, tz);
         OAOTuners.updateNewTuners(hayStack, siteRef,equipRef, equipDis,tz,false);
         checkForTunerMigration();
+        //TunerUpgrades.handleTunerUpgrades(CCUHsApi.getInstance());
     }
 
     private void checkForTunerMigration() {
@@ -91,8 +92,9 @@ public class BuildingTuners
             String tunerVersion = info.versionName + "." + info.versionCode;
 
             if (!CCUHsApi.getInstance().getTunerVersion().equals(tunerVersion)) {
-                CCUHsApi.getInstance().setTunerVersion(tunerVersion);
                 doTunerMigrationJob();
+                TunerUpgrades.handleTunerUpgrades(CCUHsApi.getInstance());
+                CCUHsApi.getInstance().setTunerVersion(tunerVersion);
             }
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();

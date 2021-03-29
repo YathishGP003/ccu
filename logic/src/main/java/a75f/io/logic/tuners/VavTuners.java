@@ -11,6 +11,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 
@@ -625,6 +626,12 @@ public class VavTuners {
         String fanControlOnFixedTimeDelayId = CCUHsApi.getInstance().addPoint(fanControlOnFixedTimeDelay);
         CCUHsApi.getInstance().writeDefaultValById(fanControlOnFixedTimeDelayId, TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY);
         CCUHsApi.getInstance().writeHisValById(fanControlOnFixedTimeDelayId, TunerConstants.DEFAULT_FAN_ON_CONTROL_DELAY);
+    
+        Point reheatZoneToDATMinDifferential  = createReheatZoneToDATMinDifferentialTuner(true, equipDis, equipRef,
+                                                                                          siteRef, tz);
+        String reheatZoneToDATMinDifferentialId = CCUHsApi.getInstance().addPoint(reheatZoneToDATMinDifferential);
+        CCUHsApi.getInstance().writeDefaultValById(reheatZoneToDATMinDifferentialId, TunerConstants.DEFAULT_REHEAT_ZONE_DAT_MIN_DIFFERENTIAL);
+        CCUHsApi.getInstance().writeHisValById(reheatZoneToDATMinDifferentialId, TunerConstants.DEFAULT_REHEAT_ZONE_DAT_MIN_DIFFERENTIAL);
     }
     
     public static void addDefaultVavSystemTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,
@@ -964,6 +971,32 @@ public class VavTuners {
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
         BuildingTunerUtil.updateTunerLevels(zoneVOCThresholdId, roomRef, hayStack);
         hayStack.writeHisValById(zoneVOCThresholdId, HSUtil.getPriorityVal(zoneVOCThresholdId));
-
+        
+        Point reheatZoneToDATMinDifferential  = createReheatZoneToDATMinDifferentialTuner(false, equipdis, equipref,
+                                                                                          siteRef, tz );
+        String reheatZoneToDATMinDifferentialId = hayStack.addPoint(reheatZoneToDATMinDifferential);
+        BuildingTunerUtil.updateTunerLevels(reheatZoneToDATMinDifferentialId, roomRef, hayStack);
+        hayStack.writeHisValById(reheatZoneToDATMinDifferentialId, HSUtil.getPriorityVal(reheatZoneToDATMinDifferentialId));
+    }
+    
+    public static Point createReheatZoneToDATMinDifferentialTuner(boolean defaultTuner, String equipDis,
+                                                                  String equipRef, String siteRef, String tz) {
+        Point reheatZoneToDATMinDifferential  = new Point.Builder()
+                                                    .setDisplayName(equipDis + "-VAV-"+"reheatZoneToDATMinDifferential ")
+                                                    .setSiteRef(siteRef)
+                                                    .setEquipRef(equipRef)
+                                                    .setHisInterpolate("cov")
+                                                    .addMarker("tuner").addMarker("writable").addMarker("his")
+                                                    .addMarker("reheat").addMarker("dat").addMarker("min").addMarker("differential").addMarker("sp")
+                                                    .addMarker(defaultTuner ? Tags.DEFAULT : Tags.VAV)
+                                                    .setMinVal("0")
+                                                    .setMaxVal("20")
+                                                    .setIncrementVal("0.5")
+                                                    .setTunerGroup(TunerConstants.VAV_TUNER_GROUP)
+                                                    .setUnit("\u00B0F")
+                                                    .setTz(tz)
+                                                    .build();
+        
+        return reheatZoneToDATMinDifferential;
     }
 }

@@ -127,8 +127,12 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 if (currentFragment instanceof CreateNewSite) {
                     selectItem(2);
                 }
+
+                if (currentFragment instanceof InstallTypeFragment) {
+                    selectItem(0);
+                }
                 if (currentFragment instanceof InstallerOptions) {
-                    String installType = prefs.getString("INSTALL_TYPE");
+                   String installType = prefs.getString("INSTALL_TYPE");
                     if (installType.equals("OFFLINE")) {
                         selectItem(1);
                     } else {
@@ -1232,5 +1236,16 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             spDefaultPrefs.edit().putBoolean("75fNetworkAvailable", false).commit();
             return false;
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
+         if(currentFragment instanceof  StartCCUFragment)
+             super.onBackPressed();
+        else
+             imageView_Goback.callOnClick();
+
     }
 }

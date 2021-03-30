@@ -46,12 +46,11 @@ import a75f.io.logic.tuners.VavTuners;
  */
 
 /**
- * A Profile logical Map represents the logical side of a haystack Equip entity.
  * It acts as a container of profile's PI controllers and TR Request objects and it interfaces profile with the haystack.
  * Current design requires only one equip/map per profile, but map/list of LogicalMap
  * per profile is maintained to support any requirement of adding multiple equips/devices per profile.
  */
-public class VAVLogicalMap
+public class VavEquip
 {
     //TODO - Tuners
     int    integralMaxTimeout = 30;
@@ -90,7 +89,7 @@ public class VAVLogicalMap
     double vocTarget = TunerConstants.ZONE_VOC_TARGET;
     double vocThreshold = TunerConstants.ZONE_VOC_THRESHOLD;
     
-    public VAVLogicalMap(ProfileType T, int node) {
+    public VavEquip(ProfileType T, int node) {
         
         coolingLoop = new ControlLoop();
         heatingLoop = new ControlLoop();

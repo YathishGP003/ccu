@@ -319,8 +319,11 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         
         ArrayList<String> analog2InArr = new ArrayList<>();
         for (Sensor r : SensorManager.getInstance().getExternalSensorList()) {
-            analog2InArr.add(r.sensorName+" "+r.engineeringUnit);
+            if (!r.sensorName.contains("ION Meter")) {
+                analog2InArr.add(r.sensorName + " " + r.engineeringUnit);
+            }
         }
+        
         ArrayAdapter<String> analgo2InAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, analog2InArr);
         analgo2InAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         analog2InSensorSp.setAdapter(analgo2InAdapter);

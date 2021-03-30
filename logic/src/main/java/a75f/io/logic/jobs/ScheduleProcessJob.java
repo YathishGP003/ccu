@@ -1208,6 +1208,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             case 11:
                 plcPoints.put("Unit Type", "Current");
                 plcPoints.put("Unit", "A");
+            case 12:
+                plcPoints.put("Unit Type", "ION Density");
+                plcPoints.put("Unit", "ions/cc");
                 break;
         }
 

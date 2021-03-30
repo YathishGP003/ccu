@@ -91,8 +91,9 @@ public class BuildingTuners
             String tunerVersion = info.versionName + "." + info.versionCode;
 
             if (!CCUHsApi.getInstance().getTunerVersion().equals(tunerVersion)) {
-                CCUHsApi.getInstance().setTunerVersion(tunerVersion);
                 doTunerMigrationJob();
+                TunerUpgrades.handleTunerUpgrades(CCUHsApi.getInstance());
+                CCUHsApi.getInstance().setTunerVersion(tunerVersion);
             }
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();

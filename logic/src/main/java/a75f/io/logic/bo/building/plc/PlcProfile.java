@@ -123,13 +123,11 @@ public class PlcProfile extends ZoneProfile
         double relayOffThreshold = plcEquip.getConfigNumVal(relay+" and off and threshold");
     
         double relayStatus = plcEquip.getCmdVal(relay);
-        Log.d(L.TAG_CCU_ZONE, relay+" status : "+relayStatus);
+        
         if (loopOp > relayOnThreshold) {
             plcEquip.setCmdVal(relay, 1);
-            Log.d(L.TAG_CCU_ZONE, relay+" ON");
         } else if (relayStatus > 0 && loopOp < relayOffThreshold) {
             plcEquip.setCmdVal(relay, 0);
-            Log.d(L.TAG_CCU_ZONE, relay+" OFF");
         }
         
     }

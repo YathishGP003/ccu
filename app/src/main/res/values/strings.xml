@@ -759,7 +759,7 @@
     <!--Modbus Option-->
     <string name="title_mb">MB</string>
     <string name="title_modbus">MODBUS</string>
-    <string name="title_modbus_energy_proportional_distribution">ENERGY PROPORTIONAL DISTRIBUTION</string>
+    <string name="title_modbus_energy_proportional_distribution">Energy Proportional Distribution</string>
     <string name="title_equipment_type">Equipment Type</string>
     <string name="title_start_address">Slave Id</string>
     <string name="title_param">PARAMETER</string>
@@ -823,5 +823,19 @@
         <item>  1 </item>
         <item>  2 </item>
     </string-array>
+
+    <string-array name="energy_distribution_values">
+        <item> 10% </item>
+        <item> 20% </item>
+        <item> 30% </item>
+        <item> 40% </item>
+        <item> 50% </item>
+        <item> 60% </item>
+        <item> 70% </item>
+        <item> 80% </item>
+        <item> 90% </item>
+        <item> 100% </item>
+    </string-array>
+
 
 </resources>

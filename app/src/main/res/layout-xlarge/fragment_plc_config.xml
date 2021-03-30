@@ -10,6 +10,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -443,7 +447,7 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="36dp">
+                        android:layout_marginTop="395dp">
                         <TextView
                             android:id="@+id/relay2Text"
                             android:layout_width="wrap_content"
@@ -511,23 +515,22 @@
 
             </LinearLayout>
 
-
-            <Button
-                android:id="@+id/setBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentBottom="true"
-                android:layout_marginRight="24dp"
-                android:layout_marginBottom="24dp"
-                android:background="@null"
-                android:button="@null"
-                android:fontFamily="@font/lato_regular"
-                android:text="@string/button_set"
-                android:textAllCaps="true"
-                android:textColor="@color/orange_75f"
-                android:textSize="19.5dp" />
         </RelativeLayout>
+
+        <Button
+            android:id="@+id/setBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="900dp"
+            android:layout_marginBottom="24dp"
+            android:background="@null"
+            android:button="@null"
+            android:fontFamily="@font/lato_regular"
+            android:text="@string/button_set"
+            android:textAllCaps="true"
+            android:textColor="@color/orange_75f"
+            android:textSize="19.5dp" />
+        </LinearLayout>
     </ScrollView>
 </LinearLayout>
 

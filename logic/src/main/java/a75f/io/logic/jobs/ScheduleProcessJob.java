@@ -1224,9 +1224,28 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         
         if (nativeInputSensor > 0) {
             NativeSensor selectedSensor = SensorManager.getInstance().getNativeSensorList().get(nativeInputSensor - 1);
-            String sensorName = selectedSensor.sensorName.replace("Native-","");
-            plcPoints.put("Unit Type", sensorName);
+            plcPoints.put("Unit Type", selectedSensor.sensorName);
             plcPoints.put("Unit", selectedSensor.engineeringUnit);
+    
+            double relay1Config = CCUHsApi.getInstance().readDefaultVal("point and relay1 and config and" +
+                                                                                    " enabled and equipRef == \""+equipID+"\"");
+            StringBuilder relayStatus = new StringBuilder();
+            if (relay1Config > Math.abs(0.01)) {
+                double relay1Status = CCUHsApi.getInstance().readHisValByQuery("point and relay1 and cmd and equipRef" +
+                                                                               " == \""+equipID+"\"");
+                relayStatus.append(", Relay1 "+(relay1Status > Math.abs(0.01) ? "ON":"OFF"));
+            }
+            double relay2Config = CCUHsApi.getInstance().readDefaultVal("point and relay2 and config and" +
+                                                                        " enabled and equipRef == \""+equipID+"\"");
+            
+            if (relay2Config > Math.abs(0.01)) {
+                double relay2Status = CCUHsApi.getInstance().readHisValByQuery("point and relay2 and cmd and equipRef" +
+                                                                               " == \""+equipID+"\"");
+                relayStatus.append(", Relay2 "+(relay2Status > Math.abs(0.01) ? "ON":"OFF"));
+            }
+            
+            String currStatus = plcPoints.get("Status").toString();
+            plcPoints.put("Status", currStatus+relayStatus.toString());
         }
     
     

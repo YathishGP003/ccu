@@ -123,6 +123,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
     String zoneRef;
     
     private int targetValSelection = 0;
+    private int nativeValSelection = 0;
     
     @Override
     public String getIdString()
@@ -308,6 +309,17 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         ArrayAdapter<Double> targetValAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, targetVal);
         targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         targetValSp.setAdapter(targetValAdapter);
+    
+        targetValSp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                Log.d("CCU_UI"," targetValSp Selected : "+position);
+                targetValSelection = position;
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
         
         ArrayList<Double> errRange = new ArrayList<Double>();
         for (double pos = 1; pos <= 10; pos+=1) {
@@ -495,7 +507,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
     private void configureNativeSensorInputSpinner() {
     
         ArrayList<String> onboardSensorInArr = new ArrayList<>();
-        onboardSensorInArr.add("Not Used");//TODO-
+        onboardSensorInArr.add("Not Used");
         for (NativeSensor sensor : SensorManager.getInstance().getNativeSensorList()) {
             onboardSensorInArr.add(sensor.sensorName+" "+sensor.engineeringUnit);
         }
@@ -506,12 +518,11 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         sensorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         nativeSensorSp.setAdapter(sensorAdapter);
         if (mProfileConfig != null) {
-            targetValSelection = (int)mProfileConfig.pidTargetValue;
+            nativeValSelection = mProfileConfig.nativeSensorInput;
         }
         nativeSensorSp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                Log.d("CCU_UI"," onboardSensor Selected : "+position);
                 if (position == 0) {
                     return;
                 }
@@ -528,17 +539,21 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 targetValSp.setAdapter(targetValAdapter);
                 targetValSp.invalidate();
                 
+                //Initialize targetValueSpinner based on input sensor type.
                 if (mProfileConfig != null) {
                     if (targetValSelection > 0) {
-                        Log.d("CCU_UI"," onboardSensor set targetval pos : "+targetValAdapter.getCount()/2);
-                        targetValSp.setSelection(targetValAdapter.getCount()/2, false);
+                        if (nativeValSelection == position) {
+                            targetValSp.setSelection(targetValSelection, false);
+                        } else {
+                            targetValSp.setSelection(targetValAdapter.getCount()/2, false);
+                        }
                     } else {
                         targetValSp.setSelection(targetValAdapter.getPosition(mProfileConfig.pidTargetValue), false);
                     }
                 } else {
-                    Log.d("CCU_UI"," onboardSensor set targetval pos : "+targetValAdapter.getCount()/2);
                     targetValSp.setSelection(targetValAdapter.getCount()/2, false);
                 }
+                nativeValSelection = position;
                 analog1InSensorSp.setSelection(0, false);
                 th1InSensorSp.setSelection(0, false);
             }

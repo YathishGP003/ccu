@@ -113,7 +113,7 @@ public class PlcProfile extends ZoneProfile
     
     private void handleRelayOp(String relay, double loopOp) {
     
-        double relayConfig = plcEquip.getConfigNumVal(relay+" and config");
+        double relayConfig = plcEquip.getConfigNumVal(relay+" and enabled");
         if (Math.abs(relayConfig) < 0.01) {
             plcEquip.setCmdVal(relay, 0);
             return;

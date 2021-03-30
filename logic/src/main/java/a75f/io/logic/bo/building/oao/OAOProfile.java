@@ -204,11 +204,11 @@ public class OAOProfile
             }else if (L.ccu().systemProfile instanceof VavStagedRtu) {
                 //VavStagedProfile
                 VavStagedRtu profile = (VavStagedRtu) L.ccu().systemProfile;
-                economizingLoopOutput = Math.min(profile.getCoolingLoopOp() * 100 /(profile.coolingStages + 1), 100);
+                economizingLoopOutput = Math.min(profile.getCoolingLoopOp() * (profile.coolingStages + 1)  , 100);
             }else if (L.ccu().systemProfile instanceof DabStagedRtu) {
                 //DabStagedProfile
                 DabStagedRtu profile = (DabStagedRtu) L.ccu().systemProfile;
-                economizingLoopOutput = Math.min(profile.getCoolingLoopOp() * 100 /(profile.coolingStages + 1), 100);
+                economizingLoopOutput = Math.min(profile.getCoolingLoopOp() * (profile.coolingStages + 1), 100);
             }
         } else {
             setEconomizingAvailable(false);

@@ -240,6 +240,15 @@
 
         </LinearLayout>
 
+        <!--Remove after we're satisfied with Crashlytics working -->
+        <Button
+           android:id="@+id/crashButton"
+           android:visibility="gone"
+           android:layout_margin="@dimen/margin_20"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="Crash App"/>
+
     </LinearLayout>
     
 </FrameLayout>

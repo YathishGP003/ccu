@@ -1707,7 +1707,8 @@ public class CCUHsApi
                             hisGrid.dump();
                             HRow r = hisGrid.row(hisGrid.numRows() - 1);
                             HDateTime date = (HDateTime) r.get("ts");
-                            double tempVal = Double.parseDouble(r.get("val").toString());
+                            //Remove unicode chars and units. 48.32°F ->48.32
+                            double tempVal = Double.parseDouble(r.get("val").toString().replaceAll("[^\\d.]", ""));
                             Log.d("CCU_OAO",date+" External Temp: "+tempVal);
                             return tempVal;
 
@@ -1720,7 +1721,7 @@ public class CCUHsApi
             if (hisGrid != null && hisGrid.numRows() > 0) {
                 hisGrid.dump();
                 HRow r = hisGrid.row(hisGrid.numRows() - 1);
-                return Double.parseDouble(r.get("val").toString());
+                return Double.parseDouble(r.get("val").toString().replaceAll("[^\\d.]", ""));
             } else {
                 return CCUHsApi.getInstance().readHisValByQuery("system and outside and temp");
             }
@@ -1749,7 +1750,7 @@ public class CCUHsApi
                     if (hisGrid != null && hisGrid.numRows() > 0) {
                         HRow r = hisGrid.row(hisGrid.numRows() - 1);
                         HDateTime date = (HDateTime) r.get("ts");
-                        double humidityVal = Double.parseDouble(r.get("val").toString());
+                        double humidityVal = Double.parseDouble(r.get("val").toString().replaceAll("[^\\d.]", ""));
                         Log.d("CCU_OAO",date+" External Humidity: "+humidityVal);
                         return 100 * humidityVal;
 
@@ -1761,7 +1762,7 @@ public class CCUHsApi
             if (hisGrid != null && hisGrid.numRows() > 0) {
                 hisGrid.dump();
                 HRow r = hisGrid.row(hisGrid.numRows() - 1);
-                double humidityVal = Double.parseDouble(r.get("val").toString());
+                double humidityVal = Double.parseDouble(r.get("val").toString().replaceAll("[^\\d.]", ""));
                 return 100 * humidityVal;
             } else {
                 return CCUHsApi.getInstance().readHisValByQuery("system and outside and humidity");

@@ -129,7 +129,7 @@ public class Pulse
 				}
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
 				if (logPoint.isEmpty()) {
-					CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for "+logPoint.get("dis"));
+					CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for "+phyPoint.get("dis"));
 					continue;
 				}
 				Point logPointInfo = new Point.Builder().setHashMap(logPoint).build();
@@ -650,7 +650,7 @@ public class Pulse
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
 				
 				if (logPoint.isEmpty()) {
-					CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for "+logPoint.get("dis"));
+					CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for "+phyPoint.get("dis"));
 					continue;
 				}
 				

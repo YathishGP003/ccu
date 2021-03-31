@@ -871,6 +871,19 @@ public class PlcEquip {
     }
     
     private void handleRelayConfigUpdate(PlcProfileConfiguration config) {
+    
+        HashMap relay1Config = CCUHsApi.getInstance().read("point and config and relay1 and enabled and equipRef == " +
+                                                           "\"" + equipRef + "\"");
+        
+        //Required during upgrades of PI profiles which do not have relay config points.
+        if (relay1Config.isEmpty()) {
+            HashMap equipHash = CCUHsApi.getInstance().read("equip and group == \"" + nodeAddr + "\"");
+            Equip equip = new Equip.Builder().setHashMap(equipHash).build();
+    
+            PlcRelayConfigHandler.updateRelayConfigPoints(equip, config, Tags.RELAY1, CCUHsApi.getInstance());
+            PlcRelayConfigHandler.updateRelayConfigPoints(equip, config, Tags.RELAY2, CCUHsApi.getInstance());
+            return;
+        }
         
         hayStack.writeDefaultVal("point and config and relay1 and enabled and equipRef == \"" + equipRef + "\"",
                                  config.relay1ConfigEnabled ? 1.0 : 0);

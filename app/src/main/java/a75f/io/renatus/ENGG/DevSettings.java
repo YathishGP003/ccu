@@ -6,6 +6,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+
+import a75f.io.renatus.BuildConfig;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
@@ -76,7 +78,9 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     @BindView(R.id.imageMBSerial) ImageView mbSerial;
     @BindView(R.id.reconnectSerial) Button reconnectSerial;
     LinearLayout testParams;
-    
+
+    @BindView(R.id.crashButton) Button crashButton;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                                   Bundle savedInstanceState) {
@@ -232,6 +236,16 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                 triggerRebirth(getActivity());
             }
         });
+
+        if (BuildConfig.BUILD_TYPE.equals("local") || BuildConfig.BUILD_TYPE.equals("dev")) {
+
+            crashButton.setVisibility(View.VISIBLE);
+            crashButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View view) {
+                    throw new RuntimeException("Test Crash"); // Force a crash
+                }
+            });
+        }
     }
     
     @Override

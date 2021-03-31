@@ -175,17 +175,16 @@ public class OAOProfile
                                       .getInt("outside_temp", 0);
                 externalHumidity = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                                       .getInt("outside_humidity", 0);
-            } else
-            {
+            } else {
                 externalTemp = CCUHsApi.getInstance().readHisValByQuery("system and outside and temp");
                 externalHumidity = CCUHsApi.getInstance().readHisValByQuery("system and outside and humidity");
             }
         } catch (Exception e) {
             e.printStackTrace();
             Log.d(L.TAG_CCU_OAO," Failed to read external Temp or Humidity , Disable Economizing");
-            setEconomizingAvailable(false);
-            resetOAOParams();
-            return;
+            //setEconomizingAvailable(false);
+            //resetOAOParams();
+            //return;
         }
         oaoEquip.setHisVal("outsideWeather and air and temp", externalTemp);
         oaoEquip.setHisVal("outsideWeather and air and humidity", externalHumidity);
@@ -246,6 +245,7 @@ public class OAOProfile
         }
     
         if (isDryBulbTemperatureGoodForEconomizing(externalTemp, externalHumidity, economizingMinTemp)) {
+            CcuLog.d(L.TAG_CCU_OAO, "Do economizing based on drybulb temperature");
             return true;
         }
         
@@ -255,6 +255,7 @@ public class OAOProfile
         
         //If outside enthalpy is lower, do economizing.
         if (isInsideEnthalpyGreaterThanOutsideEnthalpy(externalTemp, externalHumidity)) {
+            CcuLog.d(L.TAG_CCU_OAO, "Do economizing based on enthalpy");
             return true;
         }
         
@@ -308,7 +309,7 @@ public class OAOProfile
             return true;
         }
         CcuLog.d(L.TAG_CCU_OAO, "Outside air not suitable for economizing Temp : "+externalTemp
-                                +"Humidity : "+externalHumidity);
+                                +" Humidity : "+externalHumidity);
         return false;
     }
     

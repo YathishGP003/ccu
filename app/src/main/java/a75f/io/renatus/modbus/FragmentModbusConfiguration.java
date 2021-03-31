@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatSpinner;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,9 +24,13 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
+import a75f.io.api.haystack.Floor;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.ModbusEquipsInfo;
 import a75f.io.api.haystack.modbus.Parameter;
@@ -39,6 +44,7 @@ import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.EnergyDistributionAdapter;
 import a75f.io.renatus.FloorPlanFragment;
 import a75f.io.renatus.FragmentEMRConfiguration;
 import a75f.io.renatus.R;
@@ -53,7 +59,13 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     private short curSelectedSlaveId;
     String floorRef;
     String zoneRef;
-
+    public ArrayList<Floor> floorList = new ArrayList();
+    Comparator<Floor> floorComparator = new Comparator<Floor>() {
+        @Override
+        public int compare(Floor a, Floor b) {
+            return a.getDisplayName().compareToIgnoreCase(b.getDisplayName());
+        }
+    };
     ModbusProfile modbusProfile;
     EquipmentDevice equipmentDevice;
     @BindView(R.id.spEquipmentType)
@@ -79,6 +91,9 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
 
     @BindView(R.id.ivEditAddress)
     ImageView ivEditAddress;
+
+    @BindView(R.id.floorList)
+    RecyclerView floorListView;
 
     List<EquipmentDevice> equipmentDeviceCollection;
     RecyclerModbusParamAdapter recyclerModbusParamAdapter;
@@ -172,7 +187,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
 
     }
     private void updateUi(boolean isNewConfig){
-
+        initConfiguration();
         //If multiple slave address occurs
         ArrayList<Integer> slaveAddress = new ArrayList();
         for(int i =1; i <= 247; i++)
@@ -440,7 +455,15 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     public String getIdString() {
         return ID;
     }
+    void initConfiguration() {
 
+        floorList = HSUtil.getFloors();
+        Collections.sort(floorList, floorComparator);
+        EnergyDistributionAdapter energyDistributionAdapter = new EnergyDistributionAdapter(floorList, getContext());
+        floorListView.setLayoutManager(new LinearLayoutManager(getContext()));
+        floorListView.setAdapter(energyDistributionAdapter);
+        equipmentDeviceCollection  = EquipsManager.getInstance().getAllEquipments();
+    }
     /*public List<EquipmentDevice> loadJSONFromAsset() {
         List<EquipmentDevice> equipmentDevicesList = new ArrayList<EquipmentDevice>();
         try {

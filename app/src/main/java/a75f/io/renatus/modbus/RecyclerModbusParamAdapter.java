@@ -15,7 +15,7 @@ import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.renatus.R;
 
-class RecyclerModbusParamAdapter extends RecyclerView.Adapter<RecyclerModbusParamAdapter.ViewHolder> {
+public class RecyclerModbusParamAdapter extends RecyclerView.Adapter<RecyclerModbusParamAdapter.ViewHolder> {
 
     Context context;
     List<Parameter> modbusParam;

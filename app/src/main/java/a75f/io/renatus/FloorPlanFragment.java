@@ -1180,10 +1180,16 @@ public class FloorPlanFragment extends Fragment
 			}
 			if(priviousSelectedDevice==2){
 
+				/**
+				 * Modbus energy meter selection
+				 */
 				showDialogFragment(FragmentModbusConfiguration
 						.newInstance(meshAddress,"SYSTEM","SYSTEM", ProfileType.MODBUS_EM), FragmentModbusConfiguration.ID);
 			}
 			if(priviousSelectedDevice==3){
+				/**
+				 * Modbus BTU meter selection
+				 */
 				showDialogFragment(FragmentModbusConfiguration
 						.newInstance(meshAddress,"SYSTEM","SYSTEM", ProfileType.MODBUS_EM), FragmentModbusConfiguration.ID);
 			}

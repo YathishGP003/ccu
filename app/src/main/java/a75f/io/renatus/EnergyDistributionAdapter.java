@@ -1,20 +1,17 @@
 package a75f.io.renatus;
 
 import android.content.Context;
-import android.graphics.PorterDuff;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Spinner;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
+import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
 import a75f.io.api.haystack.Floor;
+import a75f.io.renatus.databinding.EnergyProDisItemBinding;
 
 public class EnergyDistributionAdapter extends RecyclerView.Adapter<EnergyDistributionAdapter.EnergyDistributorView> {
 
@@ -29,13 +26,14 @@ public class EnergyDistributionAdapter extends RecyclerView.Adapter<EnergyDistri
     @NonNull
     @Override
     public EnergyDistributorView onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new EnergyDistributorView(LayoutInflater.from(mContext).
-                inflate(R.layout.energy_pro_dis_item, parent, false));
+
+        EnergyProDisItemBinding item = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), R.layout.energy_pro_dis_item, parent, false);
+        return new EnergyDistributorView(item);
     }
 
     @Override
     public void onBindViewHolder(@NonNull EnergyDistributorView holder, int position) {
-        holder.floorName.setText(this.floorList.get(position).getDisplayName() + " : ");
+        holder.bind(this.floorList.get(position));
     }
 
     @Override
@@ -45,14 +43,16 @@ public class EnergyDistributionAdapter extends RecyclerView.Adapter<EnergyDistri
 
     class EnergyDistributorView extends RecyclerView.ViewHolder {
 
-        TextView floorName;
-        Spinner energyDistributeValue;
+        EnergyProDisItemBinding energyProDisItemBinding;
 
-        public EnergyDistributorView(@NonNull View itemView) {
-            super(itemView);
-            floorName = itemView.findViewById(R.id.floor_name);
-            energyDistributeValue = itemView.findViewById(R.id.distribution_value);
+        public EnergyDistributorView(EnergyProDisItemBinding energyProDisItemBinding) {
+            super(energyProDisItemBinding.getRoot());
+            this.energyProDisItemBinding = energyProDisItemBinding;
+        }
 
+        public void bind(Object obj) {
+            this.energyProDisItemBinding.setVariable(BR.floor, obj);
+            this.energyProDisItemBinding.executePendingBindings();
         }
     }
 }

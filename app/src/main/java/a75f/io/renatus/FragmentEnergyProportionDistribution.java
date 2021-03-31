@@ -20,22 +20,19 @@ import a75f.io.api.haystack.HSUtil;
 
 public class FragmentEnergyProportionDistribution extends Fragment {
 
-
-
-    public FragmentEnergyProportionDistribution newInstance() {
-        return new FragmentEnergyProportionDistribution();
-    }
-
     public ArrayList<Floor> floorList = new ArrayList();
-    private View rootView;
     Comparator<Floor> floorComparator = new Comparator<Floor>() {
         @Override
         public int compare(Floor a, Floor b) {
             return a.getDisplayName().compareToIgnoreCase(b.getDisplayName());
         }
     };
-
+    private View rootView;
     private RecyclerView floorListView;
+
+    public FragmentEnergyProportionDistribution newInstance() {
+        return new FragmentEnergyProportionDistribution();
+    }
 
     @Nullable
     @Override
@@ -46,11 +43,11 @@ public class FragmentEnergyProportionDistribution extends Fragment {
         return rootView;
     }
 
-    void initConfiguration(){
+    void initConfiguration() {
         floorListView = rootView.findViewById(R.id.floorList);
         floorList = HSUtil.getFloors();
         Collections.sort(floorList, floorComparator);
-        EnergyDistributionAdapter energyDistributionAdapter = new EnergyDistributionAdapter(floorList,getContext());
+        EnergyDistributionAdapter energyDistributionAdapter = new EnergyDistributionAdapter(floorList, getContext());
         floorListView.setLayoutManager(new LinearLayoutManager(getContext()));
         floorListView.setAdapter(energyDistributionAdapter);
     }

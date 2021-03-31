@@ -99,9 +99,7 @@ public class PlcProfile extends ZoneProfile
         int eStatus = (int)(Math.round(100*controlVariable)/100);
         if(plcEquip.getControlVariable() != curCv )
             plcEquip.setControlVariable(curCv);
-        if (eStatus != outputSignal){
-            plcEquip.setEquipStatus(eStatus);
-        }
+        plcEquip.setEquipStatus(getStatusMessage(plcEquip.equipRef, eStatus, CCUHsApi.getInstance()));
         outputSignal = eStatus;
     
         handleRelayOp(Tags.RELAY1, curCv);
@@ -110,6 +108,38 @@ public class PlcProfile extends ZoneProfile
         plcEquip.getPIController().dump();
         Log.d(L.TAG_CCU_ZONE, "PlcProfile, processVariable: "+processVariable+", targetValue: "+targetValue+", controlVariable: "+controlVariable);
     }
+    
+    /**
+     * Generate a PI Loop Status Message.
+     * Defer to CCU-UI spec of PI Profile for the format of this message.
+     * @param equipID
+     * @param outputSignal
+     * @param hayStack
+     * @return
+     */
+    private String getStatusMessage(String equipID, int outputSignal, CCUHsApi hayStack) {
+        
+        double relay1Config = hayStack.readDefaultVal("point and relay1 and config and" +
+                                                                    " enabled and equipRef == \""+equipID+"\"");
+        StringBuilder statusBuilder = new StringBuilder();
+        statusBuilder.append("Output Loop Signal is " + outputSignal + "%");
+        if (relay1Config > Math.abs(0.01)) {
+            double relay1Status = hayStack.readHisValByQuery("point and relay1 and cmd and equipRef" +
+                                                                           " == \""+equipID+"\"");
+            statusBuilder.append(", Relay1 "+(relay1Status > Math.abs(0.01) ? "ON":"OFF"));
+        }
+        double relay2Config = hayStack.readDefaultVal("point and relay2 and config and" +
+                                                                    " enabled and equipRef == \""+equipID+"\"");
+    
+        if (relay2Config > Math.abs(0.01)) {
+            double relay2Status = hayStack.readHisValByQuery("point and relay2 and cmd and equipRef" +
+                                                                           " == \""+equipID+"\"");
+            statusBuilder.append(", Relay2 "+(relay2Status > Math.abs(0.01) ? "ON":"OFF"));
+        }
+    
+        return statusBuilder.toString();
+    }
+    
     
     private void handleRelayOp(String relay, double loopOp) {
     

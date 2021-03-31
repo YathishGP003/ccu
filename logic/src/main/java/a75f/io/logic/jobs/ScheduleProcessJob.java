@@ -1221,11 +1221,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     
         int nativeInputSensor =  CCUHsApi.getInstance().readDefaultVal("point and config and native and input and " +
                                                                        "sensor and equipRef == \"" + equipID + "\"").intValue();
-        
         if (nativeInputSensor > 0) {
             NativeSensor selectedSensor = SensorManager.getInstance().getNativeSensorList().get(nativeInputSensor - 1);
-            String sensorName = selectedSensor.sensorName.replace("Native-","");
-            plcPoints.put("Unit Type", sensorName);
+            plcPoints.put("Unit Type", selectedSensor.sensorName);
             plcPoints.put("Unit", selectedSensor.engineeringUnit);
         }
     

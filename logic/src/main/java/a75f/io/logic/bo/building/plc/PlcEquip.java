@@ -877,7 +877,7 @@ public class PlcEquip {
         hayStack.writeDefaultVal("point and config and relay1 and on and threshold and equipRef == \"" + equipRef +
                                  "\"", config.relay1OnThresholdVal);
         hayStack.writeDefaultVal("point and config and relay1 and off and threshold and equipRef == \"" + equipRef +
-                                 "\"", config.relay1OnThresholdVal);
+                                 "\"", config.relay1OffThresholdVal);
         SmartNode.setPointEnabled(nodeAddr, Port.RELAY_ONE.name(), config.relay1ConfigEnabled);
         
         hayStack.writeDefaultVal("point and config and relay2 and enabled and equipRef == \"" + equipRef + "\"",
@@ -885,7 +885,7 @@ public class PlcEquip {
         hayStack.writeDefaultVal("point and config and relay2 and on and threshold and equipRef == \"" + equipRef +
                                  "\"", config.relay2OnThresholdVal);
         hayStack.writeDefaultVal("point and config and relay2 and off and threshold and equipRef == \"" + equipRef +
-                                 "\"", config.relay2OnThresholdVal);
+                                 "\"", config.relay2OffThresholdVal);
         SmartNode.setPointEnabled(nodeAddr, Port.RELAY_TWO.name(), config.relay2ConfigEnabled);
     }
     
@@ -1197,8 +1197,8 @@ public class PlcEquip {
 
     }
 
-    public void setEquipStatus(int signal) {
-        hayStack.writeDefaultVal("point and status and message and equipRef == \"" + equipRef + "\"", "Output Loop Signal is " + signal + "%");
+    public void setEquipStatus(String message) {
+        hayStack.writeDefaultVal("point and status and message and equipRef == \"" + equipRef + "\"", message);
 
     }
     

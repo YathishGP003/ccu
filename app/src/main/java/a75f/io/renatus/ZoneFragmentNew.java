@@ -2744,7 +2744,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     linearLayoutZonePoints.addView(viewPointRow2);
 
             }else{
-                    labelTarget.setText("Target "+plcPoints.get("Unit Type").toString()+" : ");
+                    labelTarget.setText("Target "+plcPoints.get("Unit Type").toString().replace("Native-","")+" : ");
                     textViewTargetAir.setText(plcPoints.get("Target Value").toString()+" "+plcPoints.get("Unit").toString());
                     viewPointRow1.setPadding(0,0,0,40);
                     linearLayoutZonePoints.addView(viewTitle);

@@ -99,7 +99,7 @@ public class CCUHsApi
         tagsDb = (CCUTagsDb) hsClient.db();
         tagsDb.init(context);
         instance = this;
-        entitySyncHandler = new EntitySyncHandler();
+        entitySyncHandler = new EntitySyncHandler(PreferenceManager.getDefaultSharedPreferences(context));
         hisSyncHandler = new HisSyncHandler(this);
         checkSiloMigration(c);                  // remove after all sites migrated, post Jan 20 2021
     }
@@ -134,7 +134,7 @@ public class CCUHsApi
         tagsDb = (CCUTagsDb) hsClient.db();
         tagsDb.init();
         instance = this;
-        entitySyncHandler = new EntitySyncHandler();
+        entitySyncHandler = new EntitySyncHandler(null);   // null prefs.
         hisSyncHandler = new HisSyncHandler(this);
     }
 
@@ -253,10 +253,13 @@ public class CCUHsApi
     public void updateSite(Site s, String id)
     {
         tagsDb.updateSite(s, id);
-        /*if (tagsDb.idMap.get(id) != null)
-        {
-            tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
-        }*/
+        entitySyncHandler.requestSiteSync();
+    }
+    
+    //Local site entity may be updated on pubnub notification which does not need to be synced back.
+    public void updateSiteLocal(Site s, String id)
+    {
+        tagsDb.updateSite(s, id);
     }
 
     public void updateEquip(Equip q, String id)
@@ -1355,6 +1358,26 @@ public class CCUHsApi
         sync.dump();
 
         return sync;
+    }
+    
+    public Site getRemoteSiteEntity(String siteGuid) {
+        HGrid siteGrid = getRemoteSite(siteGuid);
+    
+        Iterator it = siteGrid.iterator();
+        while (it.hasNext()) {
+            HashMap<Object, Object> map = new HashMap<>();
+            HRow r = (HRow) it.next();
+            HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
+            while (ri.hasNext()) {
+                HDict.MapEntry m = (HDict.MapEntry) ri.next();
+                map.put(m.getKey(), m.getValue());
+            }
+        
+            if (map.get("site") != null) {
+                return new Site.Builder().setHashMap(map).build();
+            }
+        }
+        return null;
     }
 
 

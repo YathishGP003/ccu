@@ -126,6 +126,7 @@ class BuildingTunerFallback {
         tagsValMap.put("rebalance,hold,time",TunerConstants.REBALANCE_HOLD_TIME);
     
         tagsValMap.put("target,cumulative,damper",TunerConstants.TARGET_CUMULATIVE_DAMPER);
+        tagsValMap.put("reheat,dat,differential",TunerConstants.DEFAULT_REHEAT_ZONE_DAT_MIN_DIFFERENTIAL);
         
         return tagsValMap;
     }

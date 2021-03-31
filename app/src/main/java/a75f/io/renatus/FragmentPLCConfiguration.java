@@ -364,12 +364,12 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         
         
         
-        ArrayList<Integer> analogArray = new ArrayList<>();
-        for (int a = 0; a <= 10; a++)
+        ArrayList<Double> analogArray = new ArrayList<>();
+        for (double a = 0; a <= 10; a++)
         {
             analogArray.add(a);
         }
-        ArrayAdapter<Integer> analogAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, analogArray);
+        ArrayAdapter<Double> analogAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, analogArray);
         analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         analogout1AtMinSp.setAdapter(analogAdapter);
         analogout1AtMaxSp.setAdapter(analogAdapter);
@@ -423,8 +423,10 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             analog2InSensorSp.setSelection(mProfileConfig.analog2InputSensor, false);
             
             zeroErrorAtMP.setChecked(mProfileConfig.expectZeroErrorAtMidpoint);
-            analogout1AtMinSp.setSelection(analogAdapter.getPosition((int)mProfileConfig.analog1AtMinOutput));
-            analogout1AtMaxSp.setSelection(analogAdapter.getPosition((int)mProfileConfig.analog1AtMaxOutput));
+            /*analogout1AtMinSp.setSelection(analogAdapter.getPosition((int)mProfileConfig.analog1AtMinOutput));
+            analogout1AtMaxSp.setSelection(analogAdapter.getPosition((int)mProfileConfig.analog1AtMaxOutput));*/
+            analogout1AtMinSp.setSelection(analogAdapter.getPosition(mProfileConfig.analog1AtMinOutput));
+            analogout1AtMaxSp.setSelection(analogAdapter.getPosition(mProfileConfig.analog1AtMaxOutput));
     
             analog2InSensorSp.setEnabled(mProfileConfig.useAnalogIn2ForSetpoint);
             sensorOffsetSp.setEnabled(mProfileConfig.useAnalogIn2ForSetpoint);
@@ -442,7 +444,8 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             relay2OnThreshold.setSelection((int)mProfileConfig.relay2OnThresholdVal);
             relay2OffThreshold.setSelection((int)mProfileConfig.relay2OffThresholdVal);
         } else {
-            analogout1AtMaxSp.setSelection(analogAdapter.getPosition(10), false);
+            /*analogout1AtMaxSp.setSelection(analogAdapter.getPosition(10), false);*/
+            analogout1AtMaxSp.setSelection(10, false);
             analog1InSensorSp.setSelection(1, false);
             th1InSensorSp.setSelection(0,false);
             nativeSensorSp.setSelection(0,false);

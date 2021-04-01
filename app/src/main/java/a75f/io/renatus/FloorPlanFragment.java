@@ -59,6 +59,7 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.renatus.modbus.FragmentModbusConfiguration;
+import a75f.io.renatus.modbus.FragmentModbusEnergyMeterConfiguration;
 import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -148,7 +149,7 @@ public class FloorPlanFragment extends Fragment
 									//Update BACnet Database Revision by adding new module to zone
 									ArrayList<Equip> zoneEquips = HSUtil.getEquips(getSelectedZone().getId());
 									if (zoneEquips.size() == 1) {
-										if (!zoneEquips.get(0).getMarkers().contains("pid") && !zoneEquips.get(0).getMarkers().contains("emr")) {
+										if (!zoneEquips.get(0).getMarkers().contains("pid")) {
 											BACnetUtils.updateDatabaseRevision();
 										}
 									}
@@ -1019,7 +1020,6 @@ public class FloorPlanFragment extends Fragment
 	@OnClick(R.id.pairModuleBtn)
 	public void startPairing()
 	{
-
         if (mFloorListAdapter.getSelectedPostion() == -1) {
             short meshAddress = L.generateSmartNodeAddress();
             if (L.ccu().oaoProfile != null) {
@@ -1048,9 +1048,6 @@ public class FloorPlanFragment extends Fragment
 				if(zoneEquips.get(i).getProfile().contains("PLC"))
 				{
 					isPLCPaired = true;
-				}if(zoneEquips.get(i).getProfile().contains("EMR"))
-				{
-					isEMRPaired = true;
 				}if(zoneEquips.get(i).getProfile().contains("TEMP_INFLUENCE"))
 				{
 					isCCUPaired = true;
@@ -1058,9 +1055,10 @@ public class FloorPlanFragment extends Fragment
 			}
 		}
 
-		if(!isPLCPaired && !isEMRPaired && !isCCUPaired) {
+		if(!isPLCPaired && !isCCUPaired) {
 			short meshAddress = L.generateSmartNodeAddress();
 			if (mFloorListAdapter.getSelectedPostion() == -1) {
+
 				if (L.ccu().oaoProfile != null) {
 					Toast.makeText(getActivity(), "OAO Module already paired", Toast.LENGTH_LONG).show();
 				} else {
@@ -1086,9 +1084,9 @@ public class FloorPlanFragment extends Fragment
 			if (isPLCPaired) {
 				Toast.makeText(getActivity(), "Pi Loop Module is already paired in this zone", Toast.LENGTH_LONG).show();
 			}
-			if (isEMRPaired) {
-				Toast.makeText(getActivity(), "Energy Meter Module is already paired in this zone", Toast.LENGTH_LONG).show();
-			}
+			//if (isEMRPaired) {
+			//	Toast.makeText(getActivity(), "Energy Meter Module is already paired in this zone", Toast.LENGTH_LONG).show();
+			//}
 			if (isCCUPaired) {
 				Toast.makeText(getActivity(), "CCU as Zone is already paired in this zone", Toast.LENGTH_LONG).show();
 			}
@@ -1150,7 +1148,6 @@ public class FloorPlanFragment extends Fragment
 		
 		ZoneProfile profile = L.getProfile(Short.parseShort(nodeAddr));
 		if(profile != null) {
-
 			switch (profile.getProfileType()) {
 			/*case HMP:
 				showDialogFragment(FragmentHMPConfiguration
@@ -1204,6 +1201,10 @@ public class FloorPlanFragment extends Fragment
 				case SSE:
 					showDialogFragment(FragmentSSEConfiguration
 							.newInstance(Short.parseShort(nodeAddr),zone.getId(), NodeType.SMART_NODE, floor.getId(),profile.getProfileType()), FragmentSSEConfiguration.ID);
+					break;
+				case MODBUS_EMR:
+					showDialogFragment(FragmentModbusEnergyMeterConfiguration
+							.newInstance(Short.parseShort(nodeAddr),zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusEnergyMeterConfiguration.ID);
 					break;
 				case MODBUS_UPS30:
 				case MODBUS_UPS80:

@@ -821,4 +821,11 @@
         <item>  2 </item>
     </string-array>
 
+    <!-- Modbus Module type screen-->
+    <string name="label_modbusselectdevicetype">MODBUS | SELECT DEVICE TYPE</string>
+    <string name="title_modbusequipment">Modbus Equipment</string>
+    <string name="description_modbusequipment">Hook up a Modbus equipment to monitor electricity consumption</string>
+    <string name="title_modbusenergymeter">Modbus Energy Meter</string>
+    <string name="description_modbusenergymeter">Hook up a Modbus energy meter to monitor electricity consumption</string>
+
 </resources>

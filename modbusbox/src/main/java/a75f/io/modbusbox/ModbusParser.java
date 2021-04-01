@@ -1,4 +1,4 @@
-package a75f.io.modbusbox;
+ package a75f.io.modbusbox;
 
 import android.content.Context;
 import android.util.Log;
@@ -74,5 +74,21 @@ public class ModbusParser {
             e.printStackTrace();
         }
         return jsonObjects;
+    }
+
+    public ArrayList<EquipmentDevice> parseEneryMeterEquips(Context c) {
+        ArrayList<EquipmentDevice> assetEquipments = new ArrayList<>();
+
+        try {
+            String[] fileList;
+            fileList = c.getAssets().list("modbus-em");
+            for (String filename : fileList) {
+                String equipJson = readFileFromAssets(c, "modbus-em/" + filename);
+                assetEquipments.add(parseModbusDataFromString(equipJson));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return assetEquipments;
     }
 }

@@ -1,6 +1,7 @@
 package a75f.io.modbusbox;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -19,6 +20,7 @@ import io.objectbox.query.QueryBuilder;
 public class EquipProcessor
 {
     ArrayList<EquipmentDevice> equipmentDevices;
+    ArrayList<EquipmentDevice> energyMeterDevices;
     ModbusParser parser;
     Context mContext;
     private BoxStore boxStore;
@@ -34,6 +36,7 @@ public class EquipProcessor
 
         boxStore = CCUHsApi.getInstance().tagsDb.getBoxStore();
         modbusBox = boxStore.boxFor(EquipmentDevice.class);
+
         parser = new ModbusParser();
 
         objectMapper = new ObjectMapper();
@@ -41,7 +44,11 @@ public class EquipProcessor
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
         equipmentDevices = parser.parseAllEquips(c);
+        energyMeterDevices = parser.parseEneryMeterEquips(c);
         for(EquipmentDevice equipmentDevice:equipmentDevices){
+            addEquips(equipmentDevice);
+        }
+        for(EquipmentDevice equipmentDevice:energyMeterDevices){
             addEquips(equipmentDevice);
         }
     }
@@ -50,6 +57,13 @@ public class EquipProcessor
         if (getMbEquip(equipmentDevice.getModbusEquipIdId()) == null) {
             modbusBox.put(equipmentDevice);
         }
+    }
+
+    public List<EquipmentDevice> getAllEMEquips(){
+        QueryBuilder<EquipmentDevice> mbQuery = modbusBox.query();
+        mbQuery.equal(EquipmentDevice_.isPaired, false);
+        mbQuery.equal(EquipmentDevice_.equipType,"EMR");
+        return mbQuery.build().find();
     }
 
     public List<EquipmentDevice> getAllEquips(){

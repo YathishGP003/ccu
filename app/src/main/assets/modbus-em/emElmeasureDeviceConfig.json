@@ -1,0 +1,468 @@
+{
+  "modbusEquipId (_id)": "5f1f30ad18bcbf4f1d9a2a63",
+  "name": "Energy Meter El Measure",
+  "description": "This document contains the configuration necessary to manage Energy meters",
+  "equipType": "EMR",
+  "vendor": "El Measure",
+  "model": [
+    "Multi Function Meters"
+  ],
+  "registers": [
+    {
+      "registerAddress": 140,
+      "registerNumber": "40141",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2a63",
+          "name": "Line Voltage (Avg)",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+            {
+              "tagName": "emr"
+            },
+            {
+              "tagName": "line"
+            },
+            {
+              "tagName": "voltage"
+            },
+            {
+              "tagName": "average"
+            },
+            {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 142,
+      "registerNumber": "40143",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2f15",
+          "name": "Line Voltage (R Phase)",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+            {
+              "tagName": "emr"
+            },
+            {
+              "tagName": "line"
+            },
+            {
+              "tagName": "voltage"
+            },
+            {
+              "tagName": "rPhase"
+            },
+            {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 144,
+      "registerNumber": "40145",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2f16",
+          "name": "Line Voltage (Y Phase)",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+            {
+              "tagName": "emr"
+            },
+            {
+              "tagName": "line"
+            },
+            {
+              "tagName": "voltage"
+            },
+            {
+              "tagName": "yPhase"
+            },
+            {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 146,
+      "registerNumber": "40147",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2f17",
+          "name": "Line Voltage (B Phase)",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "emr"
+            },
+            {
+              "tagName": "line"
+            },
+            {
+              "tagName": "voltage"
+            },
+            {
+              "tagName": "bPhase"
+            },
+            {
+              "tagName": "unit",
+              "value": "V"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 148,
+      "registerNumber": "40149",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2f18",
+          "name": "Phase Current (Avg)",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "emr"
+            },
+            {
+              "tagName": "phaseCur"
+            },
+            {
+              "tagName": "average"
+            },
+            {
+              "tagName": "unit",
+              "value": "A"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 150,
+      "registerNumber": "40151",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2f19",
+          "name": "Phase Current (R)",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "emr"
+            },
+            {
+              "tagName": "phaseCur"
+            },
+            {
+              "tagName": "rPhase"
+            },
+            {
+              "tagName": "unit",
+              "value": "A"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 152,
+      "registerNumber": "40153",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2fea",
+          "name": "Phase Current (Y)",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "emr"
+            },
+            {
+              "tagName": "phaseCur"
+            },
+            {
+              "tagName": "yPhase"
+            },
+            {
+              "tagName": "unit",
+              "value": "A"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 154,
+      "registerNumber": "40155",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2feb",
+          "name": "Phase Current (B)",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "emr"
+            },
+            {
+              "tagName": "phaseCur"
+            },
+            {
+              "tagName": "bPhase"
+            },
+            {
+              "tagName": "unit",
+              "value": "A"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 156,
+      "registerNumber": "40157",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2fec",
+          "name": "Frequency",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "emr"
+            },
+            {
+              "tagName": "frequency"
+            },
+            {
+              "tagName": "unit",
+              "value": "Hz"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 116,
+      "registerNumber": "40117",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2fed",
+          "name": "Power Factor",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "emr"
+            },
+            {
+              "tagName": "power"
+            },
+            {
+              "tagName": "factor"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 158,
+      "registerNumber": "40159",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2fee",
+          "name": "Summation of Wh",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "emr"
+            },
+            {
+              "tagName": "summation"
+            },
+            {
+              "tagName": "unit",
+              "value": "Wh"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

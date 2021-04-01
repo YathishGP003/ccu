@@ -159,7 +159,7 @@ public class EquipmentDevice {
         @Override
         public List<Register> convertToEntityProperty(String databaseValue) {
             if (databaseValue == null) {
-                return null;
+                return null;  
             }
 
             return new Gson().fromJson(databaseValue, new TypeToken<List<Register>>() {

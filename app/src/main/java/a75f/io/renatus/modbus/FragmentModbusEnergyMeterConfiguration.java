@@ -4,12 +4,6 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatSpinner;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +14,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatSpinner;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +31,6 @@ import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.ModbusEquipsInfo;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.Register;
-import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -40,15 +40,16 @@ import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.FloorPlanFragment;
-import a75f.io.renatus.FragmentEMRConfiguration;
 import a75f.io.renatus.R;
+import a75f.io.renatus.modbus.FragmentModbusConfiguration;
+import a75f.io.renatus.modbus.RecyclerModbusParamAdapter;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class FragmentModbusConfiguration extends BaseDialogFragment {
+public class FragmentModbusEnergyMeterConfiguration extends BaseDialogFragment {
 
-    public static final String ID = FragmentModbusConfiguration.class.getSimpleName();
+    public static final String ID = FragmentModbusEnergyMeterConfiguration.class.getSimpleName();
 
     private short curSelectedSlaveId;
     String floorRef;
@@ -80,6 +81,8 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     @BindView(R.id.ivEditAddress)
     ImageView ivEditAddress;
 
+    @BindView(R.id.textTitleFragment)
+    TextView tvtitle;
     List<EquipmentDevice> equipmentDeviceCollection;
     RecyclerModbusParamAdapter recyclerModbusParamAdapter;
     boolean isEditConfig = false;
@@ -92,7 +95,8 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
 
         View view = inflater.inflate(R.layout.fragment_modbus_config, container, false);
         ButterKnife.bind(this, view);
-
+        tvtitle = view.findViewById(R.id.textTitleFragment);
+        tvtitle.setText(R.string.title_modbusenergymeter);
         setBtn.setOnClickListener(view1 -> {
             if(!isEditConfig && L.isModbusSlaveIdExists((short)(spAddress.getSelectedItemPosition() +1))){
                 Toast.makeText(getActivity(),"Slave Id already exists, choose another slave id to proceed", Toast.LENGTH_LONG).show();
@@ -112,7 +116,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 ivEditAddress.setImageDrawable(getContext().getDrawable(R.drawable.ic_edit_accent));
             }
         });
-        equipmentDeviceCollection  = EquipsManager.getInstance().getAllEquipments();
+        equipmentDeviceCollection  = EquipsManager.getInstance().getEnergyMeterEquipments();
         return view;
     }
     @Override
@@ -120,17 +124,9 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         if(L.getProfile(curSelectedSlaveId) != null) {
             ProfileType profileType = L.getProfile(curSelectedSlaveId).getProfileType();
             switch (profileType) {
-                case MODBUS_PAC:
-                case MODBUS_RRS:
-                case MODBUS_UPS30:
-                case MODBUS_UPS400:
-                case MODBUS_UPS80:
-                case MODBUS_VRF:
-                case MODBUS_WLD:
                 case MODBUS_EM:
                 case MODBUS_EMS:
-                case MODBUS_ATS:
-                case MODBUS_UPS150:
+                case MODBUS_EMR:
                     modbusProfile = (ModbusProfile) L.getProfile(curSelectedSlaveId);
                     if(modbusProfile != null){
                         curSelectedSlaveId = modbusProfile.getSlaveId();
@@ -172,7 +168,6 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
 
     }
     private void updateUi(boolean isNewConfig){
-
         //If multiple slave address occurs
         ArrayList<Integer> slaveAddress = new ArrayList();
         for(int i =1; i <= 247; i++)
@@ -184,7 +179,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         spAddress.setAdapter(slaveAdapter);
         Log.d("Modbus","updateUi="+equipmentDevice.getName()+","+equipmentDevice.getSlaveId());
 
-        if(Objects.nonNull(equipmentDevice.getSlaveId()) && equipmentDevice.getSlaveId() > 0) {
+        if(Objects.nonNull(equipmentDevice.getSlaveId()) &&  equipmentDevice.getSlaveId() > 0) {
             curSelectedSlaveId = (short) (equipmentDevice.getSlaveId() -1);
             spAddress.setSelection(curSelectedSlaveId, false);
             spAddress.setEnabled(false);
@@ -252,7 +247,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 setBtn.setEnabled(false);
                 if(ProgressDialogUtils.isDialogShowing())
                     ProgressDialogUtils.hideProgressDialog();
-                ProgressDialogUtils.showProgressDialog(getActivity(),"Saving Modbus Configuration");
+                ProgressDialogUtils.showProgressDialog(getActivity(),"Saving Modbus Energy Meter Configuration");
                 super.onPreExecute();
             }
 
@@ -266,13 +261,12 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
             @Override
             protected void onPostExecute( final Void result ) {
                 ProgressDialogUtils.hideProgressDialog();
-                FragmentModbusConfiguration.this.closeAllBaseDialogFragments();
+                FragmentModbusEnergyMeterConfiguration.this.closeAllBaseDialogFragments();
                 getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
     private void setUpsModbusProfile() {
-
         Log.i("ModbusUI", "Data:" + recyclerModbusParamAdapter.modbusParam);
         String equipType = equipmentDevice.getEquipType();
         ModbusEquipTypes curEquipTypeSelected = ModbusEquipTypes.valueOf(equipType);
@@ -281,10 +275,9 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         if(spAddress.getVisibility() == View.GONE){
             curSelectedSlaveId = (short) Integer.parseInt(editSlaveId.getText().toString());
         }
-     //   equipmentDevice.getRegisters().get(0).setParameters(recyclerModbusParamAdapter.modbusParam);
-        equipmentDevice.setSlaveId(curSelectedSlaveId);
+        //   equipmentDevice.getRegisters().get(0).setParameters(recyclerModbusParamAdapter.modbusParam);
+        equipmentDevice.setSlaveId(curSelectedSlaveId); 
         boolean isNewDevice = L.getProfile((short) curSelectedSlaveId) == null;
-
         switch (curEquipTypeSelected) {
             case UPS30K:
                 if(L.getProfile((short)curSelectedSlaveId) == null) {
@@ -385,6 +378,15 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 } else
                     equipRef = updateModbusProfile(curSelectedSlaveId);
                 break;
+            case EMR:
+                CcuLog.d(L.TAG_CCU_UI, "Set modbus energy meter Config: MB Profiles - " + L.ccu().zoneProfiles.size() + "," + L.getProfile((short) curSelectedSlaveId) + "," + curSelectedSlaveId);
+                if (L.getProfile((short) curSelectedSlaveId) == null) {
+                    modbusProfile.addMbEquip((short) curSelectedSlaveId, floorRef, zoneRef, equipmentDevice, recyclerModbusParamAdapter.modbusParam, ProfileType.MODBUS_EMR);
+                    L.ccu().zoneProfiles.add(modbusProfile);
+                    equipRef = modbusProfile.getEquip().getId();
+                } else
+                    equipRef = updateModbusProfile(curSelectedSlaveId);
+                break;
         }
         saveToBox(zoneRef,equipRef,equipmentDevice,curSelectedSlaveId, isNewDevice,floorRef);
     }
@@ -415,8 +417,8 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         return EquipsManager.getInstance().fetchProfileBySlaveId(slaveId);
     }
 
-    public static FragmentModbusConfiguration newInstance(short meshAddress, String roomName, String floorName, ProfileType profileType) {
-        FragmentModbusConfiguration f = new FragmentModbusConfiguration();
+    public static FragmentModbusEnergyMeterConfiguration newInstance(short meshAddress, String roomName, String floorName, ProfileType profileType) {
+        FragmentModbusEnergyMeterConfiguration f = new FragmentModbusEnergyMeterConfiguration();
         Bundle bundle = new Bundle();
         bundle.putShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR, meshAddress);
         bundle.putString(FragmentCommonBundleArgs.ARG_NAME, roomName);
@@ -441,40 +443,4 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     public String getIdString() {
         return ID;
     }
-
-    /*public List<EquipmentDevice> loadJSONFromAsset() {
-        List<EquipmentDevice> equipmentDevicesList = new ArrayList<EquipmentDevice>();
-        try {
-            String[] fileList;
-            fileList = getActivity().getAssets().list("modbus");
-            for(String filename: fileList) {
-                InputStream is = getActivity().getAssets().open("modbus/"+filename);
-                int size = is.available();
-                if(size > 0) {
-                    byte[] buffer = new byte[size];
-                    is.read(buffer);
-                    is.close();
-                    EquipmentDevice equipmentDevice = gson.fromJson(new String(buffer, "UTF-8"), EquipmentDevice.class);
-                    List<ModbusEquipsInfo> equipsQueryBuilder = modbusEquipsBox.query()
-                            .equal(ModbusEquipsInfo_.modbusEquipId, equipmentDevice.getModbusEquipIdId()).build().find();
-                    if(equipsQueryBuilder.size() > 0) {
-                        for(ModbusEquipsInfo info : equipsQueryBuilder) {
-                            Log.d("Modbus", "loadjson=" + equipmentDevice.getModbusEquipIdId()+","+info.getModbusEquipId());
-                            if ((info.getModbusEquipId() == null) || !info.getModbusEquipId().equals(equipmentDevice.getModbusEquipIdId())) {
-                                modbusEquipsBox.put(new ModbusEquipsInfo(equipmentDevice));
-                            }
-                        }
-                    }else {
-                        Log.d("Modbus", "loadjson22 new="+equipmentDevice.getName());
-                        modbusEquipsBox.put(new ModbusEquipsInfo(equipmentDevice.getModbusEquipIdId(), equipmentDevice));
-                    }
-                    equipmentDevicesList.add(equipmentDevice);
-                }
-            }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return equipmentDevicesList;
-        }
-        return equipmentDevicesList;
-    }*/
 }

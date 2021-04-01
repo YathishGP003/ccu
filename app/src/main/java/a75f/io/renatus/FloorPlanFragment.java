@@ -227,6 +227,7 @@ public class FloorPlanFragment extends Fragment
 	
 	private Zone getSelectedZone()
 	{
+		Log.i("test", "getSelectedZone:");
 		selectedZone = roomList.get(mRoomListAdapter.getSelectedPostion());
 		return selectedZone;
 	}
@@ -607,7 +608,6 @@ public class FloorPlanFragment extends Fragment
 	@OnClick(R.id.rl_systemdevice)
 	public void systemDeviceOnClick()
 	{
-
 		setSystemSelection(1);
 		if(floorList.size()>0) {
 			if(roomList.size()>0) {
@@ -644,7 +644,7 @@ public class FloorPlanFragment extends Fragment
 				if (zoneEquips.size() > 0) {
 					mModuleListAdapter.setSelectedItem(-1);
 				}
-				mRoomListAdapter.setSelectedItem(-1);
+			//	mRoomListAdapter.setSelectedItem(-1);
 				addFloorBtn.setEnabled(false);
 				addZonelt.setEnabled(false);
 			}
@@ -668,7 +668,7 @@ public class FloorPlanFragment extends Fragment
 				if (zoneEquips.size() > 0) {
 					mModuleListAdapter.setSelectedItem(-1);
 				}
-				mRoomListAdapter.setSelectedItem(-1);
+			//	mRoomListAdapter.setSelectedItem(-1);
 				addFloorBtn.setEnabled(false);
 				addZonelt.setEnabled(false);
 			}
@@ -691,7 +691,7 @@ public class FloorPlanFragment extends Fragment
 				if (zoneEquips.size() > 0) {
 					mModuleListAdapter.setSelectedItem(-1);
 				}
-				mRoomListAdapter.setSelectedItem(-1);
+				//mRoomListAdapter.setSelectedItem(-1);
 				addFloorBtn.setEnabled(false);
 				addZonelt.setEnabled(false);
 			}
@@ -806,7 +806,7 @@ public class FloorPlanFragment extends Fragment
 		rl_modbus_energy_meter.setEnabled(true);
 
 		/**
-		 * Modbus BTU Meter Configuraiton for un-selection
+		 * Modbus BTU Meter Configuration for un-selection
 		 */
 
 
@@ -1191,7 +1191,7 @@ public class FloorPlanFragment extends Fragment
 				 * Modbus BTU meter selection
 				 */
 				showDialogFragment(FragmentModbusConfiguration
-						.newInstance(meshAddress,"SYSTEM","SYSTEM", ProfileType.MODBUS_EM), FragmentModbusConfiguration.ID);
+						.newInstance(meshAddress,"SYSTEM","SYSTEM", ProfileType.MODBUS_BTU), FragmentModbusConfiguration.ID);
 			}
             return;
         }

@@ -52,6 +52,8 @@ import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.PROFILE_TYPE;
+
 public class FragmentModbusConfiguration extends BaseDialogFragment {
 
     public static final String ID = FragmentModbusConfiguration.class.getSimpleName();
@@ -95,6 +97,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     @BindView(R.id.floorList)
     RecyclerView floorListView;
 
+    ProfileType profileType;
     List<EquipmentDevice> equipmentDeviceCollection;
     RecyclerModbusParamAdapter recyclerModbusParamAdapter;
     boolean isEditConfig = false;
@@ -105,6 +108,9 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         zoneRef = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         floorRef = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
 
+        int profileOriginalValue=getArguments().getInt(FragmentCommonBundleArgs.PROFILE_TYPE);
+
+        profileType =ProfileType.values()[profileOriginalValue];
         View view = inflater.inflate(R.layout.fragment_modbus_config, container, false);
         ButterKnife.bind(this, view);
 
@@ -127,7 +133,22 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 ivEditAddress.setImageDrawable(getContext().getDrawable(R.drawable.ic_edit_accent));
             }
         });
-        equipmentDeviceCollection  = EquipsManager.getInstance().getAllEquipments();
+
+        /**
+         * Get all the mov
+         */
+        List<EquipmentDevice> equipmentDeviceList =  EquipsManager.getInstance().getAllEquipments();
+
+        List<EquipmentDevice> modbusBTUequipmentDeviceCollection=new ArrayList<>();
+        if(profileType==ProfileType.MODBUS_BTU){
+            for (int i = 0; i < equipmentDeviceList.size(); i++) {
+                Log.i("type", "onCreateView: "+equipmentDeviceList.get(i).getEquipType());
+                //BTU meter
+            }
+        }else{
+            equipmentDeviceCollection  = EquipsManager.getInstance().getAllEquipments();
+        }
+
         return view;
     }
     @Override
@@ -165,7 +186,6 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                         }
                     }
                     break;
-
             }
         }else {
             modbusProfile = new ModbusProfile();
@@ -455,8 +475,8 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     public String getIdString() {
         return ID;
     }
-    void initConfiguration() {
 
+    void initConfiguration() {
         floorList = HSUtil.getFloors();
         Collections.sort(floorList, floorComparator);
         EnergyDistributionAdapter energyDistributionAdapter = new EnergyDistributionAdapter(floorList, getContext());

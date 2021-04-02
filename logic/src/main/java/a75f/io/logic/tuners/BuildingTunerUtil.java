@@ -100,7 +100,7 @@ class BuildingTunerUtil {
         return false;
     }
     
-    private static boolean copyFromBuildingTuner(String dstPointId, String queryString, CCUHsApi hayStack) {
+    public static boolean copyFromBuildingTuner(String dstPointId, String queryString, CCUHsApi hayStack) {
         CcuLog.e(L.TAG_CCU_TUNER, " copyFromBuildingTuner : ");
         String buildingQuery = HSUtil.appendMarkerToQuery(queryString, Tags.DEFAULT);
 

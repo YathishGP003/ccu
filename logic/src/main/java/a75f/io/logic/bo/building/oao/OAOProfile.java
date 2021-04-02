@@ -399,7 +399,7 @@ public class OAOProfile
         double B = 0.2372 * averageTemp + 0.1230;
         double H = A * averageHumidity + B;
     
-        Log.d(L.TAG_CCU_OAO, "averageTemp "+averageTemp+" averageHumidity "+averageHumidity+" Enthalpy "+H);
+        Log.d(L.TAG_CCU_OAO, "temperature "+averageTemp+" humidity "+averageHumidity+" Enthalpy: "+H);
         return CCUUtils.roundToTwoDecimal(H);
     }
 

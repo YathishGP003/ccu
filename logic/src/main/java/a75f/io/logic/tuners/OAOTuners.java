@@ -759,6 +759,7 @@ public class OAOTuners
                                                        .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his")
                                                        .addMarker("economizing").addMarker("dry").addMarker("bulb").addMarker("threshold").addMarker("system")
                                                        .setMinVal("0").setMaxVal("70").setIncrementVal("0.5").setTunerGroup(TunerConstants.OAO_TUNER_GROUP)
+                                                       .setUnit("\u00B0F")
                                                        .setTz(tz)
                                                        .build();
             String economizingDryBulbThresholdId = hayStack.addPoint(economizingDryBulbThreshold);

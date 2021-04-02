@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
 import android.net.Network;
@@ -26,6 +28,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.raygun.raygun4android.RaygunClient;
 import com.renovo.bacnet4j.LocalDevice;
 import com.renovo.bacnet4j.RemoteDevice;
 import com.renovo.bacnet4j.event.DeviceEventAdapter;
@@ -72,6 +75,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.alerts.AlertManager;
@@ -194,7 +198,15 @@ public abstract class UtilityApplication extends Application {
     public void onCreate() {
         super.onCreate();
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+
+        // initialize crash reports as early as possible
+        initializeCrashReporting();
+
         Globals.getInstance().setApplicationContext(this);
+
+        // we now have haystack
+        RaygunClient.setUser(userNameForCrashReportsFromHaystack());
+
         AlertManager.getInstance(this).setApplicationContext(this);
 
         //Modbus EquipmendManager
@@ -223,6 +235,41 @@ public abstract class UtilityApplication extends Application {
         context.registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         InitialiseBACnet();
     }
+
+    private void initializeCrashReporting() {
+
+        RaygunClient.init(this);
+        RaygunClient.setVersion(versionName());
+        RaygunClient.enableCrashReporting();
+    }
+
+    private String versionName() {
+        try {
+            PackageInfo pi = getPackageManager().getPackageInfo("a75f.io.renatus", 0);
+            return pi.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return "Version-name-not-found";
+    }
+
+    private String userNameForCrashReportsFromHaystack() {
+        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
+        HashMap site = ccuHsApi.read("site");
+        if (site.size() > 0) {
+            String siteName = site.get("dis").toString();
+            HashMap ccu = ccuHsApi.read("device and ccu");
+            if (ccu.size() > 0) {
+                String ccuName = ccu.get("dis").toString();
+                return siteName + ": " + ccuName;
+            } else {
+                return siteName + ": " + "no-ccu-name";
+            }
+        } else {
+            return "Unregistered";
+        }
+    }
+
 
     private void setUsbFilters() {
         IntentFilter filter = new IntentFilter();

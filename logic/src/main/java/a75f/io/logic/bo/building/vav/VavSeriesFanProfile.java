@@ -35,7 +35,7 @@ import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 public class VavSeriesFanProfile extends VavProfile
 {
     
-    private VAVLogicalMap vavDevice;
+    private VavEquip vavDevice;
     
     private boolean fanReady = false;
     private boolean damperOverride = false;
@@ -172,9 +172,11 @@ public class VavSeriesFanProfile extends VavProfile
     
     private void logLoopParams(short node, double roomTemp, int loopOp) {
         
-        CcuLog.d(L.TAG_CCU_ZONE,"CoolingLoop "+node +" roomTemp :"+roomTemp+" setTempCooling: "+setTempCooling);
+        CcuLog.d(L.TAG_CCU_ZONE,"CoolingLoop "+node +" roomTemp :"+roomTemp+" setTempCooling: "+setTempCooling+
+                                                                                " Op: "+coolingLoop.getLoopOutput());
         coolingLoop.dump();
-        CcuLog.d(L.TAG_CCU_ZONE,"HeatingLoop "+node +" roomTemp :"+roomTemp+" setTempHeating: "+setTempHeating);
+        CcuLog.d(L.TAG_CCU_ZONE, "HeatingLoop "+node +" roomTemp :"+roomTemp+" setTempHeating: "+setTempHeating+
+                                                                                    " Op "+heatingLoop.getLoopOutput());
         heatingLoop.dump();
         CcuLog.d(L.TAG_CCU_ZONE, "STATE :"+state+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition
                                  +", valve:"+valve.currentPosition+" damperOverride: "+damperOverride);
@@ -270,7 +272,7 @@ public class VavSeriesFanProfile extends VavProfile
         state = TEMPDEAD;
         double zoneStatus = vavDevice.getStatus();
         if (zoneStatus != state.ordinal()) {
-            VAVLogicalMap vavDevice = vavDeviceMap.get(node);
+            VavEquip vavDevice = vavDeviceMap.get(node);
             SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
             double damperMin = vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "min");
             double damperMax = vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "max");

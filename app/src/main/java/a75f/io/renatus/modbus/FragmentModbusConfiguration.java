@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -94,6 +95,9 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     @BindView(R.id.ivEditAddress)
     ImageView ivEditAddress;
 
+    @BindView(R.id.header_for_floors)
+    TextView floorViewheader;
+
     @BindView(R.id.floorList)
     RecyclerView floorListView;
 
@@ -142,9 +146,10 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         List<EquipmentDevice> modbusBTUequipmentDeviceCollection=new ArrayList<>();
         if(profileType==ProfileType.MODBUS_BTU){
             for (int i = 0; i < equipmentDeviceList.size(); i++) {
-                Log.i("type", "onCreateView: "+equipmentDeviceList.get(i).getEquipType());
-                //BTU meter
+                if(equipmentDeviceList.get(i).getEquipType().equalsIgnoreCase("BTU meter"))
+                    modbusBTUequipmentDeviceCollection.add(equipmentDeviceList.get(i));
             }
+            equipmentDeviceCollection = modbusBTUequipmentDeviceCollection;
         }else{
             equipmentDeviceCollection  = EquipsManager.getInstance().getAllEquipments();
         }
@@ -477,12 +482,20 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     }
 
     void initConfiguration() {
-        floorList = HSUtil.getFloors();
-        Collections.sort(floorList, floorComparator);
-        EnergyDistributionAdapter energyDistributionAdapter = new EnergyDistributionAdapter(floorList, getContext());
-        floorListView.setLayoutManager(new LinearLayoutManager(getContext()));
-        floorListView.setAdapter(energyDistributionAdapter);
-        equipmentDeviceCollection  = EquipsManager.getInstance().getAllEquipments();
+        /**
+         * If Profile type is BTU meter then only enable the energy distribution details
+         */
+        if(profileType==ProfileType.MODBUS_BTU){
+            floorViewheader.setVisibility(View.VISIBLE);
+            floorListView.setVisibility(View.VISIBLE);
+            floorList = HSUtil.getFloors();
+            Collections.sort(floorList, floorComparator);
+            EnergyDistributionAdapter energyDistributionAdapter = new EnergyDistributionAdapter(floorList, getContext());
+            floorListView.setLayoutManager(new LinearLayoutManager(getContext()));
+            floorListView.setAdapter(energyDistributionAdapter);
+            equipmentDeviceCollection  = EquipsManager.getInstance().getAllEquipments();
+        }
+
     }
     /*public List<EquipmentDevice> loadJSONFromAsset() {
         List<EquipmentDevice> equipmentDevicesList = new ArrayList<EquipmentDevice>();

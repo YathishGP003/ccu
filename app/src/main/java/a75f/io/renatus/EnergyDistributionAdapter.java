@@ -1,14 +1,23 @@
 package a75f.io.renatus;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.databinding.Bindable;
+import androidx.databinding.BindingAdapter;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import a75f.io.api.haystack.Floor;
 import a75f.io.renatus.databinding.EnergyProDisItemBinding;
@@ -17,10 +26,11 @@ public class EnergyDistributionAdapter extends RecyclerView.Adapter<EnergyDistri
 
     ArrayList<Floor> floorList;
     Context mContext;
-
+    List<Integer> energyDistribution;
     public EnergyDistributionAdapter(ArrayList<Floor> floorList, Context mContext) {
         this.floorList = floorList;
         this.mContext = mContext;
+        energyDistribution = new ArrayList<>(floorList.size());
     }
 
     @NonNull
@@ -33,7 +43,9 @@ public class EnergyDistributionAdapter extends RecyclerView.Adapter<EnergyDistri
 
     @Override
     public void onBindViewHolder(@NonNull EnergyDistributorView holder, int position) {
-        holder.bind(this.floorList.get(position));
+        MyEventHandler myEventHandler = new MyEventHandler(mContext);
+        holder.bind(this.floorList.get(position),myEventHandler);
+
     }
 
     @Override
@@ -44,15 +56,40 @@ public class EnergyDistributionAdapter extends RecyclerView.Adapter<EnergyDistri
     class EnergyDistributorView extends RecyclerView.ViewHolder {
 
         EnergyProDisItemBinding energyProDisItemBinding;
-
         public EnergyDistributorView(EnergyProDisItemBinding energyProDisItemBinding) {
             super(energyProDisItemBinding.getRoot());
             this.energyProDisItemBinding = energyProDisItemBinding;
+
         }
 
-        public void bind(Object obj) {
+        public void bind(Object obj,MyEventHandler myEventHandler) {
             this.energyProDisItemBinding.setVariable(BR.floor, obj);
+            this.energyProDisItemBinding.setVariable(BR.eventListener,myEventHandler);
             this.energyProDisItemBinding.executePendingBindings();
+
+        }
+
+    }
+
+    private void  updateEnergyValue(String selectedValue){
+        Toast.makeText(mContext, selectedValue, Toast.LENGTH_SHORT).show();
+    }
+
+    public class  MyEventHandler{
+
+        Context context;
+        public MyEventHandler(Context context) {
+            this.context=context;
+        }
+
+        public void customClickHandler(View view){
+            Toast.makeText(context, "Clicked", Toast.LENGTH_SHORT).show();
+        }
+
+        public void onEnergyValueChanged(View view){
+            updateEnergyValue(((Spinner)view).getSelectedItem().toString());
         }
     }
+
+
 }

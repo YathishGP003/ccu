@@ -7,6 +7,11 @@
     <variable
         name="floor"
         type="a75f.io.api.haystack.Floor" />
+
+
+        <variable
+            name="eventListener"
+            type="a75f.io.renatus.EnergyDistributionAdapter.MyEventHandler" />
     </data>
 
 
@@ -28,6 +33,7 @@
         app:layout_constraintHorizontal_bias="0.12"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        android:onClick="@{eventListener::customClickHandler}"
         app:layout_constraintVertical_bias="0.51" />
 
     <Spinner
@@ -39,6 +45,7 @@
         android:paddingLeft="@dimen/margin_20"
         tools:listitem="@layout/spinner_dropdown_item"
         style="@style/Widget.AppCompat.Spinner.Underlined"
+        android:OnItemSelected="@{eventListener::onEnergyValueChanged}"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"

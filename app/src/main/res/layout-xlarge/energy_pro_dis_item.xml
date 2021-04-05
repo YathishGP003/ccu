@@ -4,14 +4,21 @@
 
 
     <data>
+
         <variable
             name="floor"
             type="a75f.io.api.haystack.Floor" />
+
+
+        <variable
+            name="eventListener"
+            type="a75f.io.renatus.EnergyDistributionAdapter.MyEventHandler" />
+
+
     </data>
 
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:tools="http://schemas.android.com/tools"
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
@@ -26,9 +33,12 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/distribution_value"
             app:layout_constraintHorizontal_bias="0.12"
+            android:onClick="@{eventListener::customClickHandler}"
+
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.51" />
+
 
         <Spinner
             android:id="@+id/distribution_value"
@@ -41,6 +51,7 @@
             style="@style/Widget.AppCompat.Spinner.Underlined"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+                android:OnItemSelected="@{eventListener::onEnergyValueChanged}"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="1.0" />
 

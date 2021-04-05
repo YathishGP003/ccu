@@ -11,6 +11,7 @@ import org.projecthaystack.HRow;
 import org.projecthaystack.HVal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -37,13 +38,14 @@ public class UpdatePointHandler
         }
         
         String luid = hayStack.getLUID("@" + pointGuid);
-
+        
         if (HSUtil.isBuildingTuner(luid, hayStack)) {
             TunerUpdateHandler.updateBuildingTuner(msgObject, CCUHsApi.getInstance());
             return;
         }
 
         Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(luid)).build();
+        CcuLog.d(L.TAG_CCU_PUBNUB, " HandlePubnub for" + Arrays.toString(localPoint.getMarkers().toArray()));
         
         if (HSUtil.isSystemConfigOutputPoint(luid, CCUHsApi.getInstance())
                 || HSUtil.isSystemConfigHumidifierType(luid, CCUHsApi.getInstance())

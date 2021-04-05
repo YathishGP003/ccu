@@ -12,6 +12,7 @@ import a75.io.algos.tr.TrimResponseRequest;
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.ZonePriority;
@@ -37,9 +38,9 @@ public abstract class VavProfile extends ZoneProfile
     public static String TAG = VavProfile.class.getSimpleName().toUpperCase();
     public static final int MAX_DISCHARGE_TEMP = 90;
     public static final int HEATING_LOOP_OFFSET = 20;
-    public static final int REHEAT_THRESHOLD_TEMP = 50;
+    public static final int REHEAT_THRESHOLD_HEATING_LOOP = 50;
     
-    public HashMap<Short, VAVLogicalMap> vavDeviceMap;
+    public HashMap<Short, VavEquip> vavDeviceMap;
     SatResetListener satResetListener;
     CO2ResetListener co2ResetListener;
     SpResetListener spResetListener;
@@ -88,7 +89,7 @@ public abstract class VavProfile extends ZoneProfile
      * @param addr
      */
     public void addLogicalMap(short addr) {
-        VAVLogicalMap deviceMap = new VAVLogicalMap(getProfileType(), addr);
+        VavEquip deviceMap = new VavEquip(getProfileType(), addr);
         vavDeviceMap.put(addr, deviceMap);
         deviceMap.satResetRequest.setImportanceMultiplier(getPriority().multiplier);
         deviceMap.co2ResetRequest.setImportanceMultiplier(getPriority().multiplier);
@@ -106,7 +107,7 @@ public abstract class VavProfile extends ZoneProfile
      * @param roomRef
      */
     public void addLogicalMapAndPoints(short addr, VavProfileConfiguration config, String floorRef, String roomRef) {
-        VAVLogicalMap deviceMap = new VAVLogicalMap(getProfileType(), addr);
+        VavEquip deviceMap = new VavEquip(getProfileType(), addr);
         deviceMap.createHaystackPoints(config, floorRef, roomRef );
         vavDeviceMap.put(addr, deviceMap);
         deviceMap.satResetRequest.setImportanceMultiplier(getPriority().multiplier);
@@ -117,7 +118,7 @@ public abstract class VavProfile extends ZoneProfile
     }
     
     public void updateLogicalMapAndPoints(short addr, VavProfileConfiguration config) {
-        VAVLogicalMap deviceMap = vavDeviceMap.get(addr);
+        VavEquip deviceMap = vavDeviceMap.get(addr);
         deviceMap.updateHaystackPoints(config);
     
         deviceMap.satResetRequest.setImportanceMultiplier(getPriority().multiplier);
@@ -527,4 +528,22 @@ public abstract class VavProfile extends ZoneProfile
         }
     }
     
+    /**
+     * GPC-36 recommendation:
+     * if the DAT is greater than room temperature plus differential tuner , the heating-loop output shall reset
+     * the airflow set point from the heating minimum airflow set point to the heating maximum airflow set point.
+     */
+    public int getGPC36AdjustedHeatingLoopOp(double heatingLoop, double roomTemp,
+                                                 double dischargeTemp, Equip vavEquip) {
+        double reheatDatDifferential = TunerUtil.readTunerValByQuery("vav and reheat and dat and min and " +
+                                                                     "differential and equipRef == \""+vavEquip.getId()+"\"");
+        
+        //Damper should be at the min position when heatingLoop is less than the threshold
+        //or when dischargeTemp is still within the roomTemp+tuner limit.
+        if (heatingLoop < REHEAT_THRESHOLD_HEATING_LOOP || dischargeTemp <= (roomTemp + reheatDatDifferential)) {
+            return 0;
+        }
+        
+        return (int)(heatingLoop - REHEAT_THRESHOLD_HEATING_LOOP) * 2;
+    }
 }

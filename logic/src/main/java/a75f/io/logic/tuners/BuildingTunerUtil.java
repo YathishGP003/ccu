@@ -108,6 +108,7 @@ class BuildingTunerUtil {
         HashMap buildingTunerPoint = hayStack.read(buildingQuery);
         
         if (buildingTunerPoint.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_TUNER, " copyFromBuildingTuner Failed: "+queryString);
             return false;
         }
     

@@ -2,7 +2,7 @@
   "modbusEquipId (_id)": "5f1f30ad29baef4f1d9a069",
   "name": "Kamstrup btu 603",
   "description": "This document contains the configuration necessary to manage Cooling Energy Meter",
-  "equipType": "BTU meter",
+  "equipType": "BTU_meter",
   "model": [
     "Multical 603"
   ],
@@ -23,9 +23,9 @@
             {
               "tagName": "btu"
             },
-			{
+            {
               "tagName": "inlet"
-			},
+            },
             {
               "tagName": "temperature"
             },
@@ -67,8 +67,8 @@
             {
               "tagName": "btu"
             },
-			{
-              "tagName": "Outlet"
+            {
+              "tagName": "outlet"
             },
             {
               "tagName": "temperature"
@@ -76,7 +76,6 @@
             {
               "tagName": "t2"
             },
-
             {
               "tagName": "kind",
               "value": "Number"
@@ -109,7 +108,7 @@
           "endBit": 15,
           "displayInUiDefault": false,
           "logicalPointTags": [
-			{
+            {
               "tagName": "btu"
             },
             {
@@ -195,9 +194,9 @@
             {
               "tagName": "energy"
             },
-			{
-			  "tagName": "consumption"
-			},
+            {
+              "tagName": "consumption"
+            },
             {
               "tagName": "kind",
               "value": "Number"
@@ -235,7 +234,7 @@
             {
               "tagName": "volume"
             },
-            {           
+            {
               "tagName": "kind",
               "value": "Number"
             },
@@ -254,5 +253,5 @@
         }
       ]
     }
-   ]
- }
+  ]
+}

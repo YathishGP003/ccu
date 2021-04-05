@@ -195,6 +195,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 //If building vacation is not active, check zone vacations.
                 if (activeSystemVacation == null )
                 {
+                    Log.e(TAG, "processSchedules: "+equip.getRoomRef() );
                     ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);
                     Schedule activeZoneVacationSchedule = getActiveVacation(activeZoneVacationSchedules);
                     Log.d(L.TAG_CCU_JOB, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size()+" activeSystemVacation "+activeSystemVacation);

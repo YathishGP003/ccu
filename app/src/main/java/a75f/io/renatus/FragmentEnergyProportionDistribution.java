@@ -47,7 +47,7 @@ public class FragmentEnergyProportionDistribution extends Fragment {
         floorListView = rootView.findViewById(R.id.floorList);
         floorList = HSUtil.getFloors();
         Collections.sort(floorList, floorComparator);
-        EnergyDistributionAdapter energyDistributionAdapter = new EnergyDistributionAdapter(floorList, getContext());
+        EnergyDistributionAdapter energyDistributionAdapter = new EnergyDistributionAdapter(floorList, getContext(),null);
         floorListView.setLayoutManager(new LinearLayoutManager(getContext()));
         floorListView.setAdapter(energyDistributionAdapter);
     }

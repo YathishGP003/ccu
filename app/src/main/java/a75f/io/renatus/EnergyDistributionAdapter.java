@@ -5,46 +5,64 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
+import android.widget.AdapterView;
 import android.widget.Spinner;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.databinding.Bindable;
-import androidx.databinding.BindingAdapter;
-import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.BiConsumer;
 
 import a75f.io.api.haystack.Floor;
-import a75f.io.renatus.databinding.EnergyProDisItemBinding;
+import a75f.io.renatus.modbus.FragmentModbusConfiguration;
 
 public class EnergyDistributionAdapter extends RecyclerView.Adapter<EnergyDistributionAdapter.EnergyDistributorView> {
 
     ArrayList<Floor> floorList;
     Context mContext;
-    List<Integer> energyDistribution;
-    public EnergyDistributionAdapter(ArrayList<Floor> floorList, Context mContext) {
+    Map<Integer, Integer> energyDistribution;
+    Object callBackReff;
+
+    public EnergyDistributionAdapter(ArrayList<Floor> floorList, Context mContext,Object callBackReff) {
         this.floorList = floorList;
         this.mContext = mContext;
-        energyDistribution = new ArrayList<>(floorList.size());
+        energyDistribution = new HashMap<>(floorList.size());
+        this.callBackReff = callBackReff;
     }
 
     @NonNull
     @Override
     public EnergyDistributorView onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        Context context = parent.getContext();
+        LayoutInflater inflater = LayoutInflater.from(context);
 
-        EnergyProDisItemBinding item = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), R.layout.energy_pro_dis_item, parent, false);
-        return new EnergyDistributorView(item);
+        View energyProDisItem = inflater.inflate(R.layout.energy_pro_dis_item, parent, false);
+        EnergyDistributorView EnergyDistributorView = new EnergyDistributorView(energyProDisItem);
+        return EnergyDistributorView;
     }
 
     @Override
     public void onBindViewHolder(@NonNull EnergyDistributorView holder, int position) {
-        MyEventHandler myEventHandler = new MyEventHandler(mContext);
-        holder.bind(this.floorList.get(position),myEventHandler);
+
+        holder.floorName.setText(floorList.get(position).getDisplayName());
+
+        holder.distributionValue.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int dropDownPosition, long id) {
+                int value = Integer.parseInt(holder.distributionValue.getSelectedItem().toString().split("%")[0]);
+                energyDistribution.put(position, value);
+                ((FragmentModbusConfiguration)callBackReff).validateEnergyDistributionValue(energyDistribution);
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
 
     }
 
@@ -55,41 +73,14 @@ public class EnergyDistributionAdapter extends RecyclerView.Adapter<EnergyDistri
 
     class EnergyDistributorView extends RecyclerView.ViewHolder {
 
-        EnergyProDisItemBinding energyProDisItemBinding;
-        public EnergyDistributorView(EnergyProDisItemBinding energyProDisItemBinding) {
-            super(energyProDisItemBinding.getRoot());
-            this.energyProDisItemBinding = energyProDisItemBinding;
+        Spinner distributionValue;
+        TextView floorName;
 
-        }
-
-        public void bind(Object obj,MyEventHandler myEventHandler) {
-            this.energyProDisItemBinding.setVariable(BR.floor, obj);
-            this.energyProDisItemBinding.setVariable(BR.eventListener,myEventHandler);
-            this.energyProDisItemBinding.executePendingBindings();
-
-        }
-
-    }
-
-    private void  updateEnergyValue(String selectedValue){
-        Toast.makeText(mContext, selectedValue, Toast.LENGTH_SHORT).show();
-    }
-
-    public class  MyEventHandler{
-
-        Context context;
-        public MyEventHandler(Context context) {
-            this.context=context;
-        }
-
-        public void customClickHandler(View view){
-            Toast.makeText(context, "Clicked", Toast.LENGTH_SHORT).show();
-        }
-
-        public void onEnergyValueChanged(View view){
-            updateEnergyValue(((Spinner)view).getSelectedItem().toString());
+        public EnergyDistributorView(View view) {
+            super(view);
+            distributionValue = view.findViewById(R.id.distribution_value);
+            floorName = view.findViewById(R.id.floor_name);
         }
     }
-
 
 }

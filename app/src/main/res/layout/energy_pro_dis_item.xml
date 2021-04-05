@@ -1,21 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-
-
-    <data>
-    <variable
-        name="floor"
-        type="a75f.io.api.haystack.Floor" />
-
-
-        <variable
-            name="eventListener"
-            type="a75f.io.renatus.EnergyDistributionAdapter.MyEventHandler" />
-    </data>
-
-
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
@@ -25,7 +10,6 @@
         android:layout_width="268dp"
         android:layout_height="55dp"
         android:gravity="left"
-        android:text="@{floor.displayName+` : `}"
         android:textColor="@color/black"
         android:textSize="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -33,24 +17,21 @@
         app:layout_constraintHorizontal_bias="0.12"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:onClick="@{eventListener::customClickHandler}"
         app:layout_constraintVertical_bias="0.51" />
 
     <Spinner
         android:id="@+id/distribution_value"
+        style="@style/Widget.AppCompat.Spinner.Underlined"
         android:layout_width="177dp"
         android:layout_height="61dp"
         android:entries="@array/energy_distribution_values"
         android:gravity="center"
         android:paddingLeft="@dimen/margin_20"
-        tools:listitem="@layout/spinner_dropdown_item"
-        style="@style/Widget.AppCompat.Spinner.Underlined"
-        android:OnItemSelected="@{eventListener::onEnergyValueChanged}"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintVertical_bias="1.0"
+        tools:listitem="@layout/spinner_dropdown_item" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-</layout>

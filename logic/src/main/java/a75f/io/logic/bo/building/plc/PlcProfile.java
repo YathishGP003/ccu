@@ -140,7 +140,11 @@ public class PlcProfile extends ZoneProfile
         return statusBuilder.toString();
     }
     
-    
+    /**
+     * Update the relay output status based on current loop output and threshold configurations.
+     * @param relay
+     * @param loopOp
+     */
     private void handleRelayOp(String relay, double loopOp) {
     
         double relayConfig = plcEquip.getConfigNumVal(relay+" and enabled");

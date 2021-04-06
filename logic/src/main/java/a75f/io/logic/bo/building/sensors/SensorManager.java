@@ -3,6 +3,14 @@ package a75f.io.logic.bo.building.sensors;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class the provides singleton access to all all the supported sensor types.
+ * SensorList is iterated every minute to parse inputs or update measurements received. The list created once and
+ * maintained through the app-life to avoid them getting recreated every time.
+ *
+ * There are too many magic numbers here.
+ * The values are directly copied from 75F spec for sensors. Any changes to spec will need updating this file.
+ */
 public class SensorManager {
     
     private static SensorManager instance = null;

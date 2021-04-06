@@ -52,6 +52,13 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
     public static final String TAG = "PlcConfig";
     public static final String ID = FragmentPLCConfiguration.class.getSimpleName();
     
+    private static final int OFFSET_MIN_LIMIT = -100;
+    private static final int OFFSET_MAX_LIMIT = 100;
+    private static final double OFFSET_INCREMENT = 0.5;
+    
+    private static final double DECIMAL_ADJUST_MULTIPLIER = 100.0;
+    
+    
     @BindView(R.id.analog1InSensor)
     Spinner analog1InSensorSp;
     
@@ -313,7 +320,6 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         targetValSp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                Log.d("CCU_UI"," targetValSp Selected : "+position);
                 targetValSelection = position;
             }
             @Override
@@ -347,15 +353,19 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 Log.d("CCU_UI"," analog2InSensorSp Selected : "+i);
                 ArrayList<Double> targetVal = new ArrayList<Double>();
                 Sensor r = SensorManager.getInstance().getExternalSensorList().get(i);
-                Log.d("CCU_UI",r.sensorName);
+                
+                /* Dynamically populate the sensor targets based on definitions.
+                 * There is a special requirement that when dynamic setpoint is enabled and Generic 0-10 type is
+                 * selected, offset should show a range of -100 to +100 ,with 0.5 increments.
+                 * Otherwise it is derived from engineering values.
+                 *
+                 */
                 if (r.sensorName.equals("Generic 0-10") ) {
-                    Log.d("CCU_UI"," Gneric 0-10 Selected : "+i);
-                    for (double pos = -100; pos <= 100; pos+=0.5) {
+                    for (double pos = OFFSET_MIN_LIMIT ; pos <= OFFSET_MAX_LIMIT; pos += OFFSET_INCREMENT) {
                         targetVal.add(Math.round(pos * 10) /10.0);
                     }
                 } else {
-                    for (int pos =
-                         (int) (100 * (r.minEngineeringValue < 0 ? r.minEngineeringValue : -1 * r.maxEngineeringValue));
+                    for (int pos = (int) (100 * (r.minEngineeringValue < 0 ? r.minEngineeringValue : -1 * r.maxEngineeringValue));
                          pos <= (100 * r.maxEngineeringValue); pos += (100 * r.incrementEgineeringValue)) {
                         targetVal.add(pos / 100.0);
                     }
@@ -377,9 +387,9 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         
         
         ArrayList<Double> analogArray = new ArrayList<>();
-        for (double a = 0; a <= 10; a++)
+        for (double analogVolt = 0; analogVolt <= 10; analogVolt++)
         {
-            analogArray.add(a);
+            analogArray.add(analogVolt);
         }
         ArrayAdapter<Double> analogAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, analogArray);
         analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
@@ -435,8 +445,6 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             analog2InSensorSp.setSelection(mProfileConfig.analog2InputSensor, false);
             
             zeroErrorAtMP.setChecked(mProfileConfig.expectZeroErrorAtMidpoint);
-            /*analogout1AtMinSp.setSelection(analogAdapter.getPosition((int)mProfileConfig.analog1AtMinOutput));
-            analogout1AtMaxSp.setSelection(analogAdapter.getPosition((int)mProfileConfig.analog1AtMaxOutput));*/
             analogout1AtMinSp.setSelection(analogAdapter.getPosition(mProfileConfig.analog1AtMinOutput));
             analogout1AtMaxSp.setSelection(analogAdapter.getPosition(mProfileConfig.analog1AtMaxOutput));
     
@@ -532,9 +540,11 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 ArrayList<Double> targetVal = new ArrayList<>();
                 NativeSensor sensor = SensorManager.getInstance().getNativeSensorList().get(position - 1);
                 
-                //TODO
-                for (int pos = (int)(100.0*sensor.minEngineeringValue); pos <= (100.0*sensor.maxEngineeringValue); pos+=(100.0*sensor.incrementEngineeringValue)) {
-                    targetVal.add(pos/100.0);
+                //Populate the value-list of sensor limits with 2 decimals.
+                for (int pos = (int)(DECIMAL_ADJUST_MULTIPLIER * sensor.minEngineeringValue);
+                     pos <= (DECIMAL_ADJUST_MULTIPLIER * sensor.maxEngineeringValue);
+                     pos+=(DECIMAL_ADJUST_MULTIPLIER*sensor.incrementEngineeringValue)) {
+                    targetVal.add(pos/DECIMAL_ADJUST_MULTIPLIER);
                 }
                 
                 ArrayAdapter<Double> targetValAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, targetVal);

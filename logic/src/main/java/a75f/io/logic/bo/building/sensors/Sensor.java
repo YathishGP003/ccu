@@ -8,7 +8,7 @@ import java.util.List;
  */
 
 /**
- * Defines an external sensor which provided raw voltage output.
+ * Defines an external sensor which provides raw voltage output.
  */
 public class Sensor
 {

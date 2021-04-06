@@ -8,8 +8,20 @@ import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 
+/**
+ * Util class that handles create/update of points for PI equip relays and initialize them.
+ */
 public class PlcRelayConfigHandler {
     
+    /**
+     * Create Relay points if they are enabled during the first time pairing.
+     * Device instance is directly used here, since it is not added to the database yet.
+     * @param equip
+     * @param config
+     * @param device
+     * @param relayType
+     * @param hayStack
+     */
     public static void createRelayConfigPoints(Equip equip, PlcProfileConfiguration config, SmartNode device,
                                                String relayType, CCUHsApi hayStack) {
     
@@ -40,6 +52,14 @@ public class PlcRelayConfigHandler {
         }
     }
     
+    /**
+     * Update the relay config points when relay status is changed during a profile update.
+     * Here we use static method to update relay configurations on the device.
+     * @param equip
+     * @param config
+     * @param relayType
+     * @param hayStack
+     */
     public static void updateRelayConfigPoints(Equip equip, PlcProfileConfiguration config,
                                                String relayType, CCUHsApi hayStack) {
     

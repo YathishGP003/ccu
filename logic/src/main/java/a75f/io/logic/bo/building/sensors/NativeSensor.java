@@ -3,16 +3,16 @@ package a75f.io.logic.bo.building.sensors;
 import java.util.ArrayList;
 
 /**
- * NativeSensor class define a sensor that is on-board , there measurements are received as engineering value
- * unlike the external sensor which gives voltages.
+ * NativeSensor class defines a sensor that is on-board. These measurements are received as readable engineering values
+ * unlike the external sensor which gives raw/analog measurement.
  */
 public class NativeSensor {
     
-    public String sensorName;// 'Generic 0-10V'
-    public String engineeringUnit;// "V"
-    public double minEngineeringValue;//: 0
-    public double maxEngineeringValue;//: 10
-    public double incrementEngineeringValue;//: 0.1
+    public String sensorName;
+    public String engineeringUnit;
+    public double minEngineeringValue;
+    public double maxEngineeringValue;
+    public double incrementEngineeringValue;
     
     public SensorType sensorType;
     public static ArrayList<Sensor> sensors = null;

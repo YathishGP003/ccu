@@ -57,7 +57,7 @@ public class RemoteCommandUpdateHandler
                                 CcuLog.d("RemoteCommand", "PUBNUB handle Restart reset cm=");
                                 HashMap ccu = CCUHsApi.getInstance().read("ccu");
                                 String ccuName = ccu.get("dis").toString();
-                                AlertManager.getInstance(Globals.getInstance().getApplicationContext()).generateAlert(CM_RESET, "CM Reset request sent for  - " + ccuName);
+                                AlertManager.getInstance().generateAlert(CM_RESET, "CM Reset request sent for  - " + ccuName);
 
                                 if (remoteCommandInterface != null)
                                     remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, "");

@@ -1,4 +1,7 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
 
 android {
     def Properties properties = new Properties()
@@ -31,25 +34,20 @@ android {
     buildTypes {
         local {
             minifyEnabled false
-            buildConfigField "String", 'ALERTS_API_KEY', '\"CCU_KEY\"'
         }
         dev {
             minifyEnabled false
-            buildConfigField "String", 'ALERTS_API_KEY', '\"ccu-45fca166-29d8-4d94-a758-eb187fcbd819\"'
         }
         prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
-            buildConfigField "String", 'ALERTS_API_KEY', '\"ccu-43a7691a-554d-4a71-844f-1a08b7afc12e\"'
         }
         qa {
             minifyEnabled false
-            buildConfigField "String", 'ALERTS_API_KEY', '\"ccu-6ce0475b-1937-4345-b9b4-d1d6b871f96a\"'
         }
         staging {
             minifyEnabled false
-            buildConfigField "String", 'ALERTS_API_KEY', '\"ccu-445de537-c8a3-4d8a-bac4-528fa193562a\"'
         }
     }
 
@@ -57,6 +55,15 @@ android {
         if(variant.buildType.name.endsWith('release') || variant.buildType.name.endsWith('debug')) {
             variant.setIgnore(true);
         }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 
     sourceSets {
@@ -67,7 +74,6 @@ android {
             }
         }
     }
-
 }
 
 dependencies {
@@ -75,6 +81,14 @@ dependencies {
     testImplementation 'junit:junit:4.13.1'
 
     implementation 'com.udojava:EvalEx:2.0'
+
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
+    implementation 'io.reactivex.rxjava3:rxjava:3.0.0'
+
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation "com.github.akarnokd:rxjava3-retrofit-adapter:3.0.0"
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.7.2'
 
     implementation 'com.fasterxml.jackson.core:jackson-core:2.8.6'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.8.6'

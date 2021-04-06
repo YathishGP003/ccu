@@ -27,9 +27,9 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.BuildConfig;
 import a75f.io.logic.L;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.functions.Consumer;
@@ -69,7 +69,9 @@ public class PbSubscriptionHandler {
         SubscribeCallback pbCallback = getSubscriberCallback(siteId, appContext);
         pbInstance = new PubNub(pbConfig);
         pbInstance.addListener(pbCallback);
-        pbInstance.subscribe().channels(Arrays.asList(siteId.replace("@", ""))).execute();
+        pbInstance.subscribe()
+                  .channels(Arrays.asList(siteId.replace("@", ""), BuildConfig.PUBNUB_GLOBAL_CHANNEL))
+                  .execute();
     }
     
     private PNConfiguration getConfiguration(String siteId) {

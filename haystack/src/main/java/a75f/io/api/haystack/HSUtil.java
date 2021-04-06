@@ -327,6 +327,7 @@ public class HSUtil
         markers.remove(Tags.WRITABLE);
         markers.remove(Tags.HIS);
         markers.remove(Tags.SP);
+        markers.remove(Tags.SYSTEM);
         return markers;
     }
 }

@@ -93,7 +93,13 @@ public class DabSystemController extends SystemController
 
     private DabSystemController()
     {
-        //Read tuners to initialize PI variables
+        proportionalGain =  TunerUtil.readTunerValByQuery("system and dab and pgain");
+        integralGain = TunerUtil.readTunerValByQuery("system and dab and igain");
+        proportionalSpread = (int)TunerUtil.readTunerValByQuery("system and dab and pspread");
+        integralMaxTimeout = (int)TunerUtil.readTunerValByQuery("system and dab and itimeout");
+    
+        CcuLog.i(L.TAG_CCU_SYSTEM, "proportionalGain "+proportionalGain+" integralGain "+integralGain
+                                   +" proportionalSpread "+proportionalSpread+" integralMaxTimeout "+integralMaxTimeout);
         
         piController = new SystemPILoopController();
         piController.setIntegralGain(integralGain);

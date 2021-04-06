@@ -17,11 +17,12 @@ class BuildingTunerFallback {
      */
     public static double getDefaultTunerVal(String tags) {
         
-        List<String> tagList = Arrays.asList(tags.split(HSUtil.QUERY_JOINER));
+        List<String> queryTagList = Arrays.asList(tags.split(HSUtil.QUERY_JOINER));
         Optional<Double> defaultVal = getDefaultTagsValMap().entrySet().stream()
                                                             .filter(m -> {
-                                                                for (String tag : tagList) {
-                                                                    if (!m.getKey().contains(tag)) {
+                                                                String[] keyTags = m.getKey().split(",");
+                                                                for (String tag : keyTags) {
+                                                                    if (!queryTagList.contains(tag)) {
                                                                         return false;
                                                                     }
                                                                 }

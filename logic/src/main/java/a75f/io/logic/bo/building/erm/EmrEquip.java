@@ -65,7 +65,7 @@ public class EmrEquip
                                           .setTz(tz)
                                           .build();
         String emrReadingId  = hayStack.addPoint(emrReading );
-        
+        hayStack.writeHisValById(emrReadingId, 0.0);
     
         Point currentRate  = new Point.Builder()
                                     .setDisplayName(equipDis+"-currentRate")

@@ -87,6 +87,9 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     TextView floorViewheader;
     @BindView(R.id.floorList)
     RecyclerView floorListView;
+
+    @BindView(R.id.textTitleFragment)
+    TextView textTitleFragment;
     ProfileType profileType;
     List<EquipmentDevice> equipmentDeviceCollection;
     RecyclerModbusParamAdapter recyclerModbusParamAdapter;
@@ -200,7 +203,6 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     equipmentDevice = (EquipmentDevice) parent.getSelectedItem();
-                    Log.i("MODBUS_UI", "equipmentDevice:" + equipmentDevice);
                     updateUi(true);
                 }
 
@@ -490,6 +492,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
          * If Profile type is BTU meter then only enable the energy distribution details
          */
         if (profileType == ProfileType.MODBUS_BTU) {
+            textTitleFragment.setText(getString(R.string.label_modbus_btu_meter));
             floorViewheader.setVisibility(View.VISIBLE);
             floorListView.setVisibility(View.VISIBLE);
             floorList = HSUtil.getFloors();

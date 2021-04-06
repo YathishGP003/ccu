@@ -188,6 +188,20 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         note = (TextView) getView().findViewById(R.id.note);
 
         scrollViewParent = view.findViewById(R.id.scrollView_zones);
+
+        scrollViewParent.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                Log.i("Test", "onScrollChange: scrollX"+scrollX);
+                Log.i("Test", "onScrollChange: scrollY"+scrollY);
+                Log.i("Test", "onScrollChange: oldScrollX"+oldScrollX);
+                Log.i("Test", "onScrollChange: oldScrollY"+oldScrollY);
+            }
+        });
+        Log.i("Test", "onViewCreated: "+scrollViewParent.getScrollX());
+        Log.i("Test", "onViewCreated: "+scrollViewParent.getScrollY());
+
+
         tableLayout = (TableLayout) view.findViewById( R.id.tableRoot );
         gridlayout = (GridLayout) view.findViewById(R.id.gridview);
         recyclerView = (RecyclerView)view.findViewById(R.id.recyclerEquip);
@@ -984,7 +998,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             seekArc.scaletoNormalBig(250, 210);
                             imageOn = true;
                             selectedView = seekArc.getId();
-                            scrollViewParent.scrollTo(0,seekArc.getTop());
+                           // scrollViewParent.scrollTo(0,seekArc.getTop());
                             //scrollViewParent.scrollTo(0,seekArc.getTop());
                             try {
                                 textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
@@ -1026,7 +1040,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     hideWeather();
                     imageOn = true;
                     selectedView = seekArc.getId();
-                    scrollViewParent.scrollTo(0,seekArc.getTop());
+                  //  scrollViewParent.scrollTo(0,seekArc.getTop());
                     try {
                         textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));

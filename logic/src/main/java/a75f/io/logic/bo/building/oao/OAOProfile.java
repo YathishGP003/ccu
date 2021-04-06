@@ -215,18 +215,6 @@ public class OAOProfile
     }
     
     /**
-     * re-initialize OAO specific his points.
-     */
-    private void resetOAOParams() {
-        oaoEquip.setHisVal("outsideWeather and air and temp", 0);
-        oaoEquip.setHisVal("outsideWeather and air and humidity", 0);
-        oaoEquip.setHisVal("inside and enthalpy", 0);
-        oaoEquip.setHisVal("outside and enthalpy", 0);
-        oaoEquip.setHisVal("economizing and available", 0);
-        oaoEquip.setHisVal("economizing and loop and output", 0);
-    }
-    
-    /**
      * Evaluates outside temperature and humidity to determine if free-cooling can be used.
      * @param externalTemp
      * @param externalHumidity

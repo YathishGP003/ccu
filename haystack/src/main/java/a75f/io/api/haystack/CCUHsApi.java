@@ -475,22 +475,22 @@ public class CCUHsApi
     public void writeDefaultVal(String query, Double val)
     {
         HashMap<Object, Object> point = readEntity(query);
-        if (point.isEmpty()) {
+        if (!point.isEmpty()) {
             String id = point.get("id").toString();
             pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, getCCUUserName(), HNum.make(val), HNum.make(0));
         } else {
-            CcuLog.d("CCU_HS", "Invalid point write attemp: "+query);
+            CcuLog.d("CCU_HS", "Invalid point write attempt: "+query);
         }
     }
 
     public void writeDefaultVal(String query, String val)
     {
         HashMap<Object, Object> point = readEntity(query);
-        if (point.isEmpty()) {
+        if (!point.isEmpty()) {
             String id = point.get("id").toString();
             pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, getCCUUserName(), HStr.make(val), HNum.make(0));
         } else {
-            CcuLog.d("CCU_HS", "Invalid point write attemp: "+query);
+            CcuLog.d("CCU_HS", "Invalid point write attempt: "+query);
         }
     }
 

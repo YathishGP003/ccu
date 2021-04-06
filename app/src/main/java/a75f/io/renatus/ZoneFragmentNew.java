@@ -984,6 +984,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             seekArc.scaletoNormalBig(250, 210);
                             imageOn = true;
                             selectedView = seekArc.getId();
+                            /**
+                             * scrollViewParent.scrollTo(0,seekArc.getTop()); - This line is scrolling the view to top,
+                             * TO resolve 5105 commented the following line
+                             */
                             //scrollViewParent.scrollTo(0,seekArc.getTop());
                             try {
                                 textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
@@ -1025,6 +1029,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     hideWeather();
                     imageOn = true;
                     selectedView = seekArc.getId();
+                    /**
+                     * scrollViewParent.scrollTo(0,seekArc.getTop()); - This line is scrolling the view to top,
+                     * TO resolve 5105 commented the following line
+                     */
                     //scrollViewParent.scrollTo(0,seekArc.getTop());
                     try {
                         textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
@@ -2930,8 +2938,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         imageView.setPadding(36,36,36,36);
     }
     public void showWeather() {
-
-
         //if (isWeatherWidget) {
             weather_data.setVisibility(View.VISIBLE);
             //mod = 3;
@@ -2942,14 +2948,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         animate.setFillAfter(true);
         weather_data.startAnimation(animate);
         //}
-
-
     }
 
     public void hideWeather() {
-
-
-
         //if (isWeatherWidget) {
             //mod = 4;
             //weather_appear.setVisibility(View.VISIBLE);

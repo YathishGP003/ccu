@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.SystemClock;
 import android.util.Log;
 
+import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
@@ -54,6 +55,7 @@ public class BearerTokenManager{
                     BearerToken token = response.body();
                     CcuLog.d(L.TAG_CCU_JOB, "BearerTokenManagerService: Set new token " + token.getAccessToken());
                     hayStack.setJwt(token.getAccessToken());
+                    refreshServices(token);
                 }
             }
             
@@ -62,5 +64,9 @@ public class BearerTokenManager{
                 System.out.println(throwable);
             }
         });
+    }
+
+    private void refreshServices(BearerToken token) {
+        AlertManager.getInstance().rebuildServiceNewToken(token.getAccessToken());
     }
 }

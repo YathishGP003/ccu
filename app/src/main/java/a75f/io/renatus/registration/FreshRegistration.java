@@ -1196,7 +1196,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
                     CCUHsApi.getInstance().registerCcu(installerEmail);
 
-                    AlertManager.getInstance().fetchAllPredefinedAlerts();
                     Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
                     i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(i);
@@ -1209,7 +1208,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                             .setPositiveButton("Proceed", (dialog, id) -> {
 
                                 CCUHsApi.getInstance().registerCcu(installerEmail);
-                                AlertManager.getInstance().fetchAllPredefinedAlerts();
                                 Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
                                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(i);

@@ -479,39 +479,17 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         String relay7OutputEnabledId = hayStack.addPoint(relay7OutputEnabled);
         hayStack.writeDefaultValById(relay7OutputEnabledId, 0.0 );
         
-        Point analog1AtMinCoolingSat = new Point.Builder()
-                                               .setDisplayName(equipDis+"-"+"analog1AtMinCooling")
-                                               .setSiteRef(siteRef)
-                                               .setEquipRef(equipref)
-                                               .addMarker("system").addMarker("config").addMarker("analog1")
-                                               .addMarker("min").addMarker("cooling").addMarker("writable").addMarker("sp")
-                                               .setUnit("V")
-                                               .setTz(tz)
-                                               .build();
-        String analog1AtMinCoolingSatId = hayStack.addPoint(analog1AtMinCoolingSat);
-        hayStack.writeDefaultValById(analog1AtMinCoolingSatId, 2.0 );
-        
-        Point analog1AtMaxCoolingSat = new Point.Builder()
-                                               .setDisplayName(equipDis+"-"+"analog1AtMaxCooling")
-                                               .setSiteRef(siteRef)
-                                               .setEquipRef(equipref)
-                                               .addMarker("system").addMarker("config").addMarker("analog1")
-                                               .addMarker("max").addMarker("cooling").addMarker("writable").addMarker("sp")
-                                               .setUnit("V")
-                                               .setTz(tz)
-                                               .build();
-        String analog1AtMaxCoolingSatId = hayStack.addPoint(analog1AtMaxCoolingSat);
-        hayStack.writeDefaultValById(analog1AtMaxCoolingSatId, 10.0 );
-        
+        addAnalog1ConfigPoints(equipDis, siteRef, equipref, tz, hayStack);
+    
         Point analog2AtMinStaticPressure = new Point.Builder()
-                                                   .setDisplayName(equipDis+"-"+"analog2AtMinFan")
-                                                   .setSiteRef(siteRef)
-                                                   .setEquipRef(equipref)
-                                                   .addMarker("system").addMarker("config").addMarker("analog2")
-                                                   .addMarker("min").addMarker("fan").addMarker("writable").addMarker("sp")
-                                                   .setUnit("V")
-                                                   .setTz(tz)
-                                                   .build();
+                                               .setDisplayName(equipDis+"-"+"analog2AtMinFan")
+                                               .setSiteRef(siteRef)
+                                               .setEquipRef(equipref)
+                                               .addMarker("system").addMarker("config").addMarker("analog2")
+                                               .addMarker("min").addMarker("fan").addMarker("writable").addMarker("sp")
+                                               .setUnit("V")
+                                               .setTz(tz)
+                                               .build();
         String analog2AtMinStaticPressureId = hayStack.addPoint(analog2AtMinStaticPressure);
         hayStack.writeDefaultValById(analog2AtMinStaticPressureId, 2.0 );
         
@@ -766,5 +744,67 @@ public class DabFullyModulatingRtu extends DabSystemProfile
 
             CCUHsApi.getInstance().scheduleSync();
         }
+    }
+    
+    public void addAnalog1ConfigPoints(String equipDis, String siteRef, String equipRef, String tz, CCUHsApi hayStack) {
+        Point analog1AtMinCoolingSat = new Point.Builder()
+                                           .setDisplayName(equipDis+"-"+"analog1AtMinCooling")
+                                           .setSiteRef(siteRef)
+                                           .setEquipRef(equipRef)
+                                           .addMarker("system").addMarker("config").addMarker("analog1")
+                                           .addMarker("min").addMarker("cooling").addMarker("writable").addMarker("sp")
+                                           .setUnit("V")
+                                           .setTz(tz)
+                                           .build();
+        String analog1AtMinCoolingSatId = hayStack.addPoint(analog1AtMinCoolingSat);
+        hayStack.writeDefaultValById(analog1AtMinCoolingSatId, 2.0 );
+    
+        Point analog1AtMaxCoolingSat = new Point.Builder()
+                                           .setDisplayName(equipDis+"-"+"analog1AtMaxCooling")
+                                           .setSiteRef(siteRef)
+                                           .setEquipRef(equipRef)
+                                           .addMarker("system").addMarker("config").addMarker("analog1")
+                                           .addMarker("max").addMarker("cooling").addMarker("writable").addMarker("sp")
+                                           .setUnit("V")
+                                           .setTz(tz)
+                                           .build();
+        String analog1AtMaxCoolingSatId = hayStack.addPoint(analog1AtMaxCoolingSat);
+        hayStack.writeDefaultValById(analog1AtMaxCoolingSatId, 10.0 );
+    }
+    
+    public void deleteAnalog1ConfigPoints(CCUHsApi hayStack) {
+        HashMap coolingMin = hayStack.read("system and config and analog1 and min and cooling");
+        if (!coolingMin.isEmpty()) {
+            hayStack.deleteWritablePoint(coolingMin.get("id").toString());
+        }
+        HashMap coolingMax = hayStack.read("system and config and analog1 and min and cooling");
+        if (!coolingMax.isEmpty()) {
+            hayStack.deleteWritablePoint(coolingMax.get("id").toString());
+        }
+    }
+    
+    public void enableDcwb() {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+    
+        HashMap systemEquipMap = hayStack.read("system and equip");
+        Equip equip = new Equip.Builder().setHashMap(systemEquipMap).build();
+    
+        deleteAnalog1ConfigPoints(hayStack);
+    
+        DcwbProfileUtil.createConfigPoints(equip, hayStack);
+        DcwbProfileUtil.createChilledWaterConfigPoints(equip, hayStack);
+        DcwbProfileUtil.createAnalog4LoopConfigPoints("cooling",equip, hayStack); //TODO
+        DcwbProfileUtil.createLoopPoints(equip, hayStack);
+    }
+    
+    public void disableDcwb() {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        DcwbProfileUtil.deleteConfigPoints(hayStack);
+        DcwbProfileUtil.deleteLoopOutputPoints(hayStack);
+        DcwbProfileUtil.deleteAnalog4LoopConfigPoints("cooling", hayStack);//TODO
+        
+        HashMap systemEquipMap = hayStack.read("system and equip");
+        Equip equip = new Equip.Builder().setHashMap(systemEquipMap).build();
+        addAnalog1ConfigPoints(equip.getDisplayName(), equip.getSiteRef(), equip.getId(), equip.getTz(), hayStack);
     }
 }

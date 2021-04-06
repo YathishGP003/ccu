@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.system.dab;
 
+import android.media.audiofx.DynamicsProcessing;
+
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -8,10 +10,8 @@ import a75f.io.api.haystack.Point;
 
 public class DcwbProfileUtil {
     
-    public static void createDcwbConfigPoints(CCUHsApi hayStack) {
-        HashMap systemEquipMap = hayStack.read("system and equip");
-        Equip equip = new Equip.Builder().setHashMap(systemEquipMap).build();
-    
+    public static void createConfigPoints(Equip equip, CCUHsApi hayStack) {
+        
         Point analog4OutputEnabled = new Point.Builder()
                                          .setDisplayName(equip.getDisplayName()+"-"+"analog2OutputEnabled")
                                          .setSiteRef(equip.getSiteRef())
@@ -80,9 +80,22 @@ public class DcwbProfileUtil {
                                                  .build();
         String analog1AtValveFullPositionId = hayStack.addPoint(analog1AtValveFullPosition);
         hayStack.writeDefaultValById(analog1AtValveFullPositionId, 10.0 );
+    
+        Point analog4LoopOutputType = new Point.Builder()
+                                          .setDisplayName(equip.getDisplayName()+"-"+"analog4LoopOutputType")
+                                          .setSiteRef(equip.getSiteRef())
+                                          .setEquipRef(equip.getId())
+                                          .addMarker("system").addMarker("config").addMarker("dcwb")
+                                          .addMarker("analog4").addMarker("loop").addMarker("output")
+                                          .addMarker("type").addMarker("writable").addMarker("sp")
+                                          .setMinVal("0").setMaxVal("1").setIncrementVal("0").setTz(equip.getTz())
+                                          .build();
+        String analog4LoopOutputTypeId = hayStack.addPoint(analog4LoopOutputType);
+        hayStack.writeDefaultValById(analog4LoopOutputTypeId, 0.0 );
     }
     
-    public static void createDcwbAnalog4Points(String associationType, Equip equip, CCUHsApi hayStack) {
+    public static void createAnalog4LoopConfigPoints(String associationType, Equip equip, CCUHsApi hayStack) {
+        
         String minLoopName = associationType.contains("cooling") ? "analog4AtMinCoolingLoop" : "analog4AtMinCo2Loop";
         String maxLoopName = associationType.contains("cooling") ? "analog4AtMaxCoolingLoop" : "analog4AtMaxCo2Loop";
     
@@ -109,7 +122,6 @@ public class DcwbProfileUtil {
                                             .build();
         String analog4AtMaxCoolingLoopId = hayStack.addPoint(analog4AtMaxCoolingLoop);
         hayStack.writeDefaultValById(analog4AtMaxCoolingLoopId, 10.0 );
-    
     }
     
     public static void createChilledWaterConfigPoints( Equip equip, CCUHsApi hayStack) {
@@ -154,7 +166,7 @@ public class DcwbProfileUtil {
         
     }
     
-    public static void createDcwbLoopPoints( Equip equip, CCUHsApi hayStack) {
+    public static void createLoopPoints( Equip equip, CCUHsApi hayStack) {
         Point systemDCWBValveLoopOutput = new Point.Builder()
                                             .setDisplayName(equip.getDisplayName()+"-"+"systemDCWBValveLoopOutput")
                                             .setSiteRef(equip.getSiteRef())
@@ -182,7 +194,7 @@ public class DcwbProfileUtil {
         hayStack.writeHisValById(chilledWaterDeltaTValveLoopId, 0.0 );
     }
     
-    private static void deleteDcwbConfigPoints(CCUHsApi hayStack) {
+    public static void deleteConfigPoints(CCUHsApi hayStack) {
     
         deleteConfigPoint("analog4 and output and enabled", hayStack);
         deleteConfigPoint("dcwb and enabled", hayStack);
@@ -200,7 +212,13 @@ public class DcwbProfileUtil {
         
     }
     
-    private static void deleteLoopOutputPoints(CCUHsApi hayStack) {
+    public static void deleteAnalog4LoopConfigPoints(String associationType, CCUHsApi hayStack) {
+        String deleteTag = associationType.contains("cooling") ? "co2" : "cooling";
+        deleteConfigPoint("analog4 and min and loop and "+deleteTag, hayStack);
+        deleteConfigPoint("analog4 and max and loop and "+deleteTag, hayStack);
+    }
+    
+    public static void deleteLoopOutputPoints(CCUHsApi hayStack) {
         deleteLoopPoint("valve and output", hayStack);
         deleteLoopPoint("chilled and water and delta", hayStack);
     }

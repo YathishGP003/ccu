@@ -445,6 +445,8 @@
         <item>  Cooling Loop </item>
         <item>  CO2 Loop </item>
     </string-array>
+
+    <string name="label_analog1_dcwb">CHW valve</string>
     <!--Heat Pump Input-->
     <string name="title_enable">ENABLE</string>
     <string name="title_testsignal">TEST SIGNAL</string>

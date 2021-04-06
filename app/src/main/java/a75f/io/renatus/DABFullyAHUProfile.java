@@ -77,7 +77,10 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
     @BindView(R.id.dabAnalog) ViewGroup dabLayout;
     @BindView(R.id.dcwbLayout)     ViewGroup dcwbLayout;
     @BindView(R.id.dcwbEnableText) TextView  dcwbText;
+    @BindView(R.id.analog1MappingText) TextView  analog1Text;
     @BindView(R.id.tableRowAnalog4) TableRow analog4View;
+    
+    
     Prefs prefs;
     @BindView(R.id.buttonNext)
     Button mNext;
@@ -206,6 +209,8 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         dcwbText.setText(dcwbEnabled ? getString(R.string.label_dcwb_enabled) :
                                         getString(R.string.label_dcwb_enable));
         analog4View.setVisibility(dcwbEnabled ? View.VISIBLE : View.GONE);
+        analog1Text.setText(dcwbEnabled ? getString(R.string.label_cooling) :
+                                          getString(R.string.label_analog1_dcwb));
     }
 
     private void goTonext() {

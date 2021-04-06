@@ -105,13 +105,27 @@ public class FloorPlanFragment extends Fragment
 
 	@BindView(R.id.rl_systemdevice)
 	RelativeLayout rl_systemdevice;
+
 	@BindView(R.id.rl_oao)
 	RelativeLayout rl_oao;
+
+	@BindView(R.id.rl_modbus_energy_meter)
+	RelativeLayout rl_modbus_energy_meter;
+
+	@BindView(R.id.rl_modbus_btu_meter)
+	RelativeLayout rl_modbus_btu_meter;
+
 
 	@BindView(R.id.textSystemDevice)
 	TextView textViewSystemDevice;
 	@BindView(R.id.textOAO)
 	TextView textViewOAO;
+
+	@BindView(R.id.textModbusEnergyMeter)
+	TextView textModbusEnergyMeter;
+
+	@BindView(R.id.textModbusBTUMeter)
+	TextView textModbusBTUMeter;
 
 	ArrayList<Floor> floorList = new ArrayList();
 	ArrayList<Zone> roomList = new ArrayList();
@@ -167,6 +181,11 @@ public class FloorPlanFragment extends Fragment
 		}
 	};
 
+	/**
+	 * Holding privious selection to Enable/disable the Selection between OAO/EneryMeter/BTUMeter
+	 */
+	int priviousSelectedDevice=0;
+
 	private void setScheduleType(String zoneId) {
 
 		new Handler(Looper.getMainLooper()).postDelayed(() -> {
@@ -208,6 +227,7 @@ public class FloorPlanFragment extends Fragment
 	
 	private Zone getSelectedZone()
 	{
+		Log.i("test", "getSelectedZone:");
 		selectedZone = roomList.get(mRoomListAdapter.getSelectedPostion());
 		return selectedZone;
 	}
@@ -310,7 +330,7 @@ public class FloorPlanFragment extends Fragment
 			//disableRoomModule();
 		}
 
-		setSytemUnselection();
+		setSystemUnselection();
 		addFloorBtn.setEnabled(true);
 		addZonelt.setEnabled(true);
 
@@ -588,8 +608,7 @@ public class FloorPlanFragment extends Fragment
 	@OnClick(R.id.rl_systemdevice)
 	public void systemDeviceOnClick()
 	{
-
-		setSytemSelection();
+		setSystemSelection(1);
 		if(floorList.size()>0) {
 			if(roomList.size()>0) {
 				ArrayList<Equip> zoneEquips = HSUtil.getEquips(getSelectedZone().getId());
@@ -618,14 +637,14 @@ public class FloorPlanFragment extends Fragment
 	@OnClick(R.id.rl_oao)
 	public void oaoOnClick()
 	{
-		setSytemSelection();
+		setSystemSelection(1);
 		if(floorList.size()>0) {
-			if(roomList.size() >0) {
+			if(roomList.size() >0&& mModuleListAdapter!=null&&mModuleListAdapter.getSelectedPostion()!=-1) {
 				ArrayList<Equip> zoneEquips = HSUtil.getEquips(getSelectedZone().getId());
 				if (zoneEquips.size() > 0) {
 					mModuleListAdapter.setSelectedItem(-1);
 				}
-				mRoomListAdapter.setSelectedItem(-1);
+			//	mRoomListAdapter.setSelectedItem(-1);
 				addFloorBtn.setEnabled(false);
 				addZonelt.setEnabled(false);
 			}
@@ -639,24 +658,116 @@ public class FloorPlanFragment extends Fragment
 		}
 	}
 
-	private void setSytemSelection()
-	{
-		rl_systemdevice.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
-		rl_oao.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
-		textViewSystemDevice.setTextColor(Color.WHITE);
-		textViewSystemDevice.setSelected(true);
-		textViewOAO.setSelected(true);
-		textViewOAO.setTextColor(Color.WHITE);
-		rl_oao.setEnabled(false);
-		rl_systemdevice.setEnabled(false);
-		roomListView.setVisibility(View.GONE);
-		moduleListView.setVisibility(View.GONE);
-		addZonelt.setEnabled(false);
-		addRoomBtn.setEnabled(false);
-		if (addRoomEdit.getVisibility() == View.VISIBLE) {
-			closeAddZoneEditViews();
+
+	@OnClick(R.id.rl_modbus_energy_meter)
+	public void onEnergyMeterClick(){
+		setSystemSelection(2);
+		if(floorList.size()>0) {
+			if(roomList.size() >0&& mModuleListAdapter!=null&&mModuleListAdapter.getSelectedPostion()!=-1) {
+				ArrayList<Equip> zoneEquips = HSUtil.getEquips(getSelectedZone().getId());
+				if (zoneEquips.size() > 0) {
+					mModuleListAdapter.setSelectedItem(-1);
+				}
+			//	mRoomListAdapter.setSelectedItem(-1);
+				addFloorBtn.setEnabled(false);
+				addZonelt.setEnabled(false);
+			}
+		}
+		mFloorListAdapter.setSelectedItem(-1);
+		if (updateOAOModule())
+		{
+			moduleListView.setVisibility(View.VISIBLE);
+		} else {
+			enableModueButton();
 		}
 	}
+
+	@OnClick(R.id.rl_modbus_btu_meter)
+	public void onBTUMeterClick(){
+		setSystemSelection(3);
+		if(floorList.size()>0) {
+			if(roomList.size() >0 && mModuleListAdapter!=null && mModuleListAdapter.getSelectedPostion()!=-1) {
+				ArrayList<Equip> zoneEquips = HSUtil.getEquips(getSelectedZone().getId());
+				if (zoneEquips.size() > 0) {
+					mModuleListAdapter.setSelectedItem(-1);
+				}
+				//mRoomListAdapter.setSelectedItem(-1);
+				addFloorBtn.setEnabled(false);
+				addZonelt.setEnabled(false);
+			}
+		}
+		mFloorListAdapter.setSelectedItem(-1);
+		if (updateOAOModule())
+		{
+			moduleListView.setVisibility(View.VISIBLE);
+		} else {
+			enableModueButton();
+		}
+	}
+
+
+	private void setSystemSelection(int position)
+	{
+			rl_systemdevice.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
+			rl_systemdevice.setEnabled(false);
+			textViewSystemDevice.setTextColor(getContext().getResources().getColor(R.color.white));
+
+			if(position==1) {
+				rl_oao.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
+				textViewOAO.setSelected(true);
+				textViewOAO.setTextColor(Color.WHITE);
+				rl_oao.setEnabled(false);
+			}
+			if(position==2) {
+				rl_modbus_energy_meter.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
+				textModbusEnergyMeter.setSelected(true);
+				textModbusEnergyMeter.setTextColor(Color.WHITE);
+				rl_modbus_energy_meter.setEnabled(false);
+			}
+			if(position==3) {
+				rl_modbus_btu_meter.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
+				textModbusBTUMeter.setSelected(true);
+				textModbusBTUMeter.setTextColor(Color.WHITE);
+				rl_modbus_btu_meter.setEnabled(false);
+			}
+
+			disablePreviousSelection(position);
+			roomListView.setVisibility(View.GONE);
+			moduleListView.setVisibility(View.GONE);
+			addZonelt.setEnabled(false);
+			addRoomBtn.setEnabled(false);
+			if (addRoomEdit.getVisibility() == View.VISIBLE) {
+				closeAddZoneEditViews();
+			}
+	}
+
+	public void disablePreviousSelection(int position){
+		/**
+		 * Disable previous selection
+		 */
+		if(priviousSelectedDevice!=0){
+			if(priviousSelectedDevice==1) {
+				rl_oao.setBackgroundColor(Color.WHITE);
+				textViewOAO.setSelected(false);
+				textViewOAO.setTextColor(getContext().getResources().getColor(R.color.text_color));
+				rl_oao.setEnabled(true);
+			}
+			if(priviousSelectedDevice==2) {
+				rl_modbus_energy_meter.setBackgroundColor(Color.WHITE);
+				textModbusEnergyMeter.setSelected(false);
+				textModbusEnergyMeter.setTextColor(getContext().getResources().getColor(R.color.text_color));
+				rl_modbus_energy_meter.setEnabled(true);
+			}
+			if(priviousSelectedDevice==3) {
+				rl_modbus_btu_meter.setBackgroundColor(Color.WHITE);
+				textModbusBTUMeter.setSelected(false);
+				textModbusBTUMeter.setTextColor(getContext().getResources().getColor(R.color.text_color));
+				rl_modbus_btu_meter.setEnabled(true);
+			}
+		}
+		priviousSelectedDevice = position;
+	}
+
 
 	private void closeAddZoneEditViews() {
 		addZonelt.setVisibility(View.VISIBLE);
@@ -667,20 +778,51 @@ public class FloorPlanFragment extends Fragment
 		mgr.hideSoftInputFromWindow(addRoomEdit.getWindowToken(), 0);
 	}
 
-	private void setSytemUnselection()
+	private void setSystemUnselection()
 	{
+		/**
+		 * System Devices configuration for un-selection
+		 */
 		rl_systemdevice.setBackgroundColor(Color.WHITE);
-		rl_oao.setBackgroundColor(Color.WHITE);
-		textViewSystemDevice.setSelected(false);
-		textViewOAO.setSelected(false);
-		textViewSystemDevice.setTextColor(getContext().getResources().getColor(R.color.text_color));
-		textViewOAO.setTextColor(getContext().getResources().getColor(R.color.text_color));
 		rl_systemdevice.setEnabled(true);
+		textViewSystemDevice.setTextColor(getContext().getResources().getColor(R.color.text_color));
+		textViewSystemDevice.setSelected(false);
+
+		/**
+		 * OAO Configuration for un-selection
+		 */
+		rl_oao.setBackgroundColor(Color.WHITE);
+		textViewOAO.setSelected(false);
+		textViewOAO.setTextColor(getContext().getResources().getColor(R.color.text_color));
 		rl_oao.setEnabled(true);
+
+		/**
+		 * Modbus Energy Meter Configuration for un-selection
+		 */
+
+		rl_modbus_energy_meter.setBackgroundColor(Color.WHITE);
+		textModbusEnergyMeter.setSelected(false);
+		textModbusEnergyMeter.setTextColor(getContext().getResources().getColor(R.color.text_color));
+		rl_modbus_energy_meter.setEnabled(true);
+
+		/**
+		 * Modbus BTU Meter Configuration for un-selection
+		 */
+
+
+		rl_modbus_btu_meter.setBackgroundColor(Color.WHITE);
+		textModbusBTUMeter.setSelected(false);
+		textModbusBTUMeter.setTextColor(getContext().getResources().getColor(R.color.text_color));
+		rl_modbus_btu_meter.setEnabled(true);
+
+		/**
+		 * Zone Configuration for un-selection
+		 */
 		roomListView.setVisibility(View.VISIBLE);
 		moduleListView.setVisibility(View.VISIBLE);
 		addZonelt.setEnabled(true);
 		addRoomBtn.setEnabled(true);
+		priviousSelectedDevice = 0;
 	}
 
 	private void enableFloorEdit()
@@ -1020,17 +1162,37 @@ public class FloorPlanFragment extends Fragment
 	public void startPairing()
 	{
 
+
         if (mFloorListAdapter.getSelectedPostion() == -1) {
             short meshAddress = L.generateSmartNodeAddress();
-            if (L.ccu().oaoProfile != null) {
-                Toast.makeText(getActivity(), "OAO Module already paired", Toast.LENGTH_LONG).show();
-            } else {
-				if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT) {
-					Toast.makeText(getActivity(), "Please set system profile to vav or dab to continue!", Toast.LENGTH_LONG).show();
-					return;
+
+            if(priviousSelectedDevice==1){
+
+				if (L.ccu().oaoProfile != null) {
+					Toast.makeText(getActivity(), "OAO Module already paired", Toast.LENGTH_LONG).show();
+				} else {
+					if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT) {
+						Toast.makeText(getActivity(), "Please set system profile to vav or dab to continue!", Toast.LENGTH_LONG).show();
+						return;
+					}
+					showDialogFragment(FragmentBLEInstructionScreen.getInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.OAO, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
 				}
-                showDialogFragment(FragmentBLEInstructionScreen.getInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.OAO, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
-            }
+			}
+			if(priviousSelectedDevice==2){
+
+				/**
+				 * Modbus energy meter selection
+				 */
+				showDialogFragment(FragmentModbusConfiguration
+						.newInstance(meshAddress,"SYSTEM","SYSTEM", ProfileType.MODBUS_EM), FragmentModbusConfiguration.ID);
+			}
+			if(priviousSelectedDevice==3){
+				/**
+				 * Modbus BTU meter selection
+				 */
+				showDialogFragment(FragmentModbusConfiguration
+						.newInstance(meshAddress,"SYSTEM","SYSTEM", ProfileType.MODBUS_BTU), FragmentModbusConfiguration.ID);
+			}
             return;
         }
 
@@ -1116,7 +1278,7 @@ public class FloorPlanFragment extends Fragment
 	public void setFloorListView(AdapterView<?> parent, View view, int position, long id)
 	{
 		selectFloor(position);
-		setSytemUnselection();
+		setSystemUnselection();
 	}
 	
 	

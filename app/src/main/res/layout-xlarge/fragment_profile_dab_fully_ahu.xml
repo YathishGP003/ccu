@@ -285,6 +285,7 @@
                         android:id="@+id/tableRowAnalog4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:visibility="gone"
                         android:layout_marginTop="20dp">
 
                         <LinearLayout
@@ -317,7 +318,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="40dp"
+                            android:layout_height="48dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">
@@ -325,10 +326,11 @@
                             <Spinner
                                 android:id="@+id/analog4Spinner"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
-                                android:layout_width="120dp"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_centerHorizontal="true"
                                 android:layout_centerVertical="true"
+                                android:entries="@array/dcwb_analog4_options"
                                 tools:listitem="@layout/spinner_dropdown_item" />
 
                         </LinearLayout>
@@ -547,7 +549,7 @@
                 android:layout_marginTop="14dp"
                 android:layout_marginBottom="16dp"
                 android:stretchColumns="0"
-                android:visibility="gone">
+                android:visibility="visible">
 
                 <TableRow
                     android:id="@+id/tableRow7"
@@ -744,6 +746,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/dcwbLayout"
                 layout="@layout/fragment_profile_dab_dcwb"
+                android:visibility="gone"
                 android:layout_below="@+id/dabAnalog"/>
 
             <Button

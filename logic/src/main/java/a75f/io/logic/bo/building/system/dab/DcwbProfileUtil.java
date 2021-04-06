@@ -1,0 +1,223 @@
+package a75f.io.logic.bo.building.system.dab;
+
+import java.util.HashMap;
+
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Point;
+
+public class DcwbProfileUtil {
+    
+    public static void createDcwbConfigPoints(CCUHsApi hayStack) {
+        HashMap systemEquipMap = hayStack.read("system and equip");
+        Equip equip = new Equip.Builder().setHashMap(systemEquipMap).build();
+    
+        Point analog4OutputEnabled = new Point.Builder()
+                                         .setDisplayName(equip.getDisplayName()+"-"+"analog2OutputEnabled")
+                                         .setSiteRef(equip.getSiteRef())
+                                         .setEquipRef(equip.getId())
+                                         .addMarker("system").addMarker("config").addMarker("analog4")
+                                         .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
+                                         .setEnums("false,true").setTz(equip.getTz())
+                                         .build();
+        String analog4OutputEnabledId = hayStack.addPoint(analog4OutputEnabled);
+        hayStack.writeDefaultValById(analog4OutputEnabledId, 0.0 );
+    
+        Point dcwbEnabled = new Point.Builder()
+                                         .setDisplayName(equip.getDisplayName()+"-"+"dcwbEnabled")
+                                         .setSiteRef(equip.getSiteRef())
+                                         .setEquipRef(equip.getId())
+                                         .addMarker("system").addMarker("config").addMarker("dcwb")
+                                         .addMarker("enabled").addMarker("writable").addMarker("sp")
+                                         .setEnums("false,true").setTz(equip.getTz())
+                                         .build();
+        String dcwbEnabledId = hayStack.addPoint(dcwbEnabled);
+        hayStack.writeDefaultValById(dcwbEnabledId, 0.0 );
+    
+        Point adaptiveDeltaEnabled = new Point.Builder()
+                                .setDisplayName(equip.getDisplayName()+"-"+"adaptiveDeltaEnabled")
+                                .setSiteRef(equip.getSiteRef())
+                                .setEquipRef(equip.getId())
+                                .addMarker("system").addMarker("config").addMarker("dcwb")
+                                .addMarker("adaptive").addMarker("delta").addMarker("enabled").addMarker("writable").addMarker("sp")
+                                .setEnums("false,true").setTz(equip.getTz())
+                                .build();
+        String adaptiveDeltaEnabledId = hayStack.addPoint(adaptiveDeltaEnabled);
+        hayStack.writeDefaultValById(adaptiveDeltaEnabledId, 0.0 );
+    
+        Point maximizedExitWaterTempEnabled = new Point.Builder()
+                                         .setDisplayName(equip.getDisplayName()+"-"+"maximizedExitWaterTempEnabled")
+                                         .setSiteRef(equip.getSiteRef())
+                                         .setEquipRef(equip.getId())
+                                         .addMarker("system").addMarker("config").addMarker("dcwb")
+                                         .addMarker("maximized").addMarker("exit").addMarker("water").addMarker("temp")
+                                         .addMarker("enabled").addMarker("writable").addMarker("sp")
+                                         .setEnums("false,true").setTz(equip.getTz())
+                                         .build();
+        String maximizedExitWaterTempEnabledId = hayStack.addPoint(maximizedExitWaterTempEnabled);
+        hayStack.writeDefaultValById(maximizedExitWaterTempEnabledId, 0.0 );
+    
+        Point analog1AtValveClosedPosition = new Point.Builder()
+                                             .setDisplayName(equip.getDisplayName()+"-"+"analog1AtValveClosedPosition")
+                                             .setSiteRef(equip.getSiteRef())
+                                             .setEquipRef(equip.getId())
+                                             .addMarker("system").addMarker("config").addMarker("dcwb")
+                                             .addMarker("analog1").addMarker("valve").addMarker("closed")
+                                             .addMarker("position").addMarker("writable").addMarker("sp")
+                                             .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTz(equip.getTz())
+                                             .build();
+        String analog1AtValveClosedPositionId = hayStack.addPoint(analog1AtValveClosedPosition);
+        hayStack.writeDefaultValById(analog1AtValveClosedPositionId, 0.0 );
+    
+        Point analog1AtValveFullPosition = new Point.Builder()
+                                                 .setDisplayName(equip.getDisplayName()+"-"+"analog1AtValveFullPosition")
+                                                 .setSiteRef(equip.getSiteRef())
+                                                 .setEquipRef(equip.getId())
+                                                 .addMarker("system").addMarker("config").addMarker("dcwb")
+                                                 .addMarker("analog1").addMarker("valve").addMarker("full")
+                                                 .addMarker("position").addMarker("writable").addMarker("sp")
+                                                 .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTz(equip.getTz())
+                                                 .build();
+        String analog1AtValveFullPositionId = hayStack.addPoint(analog1AtValveFullPosition);
+        hayStack.writeDefaultValById(analog1AtValveFullPositionId, 10.0 );
+    }
+    
+    public static void createDcwbAnalog4Points(String associationType, Equip equip, CCUHsApi hayStack) {
+        String minLoopName = associationType.contains("cooling") ? "analog4AtMinCoolingLoop" : "analog4AtMinCo2Loop";
+        String maxLoopName = associationType.contains("cooling") ? "analog4AtMaxCoolingLoop" : "analog4AtMaxCo2Loop";
+    
+        Point analog4AtMinCoolingLoop = new Point.Builder()
+                                            .setDisplayName(equip.getDisplayName()+"-"+minLoopName)
+                                            .setSiteRef(equip.getSiteRef())
+                                            .setEquipRef(equip.getId())
+                                            .addMarker("system").addMarker("config").addMarker("dcwb")
+                                            .addMarker("analog4").addMarker("min").addMarker(associationType)
+                                            .addMarker("loop").addMarker("writable").addMarker("sp")
+                                            .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTz(equip.getTz())
+                                            .build();
+        String analog4AtMinCoolingLoopId = hayStack.addPoint(analog4AtMinCoolingLoop);
+        hayStack.writeDefaultValById(analog4AtMinCoolingLoopId, 0.0 );
+    
+        Point analog4AtMaxCoolingLoop = new Point.Builder()
+                                            .setDisplayName(equip.getDisplayName()+"-"+maxLoopName)
+                                            .setSiteRef(equip.getSiteRef())
+                                            .setEquipRef(equip.getId())
+                                            .addMarker("system").addMarker("config").addMarker("dcwb")
+                                            .addMarker("analog4").addMarker("max").addMarker(associationType)
+                                            .addMarker("loop").addMarker("writable").addMarker("sp")
+                                            .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTz(equip.getTz())
+                                            .build();
+        String analog4AtMaxCoolingLoopId = hayStack.addPoint(analog4AtMaxCoolingLoop);
+        hayStack.writeDefaultValById(analog4AtMaxCoolingLoopId, 10.0 );
+    
+    }
+    
+    public static void createChilledWaterConfigPoints( Equip equip, CCUHsApi hayStack) {
+        Point chilledWaterTargetDelta = new Point.Builder()
+                                            .setDisplayName(equip.getDisplayName()+"-"+"chilledWaterTargetDelta")
+                                            .setSiteRef(equip.getSiteRef())
+                                            .setEquipRef(equip.getId())
+                                            .addMarker("system").addMarker("config").addMarker("dcwb")
+                                            .addMarker("chilled").addMarker("water").addMarker("target")
+                                            .addMarker("delta").addMarker("writable").addMarker("sp")
+                                            .setMinVal("0").setMaxVal("30").setIncrementVal("1").setTz(equip.getTz())
+                                            .setUnit("\u00B0F")
+                                            .build();
+        String chilledWaterTargetDeltaId = hayStack.addPoint(chilledWaterTargetDelta);
+        hayStack.writeDefaultValById(chilledWaterTargetDeltaId, 15.0 );
+    
+        Point chilledWaterExitMargin = new Point.Builder()
+                                            .setDisplayName(equip.getDisplayName()+"-"+"chilledWaterExitTemperatureMargin")
+                                            .setSiteRef(equip.getSiteRef())
+                                            .setEquipRef(equip.getId())
+                                            .addMarker("system").addMarker("config").addMarker("dcwb")
+                                            .addMarker("chilled").addMarker("water").addMarker("exit")
+                                            .addMarker("temp").addMarker("margin").addMarker("writable").addMarker("sp")
+                                            .setMinVal("0").setMaxVal("15").setIncrementVal("1").setTz(equip.getTz())
+                                            .setUnit("\u00B0F")
+                                            .build();
+        String chilledWaterExitMarginId = hayStack.addPoint(chilledWaterExitMargin);
+        hayStack.writeDefaultValById(chilledWaterExitMarginId, 4.0 );
+    
+        Point chilledWaterMaxFlowRate = new Point.Builder()
+                                           .setDisplayName(equip.getDisplayName()+"-"+"chilledWaterMaxFlowRate")
+                                           .setSiteRef(equip.getSiteRef())
+                                           .setEquipRef(equip.getId())
+                                           .addMarker("system").addMarker("config").addMarker("dcwb")
+                                           .addMarker("chilled").addMarker("water").addMarker("max")
+                                           .addMarker("flow").addMarker("rate").addMarker("writable").addMarker("sp")
+                                           .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTz(equip.getTz())
+                                           .setUnit("gpm")
+                                           .build();
+        String chilledWaterMaxFlowRateId = hayStack.addPoint(chilledWaterMaxFlowRate);
+        hayStack.writeDefaultValById(chilledWaterMaxFlowRateId, 100.0 );
+        
+    }
+    
+    public static void createDcwbLoopPoints( Equip equip, CCUHsApi hayStack) {
+        Point systemDCWBValveLoopOutput = new Point.Builder()
+                                            .setDisplayName(equip.getDisplayName()+"-"+"systemDCWBValveLoopOutput")
+                                            .setSiteRef(equip.getSiteRef())
+                                            .setEquipRef(equip.getId())
+                                            .addMarker("system").addMarker("config").addMarker("dcwb")
+                                            .addMarker("valve").addMarker("loop").addMarker("output")
+                                            .addMarker("his").addMarker("sp")
+                                            .setTz(equip.getTz())
+                                            .setUnit("%")
+                                            .build();
+        String systemDCWBValveLoopOutputId = hayStack.addPoint(systemDCWBValveLoopOutput);
+        hayStack.writeHisValById(systemDCWBValveLoopOutputId, 0.0 );
+    
+        Point chilledWaterDeltaTValveLoop  = new Point.Builder()
+                                              .setDisplayName(equip.getDisplayName()+"-"+"chilledWaterDeltaTValveLoop ")
+                                              .setSiteRef(equip.getSiteRef())
+                                              .setEquipRef(equip.getId())
+                                              .addMarker("system").addMarker("config").addMarker("dcwb")
+                                              .addMarker("chilled").addMarker("water").addMarker("delta").addMarker("loop")
+                                              .addMarker("his").addMarker("sp")
+                                              .setTz(equip.getTz())
+                                              .setUnit("%")
+                                              .build();
+        String chilledWaterDeltaTValveLoopId = hayStack.addPoint(chilledWaterDeltaTValveLoop );
+        hayStack.writeHisValById(chilledWaterDeltaTValveLoopId, 0.0 );
+    }
+    
+    private static void deleteDcwbConfigPoints(CCUHsApi hayStack) {
+    
+        deleteConfigPoint("analog4 and output and enabled", hayStack);
+        deleteConfigPoint("dcwb and enabled", hayStack);
+        deleteConfigPoint("adaptive and delta and enabled", hayStack);
+        deleteConfigPoint("maximized and exit and temp and enabled", hayStack);
+        deleteConfigPoint("analog1 and valve and closed and position", hayStack);
+        deleteConfigPoint("analog1 and valve and full and position", hayStack);
+    
+        deleteConfigPoint("analog4 and min and loop", hayStack);
+        deleteConfigPoint("analog4 and max and loop", hayStack);
+    
+        deleteConfigPoint("chilled and water and target and delta", hayStack);
+        deleteConfigPoint("chilled and water and exit and margin", hayStack);
+        deleteConfigPoint("chilled and water and max and flow and rate", hayStack);
+        
+    }
+    
+    private static void deleteLoopOutputPoints(CCUHsApi hayStack) {
+        deleteLoopPoint("valve and output", hayStack);
+        deleteLoopPoint("chilled and water and delta", hayStack);
+    }
+    
+    
+    private static void deleteConfigPoint(String query, CCUHsApi hayStack) {
+        HashMap point = hayStack.read("dcwb and system and config and "+query);
+        if (!point.isEmpty()) {
+            hayStack.deleteWritablePoint(point.get("id").toString());
+        }
+    }
+    
+    private static void deleteLoopPoint(String query, CCUHsApi hayStack) {
+        HashMap point = hayStack.read("dcwb and system and loop and "+query);
+        if (!point.isEmpty()) {
+            hayStack.deleteWritablePoint(point.get("id").toString());
+        }
+    }
+    
+}

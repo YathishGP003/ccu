@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -18,7 +19,11 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import android.widget.TableRow;
+import android.widget.TextView;
 import android.widget.ToggleButton;
+
+import org.javolution.text.Text;
 
 import java.util.ArrayList;
 
@@ -66,9 +71,13 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
 
     @BindView(R.id.relay3Test) ToggleButton relay3Test;
     @BindView(R.id.relay7Test) ToggleButton relay7Test;
-    @BindView(R.id.imageRTUInput)
-    ImageView imageView;
-
+    @BindView(R.id.imageRTUInput) ImageView imageView;
+    
+    @BindView(R.id.dcwbEnableToggle) ToggleButton dcwbToggle;
+    @BindView(R.id.dabAnalog) ViewGroup dabLayout;
+    @BindView(R.id.dcwbLayout)     ViewGroup dcwbLayout;
+    @BindView(R.id.dcwbEnableText) TextView  dcwbText;
+    @BindView(R.id.tableRowAnalog4) TableRow analog4View;
     Prefs prefs;
     @BindView(R.id.buttonNext)
     Button mNext;
@@ -108,7 +117,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             relay7Tb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
             setupAnalogLimitSelectors();
         } else {
-        
+            
             new AsyncTask<String, Void, Void>() {
 
                 @Override
@@ -184,6 +193,19 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
                 }
             }
         });
+        
+        dcwbToggle.setOnCheckedChangeListener((compoundButton, b) -> {
+           handleDabDwcbSelection(b);
+        });
+    }
+    
+    
+    private void handleDabDwcbSelection(boolean dcwbEnabled) {
+        dcwbLayout.setVisibility(dcwbEnabled ? View.VISIBLE : View.GONE);
+        dabLayout.setVisibility(dcwbEnabled ? View.GONE : View.VISIBLE);
+        dcwbText.setText(dcwbEnabled ? getString(R.string.label_dcwb_enabled) :
+                                        getString(R.string.label_dcwb_enable));
+        analog4View.setVisibility(dcwbEnabled ? View.VISIBLE : View.GONE);
     }
 
     private void goTonext() {

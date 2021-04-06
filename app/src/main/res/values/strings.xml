@@ -441,6 +441,10 @@
     <string name="label_analog_out4_at_min_co2">Analog-out 2 at Min CO2 </string>
     <string name="label_analog_out4_at_max_co2">Analog-out 2 at Max CO2 </string>
 
+    <string-array name="dcwb_analog4_options">
+        <item>  Cooling Loop </item>
+        <item>  CO2 Loop </item>
+    </string-array>
     <!--Heat Pump Input-->
     <string name="title_enable">ENABLE</string>
     <string name="title_testsignal">TEST SIGNAL</string>

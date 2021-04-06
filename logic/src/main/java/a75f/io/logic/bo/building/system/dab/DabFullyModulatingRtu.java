@@ -22,6 +22,7 @@ import a75f.io.logic.tuners.TunerUtil;
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
+import static a75f.io.logic.bo.building.system.dab.DcwbProfileUtil.*;
 import static a75f.io.logic.jobs.ScheduleProcessJob.ACTION_STATUS_CHANGE;
 
 public class DabFullyModulatingRtu extends DabSystemProfile
@@ -479,17 +480,39 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         String relay7OutputEnabledId = hayStack.addPoint(relay7OutputEnabled);
         hayStack.writeDefaultValById(relay7OutputEnabledId, 0.0 );
         
-        addAnalog1ConfigPoints(equipDis, siteRef, equipref, tz, hayStack);
-    
-        Point analog2AtMinStaticPressure = new Point.Builder()
-                                               .setDisplayName(equipDis+"-"+"analog2AtMinFan")
+        Point analog1AtMinCoolingSat = new Point.Builder()
+                                               .setDisplayName(equipDis+"-"+"analog1AtMinCooling")
                                                .setSiteRef(siteRef)
                                                .setEquipRef(equipref)
-                                               .addMarker("system").addMarker("config").addMarker("analog2")
-                                               .addMarker("min").addMarker("fan").addMarker("writable").addMarker("sp")
+                                               .addMarker("system").addMarker("config").addMarker("analog1")
+                                               .addMarker("min").addMarker("cooling").addMarker("writable").addMarker("sp")
                                                .setUnit("V")
                                                .setTz(tz)
                                                .build();
+        String analog1AtMinCoolingSatId = hayStack.addPoint(analog1AtMinCoolingSat);
+        hayStack.writeDefaultValById(analog1AtMinCoolingSatId, 2.0 );
+        
+        Point analog1AtMaxCoolingSat = new Point.Builder()
+                                               .setDisplayName(equipDis+"-"+"analog1AtMaxCooling")
+                                               .setSiteRef(siteRef)
+                                               .setEquipRef(equipref)
+                                               .addMarker("system").addMarker("config").addMarker("analog1")
+                                               .addMarker("max").addMarker("cooling").addMarker("writable").addMarker("sp")
+                                               .setUnit("V")
+                                               .setTz(tz)
+                                               .build();
+        String analog1AtMaxCoolingSatId = hayStack.addPoint(analog1AtMaxCoolingSat);
+        hayStack.writeDefaultValById(analog1AtMaxCoolingSatId, 10.0 );
+        
+        Point analog2AtMinStaticPressure = new Point.Builder()
+                                                   .setDisplayName(equipDis+"-"+"analog2AtMinFan")
+                                                   .setSiteRef(siteRef)
+                                                   .setEquipRef(equipref)
+                                                   .addMarker("system").addMarker("config").addMarker("analog2")
+                                                   .addMarker("min").addMarker("fan").addMarker("writable").addMarker("sp")
+                                                   .setUnit("V")
+                                                   .setTz(tz)
+                                                   .build();
         String analog2AtMinStaticPressureId = hayStack.addPoint(analog2AtMinStaticPressure);
         hayStack.writeDefaultValById(analog2AtMinStaticPressureId, 2.0 );
         
@@ -540,6 +563,17 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                        .build();
         String humidifierTypeId = hayStack.addPoint(humidifierType);
         hayStack.writeDefaultValById(humidifierTypeId, 0.0 );
+    
+        Point dcwbEnabled = new Point.Builder()
+                                .setDisplayName(equipDis+"-"+"dcwbEnabled")
+                                .setSiteRef(siteRef)
+                                .setEquipRef(equipref)
+                                .addMarker("system").addMarker("config").addMarker("dcwb")
+                                .addMarker("enabled").addMarker("writable").addMarker("sp")
+                                .setEnums("false,true").setTz(tz)
+                                .build();
+        String dcwbEnabledId = hayStack.addPoint(dcwbEnabled);
+        hayStack.writeDefaultValById(dcwbEnabledId, 0.0 );
         
     }
     
@@ -746,65 +780,112 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         }
     }
     
-    public void addAnalog1ConfigPoints(String equipDis, String siteRef, String equipRef, String tz, CCUHsApi hayStack) {
-        Point analog1AtMinCoolingSat = new Point.Builder()
-                                           .setDisplayName(equipDis+"-"+"analog1AtMinCooling")
-                                           .setSiteRef(siteRef)
-                                           .setEquipRef(equipRef)
-                                           .addMarker("system").addMarker("config").addMarker("analog1")
-                                           .addMarker("min").addMarker("cooling").addMarker("writable").addMarker("sp")
-                                           .setUnit("V")
-                                           .setTz(tz)
-                                           .build();
-        String analog1AtMinCoolingSatId = hayStack.addPoint(analog1AtMinCoolingSat);
-        hayStack.writeDefaultValById(analog1AtMinCoolingSatId, 2.0 );
-    
-        Point analog1AtMaxCoolingSat = new Point.Builder()
-                                           .setDisplayName(equipDis+"-"+"analog1AtMaxCooling")
-                                           .setSiteRef(siteRef)
-                                           .setEquipRef(equipRef)
-                                           .addMarker("system").addMarker("config").addMarker("analog1")
-                                           .addMarker("max").addMarker("cooling").addMarker("writable").addMarker("sp")
-                                           .setUnit("V")
-                                           .setTz(tz)
-                                           .build();
-        String analog1AtMaxCoolingSatId = hayStack.addPoint(analog1AtMaxCoolingSat);
-        hayStack.writeDefaultValById(analog1AtMaxCoolingSatId, 10.0 );
-    }
-    
-    public void deleteAnalog1ConfigPoints(CCUHsApi hayStack) {
-        HashMap coolingMin = hayStack.read("system and config and analog1 and min and cooling");
-        if (!coolingMin.isEmpty()) {
-            hayStack.deleteWritablePoint(coolingMin.get("id").toString());
-        }
-        HashMap coolingMax = hayStack.read("system and config and analog1 and min and cooling");
-        if (!coolingMax.isEmpty()) {
-            hayStack.deleteWritablePoint(coolingMax.get("id").toString());
-        }
-    }
-    
-    public void enableDcwb() {
+    /**
+     * DCWB when enabled takes control of analog1 and analog4. Other ports are still managed as DAB.
+     * @param tags
+     * @param val
+     */
+    public void setDcwbConfigEnabled(String tags, double val) {
+        CcuLog.i(L.TAG_CCU_SYSTEM, "setDcwbConfigEnabled "+tags+" val "+val);
         CCUHsApi hayStack = CCUHsApi.getInstance();
-    
-        HashMap systemEquipMap = hayStack.read("system and equip");
-        Equip equip = new Equip.Builder().setHashMap(systemEquipMap).build();
-    
-        deleteAnalog1ConfigPoints(hayStack);
-    
-        DcwbProfileUtil.createConfigPoints(equip, hayStack);
-        DcwbProfileUtil.createChilledWaterConfigPoints(equip, hayStack);
-        DcwbProfileUtil.createAnalog4LoopConfigPoints("cooling",equip, hayStack); //TODO
-        DcwbProfileUtil.createLoopPoints(equip, hayStack);
-    }
-    
-    public void disableDcwb() {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        DcwbProfileUtil.deleteConfigPoints(hayStack);
-        DcwbProfileUtil.deleteLoopOutputPoints(hayStack);
-        DcwbProfileUtil.deleteAnalog4LoopConfigPoints("cooling", hayStack);//TODO
+        HashMap configPoint = hayStack.read("point and system and config and output and enabled and "+tags);
+        Point configEnabledPt = new Point.Builder().setHashMap(configPoint).build();
+        double curConfig = hayStack.readPointPriorityVal(configEnabledPt.getId());
+        CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and enabled and "+tags, val);
         
-        HashMap systemEquipMap = hayStack.read("system and equip");
-        Equip equip = new Equip.Builder().setHashMap(systemEquipMap).build();
-        addAnalog1ConfigPoints(equip.getDisplayName(), equip.getSiteRef(), equip.getId(), equip.getTz(), hayStack);
+        if(curConfig != val){
+            HashMap equipMap = hayStack.read("equip and system");
+            Equip systemEquip = new Equip.Builder().setHashMap(equipMap).build();
+            switch (tags){
+                case Tags.ANALOG1:
+                    HashMap cmdCool = CCUHsApi.getInstance().read("point and system and cmd and chilled and water and" +
+                                                                  " valve");
+                    if(cmdCool != null && cmdCool.size() > 0) {
+                        if(val == 0.0) {
+                            CCUHsApi.getInstance().deleteEntityTree(cmdCool.get("id").toString());
+                        }
+                    }else {
+                        Point coolingSignal = new Point.Builder()
+                                                  .setDisplayName(systemEquip.getDisplayName() + "-" + "chwValveSignal")
+                                                  .setSiteRef(systemEquip.getSiteRef())
+                                                  .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
+                                                  .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("his").setUnit("%")
+                                                  .setTz(systemEquip.getTz())
+                                                  .build();
+                        String cmdCoolingPtId = CCUHsApi.getInstance().addPoint(coolingSignal);
+                        CCUHsApi.getInstance().writeHisValById(cmdCoolingPtId,0.0);
+                    }
+                    break;
+    
+                case Tags.ANALOG4:
+                    double loopType = hayStack.readDefaultVal("analog4 and loop and output and type");
+                    String loopTag = loopType == 0 ? Tags.COOLING : Tags.CO2;
+                    HashMap cmd = CCUHsApi.getInstance().read("point and system and cmd and "+loopTag);
+                    
+                    if(cmd != null && cmd.size() > 0) {
+                        if(val == 0.0) {
+                            CCUHsApi.getInstance().deleteEntityTree(cmd.get("id").toString());
+                        }
+                    }else {
+                        Point loopSignal = new Point.Builder()
+                                              .setDisplayName(systemEquip.getDisplayName() + "-" + loopTag+"Signal")
+                                              .setSiteRef(systemEquip.getSiteRef())
+                                              .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
+                                              .addMarker("system").addMarker("cmd").addMarker(loopTag).addMarker("his").setUnit("%")
+                                              .setTz(systemEquip.getTz())
+                                              .build();
+                        String loopSignalId = CCUHsApi.getInstance().addPoint(loopSignal);
+                        CCUHsApi.getInstance().writeHisValById(loopSignalId,0.0);
+                    }
+                    break;
+            }
+        }
+    }
+    
+    /**
+     * Enable (Dynamic Chilled Water Balancing) DCWB extension to the DAB profile.
+     * Creates all the necessary config/loop/output points for DCWB.
+     */
+    public void enableDcwb(CCUHsApi hayStack) {
+        //Remove analog1 Command points
+        setConfigEnabled(Tags.ANALOG1, 0);
+        HashMap equipMap = hayStack.read("equip and system");
+        Equip systemEquip = new Equip.Builder().setHashMap(equipMap).build();
+        createConfigPoints(systemEquip, hayStack);
+        createAnalog4LoopConfigPoints(Tags.COOLING,systemEquip, hayStack);
+        createChilledWaterConfigPoints(systemEquip, hayStack);
+        createLoopPoints(systemEquip, hayStack);
+        CCUHsApi.getInstance().scheduleSync();
+    }
+    
+    /**
+     * Disable DCWB extension to the DAB profile.
+     * Deletes all the necessary config/loop/output points for DCWB.
+     */
+    public void disableDcwb(CCUHsApi hayStack) {
+        setDcwbConfigEnabled(Tags.ANALOG1, 0);
+        setDcwbConfigEnabled(Tags.ANALOG4, 0);
+        deleteConfigPoints(hayStack);
+        deleteLoopOutputPoints(hayStack);
+        double loopType = hayStack.readDefaultVal("analog4 and loop and output and type");
+        deleteAnalog4LoopConfigPoints(loopType == 0 ? Tags.COOLING : Tags.CO2, hayStack);
+        CCUHsApi.getInstance().scheduleSync();
+    }
+    
+    public void updateDcwbAnalog4Mapping(double newLoopType) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        double loopType = hayStack.readDefaultVal("analog4 and loop and output and type");
+        if (loopType == newLoopType) {
+            return;
+        }
+        deleteAnalog4LoopConfigPoints(loopType == 0 ? Tags.COOLING : Tags.CO2, CCUHsApi.getInstance());
+        HashMap equipMap = hayStack.read("equip and system");
+        Equip systemEquip = new Equip.Builder().setHashMap(equipMap).build();
+        createAnalog4LoopConfigPoints(newLoopType == 0 ? Tags.COOLING : Tags.CO2, systemEquip, hayStack);
+        CCUHsApi.getInstance().scheduleSync();
+    }
+    
+    public boolean isDcwbEnabled() {
+        return CCUHsApi.getInstance().readDefaultVal("system and dcwb and enabled") > 0;
     }
 }

@@ -435,11 +435,11 @@
     <string name="label_analog_out2_at_min_fan_speed">Analog-out 2 at Min Fan Speed </string>
     <string name="label_analog_out2_at_max_fan_speed">Analog-out 2 at Max Fan Speed </string>
     <string name="label_analog_out3_at_min_heating">Analog-out 3 at Min Heating </string>
-    <string name="label_analog_out3_at_max_heating">Analog-out 2 at Max Heating </string>
-    <string name="label_analog_out4_at_min_cooling">Analog-out 2 at Min Cooling Loop </string>
-    <string name="label_analog_out4_at_max_cooling">Analog-out 2 at Max Cooling Loop </string>
-    <string name="label_analog_out4_at_min_co2">Analog-out 2 at Min CO2 </string>
-    <string name="label_analog_out4_at_max_co2">Analog-out 2 at Max CO2 </string>
+    <string name="label_analog_out3_at_max_heating">Analog-out 3 at Max Heating </string>
+    <string name="label_analog_out4_at_min_cooling">Analog-out 4 at Min Cooling Loop </string>
+    <string name="label_analog_out4_at_max_cooling">Analog-out 4 at Max Cooling Loop </string>
+    <string name="label_analog_out4_at_min_co2">Analog-out 4 at Min CO2 </string>
+    <string name="label_analog_out4_at_max_co2">Analog-out 4 at Max CO2 </string>
 
     <string-array name="dcwb_analog4_options">
         <item>  Cooling Loop </item>

@@ -186,7 +186,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 Log.d(L.TAG_CCU_JOB, " Equip "+equip.getDisplayName());
                 Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
             
-                if(equipSchedule == null)
+                if(equipSchedule == null || equip.getRoomRef().contains("SYSTEM"))
                 {
                     CcuLog.d(L.TAG_CCU_JOB,"<- *no schedule*");
                     continue;

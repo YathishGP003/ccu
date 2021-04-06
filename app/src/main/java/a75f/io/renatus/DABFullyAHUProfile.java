@@ -91,6 +91,22 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         if(getArguments() != null) {
             isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
         }
+        if (systemProfile != null) {
+            systemProfile.deleteSystemEquip();
+            L.ccu().systemProfile = null; //Makes sure that System Algos dont run until new profile is ready.
+        }
+        systemProfile = new DabFullyModulatingRtu();
+        systemProfile.addSystemEquip();
+        L.ccu().systemProfile = systemProfile;
+        if (L.ccu().systemProfile instanceof DabFullyModulatingRtu) {
+            systemProfile = (DabFullyModulatingRtu) L.ccu().systemProfile;
+            ahuAnalog1Tb.setChecked(systemProfile.getConfigEnabled("analog1") > 0);
+            ahuAnalog2Tb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
+            ahuAnalog3Tb.setChecked(systemProfile.getConfigEnabled("analog3") > 0);
+            relay3Tb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
+            relay7Tb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
+            setupAnalogLimitSelectors();
+        }
         return rootView;
     }
     

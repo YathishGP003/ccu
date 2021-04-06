@@ -120,22 +120,31 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
         if(getArguments() != null) {
             isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
         }
-        systemProfile = (VavAdvancedHybridRtu) L.ccu().systemProfile;
-        relay1Tb.setChecked(systemProfile.getConfigEnabled("relay1") > 0);
-        relay2Tb.setChecked(systemProfile.getConfigEnabled("relay2") > 0);
-        relay3Tb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
-        relay4Tb.setChecked(systemProfile.getConfigEnabled("relay4") > 0);
-        relay5Tb.setChecked(systemProfile.getConfigEnabled("relay5") > 0);
-        relay6Tb.setChecked(systemProfile.getConfigEnabled("relay6") > 0);
-        relay7Tb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
+        if (systemProfile != null) {
+            systemProfile.deleteSystemEquip();
+            L.ccu().systemProfile = null;
+        }
+        systemProfile = new VavAdvancedHybridRtu();
+        systemProfile.addSystemEquip();
+        L.ccu().systemProfile = systemProfile;
+        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU) {
+            systemProfile = (VavAdvancedHybridRtu) L.ccu().systemProfile;
+            relay1Tb.setChecked(systemProfile.getConfigEnabled("relay1") > 0);
+            relay2Tb.setChecked(systemProfile.getConfigEnabled("relay2") > 0);
+            relay3Tb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
+            relay4Tb.setChecked(systemProfile.getConfigEnabled("relay4") > 0);
+            relay5Tb.setChecked(systemProfile.getConfigEnabled("relay5") > 0);
+            relay6Tb.setChecked(systemProfile.getConfigEnabled("relay6") > 0);
+            relay7Tb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
 
-        ahuAnalog1Tb.setChecked(systemProfile.getConfigEnabled("analog1") > 0);
-        ahuAnalog2Tb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
-        ahuAnalog3Tb.setChecked(systemProfile.getConfigEnabled("analog3") > 0);
-        ahuAnalog4Tb.setChecked(systemProfile.getConfigEnabled("analog4") > 0);
+            ahuAnalog1Tb.setChecked(systemProfile.getConfigEnabled("analog1") > 0);
+            ahuAnalog2Tb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
+            ahuAnalog3Tb.setChecked(systemProfile.getConfigEnabled("analog3") > 0);
+            ahuAnalog4Tb.setChecked(systemProfile.getConfigEnabled("analog4") > 0);
 
-        setUpCheckBoxes();
-        setUpSpinners();
+            setUpCheckBoxes();
+            setUpSpinners();
+        }
         return rootView;
     }
     
@@ -144,6 +153,13 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
     {
         prefs = new Prefs(getContext().getApplicationContext());
         if (getUserVisibleHint()) {
+            if (systemProfile != null) {
+                systemProfile.deleteSystemEquip();
+                L.ccu().systemProfile = null;
+            }
+            systemProfile = new VavAdvancedHybridRtu();
+            systemProfile.addSystemEquip();
+            L.ccu().systemProfile = systemProfile;
             if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU) {
                 systemProfile = (VavAdvancedHybridRtu) L.ccu().systemProfile;
                 relay1Tb.setChecked(systemProfile.getConfigEnabled("relay1") > 0);

@@ -91,16 +91,25 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
         if(getArguments() != null) {
             isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
         }
-        systemProfile = (VavStagedRtu) L.ccu().systemProfile;
-        relay1Cb.setChecked(systemProfile.getConfigEnabled("relay1") > 0);
-        relay2Cb.setChecked(systemProfile.getConfigEnabled("relay2") > 0);
-        relay3Cb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
-        relay4Cb.setChecked(systemProfile.getConfigEnabled("relay4") > 0);
-        relay5Cb.setChecked(systemProfile.getConfigEnabled("relay5") > 0);
-        relay6Cb.setChecked(systemProfile.getConfigEnabled("relay6") > 0);
-        relay7Cb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
-        setUpCheckBoxes();
-        setUpSpinners();
+        if (systemProfile != null) {
+            systemProfile.deleteSystemEquip();
+            L.ccu().systemProfile = null;
+        }
+        systemProfile = new VavStagedRtu();
+        systemProfile.addSystemEquip();
+        L.ccu().systemProfile = systemProfile;
+        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_RTU) {
+            systemProfile = (VavStagedRtu) L.ccu().systemProfile;
+            relay1Cb.setChecked(systemProfile.getConfigEnabled("relay1") > 0);
+            relay2Cb.setChecked(systemProfile.getConfigEnabled("relay2") > 0);
+            relay3Cb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
+            relay4Cb.setChecked(systemProfile.getConfigEnabled("relay4") > 0);
+            relay5Cb.setChecked(systemProfile.getConfigEnabled("relay5") > 0);
+            relay6Cb.setChecked(systemProfile.getConfigEnabled("relay6") > 0);
+            relay7Cb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
+            setUpCheckBoxes();
+            setUpSpinners();
+        }
         return rootView;
     }
     

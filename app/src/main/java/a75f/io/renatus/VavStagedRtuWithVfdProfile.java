@@ -114,17 +114,26 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         if(getArguments() != null) {
             isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
         }
-        systemProfile = (VavStagedRtuWithVfd) L.ccu().systemProfile;
-        relay1Tb.setChecked(systemProfile.getConfigEnabled("relay1") > 0);
-        relay2Tb.setChecked(systemProfile.getConfigEnabled("relay2") > 0);
-        relay3Tb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
-        relay4Tb.setChecked(systemProfile.getConfigEnabled("relay4") > 0);
-        relay5Tb.setChecked(systemProfile.getConfigEnabled("relay5") > 0);
-        relay6Tb.setChecked(systemProfile.getConfigEnabled("relay6") > 0);
-        relay7Tb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
-        analog2Tb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
-        setUpCheckBoxes();
-        setUpSpinners();
+        if (systemProfile != null) {
+            systemProfile.deleteSystemEquip();
+            L.ccu().systemProfile = null;
+        }
+        systemProfile = new VavStagedRtuWithVfd();
+        systemProfile.addSystemEquip();
+        L.ccu().systemProfile = systemProfile;
+        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU) {
+            systemProfile = (VavStagedRtuWithVfd) L.ccu().systemProfile;
+            relay1Tb.setChecked(systemProfile.getConfigEnabled("relay1") > 0);
+            relay2Tb.setChecked(systemProfile.getConfigEnabled("relay2") > 0);
+            relay3Tb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
+            relay4Tb.setChecked(systemProfile.getConfigEnabled("relay4") > 0);
+            relay5Tb.setChecked(systemProfile.getConfigEnabled("relay5") > 0);
+            relay6Tb.setChecked(systemProfile.getConfigEnabled("relay6") > 0);
+            relay7Tb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
+            analog2Tb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
+            setUpCheckBoxes();
+            setUpSpinners();
+        }
         return rootView;
     }
 

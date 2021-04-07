@@ -984,8 +984,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             seekArc.scaletoNormalBig(250, 210);
                             imageOn = true;
                             selectedView = seekArc.getId();
-                            scrollViewParent.scrollTo(0,seekArc.getTop());
-                            //scrollViewParent.scrollTo(0,seekArc.getTop());
                             try {
                                 textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
                                 textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
@@ -1026,7 +1024,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     hideWeather();
                     imageOn = true;
                     selectedView = seekArc.getId();
-                    scrollViewParent.scrollTo(0,seekArc.getTop());
                     try {
                         textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));

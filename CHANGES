@@ -1,35 +1,60 @@
- - Merged PR 560: Added back option while registering new site in CCU
- - Merged PR 567: Reconfig support for CPU & HPU profiles
- - Merged PR 579: Sync site only when pref set
- - Merged PR 599: Revert 'Alerts V2 Endpoints cutover'
- - Merged PR 556: Alerts V2 Endpoints cutover
- - Clearing point array during conditioning mode change crash - Fix
- - FanLow update with humidifier selected and Comment format update
- - FanMode pointWrite fix
- - FanMode fallback and hisWrite issues
- - Retaining Old Changes.
- - Retaining Old Changes
- - Added back option while registering new site in CCU (Retaining Old Changes)
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/4868_CCU_crashed_when_clicks_on_back_button_while_doing_the_registration
- - Point level handling for CPU and HPU userIntents
- - HPU changeover point duplication fix
- - Merge branch 'master' into story/samjith/570x_cpu_hpu_reconfig_support
- - Merged PR 559: SmartStat profile reconfig crashes
- - Merge branches 'bug/mkundaragi/4868_CCU_crashed_when_clicks_on_back_button_while_doing_the_registration' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/4868_CCU_crashed_when_clicks_on_back_button_while_doing_the_registration
- - ConditionalMode and fanMode handling updated
- - Merge branch 'Bug/samjith/571x_ss_profile_crashes' into story/samjith/570x_cpu_hpu_reconfig_support
- - Cleaned up commented code and addressed a missed scenario
- - Merged PR 524: Resolved app crash on home button press while override popup is open
- - Merged PR 534: CCU App default Page from Floor Layout to Zoon View
- - Added back option while registering new site in CCU
- - HPU profile reconfig support
- - CPU reconfig support
- - CPU conditioning mode crash : Fix
- - 4PFCU conditioning mode incorrect update : Fix
- - CPU and HPU config change crash : Fix
- - Retained old changes.
- - Updated RenatusLandingActivity.java.  Changed with viewPage adapter mStatusPagerAdapter with first position tab selected.
- - Updated as per the given comments.
- - resolved conflict for Androidx Lib
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/5437_Tuners_UI_APP_Crash_While_Override_popup_minimized
- - Resolved app crash on home button press while override popup is open
+ - Merged PR 654: 5105 Zone page collapsing after indivisual zone expanded for revertiing to normal view
+ - Merged PR 650: 1966 : PI Profile Enhancements and Native Sensor support
+ - Removed unused/commented code.
+ - Merged PR 657: OAO tuner consumption and algo tweak
+ - Clean up
+ - Clean up
+ - Merged PR 589: Adding default value 0 to energyMeterReading haystack point
+ - Added description for commented code.
+ - Just removed scrolling the view on selection
+ - Make nativeSensor input visible -Add support for upgrades -Change the default value of relay actuator type
+ - Merged PR 630: Alerts -- Endpoint and pubnub swithover
+ - Update test input limits and tuner unit
+ - Fix weather data parsing issue
+ - Merge branch 'story/samjith/1966_generic_pi_sensor_support' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/samjith/1966_generic_pi_sensor_support
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/samjith/1966_generic_pi_sensor_support
+ - Output status message format update
+ - WIP
+ - OA damper fix for DAB and VAV Staged profiles
+ - Update tuner limits
+ - Merged PR 616: CCU Crash reporting
+ - PLC Updates
+ - Merge branch 'story/samjith/1966_generic_pi_sensor_support' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/samjith/1966_generic_pi_sensor_support
+ - Fix crash
+ - Merge branch 'story/samjith/1966_generic_pi_sensor_support' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/samjith/1966_generic_pi_sensor_support
+ - Layout Changes
+ - Remove ION meter from analog2 list
+ - ION Meter support
+ - Add ION Meter sensor support
+ - Merge branch 'master' into story/samjith/1966_generic_pi_sensor_support
+ - Merged PR 604: Vav reheat algorithm change.
+ - Merged PR 603: CCU Site update handling
+ - OAO tuners and algo updates
+ - Fix review comments and issue with roomRef
+ - Merge branch 'master' into story/samjith/vav_reheat_algo_tuning
+ - Tuner consumption
+ - Tuner initial value fix
+ - Site update handling
+ - Vav GPC-36 update for zone heating
+ - Merge branch 'master' into story/samjith/vav_reheat_algo_tuning
+ - Merge branch 'master' into story/samjith/1966_generic_pi_sensor_support
+ - Update relay handling
+ - Update native temperature handling
+ - Updated points and algo
+ - PI Enhancement UI
+ - Adding default value 0 to energyMeterReading haystack point
+ - WIP
+ - handle dat tuner migration
+ - Fixes and logs
+ - Clean up and a ui fix
+ - Implementation of VAV reheat DAT differential tuner and its algo.
+ - Update native sensor point handling
+ - Merge branch 'master' into story/samjith/1966_generic_pi_sensor_support
+ - PI Additional Sensor support - Initial commit
+ - Merge master
+ - Updae onboard sensor name to NativeSensor
+ - Merge branch 'master' into story/samjith/1966_generic_pi_sensor_support
+ - WIP
+ - Onboard sensors UI
+ - Onboard sensor definition

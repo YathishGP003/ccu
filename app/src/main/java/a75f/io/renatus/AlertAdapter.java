@@ -30,6 +30,11 @@ public class AlertAdapter extends ArrayAdapter<Alert> implements View.OnClickLis
         
     }
 
+    public void resetList(ArrayList<Alert> alerts) {
+        this.alerts = alerts;
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getCount() {
         //display only first 60 alert
@@ -70,9 +75,11 @@ public class AlertAdapter extends ArrayAdapter<Alert> implements View.OnClickLis
     }
 
     private int getIcon(Alert.AlertSeverity mSeverity) {
-        if (mSeverity.ordinal() == Alert.AlertSeverity.SEVERE.ordinal()){
+        if (mSeverity.ordinal() == Alert.AlertSeverity.SEVERE.ordinal()
+           || mSeverity.ordinal() == Alert.AlertSeverity.ERROR.ordinal()){
             return R.drawable.ic_severe;
-        } else  if (mSeverity.ordinal() == Alert.AlertSeverity.MODERATE.ordinal()){
+        } else  if (mSeverity.ordinal() == Alert.AlertSeverity.MODERATE.ordinal()
+                    || mSeverity.ordinal() == Alert.AlertSeverity.WARN.ordinal()){
             return R.drawable.ic_moderate;
         } if (mSeverity.ordinal() == Alert.AlertSeverity.LOW.ordinal()){
             return R.drawable.ic_low;

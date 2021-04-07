@@ -20,4 +20,15 @@ public class PlcProfileConfiguration extends BaseProfileConfiguration
     public double setpointSensorOffset;
     
     public boolean expectZeroErrorAtMidpoint;
+    public int nativeSensorInput;
+    
+    public boolean relay1ConfigEnabled;
+    public double relay1OnThresholdVal;
+    public double relay1OffThresholdVal;
+    
+    public boolean relay2ConfigEnabled;
+    public double relay2OnThresholdVal;
+    public double relay2OffThresholdVal;
+    
+    public boolean controlLoopInversion;
 }

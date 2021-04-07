@@ -186,5 +186,6 @@ public class TunerConstants
     public static final double TR_SP_RESMAX_SP = 1.0;
     public static final double TR_SP_TRIM_SP = -0.02;
     
+    public static final double ADAPTIVE_COMFORT_THRESHOLD_MARGIN = 4;
 
 }

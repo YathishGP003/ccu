@@ -560,7 +560,15 @@
     <string name="label_targetvalue">Target Value</string>
     <string name="label_expectedError">Expected Error Range</string>
     <string name="label_setpointsensor">Setpoint Sensor Offset</string>
+    <string name="label_native_sensor">Native Sensor Input</string>
+    <string name="label_invertloop">Invert Control Loop Output</string>
 
+    <string name="label_relay_1">Relay 1</string>
+    <string name="label_threshold_relay1_on">Turn ON Relay 1</string>
+    <string name="label_threshold_relay1_off">Turn OFF Relay 1</string>
+    <string name="label_relay_2">Relay 2</string>
+    <string name="label_threshold_relay2_on">Turn ON Relay 2</string>
+    <string name="label_threshold_relay2_off">Turn OFF Relay 2</string>
 
     <!--ENERGY METER SCREEN-->
     <string name="label_eminstruction">This profile allows monitoring and graphing of energy usage via Modbus energy meter\nconnected to the Smart Node. Please wire up the meter as shown below.</string>

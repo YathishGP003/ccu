@@ -31,6 +31,8 @@ import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
+import a75f.io.logic.bo.building.sensors.NativeSensor;
+import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
@@ -1206,6 +1208,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             case 11:
                 plcPoints.put("Unit Type", "Current");
                 plcPoints.put("Unit", "A");
+            case 12:
+                plcPoints.put("Unit Type", "ION Density");
+                plcPoints.put("Unit", "ions/cc");
                 break;
         }
 
@@ -1213,7 +1218,16 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             plcPoints.put("Unit Type", "Temperature");
             plcPoints.put("Unit", "\u00B0F");
         }
-
+    
+        int nativeInputSensor =  CCUHsApi.getInstance().readDefaultVal("point and config and native and input and " +
+                                                                       "sensor and equipRef == \"" + equipID + "\"").intValue();
+        if (nativeInputSensor > 0) {
+            NativeSensor selectedSensor = SensorManager.getInstance().getNativeSensorList().get(nativeInputSensor - 1);
+            plcPoints.put("Unit Type", selectedSensor.sensorName);
+            plcPoints.put("Unit", selectedSensor.engineeringUnit);
+        }
+    
+    
         return plcPoints;
     }
 

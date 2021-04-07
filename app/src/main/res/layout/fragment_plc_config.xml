@@ -10,298 +10,578 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
             <RelativeLayout
-                android:id="@+id/layoutHeader"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="32dp">
-
-
-                <TextView
-                    android:id="@+id/textTitleFragment"
-                    android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+                <RelativeLayout
+                    android:id="@+id/layoutHeader"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:layout_centerVertical="true"
-                    android:fontFamily="@font/lato_bold"
-                    android:text="@string/title_piloop"
-                    android:textAllCaps="true"
-                    android:textColor="@color/orange_75f"
-                    android:textSize="33.5dp"
-                    android:textStyle="bold" />
+                    android:layout_marginTop="32dp">
+
+
+                    <TextView
+                        android:id="@+id/textTitleFragment"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:layout_centerVertical="true"
+                        android:fontFamily="@font/lato_bold"
+                        android:text="@string/title_piloop"
+                        android:textAllCaps="true"
+                        android:textColor="@color/orange_75f"
+                        android:textSize="33.5dp"
+                        android:textStyle="bold" />
+
+                </RelativeLayout>
+
+
+                <LinearLayout
+                    android:id="@+id/ll_one"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:orientation="horizontal"
+                    android:layout_below="@+id/layoutHeader"
+                    android:layout_marginTop="46dp"
+                    android:paddingLeft="56dp"
+                    android:paddingRight="56dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+                            <TextView
+                                android:id="@+id/textAnalogin1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentLeft="true"
+                                android:layout_centerVertical="true"
+                                android:layout_toStartOf="@+id/analog1InSensor"
+                                android:textSize="@dimen/text_small_xlarge"
+                                android:text="@string/label_analogin1"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/analog1InSensor"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:layout_width="260dp"
+                                android:layout_height="?android:attr/listPreferredItemHeight"
+                                android:layout_alignParentRight="true"
+                                android:layout_centerVertical="true"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+                        </RelativeLayout>
+
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="20dp">
+                            <TextView
+                                android:id="@+id/textTHin1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentLeft="true"
+                                android:layout_centerVertical="true"
+                                android:layout_toStartOf="@+id/th1InSensor"
+                                android:textSize="@dimen/text_small_xlarge"
+                                android:text="@string/label_thin1"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/th1InSensor"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:layout_width="260dp"
+                                android:layout_height="?android:attr/listPreferredItemHeight"
+                                android:layout_alignParentRight="true"
+                                android:layout_centerVertical="true"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="20dp"
+                            android:visibility="gone">
+                            <TextView
+                                android:id="@+id/textOnbordSensor"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentLeft="true"
+                                android:layout_centerVertical="true"
+                                android:layout_toStartOf="@+id/nativeSensor"
+                                android:textSize="@dimen/text_small_xlarge"
+                                android:text="@string/label_native_sensor"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/nativeSensor"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:layout_width="260dp"
+                                android:layout_height="?android:attr/listPreferredItemHeight"
+                                android:layout_alignParentRight="true"
+                                android:layout_centerVertical="true"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="20dp">
+                            <TextView
+                                android:id="@+id/textZeroError"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentLeft="true"
+                                android:layout_marginBottom="12dp"
+                                android:layout_centerVertical="true"
+                                android:textSize="@dimen/text_small_xlarge"
+                                android:text="@string/label_zeroerrormp"
+                                android:textAppearance="@style/title_normal" />
+
+                            <ToggleButton
+                                android:id="@+id/zeroErrorAtMp"
+                                android:layout_width="46.12dp"
+                                android:layout_height="27.42dp"
+                                android:layout_alignParentRight="true"
+                                android:layout_centerVertical="true"
+                                android:background="@drawable/toggle_selector"
+                                android:checked="false"
+                                android:textOff=""
+                                android:textOn=""/>
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="20dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentLeft="true"
+                                android:layout_marginBottom="12dp"
+                                android:layout_centerVertical="true"
+                                android:textSize="@dimen/text_small_xlarge"
+                                android:text="@string/label_invertloop"
+                                android:textAppearance="@style/title_normal" />
+
+                            <ToggleButton
+                                android:id="@+id/invertLoop"
+                                android:layout_width="46.12dp"
+                                android:layout_height="27.42dp"
+                                android:layout_alignParentRight="true"
+                                android:layout_centerVertical="true"
+                                android:background="@drawable/toggle_selector"
+                                android:checked="false"
+                                android:textOff=""
+                                android:textOn=""/>
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="20dp">
+                            <TextView
+                                android:id="@+id/textUseAnalog2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentLeft="true"
+                                android:layout_toStartOf="@+id/analog2DynamicSp"
+                                android:textSize="@dimen/text_small_xlarge"
+                                android:text="@string/label_useanalogin2"
+                                android:textAppearance="@style/title_normal" />
+
+                            <ToggleButton
+                                android:id="@+id/analog2DynamicSp"
+                                android:layout_width="46.12dp"
+                                android:layout_height="27.42dp"
+                                android:layout_alignParentRight="true"
+                                android:layout_centerVertical="true"
+                                android:background="@drawable/toggle_selector"
+                                android:checked="false"
+                                android:textOff=""
+                                android:textOn=""/>
+                        </RelativeLayout>
+
+
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginLeft="56dp">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+                            <TextView
+                                android:id="@+id/textTargetValue"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentLeft="true"
+                                android:layout_centerVertical="true"
+                                android:textSize="@dimen/text_small_xlarge"
+                                android:text="@string/label_targetvalue"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/targetVal"
+                                android:layout_width="160dp"
+                                android:layout_height="?android:attr/listPreferredItemHeight"
+                                android:layout_alignParentRight="true"
+                                android:layout_centerVertical="true"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="20dp">
+                            <TextView
+                                android:id="@+id/textErrorRange"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentLeft="true"
+                                android:layout_centerVertical="true"
+                                android:textSize="@dimen/text_small_xlarge"
+                                android:text="@string/label_expectedError"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/errorRange"
+                                android:layout_width="160dp"
+                                android:layout_height="?android:attr/listPreferredItemHeight"
+                                android:layout_alignParentRight="true"
+                                android:layout_centerVertical="true"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+                        </RelativeLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/ll_two"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:orientation="horizontal"
+                    android:layout_below="@+id/ll_one"
+                    android:paddingLeft="56dp"
+                    android:paddingRight="56dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="20dp">
+                            <TextView
+                                android:id="@+id/textAnaglog2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentLeft="true"
+                                android:layout_centerVertical="true"
+                                android:layout_toStartOf="@+id/analog2InSensor"
+                                android:textSize="@dimen/text_small_xlarge"
+                                android:text="@string/label_analogin2"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/analog2InSensor"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:layout_width="260dp"
+                                android:layout_height="?android:attr/listPreferredItemHeight"
+                                android:layout_alignParentRight="true"
+                                android:layout_centerVertical="true"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="36dp">
+                            <TextView
+                                android:id="@+id/textAnalog1Min"
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:layout_alignParentLeft="true"
+                                android:text="@string/label_analogout1min"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/analogout1AtMin"
+                                android:layout_width="160dp"
+                                android:layout_height="40dp"
+                                android:layout_alignParentRight="true"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="36dp">
+                            <TextView
+                                android:id="@+id/textAnalog1Max"
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:layout_alignParentLeft="true"
+                                android:text="@string/label_analogout1max"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/analogout1AtMax"
+                                android:layout_width="160dp"
+                                android:layout_height="40dp"
+                                android:layout_alignParentRight="true"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+                        </RelativeLayout>
+
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginLeft="56dp">
+
+                        <RelativeLayout
+                            android:id="@+id/setPointLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="20dp">
+                            <TextView
+                                android:id="@+id/textSetpoint"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_toStartOf="@+id/sensorOffset"
+                                android:layout_alignParentLeft="true"
+                                android:layout_centerVertical="true"
+                                android:textSize="@dimen/text_small_xlarge"
+                                android:text="@string/label_setpointsensor"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/sensorOffset"
+                                android:layout_width="160dp"
+                                android:layout_height="?android:attr/listPreferredItemHeight"
+                                android:layout_alignParentRight="true"
+                                android:layout_centerVertical="true"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+                        </RelativeLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:orientation="horizontal"
+                    android:layout_below="@+id/ll_two"
+                    android:paddingLeft="56dp"
+                    android:paddingRight="56dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="36dp">
+                            <TextView
+                                android:id="@+id/relay1Text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:layout_alignParentLeft="true"
+                                android:text="@string/label_relay_1"
+                                android:textSize="@dimen/text_small_xlarge"
+                                android:textAppearance="@style/title_normal" />
+
+                            <ToggleButton
+                                android:id="@+id/relay1Toggle"
+                                android:layout_width="46.12dp"
+                                android:layout_height="27.42dp"
+                                android:layout_marginLeft="@dimen/margin_20"
+                                android:layout_toEndOf="@+id/relay1Text"
+                                android:background="@drawable/toggle_selector"
+                                android:checked="false"
+                                android:textOff=""
+                                android:textOn=""/>
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="36dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:layout_alignParentLeft="true"
+                                android:textSize="@dimen/text_small_xlarge"
+                                android:text="@string/label_threshold_relay1_on"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/relay1OnThreshold"
+                                android:layout_width="160dp"
+                                android:layout_height="40dp"
+                                android:layout_alignParentRight="true"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="36dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:layout_alignParentLeft="true"
+                                android:textSize="@dimen/text_small_xlarge"
+                                android:text="@string/label_threshold_relay1_off"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/relay1OffThreshold"
+                                android:layout_width="160dp"
+                                android:layout_height="40dp"
+                                android:layout_alignParentRight="true"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+                        </RelativeLayout>
+
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginLeft="56dp">
+
+
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="36dp">
+                            <TextView
+                                android:id="@+id/relay2Text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:textSize="@dimen/text_small_xlarge"
+                                android:layout_alignParentLeft="true"
+                                android:text="@string/label_relay_2"
+                                android:textAppearance="@style/title_normal" />
+
+                            <ToggleButton
+                                android:id="@+id/relay2Toggle"
+                                android:layout_width="46.12dp"
+                                android:layout_height="27.42dp"
+                                android:layout_marginLeft="@dimen/margin_20"
+                                android:layout_toEndOf="@+id/relay2Text"
+                                android:background="@drawable/toggle_selector"
+                                android:checked="false"
+                                android:textOff=""
+                                android:textOn=""/>
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="36dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:layout_alignParentLeft="true"
+                                android:textSize="@dimen/text_small_xlarge"
+                                android:text="@string/label_threshold_relay2_on"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/relay2OnThreshold"
+                                android:layout_width="160dp"
+                                android:layout_height="40dp"
+                                android:layout_alignParentRight="true"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="36dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:layout_alignParentLeft="true"
+                                android:textSize="@dimen/text_small_xlarge"
+                                android:text="@string/label_threshold_relay2_off"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/relay2OffThreshold"
+                                android:layout_width="160dp"
+                                android:layout_height="40dp"
+                                android:layout_alignParentRight="true"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+                        </RelativeLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
 
             </RelativeLayout>
 
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:orientation="horizontal"
-            android:layout_below="@+id/layoutHeader"
-            android:layout_marginTop="46dp"
-            android:paddingLeft="56dp"
-            android:paddingRight="56dp">
-
-            <LinearLayout
-                android:layout_width="0dp"
+            <Button
+                android:id="@+id/setBtn"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-                    <TextView
-                        android:id="@+id/textAnalogin1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:layout_alignParentLeft="true"
-                        android:text="@string/label_analogin1"
-                        android:textAppearance="@style/title_normal" />
-
-                    <Spinner
-                        android:id="@+id/analog1InSensor"
-                        android:layout_width="160dp"
-                        android:layout_height="40dp"
-                        android:layout_alignParentRight="true"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:entries="@array/hvac_stage_selector"
-                        tools:listitem="@layout/spinner_dropdown_item"/>
-                </RelativeLayout>
-
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="36dp">
-                    <TextView
-                        android:id="@+id/textTHin1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:layout_alignParentLeft="true"
-                        android:text="@string/label_thin1"
-                        android:textAppearance="@style/title_normal" />
-
-                    <Spinner
-                        android:id="@+id/th1InSensor"
-                        android:layout_width="160dp"
-                        android:layout_height="40dp"
-                        android:layout_alignParentRight="true"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:entries="@array/hvac_stage_selector"
-                        tools:listitem="@layout/spinner_dropdown_item"/>
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="36dp">
-                    <TextView
-                        android:id="@+id/textUseAnalog2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:layout_alignParentLeft="true"
-                        android:text="@string/label_useanalogin2"
-                        android:textAppearance="@style/title_normal" />
-
-                    <ToggleButton
-                        android:id="@+id/analog2DynamicSp"
-                        android:layout_width="46.12dp"
-                        android:layout_height="27.42dp"
-                        android:layout_alignParentRight="true"
-                        android:background="@drawable/toggle_selector"
-                        android:checked="false"
-                        android:textOff=""
-                        android:textOn=""/>
-                </RelativeLayout>
-
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="36dp">
-                    <TextView
-                        android:id="@+id/textAnaglog2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:layout_alignParentLeft="true"
-                        android:text="@string/label_analogin2"
-                        android:textAppearance="@style/title_normal" />
-
-                    <Spinner
-                        android:id="@+id/analog2InSensor"
-                        android:layout_width="160dp"
-                        android:layout_height="40dp"
-                        android:layout_alignParentRight="true"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:entries="@array/hvac_stage_selector"
-                        tools:listitem="@layout/spinner_dropdown_item"/>
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="36dp">
-                    <TextView
-                        android:id="@+id/textAnalog1Min"
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:layout_alignParentLeft="true"
-                        android:text="@string/label_analogout1min"
-                        android:textAppearance="@style/title_normal" />
-
-                    <Spinner
-                        android:id="@+id/analogout1AtMin"
-                        android:layout_width="160dp"
-                        android:layout_height="40dp"
-                        android:layout_alignParentRight="true"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:entries="@array/hvac_stage_selector"
-                        tools:listitem="@layout/spinner_dropdown_item"/>
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="36dp">
-                    <TextView
-                        android:id="@+id/textAnalog1Max"
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:layout_alignParentLeft="true"
-                        android:text="@string/label_analogout1max"
-                        android:textAppearance="@style/title_normal" />
-
-                    <Spinner
-                        android:id="@+id/analogout1AtMax"
-                        android:layout_width="160dp"
-                        android:layout_height="40dp"
-                        android:layout_alignParentRight="true"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:entries="@array/hvac_stage_selector"
-                        tools:listitem="@layout/spinner_dropdown_item"/>
-                </RelativeLayout>
-
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="36dp">
-                    <TextView
-                        android:id="@+id/textZeroError"
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:layout_alignParentLeft="true"
-                        android:text="@string/label_zeroerrormp"
-                        android:textAppearance="@style/title_normal" />
-
-                    <ToggleButton
-                        android:id="@+id/zeroErrorAtMp"
-                        android:layout_width="46.12dp"
-                        android:layout_height="27.42dp"
-                        android:layout_alignParentRight="true"
-                        android:background="@drawable/toggle_selector"
-                        android:checked="false"
-                        android:textOff=""
-                        android:textOn=""/>
-                </RelativeLayout>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginLeft="56dp">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-                    <TextView
-                        android:id="@+id/textTargetValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:layout_alignParentLeft="true"
-                        android:text="@string/label_targetvalue"
-                        android:textAppearance="@style/title_normal" />
-
-                    <Spinner
-                        android:id="@+id/targetVal"
-                        android:layout_width="160dp"
-                        android:layout_height="40dp"
-                        android:layout_alignParentRight="true"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:entries="@array/hvac_stage_selector"
-                        tools:listitem="@layout/spinner_dropdown_item"/>
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="36dp">
-                    <TextView
-                        android:id="@+id/textErrorRange"
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:layout_alignParentLeft="true"
-                        android:text="@string/label_expectedError"
-                        android:textAppearance="@style/title_normal" />
-
-                    <Spinner
-                        android:id="@+id/errorRange"
-                        android:layout_width="160dp"
-                        android:layout_height="40dp"
-                        android:layout_alignParentRight="true"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:entries="@array/hvac_stage_selector"
-                        tools:listitem="@layout/spinner_dropdown_item"/>
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="65dp">
-                    <TextView
-                        android:id="@+id/textSetpoint"
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:layout_alignParentLeft="true"
-                        android:text="@string/label_setpointsensor"
-                        android:textAppearance="@style/title_normal" />
-
-                    <Spinner
-                        android:id="@+id/sensorOffset"
-                        android:layout_width="160dp"
-                        android:layout_height="40dp"
-                        android:layout_alignParentRight="true"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:entries="@array/hvac_stage_selector"
-                        tools:listitem="@layout/spinner_dropdown_item"/>
-                </RelativeLayout>
-            </LinearLayout>
-
+                android:layout_marginLeft="900dp"
+                android:layout_marginBottom="24dp"
+                android:background="@null"
+                android:button="@null"
+                android:fontFamily="@font/lato_regular"
+                android:text="@string/button_set"
+                android:textAllCaps="true"
+                android:textColor="@color/orange_75f"
+                android:textSize="19.5dp" />
         </LinearLayout>
-
-
-        <Button
-            android:id="@+id/setBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginRight="24dp"
-            android:layout_marginBottom="24dp"
-            android:background="@null"
-            android:button="@null"
-            android:fontFamily="@font/lato_regular"
-            android:text="@string/button_set"
-            android:textAllCaps="true"
-            android:textColor="@color/orange_75f"
-            android:textSize="19.5dp" />
-        </RelativeLayout>
     </ScrollView>
 </LinearLayout>
 

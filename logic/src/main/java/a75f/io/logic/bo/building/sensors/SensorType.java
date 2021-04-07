@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.building;
+package a75f.io.logic.bo.building.sensors;
 
 import a75f.io.logic.bo.building.definitions.Port;
 
@@ -21,7 +21,11 @@ public enum SensorType
     SOUND("sound"),
     CO2_EQUIVALENT("co2_equivalent"),
     ILLUMINANCE ("illuminance"),
-    UVI("uvi");
+    UVI("uvi"),
+    PM2P5("pm2p5"),
+    PM10("pm10"),
+    TEMPERATURE("temperature"); // Temperature is not truly a native sensor and it is sent as part of regular
+    // update message unlike the other native sensors, which are sent as SensorReadings.
     String name;
     
     SensorType(String val) {
@@ -34,8 +38,6 @@ public enum SensorType
     
     public Port getSensorPort() {
         switch (this) {
-            case NONE:
-                return null;
             case HUMIDITY:
                 return Port.SENSOR_RH;
             case CO2:
@@ -61,6 +63,12 @@ public enum SensorType
                 return Port.SENSOR_ILLUMINANCE;
             case UVI:
                 return Port.SENSOR_UVI;
+            case PM2P5:
+                return Port.SENSOR_PM2P5;
+            case PM10:
+                return Port.SENSOR_PM10;
+            case TEMPERATURE:
+                return Port.SENSOR_RT;
             default:
                 return null;
         }

@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/bg_logoscreen"
     android:orientation="vertical">
 
@@ -30,6 +31,9 @@
             android:textAppearance="@style/title_grey" />
 
     </RelativeLayout>
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -65,8 +69,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginLeft="100dp"
-            android:layout_marginRight="100dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
             android:orientation="vertical">
 
             <LinearLayout
@@ -397,8 +401,31 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <TextView
+                android:layout_marginTop="@dimen/margin_20"
+                android:id="@+id/btuMeterModelDetails"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BTU Meter"
+                android:textSize="28sp"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+                android:textStyle="bold"
+                app:fontFamily="@font/lato_bold"
+                app:layout_constraintLeft_toLeftOf="parent"
+                tools:ignore="MissingConstraints" />
+
+
+            <androidx.recyclerview.widget.RecyclerView
+
+                android:id="@+id/btuMeterParams"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margin_20"
+                />
+
+
 
         </LinearLayout>
     </LinearLayout>
-
+    </androidx.core.widget.NestedScrollView>
 </LinearLayout>

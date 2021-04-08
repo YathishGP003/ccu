@@ -140,9 +140,6 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
             }
         });
 
-        /**
-         * Get all the mov
-         */
         List<EquipmentDevice> equipmentDeviceList = EquipsManager.getInstance().getAllEquipments();
 
         List<EquipmentDevice> modbusBTUequipmentDeviceCollection = new ArrayList<>();
@@ -175,6 +172,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 case MODBUS_EMS:
                 case MODBUS_ATS:
                 case MODBUS_UPS150:
+                case MODBUS_BTU:
                     modbusProfile = (ModbusProfile) L.getProfile(curSelectedSlaveId);
                     if (modbusProfile != null) {
                         curSelectedSlaveId = modbusProfile.getSlaveId();

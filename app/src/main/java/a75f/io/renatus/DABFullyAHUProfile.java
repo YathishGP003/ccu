@@ -88,6 +88,8 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
     @BindView(R.id.dcwbEnableText) TextView  dcwbText;
     @BindView(R.id.analog1MappingText) TextView  analog1Text;
     @BindView(R.id.tableRowAnalog4) TableRow analog4View;
+    @BindView(R.id.chilledWaterTargetExitTemp) ViewGroup chilledWaterTargetExitTemp;
+    @BindView(R.id.chilledWaterTargetDeltaT) ViewGroup chilledWaterTargetDeltaT;
     
     @BindView(R.id.adaptiveDeltaEnable) ToggleButton adaptiveDeltaEnable;
     @BindView(R.id.maxExitWaterTemp) ToggleButton maxExitWaterTemp;
@@ -395,9 +397,13 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
                                                                  analogVoltageArray);
         analogAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
     
+        
         adaptiveDeltaEnable.setChecked(systemProfile.getConfigVal("adaptive and delta and enabled") > 0);
         maxExitWaterTemp.setChecked(systemProfile.getConfigVal("maximized and exit and temp and enabled") > 0);
     
+        chilledWaterTargetDeltaT.setVisibility(adaptiveDeltaEnable.isChecked() ? View.VISIBLE : View.GONE);
+        chilledWaterTargetExitTemp.setVisibility(maxExitWaterTemp.isChecked() ? View.VISIBLE : View.GONE);
+        
         adaptiveDeltaEnable.setOnCheckedChangeListener(this);
         maxExitWaterTemp.setOnCheckedChangeListener(this);
         
@@ -410,6 +416,10 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         cwMaxFlowRateSpinner.setAdapter(flowRateAdapter);
         cwMaxFlowRateSpinner.setSelection(flowRateAdapter.getPosition(systemProfile.getConfigVal("max and " +
                                                                                                      "flow and rate")), false);
+        ArrayAdapter<Double> exitTempMarginAdapter = getArrayAdapter(0, 15, 1);
+        cwExitTempMarginSpinner.setAdapter(exitTempMarginAdapter);
+        cwExitTempMarginSpinner.setSelection(exitTempMarginAdapter.getPosition(systemProfile.getConfigVal("exit and " +
+                                                                                              "temp and margin")), false);
         analog1InAtValveClosedSpinner.setAdapter(analogAdapter);
         analog1InAtValveClosedSpinner.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("valve" +
                                                                                                              " and closed")), false);
@@ -488,9 +498,11 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
                 break;
             case R.id.adaptiveDeltaEnable:
                 setConfigBackground("adaptive and delta", isChecked ? 1 : 0);
+                enableAdaptiveDeltaTAlgorithm(isChecked);
                 break;
             case R.id.maxExitWaterTemp:
-                setConfigBackground("max and exit and temp", isChecked ? 1 : 0);
+                setConfigBackground("maximized and exit and temp", isChecked ? 1 : 0);
+                enableMaxExitWaterTempAlgorithm(isChecked);
                 break;
         }
     }
@@ -533,6 +545,9 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             case R.id.cwMaxFlowRateSpinner:
                 setConfigBackground("max and flow and rate", val);
                 break;
+            case R.id.cwExitTempMarginSpinner:
+                setConfigBackground("exit and temp and margin", val);
+                break;
             case R.id.analog1InAtValveClosedSpinner:
                 setConfigBackground("valve and closed", val);
                 break;
@@ -565,6 +580,29 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             case R.id.analog4OutMaxCo2:
                 setConfigBackground("analog4 and max", val);
                 break;
+        }
+    }
+    
+    private void enableAdaptiveDeltaTAlgorithm(boolean enabled) {
+    
+        maxExitWaterTemp.setChecked(!enabled);
+        if (enabled) {
+            chilledWaterTargetDeltaT.setVisibility(View.VISIBLE);
+            chilledWaterTargetExitTemp.setVisibility(View.GONE);
+        } else {
+            chilledWaterTargetDeltaT.setVisibility(View.GONE);
+            chilledWaterTargetExitTemp.setVisibility(View.VISIBLE);
+        }
+    }
+    
+    private void enableMaxExitWaterTempAlgorithm(boolean enabled) {
+        adaptiveDeltaEnable.setChecked(!enabled);
+        if (enabled) {
+            chilledWaterTargetDeltaT.setVisibility(View.GONE);
+            chilledWaterTargetExitTemp.setVisibility(View.VISIBLE);
+        } else {
+            chilledWaterTargetDeltaT.setVisibility(View.VISIBLE);
+            chilledWaterTargetExitTemp.setVisibility(View.GONE);
         }
     }
     

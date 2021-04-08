@@ -30,7 +30,7 @@ public class DcwbProfileUtil {
                                 .setEnums("false,true").setTz(equip.getTz())
                                 .build();
         String adaptiveDeltaEnabledId = hayStack.addPoint(adaptiveDeltaEnabled);
-        hayStack.writeDefaultValById(adaptiveDeltaEnabledId, 0.0 );
+        hayStack.writeDefaultValById(adaptiveDeltaEnabledId, 1.0 );
     
         Point maximizedExitWaterTempEnabled = new Point.Builder()
                                          .setDisplayName(equip.getDisplayName()+"-"+"maximizedExitWaterTempEnabled")

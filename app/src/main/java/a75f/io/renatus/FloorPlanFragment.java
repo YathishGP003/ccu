@@ -546,7 +546,7 @@ public class FloorPlanFragment extends Fragment
 		}
 
 		if(equipList != null && (equipList.size() > 0)) {
-
+			disableModuButton();
 			mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem,createAddressList(equipList));
 			getActivity().runOnUiThread(new Runnable() {
 				@Override

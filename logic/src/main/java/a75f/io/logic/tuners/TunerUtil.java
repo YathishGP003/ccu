@@ -9,6 +9,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.L;
 
@@ -381,130 +382,12 @@ public class TunerUtil
         return 0;
     }
     
-    public static void setIntegralTimeout(String equipRef, double itVal, int level) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and itimeout and equipRef == \""+equipRef+"\"");
-        
-        String id = cdb.get("id").toString();
-        if (id == null || id == "") {
-            throw new IllegalArgumentException();
-        }
-        hayStack.writePointForCcuUser(id, level, itVal, 0);
-        
-    }
-    public static double getMinCoolingDamperPos(String equipRef) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and config and min and damper and cooling and pos and equipRef == \""+equipRef+"\"");
-        
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("val") != null) {
-                    return Double.parseDouble(valMap.get("val").toString());
-                }
-            }
-        }
-        return 0;
-    }
-    
-    public static void setMinCoolingDamperPos(String equipRef, double dVal, int level) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and config and min and damper and cooling and pos and equipRef == \""+equipRef+"\"");
-        
-        String id = cdb.get("id").toString();
-        if (id == null || id == "") {
-            throw new IllegalArgumentException();
-        }
-        hayStack.writePointForCcuUser(id, level, dVal, 0);
-        
-    }
-    
-    public static double getMaxCoolingDamperPos(String equipRef) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and config and max and damper and cooling and pos and equipRef == \""+equipRef+"\"");
-        
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("val") != null) {
-                    return Double.parseDouble(valMap.get("val").toString());
-                }
-            }
-        }
-        return 0;
-    }
-    
-    public static void setMaxCoolingDamperPos(String equipRef, double dVal, int level) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and config and max and damper and cooling and pos and equipRef == \""+equipRef+"\"");
-        
-        String id = cdb.get("id").toString();
-        if (id == null || id == "") {
-            throw new IllegalArgumentException();
-        }
-        hayStack.writePointForCcuUser(id, level, dVal, 0);
-        
-    }
-    
-    public static double getMinHeatingDamperPos(String equipRef) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and config and min and damper and heating and pos and equipRef == \""+equipRef+"\"");
-        
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("val") != null) {
-                    return Double.parseDouble(valMap.get("val").toString());
-                }
-            }
-        }
-        return 0;
-    }
-    
-    public static void setMinHeatingDamperPos(String equipRef, double dVal, int level) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and config and min and damper and heating and pos and equipRef == \""+equipRef+"\"");
-        
-        String id = cdb.get("id").toString();
-        if (id == null || id == "") {
-            throw new IllegalArgumentException();
-        }
-        hayStack.writePointForCcuUser(id, level, dVal, 0);
-        
-    }
-    
-    public static double getMaxHeatingDamperPos(String equipRef) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and config and max and damper and heating and pos and equipRef == \""+equipRef+"\"");
-        
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("val") != null) {
-                    return Double.parseDouble(valMap.get("val").toString());
-                }
-            }
-        }
-        return 0;
-    }
-    
-    public static void setMaxHeatingDamperPos(String equipRef, double dVal, int level) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and config and max and damper and heating and pos and equipRef == \""+equipRef+"\"");
-        
-        String id = cdb.get("id").toString();
-        if (id == null || id == "") {
-            throw new IllegalArgumentException();
-        }
-        hayStack.writePointForCcuUser(id, level, dVal, 0);
-        
+    /**
+     * Creates a hayStack query using point marker tags.
+     */
+    public static String getQueryString(Point tunerPoint) {
+        ArrayList<String> markersFiltered = tunerPoint.getMarkers();
+        HSUtil.removeGenericMarkerTags(markersFiltered);
+        return HSUtil.getQueryFromMarkers(markersFiltered);
     }
 }

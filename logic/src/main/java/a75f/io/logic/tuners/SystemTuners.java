@@ -29,7 +29,7 @@ public class SystemTuners {
                              .setTz(hayStack.getTimeZone())
                              .build();
         String pgainId = hayStack.addPoint(propGain);
-        BuildingTunerUtil.copyFromBuildingTuner(pgainId, getQueryString(propGain), hayStack);
+        BuildingTunerUtil.copyFromBuildingTuner(pgainId, TunerUtil.getQueryString(propGain), hayStack);
         hayStack.writeHisValById(pgainId, HSUtil.getPriorityVal(pgainId));
     
         Point integralGain = new Point.Builder()
@@ -43,7 +43,7 @@ public class SystemTuners {
                                  .setTz(hayStack.getTimeZone())
                                  .build();
         String igainId = hayStack.addPoint(integralGain);
-        BuildingTunerUtil.copyFromBuildingTuner(igainId, getQueryString(integralGain), hayStack);
+        BuildingTunerUtil.copyFromBuildingTuner(igainId, TunerUtil.getQueryString(integralGain), hayStack);
         hayStack.writeHisValById(igainId, HSUtil.getPriorityVal(igainId));
     
         Point propSpread = new Point.Builder()
@@ -57,7 +57,7 @@ public class SystemTuners {
                                .setTz(hayStack.getTimeZone())
                                .build();
         String pSpreadId = hayStack.addPoint(propSpread);
-        BuildingTunerUtil.copyFromBuildingTuner(pSpreadId, getQueryString(propSpread), hayStack);
+        BuildingTunerUtil.copyFromBuildingTuner(pSpreadId, TunerUtil.getQueryString(propSpread), hayStack);
         hayStack.writeHisValById(pSpreadId, HSUtil.getPriorityVal(pSpreadId));
     
         Point integralTimeout = new Point.Builder()
@@ -72,16 +72,7 @@ public class SystemTuners {
                                     .setTz(hayStack.getTimeZone())
                                     .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
-        BuildingTunerUtil.copyFromBuildingTuner(iTimeoutId, getQueryString(integralTimeout), hayStack);
+        BuildingTunerUtil.copyFromBuildingTuner(iTimeoutId, TunerUtil.getQueryString(integralTimeout), hayStack);
         hayStack.writeHisValById(iTimeoutId, HSUtil.getPriorityVal(iTimeoutId));
-    }
-    
-    /**
-     * Creates a hayStack query using point marker tags.
-     */
-    private static String getQueryString(Point tunerPoint) {
-        ArrayList<String> markersFiltered = tunerPoint.getMarkers();
-        HSUtil.removeGenericMarkerTags(markersFiltered);
-        return HSUtil.getQueryFromMarkers(markersFiltered);
     }
 }

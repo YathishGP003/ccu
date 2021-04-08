@@ -24,10 +24,12 @@ public class TunerUpgrades {
      */
     public static void handleTunerUpgrades(CCUHsApi hayStack) {
         upgradeReheatZoneToDATMinDifferential(hayStack);
+        upgradeDcwbBuildingTuners(hayStack);
     }
     
     /**
      * Takes care of upgrades for vav specific tuner reheatZoneToDATMinDifferential
+     * All the builds upto 1.556 needs this migration
      */
     private static void upgradeReheatZoneToDATMinDifferential(CCUHsApi hayStack) {
     
@@ -65,5 +67,23 @@ public class TunerUpgrades {
             BuildingTunerUtil.updateTunerLevels(reheatZoneToDATMinDifferentialId, vavEquip.getRoomRef(), hayStack);
             hayStack.writeHisValById(reheatZoneToDATMinDifferentialId, HSUtil.getPriorityVal(reheatZoneToDATMinDifferentialId));
         });
+    }
+    
+    /**
+     * Takes care of upgrades for DCWB specific tuners
+     */
+    private static void upgradeDcwbBuildingTuners(CCUHsApi hayStack) {
+        ArrayList<HashMap> rdcwbTuners = hayStack.readAll("point and tuner and dcwb");
+        if (rdcwbTuners.size() > 0) {
+            CcuLog.e(L.TAG_CCU_TUNER, "dcwbTuners exist");
+            return;
+        }
+    
+        CcuLog.e(L.TAG_CCU_TUNER, "create dcwbTuners ");
+        //Create the tuner points on building tuner equip.
+        HashMap buildTuner = hayStack.read("equip and tuner");
+        Equip tunerEquip = new Equip.Builder().setHashMap(buildTuner).build();
+        DcwbTuners.addDefaultDcwbTuners(hayStack, tunerEquip.getSiteRef(), tunerEquip.getId(),
+                                        tunerEquip.getDisplayName(), tunerEquip.getTz());
     }
 }

@@ -5,6 +5,7 @@ import android.util.Log;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -25,7 +26,7 @@ public class DcwbTuners {
                              .setSiteRef(siteRef)
                              .setEquipRef(equipRef).setHisInterpolate("cov")
                              .addMarker("tuner").addMarker("default").addMarker("dcwb").addMarker("writable").addMarker("his")
-                             .addMarker("pgain").addMarker("sp")
+                             .addMarker("pgain").addMarker("sp").addMarker("chilled").addMarker("water")
                              .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                              .setTz(tz)
                              .build();
@@ -39,7 +40,7 @@ public class DcwbTuners {
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipRef).setHisInterpolate("cov")
                                  .addMarker("tuner").addMarker("default").addMarker("dcwb").addMarker("writable").addMarker("his")
-                                 .addMarker("igain").addMarker("sp")
+                                 .addMarker("igain").addMarker("sp").addMarker("chilled").addMarker("water")
                                  .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                  .setTz(tz)
                                  .build();
@@ -53,7 +54,7 @@ public class DcwbTuners {
                                .setSiteRef(siteRef)
                                .setEquipRef(equipRef).setHisInterpolate("cov")
                                .addMarker("tuner").addMarker("default").addMarker("dcwb").addMarker("writable").addMarker("his")
-                               .addMarker("pspread").addMarker("sp")
+                               .addMarker("pspread").addMarker("sp").addMarker("chilled").addMarker("water")
                                .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                .setTz(tz)
                                .build();
@@ -66,7 +67,7 @@ public class DcwbTuners {
                                     .setSiteRef(siteRef)
                                     .setEquipRef(equipRef).setHisInterpolate("cov")
                                     .addMarker("tuner").addMarker("default").addMarker("dcwb").addMarker("writable").addMarker("his")
-                                    .addMarker("itimeout").addMarker("sp")
+                                    .addMarker("itimeout").addMarker("sp").addMarker("chilled").addMarker("water")
                                     .setUnit("m")
                                     .setMinVal("1").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                     .setTz(tz)
@@ -80,7 +81,8 @@ public class DcwbTuners {
                                     .setSiteRef(siteRef)
                                     .setEquipRef(equipRef).setHisInterpolate("cov")
                                     .addMarker("tuner").addMarker("default").addMarker("dcwb").addMarker("writable").addMarker("his")
-                                    .addMarker("itimeout").addMarker("sp")
+                                    .addMarker("sp").addMarker("chilled").addMarker("water")
+                                    .addMarker("adaptive").addMarker("comfort").addMarker("threshold").addMarker("margin")
                                     .setUnit("m")
                                     .setMinVal("1").setMaxVal("15").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                     .setTz(tz)
@@ -91,9 +93,76 @@ public class DcwbTuners {
         hayStack.writeHisValById(adaptiveComfortThresholdMarginId, TunerConstants.ADAPTIVE_COMFORT_THRESHOLD_MARGIN);
     }
     
-    public static void addEquipDabTuners(CCUHsApi hayStack, String siteRef, String equipdis, String equipref,
-                                         String roomRef, String floorRef, String tz) {
-        Log.d("CCU", "addEquipDabTuners for " + equipdis);
-        
+    public static void addEquipDcwbTuners(CCUHsApi hayStack, String siteRef, String equipDis, String equipRef,
+                                        String tz) {
+        Log.d("CCU", "addEquipDcwbTuners for " + equipDis);
+    
+        Point chilledWaterProportionalKFactor  = new Point.Builder()
+                                                     .setDisplayName(equipDis+"-DCWB-"+"chilledWaterProportionalKFactor  ")
+                                                     .setSiteRef(siteRef)
+                                                     .setEquipRef(equipRef).setHisInterpolate("cov")
+                                                     .addMarker("tuner").addMarker("dcwb").addMarker("writable").addMarker("his")
+                                                     .addMarker("pgain").addMarker("sp").addMarker("chilled").addMarker("water")
+                                                     .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                                     .setTz(tz)
+                                                     .build();
+        String pgainId = hayStack.addPoint(chilledWaterProportionalKFactor);
+        BuildingTunerUtil.copyFromBuildingTuner(pgainId, TunerUtil.getQueryString(chilledWaterProportionalKFactor), hayStack);
+        hayStack.writeHisValById(pgainId, HSUtil.getPriorityVal(pgainId));
+    
+        Point chilledWaterIntegralKFactor = new Point.Builder()
+                                                .setDisplayName(equipDis+"-DCWB-"+"chilledWaterIntegralKFactor ")
+                                                .setSiteRef(siteRef)
+                                                .setEquipRef(equipRef).setHisInterpolate("cov")
+                                                .addMarker("tuner").addMarker("dcwb").addMarker("writable").addMarker("his")
+                                                .addMarker("igain").addMarker("sp").addMarker("chilled").addMarker("water")
+                                                .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                                .setTz(tz)
+                                                .build();
+        String igainId = hayStack.addPoint(chilledWaterIntegralKFactor);
+        BuildingTunerUtil.copyFromBuildingTuner(igainId, TunerUtil.getQueryString(chilledWaterIntegralKFactor), hayStack);
+        hayStack.writeHisValById(igainId, HSUtil.getPriorityVal(igainId));
+    
+        Point chilledWaterTemperatureProportionalRange = new Point.Builder()
+                                                             .setDisplayName(equipDis+"-DCWB-"+"chilledWaterTemperatureProportionalRange ")
+                                                             .setSiteRef(siteRef)
+                                                             .setEquipRef(equipRef).setHisInterpolate("cov")
+                                                             .addMarker("tuner").addMarker("dcwb").addMarker("writable").addMarker("his")
+                                                             .addMarker("pspread").addMarker("sp").addMarker("chilled").addMarker("water")
+                                                             .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                                             .setTz(tz)
+                                                             .build();
+        String pSpreadId = hayStack.addPoint(chilledWaterTemperatureProportionalRange);
+        BuildingTunerUtil.copyFromBuildingTuner(pSpreadId, TunerUtil.getQueryString(chilledWaterTemperatureProportionalRange), hayStack);
+        hayStack.writeHisValById(pSpreadId, HSUtil.getPriorityVal(pSpreadId));
+    
+        Point integralTimeout = new Point.Builder()
+                                    .setDisplayName(equipDis+"-DCWB-"+"temperatureIntegralTime ")
+                                    .setSiteRef(siteRef)
+                                    .setEquipRef(equipRef).setHisInterpolate("cov")
+                                    .addMarker("tuner").addMarker("dcwb").addMarker("writable").addMarker("his")
+                                    .addMarker("itimeout").addMarker("sp").addMarker("chilled").addMarker("water")
+                                    .setUnit("m")
+                                    .setMinVal("1").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                    .setTz(tz)
+                                    .build();
+        String iTimeoutId = hayStack.addPoint(integralTimeout);
+        BuildingTunerUtil.copyFromBuildingTuner(iTimeoutId, TunerUtil.getQueryString(integralTimeout), hayStack);
+        hayStack.writeHisValById(iTimeoutId, HSUtil.getPriorityVal(iTimeoutId));
+    
+        Point adaptiveComfortThresholdMargin = new Point.Builder()
+                                                   .setDisplayName(equipDis+"-DCWB-"+"adaptiveComfortThresholdMargin ")
+                                                   .setSiteRef(siteRef)
+                                                   .setEquipRef(equipRef).setHisInterpolate("cov")
+                                                   .addMarker("tuner").addMarker("dcwb").addMarker("writable").addMarker("his")
+                                                   .addMarker("adaptive").addMarker("comfort").addMarker("threshold").addMarker("margin")
+                                                   .addMarker("sp").addMarker("chilled").addMarker("water")
+                                                   .setUnit("m")
+                                                   .setMinVal("1").setMaxVal("15").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                                   .setTz(tz)
+                                                   .build();
+        String adaptiveComfortThresholdMarginId = hayStack.addPoint(adaptiveComfortThresholdMargin);
+        BuildingTunerUtil.copyFromBuildingTuner(adaptiveComfortThresholdMarginId, TunerUtil.getQueryString(adaptiveComfortThresholdMargin), hayStack);
+        hayStack.writeHisValById(adaptiveComfortThresholdMarginId, HSUtil.getPriorityVal(adaptiveComfortThresholdMarginId));
     }
 }

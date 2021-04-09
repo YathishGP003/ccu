@@ -145,11 +145,11 @@ public class DcwbProfileUtil {
                                            .addMarker("system").addMarker("config")
                                            .addMarker("chilled").addMarker("water").addMarker("max")
                                            .addMarker("flow").addMarker("rate").addMarker("writable").addMarker("sp")
-                                           .setMinVal("0").setMaxVal("100").setIncrementVal("1").setTz(equip.getTz())
+                                           .setMinVal("0").setMaxVal("200").setIncrementVal("10").setTz(equip.getTz())
                                            .setUnit("gpm")
                                            .build();
         String chilledWaterMaxFlowRateId = hayStack.addPoint(chilledWaterMaxFlowRate);
-        hayStack.writeDefaultValById(chilledWaterMaxFlowRateId, 100.0 );
+        hayStack.writeDefaultValById(chilledWaterMaxFlowRateId, 00.0 );
         
     }
     

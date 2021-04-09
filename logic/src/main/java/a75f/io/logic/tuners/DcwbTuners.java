@@ -55,12 +55,12 @@ public class DcwbTuners {
                                .setEquipRef(equipRef).setHisInterpolate("cov")
                                .addMarker("tuner").addMarker("default").addMarker("dcwb").addMarker("writable").addMarker("his")
                                .addMarker("pspread").addMarker("sp").addMarker("chilled").addMarker("water")
-                               .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                               .setMinVal("1").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                .setTz(tz)
                                .build();
         String pSpreadId = hayStack.addPoint(chilledWaterTemperatureProportionalRange);
         hayStack.writePointForCcuUser(pSpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_PROPORTIONAL_SPREAD, 0);
-        hayStack.writeHisValById(pSpreadId, TunerConstants.VAV_PROPORTIONAL_SPREAD);
+        hayStack.writeHisValById(pSpreadId, TunerConstants.CHILLED_WATER_TEMP_PROPORTION_SPREAD);
     
         Point integralTimeout = new Point.Builder()
                                     .setDisplayName(equipDis+"-DCWB-"+"temperatureIntegralTime ")
@@ -129,7 +129,7 @@ public class DcwbTuners {
                                                              .setEquipRef(equipRef).setHisInterpolate("cov")
                                                              .addMarker("tuner").addMarker("dcwb").addMarker("writable").addMarker("his")
                                                              .addMarker("pspread").addMarker("sp").addMarker("chilled").addMarker("water")
-                                                             .setMinVal("0").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
+                                                             .setMinVal("1").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                                              .setTz(tz)
                                                              .build();
         String pSpreadId = hayStack.addPoint(chilledWaterTemperatureProportionalRange);

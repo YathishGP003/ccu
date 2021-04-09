@@ -158,7 +158,7 @@ public class DcwbProfileUtil {
                                             .setDisplayName(equip.getDisplayName()+"-"+"systemDCWBValveLoopOutput")
                                             .setSiteRef(equip.getSiteRef())
                                             .setEquipRef(equip.getId())
-                                            .addMarker("system").addMarker("config")
+                                            .addMarker("system").addMarker("dcwb")
                                             .addMarker("valve").addMarker("loop").addMarker("output")
                                             .addMarker("his").addMarker("sp")
                                             .setTz(equip.getTz())
@@ -171,7 +171,7 @@ public class DcwbProfileUtil {
                                               .setDisplayName(equip.getDisplayName()+"-"+"chilledWaterDeltaTValveLoop ")
                                               .setSiteRef(equip.getSiteRef())
                                               .setEquipRef(equip.getId())
-                                              .addMarker("system").addMarker("config")
+                                              .addMarker("system").addMarker("dcwb")
                                               .addMarker("chilled").addMarker("water").addMarker("delta").addMarker("loop")
                                               .addMarker("his").addMarker("sp")
                                               .setTz(equip.getTz())
@@ -195,11 +195,12 @@ public class DcwbProfileUtil {
         deleteConfigPoint("chilled and water and target and delta", hayStack);
         deleteConfigPoint("chilled and water and exit and margin", hayStack);
         deleteConfigPoint("chilled and water and max and flow and rate", hayStack);
+        deleteConfigPoint("analog4 and loop and output and type", hayStack);
         
     }
     
     public static void deleteAnalog4LoopConfigPoints(String associationType, CCUHsApi hayStack) {
-        String deleteTag = associationType.contains("cooling") ? "co2" : "cooling";
+        String deleteTag = associationType.contains("cooling") ? "cooling" : "co2";
         deleteConfigPoint("analog4 and min and loop and "+deleteTag, hayStack);
         deleteConfigPoint("analog4 and max and loop and "+deleteTag, hayStack);
     }

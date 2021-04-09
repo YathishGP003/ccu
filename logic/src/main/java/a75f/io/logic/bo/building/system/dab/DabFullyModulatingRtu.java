@@ -875,21 +875,21 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             Equip systemEquip = new Equip.Builder().setHashMap(equipMap).build();
             switch (tags){
                 case Tags.ANALOG1:
-                    HashMap cmdCool = CCUHsApi.getInstance().read("point and system and cmd and chilled and water and" +
-                                                                  " valve");
+                    HashMap cmdCool = CCUHsApi.getInstance().read("point and system and cmd and valve");
                     if(cmdCool != null && cmdCool.size() > 0) {
                         if(val == 0.0) {
                             CCUHsApi.getInstance().deleteEntityTree(cmdCool.get("id").toString());
                         }
                     }else {
-                        Point coolingSignal = new Point.Builder()
+                        Point valveSignal = new Point.Builder()
                                                   .setDisplayName(systemEquip.getDisplayName() + "-" + "chwValveSignal")
                                                   .setSiteRef(systemEquip.getSiteRef())
                                                   .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
-                                                  .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("his").setUnit("%")
+                                                  .addMarker("system").addMarker("cmd").addMarker("valve")
+                                                  .addMarker("chilled").addMarker("water").addMarker("his").setUnit("%")
                                                   .setTz(systemEquip.getTz())
                                                   .build();
-                        String cmdCoolingPtId = CCUHsApi.getInstance().addPoint(coolingSignal);
+                        String cmdCoolingPtId = CCUHsApi.getInstance().addPoint(valveSignal);
                         CCUHsApi.getInstance().writeHisValById(cmdCoolingPtId,0.0);
                     }
                     break;
@@ -949,17 +949,27 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         CCUHsApi.getInstance().scheduleSync();
     }
     
+    /**
+     * Analog4 could be switched between CoolingLoop and CO2Loop.
+     * This method takes care of managing haystack entities when there is a change.
+     */
     public void updateDcwbAnalog4Mapping(double newLoopType) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         double loopType = hayStack.readDefaultVal("analog4 and loop and output and type");
         if (loopType == newLoopType) {
             return;
         }
-        deleteAnalog4LoopConfigPoints(loopType == 0 ? Tags.COOLING : Tags.CO2, CCUHsApi.getInstance());
+        CcuLog.i(L.TAG_CCU_SYSTEM, "updateDcwbAnalog4Mapping "+loopType+" -> "+newLoopType);
+        deleteAnalog4LoopConfigPoints(loopType == 0 ? Tags.COOLING : Tags.CO2, hayStack);
         HashMap equipMap = hayStack.read("equip and system");
         Equip systemEquip = new Equip.Builder().setHashMap(equipMap).build();
         createAnalog4LoopConfigPoints(newLoopType == 0 ? Tags.COOLING : Tags.CO2, systemEquip, hayStack);
+        hayStack.writeDefaultVal("analog4 and loop and output and type", newLoopType);
         CCUHsApi.getInstance().scheduleSync();
+    }
+    
+    public void invalidateAlgorithmLoop() {
+        dcwbAlgoHandler = null;
     }
     
     public boolean isDcwbEnabled() {

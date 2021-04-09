@@ -144,19 +144,9 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         prefs = new Prefs(getContext().getApplicationContext());
         if (L.ccu().systemProfile instanceof DabFullyModulatingRtu) {
             systemProfile = (DabFullyModulatingRtu) L.ccu().systemProfile;
-            ahuAnalog1Tb.setChecked(systemProfile.getConfigEnabled("analog1") > 0);
-            ahuAnalog2Tb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
-            ahuAnalog3Tb.setChecked(systemProfile.getConfigEnabled("analog3") > 0);
-            relay3Tb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
-            relay7Tb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
             boolean dcwbEnabled = systemProfile.isDcwbEnabled();
-            if (dcwbEnabled) {
-                ahuAnalog4Tb.setChecked(systemProfile.getConfigEnabled("analog4") > 0);
-                dcwbEnableToggle.setChecked(true);
-            }
             handleDabDwcbEnabled(dcwbEnabled);
             setupAnalogLimitSelectors();
-            
         } else {
             
             new AsyncTask<String, Void, Void>() {
@@ -189,6 +179,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         ahuAnalog1Tb.setOnCheckedChangeListener(this);
         ahuAnalog2Tb.setOnCheckedChangeListener(this);
         ahuAnalog3Tb.setOnCheckedChangeListener(this);
+        ahuAnalog4Tb.setOnCheckedChangeListener(this);
         relay3Tb.setOnCheckedChangeListener(this);
         relay7Tb.setOnCheckedChangeListener(this);
 
@@ -248,6 +239,21 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         
     }
     
+    /**
+     * Called from onViewCreated to initialize toggle buttons.
+     */
+    private void initializeToggleButtons(boolean dcwbEnabled) {
+        ahuAnalog1Tb.setChecked(systemProfile.getConfigEnabled("analog1") > 0);
+        ahuAnalog2Tb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
+        ahuAnalog3Tb.setChecked(systemProfile.getConfigEnabled("analog3") > 0);
+        relay3Tb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
+        relay7Tb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
+        
+        if (dcwbEnabled) {
+            ahuAnalog4Tb.setChecked(systemProfile.getConfigEnabled("analog4") > 0);
+            dcwbEnableToggle.setChecked(true);
+        }
+    }
     
     private void handleDabDwcbEnabled(boolean dcwbEnabled) {
         if (dcwbEnabled) {
@@ -265,6 +271,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             analog1Text.setText(getString(R.string.label_cooling));
             
         }
+        initializeToggleButtons(dcwbEnabled);
     }
 
     private void goTonext() {
@@ -361,16 +368,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
                 sendAnalogOutTestSignal();
             }
         });
-    
-        analog4Spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                setAnalog4LoopType(analog4Spinner.getSelectedItemPosition());
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-            }
-        });
+        
     }
     
     private ArrayAdapter<Double> getArrayAdapter(double start, double end, double increment) {
@@ -457,6 +455,18 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         analog4OutMaxCo2.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("analog4" +
                                                                                                       " and max")), false);
     
+        analog4Spinner.setSelection((int)systemProfile.getConfigVal("analog4 and loop and type"), false);
+    
+        analog4Spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                setAnalog4LoopType(analog4Spinner.getSelectedItemPosition());
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+        
         cwTargetDeltaTSpinner.setOnItemSelectedListener(this);
         cwMaxFlowRateSpinner.setOnItemSelectedListener(this);
         analog1InAtValveClosedSpinner.setOnItemSelectedListener(this);
@@ -593,6 +603,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             chilledWaterTargetDeltaT.setVisibility(View.GONE);
             chilledWaterTargetExitTemp.setVisibility(View.VISIBLE);
         }
+        systemProfile.invalidateAlgorithmLoop();
     }
     
     private void enableMaxExitWaterTempAlgorithm(boolean enabled) {
@@ -604,11 +615,12 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             chilledWaterTargetDeltaT.setVisibility(View.VISIBLE);
             chilledWaterTargetExitTemp.setVisibility(View.GONE);
         }
+        systemProfile.invalidateAlgorithmLoop();
     }
     
     //TODO - rxjava
     private void setAnalog4LoopType( double val) {
-        new Thread(() -> systemProfile.updateDcwbAnalog4Mapping(val));
+        new Thread(() -> systemProfile.updateDcwbAnalog4Mapping(val)).start();
     }
     
     private void setConfigBackground(String tags, double val) {

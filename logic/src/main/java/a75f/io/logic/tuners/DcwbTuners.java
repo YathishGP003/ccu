@@ -59,7 +59,7 @@ public class DcwbTuners {
                                .setTz(tz)
                                .build();
         String pSpreadId = hayStack.addPoint(chilledWaterTemperatureProportionalRange);
-        hayStack.writePointForCcuUser(pSpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.VAV_PROPORTIONAL_SPREAD, 0);
+        hayStack.writePointForCcuUser(pSpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, TunerConstants.CHILLED_WATER_TEMP_PROPORTION_SPREAD, 0);
         hayStack.writeHisValById(pSpreadId, TunerConstants.CHILLED_WATER_TEMP_PROPORTION_SPREAD);
     
         Point integralTimeout = new Point.Builder()

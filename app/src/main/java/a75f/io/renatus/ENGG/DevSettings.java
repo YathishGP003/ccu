@@ -77,6 +77,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     @BindView(R.id.btuProxyBtn) ToggleButton btuProxyBtn;
     @BindView(R.id.inletWaterTemp) Spinner inletWaterTemp;
     @BindView(R.id.outletWaterTemp) Spinner outletWaterTemp;
+    @BindView(R.id.cwFlowRate) Spinner cwFlowRate;
     @BindView(R.id.btuProxyLayout) LinearLayout btuProxyLayout;
     
     @BindView(R.id.imageCMSerial) ImageView cmSerial;
@@ -273,6 +274,9 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             case R.id.outletWaterTemp:
                 writePref("outlet_waterTemp", Integer.parseInt(outletWaterTemp.getSelectedItem().toString()));
                 break;
+            case R.id.cwFlowRate:
+                writePref("cw_FlowRate", Integer.parseInt(cwFlowRate.getSelectedItem().toString()));
+                break;
             
         }
     }
@@ -325,7 +329,11 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         outletWaterTemp.setOnItemSelectedListener(this);
         outletWaterTemp.setSelection(dataAdapter.getPosition(Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                                                                                  .getInt("outlet_waterTemp", 0)));
-        
+        cwFlowRate.setAdapter(dataAdapter);
+        cwFlowRate.setOnItemSelectedListener(this);
+        cwFlowRate.setSelection(dataAdapter.getPosition(Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                                                                    .getInt("cw_FlowRate", 0)));
+    
     }
                              
 }

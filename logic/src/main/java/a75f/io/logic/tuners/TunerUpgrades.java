@@ -73,7 +73,7 @@ public class TunerUpgrades {
      * Takes care of upgrades for DCWB specific tuners
      */
     private static void upgradeDcwbBuildingTuners(CCUHsApi hayStack) {
-        ArrayList<HashMap> rdcwbTuners = hayStack.readAll("point and tuner and dcwb");
+        ArrayList<HashMap> rdcwbTuners = hayStack.readAll("point and tuner and dcwb and default");
         if (rdcwbTuners.size() > 0) {
             CcuLog.e(L.TAG_CCU_TUNER, "dcwbTuners exist");
             return;

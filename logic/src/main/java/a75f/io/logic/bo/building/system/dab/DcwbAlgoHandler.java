@@ -29,7 +29,6 @@ class DcwbAlgoHandler {
         adaptiveDelta = isAdaptiveDelta;
         dcwbControlLoop = new ControlLoop();
         systemEquipRef = equipRef;
-        initializeTuners();
     }
     
     ControlLoop dcwbControlLoop;
@@ -51,7 +50,9 @@ class DcwbAlgoHandler {
     double adaptiveComfortThresholdMargin = TunerConstants.ADAPTIVE_COMFORT_THRESHOLD_MARGIN;
     
     /**
-     * Tuners are read once during algo-loop initialization.
+     * Initialize tuners.
+     * This needs to need to be called every time before the loop , otherwise a tuner update that was
+     * received via pubnub wont be picked till next app-restart.
      */
     private void initializeTuners() {
         proportionalGain = TunerUtil.readTunerValByQuery("dcwb and pgain", systemEquipRef);
@@ -70,7 +71,8 @@ class DcwbAlgoHandler {
      * Runs the appropriage DCWB algorithm and update system chilledWaterValveLoopOutput.
      */
     public void runLoopAlgorithm() {
-        
+    
+        initializeTuners();
         DcwbBtuMeterDao btuDao = DcwbBtuMeterDao.getInstance();
         
         if (btuDao.getCWMaxFlowRate(hayStack) < chilledWaterMaxFlowRate) {

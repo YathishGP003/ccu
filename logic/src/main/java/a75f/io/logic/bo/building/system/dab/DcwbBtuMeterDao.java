@@ -36,7 +36,7 @@ public class DcwbBtuMeterDao {
                                                                                       Context.MODE_PRIVATE)
                           .getInt("inlet_waterTemp", 0);
         }
-        HashMap<Object, Object> inletTempPoint = hayStack.read("point and btu and inlet and temp");
+        HashMap<Object, Object> inletTempPoint = hayStack.read("point and zone and btu and inlet and temp");
         
         if (inletTempPoint.isEmpty()) {
             return DEFAULT_INLET_TEMP;
@@ -58,7 +58,7 @@ public class DcwbBtuMeterDao {
                           .getInt("outlet_waterTemp", 0);
         }
     
-        HashMap<Object, Object> outletTempPoint = hayStack.read("point and btu and outlet and temp");
+        HashMap<Object, Object> outletTempPoint = hayStack.read("point and zone and btu and outlet and temp");
     
         if (outletTempPoint.isEmpty()) {
             return DEFAULT_OUTLET_TEMP;
@@ -80,7 +80,7 @@ public class DcwbBtuMeterDao {
                           .getInt("cw_FlowRate", 0);
         }
     
-        HashMap<Object, Object> outletTempPoint = hayStack.read("point and btu and actual and flow");
+        HashMap<Object, Object> outletTempPoint = hayStack.read("point and zone and btu and actual and flow");
     
         if (outletTempPoint.isEmpty()) {
             return 0;

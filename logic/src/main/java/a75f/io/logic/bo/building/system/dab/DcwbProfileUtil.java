@@ -149,7 +149,7 @@ public class DcwbProfileUtil {
                                            .setUnit("gpm")
                                            .build();
         String chilledWaterMaxFlowRateId = hayStack.addPoint(chilledWaterMaxFlowRate);
-        hayStack.writeDefaultValById(chilledWaterMaxFlowRateId, 00.0 );
+        hayStack.writeDefaultValById(chilledWaterMaxFlowRateId, 100.0 );
         
     }
     

@@ -10,6 +10,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import androidx.annotation.Nullable;
+import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
 import android.view.Display;
@@ -237,11 +238,13 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             if (b) {
                 AlertDialog.Builder btuConfigDialog = new AlertDialog.Builder(getActivity());
                 btuConfigDialog.setTitle(getString(R.string.label_configure_btu));
-                btuConfigDialog.setPositiveButton(getResources().getString(R.string.txt_proceed), (dialog, which) -> {
+                btuConfigDialog.setPositiveButton(HtmlCompat.fromHtml("<font color='#E24301'>PROCEED</font>",
+                                                                      HtmlCompat.FROM_HTML_MODE_LEGACY), (dialog, which) -> {
                     systemProfile.enableDcwb(CCUHsApi.getInstance());
                     handleDabDwcbEnabled(true);
                 });
-                btuConfigDialog.setNegativeButton(getResources().getString(R.string.txt_cancel_uppercase), (dialog, which) -> {
+                btuConfigDialog.setNegativeButton(HtmlCompat.fromHtml("<font color='#E24301'>CANCEL</font>",
+                                                                      HtmlCompat.FROM_HTML_MODE_LEGACY), (dialog, which) -> {
                     dcwbEnableToggle.setChecked(false);
                 });
                 btuConfigDialog.setIcon(android.R.drawable.ic_dialog_alert);

@@ -140,15 +140,20 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
             }
         });
 
-        List<EquipmentDevice> equipmentDeviceList = EquipsManager.getInstance().getAllEquipments();
-
-        List<EquipmentDevice> modbusBTUequipmentDeviceCollection = new ArrayList<>();
+        /**
+         * Check the profile type selected under system device
+         */
         if (profileType == ProfileType.MODBUS_BTU) {
-            for (int i = 0; i < equipmentDeviceList.size(); i++) {
-                if (equipmentDeviceList.get(i).getEquipType().equalsIgnoreCase("BTU_meter"))
-                    modbusBTUequipmentDeviceCollection.add(equipmentDeviceList.get(i));
-            }
-            equipmentDeviceCollection = modbusBTUequipmentDeviceCollection;
+            // Get all the device details
+            List<EquipmentDevice> equipmentDeviceList = EquipsManager.getInstance().getAllEquipments();
+                List<EquipmentDevice> modbusBTUequipmentDeviceCollection = new ArrayList<>();
+                for (int i = 0; i < equipmentDeviceList.size(); i++) {
+                    if (equipmentDeviceList.get(i).getEquipType().equalsIgnoreCase("BTU_meter")) {
+                        modbusBTUequipmentDeviceCollection.add(equipmentDeviceList.get(i));
+                    }
+                }
+                equipmentDeviceCollection = modbusBTUequipmentDeviceCollection;
+
         } else {
             equipmentDeviceCollection = EquipsManager.getInstance().getAllEquipments();
         }
@@ -223,7 +228,6 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         ArrayAdapter slaveAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_spinner_item, slaveAddress);
         slaveAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spAddress.setAdapter(slaveAdapter);
-        Log.d("Modbus", "updateUi=" + equipmentDevice.getName() + "," + equipmentDevice.getSlaveId());
         if (Objects.nonNull(equipmentDevice.getSlaveId()) && equipmentDevice.getSlaveId() > 0) {
             curSelectedSlaveId = (short) (equipmentDevice.getSlaveId() - 1);
             spAddress.setSelection(curSelectedSlaveId, false);
@@ -242,16 +246,12 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
             }
         });
 
-        Log.i("MODBUS_UI", "Registers:" + equipmentDevice.getRegisters());
         GridLayoutManager gridLayoutManager = null;
         LinearLayout.LayoutParams header1LayoutParams = (LinearLayout.LayoutParams) paramHeader1.getLayoutParams();
         LinearLayout.LayoutParams header2LayoutParams = (LinearLayout.LayoutParams) paramHeader2.getLayoutParams();
         List<Parameter> parameterList = new ArrayList<>();
         if (Objects.nonNull(equipmentDevice.getRegisters())) {
             for (Register registerTemp : equipmentDevice.getRegisters()) {
-                Log.i("MODBUS_UI", "Registers:" + registerTemp.getRegisterAddress());
-                Log.i("MODBUS_UI", "Parameters:" + registerTemp.getParameters().get(0).getName());
-                Log.i("MODBUS_UI", "size:" + registerTemp.getParameters().size());
                 if (registerTemp.getParameters() != null) {
                     for (Parameter parameterTemp : registerTemp.getParameters()) {
                         parameterTemp.setRegisterNumber(registerTemp.getRegisterNumber());
@@ -315,9 +315,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
 
     private void setUpsModbusProfile() {
 
-        Log.i("ModbusUI", "Data:" + recyclerModbusParamAdapter.modbusParam);
         String equipType = equipmentDevice.getEquipType();
-        Log.i("equipType", "setUpsModbusProfile: "+equipType);
         ModbusEquipTypes curEquipTypeSelected = ModbusEquipTypes.valueOf(equipType);
         String equipRef = null;
         curSelectedSlaveId = (short) (spAddress.getSelectedItemPosition() + 1);
@@ -498,7 +496,6 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
             this.energyDistributionAdapter = new EnergyDistributionAdapter(floorList, getContext(), this);
             floorListView.setLayoutManager(new LinearLayoutManager(getContext()));
             floorListView.setAdapter(energyDistributionAdapter);
-            equipmentDeviceCollection = EquipsManager.getInstance().getAllEquipments();
         }
 
     }

@@ -287,6 +287,13 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		tbCompHumidity.setEnabled(false);
 		tbDemandResponse.setEnabled(false);
 
+		/**
+		 * init Modbus BTU meter  views
+		 */
+		btuMeterParams = view.findViewById(R.id.btuMeterParams);
+		btuMeterModelDetails = view.findViewById(R.id.btuMeterModelDetails);
+		configBTUMeterDetails();
+
 		if (L.ccu().systemProfile instanceof DefaultSystem) {
 			systemModePicker.setEnabled(false);
 			sbComfortValue.setEnabled(false);
@@ -405,15 +412,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 		});
 		getActivity().registerReceiver(occupancyReceiver, new IntentFilter(ACTION_STATUS_CHANGE));
-
-
-		/**
-		 * init Modbus  views
-		 */
-		btuMeterParams = view.findViewById(R.id.btuMeterParams);
-		btuMeterModelDetails = view.findViewById(R.id.btuMeterModelDetails);
-		configBTUMeterDetails();
-
 
 	}
 

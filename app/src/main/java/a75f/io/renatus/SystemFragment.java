@@ -603,7 +603,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		if(modbusDevices!=null&&modbusDevices.size()>0){
 			EquipmentDevice  btuDevice=null;
 			for (int i = 0; i <modbusDevices.size() ; i++) {
-				if(modbusDevices.get(i).getEquipType().equals("BTU_meter")){
+				if(modbusDevices.get(i).getEquipType().equals("BTU")){
 					btuDevice = modbusDevices.get(i);
 				}
 			}

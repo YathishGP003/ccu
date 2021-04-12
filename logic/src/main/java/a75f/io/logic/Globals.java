@@ -415,7 +415,7 @@ public class Globals {
         /**
          * Get all the default BTU_Meter profile details
          */
-        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and btu_meter");
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and btu");
 
         for (HashMap m : equips)
         {

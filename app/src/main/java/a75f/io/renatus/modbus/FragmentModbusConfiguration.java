@@ -148,7 +148,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
             List<EquipmentDevice> equipmentDeviceList = EquipsManager.getInstance().getAllEquipments();
                 List<EquipmentDevice> modbusBTUequipmentDeviceCollection = new ArrayList<>();
                 for (int i = 0; i < equipmentDeviceList.size(); i++) {
-                    if (equipmentDeviceList.get(i).getEquipType().equalsIgnoreCase("BTU_meter")) {
+                    if (equipmentDeviceList.get(i).getEquipType().equalsIgnoreCase("BTU")) {
                         modbusBTUequipmentDeviceCollection.add(equipmentDeviceList.get(i));
                     }
                 }
@@ -427,7 +427,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                     equipRef = updateModbusProfile(curSelectedSlaveId);
                 break;
 
-            case BTU_meter:
+            case BTU:
                 CcuLog.d(L.TAG_CCU_UI, "Set modbus Config: MB Profiles - " + L.ccu().zoneProfiles.size() + "," + L.getProfile(curSelectedSlaveId) + "," + curSelectedSlaveId);
                 if (L.getProfile(curSelectedSlaveId) == null) {
                     modbusProfile.addMbEquip(curSelectedSlaveId, floorRef, zoneRef, equipmentDevice, recyclerModbusParamAdapter.modbusParam, ProfileType.MODBUS_BTU);

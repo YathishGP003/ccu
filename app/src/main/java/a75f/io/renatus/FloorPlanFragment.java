@@ -247,12 +247,8 @@ public class FloorPlanFragment extends Fragment
 
 
 	private Zone getSelectedZone()
-	{	try {
-		Log.i("test", "getSelectedZone:" + mRoomListAdapter.getSelectedPostion());
+	{
 		selectedZone = roomList.get(mRoomListAdapter.getSelectedPostion());
-	}catch (Exception e){
-		e.printStackTrace();
-	}
 		return selectedZone;
 	}
 
@@ -554,7 +550,7 @@ public class FloorPlanFragment extends Fragment
 	}
 
 	private boolean updateBTUMeterModule() {
-		ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and btu_meter");
+		ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and btu");
 		ArrayList<Equip> equipList = new ArrayList<>();
 		for (HashMap m : equips)
 		{

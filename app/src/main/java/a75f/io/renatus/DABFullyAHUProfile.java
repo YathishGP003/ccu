@@ -16,6 +16,7 @@ import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -111,6 +112,8 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
     @BindView(R.id.analog4OutMaxCo2) Spinner analog4OutMaxCo2;
     
     @BindView(R.id.analog4Spinner) Spinner analog4Spinner;
+    @BindView(R.id.analog4OutCooling) ViewGroup analog4OutConfigCooling;
+    @BindView(R.id.analog4OutCo2) ViewGroup analog4OutConfigCo2;
     
     Prefs prefs;
     @BindView(R.id.buttonNext)
@@ -118,6 +121,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
     String PROFILE = "DAB_FULLY_MODULATING";
     boolean isFromReg = false;
     DabFullyModulatingRtu systemProfile = null;
+    private boolean dcwbEnabled;
     
     public static DABFullyAHUProfile newInstance()
     {
@@ -186,17 +190,13 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
 
         if(isFromReg){
             mNext.setVisibility(View.VISIBLE);
-        }
-        else {
+        } else {
             mNext.setVisibility(View.GONE);
         }
 
-        mNext.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                goTonext();
-                mNext.setEnabled(false);
-            }
+        mNext.setOnClickListener(v -> {
+            goTonext();
+            mNext.setEnabled(false);
         });
 
         if (getResources().getDisplayMetrics().xdpi == (float)149.824){
@@ -226,23 +226,43 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             }
         });
     
+        configureDcwbEnableButton();
+        
+    }
+    
+    private void configureDcwbEnableButton() {
+        
         dcwbEnableToggle.setOnCheckedChangeListener((compoundButton, b) -> {
             //TODO- Use a foreground progress bar to avoid user clicking this toggle too soon.
             if (b) {
-                systemProfile.enableDcwb(CCUHsApi.getInstance());
+                AlertDialog.Builder btuConfigDialog = new AlertDialog.Builder(getActivity());
+                btuConfigDialog.setTitle(getString(R.string.label_configure_btu));
+                btuConfigDialog.setPositiveButton(getResources().getString(R.string.txt_proceed), (dialog, which) -> {
+                    systemProfile.enableDcwb(CCUHsApi.getInstance());
+                    handleDabDwcbEnabled(true);
+                });
+                btuConfigDialog.setNegativeButton(getResources().getString(R.string.txt_cancel_uppercase), (dialog, which) -> {
+                    dcwbEnableToggle.setChecked(false);
+                });
+                btuConfigDialog.setIcon(android.R.drawable.ic_dialog_alert);
+                btuConfigDialog.setCancelable(false);
+                btuConfigDialog.show();
             } else {
+                if (!systemProfile.isDcwbEnabled()) {
+                    return;
+                }
                 systemProfile.disableDcwb(CCUHsApi.getInstance());
+                handleDabDwcbEnabled(false);
             }
-            setConfigBackground("dcwb and enabled",b ? 1 : 0);
-            handleDabDwcbEnabled(b);
-        });
         
+        });
     }
     
     /**
      * Called from onViewCreated to initialize toggle buttons.
      */
     private void initializeToggleButtons(boolean dcwbEnabled) {
+        this.dcwbEnabled = dcwbEnabled;
         ahuAnalog1Tb.setChecked(systemProfile.getConfigEnabled("analog1") > 0);
         ahuAnalog2Tb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
         ahuAnalog3Tb.setChecked(systemProfile.getConfigEnabled("analog3") > 0);
@@ -255,6 +275,10 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         }
     }
     
+    /**
+     * Handle UI updates when DCWB is enabled/disabled.
+     * @param dcwbEnabled
+     */
     private void handleDabDwcbEnabled(boolean dcwbEnabled) {
         if (dcwbEnabled) {
             dcwbLayout.setVisibility(View.VISIBLE);
@@ -263,6 +287,8 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             analog4View.setVisibility(View.VISIBLE);
             analog1Text.setText(getString(R.string.label_analog1_dcwb));
             initializeDcwbSpinners();
+            double loopType = systemProfile.getConfigVal("analog4 and loop and type");
+            updateAnalog4ConfigUI(loopType);
         } else {
             dcwbLayout.setVisibility(View.GONE);
             dabLayout.setVisibility(View.VISIBLE);
@@ -272,6 +298,21 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             
         }
         initializeToggleButtons(dcwbEnabled);
+    }
+    
+    /**
+     * Change analog4Type visibility based on the loopType chosen.
+     * When analog4 is not enabled , show Cooling config.
+     */
+    private void updateAnalog4ConfigUI(double loopType) {
+        CcuLog.d("CCU_UI", "loopType "+loopType);
+        if (loopType > 0) {
+            analog4OutConfigCooling.setVisibility(View.GONE);
+            analog4OutConfigCo2.setVisibility(View.VISIBLE);
+        } else {
+            analog4OutConfigCooling.setVisibility(View.VISIBLE);
+            analog4OutConfigCo2.setVisibility(View.GONE);
+        }
     }
 
     private void goTonext() {
@@ -283,13 +324,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
     }
     
     private void setupAnalogLimitSelectors() {
-        ArrayList<Integer> analogArray = new ArrayList<>();
-        for (int a = 0; a <= 10; a++)
-        {
-            analogArray.add(a);
-        }
-        ArrayAdapter<Integer> analogAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, analogArray);
-        analogAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<Integer> analogAdapter = getIntegerArrayAdapter(0 , 10, 1);
         
         analog1Min.setAdapter(analogAdapter);
         analog1Min.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("cooling and min")), false);
@@ -371,12 +406,22 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         
     }
     
-    private ArrayAdapter<Double> getArrayAdapter(double start, double end, double increment) {
-        ArrayList<Double> zoroToHundred = new ArrayList<>();
-        for (double val = start;  val <= end; val += increment) {
-            zoroToHundred.add(val);
+    private ArrayAdapter<Integer> getIntegerArrayAdapter(int start, int end, int increment) {
+        ArrayList<Integer> list = new ArrayList<>();
+        for (int val = start;  val <= end; val += increment) {
+            list.add(val);
         }
-        ArrayAdapter<Double> adapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
+        ArrayAdapter<Integer> adapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, list);
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        return adapter;
+    }
+    
+    private ArrayAdapter<Double> getArrayAdapter(double start, double end, double increment) {
+        ArrayList<Double> list = new ArrayList<>();
+        for (double val = start;  val <= end; val += increment) {
+            list.add(val);
+        }
+        ArrayAdapter<Double> adapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, list);
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         return adapter;
     }
@@ -386,16 +431,9 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
      * Otherwise gets called when dcwb toggle button is enabled.
      */
     private void initializeDcwbSpinners() {
-        
-        ArrayList<Integer> analogVoltageArray = new ArrayList<>();
-        for (int analogVal = 0; analogVal <= 10; analogVal++) {
-            analogVoltageArray.add(analogVal);
-        }
-        ArrayAdapter<Integer> analogAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item,
-                                                                 analogVoltageArray);
-        analogAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
     
-        
+        ArrayAdapter<Integer> analogAdapter = getIntegerArrayAdapter(0 , 10, 1);
+    
         adaptiveDeltaEnable.setChecked(systemProfile.getConfigVal("adaptive and delta and enabled") > 0);
         maxExitWaterTemp.setChecked(systemProfile.getConfigVal("maximized and exit and temp and enabled") > 0);
     
@@ -459,14 +497,22 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
     
         analog4Spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                setAnalog4LoopType(analog4Spinner.getSelectedItemPosition());
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                setAnalog4LoopType(position);
+                updateAnalog4ConfigUI(position);
             }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
+        configureDcwbListeners();
         
+    }
+    
+    /**
+     * Set all the DCWB specific listeners.
+     */
+    private void configureDcwbListeners() {
         cwTargetDeltaTSpinner.setOnItemSelectedListener(this);
         cwMaxFlowRateSpinner.setOnItemSelectedListener(this);
         analog1InAtValveClosedSpinner.setOnItemSelectedListener(this);

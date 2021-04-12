@@ -441,6 +441,7 @@
     <string name="label_analog_out4_at_min_co2">Analog-out 4 at Min CO2 </string>
     <string name="label_analog_out4_at_max_co2">Analog-out 4 at Max CO2 </string>
 
+    <string name="label_configure_btu">Please Configure the BTU meter\'s \nModbus parameters.</string>
     <string-array name="dcwb_analog4_options">
         <item>  Cooling Loop </item>
         <item>  CO2 Loop </item>
@@ -776,7 +777,7 @@
     <string name="txt_itm_hia">ITM-HIA</string>
     <string name="txt_itm_lpi">ITM-LPI</string>
     <string name="txt_modbus_config">Modbus Config</string>
-
+    <string name="txt_cancel_uppercase">CANCEL</string>
     <string name="toast_msg_permission_denial">"All the required permissions are not granted. CCU may not work as
         expected.\nYou may grant missing permissions to Renatus app from System Settings"</string>
 

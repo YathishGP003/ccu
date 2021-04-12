@@ -14,6 +14,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
+import a75f.io.logic.tuners.DcwbTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -49,6 +50,9 @@ class DcwbAlgoHandler {
     
     double adaptiveComfortThresholdMargin = TunerConstants.ADAPTIVE_COMFORT_THRESHOLD_MARGIN;
     
+    /**
+     * Tuners are read once during algo-loop initialization.
+     */
     private void initializeTuners() {
         proportionalGain = TunerUtil.readTunerValByQuery("dcwb and pgain", systemEquipRef);
         integralGain = TunerUtil.readTunerValByQuery("dcwb and igain", systemEquipRef);
@@ -62,20 +66,18 @@ class DcwbAlgoHandler {
         chilledWaterMaxFlowRate = getChilledWaterConfig("max and flow and rate", hayStack);
     }
     
-    private double getChilledWaterConfig(String tags, CCUHsApi hayStack) {
-        HashMap chilledWaterConfig = hayStack.read("point and system and config and chilled and water and " + tags);
-        if(!chilledWaterConfig.isEmpty()) {
-            return hayStack.readPointPriorityVal(chilledWaterConfig.get("id").toString());
-        }
-        return 0;
-    }
-    
+    /**
+     * Runs the appropriage DCWB algorithm and update system chilledWaterValveLoopOutput.
+     */
     public void runLoopAlgorithm() {
         
-        if (getCWMaxFlowRate() < chilledWaterMaxFlowRate) {
-            chilledWaterValveLoopOutput =
-                adaptiveDelta ? AdaptiveDeltaTControl.Algo.getChilledWaterAdaptiveDeltaTValveLoop(getAdaptiveDeltaDto())
-                    : MaximizedDeltaTControl.Algo.getChilledWaterMaximizedDeltaTValveLoop(getMaximizedDeltaTDto());
+        DcwbBtuMeterDao btuDao = DcwbBtuMeterDao.getInstance();
+        
+        if (btuDao.getCWMaxFlowRate(hayStack) < chilledWaterMaxFlowRate) {
+            chilledWaterValveLoopOutput = adaptiveDelta ? AdaptiveDeltaTControl.Algo
+                                                    .getChilledWaterAdaptiveDeltaTValveLoop(getAdaptiveDeltaDto(btuDao))
+                                            : MaximizedDeltaTControl.Algo
+                                                    .getChilledWaterMaximizedDeltaTValveLoop(getMaximizedDeltaTDto(btuDao));
         } else {
             chilledWaterValveLoopOutput = hayStack.readHisValByQuery("dcwb and valve and loop and output");
         }
@@ -87,8 +89,8 @@ class DcwbAlgoHandler {
         return chilledWaterValveLoopOutput;
     }
     
-    private AdaptiveDeltaTDto getAdaptiveDeltaDto() {
-        double inletWaterTemp = getInletWaterTemperature();
+    private AdaptiveDeltaTDto getAdaptiveDeltaDto(DcwbBtuMeterDao btuDao) {
+        double inletWaterTemp = btuDao.getInletWaterTemperature(hayStack);
         double averageCoolingDesiredTemp = SystemTemperatureUtil.getAverageCoolingDesiredTemp();
         return new AdaptiveDeltaTDto(inletWaterTemp,
                                  chilledWaterTargetDelta,
@@ -97,8 +99,8 @@ class DcwbAlgoHandler {
                                  dcwbControlLoop);
     }
     
-    private MaximizedDeltaTDto getMaximizedDeltaTDto() {
-        double outletWaterTemp = getOutletWaterTemperature();
+    private MaximizedDeltaTDto getMaximizedDeltaTDto(DcwbBtuMeterDao btuDao) {
+        double outletWaterTemp = btuDao.getOutletWaterTemperature(hayStack);
         double averageCoolingDesiredTemp = SystemTemperatureUtil.getAverageCoolingDesiredTemp();
         return new MaximizedDeltaTDto(outletWaterTemp,
                                       averageCoolingDesiredTemp,
@@ -106,36 +108,12 @@ class DcwbAlgoHandler {
                                      dcwbControlLoop);
     }
     
-    private double getInletWaterTemperature() {
-        if (Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                   .getBoolean("btu_proxy", false)) {
-            return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting",
-                                                                                      Context.MODE_PRIVATE)
-                   .getInt("inlet_waterTemp", 0);
+    private double getChilledWaterConfig(String tags, CCUHsApi hayStack) {
+        HashMap chilledWaterConfig = hayStack.read("point and system and config and chilled and water and " + tags);
+        if(!chilledWaterConfig.isEmpty()) {
+            return hayStack.readPointPriorityVal(chilledWaterConfig.get("id").toString());
         }
-        
-        return 44;
+        return 0;
     }
     
-    private double getOutletWaterTemperature() {
-        if (Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                   .getBoolean("btu_proxy", false)) {
-            return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting",
-                                                                                      Context.MODE_PRIVATE)
-                          .getInt("outlet_waterTemp", 0);
-        }
-        
-        return 55;
-    }
-    
-    private double getCWMaxFlowRate() {
-        if (Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                   .getBoolean("btu_proxy", false)) {
-            return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting",
-                                                                                      Context.MODE_PRIVATE)
-                          .getInt("cw_FlowRate", 0);
-        }
-        
-        return 100;
-    }
 }

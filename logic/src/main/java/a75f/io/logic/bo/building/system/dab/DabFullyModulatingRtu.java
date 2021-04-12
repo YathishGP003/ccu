@@ -924,6 +924,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
      * Creates all the necessary config/loop/output points for DCWB.
      */
     public void enableDcwb(CCUHsApi hayStack) {
+        setConfigVal("dcwb and enabled",1);
         //Remove analog1 Command points
         setConfigEnabled(Tags.ANALOG1, 0);
         HashMap equipMap = hayStack.read("equip and system");
@@ -940,6 +941,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
      * Deletes all the necessary config/loop/output points for DCWB.
      */
     public void disableDcwb(CCUHsApi hayStack) {
+        setConfigVal("dcwb and enabled",0);
         setDcwbConfigEnabled(Tags.ANALOG1, 0);
         setDcwbConfigEnabled(Tags.ANALOG4, 0);
         deleteConfigPoints(hayStack);

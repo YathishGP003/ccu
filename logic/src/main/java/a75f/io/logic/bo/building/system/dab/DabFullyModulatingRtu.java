@@ -970,6 +970,9 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         CCUHsApi.getInstance().scheduleSync();
     }
     
+    /**
+     * Used to reinitialize the algorithm loop variables when config changes.
+     */
     public void invalidateAlgorithmLoop() {
         dcwbAlgoHandler = null;
     }

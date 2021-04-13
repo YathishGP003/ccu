@@ -27,7 +27,7 @@
               "tagName": "inlet"
             },
             {
-              "tagName": "temperature"
+              "tagName": "temp"
             },
             {
               "tagName": "t1"
@@ -71,7 +71,7 @@
               "tagName": "outlet"
             },
             {
-              "tagName": "temperature"
+              "tagName": "temp"
             },
             {
               "tagName": "t2"

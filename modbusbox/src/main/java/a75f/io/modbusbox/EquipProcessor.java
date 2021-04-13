@@ -24,6 +24,7 @@ public class EquipProcessor
     private BoxStore boxStore;
     private Box<EquipmentDevice> modbusBox;
     ObjectMapper objectMapper;
+    ArrayList<EquipmentDevice> energyMeterSystemDevices;
 
     EquipProcessor(Context c) {
         mContext = c;
@@ -41,7 +42,13 @@ public class EquipProcessor
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
         equipmentDevices = parser.parseAllEquips(c);
+
+        energyMeterSystemDevices = parser.parseEneryMeterSystemEquips(c);
+
         for(EquipmentDevice equipmentDevice:equipmentDevices){
+            addEquips(equipmentDevice);
+        }
+        for(EquipmentDevice equipmentDevice:energyMeterSystemDevices){
             addEquips(equipmentDevice);
         }
     }
@@ -50,6 +57,13 @@ public class EquipProcessor
         if (getMbEquip(equipmentDevice.getModbusEquipIdId()) == null) {
             modbusBox.put(equipmentDevice);
         }
+    }
+
+    public List<EquipmentDevice> getAllEMSysEquips(){
+        QueryBuilder<EquipmentDevice> mbQuery = modbusBox.query();
+        mbQuery.equal(EquipmentDevice_.equipType,"EMR");
+        mbQuery.equal(EquipmentDevice_.isPaired,false);
+        return mbQuery.build().find();
     }
 
     public List<EquipmentDevice> getAllEquips(){

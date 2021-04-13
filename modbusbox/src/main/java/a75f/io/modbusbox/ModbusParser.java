@@ -75,4 +75,19 @@ public class ModbusParser {
         }
         return jsonObjects;
     }
+
+    public ArrayList<EquipmentDevice> parseEneryMeterSystemEquips(Context c) {
+        ArrayList<EquipmentDevice> assetEquipments = new ArrayList<>();
+        try {
+            String[] fileList = c.getAssets().list("modbus-em-system");
+            for (String filename : fileList) {
+                String equipJson = readFileFromAssets(c, "modbus-em-system/" + filename);
+                assetEquipments.add(parseModbusDataFromString(equipJson));
+            }
+        } catch (IOException e) {
+            Log.e("MODBUS PARSER","File path does not exist");
+            e.printStackTrace();
+        }
+        return assetEquipments;
+    }
 }

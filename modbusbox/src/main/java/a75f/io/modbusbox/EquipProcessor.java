@@ -24,6 +24,7 @@ public class EquipProcessor
     private BoxStore boxStore;
     private Box<EquipmentDevice> modbusBox;
     ObjectMapper objectMapper;
+    ArrayList<EquipmentDevice> energyMeterSystemDevices;
 
     EquipProcessor(Context c) {
         mContext = c;
@@ -41,6 +42,8 @@ public class EquipProcessor
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
         equipmentDevices = parser.parseAllEquips(c);
+
+        energyMeterSystemDevices = parser.parseEneryMeterSystemEquips(c);
         for(EquipmentDevice equipmentDevice:equipmentDevices){
             addEquips(equipmentDevice);
         }
@@ -50,6 +53,10 @@ public class EquipProcessor
         if (getMbEquip(equipmentDevice.getModbusEquipIdId()) == null) {
             modbusBox.put(equipmentDevice);
         }
+    }
+
+    public List<EquipmentDevice> getAllEMSysEquips(){
+        return energyMeterSystemDevices;
     }
 
     public List<EquipmentDevice> getAllEquips(){

@@ -75,4 +75,20 @@ public class ModbusParser {
         }
         return jsonObjects;
     }
+
+    public ArrayList<EquipmentDevice> parseEneryMeterSystemEquips(Context c) {
+        ArrayList<EquipmentDevice> assetEquipments = new ArrayList<>();
+
+        try {
+            String[] fileList;
+            fileList = c.getAssets().list("modbus-em-system");
+            for (String filename : fileList) {
+                String equipJson = readFileFromAssets(c, "modbus-em-system/" + filename);
+                assetEquipments.add(parseModbusDataFromString(equipJson));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return assetEquipments;
+    }
 }

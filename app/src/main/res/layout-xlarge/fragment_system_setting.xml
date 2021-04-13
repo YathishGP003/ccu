@@ -297,6 +297,7 @@
                     android:checked="false"
                     android:textOff=""
                     android:textOn="" />
+
             </LinearLayout>
 
             <LinearLayout
@@ -395,7 +396,25 @@
                         android:textOn="" />
                 </LinearLayout>
             </LinearLayout>
+            <TextView
+                android:layout_marginTop="@dimen/margin_20"
+                android:id="@+id/energyMeterModelDetails"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:textSize="28sp"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+                android:textStyle="bold"
+                android:fontFamily="@font/lato_bold"
+                tools:ignore="MissingConstraints" />
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/energyMeterParams"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margin_20"
+                />
 
         </LinearLayout>
     </LinearLayout>

@@ -10,6 +10,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,10 +30,15 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import java.lang.reflect.Field;
+import a75f.io.api.haystack.modbus.Parameter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.modbus.EquipmentDevice;
+import a75f.io.api.haystack.modbus.Register;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.oao.OAOEquip;
@@ -40,6 +48,8 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.modbusbox.EquipsManager;
+import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.views.OaoArc;
 
@@ -62,7 +72,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	ToggleButton tbSmartPostPurge;
 	ToggleButton tbEnhancedVentilation;
 	LinearLayout purgeLayout;
-
+	TextView energyMeterModelDetails;
+	RecyclerView energyMeterParams;
 
 	
 	int spinnerInit = 0;
@@ -170,6 +181,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		systemModePicker = view.findViewById(R.id.systemModePicker);
 		coolingAvailable = L.ccu().systemProfile.isCoolingAvailable();
 		heatingAvailable = L.ccu().systemProfile.isHeatingAvailable();
+		energyMeterParams = view.findViewById(R.id.energyMeterParams);
+		energyMeterModelDetails = view.findViewById(R.id.energyMeterModelDetails);
 		
 		modesAvailable.add(SystemMode.OFF.displayName);
 		if (coolingAvailable && heatingAvailable) {
@@ -275,6 +288,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		tbEnhancedVentilation = view.findViewById(R.id.tbEnhancedVentilation);
 		tbCompHumidity.setEnabled(false);
 		tbDemandResponse.setEnabled(false);
+		configEnergyMeterDetails();
 
 		if (L.ccu().systemProfile instanceof DefaultSystem) {
 			systemModePicker.setEnabled(false);
@@ -577,5 +591,49 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 		}
 	};
+
+	private void configEnergyMeterDetails(){
+		List<EquipmentDevice> modbusDevices = EquipsManager.getInstance().getAllMbEquips("SYSTEM");
+
+		if(modbusDevices!=null&&modbusDevices.size()>0){
+			EquipmentDevice EMDevice=null;
+			for (int i = 0; i <modbusDevices.size() ; i++) {
+				if(modbusDevices.get(i).getEquipType().equals("EMR")){
+					EMDevice = modbusDevices.get(i);
+				}
+			}
+
+			if(EMDevice==null)
+				return;
+			energyMeterParams.setVisibility(View.VISIBLE);
+			energyMeterModelDetails.setVisibility(View.VISIBLE);
+
+			/**
+			 * Assuming there is always only One Energy meter
+			 */
+
+			List<Parameter> parameterList = new ArrayList<>();
+			if (Objects.nonNull(EMDevice.getRegisters())) {
+				for (Register registerTemp : EMDevice.getRegisters()) {
+					if (registerTemp.getParameters() != null) {
+						for (Parameter p : registerTemp.getParameters()) {
+							//p.setParameterDefinitionType(registerTemp.getParameterDefinitionType());
+							//parameterList.add(p);
+							if (p.isDisplayInUI()) {
+								p.setParameterDefinitionType(registerTemp.getParameterDefinitionType());
+								parameterList.add(p);
+							}
+						}
+					}
+				}
+			}
+			energyMeterModelDetails.setText(EMDevice+ "("+EMDevice.getEquipType() + EMDevice.getSlaveId() + ")");
+			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+			energyMeterParams.setLayoutManager(gridLayoutManager);
+			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getActivity(), EMDevice.getEquipRef(), parameterList);
+			energyMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
+		}
+
+	}
 
 }

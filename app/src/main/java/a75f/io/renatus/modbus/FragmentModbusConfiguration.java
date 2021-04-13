@@ -143,20 +143,10 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         /**
          * Check the profile type selected under system device
          */
-        if (profileType == ProfileType.MODBUS_BTU) {
-            // Get all the device details
-            List<EquipmentDevice> equipmentDeviceList = EquipsManager.getInstance().getAllEquipments();
-                List<EquipmentDevice> modbusBTUequipmentDeviceCollection = new ArrayList<>();
-                for (int i = 0; i < equipmentDeviceList.size(); i++) {
-                    if (equipmentDeviceList.get(i).getEquipType().equalsIgnoreCase("BTU")) {
-                        modbusBTUequipmentDeviceCollection.add(equipmentDeviceList.get(i));
-                    }
-                }
-                equipmentDeviceCollection = modbusBTUequipmentDeviceCollection;
-
-        } else {
+        if (profileType == ProfileType.MODBUS_BTU)
+                equipmentDeviceCollection= EquipsManager.getInstance().getAllBtuMeters();
+        else
             equipmentDeviceCollection = EquipsManager.getInstance().getAllEquipments();
-        }
 
         return view;
     }

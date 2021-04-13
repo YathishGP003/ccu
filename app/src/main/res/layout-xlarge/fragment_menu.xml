@@ -176,33 +176,6 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/lil_modbus_energy_distribution"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        tools:ignore="UseCompoundDrawables">
-
-        <ImageView
-            android:id="@+id/icon_modbus_energy_distribution"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginEnd="16dp"
-            android:tint="@color/black"
-            app:srcCompat="@drawable/ic_energy_proportional_dist_icon"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/text_modbus_energy_distribution"
-            style="@style/text_appearance"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:text="@string/title_modbus_energy_proportional_distribution" />
-
-    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/lil_temporary_override"

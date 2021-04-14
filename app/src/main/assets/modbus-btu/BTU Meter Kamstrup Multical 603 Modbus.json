@@ -220,7 +220,8 @@
       "registerAddress": 205,
       "registerNumber": "40206",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "swapped long",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
       "parameters": [
         {
           "parameterId": "5f1f30ad29bcbf4f1d9a2fe6",

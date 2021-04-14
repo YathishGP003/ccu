@@ -205,6 +205,7 @@ public class VavReheatProfile extends VavProfile
     
     private void handleCoolingChangeOver() {
         state = COOLING;
+        valveController.reset();
         valve.currentPosition = 0;
         coolingLoop.setEnabled();
         heatingLoop.setDisabled();
@@ -220,42 +221,44 @@ public class VavReheatProfile extends VavProfile
     private void handleDeadband() {
         
         state = DEADBAND;
+        valveController.reset();
         valve.currentPosition = 0;
         heatingLoop.setDisabled();
         coolingLoop.setDisabled();
     }
     
     private void updateReheatDuringSystemCooling(int heatingLoopOp, double roomTemp) {
-    
         double dischargeTemp = vavDevice.getDischargeTemp();
         double supplyAirTemp = vavDevice.getSupplyAirTemp();
-        double dischargeSp = vavDevice.getDischargeSp();
-        if (heatingLoopOp <= 50) {
-            //Control reheat valve when heating loop is <=50
-            double datMax = (roomTemp + HEATING_LOOP_OFFSET) > MAX_DISCHARGE_TEMP ? MAX_DISCHARGE_TEMP : (roomTemp + HEATING_LOOP_OFFSET);
-            dischargeSp = supplyAirTemp + (datMax - supplyAirTemp) * heatingLoopOp / 50;
-            vavDevice.setDischargeSp(dischargeSp);
-            valveController.updateControlVariable(dischargeSp, dischargeTemp);
-            valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
-            CcuLog.d(L.TAG_CCU_ZONE, "dischargeSp: " + dischargeSp);
-        } else {
-            //Control airflow when heating loop is 51-100
-            //Also update valve control to account for change in dischargeTemp
-            if (dischargeSp == 0) {
-                double datMax = (roomTemp + HEATING_LOOP_OFFSET) > MAX_DISCHARGE_TEMP ? MAX_DISCHARGE_TEMP : (roomTemp + HEATING_LOOP_OFFSET);
-                dischargeSp = supplyAirTemp + (datMax - supplyAirTemp) * heatingLoopOp / 100;
-                vavDevice.setDischargeSp(dischargeSp);
-            }
+        double datMax = (roomTemp + HEATING_LOOP_OFFSET) > MAX_DISCHARGE_TEMP ? MAX_DISCHARGE_TEMP : (roomTemp + HEATING_LOOP_OFFSET);
         
-            if (dischargeSp > dischargeTemp) {
-                valveController.updateControlVariable(dischargeSp, dischargeTemp);
-                valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
-                CcuLog.d(L.TAG_CCU_ZONE, "dischargeSp: "+dischargeSp+" dischargeTemp "+dischargeTemp);
-            } else {
-                CcuLog.d(L.TAG_CCU_ZONE,"Invalid air temp :  supplyAirTemp: "+supplyAirTemp+" dischargeTemp: "+dischargeTemp+" dischargeSp: "+dischargeSp);
-                valve.currentPosition = 0;
-            }
+        if (!isSupplyAirTempValid(supplyAirTemp, dischargeTemp)) {
+            CcuLog.d(L.TAG_CCU_ZONE, "updateReheatDuringSystemCooling : Invalid SAT , Use roomTemp "+roomTemp);
+            supplyAirTemp = roomTemp;
         }
+        double dischargeSp = supplyAirTemp + (datMax - supplyAirTemp) * Math.min(heatingLoopOp, 50) / 50;
+        valveController.updateControlVariable(dischargeSp, dischargeTemp);
+        valveController.dump();
+        int valvePosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
+    
+        CcuLog.d(L.TAG_CCU_ZONE,
+                 "updateReheatDuringSystemCooling :  supplyAirTemp: " + supplyAirTemp +  " datMax: " + datMax+
+                 " dischargeTemp: " + dischargeTemp +" dischargeSp "+dischargeSp);
+        
+        valve.currentPosition = valvePosition < 0 ? 0 : valvePosition > 100 ? 100 : valvePosition;
+    }
+    
+    /**
+     * Thermistor measurements interpret junk reading when they are actually not connected.
+     * Avoid running the loop when the air temps are outside a reasonable range to make sure they are not picked by the
+     * algorithm.
+     */
+    private boolean isSupplyAirTempValid(double sat, double dat) {
+        if (sat < 0 || sat > 200) {
+            return false;
+        }
+        
+        return true;
     }
     
     private void updateReheatDuringSystemHeating(Equip vavEquip) {

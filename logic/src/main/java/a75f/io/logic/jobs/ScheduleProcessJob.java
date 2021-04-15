@@ -1287,7 +1287,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     } else {
                         SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
                         boolean isZoneHasStandaloneEquip = (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse"));
-                        if ((systemMode != SystemMode.OFF) && (isZonePreconditioningActive(equip.getId(), cachedOccupied, isZoneHasStandaloneEquip) || cachedOccupied.isPreconditioning())) {
+                        
+                        //Standalone zones could operate in preconditioning with system being OFF.
+                        if (isZonePreconditioningActive(equip.getId(), cachedOccupied, isZoneHasStandaloneEquip)) {
+                            c = PRECONDITIONING;
+                        }else if ((systemMode != SystemMode.OFF) && cachedOccupied.isPreconditioning()) {
                             c = PRECONDITIONING;
                         } else if (!isZoneHasStandaloneEquip && getSystemOccupancy() == PRECONDITIONING){
                             c = PRECONDITIONING;
@@ -1634,7 +1638,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             double currentTemp = CCUHsApi.getInstance().readHisValByQuery("zone and point and current and air and temp and equipRef == \""+equipId+"\"");
             double desiredTemp = CCUHsApi.getInstance().readHisValByQuery("zone and point and desired and air and temp and average and equipRef == \""+equipId+"\"");
             double tempDiff = currentTemp - desiredTemp;
-            double preconRate = CCUHsApi.getInstance().getPredictedPreconRate(equipId);
+            double preconRate = TunerUtil.readTunerValByQuery("standalone and preconditioning and rate and "+
+                                                                             (tempDiff >= 0 ? "cooling" : "heating"));
             if (preconRate == 0) {
                 //TODO - if no specific equip id precond rate, get system wide precon rate
                 equipId = L.ccu().systemProfile.getSystemEquipRef();//get System default preconditioning rate

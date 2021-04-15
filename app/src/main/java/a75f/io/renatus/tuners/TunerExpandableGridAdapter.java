@@ -81,7 +81,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                 final HashMap tunerItem = (HashMap) mDataArrayList.get(position);
                 Log.i("TunersUI", "tunerItem:" + tunerItem);
                 String tunerName = tunerItem.get("dis").toString();
-
+                
                 holder.itemTextView.setText(tunerName.substring(tunerName.lastIndexOf("-") + 1));
                 if (tunerItem.containsKey("newValue")) {
                     if (tunerItem.get("newValue") == null){

@@ -361,6 +361,9 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         
         ahuAnalog3Test.setAdapter(testValAdapter);
         ahuAnalog3Test.setSelection(0,false);
+    
+        ahuAnalog4Test.setAdapter(testValAdapter);
+        ahuAnalog4Test.setSelection(0,false);
         
         
         analog1Min.setOnItemSelectedListener(this);

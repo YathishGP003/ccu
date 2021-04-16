@@ -91,6 +91,10 @@ class DcwbAlgoHandler {
         return chilledWaterValveLoopOutput;
     }
     
+    public void resetChilledWaterValveLoop() {
+        dcwbControlLoop.reset();
+    }
+    
     private AdaptiveDeltaTDto getAdaptiveDeltaDto(DcwbBtuMeterDao btuDao) {
         double inletWaterTemp = btuDao.getInletWaterTemperature(hayStack);
         double averageCoolingDesiredTemp = SystemTemperatureUtil.getAverageCoolingDesiredTemp();

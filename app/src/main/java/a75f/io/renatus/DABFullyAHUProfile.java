@@ -85,6 +85,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
     @BindView(R.id.dabAnalog) ViewGroup dabLayout;
     @BindView(R.id.dcwbLayout)     ViewGroup dcwbLayout;
     @BindView(R.id.dcwbEnableText) TextView  dcwbText;
+    @BindView(R.id.textMeterStatus) TextView textMeterStatus;
     @BindView(R.id.analog1MappingText) TextView  analog1Text;
     @BindView(R.id.tableRowAnalog4) TableRow analog4View;
     @BindView(R.id.chilledWaterTargetExitTemp) ViewGroup chilledWaterTargetExitTemp;
@@ -165,18 +166,6 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
                                                      ProgressDialogUtils.hideProgressDialog();
                                               }
             );
-            
-            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving System Configuration");
-            Observable.fromCallable(() -> {
-                            
-                            return true;
-                        })
-                      .subscribeOn(Schedulers.io())
-                      .observeOn(AndroidSchedulers.mainThread())
-                      .doOnComplete(()-> {
-                      
-                      })
-                      .subscribe();
         }
     
         ahuAnalog1Tb.setOnCheckedChangeListener(this);
@@ -288,6 +277,10 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             analog1Text.setText(getString(R.string.label_analog1_dcwb));
             initializeDcwbSpinners();
             double loopType = systemProfile.getConfigVal("analog4 and loop and type");
+            
+            textMeterStatus.setText(CCUHsApi.getInstance().read("btu and equip").isEmpty() ?
+                                         getString(R.string.text_btu_meter_error_status) :
+                                         getString(R.string.text_btu_meter_status));
             updateAnalog4ConfigUI(loopType);
         } else {
             dcwbLayout.setVisibility(View.GONE);

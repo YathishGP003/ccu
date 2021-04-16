@@ -20,7 +20,7 @@ data class AdaptiveDeltaTDto (val inletWaterTemperature : Double,
 class AdaptiveDeltaTControl {
     companion object Algo{
 
-        var linearModeLoop : Boolean = false;
+        var linearModeLoop : Boolean = false
 
         fun getChilledWaterAdaptiveDeltaTValveLoop(data: AdaptiveDeltaTDto): Double {
             Log.i("CCU_SYSTEM", " getChilledWaterAdaptiveDeltaTValveLoop $data")

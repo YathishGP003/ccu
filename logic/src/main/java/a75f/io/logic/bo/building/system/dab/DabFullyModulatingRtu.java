@@ -95,11 +95,14 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                 boolean isAdaptiveDelta = getConfigVal("adaptive and delta") > 0;
                 dcwbAlgoHandler = new DcwbAlgoHandler(isAdaptiveDelta, getSystemEquipRef(), CCUHsApi.getInstance());
             }
-            
-            dcwbAlgoHandler.runLoopAlgorithm();
+    
+            if (dabSystem.getSystemState() == COOLING) {
+                dcwbAlgoHandler.runLoopAlgorithm();
+            }
     
             //Analog1 controls water valve when the DCWB enabled.
-            updateAnalog1DcwbOutput();
+            
+            updateAnalog1DcwbOutput(dabSystem);
     
             //Could be mapped to cooling or co2 based on configuration.
             updateAnalog4Output(dabSystem);
@@ -279,9 +282,16 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         ControlMote.setAnalogOut("analog1", signal);
     }
     
-    private void updateAnalog1DcwbOutput() {
+    private void updateAnalog1DcwbOutput(DabSystemController dabSystem) {
         double signal = 0;
-        systemDCWBValveLoopOutput = dcwbAlgoHandler.getChilledWaterValveLoopOutput();
+    
+        if (dabSystem.getSystemState() == COOLING) {
+            systemDCWBValveLoopOutput = dcwbAlgoHandler.getChilledWaterValveLoopOutput();
+        } else {
+            systemDCWBValveLoopOutput = 0;
+            dcwbAlgoHandler.resetChilledWaterValveLoop();
+        }
+        
         setSystemLoopOp("valve", systemDCWBValveLoopOutput);
     
         if (getConfigVal("analog1 and output and enabled") > 0) {
@@ -924,7 +934,6 @@ public class DabFullyModulatingRtu extends DabSystemProfile
      * Creates all the necessary config/loop/output points for DCWB.
      */
     public void enableDcwb(CCUHsApi hayStack) {
-        setConfigVal("dcwb and enabled",1);
         //Remove analog1 Command points
         setConfigEnabled(Tags.ANALOG1, 0);
         HashMap equipMap = hayStack.read("equip and system");
@@ -933,6 +942,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         createAnalog4LoopConfigPoints(Tags.COOLING,systemEquip, hayStack);
         createChilledWaterConfigPoints(systemEquip, hayStack);
         createLoopPoints(systemEquip, hayStack);
+        setConfigVal("dcwb and enabled",1);
         CCUHsApi.getInstance().scheduleSync();
     }
     

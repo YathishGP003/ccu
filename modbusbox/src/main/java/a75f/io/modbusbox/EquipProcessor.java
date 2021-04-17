@@ -51,6 +51,9 @@ public class EquipProcessor
         for(EquipmentDevice equipmentDevice:equipmentDevices){
             addEquips(equipmentDevice);
         }
+        for(EquipmentDevice equipmentDevice:modbusBTUMeterDevices){
+            addEquips(equipmentDevice);
+        }
     }
 
     public void addEquips(EquipmentDevice equipmentDevice) {
@@ -124,7 +127,10 @@ public class EquipProcessor
    }
 
     public List<EquipmentDevice> getAllBTUMeterDevicesEquips(){
-        return modbusBTUMeterDevices;
+        QueryBuilder<EquipmentDevice> configQuery = modbusBox.query();
+        configQuery.equal(EquipmentDevice_.isPaired, false);
+        configQuery.equal(EquipmentDevice_.equipType, "BTU");
+        return  configQuery.build().find();
     }
 
 }

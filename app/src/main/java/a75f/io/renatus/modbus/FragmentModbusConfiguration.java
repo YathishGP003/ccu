@@ -479,24 +479,40 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
          */
         if (profileType == ProfileType.MODBUS_BTU) {
             textTitleFragment.setText(getString(R.string.label_modbus_btu_meter));
-            floorViewheader.setVisibility(View.VISIBLE);
-            floorListView.setVisibility(View.VISIBLE);
             floorList = HSUtil.getFloors();
-            Collections.sort(floorList, floorComparator);
-            this.energyDistributionAdapter = new EnergyDistributionAdapter(floorList, getContext(), this);
-            floorListView.setLayoutManager(new LinearLayoutManager(getContext()));
-            floorListView.setAdapter(energyDistributionAdapter);
+            if(floorList.size()>0) {
+                Collections.sort(floorList, floorComparator);
+                floorViewheader.setVisibility(View.VISIBLE);
+                floorListView.setVisibility(View.VISIBLE);
+                this.energyDistributionAdapter = new EnergyDistributionAdapter(floorList, getContext(), this);
+                floorListView.setLayoutManager(new LinearLayoutManager(getContext()));
+                floorListView.setAdapter(energyDistributionAdapter);
+            }
         }
 
     }
 
 
+    /**
+     * Validate the energy distribution value
+     * @param energyDistribution
+     */
     public void validateEnergyDistributionValue(Map<Integer, Integer> energyDistribution) {
         int total = 0;
         for (Integer key : energyDistribution.keySet()) {
             total += energyDistribution.get(key);
         }
-        setBtn.setVisibility(total == 100 ? View.VISIBLE : View.INVISIBLE);
+        
+        boolean isValue100Percent = (total == 100);
+        if(isValue100Percent)    
+        {
+            setBtn.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            Toast.makeText(getContext(), getContext().getString(R.string.energy_distribution_validation_error), Toast.LENGTH_LONG).show();
+            setBtn.setVisibility(View.INVISIBLE);
+        }
     }
 
     /*public List<EquipmentDevice> loadJSONFromAsset() {
@@ -525,7 +541,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                         Log.d("Modbus", "loadjson22 new="+equipmentDevice.getName());
                         modbusEquipsBox.put(new ModbusEquipsInfo(equipmentDevice.getModbusEquipIdId(), equipmentDevice));
                     }
-                    equipmentDevicesList.add(equipmentDevice);
+                    equipmentDevicesList.add(equipmentDevice);  `
                 }
             }
         } catch (IOException ex) {

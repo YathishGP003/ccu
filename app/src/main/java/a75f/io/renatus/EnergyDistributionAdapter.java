@@ -54,8 +54,8 @@ public class EnergyDistributionAdapter extends RecyclerView.Adapter<EnergyDistri
             holder.distributionValue.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int dropDownPosition, long id) {
-                    int value = Integer.parseInt(holder.distributionValue.getSelectedItem().toString().split("%")[0]);
-                    energyDistribution.put(position, value);
+
+                    energyDistribution.put(position, Integer.parseInt(holder.distributionValue.getSelectedItem().toString().split("%")[0]));
                     ((FragmentModbusConfiguration) callBackReff).validateEnergyDistributionValue(energyDistribution);
 
                 }

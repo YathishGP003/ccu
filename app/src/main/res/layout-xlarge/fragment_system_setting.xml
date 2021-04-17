@@ -308,8 +308,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/purgelayout"
-
-                android:layout_marginBottom="@dimen/margin_20"
                 android:orientation="vertical">
                 <TextView
                     android:layout_width="match_parent"
@@ -409,12 +407,13 @@
                 </LinearLayout>
             </LinearLayout>
             <TextView
+                android:layout_marginTop="@dimen/margin_20"
                 android:id="@+id/btuMeterModelDetails"
                 android:layout_marginBottom="@dimen/fab_margin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textStyle="bold"
-                android:visibility="gone"
+                android:visibility="visible"
                 app:layout_constraintLeft_toLeftOf="parent"
                 android:text="BTU Meter"
                 style="@style/label_black"/>
@@ -427,9 +426,6 @@
                 android:visibility="gone"
                 android:layout_marginBottom="@dimen/margin_20"
                 />
-
-
-
         </LinearLayout>
     </LinearLayout>
     </androidx.core.widget.NestedScrollView>

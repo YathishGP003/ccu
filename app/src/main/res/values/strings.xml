@@ -851,5 +851,5 @@
         <item> 100% </item>
     </string-array>
 
-
+    <string name="energy_distribution_validation_error">Energy Proportional Distribution combining all floors should be equal to 100%</string>
 </resources>

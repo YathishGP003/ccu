@@ -24,6 +24,9 @@ import a75f.io.logic.tuners.TunerUtil;
  */
 class DcwbAlgoHandler {
     
+    private final int MAX_PI_LOOP_OUTPUT = 100;
+    private final int MIN_PI_LOOP_OUTPUT = 0;
+    
     public DcwbAlgoHandler(boolean isAdaptiveDelta, String equipRef, CCUHsApi hsApi) {
         hayStack = hsApi;
         adaptiveDelta = isAdaptiveDelta;
@@ -83,8 +86,10 @@ class DcwbAlgoHandler {
         } else {
             chilledWaterValveLoopOutput = hayStack.readHisValByQuery("dcwb and valve and loop and output");
         }
-        CcuLog.d(L.TAG_CCU_SYSTEM,
-                 "getAverageCoolingDesiredTemp : "+SystemTemperatureUtil.getAverageCoolingDesiredTemp());
+        
+        //PI Loop may run beyond the normal limits based on the tuner values. Restrict it to the 0-100 range here.
+        chilledWaterValveLoopOutput = Math.max(chilledWaterValveLoopOutput, MIN_PI_LOOP_OUTPUT);
+        chilledWaterValveLoopOutput = Math.min(chilledWaterValveLoopOutput, MAX_PI_LOOP_OUTPUT);
     }
     
     public double getChilledWaterValveLoopOutput() {

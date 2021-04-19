@@ -118,10 +118,6 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         //Analog3 controls heating.
         updateAnalog3Output(dabSystem);
         
-        if (isDcwbEnabled()) {
-        
-        }
-    
         updateRelayOutputs(dabSystem);
         
         setSystemPoint("operating and mode", dabSystem.systemState.ordinal());

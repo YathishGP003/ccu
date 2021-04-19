@@ -22,7 +22,7 @@ public class DcwbTuners {
         CcuLog.d(L.TAG_CCU_SYSTEM, "Default DCWB Tuner  does not exist. Create Now");
     
         Point chilledWaterProportionalKFactor  = new Point.Builder()
-                             .setDisplayName(equipDis+"-DCWB-"+"chilledWaterProportionalKFactor  ")
+                             .setDisplayName(equipDis+"-DCWB-"+"chilledWaterProportionalKFactor")
                              .setSiteRef(siteRef)
                              .setEquipRef(equipRef).setHisInterpolate("cov")
                              .addMarker("tuner").addMarker("default").addMarker("dcwb").addMarker("writable").addMarker("his")
@@ -36,7 +36,7 @@ public class DcwbTuners {
         hayStack.writeHisValById(chilledWaterProportionalKFactorId, TunerConstants.VAV_PROPORTIONAL_GAIN);
     
         Point chilledWaterIntegralKFactor = new Point.Builder()
-                                 .setDisplayName(equipDis+"-DCWB-"+"chilledWaterIntegralKFactor ")
+                                 .setDisplayName(equipDis+"-DCWB-"+"chilledWaterIntegralKFactor")
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipRef).setHisInterpolate("cov")
                                  .addMarker("tuner").addMarker("default").addMarker("dcwb").addMarker("writable").addMarker("his")
@@ -50,7 +50,7 @@ public class DcwbTuners {
         hayStack.writeHisValById(chilledWaterIntegralKFactorId, TunerConstants.VAV_INTEGRAL_GAIN);
     
         Point chilledWaterTemperatureProportionalRange = new Point.Builder()
-                               .setDisplayName(equipDis+"-DCWB-"+"chilledWaterTemperatureProportionalRange ")
+                               .setDisplayName(equipDis+"-DCWB-"+"chilledWaterTemperatureProportionalRange")
                                .setSiteRef(siteRef)
                                .setEquipRef(equipRef).setHisInterpolate("cov")
                                .addMarker("tuner").addMarker("default").addMarker("dcwb").addMarker("writable").addMarker("his")
@@ -63,7 +63,7 @@ public class DcwbTuners {
         hayStack.writeHisValById(pSpreadId, TunerConstants.CHILLED_WATER_TEMP_PROPORTION_SPREAD);
     
         Point integralTimeout = new Point.Builder()
-                                    .setDisplayName(equipDis+"-DCWB-"+"temperatureIntegralTime ")
+                                    .setDisplayName(equipDis+"-DCWB-"+"temperatureIntegralTime")
                                     .setSiteRef(siteRef)
                                     .setEquipRef(equipRef).setHisInterpolate("cov")
                                     .addMarker("tuner").addMarker("default").addMarker("dcwb").addMarker("writable").addMarker("his")
@@ -77,7 +77,7 @@ public class DcwbTuners {
         hayStack.writeHisValById(iTimeoutId, TunerConstants.VAV_INTEGRAL_TIMEOUT);
     
         Point adaptiveComfortThresholdMargin = new Point.Builder()
-                                    .setDisplayName(equipDis+"-DCWB-"+"adaptiveComfortThresholdMargin ")
+                                    .setDisplayName(equipDis+"-DCWB-"+"adaptiveComfortThresholdMargin")
                                     .setSiteRef(siteRef)
                                     .setEquipRef(equipRef).setHisInterpolate("cov")
                                     .addMarker("tuner").addMarker("default").addMarker("dcwb").addMarker("writable").addMarker("his")
@@ -98,11 +98,11 @@ public class DcwbTuners {
         Log.d("CCU", "addEquipDcwbTuners for " + equipDis);
     
         Point chilledWaterProportionalKFactor  = new Point.Builder()
-                                                     .setDisplayName(equipDis+"-DCWB-"+"chilledWaterProportionalKFactor  ")
+                                                     .setDisplayName(equipDis+"-DCWB-"+"chilledWaterProportionalKFactor")
                                                      .setSiteRef(siteRef)
                                                      .setEquipRef(equipRef).setHisInterpolate("cov")
                                                      .addMarker("tuner").addMarker("dcwb").addMarker("writable").addMarker("his")
-                                                     .addMarker("pgain").addMarker("sp").addMarker("chilled").addMarker("water")
+                                                     .addMarker("pgain").addMarker("sp").addMarker("chilled").addMarker("water").addMarker("system")
                                                      .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                                      .setTz(tz)
                                                      .build();
@@ -111,11 +111,11 @@ public class DcwbTuners {
         hayStack.writeHisValById(pgainId, HSUtil.getPriorityVal(pgainId));
     
         Point chilledWaterIntegralKFactor = new Point.Builder()
-                                                .setDisplayName(equipDis+"-DCWB-"+"chilledWaterIntegralKFactor ")
+                                                .setDisplayName(equipDis+"-DCWB-"+"chilledWaterIntegralKFactor")
                                                 .setSiteRef(siteRef)
                                                 .setEquipRef(equipRef).setHisInterpolate("cov")
                                                 .addMarker("tuner").addMarker("dcwb").addMarker("writable").addMarker("his")
-                                                .addMarker("igain").addMarker("sp").addMarker("chilled").addMarker("water")
+                                                .addMarker("igain").addMarker("sp").addMarker("chilled").addMarker("water").addMarker("system")
                                                 .setMinVal("0.1").setMaxVal("1.0").setIncrementVal("0.1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                                 .setTz(tz)
                                                 .build();
@@ -124,11 +124,11 @@ public class DcwbTuners {
         hayStack.writeHisValById(igainId, HSUtil.getPriorityVal(igainId));
     
         Point chilledWaterTemperatureProportionalRange = new Point.Builder()
-                                                             .setDisplayName(equipDis+"-DCWB-"+"chilledWaterTemperatureProportionalRange ")
+                                                             .setDisplayName(equipDis+"-DCWB-"+"chilledWaterTemperatureProportionalRange")
                                                              .setSiteRef(siteRef)
                                                              .setEquipRef(equipRef).setHisInterpolate("cov")
                                                              .addMarker("tuner").addMarker("dcwb").addMarker("writable").addMarker("his")
-                                                             .addMarker("pspread").addMarker("sp").addMarker("chilled").addMarker("water")
+                                                             .addMarker("pspread").addMarker("sp").addMarker("chilled").addMarker("water").addMarker("system")
                                                              .setMinVal("1").setMaxVal("10").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                                              .setTz(tz)
                                                              .build();
@@ -137,11 +137,11 @@ public class DcwbTuners {
         hayStack.writeHisValById(pSpreadId, HSUtil.getPriorityVal(pSpreadId));
     
         Point integralTimeout = new Point.Builder()
-                                    .setDisplayName(equipDis+"-DCWB-"+"temperatureIntegralTime ")
+                                    .setDisplayName(equipDis+"-DCWB-"+"temperatureIntegralTime")
                                     .setSiteRef(siteRef)
                                     .setEquipRef(equipRef).setHisInterpolate("cov")
                                     .addMarker("tuner").addMarker("dcwb").addMarker("writable").addMarker("his")
-                                    .addMarker("itimeout").addMarker("sp").addMarker("chilled").addMarker("water")
+                                    .addMarker("itimeout").addMarker("sp").addMarker("chilled").addMarker("water").addMarker("system")
                                     .setUnit("m")
                                     .setMinVal("1").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                     .setTz(tz)
@@ -151,12 +151,12 @@ public class DcwbTuners {
         hayStack.writeHisValById(iTimeoutId, HSUtil.getPriorityVal(iTimeoutId));
     
         Point adaptiveComfortThresholdMargin = new Point.Builder()
-                                                   .setDisplayName(equipDis+"-DCWB-"+"adaptiveComfortThresholdMargin ")
+                                                   .setDisplayName(equipDis+"-DCWB-"+"adaptiveComfortThresholdMargin")
                                                    .setSiteRef(siteRef)
                                                    .setEquipRef(equipRef).setHisInterpolate("cov")
                                                    .addMarker("tuner").addMarker("dcwb").addMarker("writable").addMarker("his")
                                                    .addMarker("adaptive").addMarker("comfort").addMarker("threshold").addMarker("margin")
-                                                   .addMarker("sp").addMarker("chilled").addMarker("water")
+                                                   .addMarker("sp").addMarker("chilled").addMarker("water").addMarker("system")
                                                    .setUnit("m")
                                                    .setMinVal("1").setMaxVal("15").setIncrementVal("1").setTunerGroup(TunerConstants.DAB_TUNER_GROUP)
                                                    .setTz(tz)

@@ -429,7 +429,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         cwTargetDeltaTSpinner.setSelection(deltaTAdapter.getPosition(systemProfile.getConfigVal("target and " +
                                                                                                      "delta")), false);
         
-        ArrayAdapter<Double> flowRateAdapter = getArrayAdapter(0, 100, 1);
+        ArrayAdapter<Double> flowRateAdapter = getArrayAdapter(0, 200, 1);
         cwMaxFlowRateSpinner.setAdapter(flowRateAdapter);
         cwMaxFlowRateSpinner.setSelection(flowRateAdapter.getPosition(systemProfile.getConfigVal("max and " +
                                                                                                      "flow and rate")), false);

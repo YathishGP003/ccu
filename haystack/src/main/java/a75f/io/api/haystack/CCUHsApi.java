@@ -1353,28 +1353,31 @@ public class CCUHsApi
         HDict   navIdDict = new HDictBuilder().add(HayStackConstants.ID, HRef.make(siteId)).toDict();
         HGrid   hGrid     = HGridBuilder.dictToGrid(navIdDict);
 
-        HGrid sync = hClient.call(HStdOps.read.name(), hGrid);
+        HGrid siteGrid = hClient.call(HStdOps.read.name(), hGrid);
+        if (siteGrid != null) {
+            siteGrid.dump();
+        } else {
+            CcuLog.e(TAG, "RemoteSite fetch Failed.");
+        }
 
-        sync.dump();
-
-        return sync;
+        return siteGrid;
     }
     
     public Site getRemoteSiteEntity(String siteGuid) {
         HGrid siteGrid = getRemoteSite(siteGuid);
-    
-        Iterator it = siteGrid.iterator();
-        while (it.hasNext()) {
-            HashMap<Object, Object> map = new HashMap<>();
-            HRow r = (HRow) it.next();
-            HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
-            while (ri.hasNext()) {
-                HDict.MapEntry m = (HDict.MapEntry) ri.next();
-                map.put(m.getKey(), m.getValue());
-            }
-        
-            if (map.get("site") != null) {
-                return new Site.Builder().setHashMap(map).build();
+        if (siteGrid != null) {
+            Iterator it = siteGrid.iterator();
+            while (it.hasNext()) {
+                HashMap<Object, Object> map = new HashMap<>();
+                HRow r = (HRow) it.next();
+                HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
+                while (ri.hasNext()) {
+                    HDict.MapEntry m = (HDict.MapEntry) ri.next();
+                    map.put(m.getKey(), m.getValue());
+                }
+                if (map.get("site") != null) {
+                    return new Site.Builder().setHashMap(map).build();
+                }
             }
         }
         return null;

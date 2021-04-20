@@ -63,7 +63,7 @@ public class DcwbTuners {
         hayStack.writeHisValById(pSpreadId, TunerConstants.CHILLED_WATER_TEMP_PROPORTION_SPREAD);
     
         Point integralTimeout = new Point.Builder()
-                                    .setDisplayName(equipDis+"-DCWB-"+"temperatureIntegralTime")
+                                    .setDisplayName(equipDis+"-DCWB-"+"chilledWaterTemperatureIntegralTime")
                                     .setSiteRef(siteRef)
                                     .setEquipRef(equipRef).setHisInterpolate("cov")
                                     .addMarker("tuner").addMarker("default").addMarker("dcwb").addMarker("writable").addMarker("his")
@@ -137,7 +137,7 @@ public class DcwbTuners {
         hayStack.writeHisValById(pSpreadId, HSUtil.getPriorityVal(pSpreadId));
     
         Point integralTimeout = new Point.Builder()
-                                    .setDisplayName(equipDis+"-DCWB-"+"temperatureIntegralTime")
+                                    .setDisplayName(equipDis+"-DCWB-"+"chilledWaterTemperatureIntegralTime")
                                     .setSiteRef(siteRef)
                                     .setEquipRef(equipRef).setHisInterpolate("cov")
                                     .addMarker("tuner").addMarker("dcwb").addMarker("writable").addMarker("his")

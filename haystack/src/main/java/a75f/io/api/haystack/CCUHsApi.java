@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.webkit.HttpAuthHandler;
 import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
@@ -1253,30 +1254,25 @@ public class CCUHsApi
         ArrayList<Equip> equips = new ArrayList<>();
         ArrayList<Point> points = new ArrayList<>();
         try {
-            HDict tunerDict = new HDictBuilder().add("filter", "tuner and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
-            HGrid tunerGrid = hClient.call("read", HGridBuilder.dictToGrid(tunerDict));
-            if (tunerGrid == null) {
-                return;
+            HDict tunerEquipDict = new HDictBuilder().add("filter",
+                                                      "tuner and equip and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+            HGrid tunerEquipGrid = hClient.call("read", HGridBuilder.dictToGrid(tunerEquipDict));
+            if (tunerEquipGrid != null) {
+                tunerEquipGrid.dump();
+            }
+            List<HashMap> equipMaps = HGridToList(tunerEquipGrid);
+            equipMaps.forEach(m -> equips.add(new Equip.Builder().setHashMap(m).build()));
+            
+            HDict tunerPointsDict = new HDictBuilder().add("filter",
+                                                      "tuner and point and default and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+            HGrid tunerPointsGrid = hClient.call("read", HGridBuilder.dictToGrid(tunerPointsDict));
+            if (tunerPointsGrid != null) {
+                tunerPointsGrid.dump();
             }
             
-            Iterator it = tunerGrid.iterator();
-            while (it.hasNext())
-            {
-                HashMap<Object, Object> map = new HashMap<>();
-                HRow r = (HRow) it.next();
-                HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
-                while (ri.hasNext())
-                {
-                    HDict.MapEntry m = (HDict.MapEntry) ri.next();
-                    map.put(m.getKey(), m.getValue());
-                }
-
-                if (map.get("equip") != null) {
-                    equips.add(new Equip.Builder().setHashMap(map).build());
-                } else if (map.get("point") != null ) {
-                    points.add(new Point.Builder().setHashMap(map).build());
-                }
-            }
+            List<HashMap> pointMaps = HGridToList(tunerPointsGrid);
+            pointMaps.forEach(m -> points.add(new Point.Builder().setHashMap(m).build()));
+            
         } catch (UnknownRecException e) {
             e.printStackTrace();
         }
@@ -2126,5 +2122,28 @@ public class CCUHsApi
     public String getTimeZone() {
         HashMap siteMap = read(Tags.SITE);
         return siteMap.get("tz").toString();
+    }
+    
+    /**
+     * Converts a Haystack Grid to Standard Java Collection.
+     * @param grid
+     * @return
+     */
+    public List<HashMap> HGridToList(HGrid grid) {
+        List<HashMap> rowList = new ArrayList<>();
+        if (grid != null) {
+            Iterator it = grid.iterator();
+            while (it != null && it.hasNext()) {
+                HashMap<Object, Object> map = new HashMap<>();
+                HRow r   = (HRow) it.next();
+                HRow.RowIterator        ri  = (HRow.RowIterator) r.iterator();
+                while (ri!= null && ri.hasNext()) {
+                    HDict.MapEntry m = (HDict.MapEntry) ri.next();
+                    map.put(m.getKey(), m.getValue());
+                }
+                rowList.add(map);
+            }
+        }
+        return rowList;
     }
 }

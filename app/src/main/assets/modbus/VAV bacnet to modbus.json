@@ -1,0 +1,213 @@
+{
+  "modbusEquipId (_id)": "5f1f30ad18b11f4f1b9a727",
+  "name": "VAV",
+  "description": "This document contains the configuration necessary to manage any BACnet VAV with Protocol Convertor.",
+  "equipType": "VAV",
+  "vendor": "BACnet VAV",
+  "model": [
+    "VAV"
+  ],
+  "registers": [
+    {
+      "registerAddress": 0,
+      "registerNumber": "40001",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1db07381",
+          "name": "VAV Temperature sp",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+            {
+              "tagName": "vav"
+            },
+            {
+              "tagName": "temp"
+            },
+            {
+              "tagName": "sp"
+            },
+            {
+              "tagName": "minVal",
+              "value": 16
+            },
+            {
+              "tagName": "maxVal",
+              "value": 32
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.5
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ],
+          "userIntentPointTags": [
+            {
+              "tagName": "vav"
+            },
+            {
+              "tagName": "sp"
+            },
+            {
+              "tagName": "temp"
+            },
+            {
+              "tagName": "minVal",
+              "value": 16
+            },
+            {
+              "tagName": "maxVal",
+              "value": 32
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.5
+            },
+            {
+              "tagName": "unit",
+              "value": "°C"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "writable"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 1,
+      "registerNumber": "40002",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1db07382",
+          "name": "Room Temperature",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "vav"
+            },
+            {
+              "tagName": "roomTemp"
+            },
+            {
+              "tagName": "unit",
+              "value": "°C"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+	{
+      "registerAddress": 2,
+      "registerNumber": "40003",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1db07383",
+          "name": "VAV Air Flow",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "vav"
+            },
+            {
+              "tagName": "airflow"
+            },
+            {
+              "tagName": "unit",
+              "value": "CFM"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+	{
+      "registerAddress": 3,
+      "registerNumber": "40004",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1db07384",
+          "name": "VAV Damper Position",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "vav"
+            },
+            {
+              "tagName": "damper position"
+            },
+            {
+              "tagName": "unit",
+              "value": "%"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

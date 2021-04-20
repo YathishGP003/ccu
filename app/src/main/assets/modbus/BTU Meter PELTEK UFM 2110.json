@@ -1,0 +1,281 @@
+{
+  "modbusEquipId (_id)": "5f1f40ad39caef4f2d9a069",
+  "name": "PELTEK UFM 2110",
+  "description": "This document contains the configuration necessary to manage Cooling Energy Meter",
+  "equipType": "BTU",
+  "model": [
+    "PELTEK UFM 2110"
+  ],
+  "registers": [
+    {
+      "registerAddress": 32,
+      "registerNumber": "40033",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad29bcbf5f2d9a3fe1",
+          "name": "inlet temperature t1",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+            {
+              "tagName": "btu"
+            },
+			{
+              "tagName": "inlet"
+			},
+            {
+              "tagName": "temperature"
+            },
+            {
+              "tagName": "t1"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "C"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 34,
+      "registerNumber": "40035",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad29bcbf5f2d9a3fe2",
+          "name": "Outlet temperature T2",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+            {
+              "tagName": "btu"
+            },
+			{
+              "tagName": "Outlet"
+            },
+            {
+              "tagName": "temperature"
+            },
+            {
+              "tagName": "t2"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "C"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 0,
+      "registerNumber": "40001",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad29bcbf5f2d9a3fe3",
+          "name": "Actual Flow",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+			{
+              "tagName": "btu"
+            },
+            {
+              "tagName": "actual"
+            },
+            {
+              "tagName": "flow"
+            },
+			{
+              "tagName": "rate"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "Cubic meter/hour"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 2,
+      "registerNumber": "40003",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad29bcbf5f2d9a3fe4",
+          "name": "Actual Power",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "btu"
+            },
+            {
+              "tagName": "actual"
+            },
+            {
+              "tagName": "power"
+            },
+			{
+              "tagName": "energy"
+            },
+			{
+              "tagName": "flow"
+            },
+			{
+              "tagName": "rate"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "GJ/h"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 118,
+      "registerNumber": "40119",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad29bcbf5f2d9a3fe5",
+          "name": "Energy Consumption",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "btu"
+            },
+            {
+              "tagName": "energy"
+            },
+			{
+			  "tagName": "consumption"
+			},
+			{
+              "tagName": "net"
+            },
+			{
+              "tagName": "accumulator"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "GJ"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 112,
+      "registerNumber": "40113",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad29bcbf5f2d9a3fe6",
+          "name": "Volume",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "btu"
+            },
+            {
+              "tagName": "volume"
+            },
+			{
+              "tagName": "net"
+            },
+			{
+              "tagName": "accumulator"
+            },
+            {           
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "Cubic meters"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    }
+   ]
+ }

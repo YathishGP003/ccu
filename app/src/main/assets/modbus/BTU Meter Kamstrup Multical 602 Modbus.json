@@ -1,0 +1,331 @@
+{
+  "modbusEquipId (_id)": "5f1f30ad18baef4f1d9a069",
+  "name": "Kamstrup btu 602",
+  "description": "This document contains the configuration necessary to manage Cooling Energy Meter",
+  "equipType": "BTU",
+  "model": [
+    "Multical 602"
+  ],
+  "registers": [
+    {
+      "registerAddress": 285,
+      "registerNumber": "40286",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2fe1",
+          "name": "inlet temperature t1",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+            {
+              "tagName": "btu"
+            },
+			{
+              "tagName": "inlet"
+			},
+            {
+              "tagName": "temperature"
+            },
+            {
+              "tagName": "t1"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "C"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 287,
+      "registerNumber": "40288",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2fe2",
+          "name": "Outlet temperature T2",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+            {
+              "tagName": "btu"
+            },
+			{
+              "tagName": "Outlet"
+            },
+            {
+              "tagName": "temperature"
+            },
+            {
+              "tagName": "t2"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "C"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 279,
+      "registerNumber": "40280",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2fe3",
+          "name": "Actual Flow",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+			{
+              "tagName": "btu"
+            },
+            {
+              "tagName": "actual"
+            },
+            {
+              "tagName": "flow"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "Cubic meter/hour"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 283,
+      "registerNumber": "40284",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2fe4",
+          "name": "Actual Power",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "btu"
+            },
+            {
+              "tagName": "actual"
+            },
+            {
+              "tagName": "power"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "MW"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 311,
+      "registerNumber": "40312",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2fe5",
+          "name": "Energy Consumption",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "btu"
+            },
+            {
+              "tagName": "energy"
+            },
+			{
+			  "tagName": "consumption"
+			},
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "MWh"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+	{
+      "registerAddress": 286,
+      "registerNumber": "40287",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2fe8",
+          "name": "Volume",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "btu"
+            },
+            {
+              "tagName": "volume"
+            },
+            {           
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "Cubic meters"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 4,
+      "registerNumber": "40005",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2fe6",
+          "name": "Volume1",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "btu"
+            },
+            {
+              "tagName": "volume1"
+            },
+            {           
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "Cubic meters"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+	{
+      "registerAddress": 6,
+      "registerNumber": "40007",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f1d9a2fe7",
+          "name": "Volume2",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "btu"
+            },
+            {
+              "tagName": "volume2"
+            },
+            {           
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "Cubic meters"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    }
+   ]
+ }

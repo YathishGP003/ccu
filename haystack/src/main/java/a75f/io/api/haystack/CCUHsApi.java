@@ -613,11 +613,11 @@ public class CCUHsApi
     {
 
         HashMap<Object, Object> point = readEntity(query);
-        String    id     = point.get("id").toString();
+        Object id = point.get("id");
         if (id == null || id == "") {
             return "";
         }
-        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        ArrayList values = CCUHsApi.getInstance().readPoint(id.toString());
         if (values != null && values.size() > 0) {
             HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
             return valMap.get("val") == null ? "" : valMap.get("val").toString();
@@ -683,23 +683,23 @@ public class CCUHsApi
     public Double readPointPriorityValByQuery(String query)
     {
         HashMap<Object, Object> point = readEntity(query);
-        String id = point.get("id").toString();
+        Object id = point.get("id");
         if (id == null || id == "") {
             return null;
         }
         
-        return readPointPriorityVal(id);
+        return readPointPriorityVal(id.toString());
     }
     
     public String readId(String query)
     {
         HashMap<Object, Object> point = readEntity(query);
-        String id = point.get("id").toString();
+        Object id = point.get("id");
         if (id == null || id == "") {
             return null;
         }
         
-        return id;
+        return id.toString();
     }
 
     public void hisWrite(HisItem item)

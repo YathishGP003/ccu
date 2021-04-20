@@ -190,7 +190,16 @@ public class HisSyncHandler
 
             String response = CCUHsApi.getInstance().hisWriteManyToHaystackService(hisWriteMetadata, hDicts);
             if (response != null && !hisItemsToSyncForDeviceOrEquip.isEmpty()) {
-                ccuHsApi.tagsDb.updateHisItemSynced(hisItemsToSyncForDeviceOrEquip);
+                try {
+                    ccuHsApi.tagsDb.updateHisItemSynced(hisItemsToSyncForDeviceOrEquip);
+                } catch (IllegalArgumentException e) {
+                    /* There is a corner case where this HisItem might have been removed from Objectbox since the
+                     * PruneJob runs on a different thread. Object box throws IllegalArgumentException in that
+                     * situation.It appears to be safe to ignore now. But we will still track by printing the stack trace to
+                     * monitor how frequently this is happening or there is more to it than what we see now.
+                     */
+                    e.printStackTrace();
+                }
             }
         }
     }

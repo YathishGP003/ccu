@@ -207,7 +207,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         testModLayout.setVisibility(Globals.getInstance().isWeatherTest()?View.VISIBLE :View.INVISIBLE);
     
         ArrayList<Integer> zoroToHundred = new ArrayList<>();
-        for (int val = 0;  val <= 100; val++)
+        for (int val = -20;  val <= 120; val++)
         {
             zoroToHundred.add(val);
         }

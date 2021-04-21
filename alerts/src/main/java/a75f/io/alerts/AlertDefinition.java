@@ -4,6 +4,8 @@ package a75f.io.alerts;
  * Created by samjithsadasivan on 4/23/18.
  */
 
+import android.content.SharedPreferences;
+
 import java.util.ArrayList;
 
 import a75f.io.api.haystack.Alert;
@@ -55,55 +57,24 @@ public class AlertDefinition
     public ArrayList<Conditional> conditionals;
     public String                 offset;
     public Alert                  alert;
-    
+    public boolean                custom;
+
     public AlertDefinition(){
     
     }
-    
-    public void evaluate() {
+
+    /** evaluate this alert definition against current values
+     * @return a string describing the evaluation, for inspection */
+    public void evaluate(SharedPreferences sharedPrefs) {
         for (Conditional c : conditionals)
         {
             if (c.operator == null)
             {
-                c.evaluate();
+                c.evaluate(sharedPrefs);
             }
         }
     }
 
-    public void evaluateAlert() {
-        for (Conditional c : conditionals)
-        {
-            if (c.operator == null)
-            {
-                c.evaluateAlert();
-            }
-        }
-    }
-    
-    //Evaluate conditionals for an equip
-    public boolean evaluate(String equipId) {
-        boolean alertStatus = true;
-        for (Conditional c : conditionals) {
-            if (c.operator == null)
-            {
-                c.evaluate(equipId);
-            }
-        }
-    
-        for (int i = 0; i < conditionals.size(); i+=2) {
-            if (i == 0) {
-                alertStatus =conditionals.get(0).status;
-                continue;
-            }
-            if (conditionals.get(i-1).operator.contains("&&")) {
-                alertStatus &= conditionals.get(i).status;
-            } else if (conditionals.get(i-1).operator.contains("||")) {
-                alertStatus |= conditionals.get(i).status;
-            }
-        }
-        return alertStatus;
-    }
-    
     public boolean validate() {
         if (conditionals.size() % 2 == 0) {
             logValidatation("Incorrect number of conditionals "+conditionals.size());
@@ -112,24 +83,27 @@ public class AlertDefinition
         
         for (int i = 0; i < conditionals.size() ; i+=2) {
             Conditional c = conditionals.get(i);
-            if ( (c.isOperator() && c.operator != null) || (c.isCondition() && c.operator == null)) {
+            if ( (c.isThisOperator() && c.operator != null) || (c.isThisCondition() && c.operator == null)) {
                 logValidatation("Operator not allowed "+c.toString());
                 return false;
             }
-            if (c.isCondition() && (c.grpOperation != null) && !c.grpOperation.equals("") && !c.grpOperation.equals("equip") && !c.grpOperation.equals("average")
+            if (c.isThisCondition() && (c.grpOperation != null) && !c.grpOperation.equals("") && !c.grpOperation.equals("equip") && !c.grpOperation.equals("average")
                         && !c.grpOperation.contains("top") && !c.grpOperation.contains("bottom")
                         && !c.grpOperation.contains("min") && !c.grpOperation.contains("max")) {
                 logValidatation("grpOperator not supported "+c.grpOperation);
                 return false;
             }
         }
+        if (alert.mSeverity == null) {
+            logValidatation("missing severity level");
+            return false;
+        }
+
         return true;
     }
-    
-    
-    
+
     private void logValidatation(String msg) {
-        CcuLog.d("CCU_ALERTS","Invalid Alert Definition : "+msg);
+        CcuLog.e("CCU_ALERTS","Invalid Alert Definition : "+msg);
     }
     
     @Override

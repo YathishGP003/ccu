@@ -75,7 +75,7 @@ public class FloorPlanFragment extends Fragment
 	public static Zone selectedZone;
 	public DataArrayAdapter<Floor> mFloorListAdapter;
 	public DataArrayAdapter<Zone>  mRoomListAdapter;
-	public DataArrayAdapter<String>                      mModuleListAdapter;
+	public DataArrayAdapter<String>   mModuleListAdapter;
 	
 	@BindView(R.id.addFloorBtn)
 	TextView addFloorBtn;
@@ -1144,8 +1144,6 @@ public class FloorPlanFragment extends Fragment
 		}
 		Floor floor = getSelectedFloor();
 		Zone zone = getSelectedZone();
-		
-		
 		ZoneProfile profile = L.getProfile(Short.parseShort(nodeAddr));
 		if(profile != null) {
 			switch (profile.getProfileType()) {

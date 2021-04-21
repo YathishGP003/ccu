@@ -282,7 +282,7 @@ public class FragmentModbusEnergyMeterConfiguration extends BaseDialogFragment {
             case UPS30K:
                 if(L.getProfile((short)curSelectedSlaveId) == null) {
                     modbusProfile.addMbEquip((short) curSelectedSlaveId, floorRef, zoneRef, equipmentDevice, recyclerModbusParamAdapter.modbusParam,ProfileType.MODBUS_UPS30);
-                    L.ccu().zoneProfiles.add(    modbusProfile);
+                    L.ccu().zoneProfiles.add(modbusProfile);
                     equipRef = modbusProfile.getEquip().getId();
                 }else
                     equipRef = updateModbusProfile(curSelectedSlaveId);

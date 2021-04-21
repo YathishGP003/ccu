@@ -280,6 +280,10 @@ public class LSmartNode
                 {
                     RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
                     HashMap logicalOpPoint = hayStack.read("point and id == " + p.getPointRef());
+                    if (logicalOpPoint.isEmpty()) {
+                        CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for "+p.getDisplayName());
+                        continue;
+                    }
                     double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
     
                     short mappedVal = 0;

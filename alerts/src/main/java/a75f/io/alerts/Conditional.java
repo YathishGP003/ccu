@@ -61,27 +61,16 @@ public class Conditional
     boolean status;
     
     String val;
-    
-    boolean evaluate(String ref) {
-        if (key.isEmpty() || value.isEmpty() || condition.isEmpty()) {
-            throw new IllegalArgumentException("Invalid Conditional");
-        }
-        resVal = CCUHsApi.getInstance().readHisValByQuery(key+" and equipRef == \""+ref+"\"");
-        CcuLog.d("CCU_ALERTS ", " Evaluate Conditional: "+toString());
-        /*if (!isNumeric(value)) {
-            value = String.valueOf(CCUHsApi.getInstance().read(value));
-        }*/
-        val = isNumeric(value) ? value : String.valueOf(CCUHsApi.getInstance().read(value));
-        Expression expression = new Expression(resVal+ " "+condition+" " + value);
-        status = expression.eval().intValue() > 0;
-        return status;
-    }
-    
-    public boolean isOperator() {
+
+    String error = null;
+
+    // "isOperator" was causing gson to deserialize server response `operator` as boolean.
+    boolean isThisOperator() {
         return order%2 == 1;
     }
-    
-    public boolean isCondition() {
+
+    // "isCondition" was causing gson to deserialize server response `condition` as boolean.
+    boolean isThisCondition() {
         return order%2 == 0;
     }
     
@@ -93,14 +82,9 @@ public class Conditional
      *
      */
 
-    void evaluateAlert(){
-        if (grpOperation!= null && !grpOperation.isEmpty() && grpOperation.contains("alert")){
-            status = true;
-        }
-    }
-    void evaluate() {
+    void evaluate(SharedPreferences spDefaultPrefs) {
         if (grpOperation!=null && !grpOperation.isEmpty() && grpOperation.contains("Clear Password")){
-            clearPassword(value);
+            clearPassword(value, spDefaultPrefs);
             return;
         }
         if (key.isEmpty() || value.isEmpty() || condition.isEmpty()) {
@@ -108,11 +92,12 @@ public class Conditional
         }
         val = isNumeric(value) ? value : String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value));
         
-        CcuLog.d("CCU_ALERTS"," Evaluate Conditional : "+key+ " "+condition+" "+val);
+        CcuLog.d("CCU_ALERTS"," Evaluate Conditional : "+key+ " "+condition+" "+val + (isNumeric(value) ? "" : "("+value+")" ));
 
         if (grpOperation == null || grpOperation.equals("")) {
             HashMap point = CCUHsApi.getInstance().read(key);
             if (point.size() == 0) {
+                error = "no point for " + key;
                 status = false;
                 return;
             }
@@ -126,6 +111,7 @@ public class Conditional
             for (Map q : equips) {
                 HashMap point = CCUHsApi.getInstance().read(key+" and equipRef == \""+q.get("id")+"\"");
                 if (point.size() == 0) {
+                    error = "no point for " + key+" and equipRef == \""+q.get("id")+"\"";
                     continue;
                 }
                 if (value.contains("zone")) {
@@ -150,6 +136,7 @@ public class Conditional
                 for (Map q : equips) {
                     HashMap point = CCUHsApi.getInstance().read(key+" and equipRef == \""+q.get("id")+"\"");
                     if (point.size() == 0) {
+                        error = "no point for " + key+" and equipRef == \""+q.get("id")+"\"";
                         continue;
                     }
                     val = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value+" and equipRef == \""+q.get("id")+"\""));
@@ -160,7 +147,6 @@ public class Conditional
                 }
             }
         } else if (grpOperation.contains("security")){
-            SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(AlertManager.getInstance().getApplicationContext());
             resVal = spDefaultPrefs.getInt("PASSWORD_ATTEMPT",0);
             CcuLog.d("CCU_ALERTS ", " Evaluate Conditional: "+toString());
             val = isNumeric(value) ? value : String.valueOf(CCUHsApi.getInstance().read(value));
@@ -242,6 +228,7 @@ public class Conditional
                 for (Map q : equips) {
                     HashMap point = CCUHsApi.getInstance().read(key+" and equipRef == \""+q.get("id")+"\"");
                     if (point.size() == 0) {
+                        error = "no point for " + key+" and equipRef == \""+q.get("id")+"\"";
                         continue;
                     }
                     //List<HisItem> hisItems = CCUHsApi.getInstance().hisRead(point.get("id").toString(),HDateTimeRange.make(HDateTime.make(System.currentTimeMillis()-1800000,HTimeZone.make(TimeZone.getDefault().getDisplayName(false,TimeZone.SHORT))), HDateTime.make(System.currentTimeMillis(),HTimeZone.make(TimeZone.getDefault().getDisplayName(false,TimeZone.SHORT)))));
@@ -250,6 +237,7 @@ public class Conditional
 
                     if (hisItems.size() < 2) {
                         CcuLog.d("CCU_ALERTS"," Not enough his vals to evaluate conditional "+toString());
+                        error = " Not enough his vals to evaluate conditional ";
                         return;
                     }
                     
@@ -283,9 +271,7 @@ public class Conditional
         CcuLog.d("CCU_ALERTS ", " Evaluated Conditional: "+toString()+" ,"+ (grpOperation != null ?(grpOperation.equals("equip") ? pointList.size() : status):"")+" resVal "+resVal);
     }
 
-    private void clearPassword(String value) {
-        Context context = AlertManager.getInstance().getApplicationContext();
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+    private void clearPassword(String value, SharedPreferences pref) {
         SharedPreferences.Editor editor = pref.edit();
         if (value.contains("Zone")){
             editor.putString("zone_settings_password","");

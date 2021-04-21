@@ -21,11 +21,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.cloud.RenatusServicesEnvironment;
+import a75f.io.logic.cloud.RenatusServicesUrls;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatDelegate;
 import android.text.format.Formatter;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import com.raygun.raygun4android.RaygunClient;
@@ -53,7 +56,6 @@ import com.renovo.bacnet4j.type.enumerated.EventType;
 import com.renovo.bacnet4j.type.enumerated.NotifyType;
 import com.renovo.bacnet4j.type.enumerated.ObjectType;
 import com.renovo.bacnet4j.type.enumerated.PropertyIdentifier;
-import com.renovo.bacnet4j.type.enumerated.RestartReason;
 import com.renovo.bacnet4j.type.enumerated.Segmentation;
 import com.renovo.bacnet4j.type.notificationParameters.NotificationParameters;
 import com.renovo.bacnet4j.type.primitive.Boolean;
@@ -89,7 +91,6 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.modbusbox.EquipsManager;
-import a75f.io.renatus.registration.InstallerOptions;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbModbusService;
@@ -207,7 +208,12 @@ public abstract class UtilityApplication extends Application {
         // we now have haystack
         RaygunClient.setUser(userNameForCrashReportsFromHaystack());
 
-        AlertManager.getInstance(this).setApplicationContext(this);
+        // Initialize AlertsManager right away.  (Urls were initialized in Globals.init)
+        RenatusServicesUrls urls = RenatusServicesEnvironment.getInstance().getUrls();
+
+        // Start AlertManager whether or not token is empty
+        String token = CCUHsApi.getInstance().getJwt();
+        AlertManager.getInstance(this, urls.getAlertsUrl(), token);
 
         //Modbus EquipmendManager
         EquipsManager.getInstance(this).setApplicationContext(this);

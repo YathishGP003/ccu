@@ -119,7 +119,7 @@ class LocalConnectionView @JvmOverloads constructor(
                .subscribeOn(Schedulers.io())
                .observeOn(AndroidSchedulers.mainThread())
                .subscribe(
-                  { _: Boolean -> { } },  // no further action on success
+                  { },  // no further action on success
                   { error: Throwable ->
                      val msg = "Error trying to reach new IP: ${error.message}"
                      CcuLog.e(L.TAG_CCU, msg, error)

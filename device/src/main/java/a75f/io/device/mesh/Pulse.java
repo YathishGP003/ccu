@@ -36,8 +36,9 @@ import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
-import a75f.io.logic.bo.building.Sensor;
-import a75f.io.logic.bo.building.SensorType;
+import a75f.io.logic.bo.building.sensors.Sensor;
+import a75f.io.logic.bo.building.sensors.SensorManager;
+import a75f.io.logic.bo.building.sensors.SensorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.bo.haystack.device.SmartNode;
@@ -127,6 +128,10 @@ public class Pulse
 					continue;
 				}
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
+				if (logPoint.isEmpty()) {
+					CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for "+phyPoint.get("dis"));
+					continue;
+				}
 				Point logPointInfo = new Point.Builder().setHashMap(logPoint).build();
 				isSse = logPointInfo.getMarkers().contains("sse");
 				double val = 0;
@@ -230,10 +235,13 @@ public class Pulse
 	private static void handleSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr) {
 		SmartNode node = new SmartNode(addr);
 		int emVal = 0;
+		
 		for (SmartNodeSensorReading_t r : sensorReadings) {
+			DLog.LogdStructAsJson(r);
 			SensorType t = SensorType.values()[r.sensorType.get()];
 			Port p = t.getSensorPort();
 			if (p == null) {
+				CcuLog.d(L.TAG_CCU_DEVICE, " Unknown sensor type : "+t.toString());
 				continue;
 			}
 			double val = r.sensorData.get();
@@ -264,6 +272,8 @@ public class Pulse
 				case SOUND:
 				case VOC:
 				case CO2_EQUIVALENT:
+				case PM2P5:
+				case PM10:
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), CCUUtils.roundToOneDecimal(val) );
 					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),CCUUtils.roundToOneDecimal(val));
 					break;
@@ -324,7 +334,7 @@ public class Pulse
 		try
 		{
 			int index = (int)Double.parseDouble(pp.get("analogType").toString());
-			analogSensor = Sensor.getSensorList().get(index);
+			analogSensor = SensorManager.getInstance().getExternalSensorList().get(index);
 		}catch (NumberFormatException e) {
 			e.printStackTrace();
 			return analogVal;
@@ -455,6 +465,12 @@ public class Pulse
 					continue;
 				}
 				HashMap logPoint = hayStack.read("point and id==" + phyPoint.get("pointRef"));
+				
+				if (logPoint.isEmpty()) {
+					CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for "+phyPoint.get("dis"));
+					continue;
+				}
+				
 				double val;
 				switch (Port.valueOf(phyPoint.get("port").toString())) {
 					case SENSOR_RT:
@@ -632,6 +648,12 @@ public class Pulse
 					continue;
 				}
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
+				
+				if (logPoint.isEmpty()) {
+					CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for "+phyPoint.get("dis"));
+					continue;
+				}
+				
 				double val;
 				switch (Port.valueOf(phyPoint.get("port").toString())){
 					case SENSOR_RT:

@@ -1,11 +1,10 @@
 package a75f.io.logic.cloud
 
-import a75f.io.alerts.HttpUtil
+import a75f.io.alerts.AlertManager
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.logic.BuildConfig
 import android.annotation.SuppressLint
 import android.content.SharedPreferences
-import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.net.InetAddress
@@ -25,7 +24,8 @@ import java.net.InetAddress
 
 private const val HTTP = "http://"
 
-private const val ALERTS_EXT = ":5000"
+private const val ALERTS_EXT = ":8087"
+
 private const val CARETAKER_EXT = ":3100/api/v1/"
 private const val HAYSTACK_EXT = ":8085/v1/"
 private const val FILESTORAGE_EXT = ":8081"
@@ -52,10 +52,6 @@ class RenatusServicesEnvironment(
          }
          return instance
       }
-   }
-
-   init {
-      HttpUtil.alertsApiBase = urls.alertsUrl
    }
 
    /**
@@ -134,8 +130,7 @@ class RenatusServicesEnvironment(
    }
 
    private fun setupUrls() {
-
-      HttpUtil.alertsApiBase = urls.alertsUrl
+      AlertManager.getInstance().setAlertsApiBase(urls.alertsUrl, CCUHsApi.getInstance().jwt)
       CCUHsApi.getInstance().resetBaseUrls(urls.haystackUrl, urls.caretakerUrl)
    }
 }

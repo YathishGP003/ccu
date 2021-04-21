@@ -9,22 +9,27 @@ import android.util.Log;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import java.util.HashMap;
-
-import a75f.io.alerts.AlertManager;
-import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+
+import static a75f.io.logic.pubnub.AlertMessageHandlers.*;
 
 public class PbMessageHandler
 {
     public static final String CM_RESET = "CM RESET";
-    public static final String PRE_DEF_ALERT = "predefinedAlertDefinition";
-    
+
     private static PbMessageHandler instance = null;
     private HandlerThread handlerThread;
     private Handler       messageHandler;
+
+    // do not use directly for now.  Use getter for lazy initialization, until DI implemented.
+    private AlertMessageHandler alertMessageHandler;
+    private AlertMessageHandler alertMessageHandler() {
+        if (alertMessageHandler == null) {
+            alertMessageHandler = AlertMessageHandler.instanceOf();
+        }
+        return alertMessageHandler;
+    }
     
     /**
      * Handler thread makes sure that the pubnub messages are processed sequentially on the CCU.
@@ -100,22 +105,26 @@ public class PbMessageHandler
             case RemoteCommandUpdateHandler.CMD:
                 RemoteCommandUpdateHandler.handleMessage(msg, context);
                 break;
-            case AlertDefinitionHandler.CMD:
-                AlertDefinitionHandler.handleMessage(msg);
+            case CREATE_CUSTOM_ALERT_DEF_CMD:
+            case UPDATE_CUSTOM_ALERT_DEF_CMD:
+                alertMessageHandler().handleCustomAlertDefMessage(msg);
                 break;
-            case AlertRemoveHandler.REM_ALERT_CMD:
-            case AlertRemoveHandler.REMOVE_DEF_CMD:
-            case AlertRemoveHandler.CLR_SITEDEF_CMD:
-                AlertRemoveHandler.handleMessage(cmd, msg);
+            case REMOVE_ALERT_CMD:
+            case REMOVE_ALERTS_CMD:
+                alertMessageHandler().handleAlertRemoveMessage(cmd, msg);
                 break;
-            case PRE_DEF_ALERT:
-                AlertManager.getInstance(Globals.getInstance().getApplicationContext()).fetchPredefinedAlerts();
+            case CREATE_PREDEFINED_ALERT_DEF_CMD:
+            case UPDATE_PREDEFINED_ALERT_DEF_CMD:
+            case DELETE_PREDEFINED_ALERT_DEF_CMD:
+                alertMessageHandler().handlePredefinedAlertDefMessage(msg);
+                break;
+            case DELETE_CUSTOM_ALERT_DEF_CMD:
+            case DELETE_SITE_DEFS_CMD:
+                alertMessageHandler().handleAlertDefRemoveMessage(cmd, msg);
                 break;
             default:
                 CcuLog.d(L.TAG_CCU_PUBNUB, "UnSupported PubNub Command : "+cmd);
-                
         }
-        
     }
     
     class PbMessage {

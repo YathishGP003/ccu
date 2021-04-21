@@ -984,8 +984,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             seekArc.scaletoNormalBig(250, 210);
                             imageOn = true;
                             selectedView = seekArc.getId();
-                            scrollViewParent.scrollTo(0,seekArc.getTop());
-                            //scrollViewParent.scrollTo(0,seekArc.getTop());
                             try {
                                 textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
                                 textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
@@ -1026,7 +1024,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     hideWeather();
                     imageOn = true;
                     selectedView = seekArc.getId();
-                    scrollViewParent.scrollTo(0,seekArc.getTop());
                     try {
                         textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
@@ -1506,6 +1503,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 nonTempControl.setEquipType(2);
                 nonTempControl.setImage(R.drawable.ic_zone_modbus);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_modbus_mx);
+            }
+            if ((zoneEquips.get("profile").toString()).contains("MODBUS") && (zoneEquips.get("profile").toString()).contains("EMR")) {
+                nonTempControl.setEquipType(2);
+                nonTempControl.setImage(R.drawable.ic_zone_em);
+                nonTempControl.setImageViewExpanded(R.drawable.ic_zone_em_max);
             }
         }else{
             //No devices paired zone
@@ -2744,7 +2746,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     linearLayoutZonePoints.addView(viewPointRow2);
 
             }else{
-                    labelTarget.setText("Target "+plcPoints.get("Unit Type").toString()+" : ");
+                    labelTarget.setText("Target "+plcPoints.get("Unit Type").toString().replace("Native-","")+" : ");
                     textViewTargetAir.setText(plcPoints.get("Target Value").toString()+" "+plcPoints.get("Unit").toString());
                     viewPointRow1.setPadding(0,0,0,40);
                     linearLayoutZonePoints.addView(viewTitle);

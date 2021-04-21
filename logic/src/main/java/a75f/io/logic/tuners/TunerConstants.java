@@ -133,7 +133,8 @@ public class TunerConstants
     public static final double OAO_SMART_PURGE_FAN_SPEED = 50 ;
     public static final double OAO_SMART_PURGE_FAN_LOOP_OUTPUT_MIN = 50 ;
     public static final double OAO_SMART_PURGE_MIN_DAMPER_OPEN_MULTIPLIER = 1.5 ;
-
+    public static final double OAO_ECONOMIZING_DRY_BULB_THRESHOLD = 55 ;
+    
 	public static final String VAV_TUNER_GROUP = "VAV";
     public static final String DAB_TUNER_GROUP = "DAB";
     public static final String TI_TUNER_GROUP = "TI";

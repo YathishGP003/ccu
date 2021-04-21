@@ -14,6 +14,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.logic.bo.building.system.SystemState;
+import a75f.io.logic.tuners.DcwbTuners;
 import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
 
@@ -158,6 +159,8 @@ public abstract class DabSystemProfile extends SystemProfile
         addNewTunerPoints(equipref);
     
         SystemTuners.addPITuners(equipref, TunerConstants.DAB_TUNER_GROUP, Tags.DAB, CCUHsApi.getInstance());
+    
+        DcwbTuners.addEquipDcwbTuners(hayStack, siteRef, HSUtil.getDis(equipref), equipref, tz);
     }
     
     public void addNewTunerPoints(String equipRef) {

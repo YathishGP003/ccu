@@ -23,7 +23,7 @@ import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.SystemPILoopController;
 import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.bo.util.HSEquipUtil;
+import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -241,8 +241,8 @@ public class DabSystemController extends SystemController
                 zoneDeadCount++;
             } else if (hasTemp(equip)) {
                 double zoneCurTemp = getEquipCurrentTemp(equip.getId());
-                double desiredTempCooling = HSEquipUtil.getDesiredTempCooling(equip.getId());
-                double desiredTempHeating = HSEquipUtil.getDesiredTempHeating(equip.getId());
+                double desiredTempCooling = SystemTemperatureUtil.getDesiredTempCooling(equip.getId());
+                double desiredTempHeating = SystemTemperatureUtil.getDesiredTempHeating(equip.getId());
                 
                 double tempMidPoint = (desiredTempCooling + desiredTempHeating)/2;
                 double zoneCoolingLoad = zoneCurTemp > tempMidPoint ? zoneCurTemp - desiredTempCooling : 0;

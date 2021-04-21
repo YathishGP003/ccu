@@ -1,6 +1,6 @@
 {
   "modbusEquipId (_id)": "5f1f30ad18baef4f1d9a069",
-  "name": "Kamstrup btu 602",
+  "name": "Kamstrup BTU 602",
   "description": "This document contains the configuration necessary to manage Cooling Energy Meter",
   "equipType": "BTU",
   "model": [
@@ -15,7 +15,7 @@
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2fe1",
-          "name": "inlet temperature t1",
+          "name": "Inlet Temperature T1",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
@@ -59,7 +59,7 @@
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2fe2",
-          "name": "Outlet temperature T2",
+          "name": "Outlet Temperature T2",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
@@ -261,7 +261,7 @@
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2fe6",
-          "name": "Volume1",
+          "name": "Volume 1",
           "startBit": 0,
           "endBit": 15,
           "logicalPointTags": [
@@ -298,7 +298,7 @@
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a2fe7",
-          "name": "Volume2",
+          "name": "Volume 2",
           "startBit": 0,
           "endBit": 15,
           "logicalPointTags": [

@@ -44,13 +44,13 @@ public class EquipProcessor
         equipmentDevices = parser.parseAllEquips(c);
 
         energyMeterSystemDevices = parser.parseEneryMeterSystemEquips(c);
-
         for(EquipmentDevice equipmentDevice:equipmentDevices){
             addEquips(equipmentDevice);
         }
         for(EquipmentDevice equipmentDevice:energyMeterSystemDevices){
-            addEquips(equipmentDevice);
+                       addEquips(equipmentDevice);
         }
+
     }
 
     public void addEquips(EquipmentDevice equipmentDevice) {

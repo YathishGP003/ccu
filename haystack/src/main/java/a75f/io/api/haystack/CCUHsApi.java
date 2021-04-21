@@ -474,27 +474,24 @@ public class CCUHsApi
      */
     public void writeDefaultVal(String query, Double val)
     {
-        try {
-            ArrayList points = readAll(query);
-            String id = ((HashMap) points.get(0)).get("id").toString();
-            if (id == null || id == "") {
-                throw new IllegalArgumentException();
-            }
+        HashMap<Object, Object> point = readEntity(query);
+        if (!point.isEmpty()) {
+            String id = point.get("id").toString();
             pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, getCCUUserName(), HNum.make(val), HNum.make(0));
-        }catch (Exception e){
-            e.printStackTrace();
+        } else {
+            CcuLog.d("CCU_HS", "Invalid point write attempt: "+query);
         }
     }
 
     public void writeDefaultVal(String query, String val)
     {
-        ArrayList points = readAll(query);
-        String    id     = ((HashMap) points.get(0)).get("id").toString();
-        if (id == null || id == "")
-        {
-            throw new IllegalArgumentException();
+        HashMap<Object, Object> point = readEntity(query);
+        if (!point.isEmpty()) {
+            String id = point.get("id").toString();
+            pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, getCCUUserName(), HStr.make(val), HNum.make(0));
+        } else {
+            CcuLog.d("CCU_HS", "Invalid point write attempt: "+query);
         }
-        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, getCCUUserName(), HStr.make(val), HNum.make(0));
     }
 
     public void writeDefaultValById(String id, Double val)
@@ -570,16 +567,15 @@ public class CCUHsApi
     public Double readDefaultVal(String query)
     {
 
-        ArrayList points = readAll(query);
-        if((points != null) && (points.size() > 0)) {
-            String id = ((HashMap) points.get(0)).get("id").toString();
+        HashMap<Object, Object> point = readEntity(query);
+        if(!point.isEmpty()) {
+            String id = point.get("id").toString();
             if (id == null || id == "") {
                 return 0.0;
             }
             ArrayList values = CCUHsApi.getInstance().readPoint(id);
             if (values != null && values.size() > 0) {
                 HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
-                //CcuLog.d("CCU_HS", "" + valMap);
                 return valMap.get("val") == null ? 0 : Double.parseDouble(valMap.get("val").toString());
             } else {
                 return null;
@@ -616,20 +612,16 @@ public class CCUHsApi
     public String readDefaultStrVal(String query)
     {
 
-        ArrayList points = readAll(query);
-        String    id     = ((HashMap) points.get(0)).get("id").toString();
-        if (id == null || id == "")
-        {
+        HashMap<Object, Object> point = readEntity(query);
+        Object id = point.get("id");
+        if (id == null || id == "") {
             return "";
         }
-        ArrayList values = CCUHsApi.getInstance().readPoint(id);
-        if (values != null && values.size() > 0)
-        {
+        ArrayList values = CCUHsApi.getInstance().readPoint(id.toString());
+        if (values != null && values.size() > 0) {
             HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
-            //CcuLog.d("CCU_HS", "" + valMap);
             return valMap.get("val") == null ? "" : valMap.get("val").toString();
-        } else
-        {
+        } else {
             return "";
         }
     }
@@ -690,26 +682,24 @@ public class CCUHsApi
     
     public Double readPointPriorityValByQuery(String query)
     {
-        ArrayList points = readAll(query);
-        String    id     = points.size() == 0 ? null : ((HashMap) points.get(0)).get("id").toString();
-        if (id == null || id == "")
-        {
+        HashMap<Object, Object> point = readEntity(query);
+        Object id = point.get("id");
+        if (id == null || id == "") {
             return null;
         }
         
-        return readPointPriorityVal(id);
+        return readPointPriorityVal(id.toString());
     }
     
     public String readId(String query)
     {
-        ArrayList points = readAll(query);
-        String    id     = points.size() == 0 ? null : ((HashMap) points.get(0)).get("id").toString();
-        if (id == null || id == "")
-        {
+        HashMap<Object, Object> point = readEntity(query);
+        Object id = point.get("id");
+        if (id == null || id == "") {
             return null;
         }
         
-        return id;
+        return id.toString();
     }
 
     public void hisWrite(HisItem item)

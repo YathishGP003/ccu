@@ -765,14 +765,22 @@ public class OAOTuners
             String economizingDryBulbThresholdId = hayStack.addPoint(economizingDryBulbThreshold);
             HashMap economizingDryBulbThresholdPoint = hayStack.read("point and tuner and default and oao and " +
                                                                         "economizing and dry and bulb and threshold");
-            ArrayList<HashMap> economizingDryBulbThresholdPointArr = hayStack.readPoint(economizingDryBulbThresholdPoint.get("id").toString());
-            for (HashMap valMap : economizingDryBulbThresholdPointArr) {
-                if (valMap.get("val") != null) {
-                    hayStack.pointWrite(HRef.copy(economizingDryBulbThresholdId), (int) Double.parseDouble(valMap.get(
-                        "level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            //Just in case BuildingTuner is not initialized during upgrades on non-primary CCUs, initialize with
+            // default values
+            if (economizingDryBulbThresholdPoint.isEmpty()) {
+                hayStack.writePointForCcuUser(economizingDryBulbThresholdId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.OAO_ECONOMIZING_DRY_BULB_THRESHOLD, 0);
+                hayStack.writeHisValById(economizingDryBulbThresholdId, TunerConstants.OAO_ECONOMIZING_DRY_BULB_THRESHOLD);
+            } else {
+                ArrayList<HashMap> economizingDryBulbThresholdPointArr = hayStack.readPoint(economizingDryBulbThresholdPoint.get("id").toString());
+                for (HashMap valMap : economizingDryBulbThresholdPointArr) {
+                    if (valMap.get("val") != null) {
+                        hayStack.pointWrite(HRef.copy(economizingDryBulbThresholdId), (int) Double.parseDouble(valMap.get("level").toString()),
+                                            valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                    }
                 }
+                hayStack.writeHisValById(economizingDryBulbThresholdId, HSUtil.getPriorityVal(economizingDryBulbThresholdId));
             }
-            hayStack.writeHisValById(economizingDryBulbThresholdId, HSUtil.getPriorityVal(economizingDryBulbThresholdId));
+    
         }
         
     }

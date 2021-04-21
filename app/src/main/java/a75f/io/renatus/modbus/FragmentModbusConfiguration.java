@@ -208,7 +208,10 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     }
 
     private void updateUi(boolean isNewConfig) {
-        initConfiguration();
+        /**
+         * Still under progress for specs
+         */
+        // initConfiguration();
         //If multiple slave address occurs
         ArrayList<Integer> slaveAddress = new ArrayList();
         for (int i = 1; i <= 247; i++)

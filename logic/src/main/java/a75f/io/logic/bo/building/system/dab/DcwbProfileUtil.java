@@ -167,18 +167,18 @@ public class DcwbProfileUtil {
         String systemDCWBValveLoopOutputId = hayStack.addPoint(systemDCWBValveLoopOutput);
         hayStack.writeHisValById(systemDCWBValveLoopOutputId, 0.0 );
     
-        Point chilledWaterDeltaTValveLoop  = new Point.Builder()
-                                              .setDisplayName(equip.getDisplayName()+"-"+"chilledWaterDeltaTValveLoop ")
+        Point chilledWaterTargetExitTemperature  = new Point.Builder()
+                                              .setDisplayName(equip.getDisplayName()+"-"+ "chilledWaterExitTemperatureTarget")
                                               .setSiteRef(equip.getSiteRef())
                                               .setEquipRef(equip.getId())
                                               .addMarker("system").addMarker("dcwb")
-                                              .addMarker("chilled").addMarker("water").addMarker("delta").addMarker("loop")
-                                              .addMarker("his").addMarker("sp")
+                                              .addMarker("chilled").addMarker("water").addMarker("exit").addMarker("temp")
+                                              .addMarker("target").addMarker("his").addMarker("sp")
                                               .setTz(equip.getTz())
-                                              .setUnit("%")
+                                              .setUnit("\u00B0F")
                                               .build();
-        String chilledWaterDeltaTValveLoopId = hayStack.addPoint(chilledWaterDeltaTValveLoop );
-        hayStack.writeHisValById(chilledWaterDeltaTValveLoopId, 0.0 );
+        String chilledWaterTargetExitTemperatureId = hayStack.addPoint(chilledWaterTargetExitTemperature );
+        hayStack.writeHisValById(chilledWaterTargetExitTemperatureId, 0.0 );
     }
     
     public static void deleteConfigPoints(CCUHsApi hayStack) {
@@ -206,8 +206,8 @@ public class DcwbProfileUtil {
     }
     
     public static void deleteLoopOutputPoints(CCUHsApi hayStack) {
-        deleteLoopPoint("valve and output", hayStack);
-        deleteLoopPoint("chilled and water and delta", hayStack);
+        deleteLoopPoint("valve and loop and output", hayStack);
+        deleteLoopPoint("chilled and water and target and exit and temp", hayStack);
     }
     
     
@@ -219,7 +219,7 @@ public class DcwbProfileUtil {
     }
     
     private static void deleteLoopPoint(String query, CCUHsApi hayStack) {
-        HashMap point = hayStack.read("system and loop and "+query);
+        HashMap point = hayStack.read("system and "+query);
         if (!point.isEmpty()) {
             hayStack.deleteWritablePoint(point.get("id").toString());
         }

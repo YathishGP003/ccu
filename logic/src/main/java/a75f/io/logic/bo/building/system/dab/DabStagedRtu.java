@@ -228,7 +228,6 @@ public class DabStagedRtu extends DabSystemProfile
         for (int stageIndex = HEATING_5.ordinal(); stageIndex >= COOLING_1.ordinal(); stageIndex-- ) {
             Stage stage = Stage.values()[stageIndex];
             HashSet<Integer> relaySet = getRelayMappingForStage(stage);
-            CcuLog.d(L.TAG_CCU_SYSTEM, "Relays mapped to stage "+stage+" "+relaySet.toString());
             for (Integer relay : relaySet) {
                 double curRelayState = ControlMote.getRelayState("relay" + relay);
                 stageStatus[stage.ordinal()] = (int) curRelayState;
@@ -251,7 +250,6 @@ public class DabStagedRtu extends DabSystemProfile
         for (int stageIndex = COOLING_1.ordinal(); stageIndex <= HEATING_5.ordinal(); stageIndex++ ) {
             Stage stage = Stage.values()[stageIndex];
             HashSet<Integer> relaySet = getRelayMappingForStage(stage);
-            CcuLog.d(L.TAG_CCU_SYSTEM, "Relays mapped to stage "+stage+" "+relaySet.toString());
             for (Integer relay : relaySet) {
                 if (stageUpTimerCounter == 0 && stageDownTimerCounter == 0) {
                     double relayState = tempStatus[stage.ordinal()];

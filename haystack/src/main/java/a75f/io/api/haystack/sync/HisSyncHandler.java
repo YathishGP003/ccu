@@ -198,7 +198,7 @@ public class HisSyncHandler
                      * situation.It appears to be safe to ignore now. But we will still track by printing the stack trace to
                      * monitor how frequently this is happening or there is more to it than what we see now.
                      */
-                    e.printStackTrace();
+                    CcuLog.e(TAG, "Failed to update HisItem !", e);
                 }
             }
         }

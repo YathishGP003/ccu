@@ -4,7 +4,7 @@ import a75.io.algos.ControlLoop
 import android.util.Log
 
 
-data class MaximizedDeltaTDto( val outletWaterTemperature : Double,
+data class MaximizedDeltaTInput( val outletWaterTemperature : Double,
                             val averageDesiredCoolingTemp : Double,
                             val chilledWaterExitTemperatureMargin : Double,
                             val piLoop : ControlLoop)
@@ -18,8 +18,10 @@ data class MaximizedDeltaTDto( val outletWaterTemperature : Double,
  * to open the valve to 100% from 4 deg below desired temperature to same as desired cooling temperature .
  */
 class MaximizedDeltaTControl {
-    companion object Algo{
-        fun getChilledWaterMaximizedDeltaTValveLoop(data: MaximizedDeltaTDto): Double {
+
+    companion object {
+        @JvmStatic
+        fun getChilledWaterMaximizedDeltaTValveLoop(data: MaximizedDeltaTInput): Double {
             Log.i("CCU_SYSTEM", " getChilledWaterAdaptiveDeltaTValveLoop $data")
             data.piLoop.dump()
             val chilledWaterTargetExitTemperature = data.averageDesiredCoolingTemp - data.chilledWaterExitTemperatureMargin

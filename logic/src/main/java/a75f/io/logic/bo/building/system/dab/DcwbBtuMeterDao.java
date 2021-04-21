@@ -16,8 +16,8 @@ import a75f.io.logic.Globals;
 public class DcwbBtuMeterDao {
     
     //Just use a reasonable non-zero value to avoid algos going crazy when btu meter is actually not paired.
-    private static int DEFAULT_INLET_TEMP = 44;
-    private static int DEFAULT_OUTLET_TEMP = 55;
+    private static final int DEFAULT_INLET_TEMP = 44;
+    private static final int DEFAULT_OUTLET_TEMP = 55;
     
     
     public static DcwbBtuMeterDao getInstance() {

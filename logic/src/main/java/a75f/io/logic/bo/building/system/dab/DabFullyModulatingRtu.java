@@ -300,6 +300,9 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             setCmdSignal("valve", signal);
         }
         ControlMote.setAnalogOut("analog1", signal);
+        
+        setSystemPoint("dcwb and exit and temp and target",
+                       dcwbAlgoHandler.getChilledWaterTargetExitTemperature());
     }
     
     private void updateAnalog2Output(DabSystemController dabSystem) {
@@ -647,17 +650,22 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         String humidifierTypeId = hayStack.addPoint(humidifierType);
         hayStack.writeDefaultValById(humidifierTypeId, 0.0 );
     
+        createDcwbEnabledPoint(hayStack, siteRef, equipDis, equipref, tz);
+        
+    }
+    
+    private void createDcwbEnabledPoint(CCUHsApi hayStack, String siteRef, String equipDis, String equipRef,
+                                        String tz) {
         Point dcwbEnabled = new Point.Builder()
                                 .setDisplayName(equipDis+"-"+"dcwbEnabled")
                                 .setSiteRef(siteRef)
-                                .setEquipRef(equipref)
+                                .setEquipRef(equipRef)
                                 .addMarker("system").addMarker("config").addMarker("dcwb")
                                 .addMarker("enabled").addMarker("writable").addMarker("sp")
                                 .setEnums("false,true").setTz(tz)
                                 .build();
         String dcwbEnabledId = hayStack.addPoint(dcwbEnabled);
         hayStack.writeDefaultValById(dcwbEnabledId, 0.0 );
-        
     }
     
     public double getConfigVal(String tags) {
@@ -938,6 +946,14 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         createAnalog4LoopConfigPoints(Tags.COOLING,systemEquip, hayStack);
         createChilledWaterConfigPoints(systemEquip, hayStack);
         createLoopPoints(systemEquip, hayStack);
+    
+        //Needed for upgrades
+        HashMap configPoint = hayStack.read("point and system and config and dcwb and enabled");
+        if (configPoint.isEmpty()) {
+            createDcwbEnabledPoint(hayStack, systemEquip.getSiteRef(), systemEquip.getDisplayName(),
+                                   systemEquip.getId(), systemEquip.getTz());
+        }
+        
         setConfigVal("dcwb and enabled",1);
         CCUHsApi.getInstance().scheduleSync();
     }

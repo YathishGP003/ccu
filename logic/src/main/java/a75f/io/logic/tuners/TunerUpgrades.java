@@ -11,6 +11,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 
 /**
  * Tuners are normally created when an equip is created.
@@ -85,5 +86,17 @@ public class TunerUpgrades {
         Equip tunerEquip = new Equip.Builder().setHashMap(buildTuner).build();
         DcwbTuners.addDefaultDcwbTuners(hayStack, tunerEquip.getSiteRef(), tunerEquip.getId(),
                                         tunerEquip.getDisplayName(), tunerEquip.getTz());
+    
+    
+        //If the current profile is DABFullyModulating, create new system equip tuner points.
+        HashMap equipMap = CCUHsApi.getInstance().read("equip and system");
+        if (!equipMap.isEmpty()) {
+            Equip systemEquip = new Equip.Builder().setHashMap(equipMap).build();
+            if (ProfileType.valueOf(systemEquip.getProfile()) == ProfileType.SYSTEM_DAB_ANALOG_RTU ) {
+                DcwbTuners.addEquipDcwbTuners(hayStack, systemEquip.getSiteRef(), systemEquip.getDisplayName(),
+                                              systemEquip.getId(), systemEquip.getTz());
+            }
+        }
+        
     }
 }

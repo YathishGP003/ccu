@@ -1,20 +1,15 @@
 package a75f.io.logic.bo.building.system.dab;
 
-import android.content.Context;
-
 import java.util.HashMap;
 
 import a75.io.algos.ControlLoop;
-import a75f.io.algos.dcwb.AdaptiveDeltaTControl;
-import a75f.io.algos.dcwb.AdaptiveDeltaTDto;
+import a75f.io.algos.dcwb.AdaptiveDeltaTControlAlgo;
+import a75f.io.algos.dcwb.AdaptiveDeltaTInput;
 import a75f.io.algos.dcwb.MaximizedDeltaTControl;
-import a75f.io.algos.dcwb.MaximizedDeltaTDto;
+import a75f.io.algos.dcwb.MaximizedDeltaTInput;
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.logger.CcuLog;
-import a75f.io.logic.Globals;
-import a75f.io.logic.L;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
-import a75f.io.logic.tuners.DcwbTuners;
+import a75f.io.logic.bo.util.UnitUtils;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -24,8 +19,8 @@ import a75f.io.logic.tuners.TunerUtil;
  */
 class DcwbAlgoHandler {
     
-    private final int MAX_PI_LOOP_OUTPUT = 100;
-    private final int MIN_PI_LOOP_OUTPUT = 0;
+    private static final int MAX_PI_LOOP_OUTPUT = 100;
+    private static final int MIN_PI_LOOP_OUTPUT = 0;
     
     public DcwbAlgoHandler(boolean isAdaptiveDelta, String equipRef, CCUHsApi hsApi) {
         hayStack = hsApi;
@@ -34,23 +29,23 @@ class DcwbAlgoHandler {
         systemEquipRef = equipRef;
     }
     
-    ControlLoop dcwbControlLoop;
-    String systemEquipRef;
-    CCUHsApi hayStack;
-    double proportionalGain = TunerConstants.DEFAULT_PROPORTIONAL_GAIN;
-    double integralGain =  TunerConstants.DEFAULT_INTEGRAL_GAIN;
-    double proportionalSpread = TunerConstants.DEFAULT_PROPORTIONAL_SPREAD;
-    double integralTimeout = TunerConstants.DEFAULT_INTEGRAL_TIMEOUT;
+    private ControlLoop dcwbControlLoop;
+    private String systemEquipRef;
+    private CCUHsApi hayStack;
+    private double proportionalGain = TunerConstants.DEFAULT_PROPORTIONAL_GAIN;
+    private double integralGain =  TunerConstants.DEFAULT_INTEGRAL_GAIN;
+    private double proportionalSpread = TunerConstants.DEFAULT_PROPORTIONAL_SPREAD;
+    private double integralTimeout = TunerConstants.DEFAULT_INTEGRAL_TIMEOUT;
     
-    double chilledWaterTargetDelta;
-    double chilledWaterExitTemperatureMargin;
-    double chilledWaterMaxFlowRate;
+    private double chilledWaterTargetDelta;
+    private double chilledWaterExitTemperatureMargin;
+    private double chilledWaterMaxFlowRate;
     
-    boolean adaptiveDelta;
+    private boolean adaptiveDelta;
     
-    double chilledWaterValveLoopOutput;
+    private double chilledWaterValveLoopOutput;
     
-    double adaptiveComfortThresholdMargin = TunerConstants.ADAPTIVE_COMFORT_THRESHOLD_MARGIN;
+    private double adaptiveComfortThresholdMargin = TunerConstants.ADAPTIVE_COMFORT_THRESHOLD_MARGIN;
     
     /**
      * Initialize tuners.
@@ -71,7 +66,7 @@ class DcwbAlgoHandler {
     }
     
     /**
-     * Runs the appropriage DCWB algorithm and update system chilledWaterValveLoopOutput.
+     * Runs the appropriate DCWB algorithm and update system chilledWaterValveLoopOutput.
      */
     public void runLoopAlgorithm() {
     
@@ -79,10 +74,8 @@ class DcwbAlgoHandler {
         DcwbBtuMeterDao btuDao = DcwbBtuMeterDao.getInstance();
         
         if (btuDao.getCWMaxFlowRate(hayStack) < chilledWaterMaxFlowRate) {
-            chilledWaterValveLoopOutput = adaptiveDelta ? AdaptiveDeltaTControl.Algo
-                                                    .getChilledWaterAdaptiveDeltaTValveLoop(getAdaptiveDeltaDto(btuDao))
-                                            : MaximizedDeltaTControl.Algo
-                                                    .getChilledWaterMaximizedDeltaTValveLoop(getMaximizedDeltaTDto(btuDao));
+            chilledWaterValveLoopOutput = adaptiveDelta ? AdaptiveDeltaTControlAlgo.getChilledWaterAdaptiveDeltaTValveLoop(getAdaptiveDeltaDto(btuDao))
+                                            : MaximizedDeltaTControl.getChilledWaterMaximizedDeltaTValveLoop(getMaximizedDeltaTDto(btuDao));
         } else {
             chilledWaterValveLoopOutput = hayStack.readHisValByQuery("dcwb and valve and loop and output");
         }
@@ -100,20 +93,25 @@ class DcwbAlgoHandler {
         dcwbControlLoop.reset();
     }
     
-    private AdaptiveDeltaTDto getAdaptiveDeltaDto(DcwbBtuMeterDao btuDao) {
-        double inletWaterTemp = btuDao.getInletWaterTemperature(hayStack);
+    public double getChilledWaterTargetExitTemperature() {
+        return adaptiveDelta ? 0 :
+                     (SystemTemperatureUtil.getAverageCoolingDesiredTemp() - chilledWaterExitTemperatureMargin);
+    }
+    
+    private AdaptiveDeltaTInput getAdaptiveDeltaDto(DcwbBtuMeterDao btuDao) {
+        double inletWaterTemp = UnitUtils.celsiusToFahrenheit(btuDao.getInletWaterTemperature(hayStack));
         double averageCoolingDesiredTemp = SystemTemperatureUtil.getAverageCoolingDesiredTemp();
-        return new AdaptiveDeltaTDto(inletWaterTemp,
+        return new AdaptiveDeltaTInput(inletWaterTemp,
                                  chilledWaterTargetDelta,
                                  adaptiveComfortThresholdMargin,
                                      averageCoolingDesiredTemp,
                                  dcwbControlLoop);
     }
     
-    private MaximizedDeltaTDto getMaximizedDeltaTDto(DcwbBtuMeterDao btuDao) {
-        double outletWaterTemp = btuDao.getOutletWaterTemperature(hayStack);
+    private MaximizedDeltaTInput getMaximizedDeltaTDto(DcwbBtuMeterDao btuDao) {
+        double outletWaterTemp = UnitUtils.celsiusToFahrenheit(btuDao.getOutletWaterTemperature(hayStack));
         double averageCoolingDesiredTemp = SystemTemperatureUtil.getAverageCoolingDesiredTemp();
-        return new MaximizedDeltaTDto(outletWaterTemp,
+        return new MaximizedDeltaTInput(outletWaterTemp,
                                       averageCoolingDesiredTemp,
                                      chilledWaterExitTemperatureMargin,
                                      dcwbControlLoop);

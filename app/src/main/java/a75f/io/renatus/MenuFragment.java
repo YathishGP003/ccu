@@ -47,7 +47,6 @@ public class MenuFragment extends Fragment {
     TextView textSystemProfile;
     @BindView(R.id.text_modbus_config)
     TextView textModbusConfig;
-
     @BindView(R.id.text_temporary_override)
     TextView textTemporaryOverride;
     @BindView(R.id.text_about)
@@ -65,7 +64,6 @@ public class MenuFragment extends Fragment {
     LinearLayout lilSystemProfile;
     @BindView(R.id.lil_modbus_config)
     LinearLayout lilModbusConfig;
-
     @BindView(R.id.lil_temporary_override)
     LinearLayout lilTemporaryOverride;
     @BindView(R.id.lil_about)
@@ -105,6 +103,7 @@ public class MenuFragment extends Fragment {
         textModbusConfig.setTextColor(getResources().getColor(R.color.black));
         textTemporaryOverride.setTextColor(getResources().getColor(R.color.black));
         textAbout.setTextColor(getResources().getColor(R.color.black));
+
         lilAccount.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
         lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
         liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
@@ -200,7 +199,6 @@ public class MenuFragment extends Fragment {
             lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             lilModbusConfig.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-
             lilTemporaryOverride.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             lilAbout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
         });
@@ -330,29 +328,29 @@ public class MenuFragment extends Fragment {
             lilAbout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
 
         });
-    
+
         view.findViewById(R.id.lil_modbus_config).setOnClickListener(view1 -> {
             if (SettingsFragment.SettingFragmentHandler != null) {
                 SettingsFragment.SettingFragmentHandler.sendEmptyMessage(5);
             }
-        
+
             iconAccount.setColorFilter(ContextCompat.getColor(getActivity(),
-                                                              R.color.black));
+                    R.color.black));
             iconSecurity.setColorFilter(ContextCompat.getColor(getActivity(),
-                                                               R.color.black));
+                    R.color.black));
             iconWifi.setColorFilter(ContextCompat.getColor(getActivity(),
-                                                           R.color.black));
+                    R.color.black));
             iconInstaller.setColorFilter(ContextCompat.getColor(getActivity(),
-                                                                R.color.black));
+                    R.color.black));
             iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
-                                                                    R.color.black));
+                    R.color.black));
             iconModbusConfig.setColorFilter(ContextCompat.getColor(getActivity(),
-                                                                   R.color.white));
+                    R.color.white));
             iconTemporaryOverride.setColorFilter(ContextCompat.getColor(getActivity(),
-                                                                        R.color.black));
+                    R.color.black));
             iconAbout.setColorFilter(ContextCompat.getColor(getActivity(),
-                                                            R.color.black));
-        
+                    R.color.black));
+
             textAccount.setTextColor(getResources().getColor(R.color.black));
             textSecurity.setTextColor(getResources().getColor(R.color.black));
             textWifi.setTextColor(getResources().getColor(R.color.black));
@@ -361,8 +359,8 @@ public class MenuFragment extends Fragment {
             textModbusConfig.setTextColor(getResources().getColor(R.color.white));
             textTemporaryOverride.setTextColor(getResources().getColor(R.color.black));
             textAbout.setTextColor(getResources().getColor(R.color.black));
-        
-        
+
+
             lilAccount.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             lilAbout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
@@ -370,11 +368,10 @@ public class MenuFragment extends Fragment {
             lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             lilModbusConfig.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
-
             lilTemporaryOverride.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-        
+
         });
-    
+
         view.findViewById(R.id.lil_temporary_override).setOnClickListener(view1 -> {
             if (SettingsFragment.SettingFragmentHandler != null) {
                 SettingsFragment.SettingFragmentHandler.sendEmptyMessage(6);
@@ -413,7 +410,6 @@ public class MenuFragment extends Fragment {
             lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             lilModbusConfig.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-
             lilAbout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
 
         });
@@ -460,7 +456,6 @@ public class MenuFragment extends Fragment {
             lilTemporaryOverride.setBackgroundColor(getResources().getColor(android.R.color.transparent));
 
         });
-
 
 
     }

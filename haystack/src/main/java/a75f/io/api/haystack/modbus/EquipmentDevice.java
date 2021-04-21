@@ -216,7 +216,4 @@ public class EquipmentDevice {
     public void setFloorRef(String floorRef) {
         this.floorRef = floorRef;
     }
-
-
-
 }

@@ -176,7 +176,6 @@
 
     </LinearLayout>
 
-
     <LinearLayout
         android:id="@+id/lil_temporary_override"
         android:layout_width="match_parent"

@@ -494,7 +494,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
 
 
     /**
-     * Validate the energy distribution value
+     * Validate the energy distribution value for each floor
      * @param energyDistribution
      */
     public void validateEnergyDistributionValue(Map<Integer, Integer> energyDistribution) {

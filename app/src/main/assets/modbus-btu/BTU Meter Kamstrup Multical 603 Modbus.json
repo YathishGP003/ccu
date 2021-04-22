@@ -1,0 +1,258 @@
+{
+  "modbusEquipId (_id)": "5f1f30ad29baef4f1d9a069",
+  "name": "Kamstrup BTU 603",
+  "description": "This document contains the configuration necessary to manage Cooling Energy Meter",
+  "equipType": "BTU",
+  "model": [
+    "Multical 603"
+  ],
+  "registers": [
+    {
+      "registerAddress": 160,
+      "registerNumber": "40161",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad29bcbf4f1d9a2fe1",
+          "name": "Inlet Temperature T1",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+            {
+              "tagName": "btu"
+            },
+            {
+              "tagName": "inlet"
+            },
+            {
+              "tagName": "temp"
+            },
+            {
+              "tagName": "t1"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "C"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 162,
+      "registerNumber": "40163",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad29bcbf4f1d9a2fe2",
+          "name": "Outlet Temperature T2",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+            {
+              "tagName": "btu"
+            },
+            {
+              "tagName": "outlet"
+            },
+            {
+              "tagName": "temp"
+            },
+            {
+              "tagName": "t2"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "C"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 154,
+      "registerNumber": "40155",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad29bcbf4f1d9a2fe3",
+          "name": "Actual Flow",
+          "startBit": 0,
+          "endBit": 15,
+          "displayInUiDefault": false,
+          "logicalPointTags": [
+            {
+              "tagName": "btu"
+            },
+            {
+              "tagName": "actual"
+            },
+            {
+              "tagName": "flow"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "Cubic meter/hour"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 158,
+      "registerNumber": "40159",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad29bcbf4f1d9a2fe4",
+          "name": "Actual Power",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "btu"
+            },
+            {
+              "tagName": "actual"
+            },
+            {
+              "tagName": "power"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "MW"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 178,
+      "registerNumber": "40179",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "decimal",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad29bcbf4f1d9a2fe5",
+          "name": "Energy Consumption",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "btu"
+            },
+            {
+              "tagName": "energy"
+            },
+            {
+              "tagName": "consumption"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "MWh"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 205,
+      "registerNumber": "40206",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+      "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad29bcbf4f1d9a2fe6",
+          "name": "Volume",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "btu"
+            },
+            {
+              "tagName": "volume"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "unit",
+              "value": "Cubic meters"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

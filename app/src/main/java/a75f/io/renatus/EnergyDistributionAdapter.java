@@ -14,7 +14,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+<<<<<<< HEAD
 import java.util.List;
+=======
+>>>>>>> 8b3674075fe7df2b1b9c5568bc7c752327a6652f
 import java.util.Map;
 import java.util.function.BiConsumer;
 
@@ -23,7 +26,11 @@ import a75f.io.renatus.modbus.FragmentModbusConfiguration;
 
 public class EnergyDistributionAdapter extends RecyclerView.Adapter<EnergyDistributionAdapter.EnergyDistributorView> {
 
+<<<<<<< HEAD
     List<Floor> floorList;
+=======
+    ArrayList<Floor> floorList;
+>>>>>>> 8b3674075fe7df2b1b9c5568bc7c752327a6652f
     Context mContext;
     Map<Integer, Integer> energyDistribution;
     Object callBackReff;
@@ -55,8 +62,13 @@ public class EnergyDistributionAdapter extends RecyclerView.Adapter<EnergyDistri
             holder.distributionValue.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int dropDownPosition, long id) {
+<<<<<<< HEAD
                     int value = Integer.parseInt(holder.distributionValue.getSelectedItem().toString().split("%")[0]);
                     energyDistribution.put(position, value);
+=======
+
+                    energyDistribution.put(position, Integer.parseInt(holder.distributionValue.getSelectedItem().toString().split("%")[0]));
+>>>>>>> 8b3674075fe7df2b1b9c5568bc7c752327a6652f
                     ((FragmentModbusConfiguration) callBackReff).validateEnergyDistributionValue(energyDistribution);
 
                 }

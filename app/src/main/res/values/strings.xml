@@ -619,6 +619,8 @@
     <string name="label_selectdevicetype">SELECT DEVICE TYPE</string>
     <string name="label_systemdevice">SYSTEM DEVICES</string>
     <string name="label_oao">OAO</string>
+    <string name="label_modbus_btu_meter">MODBUS BTU METER</string>
+    <string name="label_modbus_energy_meter">MODBUS ENERGY METER</string>
     <string name="title_oao">OUTSIDE AIR OPTIMIZER (OAO)</string>
     <string name="label_oadamper_at_min">Outside Damper at Min Drive (V)</string>
     <string name="label_oadamper_at_max">Outside Damper at Max Drive (V)</string>
@@ -798,6 +800,7 @@
     <!--Modbus Option-->
     <string name="title_mb">MB</string>
     <string name="title_modbus">MODBUS</string>
+    <string name="title_modbus_energy_proportional_distribution">Energy Proportional Distribution</string>
     <string name="title_equipment_type">Equipment Type</string>
     <string name="title_start_address">Slave Id</string>
     <string name="title_param">PARAMETER</string>
@@ -867,8 +870,11 @@
         <item>  2 </item>
     </string-array>
 
+<<<<<<< HEAD
     <string name="label_modbus_energy_meter">MODBUS ENERGY METER</string>
     <string name="title_modbus_energy_proportional_distribution">Energy Proportional Distribution</string>
+=======
+>>>>>>> 8b3674075fe7df2b1b9c5568bc7c752327a6652f
     <string-array name="energy_distribution_values">
         <item> 0% </item>
         <item> 10% </item>
@@ -882,4 +888,9 @@
         <item> 90% </item>
         <item> 100% </item>
     </string-array>
+<<<<<<< HEAD
+=======
+
+    <string name="energy_distribution_validation_error">Energy Proportional Distribution combining all floors should be equal to 100%</string>
+>>>>>>> 8b3674075fe7df2b1b9c5568bc7c752327a6652f
 </resources>

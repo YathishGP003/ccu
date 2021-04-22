@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_height="match_parent"
     android:background="@drawable/bg_logoscreen"
     android:orientation="vertical">
@@ -31,6 +32,10 @@
             android:textAppearance="@style/title_grey" />
 
     </RelativeLayout>
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -38,7 +43,36 @@
 
         <LinearLayout
             android:layout_width="match_parent"
+<<<<<<< HEAD
             android:layout_height="match_parent">
+=======
+            android:layout_height="match_parent"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:text="@string/txt_occupancy_status"
+                    android:textAppearance="@style/label_black" />
+
+                <TextView
+                    android:id="@+id/occupancyStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:text=""
+                    android:textSize="20sp" />
+
+            </LinearLayout>
+>>>>>>> 8b3674075fe7df2b1b9c5568bc7c752327a6652f
 
             <RelativeLayout
                 android:layout_width="wrap_content"
@@ -152,6 +186,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+<<<<<<< HEAD
                     android:layout_marginLeft="24dp"
                     android:layout_marginTop="24dp"
                     android:layout_marginRight="24dp">
@@ -169,6 +204,18 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="30dp"
                     android:baselineAligned="false"
+=======
+                    android:layout_marginTop="@dimen/margin_20"
+                    android:textStyle="bold"
+                     app:layout_constraintLeft_toLeftOf="parent"
+                    android:text="@string/lable_epidemic_settings_text"
+                    style="@style/label_black"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginLeft="@dimen/fab_margin"
+>>>>>>> 8b3674075fe7df2b1b9c5568bc7c752327a6652f
                     android:orientation="horizontal">
 
                     <LinearLayout
@@ -248,8 +295,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="30dp"
+<<<<<<< HEAD
                     android:orientation="horizontal"
                     android:visibility="gone">
+=======
+                    android:layout_marginLeft="@dimen/fab_margin"
+                    android:orientation="horizontal">
+>>>>>>> 8b3674075fe7df2b1b9c5568bc7c752327a6652f
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -278,8 +330,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="30dp"
+<<<<<<< HEAD
                     android:orientation="horizontal"
                     android:visibility="gone">
+=======
+                    android:layout_marginBottom="@dimen/margin_20"
+                    android:layout_marginLeft="@dimen/fab_margin"
+                    android:orientation="horizontal">
+>>>>>>> 8b3674075fe7df2b1b9c5568bc7c752327a6652f
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -304,6 +362,7 @@
                         android:textOn="" />
 
                 </LinearLayout>
+<<<<<<< HEAD
 
                 <LinearLayout
                     android:id="@+id/purgelayout"
@@ -434,5 +493,30 @@
 
             </LinearLayout>
         </LinearLayout>
+=======
+            </LinearLayout>
+            <TextView
+                android:layout_marginTop="@dimen/margin_20"
+                android:id="@+id/btuMeterModelDetails"
+                android:layout_marginBottom="@dimen/fab_margin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:visibility="gone"
+                app:layout_constraintLeft_toLeftOf="parent"
+                android:text="BTU Meter"
+                style="@style/label_black"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/btuMeterParams"
+                android:layout_marginLeft="@dimen/fab_margin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginBottom="@dimen/margin_20"
+                />
+        </LinearLayout>
+    </LinearLayout>
+>>>>>>> 8b3674075fe7df2b1b9c5568bc7c752327a6652f
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

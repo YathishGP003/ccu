@@ -488,19 +488,24 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
                 }
                 break;
             case R.id.toggleCpuFanHigh:
-                if(fanHumiDSpinner.getSelectedItemPosition() > 0){
+                if(isChecked) {
+                    fanHumiDSpinner.setEnabled(true);
+                    if (fanHumiDSpinner.getSelectedItemPosition() > 0) {
 
-                    if(!switchFanHighOb.isChecked())
-                        switchFanHighOb.setChecked(false);
-                    else
-                        switchFanHighOb.setChecked(true);
-                    switchFanHighOb.setEnabled(true);
-                }else {
-                    if(!switchFanLowG.isChecked()) {
+                        if (!switchFanHighOb.isChecked())
+                            switchFanHighOb.setChecked(false);
+                        else
+                            switchFanHighOb.setChecked(true);
+                        switchFanHighOb.setEnabled(true);
+                    } else {
+                        if (!switchFanLowG.isChecked()) {
 
-                        switchFanHighOb.setEnabled(false);
-                        switchFanHighOb.setChecked(false);
+                            switchFanHighOb.setEnabled(false);
+                            switchFanHighOb.setChecked(false);
+                        }
                     }
+                }else{
+                    fanHumiDSpinner.setEnabled(false);
                 }
                 break;
         }

@@ -72,8 +72,13 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	ToggleButton tbSmartPostPurge;
 	ToggleButton tbEnhancedVentilation;
 	LinearLayout purgeLayout;
+
 	TextView energyMeterModelDetails;
 	RecyclerView energyMeterParams;
+
+	RecyclerView btuMeterParams;
+	TextView btuMeterModelDetails;
+
 
 	
 	int spinnerInit = 0;
@@ -288,7 +293,18 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		tbEnhancedVentilation = view.findViewById(R.id.tbEnhancedVentilation);
 		tbCompHumidity.setEnabled(false);
 		tbDemandResponse.setEnabled(false);
+
+		energyMeterParams = view.findViewById(R.id.energyMeterParams);
+		energyMeterModelDetails = view.findViewById(R.id.energyMeterModelDetails);
 		configEnergyMeterDetails();
+
+		/**
+		 * init Modbus BTU meter  views
+		 */
+		btuMeterParams = view.findViewById(R.id.btuMeterParams);
+		btuMeterModelDetails = view.findViewById(R.id.btuMeterModelDetails);
+		configBTUMeterDetails();
+
 
 		if (L.ccu().systemProfile instanceof DefaultSystem) {
 			systemModePicker.setEnabled(false);
@@ -591,18 +607,17 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 		}
 	};
-
 	private void configEnergyMeterDetails(){
 		List<EquipmentDevice> modbusDevices = EquipsManager.getInstance().getAllMbEquips("SYSTEM");
-
-		if(!modbusDevices.isEmpty()){
-			EquipmentDevice emDevice = null ;
-			for (EquipmentDevice equipmentDevice : modbusDevices) {
-				if(equipmentDevice.getEquipType().equals("EMR")){
-					emDevice = equipmentDevice;
+		if(modbusDevices!=null&&modbusDevices.size()>0){
+			EquipmentDevice  emDevice=null;
+			for (int i = 0; i <modbusDevices.size() ; i++) {
+				if(modbusDevices.get(i).getEquipType().equals("EMR")){
+					emDevice = modbusDevices.get(i);
 				}
 			}
-			if( null == emDevice)
+
+			if(emDevice==null)
 				return;
 			energyMeterParams.setVisibility(View.VISIBLE);
 			energyMeterModelDetails.setVisibility(View.VISIBLE);
@@ -610,6 +625,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			/**
 			 * Assuming there is always only One Energy meter
 			 */
+
 			List<Parameter> parameterList = new ArrayList<>();
 			if (Objects.nonNull(emDevice.getRegisters())) {
 				for (Register registerTemp : emDevice.getRegisters()) {
@@ -632,4 +648,44 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	}
 
+	private void configBTUMeterDetails(){
+		List<EquipmentDevice> modbusDevices = EquipsManager.getInstance().getAllMbEquips("SYSTEM");
+		if(modbusDevices!=null&&modbusDevices.size()>0){
+			EquipmentDevice  btuDevice=null;
+			for (int i = 0; i <modbusDevices.size() ; i++) {
+				if(modbusDevices.get(i).getEquipType().equals("BTU")){
+					btuDevice = modbusDevices.get(i);
+				}
+			}
+
+			if(btuDevice==null)
+				return;
+			btuMeterParams.setVisibility(View.VISIBLE);
+			btuMeterModelDetails.setVisibility(View.VISIBLE);
+
+			/**
+			 * Assuming there is always only One BTU meter
+			 */
+
+			List<Parameter> parameterList = new ArrayList<>();
+			if (Objects.nonNull(btuDevice.getRegisters())) {
+				for (Register registerTemp : btuDevice.getRegisters()) {
+					if (registerTemp.getParameters() != null) {
+						for (Parameter p : registerTemp.getParameters()) {
+							if (p.isDisplayInUI()) {
+								p.setParameterDefinitionType(registerTemp.getParameterDefinitionType());
+								parameterList.add(p);
+							}
+						}
+					}
+				}
+			}
+			btuMeterModelDetails.setText(btuDevice+ "("+btuDevice.getEquipType() + btuDevice.getSlaveId() + ")");
+			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+			btuMeterParams.setLayoutManager(gridLayoutManager);
+			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getActivity(), btuDevice.getEquipRef(), parameterList);
+			btuMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
+		}
+
+	}
 }

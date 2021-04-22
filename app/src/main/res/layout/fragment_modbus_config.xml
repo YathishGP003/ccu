@@ -170,288 +170,45 @@
         android:layout_marginTop="38dp"
         android:layout_marginEnd="65dp"
         app:layout_constraintTop_toBottomOf="@+id/paramHeader"/>
-    <!--<TableRow
-        android:id="@+id/tableRow1"
+
+
+    <TextView
+        android:id="@+id/header_for_floors"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:layout_marginTop="38dp"
+        android:layout_marginEnd="65dp"
+        android:layout_weight="1"
+        android:textAllCaps="true"
+        android:visibility="invisible"
+        android:text="@string/title_modbus_energy_proportional_distribution"
+        android:textAppearance="@style/text_label"
+        app:layout_constraintBottom_toTopOf="@+id/floorList"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.18"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/recyclerParams"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/floorList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="65dp"
-        android:layout_marginTop="38dp"
-        android:layout_marginEnd="65dp"
-        android:weightSum="4"
-        app:layout_constraintTop_toBottomOf="@+id/tvEquipmentType">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/title_param"
-            android:textAppearance="@style/text_label" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center_horizontal"
-            android:text="@string/title_display"
-            android:textAppearance="@style/text_label" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/title_param"
-            android:textAppearance="@style/text_label" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center_horizontal"
-            android:text="@string/title_display"
-            android:textAppearance="@style/text_label" />
-    </TableRow>
-
-    <TableRow
-        android:id="@+id/tableRow2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="65dp"
-        android:layout_marginTop="38dp"
-        android:layout_marginEnd="65dp"
-        android:weightSum="4"
-        app:layout_constraintTop_toBottomOf="@+id/tableRow1">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1"
-            android:text="@string/title_unit_status"
-            android:textAppearance="@style/text_appearance" />
-
-        <RelativeLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center">
-
-            <ToggleButton
-                android:id="@+id/toggleButton1"
-                android:layout_width="48dp"
-                android:layout_height="30dp"
-                android:button="@drawable/toggle_selector"
-                android:checked="false"
-                android:textOff=""
-                android:textOn="" />
-        </RelativeLayout>
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/title_return_air_temperature"
-            android:textAppearance="@style/text_appearance" />
-
-        <RelativeLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center">
-
-            <ToggleButton
-                android:id="@+id/toggleButton2"
-                android:layout_width="48dp"
-                android:layout_height="30dp"
-                android:button="@drawable/toggle_selector"
-                android:checked="false"
-                android:textOff=""
-                android:textOn="" />
-        </RelativeLayout>
-    </TableRow>
-
-    <TableRow
-        android:id="@+id/tableRow3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="65dp"
-        android:layout_marginTop="38dp"
-        android:layout_marginEnd="65dp"
-        android:weightSum="4"
-        app:layout_constraintTop_toBottomOf="@+id/tableRow2">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1"
-            android:text="@string/title_compressor_1_status"
-            android:textAppearance="@style/text_appearance" />
-
-        <RelativeLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center">
-
-            <ToggleButton
-                android:id="@+id/toggleButton3"
-                android:layout_width="48dp"
-                android:layout_height="30dp"
-                android:button="@drawable/toggle_selector"
-                android:checked="false"
-                android:textOff=""
-                android:textOn="" />
-        </RelativeLayout>
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/title_return_air_humidity"
-            android:textAppearance="@style/text_appearance" />
-
-        <RelativeLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center">
-
-            <ToggleButton
-                android:id="@+id/toggleButton4"
-                android:layout_width="48dp"
-                android:layout_height="30dp"
-                android:button="@drawable/toggle_selector"
-                android:checked="false"
-                android:textOff=""
-                android:textOn="" />
-        </RelativeLayout>
-    </TableRow>
-
-    <TableRow
-        android:id="@+id/tableRow4"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="65dp"
-        android:layout_marginTop="38dp"
-        android:layout_marginEnd="65dp"
-        android:weightSum="4"
-        app:layout_constraintTop_toBottomOf="@+id/tableRow3">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1"
-            android:text="@string/title_fan_running_status"
-            android:textAppearance="@style/text_appearance" />
-
-        <RelativeLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center">
-
-            <ToggleButton
-                android:id="@+id/toggleButton5"
-                android:layout_width="48dp"
-                android:layout_height="30dp"
-                android:button="@drawable/toggle_selector"
-                android:checked="false"
-                android:textOff=""
-                android:textOn="" />
-        </RelativeLayout>
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/title_temperature_setpoint"
-            android:textAppearance="@style/text_appearance" />
-
-        <RelativeLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center">
-
-            <ToggleButton
-                android:id="@+id/toggleButton6"
-                android:layout_width="48dp"
-                android:layout_height="30dp"
-                android:button="@drawable/toggle_selector"
-                android:checked="false"
-                android:textOff=""
-                android:textOn="" />
-        </RelativeLayout>
-    </TableRow>
-
-    <TableRow
-        android:id="@+id/tableRow5"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="65dp"
-        android:layout_marginTop="38dp"
-        android:layout_marginEnd="65dp"
-        android:weightSum="4"
-        app:layout_constraintTop_toBottomOf="@+id/tableRow4">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1"
-            android:text="@string/title_heater_on_off_status"
-            android:textAppearance="@style/text_appearance" />
-
-        <RelativeLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center">
-
-            <ToggleButton
-                android:id="@+id/toggleButton7"
-                android:layout_width="48dp"
-                android:layout_height="30dp"
-                android:button="@drawable/toggle_selector"
-                android:checked="false"
-                android:textOff=""
-                android:textOn="" />
-        </RelativeLayout>
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/title_humidity_setpoint"
-            android:textAppearance="@style/text_appearance" />
-
-        <RelativeLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center">
-
-            <ToggleButton
-                android:id="@+id/toggleButton8"
-                android:layout_width="48dp"
-                android:layout_height="30dp"
-                android:button="@drawable/toggle_selector"
-                android:checked="false"
-                android:textOff=""
-                android:textOn="" />
-        </RelativeLayout>
-    </TableRow>-->
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/recyclerParams" />
 
     <Button
         android:id="@+id/setBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginTop="40dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="30dp"
         android:background="@null"
         android:button="@null"
         android:fontFamily="@font/lato_regular"
@@ -459,7 +216,11 @@
         android:textAllCaps="true"
         android:textColor="@color/orange_75f"
         android:textSize="19.5sp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/recyclerParams" />
+        app:layout_constraintHorizontal_bias="0.953"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/recyclerView"
+        app:layout_constraintVertical_bias="0.466" />
 </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

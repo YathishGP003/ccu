@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_height="match_parent"
     android:background="@drawable/bg_logoscreen"
     android:orientation="vertical">
@@ -30,6 +31,10 @@
             android:textAppearance="@style/title_grey" />
 
     </RelativeLayout>
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -65,8 +70,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginLeft="100dp"
-            android:layout_marginRight="100dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
             android:orientation="vertical">
 
             <LinearLayout
@@ -307,13 +312,16 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="@dimen/margin_20"
+                    android:textStyle="bold"
+                     app:layout_constraintLeft_toLeftOf="parent"
                     android:text="@string/lable_epidemic_settings_text"
-                    android:textColor="@color/grey_select"/>
+                    style="@style/label_black"/>
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
+                    android:layout_marginLeft="@dimen/fab_margin"
                     android:orientation="horizontal">
 
                     <TextView
@@ -342,6 +350,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="30dp"
+                    android:layout_marginLeft="@dimen/fab_margin"
                     android:orientation="horizontal">
 
                     <TextView
@@ -370,6 +379,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="30dp"
+                    android:layout_marginBottom="@dimen/margin_20"
+                    android:layout_marginLeft="@dimen/fab_margin"
                     android:orientation="horizontal">
 
                     <TextView
@@ -395,9 +406,27 @@
                         android:textOn="" />
                 </LinearLayout>
             </LinearLayout>
+            <TextView
+                android:layout_marginTop="@dimen/margin_20"
+                android:id="@+id/btuMeterModelDetails"
+                android:layout_marginBottom="@dimen/fab_margin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:visibility="gone"
+                app:layout_constraintLeft_toLeftOf="parent"
+                android:text="BTU Meter"
+                style="@style/label_black"/>
 
-
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/btuMeterParams"
+                android:layout_marginLeft="@dimen/fab_margin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginBottom="@dimen/margin_20"
+                />
         </LinearLayout>
     </LinearLayout>
-
+    </androidx.core.widget.NestedScrollView>
 </LinearLayout>

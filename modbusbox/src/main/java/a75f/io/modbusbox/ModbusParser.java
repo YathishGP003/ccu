@@ -75,4 +75,26 @@ public class ModbusParser {
         }
         return jsonObjects;
     }
+
+
+    /**
+     * Read all the BTU Meter details JSON file
+     * @param context
+     * @return
+     */
+    public ArrayList<EquipmentDevice> readBTUMeterDeviceDetails(Context context) {
+        ArrayList<EquipmentDevice> btuMeterDevices = new ArrayList<>();
+
+        try {
+            String[] fileList;
+            fileList = context.getAssets().list("modbus-btu");
+            for (String filename : fileList) {
+                String equipJson = readFileFromAssets(context, "modbus-btu/" + filename);
+                btuMeterDevices.add(parseModbusDataFromString(equipJson));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return btuMeterDevices;
+    }
 }

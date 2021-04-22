@@ -19,6 +19,12 @@ import io.objectbox.query.QueryBuilder;
 public class EquipProcessor
 {
     ArrayList<EquipmentDevice> equipmentDevices;
+
+    /**
+     * Hold the Modbus BTU Meter Device List
+     */
+    ArrayList<EquipmentDevice> modbusBTUMeterDevices;
+
     ModbusParser parser;
     Context mContext;
     private BoxStore boxStore;
@@ -41,7 +47,11 @@ public class EquipProcessor
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
         equipmentDevices = parser.parseAllEquips(c);
+        modbusBTUMeterDevices = parser.readBTUMeterDeviceDetails(c);
         for(EquipmentDevice equipmentDevice:equipmentDevices){
+            addEquips(equipmentDevice);
+        }
+        for(EquipmentDevice equipmentDevice:modbusBTUMeterDevices){
             addEquips(equipmentDevice);
         }
     }
@@ -115,4 +125,12 @@ public class EquipProcessor
        configQuery.equal(EquipmentDevice_.isPaired, true);
        return configQuery.build().find();
    }
+
+    public List<EquipmentDevice> getAllBTUMeterDevicesEquips(){
+        QueryBuilder<EquipmentDevice> configQuery = modbusBox.query();
+        configQuery.equal(EquipmentDevice_.isPaired, false);
+        configQuery.equal(EquipmentDevice_.equipType, "BTU");
+        return  configQuery.build().find();
+    }
+
 }

@@ -75,7 +75,15 @@ public class FloorPlanFragment extends Fragment
 	public DataArrayAdapter<Floor> mFloorListAdapter;
 	public DataArrayAdapter<Zone>  mRoomListAdapter;
 	public DataArrayAdapter<String>                      mModuleListAdapter;
-	
+
+	enum SysyemDeviceType {
+		OAO,
+		ENERGY_METER,
+		BTU_METER
+	}
+
+	SysyemDeviceType sysyemDeviceType;
+
 	@BindView(R.id.addFloorBtn)
 	TextView addFloorBtn;
 	@BindView(R.id.addRoomBtn)
@@ -105,13 +113,27 @@ public class FloorPlanFragment extends Fragment
 
 	@BindView(R.id.rl_systemdevice)
 	RelativeLayout rl_systemdevice;
+
 	@BindView(R.id.rl_oao)
 	RelativeLayout rl_oao;
+
+	@BindView(R.id.rl_modbus_energy_meter)
+	RelativeLayout rl_modbus_energy_meter;
+
+	@BindView(R.id.rl_modbus_btu_meter)
+	RelativeLayout rl_modbus_btu_meter;
+
 
 	@BindView(R.id.textSystemDevice)
 	TextView textViewSystemDevice;
 	@BindView(R.id.textOAO)
 	TextView textViewOAO;
+
+	@BindView(R.id.textModbusEnergyMeter)
+	TextView textModbusEnergyMeter;
+
+	@BindView(R.id.textModbusBTUMeter)
+	TextView textModbusBTUMeter;
 
 	ArrayList<Floor> floorList = new ArrayList();
 	ArrayList<Zone> roomList = new ArrayList();
@@ -128,8 +150,9 @@ public class FloorPlanFragment extends Fragment
 		{
 			switch (intent.getAction())
 			{
-				
+
 				case ACTION_BLE_PAIRING_COMPLETED:
+					Log.i("Test", "onReceive: "+ACTION_BLE_PAIRING_COMPLETED);
 					new Thread(new Runnable()
 					{
 						@Override
@@ -140,7 +163,19 @@ public class FloorPlanFragment extends Fragment
 							//	LSerial.getInstance().setResetSeedMessage(true);
 							try{
 								if (mFloorListAdapter.getSelectedPostion() == -1) {
-									updateOAOModule();
+									if(sysyemDeviceType==SysyemDeviceType.BTU_METER)
+									{
+										getActivity().runOnUiThread(new Runnable() {
+											@Override
+											public void run() {
+												onBTUMeterClick();
+											}
+										});
+
+
+									}
+									if(sysyemDeviceType==SysyemDeviceType.OAO)
+										updateOAOModule();
 								}else
 								{
 									updateModules(getSelectedZone());
@@ -167,6 +202,11 @@ public class FloorPlanFragment extends Fragment
 		}
 	};
 
+	/**
+	 * Holding privious selection to Enable/disable the Selection between OAO/EneryMeter/BTUMeter
+	 */
+	int priviousSelectedDevice=0;
+
 	private void setScheduleType(String zoneId) {
 
 		new Handler(Looper.getMainLooper()).postDelayed(() -> {
@@ -187,7 +227,7 @@ public class FloorPlanFragment extends Fragment
 
 					CCUHsApi.getInstance().writeDefaultValById(scheduleTypeId, (double) newScheduleType);
 					CCUHsApi.getInstance().writeHisValById(scheduleTypeId, (double)newScheduleType);
-					
+
 				}
 			}
 		},6000);
@@ -198,14 +238,14 @@ public class FloorPlanFragment extends Fragment
 	public FloorPlanFragment()
 	{
 	}
-	
-	
+
+
 	public static FloorPlanFragment newInstance()
 	{
 		return new FloorPlanFragment();
 	}
-	
-	
+
+
 	private Zone getSelectedZone()
 	{
 		selectedZone = roomList.get(mRoomListAdapter.getSelectedPostion());
@@ -217,8 +257,8 @@ public class FloorPlanFragment extends Fragment
 	{
 		return floorList.get(mFloorListAdapter.getSelectedPostion());
 	}
-	
-	
+
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState)
@@ -237,8 +277,8 @@ public class FloorPlanFragment extends Fragment
 		enableFloorButton();
 		disableRoomModule();
 	}
-	
-	
+
+
 	@Override
 	public void onStart()
 	{
@@ -251,43 +291,43 @@ public class FloorPlanFragment extends Fragment
 		moduleListView.setMultiChoiceModeListener(new ModuleListActionMenuListener(this));
 		//EventBus.getDefault().register();
 	}
-	
-	
+
+
 	@Override
 	public void onResume()
 	{
 		super.onResume();
 		refreshScreen();
 	}
-	
-	
+
+
 	@Override
 	public void onPause()
 	{
 		super.onPause();
 		saveData();
 	}
-	
-	
+
+
 	public void saveData()
 	{
 		//Save
 		L.saveCCUState();
-		
+
 	}
-	
-	
+
+
 	public void refreshScreen()
 	{
 		floorList = HSUtil.getFloors();
 		Collections.sort(floorList, new FloorComparator());
 		updateFloors();
 	}
-	
-	
+
+
 	private void updateFloors()
 	{
-		
+
 		mFloorListAdapter = new DataArrayAdapter<>(this.getActivity(), R.layout.listviewitem,floorList);
 		//mFloorListAdapter = new DataArrayAdapter<>(this.getActivity(), R.id.textData,floorList);
 		floorListView.setAdapter(mFloorListAdapter);
@@ -310,23 +350,23 @@ public class FloorPlanFragment extends Fragment
 			//disableRoomModule();
 		}
 
-		setSytemUnselection();
+		setSystemUnselection();
 		addFloorBtn.setEnabled(true);
 		addZonelt.setEnabled(true);
 
 	}
-	
-	
+
+
 	private void selectFloor(int position)
 	{
 		mFloorListAdapter.setSelectedItem(position);
 		roomList = HSUtil.getZones(getSelectedFloor().getId());
 		Collections.sort(roomList, new ZoneComparator());
 		updateRooms(roomList);
-		
+
 	}
-	
-	
+
+
 	//
 	private void enableRoomBtn()
 	{
@@ -334,8 +374,8 @@ public class FloorPlanFragment extends Fragment
 		addRoomBtn.setVisibility(View.VISIBLE);
 		addRoomEdit.setVisibility(View.INVISIBLE);
 	}
-	
-	
+
+
 	private void updateRooms(ArrayList<Zone> zones)
 	{
 		mRoomListAdapter = new DataArrayAdapter<>(this.getActivity(), R.layout.listviewitem,zones);
@@ -355,7 +395,7 @@ public class FloorPlanFragment extends Fragment
 						                                                                     .layout.listviewitem, new Short[]{});
 				moduleListView.setAdapter(mModuleListAdapter);*/
 				mModuleListAdapter.clear();
-				
+
 			}
 			disableModuButton();
 		}
@@ -406,7 +446,7 @@ public class FloorPlanFragment extends Fragment
 
 				//for zones
 				HDict zDict = new HDictBuilder().add("filter", "room and not oao and siteRef == " + siteGUID).toDict();
-				
+
 				try
 				{
 					HGrid zonePoint = hClient.call("read", HGridBuilder.dictToGrid(zDict));
@@ -418,7 +458,7 @@ public class FloorPlanFragment extends Fragment
 					while (zit.hasNext())
 					{
 						HRow zr = (HRow) zit.next();
-						
+
 						if (zr.getStr("dis") != null) {
 							siteRoomList.add(zr.getStr("dis"));
 						}
@@ -429,7 +469,7 @@ public class FloorPlanFragment extends Fragment
 					//ProgressDialogUtils.hideProgressDialog();
 					e.printStackTrace();
 				}
-				
+
 
 				return null;
 			}
@@ -465,22 +505,22 @@ public class FloorPlanFragment extends Fragment
 		mRoomListAdapter.setSelectedItem(position);
 		updateModules(getSelectedZone());
 	}
-	
-	
+
+
 	private void enableModueButton()
 	{
 		addModulelt.setVisibility(View.VISIBLE);
 		pairModuleBtn.setVisibility(View.VISIBLE);
 	}
-	
-	
+
+
 	private void disableModuButton()
 	{
 		addModulelt.setVisibility(View.INVISIBLE);
 		pairModuleBtn.setVisibility(View.INVISIBLE);
 	}
-	
-	
+
+
 	private boolean updateOAOModule() {
 		ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and oao");
 		ArrayList<Equip> equipList = new ArrayList<>();
@@ -488,7 +528,7 @@ public class FloorPlanFragment extends Fragment
 		{
 			equipList.add(new Equip.Builder().setHashMap(m).build());
 		}
-		
+
 		if(equipList != null && (equipList.size() > 0)) {
 			Log.d(L.TAG_CCU_UI,"Show OAO Equip ");
 			mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem,createAddressList(equipList));
@@ -498,7 +538,7 @@ public class FloorPlanFragment extends Fragment
 					moduleListView.setAdapter(mModuleListAdapter);
 					moduleListView.setVisibility(View.VISIBLE);
 				}
-				
+
 			});
 			return true;
 		} else {
@@ -506,8 +546,40 @@ public class FloorPlanFragment extends Fragment
 			Log.d(L.TAG_CCU_UI,"OAO Equip does not exist ");
 			return false;
 		}
-		
+
 	}
+
+	private boolean updateBTUMeterModule() {
+		ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and btu");
+		ArrayList<Equip> equipList = new ArrayList<>();
+		for (HashMap m : equips)
+		{
+			if(m.get("roomRef").toString().equalsIgnoreCase("SYSTEM")&&m.get("floorRef").toString().equalsIgnoreCase("SYSTEM"))
+			{
+				equipList.add(new Equip.Builder().setHashMap(m).build());
+			}
+		}
+
+		if(equipList != null && (equipList.size() > 0)) {
+			disableModuButton();
+			mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem,createAddressList(equipList));
+			getActivity().runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					moduleListView.setAdapter(mModuleListAdapter);
+					moduleListView.setVisibility(View.VISIBLE);
+				}
+
+			});
+			return true;
+		} else {
+			moduleListView.setAdapter(null);
+			return false;
+		}
+
+	}
+
+
 	private void updateModules(Zone zone)
 	{
 		Log.d(L.TAG_CCU_UI,"Zone Selected "+zone.getDisplayName());
@@ -526,28 +598,28 @@ public class FloorPlanFragment extends Fragment
 			moduleListView.setAdapter(null);
 		}
 	}
-	
+
 	private ArrayList<String> createAddressList(ArrayList<Equip> equips)
 	{
 		Collections.sort(equips, new ModuleComparator());
 		ArrayList<String> arrayList = new ArrayList<>();
-		 
+
 		for(Equip e : equips)
 		{
 			arrayList.add(e.getGroup());
-			
+
 		}
 		return arrayList;
 	}
-	
+
 	private void enableFloorButton()
 	{
 		addFloorlt.setVisibility(View.VISIBLE);
 		addFloorBtn.setVisibility(View.VISIBLE);
 		addFloorEdit.setVisibility(View.INVISIBLE);
 	}
-	
-	
+
+
 	private void disableRoomModule()
 	{
 		addFloorlt.setVisibility(View.INVISIBLE);
@@ -559,8 +631,8 @@ public class FloorPlanFragment extends Fragment
 		pairModuleBtn.setVisibility(View.INVISIBLE);
 		addModuleEdit.setVisibility(View.INVISIBLE);
 	}
-	
-	
+
+
 	@OnClick(R.id.addFloorBtn)
 	public void handleFloorBtn()
 	{
@@ -582,14 +654,13 @@ public class FloorPlanFragment extends Fragment
 				(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 		mgr.showSoftInput(addFloorEdit, InputMethodManager.SHOW_IMPLICIT);
 	}
-	
+
 
 
 	@OnClick(R.id.rl_systemdevice)
 	public void systemDeviceOnClick()
 	{
-
-		setSytemSelection();
+		setSystemSelection(1);
 		if(floorList.size()>0) {
 			if(roomList.size()>0) {
 				ArrayList<Equip> zoneEquips = HSUtil.getEquips(getSelectedZone().getId());
@@ -618,16 +689,18 @@ public class FloorPlanFragment extends Fragment
 	@OnClick(R.id.rl_oao)
 	public void oaoOnClick()
 	{
-		setSytemSelection();
+		setSystemSelection(1);
 		if(floorList.size()>0) {
-			if(roomList.size() >0) {
-				ArrayList<Equip> zoneEquips = HSUtil.getEquips(getSelectedZone().getId());
-				if (zoneEquips.size() > 0) {
-					mModuleListAdapter.setSelectedItem(-1);
-				}
-				mRoomListAdapter.setSelectedItem(-1);
-				addFloorBtn.setEnabled(false);
-				addZonelt.setEnabled(false);
+			if(roomList.size() >0&& mModuleListAdapter!=null&&mModuleListAdapter.getSelectedPostion()!=-1) {
+                if (mRoomListAdapter.getSelectedPostion() != -1) {
+                    ArrayList<Equip> zoneEquips = HSUtil.getEquips(getSelectedZone().getId());
+                    if (zoneEquips.size() > 0) {
+                        mModuleListAdapter.setSelectedItem(-1);
+                    }
+                    	mRoomListAdapter.setSelectedItem(-1);
+                    addFloorBtn.setEnabled(false);
+                    addZonelt.setEnabled(false);
+                }
 			}
 		}
 		mFloorListAdapter.setSelectedItem(-1);
@@ -639,24 +712,104 @@ public class FloorPlanFragment extends Fragment
 		}
 	}
 
-	private void setSytemSelection()
-	{
-		rl_systemdevice.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
-		rl_oao.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
-		textViewSystemDevice.setTextColor(Color.WHITE);
-		textViewSystemDevice.setSelected(true);
-		textViewOAO.setSelected(true);
-		textViewOAO.setTextColor(Color.WHITE);
-		rl_oao.setEnabled(false);
-		rl_systemdevice.setEnabled(false);
-		roomListView.setVisibility(View.GONE);
-		moduleListView.setVisibility(View.GONE);
-		addZonelt.setEnabled(false);
-		addRoomBtn.setEnabled(false);
-		if (addRoomEdit.getVisibility() == View.VISIBLE) {
-			closeAddZoneEditViews();
+
+	@OnClick(R.id.rl_modbus_energy_meter)
+	public void onEnergyMeterClick(){
+
+	}
+
+	@OnClick(R.id.rl_modbus_btu_meter)
+	public void onBTUMeterClick(){
+		setSystemSelection(3);
+		if(floorList.size()>0) {
+			if(roomList.size() >0 && mModuleListAdapter!=null && mModuleListAdapter.getSelectedPostion()!=-1) {
+				if (mRoomListAdapter.getSelectedPostion() != -1) {
+					ArrayList<Equip> zoneEquips = HSUtil.getEquips(getSelectedZone().getId());
+					if (zoneEquips.size() > 0) {
+						mModuleListAdapter.setSelectedItem(-1);
+					}
+					//mRoomListAdapter.setSelectedItem(-1);
+					addFloorBtn.setEnabled(false);
+					addZonelt.setEnabled(false);
+				}
+			}
+		}
+		mFloorListAdapter.setSelectedItem(-1);
+		if (updateBTUMeterModule())
+		{
+			moduleListView.setVisibility(View.VISIBLE);
+		} else {
+			enableModueButton();
 		}
 	}
+
+
+	private void setSystemSelection(int position)
+	{
+
+			rl_systemdevice.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
+			rl_systemdevice.setEnabled(false);
+			textViewSystemDevice.setTextColor(getContext().getResources().getColor(R.color.white));
+
+			if(position==1) {
+				sysyemDeviceType = SysyemDeviceType.OAO;
+				rl_oao.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
+				textViewOAO.setSelected(true);
+				textViewOAO.setTextColor(Color.WHITE);
+				rl_oao.setEnabled(false);
+			}
+			if(position==2) {
+				sysyemDeviceType = SysyemDeviceType.ENERGY_METER;
+				rl_modbus_energy_meter.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
+				textModbusEnergyMeter.setSelected(true);
+				textModbusEnergyMeter.setTextColor(Color.WHITE);
+				rl_modbus_energy_meter.setEnabled(false);
+			}
+			if(position==3) {
+				sysyemDeviceType = SysyemDeviceType.BTU_METER;
+				rl_modbus_btu_meter.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
+				textModbusBTUMeter.setSelected(true);
+				textModbusBTUMeter.setTextColor(Color.WHITE);
+				rl_modbus_btu_meter.setEnabled(false);
+			}
+			if(position!=priviousSelectedDevice)
+				disablePreviousSelection(position);
+			roomListView.setVisibility(View.GONE);
+			moduleListView.setVisibility(View.GONE);
+			addZonelt.setEnabled(false);
+			addRoomBtn.setEnabled(false);
+			if (addRoomEdit.getVisibility() == View.VISIBLE) {
+				closeAddZoneEditViews();
+			}
+	}
+
+	public void disablePreviousSelection(int position){
+		/**
+		 * Disable previous selection
+		 */
+		if(priviousSelectedDevice!=0){
+			if(priviousSelectedDevice==1) {
+				rl_oao.setBackgroundColor(Color.WHITE);
+				textViewOAO.setSelected(false);
+				textViewOAO.setTextColor(getContext().getResources().getColor(R.color.text_color));
+				rl_oao.setEnabled(true);
+			}
+			if(priviousSelectedDevice==2) {
+				rl_modbus_energy_meter.setBackgroundColor(Color.WHITE);
+				textModbusEnergyMeter.setSelected(false);
+				textModbusEnergyMeter.setTextColor(getContext().getResources().getColor(R.color.text_color));
+				rl_modbus_energy_meter.setEnabled(true);
+			}
+			if(priviousSelectedDevice==3) {
+				rl_modbus_btu_meter.setBackgroundColor(Color.WHITE);
+				textModbusBTUMeter.setSelected(false);
+				textModbusBTUMeter.setTextColor(getContext().getResources().getColor(R.color.text_color));
+				rl_modbus_btu_meter.setEnabled(true);
+			}
+		}
+		priviousSelectedDevice = position;
+	}
+
 
 	private void closeAddZoneEditViews() {
 		addZonelt.setVisibility(View.VISIBLE);
@@ -667,20 +820,51 @@ public class FloorPlanFragment extends Fragment
 		mgr.hideSoftInputFromWindow(addRoomEdit.getWindowToken(), 0);
 	}
 
-	private void setSytemUnselection()
+	private void setSystemUnselection()
 	{
+		/**
+		 * System Devices configuration for un-selection
+		 */
 		rl_systemdevice.setBackgroundColor(Color.WHITE);
-		rl_oao.setBackgroundColor(Color.WHITE);
-		textViewSystemDevice.setSelected(false);
-		textViewOAO.setSelected(false);
-		textViewSystemDevice.setTextColor(getContext().getResources().getColor(R.color.text_color));
-		textViewOAO.setTextColor(getContext().getResources().getColor(R.color.text_color));
 		rl_systemdevice.setEnabled(true);
+		textViewSystemDevice.setTextColor(getContext().getResources().getColor(R.color.text_color));
+		textViewSystemDevice.setSelected(false);
+
+		/**
+		 * OAO Configuration for un-selection
+		 */
+		rl_oao.setBackgroundColor(Color.WHITE);
+		textViewOAO.setSelected(false);
+		textViewOAO.setTextColor(getContext().getResources().getColor(R.color.text_color));
 		rl_oao.setEnabled(true);
+
+		/**
+		 * Modbus Energy Meter Configuration for un-selection
+		 */
+
+		rl_modbus_energy_meter.setBackgroundColor(Color.WHITE);
+		textModbusEnergyMeter.setSelected(false);
+		textModbusEnergyMeter.setTextColor(getContext().getResources().getColor(R.color.text_color));
+		rl_modbus_energy_meter.setEnabled(true);
+
+		/**
+		 * Modbus BTU Meter Configuration for un-selection
+		 */
+
+
+		rl_modbus_btu_meter.setBackgroundColor(Color.WHITE);
+		textModbusBTUMeter.setSelected(false);
+		textModbusBTUMeter.setTextColor(getContext().getResources().getColor(R.color.text_color));
+		rl_modbus_btu_meter.setEnabled(true);
+
+		/**
+		 * Zone Configuration for un-selection
+		 */
 		roomListView.setVisibility(View.VISIBLE);
 		moduleListView.setVisibility(View.VISIBLE);
 		addZonelt.setEnabled(true);
 		addRoomBtn.setEnabled(true);
+		priviousSelectedDevice = 0;
 	}
 
 	private void enableFloorEdit()
@@ -690,8 +874,8 @@ public class FloorPlanFragment extends Fragment
 		addFloorEdit.setVisibility(View.VISIBLE);
 		getBuildingFloorsZones("floor");
 	}
-	
-	
+
+
 	@OnEditorAction(R.id.addFloorEdit)
 	public boolean handleFloorChange(TextView v, int actionId, KeyEvent event)
 	{
@@ -850,7 +1034,7 @@ public class FloorPlanFragment extends Fragment
 			enableFloorButton();
 		}
 	}
-	
+
 
 	@OnClick(R.id.addRoomBtn)
 	public void handleRoomBtn()
@@ -883,8 +1067,8 @@ public class FloorPlanFragment extends Fragment
 		addRoomEdit.setVisibility(View.VISIBLE);
 		getBuildingFloorsZones("room");
 	}
-	
-	
+
+
 	@OnFocusChange(R.id.addRoomEdit)
 	public void handleRoomFocus(View v, boolean hasFocus)
 	{
@@ -1020,17 +1204,37 @@ public class FloorPlanFragment extends Fragment
 	public void startPairing()
 	{
 
+
         if (mFloorListAdapter.getSelectedPostion() == -1) {
             short meshAddress = L.generateSmartNodeAddress();
-            if (L.ccu().oaoProfile != null) {
-                Toast.makeText(getActivity(), "OAO Module already paired", Toast.LENGTH_LONG).show();
-            } else {
-				if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT) {
-					Toast.makeText(getActivity(), "Please set system profile to vav or dab to continue!", Toast.LENGTH_LONG).show();
-					return;
+
+            if(priviousSelectedDevice==1){
+
+				if (L.ccu().oaoProfile != null) {
+					Toast.makeText(getActivity(), "OAO Module already paired", Toast.LENGTH_LONG).show();
+				} else {
+					if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT) {
+						Toast.makeText(getActivity(), "Please set system profile to vav or dab to continue!", Toast.LENGTH_LONG).show();
+						return;
+					}
+					showDialogFragment(FragmentBLEInstructionScreen.getInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.OAO, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
 				}
-                showDialogFragment(FragmentBLEInstructionScreen.getInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.OAO, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
-            }
+			}
+			if(priviousSelectedDevice==2){
+
+				/**
+				 * Modbus energy meter selection
+				 */
+				showDialogFragment(FragmentModbusConfiguration
+						.newInstance(meshAddress,"SYSTEM","SYSTEM", ProfileType.MODBUS_EM), FragmentModbusConfiguration.ID);
+			}
+			if(priviousSelectedDevice==3){
+				/**
+				 * Modbus BTU meter selection
+				 */
+				showDialogFragment(FragmentModbusConfiguration
+						.newInstance(meshAddress,"SYSTEM","SYSTEM", ProfileType.MODBUS_BTU), FragmentModbusConfiguration.ID);
+			}
             return;
         }
 
@@ -1094,8 +1298,8 @@ public class FloorPlanFragment extends Fragment
 			}
 		}
 	}
-	
-	
+
+
 	private void showDialogFragment(DialogFragment dialogFragment, String id)
 	{
 		FragmentTransaction ft = getFragmentManager().beginTransaction();
@@ -1110,44 +1314,64 @@ public class FloorPlanFragment extends Fragment
 		// Create and show the dialog.
 		dialogFragment.show(ft, id);
 	}
-	
-	
+
+
 	@OnItemClick(R.id.floorList)
 	public void setFloorListView(AdapterView<?> parent, View view, int position, long id)
 	{
 		selectFloor(position);
-		setSytemUnselection();
+		setSystemUnselection();
 	}
-	
-	
+
+
 	@OnItemClick(R.id.roomList)
 	public void setRoomListView(AdapterView<?> parent, View view, int position, long id)
 	{
 		selectRoom(position);
 	}
-	
-	
+
+
 	@OnItemClick(R.id.moduleList)
 	public void setModuleListView(AdapterView<?> parent, View view, int position, long id)
 	{
 		selectModule(position);
 	}
-	
-	
+
+
 	private void selectModule(int position)
 	{
 		mModuleListAdapter.setSelectedItem(position);
 		String nodeAddr = mModuleListAdapter.getItem(position);
-		if (((mFloorListAdapter != null && mFloorListAdapter.getSelectedPostion() == -1) && (mRoomListAdapter != null && mRoomListAdapter.getSelectedPostion() != -1))|| (mRoomListAdapter == null || mRoomListAdapter.getSelectedPostion() == -1) )
+		Log.i("Test", "selectModule: "+sysyemDeviceType);
+		Log.i("Test", "selectModule: "+mFloorListAdapter.getSelectedPostion());
+
+		if (((mFloorListAdapter != null && mFloorListAdapter.getSelectedPostion() == -1) &&
+				(mRoomListAdapter != null && mRoomListAdapter.getSelectedPostion() != -1))||
+				(mRoomListAdapter == null || mRoomListAdapter.getSelectedPostion() == -1) )
+		{
+			if(sysyemDeviceType==SysyemDeviceType.OAO){
+
+				DialogOAOProfile oaoProfiling = DialogOAOProfile.newInstance(Short.parseShort(nodeAddr), "SYSTEM", "SYSTEM");
+				showDialogFragment(oaoProfiling, DialogOAOProfile.ID);
+			}
+			if(sysyemDeviceType== SysyemDeviceType.BTU_METER){
+				showDialogFragment(FragmentModbusConfiguration
+						.newInstance(Short.parseShort(nodeAddr),"SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU), FragmentModbusConfiguration.ID);
+			}
+			return;
+		}
+
+		/*if (((mFloorListAdapter != null && mFloorListAdapter.getSelectedPostion() == -1) && (mRoomListAdapter != null && mRoomListAdapter.getSelectedPostion() != -1))|| (mRoomListAdapter == null || mRoomListAdapter.getSelectedPostion() == -1) )
 		{
 			DialogOAOProfile oaoProfiling = DialogOAOProfile.newInstance(Short.parseShort(nodeAddr), "SYSTEM", "SYSTEM");
 			showDialogFragment(oaoProfiling, DialogOAOProfile.ID);
 			return;
-		}
+		}*/
+
 		Floor floor = getSelectedFloor();
 		Zone zone = getSelectedZone();
-		
-		
+
+
 		ZoneProfile profile = L.getProfile(Short.parseShort(nodeAddr));
 		if(profile != null) {
 
@@ -1216,6 +1440,7 @@ public class FloorPlanFragment extends Fragment
 				case MODBUS_EMS:
 				case MODBUS_ATS:
 				case MODBUS_UPS150:
+				case MODBUS_BTU:
 					showDialogFragment(FragmentModbusConfiguration
 							.newInstance(Short.parseShort(nodeAddr),zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusConfiguration.ID);
 					break;
@@ -1223,10 +1448,10 @@ public class FloorPlanFragment extends Fragment
 			}
 		}else
 			Toast.makeText(getActivity(),"Zone profile is empty, recheck your DB",Toast.LENGTH_LONG).show();
-		
-		
+
+
 	}
-	
+
 	class FloorComparator implements Comparator<Floor>
 	{
 		@Override
@@ -1234,7 +1459,7 @@ public class FloorPlanFragment extends Fragment
 			return a.getDisplayName().compareToIgnoreCase(b.getDisplayName());
 		}
 	}
-	
+
 	class ZoneComparator implements Comparator<Zone>
 	{
 		@Override

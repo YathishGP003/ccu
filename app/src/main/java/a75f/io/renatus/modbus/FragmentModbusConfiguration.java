@@ -55,11 +55,16 @@ import butterknife.ButterKnife;
 public class FragmentModbusConfiguration extends BaseDialogFragment {
 
     public static final String ID = FragmentModbusConfiguration.class.getSimpleName();
-    private ArrayList<Floor> floorList;
+    public ArrayList<Floor> floorList = new ArrayList();
     String floorRef;
     String zoneRef;
     EnergyDistributionAdapter energyDistributionAdapter;
-    Comparator<Floor> floorComparator = (a, b) -> a.getDisplayName().compareToIgnoreCase(b.getDisplayName());
+    Comparator<Floor> floorComparator = new Comparator<Floor>() {
+        @Override
+        public int compare(Floor a, Floor b) {
+            return a.getDisplayName().compareToIgnoreCase(b.getDisplayName());
+        }
+    };
     ModbusProfile modbusProfile;
     EquipmentDevice equipmentDevice;
     @BindView(R.id.spEquipmentType)
@@ -91,9 +96,6 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     boolean isEditConfig = false;
     private short curSelectedSlaveId;
 
-    public FragmentModbusConfiguration(){
-        floorList = new ArrayList();
-    }
     public static FragmentModbusConfiguration newInstance(short meshAddress, String roomName, String floorName, ProfileType profileType) {
         FragmentModbusConfiguration f = new FragmentModbusConfiguration();
         Bundle bundle = new Bundle();
@@ -111,13 +113,15 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         curSelectedSlaveId = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
         zoneRef = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         floorRef = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
+
         int profileOriginalValue = getArguments().getInt(FragmentCommonBundleArgs.PROFILE_TYPE);
+
         profileType = ProfileType.values()[profileOriginalValue];
         View view = inflater.inflate(R.layout.fragment_modbus_config, container, false);
         ButterKnife.bind(this, view);
 
         setBtn.setOnClickListener(view1 -> {
-            if(!isEditConfig && L.isModbusSlaveIdExists((short) (spAddress.getSelectedItemPosition() +1))) {
+            if (!isEditConfig && L.isModbusSlaveIdExists((short) (spAddress.getSelectedItemPosition() + 1))) {
                 Toast.makeText(getActivity(), "Slave Id already exists, choose another slave id to proceed", Toast.LENGTH_LONG).show();
             } else
                 saveConfig();
@@ -479,17 +483,19 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
 
     void initConfiguration() {
         /**
-         * If Profile type is BTU meter then only enable the energy distribution details
+         * If Profile type is ENergy meter then only enable the energy distribution details
          */
         if (profileType == ProfileType.MODBUS_EMR) {
             textTitleFragment.setText(getString(R.string.label_modbus_energy_meter));
-            floorViewheader.setVisibility(View.VISIBLE);
-            floorListView.setVisibility(View.VISIBLE);
             floorList = HSUtil.getFloors();
-            Collections.sort(floorList, floorComparator);
-            this.energyDistributionAdapter = new EnergyDistributionAdapter(floorList, getContext(), this);
-            floorListView.setLayoutManager(new LinearLayoutManager(getContext()));
-            floorListView.setAdapter(energyDistributionAdapter);
+            if(floorList.size()>0) {
+                Collections.sort(floorList, floorComparator);
+                floorViewheader.setVisibility(View.VISIBLE);
+                floorListView.setVisibility(View.VISIBLE);
+                this.energyDistributionAdapter = new EnergyDistributionAdapter(floorList, getContext(), this);
+                floorListView.setLayoutManager(new LinearLayoutManager(getContext()));
+                floorListView.setAdapter(energyDistributionAdapter);
+            }
         }
 
     }

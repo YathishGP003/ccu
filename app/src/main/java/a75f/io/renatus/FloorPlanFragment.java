@@ -75,8 +75,7 @@ public class FloorPlanFragment extends Fragment
 	public static Zone selectedZone;
 	public DataArrayAdapter<Floor> mFloorListAdapter;
 	public DataArrayAdapter<Zone>  mRoomListAdapter;
-	public DataArrayAdapter<String>                      mModuleListAdapter;
-    private boolean viewDestroyed = false;
+	public DataArrayAdapter<String>  mModuleListAdapter;
 	enum SysyemDeviceType {
 		OAO,
 		ENERGY_METER
@@ -216,12 +215,6 @@ public class FloorPlanFragment extends Fragment
 			}
 		},6000);
 
-	}
-
-	@Override
-	public void onDestroyView() {
-		super.onDestroyView();
-		viewDestroyed = true;
 	}
 
 	public FloorPlanFragment()
@@ -518,7 +511,7 @@ public class FloorPlanFragment extends Fragment
 			equipList.add(new Equip.Builder().setHashMap(m).build());
 		}
 
-		if(equipList.isEmpty()) {
+		if(!equipList.isEmpty()) {
 			Log.d(L.TAG_CCU_UI,"Show OAO Equip ");
 			mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem,createAddressList(equipList));
 			getActivity().runOnUiThread(new Runnable() {
@@ -555,7 +548,6 @@ public class FloorPlanFragment extends Fragment
 		}
 
 		if(equipList != null && (equipList.size() > 0)) {
-			disableModuButton();
 			mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem,createAddressList(equipList));
 			getActivity().runOnUiThread(() -> {
 				moduleListView.setAdapter(mModuleListAdapter);
@@ -695,6 +687,7 @@ public class FloorPlanFragment extends Fragment
 		mFloorListAdapter.setSelectedItem(-1);
 		if (updateOAOModule())
 		{
+			pairModuleBtn.setVisibility(View.VISIBLE);
 			moduleListView.setVisibility(View.VISIBLE);
 		} else {
 			enableModueButton();
@@ -719,6 +712,7 @@ public class FloorPlanFragment extends Fragment
 		mFloorListAdapter.setSelectedItem(-1);
 		if (updateEnergyMeterModule())
 		{
+			pairModuleBtn.setVisibility(View.VISIBLE);
 			moduleListView.setVisibility(View.VISIBLE);
 		} else {
 			enableModueButton();
@@ -745,8 +739,8 @@ public class FloorPlanFragment extends Fragment
 			textModbusEnergyMeter.setTextColor(Color.WHITE);
 			rl_modbus_energy_meter.setEnabled(false);
 		}
-
-		disablePreviousSelection(position);
+		if(position!=priviousSelectedDevice)
+		    disablePreviousSelection(position);
 		roomListView.setVisibility(View.GONE);
 		moduleListView.setVisibility(View.GONE);
 		addZonelt.setEnabled(false);
@@ -1182,8 +1176,13 @@ public class FloorPlanFragment extends Fragment
 				/**
 				 * Modbus energy meter selection
 				 */
-				showDialogFragment(FragmentModbusConfiguration
-						.newInstance(meshAddress,"SYSTEM","SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
+				Log.d("Spoo-log","L.ccu().zoneProfiles.size = "+L.ccu().zoneProfiles.size());
+				if (L.ccu().zoneProfiles.size() > 0) {
+					Toast.makeText(getActivity(), "Energy Meter Module already paired", Toast.LENGTH_LONG).show();
+				} else {
+					showDialogFragment(FragmentModbusConfiguration
+							.newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
+				}
 			}
 			return;
 		}
@@ -1388,7 +1387,6 @@ public class FloorPlanFragment extends Fragment
 				case MODBUS_EMS:
 				case MODBUS_ATS:
 				case MODBUS_UPS150:
-				case MODBUS_EMR:
 					showDialogFragment(FragmentModbusConfiguration
 							.newInstance(Short.parseShort(nodeAddr),zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusConfiguration.ID);
 					break;

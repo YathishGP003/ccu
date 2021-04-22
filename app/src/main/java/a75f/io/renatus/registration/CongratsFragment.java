@@ -17,7 +17,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
-import a75f.io.logic.bo.util.HSEquipUtil;
+import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.R;
 import butterknife.BindView;
@@ -149,7 +149,7 @@ public class CongratsFragment extends Fragment {
         heatingLimit = (int)getTuner(minHeatMap.get("id").toString())+"|"+(int)getTuner(maxHeatMap.get("id").toString());
         coolingLimit = (int)getTuner(minCoolMap.get("id").toString())+"|"+(int)getTuner(maxCoolMap.get("id").toString());
         zoneRange = (int)getTuner(maxHeatMap.get("id").toString())+"|"+(int)getTuner(maxCoolMap.get("id").toString());
-        currentTemp = String.valueOf((int)HSEquipUtil.getCurrentTemp(eqp.getId()));
+        currentTemp = String.valueOf((int) SystemTemperatureUtil.getCurrentTemp(eqp.getId()));
         if (L.ccu().systemProfile instanceof DefaultSystem) {
             currentHumidity = "0.0%";
         } else {

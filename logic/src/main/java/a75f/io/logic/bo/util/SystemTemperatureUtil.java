@@ -1,16 +1,19 @@
 package a75f.io.logic.bo.util;
 
+import android.widget.ArrayAdapter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.logger.CcuLog;
 
 /**
  * Created by samjithsadasivan on 1/31/19.
  */
 
-public class HSEquipUtil
+public class SystemTemperatureUtil
 {
     public static double getCurrentTemp(String equipRef)
     {
@@ -83,5 +86,18 @@ public class HSEquipUtil
     public static Equip getEquip(int group) {
         HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+group+"\"");
         return new Equip.Builder().setHashMap(equip).build();
+    }
+    
+    /**
+     * @return Average of all the cooling desired temps across the system.
+     */
+    public static double getAverageCoolingDesiredTemp() {
+        ArrayList<HashMap<Object, Object>> desireTemps = CCUHsApi.getInstance().readAllEntities("point and " +
+                                                                                          "zone and desired and temp and cooling");
+        return desireTemps.stream()
+                           .map(m -> CCUHsApi.getInstance().readPointPriorityVal(m.get("id").toString()) )
+                           .mapToInt(m ->  m.intValue())
+                           .average()
+                           .getAsDouble();
     }
 }

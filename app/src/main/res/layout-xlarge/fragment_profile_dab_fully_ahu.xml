@@ -117,6 +117,7 @@
                             android:gravity="center">
 
                             <TextView
+                                android:id="@+id/analog1MappingText"
                                 android:layout_width="129dp"
                                 android:layout_height="wrap_content"
                                 android:text="@string/label_cooling"
@@ -282,6 +283,80 @@
                     </TableRow>
 
                     <TableRow
+                        android:id="@+id/tableRowAnalog4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:layout_marginTop="20dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1">
+
+                            <ToggleButton
+                                android:id="@+id/toggleAnalog4"
+                                android:layout_width="46.12dp"
+                                android:layout_height="27.42dp"
+                                android:layout_alignParentLeft="true"
+                                android:layout_centerVertical="true"
+                                android:layout_marginLeft="10dp"
+                                android:background="@drawable/toggle_selector"
+                                android:checked="false"
+                                android:textOff=""
+                                android:textOn="" />
+
+                            <TextView
+                                android:id="@+id/textToggleAnalog4"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_marginLeft="20dp"
+                                android:layout_toRightOf="@+id/toggleAnalog3"
+                                android:text="@string/label_analog4"
+                                android:textAppearance="@style/text_appearance" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center">
+
+                            <Spinner
+                                android:id="@+id/analog4Spinner"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerHorizontal="true"
+                                android:layout_centerVertical="true"
+                                android:entries="@array/dcwb_analog4_options"
+                                tools:listitem="@layout/spinner_dropdown_item" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="41.5dp"
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center">
+
+                            <Spinner
+                                android:id="@+id/analog4TestSpinner"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:layout_width="120dp"
+                                android:layout_height="wrap_content"
+                                android:layout_centerHorizontal="true"
+                                android:layout_centerVertical="true"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
+
+                    </TableRow>
+
+                    <TableRow
                         android:id="@+id/tableRow4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -426,12 +501,48 @@
                                 android:textOn="ON" />
                         </LinearLayout>
                     </TableRow>
+
+                    <TableRow
+                        android:id="@+id/tableRow6"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="21dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1">
+
+                            <ToggleButton
+                                android:id="@+id/dcwbEnableToggle"
+                                android:layout_width="46.12dp"
+                                android:layout_height="27.42dp"
+                                android:layout_alignParentLeft="true"
+                                android:layout_centerVertical="true"
+                                android:layout_marginLeft="10dp"
+                                android:background="@drawable/toggle_selector"
+                                android:checked="false"
+                                android:textOff=""
+                                android:textOn="" />
+
+                            <TextView
+                                android:id="@+id/dcwbEnableText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_marginLeft="20dp"
+                                android:layout_toRightOf="@+id/toggleRelay7"
+                                android:text="@string/label_dcwb_enable"
+                                android:textAppearance="@style/text_appearance" />
+                        </LinearLayout>
+                    </TableRow>
+
                 </TableLayout>
             </LinearLayout>
 
 
             <TableLayout
-                android:id="@+id/vavAnalog"
+                android:id="@+id/dabAnalog"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/lt_inputs"
@@ -631,11 +742,19 @@
 
             </TableLayout>
 
+            <include
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/dcwbLayout"
+                layout="@layout/fragment_profile_dab_dcwb"
+                android:visibility="gone"
+                android:layout_below="@+id/dabAnalog"/>
+
             <Button
                 android:id="@+id/buttonNext"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/vavAnalog"
+                android:layout_below="@+id/dcwbLayout"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="20dp"
                 android:layout_marginRight="30dp"

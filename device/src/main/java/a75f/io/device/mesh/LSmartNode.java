@@ -30,7 +30,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
-import a75f.io.logic.bo.util.HSEquipUtil;
+import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.L.TAG_CCU_DEVICE;
@@ -237,7 +237,7 @@ public class LSmartNode
         settings.forwardMotorBacklash.set((short)5);
         settings.reverseMotorBacklash.set((short)5);
         
-        String equipId = HSEquipUtil.getEquip(address).getId();
+        String equipId = SystemTemperatureUtil.getEquip(address).getId();
         try {
             settings.proportionalConstant.set((short)(TunerUtil.getProportionalGain(equipId) * 100));
             settings.integralConstant.set((short)(TunerUtil.getIntegralGain(equipId) * 100));

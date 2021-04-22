@@ -74,6 +74,12 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     @BindView(R.id.outsideHumidity)
     Spinner outsideHumidity;
     
+    @BindView(R.id.btuProxyBtn) ToggleButton btuProxyBtn;
+    @BindView(R.id.inletWaterTemp) Spinner inletWaterTemp;
+    @BindView(R.id.outletWaterTemp) Spinner outletWaterTemp;
+    @BindView(R.id.cwFlowRate) Spinner cwFlowRate;
+    @BindView(R.id.btuProxyLayout) LinearLayout btuProxyLayout;
+    
     @BindView(R.id.imageCMSerial) ImageView cmSerial;
     @BindView(R.id.imageMBSerial) ImageView mbSerial;
     @BindView(R.id.reconnectSerial) Button reconnectSerial;
@@ -221,8 +227,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         outsideHumidity.setOnItemSelectedListener(this);
         outsideHumidity.setSelection(zeroToHundredDataAdapter.getPosition(Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                                                                              .getInt("outside_humidity", 0)));
-    
-    
+        
         cmSerial.setImageResource(LSerial.getInstance().isConnected() ? android.R.drawable.checkbox_on_background
                                                                       : android.R.drawable.checkbox_off_background);
         mbSerial.setImageResource(LSerial.getInstance().isModbusConnected() ? android.R.drawable.checkbox_on_background
@@ -246,6 +251,8 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                 }
             });
         }
+    
+        configureBtuProxy(zeroToHundredDataAdapter);
     }
     
     @Override
@@ -255,15 +262,21 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         switch (arg0.getId())
         {
             case R.id.outsideTemp:
-                Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                       .edit().putInt("outside_temp", Integer.parseInt(outsideTemp.getSelectedItem().toString())).apply();
+                writePref("outside_temp", Integer.parseInt(outsideTemp.getSelectedItem().toString()));
                 break;
     
             case R.id.outsideHumidity:
-                Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                       .edit().putInt("outside_humidity", Integer.parseInt(outsideHumidity.getSelectedItem().toString())).apply();
+                writePref("outside_humidity", Integer.parseInt(outsideHumidity.getSelectedItem().toString()));
                 break;
-               
+            case R.id.inletWaterTemp:
+                writePref("inlet_waterTemp", Integer.parseInt(inletWaterTemp.getSelectedItem().toString()));
+                break;
+            case R.id.outletWaterTemp:
+                writePref("outlet_waterTemp", Integer.parseInt(outletWaterTemp.getSelectedItem().toString()));
+                break;
+            case R.id.cwFlowRate:
+                writePref("cw_FlowRate", Integer.parseInt(cwFlowRate.getSelectedItem().toString()));
+                break;
             
         }
     }
@@ -272,6 +285,11 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     public void onNothingSelected(AdapterView<?> arg0) {
         // TODO Auto-generated method stub
         
+    }
+    
+    private void writePref(String prefName, int val) {
+        Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+               .edit().putInt(prefName, val).apply();
     }
 
     // Shows a simple error dialog for the given message.  (We should have a general tool for this.)
@@ -290,6 +308,32 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         Intent mainIntent = Intent.makeRestartActivityTask(componentName);
         context.startActivity(mainIntent);
         Runtime.getRuntime().exit(0);
+    }
+    
+    private void configureBtuProxy(ArrayAdapter<Integer> dataAdapter) {
+        btuProxyBtn.setOnCheckedChangeListener((compoundButton, b) -> {
+            Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                   .edit().putBoolean("btu_proxy", b).apply();
+            btuProxyLayout.setVisibility(b?View.VISIBLE :View.INVISIBLE);
+        });
+        boolean btuProxyEnabled = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting"
+                        , Context.MODE_PRIVATE).getBoolean("btu_proxy", false);
+        btuProxyBtn.setChecked(btuProxyEnabled);
+        btuProxyLayout.setVisibility(btuProxyEnabled ? View.VISIBLE :View.INVISIBLE);
+    
+        inletWaterTemp.setAdapter(dataAdapter);
+        inletWaterTemp.setOnItemSelectedListener(this);
+        inletWaterTemp.setSelection(dataAdapter.getPosition(Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                                                                                .getInt("inlet_waterTemp", 0)));
+        outletWaterTemp.setAdapter(dataAdapter);
+        outletWaterTemp.setOnItemSelectedListener(this);
+        outletWaterTemp.setSelection(dataAdapter.getPosition(Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                                                                                 .getInt("outlet_waterTemp", 0)));
+        cwFlowRate.setAdapter(dataAdapter);
+        cwFlowRate.setOnItemSelectedListener(this);
+        cwFlowRate.setSelection(dataAdapter.getPosition(Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                                                                    .getInt("cw_FlowRate", 0)));
+    
     }
                              
 }

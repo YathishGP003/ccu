@@ -7,12 +7,9 @@ import com.google.common.collect.EvictingQueue;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.stream.Collectors;
 
-import a75.io.algos.ControlLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -24,9 +21,8 @@ import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.SystemPILoopController;
-import a75f.io.logic.bo.building.vav.VavProfile;
 import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.bo.util.HSEquipUtil;
+import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -265,8 +261,8 @@ public class VavSystemController extends SystemController
                 zoneDeadCount++;
             } else if (hasTemp(equip)) {
                 double zoneCurTemp = getEquipCurrentTemp(equip.getId());
-                double desiredTempCooling = HSEquipUtil.getDesiredTempCooling(equip.getId());
-                double desiredTempHeating = HSEquipUtil.getDesiredTempHeating(equip.getId());
+                double desiredTempCooling = SystemTemperatureUtil.getDesiredTempCooling(equip.getId());
+                double desiredTempHeating = SystemTemperatureUtil.getDesiredTempHeating(equip.getId());
 
                 double zoneCoolingLoad = zoneCurTemp > desiredTempCooling ? zoneCurTemp - desiredTempCooling : 0;
                 double zoneHeatingLoad = zoneCurTemp < desiredTempHeating ? desiredTempHeating - zoneCurTemp : 0;

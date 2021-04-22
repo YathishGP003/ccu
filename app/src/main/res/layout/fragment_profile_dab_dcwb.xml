@@ -1,0 +1,565 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <TableLayout
+        android:id="@+id/dabDCWBTable"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/lt_inputs"
+        android:layout_marginLeft="12dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginBottom="16dp"
+        android:stretchColumns="0"
+        android:visibility="visible">
+
+        <TableRow
+            android:id="@+id/btuMeterStatusRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="42dp">
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/labelMeterStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/label_btu_meter_status"
+                    android:textAppearance="@style/text_appearance" />
+
+                <TextView
+                    android:id="@+id/textMeterStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="200dp"
+                    android:layout_toRightOf="@+id/labelMeterStatus"
+                    android:text="@string/text_btu_meter_status"
+                    android:textAppearance="@style/text_appearance" />
+
+            </RelativeLayout>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/dcwbAlgoType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="42dp">
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/texAdaptiveDelta"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="86dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/label_adaptive_delta_t"
+                    android:textAppearance="@style/text_appearance" />
+
+                <ToggleButton
+                    android:id="@+id/adaptiveDeltaEnable"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_toRightOf="@+id/texAdaptiveDelta"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/textMaxExitTemp"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="86dp"
+                    android:layout_marginBottom="1dp"
+                    android:layout_toLeftOf="@+id/maxExitWaterTemp"
+                    android:text="@string/label_max_exit_water_temp"
+                    android:textAppearance="@style/text_appearance" />
+
+                <ToggleButton
+                    android:id="@+id/maxExitWaterTemp"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="120dp"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+            </RelativeLayout>
+
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/chilledWaterTarget"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="42dp">
+
+            <RelativeLayout
+                android:id="@+id/chilledWaterTargetDeltaT"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/textcwTargetDelta"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/label_chilled_water_target_delta_t"
+                    android:textAppearance="@style/text_appearance" />
+
+                <Spinner
+                    android:id="@+id/cwTargetDeltaTSpinner"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="86dp"
+                    android:layout_toRightOf="@+id/textcwTargetDelta"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/chilledWaterTargetExitTemp"
+                android:visibility="gone"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/textcwExitTemp"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/label_chilled_water_exit_temp_margin"
+                    android:textAppearance="@style/text_appearance" />
+
+                <Spinner
+                    android:id="@+id/cwExitTempMarginSpinner"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="86dp"
+                    android:layout_toRightOf="@+id/textcwExitTemp"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/textcwMaxTemp"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="86dp"
+                    android:layout_toLeftOf="@+id/cwMaxFlowRateSpinner"
+                    android:text="@string/label_chilled_water_max_flow_rate"
+                    android:textAppearance="@style/text_appearance" />
+
+                <Spinner
+                    android:id="@+id/cwMaxFlowRateSpinner"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="54dp"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+            </RelativeLayout>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/analog1In"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp">
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/textAnalog1InMn"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/label_analog_in1_at_valve_closed_position"
+                    android:textAppearance="@style/text_appearance" />
+
+                <Spinner
+                    android:id="@+id/analog1InAtValveClosedSpinner"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="86dp"
+                    android:layout_toRightOf="@+id/textAnalog1InMn"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/textValvFull"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="86dp"
+                    android:layout_toLeftOf="@+id/analog1InAtValveFullSpinner"
+                    android:text="@string/label_analog_in1_at_valve_full_position"
+                    android:textAppearance="@style/text_appearance" />
+
+                <Spinner
+                    android:id="@+id/analog1InAtValveFullSpinner"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="54dp"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+            </RelativeLayout>
+
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/analog1Out"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp">
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/textMinCHW"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/label_analog_out1_at_min_chw_valve"
+                    android:textAppearance="@style/text_appearance" />
+
+                <Spinner
+                    android:id="@+id/analog1OutAtMinCHWSpinner"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="86dp"
+                    android:layout_toRightOf="@+id/textMinCHW"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/textMaxCHW"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="86dp"
+                    android:layout_toLeftOf="@+id/analog1OutAtMaxCHWSpinner"
+                    android:text="@string/label_analog_out1_at_max_chw_valve"
+                    android:textAppearance="@style/text_appearance" />
+
+                <Spinner
+                    android:id="@+id/analog1OutAtMaxCHWSpinner"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="54dp"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+            </RelativeLayout>
+
+        </TableRow>
+
+
+        <TableRow
+            android:id="@+id/analog2Out"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp">
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/textMinFanSpeed"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/label_analog_out2_at_min_fan_speed"
+                    android:textAppearance="@style/text_appearance" />
+
+                <Spinner
+                    android:id="@+id/analog2OutAtMinFanSpeed"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="86dp"
+                    android:layout_toRightOf="@+id/textMinFanSpeed"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/textMaxFanSpeed"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="86dp"
+                    android:layout_toLeftOf="@+id/analog2OutAtMaxFanSpeed"
+                    android:text="@string/label_analog_out2_at_max_fan_speed"
+                    android:textAppearance="@style/text_appearance" />
+
+                <Spinner
+                    android:id="@+id/analog2OutAtMaxFanSpeed"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="54dp"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+            </RelativeLayout>
+
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/analog3Out"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp">
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/textMinHeating"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/label_analog_out3_at_min_heating"
+                    android:textAppearance="@style/text_appearance" />
+
+                <Spinner
+                    android:id="@+id/analog3OutAtMinHeating"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="86dp"
+                    android:layout_toRightOf="@+id/textMinHeating"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/textMaxHeating"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="86dp"
+                    android:layout_toLeftOf="@+id/analog3OutMaxHeating"
+                    android:text="@string/label_analog_out3_at_max_heating"
+                    android:textAppearance="@style/text_appearance" />
+
+                <Spinner
+                    android:id="@+id/analog3OutMaxHeating"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="54dp"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+            </RelativeLayout>
+
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/analog4OutCooling"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp">
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/textMinCooling"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/label_analog_out4_at_min_cooling"
+                    android:textAppearance="@style/text_appearance" />
+
+                <Spinner
+                    android:id="@+id/analog4OutAtMinCooling"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="86dp"
+                    android:layout_toRightOf="@+id/textMinCooling"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/textMaxCooling"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="86dp"
+                    android:layout_toLeftOf="@+id/analog4OutMaxCooling"
+                    android:text="@string/label_analog_out4_at_max_cooling"
+                    android:textAppearance="@style/text_appearance" />
+
+                <Spinner
+                    android:id="@+id/analog4OutMaxCooling"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="54dp"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+            </RelativeLayout>
+
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/analog4OutCo2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp">
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/textMinCo2"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/label_analog_out4_at_min_co2"
+                    android:textAppearance="@style/text_appearance" />
+
+                <Spinner
+                    android:id="@+id/analog4OutAtMinCo2"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="86dp"
+                    android:layout_toRightOf="@+id/textMinCo2"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/textMaxCo2"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="86dp"
+                    android:layout_toLeftOf="@+id/analog4OutMaxCo2"
+                    android:text="@string/label_analog_out4_at_max_co2"
+                    android:textAppearance="@style/text_appearance" />
+
+                <Spinner
+                    android:id="@+id/analog4OutMaxCo2"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="54dp"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+            </RelativeLayout>
+
+        </TableRow>
+
+    </TableLayout>
+</LinearLayout>

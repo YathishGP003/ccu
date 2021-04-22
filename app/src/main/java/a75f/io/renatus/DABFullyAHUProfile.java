@@ -1,12 +1,8 @@
 package a75f.io.renatus;
 
 import android.content.DialogInterface;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.appcompat.app.AlertDialog;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,13 +14,18 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import android.widget.TableRow;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Tags;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemMode;
@@ -34,8 +35,18 @@ import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.util.RxjavaUtil;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.text.HtmlCompat;
+import androidx.fragment.app.Fragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+
+import static a75f.io.renatus.util.RxjavaUtil.executeBackground;
 
 /**
  * Created by samjithsadasivan on 11/8/18.
@@ -54,6 +65,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
     @BindView(R.id.toggleAnalog1) ToggleButton ahuAnalog1Tb;
     @BindView(R.id.toggleAnalog2) ToggleButton ahuAnalog2Tb;
     @BindView(R.id.toggleAnalog3) ToggleButton ahuAnalog3Tb;
+    @BindView(R.id.toggleAnalog4) ToggleButton ahuAnalog4Tb;
 
     @BindView(R.id.toggleRelay3) ToggleButton relay3Tb;
     @BindView(R.id.toggleRelay7) ToggleButton relay7Tb;
@@ -63,18 +75,52 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
     @BindView(R.id.analog1Spinner) Spinner ahuAnalog1Test;
     @BindView(R.id.analog2Spinner) Spinner ahuAnalog2Test;
     @BindView(R.id.analog3Spinner) Spinner ahuAnalog3Test;
+    @BindView(R.id.analog4TestSpinner) Spinner ahuAnalog4Test;
 
     @BindView(R.id.relay3Test) ToggleButton relay3Test;
     @BindView(R.id.relay7Test) ToggleButton relay7Test;
-    @BindView(R.id.imageRTUInput)
-    ImageView imageView;
-
+    @BindView(R.id.imageRTUInput) ImageView imageView;
+    
+    @BindView(R.id.dcwbEnableToggle) ToggleButton dcwbEnableToggle;
+    @BindView(R.id.dabAnalog) ViewGroup dabLayout;
+    @BindView(R.id.dcwbLayout)     ViewGroup dcwbLayout;
+    @BindView(R.id.dcwbEnableText) TextView  dcwbText;
+    @BindView(R.id.textMeterStatus) TextView textMeterStatus;
+    @BindView(R.id.analog1MappingText) TextView  analog1Text;
+    @BindView(R.id.tableRowAnalog4) TableRow analog4View;
+    @BindView(R.id.chilledWaterTargetExitTemp) ViewGroup chilledWaterTargetExitTemp;
+    @BindView(R.id.chilledWaterTargetDeltaT) ViewGroup chilledWaterTargetDeltaT;
+    
+    @BindView(R.id.adaptiveDeltaEnable) ToggleButton adaptiveDeltaEnable;
+    @BindView(R.id.maxExitWaterTemp) ToggleButton maxExitWaterTemp;
+    @BindView(R.id.cwTargetDeltaTSpinner) Spinner cwTargetDeltaTSpinner;
+    @BindView(R.id.cwExitTempMarginSpinner) Spinner cwExitTempMarginSpinner;
+    @BindView(R.id.cwMaxFlowRateSpinner) Spinner cwMaxFlowRateSpinner;
+    @BindView(R.id.analog1InAtValveClosedSpinner) Spinner analog1InAtValveClosedSpinner;
+    @BindView(R.id.analog1InAtValveFullSpinner) Spinner analog1InAtValveFullSpinner;
+    
+    @BindView(R.id.analog1OutAtMinCHWSpinner) Spinner analog1OutAtMinCHWSpinner;
+    @BindView(R.id.analog1OutAtMaxCHWSpinner) Spinner analog1OutAtMaxCHWSpinner;
+    @BindView(R.id.analog2OutAtMinFanSpeed) Spinner analog2OutAtMinFanSpeed;
+    @BindView(R.id.analog2OutAtMaxFanSpeed) Spinner analog2OutAtMaxFanSpeed;
+    @BindView(R.id.analog3OutAtMinHeating) Spinner analog3OutAtMinHeating;
+    @BindView(R.id.analog3OutMaxHeating) Spinner analog3OutMaxHeating;
+    @BindView(R.id.analog4OutAtMinCooling) Spinner analog4OutAtMinCooling;
+    @BindView(R.id.analog4OutMaxCooling) Spinner analog4OutMaxCooling;
+    @BindView(R.id.analog4OutAtMinCo2) Spinner analog4OutAtMinCo2;
+    @BindView(R.id.analog4OutMaxCo2) Spinner analog4OutMaxCo2;
+    
+    @BindView(R.id.analog4Spinner) Spinner analog4Spinner;
+    @BindView(R.id.analog4OutCooling) ViewGroup analog4OutConfigCooling;
+    @BindView(R.id.analog4OutCo2) ViewGroup analog4OutConfigCo2;
+    
     Prefs prefs;
     @BindView(R.id.buttonNext)
     Button mNext;
     String PROFILE = "DAB_FULLY_MODULATING";
     boolean isFromReg = false;
     DabFullyModulatingRtu systemProfile = null;
+    private boolean dcwbEnabled;
     
     public static DABFullyAHUProfile newInstance()
     {
@@ -101,61 +147,44 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         prefs = new Prefs(getContext().getApplicationContext());
         if (L.ccu().systemProfile instanceof DabFullyModulatingRtu) {
             systemProfile = (DabFullyModulatingRtu) L.ccu().systemProfile;
-            ahuAnalog1Tb.setChecked(systemProfile.getConfigEnabled("analog1") > 0);
-            ahuAnalog2Tb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
-            ahuAnalog3Tb.setChecked(systemProfile.getConfigEnabled("analog3") > 0);
-            relay3Tb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
-            relay7Tb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
+            boolean dcwbEnabled = systemProfile.isDcwbEnabled();
+            handleDabDwcbEnabled(dcwbEnabled);
             setupAnalogLimitSelectors();
         } else {
-        
-            new AsyncTask<String, Void, Void>() {
-
-                @Override
-                protected void onPreExecute() {
-                    ProgressDialogUtils.showProgressDialog(getActivity(),"Loading System Profile");
-                    super.onPreExecute();
-                }
-            
-                @Override
-                protected Void doInBackground( final String ... params ) {
-                    if (systemProfile != null) {
-                        systemProfile.deleteSystemEquip();
-                        L.ccu().systemProfile = null; //Makes sure that System Algos dont run until new profile is ready.
-                    }
-                    systemProfile = new DabFullyModulatingRtu();
-                    systemProfile.addSystemEquip();
-                    L.ccu().systemProfile = systemProfile;
-                    return null;
-                }
-                @Override
-                protected void onPostExecute( final Void result ) {
-                    setupAnalogLimitSelectors();
-                    ProgressDialogUtils.hideProgressDialog();
-                }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+    
+            RxjavaUtil.executeBackgroundTask( () -> ProgressDialogUtils.showProgressDialog(getActivity(),
+                                                                                  "Saving DAB System Configuration"),
+                                              () -> { if (systemProfile != null) {
+                                                          systemProfile.deleteSystemEquip();
+                                                          L.ccu().systemProfile = null; //Makes sure that System Algos dont run until new profile is ready.
+                                                          }
+                                                      systemProfile = new DabFullyModulatingRtu();
+                                                      systemProfile.addSystemEquip();
+                                                      L.ccu().systemProfile = systemProfile;
+                                                    },
+                                              ()-> { setupAnalogLimitSelectors();
+                                                     ProgressDialogUtils.hideProgressDialog();
+                                              }
+            );
         }
     
         ahuAnalog1Tb.setOnCheckedChangeListener(this);
         ahuAnalog2Tb.setOnCheckedChangeListener(this);
         ahuAnalog3Tb.setOnCheckedChangeListener(this);
+        ahuAnalog4Tb.setOnCheckedChangeListener(this);
         relay3Tb.setOnCheckedChangeListener(this);
         relay7Tb.setOnCheckedChangeListener(this);
 
 
         if(isFromReg){
             mNext.setVisibility(View.VISIBLE);
-        }
-        else {
+        } else {
             mNext.setVisibility(View.GONE);
         }
 
-        mNext.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                goTonext();
-                mNext.setEnabled(false);
-            }
+        mNext.setOnClickListener(v -> {
+            goTonext();
+            mNext.setEnabled(false);
         });
 
         if (getResources().getDisplayMetrics().xdpi == (float)149.824){
@@ -184,6 +213,99 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
                 }
             }
         });
+    
+        configureDcwbEnableButton();
+        
+    }
+    
+    private void configureDcwbEnableButton() {
+        
+        dcwbEnableToggle.setOnCheckedChangeListener((compoundButton, b) -> {
+            if (b) {
+                AlertDialog.Builder btuConfigDialog = new AlertDialog.Builder(getActivity());
+                btuConfigDialog.setTitle(getString(R.string.label_configure_btu));
+                btuConfigDialog.setPositiveButton(HtmlCompat.fromHtml("<font color='#E24301'>PROCEED</font>",
+                                                                      HtmlCompat.FROM_HTML_MODE_LEGACY), (dialog, which) -> {
+                    systemProfile.enableDcwb(CCUHsApi.getInstance());
+                    handleDabDwcbEnabled(true);
+                });
+                btuConfigDialog.setNegativeButton(HtmlCompat.fromHtml("<font color='#E24301'>CANCEL</font>",
+                                                                      HtmlCompat.FROM_HTML_MODE_LEGACY), (dialog, which) -> {
+                    dcwbEnableToggle.setChecked(false);
+                });
+                btuConfigDialog.setIcon(android.R.drawable.ic_dialog_alert);
+                btuConfigDialog.setCancelable(false);
+                btuConfigDialog.show();
+            } else {
+                if (!systemProfile.isDcwbEnabled()) {
+                    return;
+                }
+                systemProfile.disableDcwb(CCUHsApi.getInstance());
+                handleDabDwcbEnabled(false);
+            }
+        
+        });
+    }
+    
+    /**
+     * Called from onViewCreated to initialize toggle buttons.
+     */
+    private void initializeToggleButtons(boolean dcwbEnabled) {
+        this.dcwbEnabled = dcwbEnabled;
+        ahuAnalog1Tb.setChecked(systemProfile.getConfigEnabled("analog1") > 0);
+        ahuAnalog2Tb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
+        ahuAnalog3Tb.setChecked(systemProfile.getConfigEnabled("analog3") > 0);
+        relay3Tb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
+        relay7Tb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
+        
+        if (dcwbEnabled) {
+            ahuAnalog4Tb.setChecked(systemProfile.getConfigEnabled("analog4") > 0);
+            dcwbEnableToggle.setChecked(true);
+        }
+    }
+    
+    /**
+     * Handle UI updates when DCWB is enabled/disabled.
+     * @param dcwbEnabled
+     */
+    private void handleDabDwcbEnabled(boolean dcwbEnabled) {
+        if (dcwbEnabled) {
+            dcwbLayout.setVisibility(View.VISIBLE);
+            dabLayout.setVisibility(View.GONE);
+            dcwbText.setText(getString(R.string.label_dcwb_enabled));
+            analog4View.setVisibility(View.VISIBLE);
+            analog1Text.setText(getString(R.string.label_analog1_dcwb));
+            initializeDcwbSpinners();
+            double loopType = systemProfile.getConfigVal("analog4 and loop and type");
+            
+            textMeterStatus.setText(CCUHsApi.getInstance().read("btu and equip").isEmpty() ?
+                                         getString(R.string.text_btu_meter_error_status) :
+                                         getString(R.string.text_btu_meter_status));
+            updateAnalog4ConfigUI(loopType);
+        } else {
+            dcwbLayout.setVisibility(View.GONE);
+            dabLayout.setVisibility(View.VISIBLE);
+            dcwbText.setText(getString(R.string.label_dcwb_enable));
+            analog4View.setVisibility(View.GONE);
+            analog1Text.setText(getString(R.string.label_cooling));
+            
+        }
+        initializeToggleButtons(dcwbEnabled);
+    }
+    
+    /**
+     * Change analog4Type visibility based on the loopType chosen.
+     * When analog4 is not enabled , show Cooling config.
+     */
+    private void updateAnalog4ConfigUI(double loopType) {
+        CcuLog.d("CCU_UI", "loopType "+loopType);
+        if (loopType > 0) {
+            analog4OutConfigCooling.setVisibility(View.GONE);
+            analog4OutConfigCo2.setVisibility(View.VISIBLE);
+        } else {
+            analog4OutConfigCooling.setVisibility(View.VISIBLE);
+            analog4OutConfigCo2.setVisibility(View.GONE);
+        }
     }
 
     private void goTonext() {
@@ -195,13 +317,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
     }
     
     private void setupAnalogLimitSelectors() {
-        ArrayList<Integer> analogArray = new ArrayList<>();
-        for (int a = 0; a <= 10; a++)
-        {
-            analogArray.add(a);
-        }
-        ArrayAdapter<Integer> analogAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, analogArray);
-        analogAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<Integer> analogAdapter = getIntegerArrayAdapter(0 , 10, 1);
         
         analog1Min.setAdapter(analogAdapter);
         analog1Min.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("cooling and min")), false);
@@ -229,26 +345,18 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         int selection = (int)systemProfile.getConfigVal("humidifier and type");
         relay7Spinner.setSelection(selection, false);
         
-        
-        ArrayList<Double> zoroToHundred = new ArrayList<>();
-        for (double val = 0;  val <= 100.0; val++)
-        {
-            zoroToHundred.add(val);
-        }
-        ArrayAdapter<Double> coolingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
-        coolingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        ahuAnalog1Test.setAdapter(coolingSatTestAdapter);
+        ArrayAdapter<Double> testValAdapter = getArrayAdapter(0,100,1);
+        ahuAnalog1Test.setAdapter(testValAdapter);
         ahuAnalog1Test.setSelection(0,false);
         
-        ArrayAdapter<Double> spTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
-        spTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        ahuAnalog2Test.setAdapter(spTestAdapter);
+        ahuAnalog2Test.setAdapter(testValAdapter);
         ahuAnalog2Test.setSelection(0,false);
         
-        ArrayAdapter<Double> heatingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
-        heatingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        ahuAnalog3Test.setAdapter(heatingSatTestAdapter);
+        ahuAnalog3Test.setAdapter(testValAdapter);
         ahuAnalog3Test.setSelection(0,false);
+    
+        ahuAnalog4Test.setAdapter(testValAdapter);
+        ahuAnalog4Test.setSelection(0,false);
         
         
         analog1Min.setOnItemSelectedListener(this);
@@ -262,12 +370,11 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         ahuAnalog2Test.setOnItemSelectedListener(this);
         ahuAnalog3Test.setOnItemSelectedListener(this);
         
-        relay7Spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
-        {
+        relay7Spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l)
             {
-                setHumidifierrConfigBackground("relay7 and humidifier and type", i);
+                setConfigBackgroundWithProgress("relay7 and humidifier and type", i);
             }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView)
@@ -275,26 +382,139 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             }
         });
         
-        relay3Test.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-        {
+        relay3Test.setOnCheckedChangeListener((compoundButton, b) -> sendAnalogOutTestSignal());
+        relay7Test.setOnCheckedChangeListener((compoundButton, b) -> sendAnalogOutTestSignal());
+        
+    }
+    
+    private ArrayAdapter<Integer> getIntegerArrayAdapter(int start, int end, int increment) {
+        ArrayList<Integer> list = new ArrayList<>();
+        for (int val = start;  val <= end; val += increment) {
+            list.add(val);
+        }
+        ArrayAdapter<Integer> adapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, list);
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        return adapter;
+    }
+    
+    private ArrayAdapter<Double> getArrayAdapter(double start, double end, double increment) {
+        ArrayList<Double> list = new ArrayList<>();
+        for (double val = start;  val <= end; val += increment) {
+            list.add(val);
+        }
+        ArrayAdapter<Double> adapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, list);
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        return adapter;
+    }
+    
+    /**
+     * Called from OnCreateView if dcwb is already enabled.
+     * Otherwise gets called when dcwb toggle button is enabled.
+     */
+    private void initializeDcwbSpinners() {
+    
+        ArrayAdapter<Integer> analogAdapter = getIntegerArrayAdapter(0 , 10, 1);
+    
+        adaptiveDeltaEnable.setChecked(systemProfile.getConfigVal("adaptive and delta and enabled") > 0);
+        maxExitWaterTemp.setChecked(systemProfile.getConfigVal("maximized and exit and temp and enabled") > 0);
+    
+        chilledWaterTargetDeltaT.setVisibility(adaptiveDeltaEnable.isChecked() ? View.VISIBLE : View.GONE);
+        chilledWaterTargetExitTemp.setVisibility(maxExitWaterTemp.isChecked() ? View.VISIBLE : View.GONE);
+        
+        adaptiveDeltaEnable.setOnCheckedChangeListener(this);
+        maxExitWaterTemp.setOnCheckedChangeListener(this);
+        
+        ArrayAdapter<Double> deltaTAdapter = getArrayAdapter(0, 30, 1);
+        cwTargetDeltaTSpinner.setAdapter(deltaTAdapter);
+        cwTargetDeltaTSpinner.setSelection(deltaTAdapter.getPosition(systemProfile.getConfigVal("target and " +
+                                                                                                     "delta")), false);
+        
+        ArrayAdapter<Double> flowRateAdapter = getArrayAdapter(0, 200, 1);
+        cwMaxFlowRateSpinner.setAdapter(flowRateAdapter);
+        cwMaxFlowRateSpinner.setSelection(flowRateAdapter.getPosition(systemProfile.getConfigVal("max and " +
+                                                                                                     "flow and rate")), false);
+        ArrayAdapter<Double> exitTempMarginAdapter = getArrayAdapter(0, 15, 1);
+        cwExitTempMarginSpinner.setAdapter(exitTempMarginAdapter);
+        cwExitTempMarginSpinner.setSelection(exitTempMarginAdapter.getPosition(systemProfile.getConfigVal("exit and " +
+                                                                                              "temp and margin")), false);
+        analog1InAtValveClosedSpinner.setAdapter(analogAdapter);
+        analog1InAtValveClosedSpinner.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("valve" +
+                                                                                                             " and closed")), false);
+        analog1InAtValveFullSpinner.setAdapter(analogAdapter);
+        analog1InAtValveFullSpinner.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("valve" +
+                                                                                                           " and full")), false);
+        analog1OutAtMinCHWSpinner.setAdapter(analogAdapter);
+        analog1OutAtMinCHWSpinner.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("analog1" +
+                                                                                                           " and min")), false);
+        analog1OutAtMaxCHWSpinner.setAdapter(analogAdapter);
+        analog1OutAtMaxCHWSpinner.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("analog1" +
+                                                                                                           " and max")), false);
+        analog2OutAtMinFanSpeed.setAdapter(analogAdapter);
+        analog2OutAtMinFanSpeed.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("analog2" +
+                                                                                                         " and min")), false);
+        analog2OutAtMaxFanSpeed.setAdapter(analogAdapter);
+        analog2OutAtMaxFanSpeed.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("analog2" +
+                                                                                                         " and max")), false);
+        analog3OutAtMinHeating.setAdapter(analogAdapter);
+        analog3OutAtMinHeating.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("analog3" +
+                                                                                                       " and min")), false);
+        analog3OutMaxHeating.setAdapter(analogAdapter);
+        analog3OutMaxHeating.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("analog3" +
+                                                                                                       " and max")), false);
+        analog4OutAtMinCooling.setAdapter(analogAdapter);
+        analog4OutAtMinCooling.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("analog4" +
+                                                                                                      " and min")), false);
+        analog4OutMaxCooling.setAdapter(analogAdapter);
+        analog4OutMaxCooling.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("analog4" +
+                                                                                                    " and max")), false);
+        analog4OutAtMinCo2.setAdapter(analogAdapter);
+        analog4OutAtMinCo2.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("analog4" +
+                                                                                                      " and min")), false);
+        analog4OutMaxCo2.setAdapter(analogAdapter);
+        analog4OutMaxCo2.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("analog4" +
+                                                                                                      " and max")), false);
+    
+        configureAnalog4Spinner();
+        configureDcwbListeners();
+        
+    }
+    
+    private void configureAnalog4Spinner() {
+        analog4Spinner.setSelection((int)systemProfile.getConfigVal("analog4 and loop and type"), false);
+    
+        analog4Spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b)
-            {
-                sendAnalogOutTestSignal();
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                setAnalog4LoopType(position);
+                updateAnalog4ConfigUI(position);
             }
-        });
-        relay7Test.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-        {
             @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b)
-            {
-                sendAnalogOutTestSignal();
+            public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
     }
     
-    
-    @Override
+    /**
+     * Set all the DCWB specific listeners.
+     */
+    private void configureDcwbListeners() {
+        cwTargetDeltaTSpinner.setOnItemSelectedListener(this);
+        cwMaxFlowRateSpinner.setOnItemSelectedListener(this);
+        analog1InAtValveClosedSpinner.setOnItemSelectedListener(this);
+        analog1InAtValveFullSpinner.setOnItemSelectedListener(this);
+        analog1OutAtMinCHWSpinner.setOnItemSelectedListener(this);
+        analog1OutAtMaxCHWSpinner.setOnItemSelectedListener(this);
+        analog2OutAtMinFanSpeed.setOnItemSelectedListener(this);
+        analog2OutAtMaxFanSpeed.setOnItemSelectedListener(this);
+        analog3OutAtMinHeating.setOnItemSelectedListener(this);
+        analog3OutMaxHeating.setOnItemSelectedListener(this);
+        analog4OutAtMinCooling.setOnItemSelectedListener(this);
+        analog4OutMaxCooling.setOnItemSelectedListener(this);
+        analog4OutAtMinCo2.setOnItemSelectedListener(this);
+        analog4OutMaxCo2.setOnItemSelectedListener(this);
+    }
+        
+        @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
     {
         switch (buttonView.getId())
@@ -308,11 +528,22 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             case R.id.toggleAnalog3:
                 setSelectionBackground("analog3", isChecked);
                 break;
+            case R.id.toggleAnalog4:
+                setSelectionBackground("analog4", isChecked);
+                break;
             case R.id.toggleRelay3:
                 setSelectionBackground("relay3", isChecked);
                 break;
             case R.id.toggleRelay7:
                 setSelectionBackground("relay7", isChecked);
+                break;
+            case R.id.adaptiveDeltaEnable:
+                setConfigBackground("adaptive and delta", isChecked ? 1 : 0);
+                enableAdaptiveDeltaTAlgorithm(isChecked);
+                break;
+            case R.id.maxExitWaterTemp:
+                setConfigBackground("maximized and exit and temp", isChecked ? 1 : 0);
+                enableMaxExitWaterTempAlgorithm(isChecked);
                 break;
         }
     }
@@ -321,7 +552,8 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
     public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
                                long arg3)
     {
-        double val = Double.parseDouble(arg0.getSelectedItem().toString());
+        double val = Double.parseDouble(arg0.getSelectedItem().toString());;
+       
         switch (arg0.getId())
         {
             
@@ -346,87 +578,115 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             case R.id.analog1Spinner:
             case R.id.analog2Spinner:
             case R.id.analog3Spinner:
+            case R.id.analog4TestSpinner:
                 sendAnalogOutTestSignal();
+                break;
+            case R.id.cwTargetDeltaTSpinner:
+                setConfigBackground("target and delta", val);
+                break;
+            case R.id.cwMaxFlowRateSpinner:
+                setConfigBackground("max and flow and rate", val);
+                break;
+            case R.id.cwExitTempMarginSpinner:
+                setConfigBackground("exit and temp and margin", val);
+                break;
+            case R.id.analog1InAtValveClosedSpinner:
+                setConfigBackground("valve and closed", val);
+                break;
+            case R.id.analog1InAtValveFullSpinner:
+                setConfigBackground("valve and full", val);
+                break;
+            case R.id.analog1OutAtMinCHWSpinner:
+                setConfigBackground("analog1 and min", val);
+                break;
+            case R.id.analog1OutAtMaxCHWSpinner:
+                setConfigBackground("analog1 and max", val);
+                break;
+            case R.id.analog2OutAtMinFanSpeed:
+                setConfigBackground("analog2 and min", val);
+                break;
+            case R.id.analog2OutAtMaxFanSpeed:
+                setConfigBackground("analog2 and max", val);
+                break;
+            case R.id.analog3OutAtMinHeating:
+                setConfigBackground("analog3 and min", val);
+                break;
+            case R.id.analog3OutMaxHeating:
+                setConfigBackground("analog3 and max", val);
+                break;
+            case R.id.analog4OutAtMinCooling:
+            case R.id.analog4OutAtMinCo2:
+                setConfigBackground("analog4 and min", val);
+                break;
+            case R.id.analog4OutMaxCooling:
+            case R.id.analog4OutMaxCo2:
+                setConfigBackground("analog4 and max", val);
                 break;
         }
     }
     
+    private void enableAdaptiveDeltaTAlgorithm(boolean enabled) {
+    
+        maxExitWaterTemp.setChecked(!enabled);
+        if (enabled) {
+            chilledWaterTargetDeltaT.setVisibility(View.VISIBLE);
+            chilledWaterTargetExitTemp.setVisibility(View.GONE);
+        } else {
+            chilledWaterTargetDeltaT.setVisibility(View.GONE);
+            chilledWaterTargetExitTemp.setVisibility(View.VISIBLE);
+        }
+        systemProfile.invalidateAlgorithmLoop();
+    }
+    
+    private void enableMaxExitWaterTempAlgorithm(boolean enabled) {
+        adaptiveDeltaEnable.setChecked(!enabled);
+        if (enabled) {
+            chilledWaterTargetDeltaT.setVisibility(View.GONE);
+            chilledWaterTargetExitTemp.setVisibility(View.VISIBLE);
+        } else {
+            chilledWaterTargetDeltaT.setVisibility(View.VISIBLE);
+            chilledWaterTargetExitTemp.setVisibility(View.GONE);
+        }
+        systemProfile.invalidateAlgorithmLoop();
+    }
+    
+    private void setAnalog4LoopType( double val) {
+        executeBackground(() -> systemProfile.updateDcwbAnalog4Mapping(val));
+    }
     
     private void setConfigBackground(String tags, double val) {
-        new AsyncTask<String, Void, Void>() {
-            
-            @Override
-            protected Void doInBackground( final String ... params ) {
-                systemProfile.setConfigVal(tags, val);
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute( final Void result ) {
-                // continue what you are doing...
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
-    }
-    private void setHumidifierrConfigBackground(String tags, double val) {
-        new AsyncTask<String, Void, Void>() {
-            
-            @Override
-            protected void onPreExecute() {
-                ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB System Configuration");
-                super.onPreExecute();
-            }
-            
-            @Override
-            protected Void doInBackground( final String ... params ) {
-                systemProfile.setHumidifierConfigVal(tags, val);
-                return null;
-            }
-            
-            @Override
-            protected void onPostExecute( final Void result ) {
-                // continue what you are doing...
-                ProgressDialogUtils.hideProgressDialog();
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
-    }
-    
-    private void setSelectionBackground(String analog, boolean selected) {
-        new AsyncTask<String, Void, Void>() {
-            @Override
-            protected void onPreExecute() {
-                ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB System Configuration");
-                super.onPreExecute();
-            }
-            @Override
-            protected Void doInBackground( final String ... params ) {
-                systemProfile.setConfigEnabled(analog, selected ? 1: 0);
-                return null;
-            }
-            
-            @Override
-            protected void onPostExecute( final Void result ) {
-                if (!selected) {
-                    updateSystemMode();
-                }
-                ProgressDialogUtils.hideProgressDialog();
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        executeBackground(() -> systemProfile.setConfigVal(tags, val));
     }
     
     private void setUserIntentBackground(String query, double val) {
+        executeBackground(() -> TunerUtil.writeSystemUserIntentVal(query, val));
+    }
+    
+    private void setConfigBackgroundWithProgress(String tags, double val) {
+    
+        RxjavaUtil.executeBackgroundTask( () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Saving System " +
+                                                                                                     "Configuration"),
+                                          () -> systemProfile.setConfigVal(tags, val),
+                                          ()-> ProgressDialogUtils.hideProgressDialog());
         
-        new AsyncTask<String, Void, Void>() {
-            @Override
-            protected Void doInBackground( final String ... params ) {
-                TunerUtil.writeSystemUserIntentVal(query, val);
-                return null;
-            }
-            
-            @Override
-            protected void onPostExecute( final Void result ) {
-                // continue what you are doing...
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+    }
+    
+    private void setSelectionBackground(String analog, boolean selected) {
+    
+        RxjavaUtil.executeBackgroundTask( () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Saving System " +
+                                                                                                     "Configuration"),
+                                          () -> {  if (systemProfile.isDcwbEnabled() &&
+                                                      (analog.contains(Tags.ANALOG1) || analog.contains(Tags.ANALOG4))) {
+                                                      systemProfile.setDcwbConfigEnabled(analog, selected ? 1: 0);
+                                                  } else {
+                                                      systemProfile.setConfigEnabled(analog, selected ? 1 : 0);
+                                                  }
+                                                },
+                                          ()-> { if (!selected)
+                                                  updateSystemMode();
+                                                 ProgressDialogUtils.hideProgressDialog();
+                                               }
+                                          );
     }
     
     @Override
@@ -468,14 +728,17 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
         msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
         
-        msg.analog0.set(getAnalogVal(systemProfile.getConfigVal("cooling and min"), systemProfile.getConfigVal("cooling and max"),
-                Double.parseDouble(ahuAnalog1Test.getSelectedItem().toString())));
+        msg.analog0.set(getAnalogVal(systemProfile.getConfigVal("analog1 and min"), systemProfile.getConfigVal(
+            "analog1 and max"), Double.parseDouble(ahuAnalog1Test.getSelectedItem().toString())));
         
-        msg.analog1.set(getAnalogVal(systemProfile.getConfigVal("fan and min"), systemProfile.getConfigVal("fan and max"),
-                Double.parseDouble(ahuAnalog2Test.getSelectedItem().toString())));
+        msg.analog1.set(getAnalogVal(systemProfile.getConfigVal("analog2 and min"), systemProfile.getConfigVal(
+            "analog2 and max"), Double.parseDouble(ahuAnalog2Test.getSelectedItem().toString())));
         
-        msg.analog2.set(getAnalogVal(systemProfile.getConfigVal("heating and min"), systemProfile.getConfigVal("heating and max"),
-                Double.parseDouble(ahuAnalog3Test.getSelectedItem().toString())));
+        msg.analog2.set(getAnalogVal(systemProfile.getConfigVal("analog3 and min"), systemProfile.getConfigVal(
+            "analog3 and max"), Double.parseDouble(ahuAnalog3Test.getSelectedItem().toString())));
+    
+        msg.analog3.set(getAnalogVal(systemProfile.getConfigVal("analog4 and min"), systemProfile.getConfigVal(
+            "analog4 and max"), Double.parseDouble(ahuAnalog3Test.getSelectedItem().toString())));
     
         short relayStatus = (short) ((relay3Test.isChecked() ? 1 << 2 : 0) | (relay7Test.isChecked() ? 1 << 6 : 0));
         msg.relayBitmap.set(relayStatus);
@@ -484,11 +747,14 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         ControlMote.setAnalogOut("analog1",Double.parseDouble(ahuAnalog1Test.getSelectedItem().toString()));
         ControlMote.setAnalogOut("analog2",Double.parseDouble(ahuAnalog2Test.getSelectedItem().toString()));
         ControlMote.setAnalogOut("analog3",Double.parseDouble(ahuAnalog3Test.getSelectedItem().toString()));
+        ControlMote.setAnalogOut("analog4",Double.parseDouble(ahuAnalog4Test.getSelectedItem().toString()));
         ControlMote.setRelayState("relay3",relay3Test.isChecked() ? 1 : 0);
         ControlMote.setRelayState("relay7",relay7Test.isChecked() ? 1 : 0);
 
-        if (relayStatus > 0 || Double.parseDouble(ahuAnalog1Test.getSelectedItem().toString()) > 0 || Double.parseDouble(ahuAnalog2Test.getSelectedItem().toString()) > 0
-                || Double.parseDouble(ahuAnalog3Test.getSelectedItem().toString()) > 0) {
+        if (relayStatus > 0 || Double.parseDouble(ahuAnalog1Test.getSelectedItem().toString()) > 0
+                            || Double.parseDouble(ahuAnalog2Test.getSelectedItem().toString()) > 0
+                            || Double.parseDouble(ahuAnalog3Test.getSelectedItem().toString()) > 0
+                            || Double.parseDouble(ahuAnalog4Test.getSelectedItem().toString()) > 0) {
             if (!Globals.getInstance().isTestMode()) {
                 Globals.getInstance().setTestMode(true);
             }

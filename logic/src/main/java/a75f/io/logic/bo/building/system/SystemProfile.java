@@ -50,7 +50,7 @@ public abstract class SystemProfile
     public double systemHeatingLoopOp;
     public double systemFanLoopOp;
     public double systemCo2LoopOp;
-
+    
     public abstract void doSystemControl();
 
     public abstract void addSystemEquip();

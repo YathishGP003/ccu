@@ -11,6 +11,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 
 /**
  * Tuners are normally created when an equip is created.
@@ -24,10 +25,12 @@ public class TunerUpgrades {
      */
     public static void handleTunerUpgrades(CCUHsApi hayStack) {
         upgradeReheatZoneToDATMinDifferential(hayStack);
+        upgradeDcwbBuildingTuners(hayStack);
     }
     
     /**
      * Takes care of upgrades for vav specific tuner reheatZoneToDATMinDifferential
+     * All the builds upto 1.556 needs this migration
      */
     private static void upgradeReheatZoneToDATMinDifferential(CCUHsApi hayStack) {
     
@@ -65,5 +68,35 @@ public class TunerUpgrades {
             BuildingTunerUtil.updateTunerLevels(reheatZoneToDATMinDifferentialId, vavEquip.getRoomRef(), hayStack);
             hayStack.writeHisValById(reheatZoneToDATMinDifferentialId, HSUtil.getPriorityVal(reheatZoneToDATMinDifferentialId));
         });
+    }
+    
+    /**
+     * Takes care of upgrades for DCWB specific tuners
+     */
+    private static void upgradeDcwbBuildingTuners(CCUHsApi hayStack) {
+        ArrayList<HashMap> rdcwbTuners = hayStack.readAll("point and tuner and dcwb and default");
+        if (rdcwbTuners.size() > 0) {
+            CcuLog.e(L.TAG_CCU_TUNER, "dcwbTuners exist");
+            return;
+        }
+    
+        CcuLog.e(L.TAG_CCU_TUNER, "create dcwbTuners ");
+        //Create the tuner points on building tuner equip.
+        HashMap buildTuner = hayStack.read("equip and tuner");
+        Equip tunerEquip = new Equip.Builder().setHashMap(buildTuner).build();
+        DcwbTuners.addDefaultDcwbTuners(hayStack, tunerEquip.getSiteRef(), tunerEquip.getId(),
+                                        tunerEquip.getDisplayName(), tunerEquip.getTz());
+    
+    
+        //If the current profile is DABFullyModulating, create new system equip tuner points.
+        HashMap equipMap = CCUHsApi.getInstance().read("equip and system");
+        if (!equipMap.isEmpty()) {
+            Equip systemEquip = new Equip.Builder().setHashMap(equipMap).build();
+            if (ProfileType.valueOf(systemEquip.getProfile()) == ProfileType.SYSTEM_DAB_ANALOG_RTU ) {
+                DcwbTuners.addEquipDcwbTuners(hayStack, systemEquip.getSiteRef(), systemEquip.getDisplayName(),
+                                              systemEquip.getId(), systemEquip.getTz());
+            }
+        }
+        
     }
 }

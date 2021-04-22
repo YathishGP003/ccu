@@ -53,7 +53,14 @@ public class PbMessageHandler
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
                 PbMessage pbMessage = (PbMessage) msg.obj;
-                handlePbMessage( pbMessage.msg, pbMessage.cxt);
+                try {
+                    handlePbMessage(pbMessage.msg, pbMessage.cxt);
+                } catch (Exception e) {
+                    //We do understand the consequences of doing this.
+                    //But the system could still continue to work in standalone mode controlling the hvac system
+                    //even if there are failures in handling a pubnub message.
+                    CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to handle pubnub !", e);
+                }
             }
         };
         

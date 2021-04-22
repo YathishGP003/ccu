@@ -138,7 +138,7 @@ class GenericTuners {
                                          .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his").setMinVal("70").setMaxVal("77")
                                          .setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                          .addMarker("zone").addMarker("cooling").addMarker("user").addMarker("limit").addMarker("min").addMarker("sp")
-                                         .setMinVal("70").setMaxVal("77").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                                         .setMinVal("70").setMaxVal("80").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                          .setUnit("\u00B0F")
                                          .setTz(tz)
                                          .build();
@@ -152,7 +152,7 @@ class GenericTuners {
                                          .setEquipRef(equipRef).setHisInterpolate("cov")
                                          .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("his")
                                          .addMarker("zone").addMarker("cooling").addMarker("user").addMarker("limit").addMarker("max").addMarker("sp")
-                                         .setMinVal("72").setMaxVal("80").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
+                                         .setMinVal("70").setMaxVal("80").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
                                          .setUnit("\u00B0F")
                                          .setTz(tz)
                                          .build();

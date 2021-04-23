@@ -79,6 +79,8 @@ public class EquipProcessor
     public List<EquipmentDevice> getAllEquips(){
         QueryBuilder<EquipmentDevice> mbQuery = modbusBox.query();
         mbQuery.equal(EquipmentDevice_.isPaired,false);
+        mbQuery.notEqual(EquipmentDevice_.equipType,"EMR");
+        mbQuery.notEqual(EquipmentDevice_.equipType,"BTU");
         return mbQuery.build().find();
     }
 

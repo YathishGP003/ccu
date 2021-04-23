@@ -73,24 +73,8 @@ public class FragmentModbusType  extends BaseDialogFragment {
             showDialogFragment(modBusConfiguration, FragmentModbusConfiguration.ID);
         });
         modbusem.setOnClickListener(v -> {
-            ArrayList<Equip> zoneEquips  = HSUtil.getEquips(selectedZone.getId());
-            boolean isEMR = false;
-            if(zoneEquips.size() > 0)
-            {
-                for(int i=0;i<zoneEquips.size();i++)
-                {
-                    if(zoneEquips.get(i).getProfile().contains("EMR"))
-                    {
-                        isEMR = true;
-                    }
-                }
-            }
-            if(isEMR){
-                Toast.makeText(getActivity(), "Energy Meter Module already paired", Toast.LENGTH_LONG).show();
-            }else {
-                FragmentModbusEnergyMeterConfiguration modBusEmConfiguration = FragmentModbusEnergyMeterConfiguration.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_EMR);
-                showDialogFragment(modBusEmConfiguration, FragmentModbusEnergyMeterConfiguration.ID);
-            }
+            FragmentModbusEnergyMeterConfiguration modBusEmConfiguration = FragmentModbusEnergyMeterConfiguration.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_EMR);
+            showDialogFragment(modBusEmConfiguration, FragmentModbusEnergyMeterConfiguration.ID);
         });
 
         return view;

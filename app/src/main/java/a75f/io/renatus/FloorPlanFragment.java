@@ -1052,10 +1052,14 @@ public class FloorPlanFragment extends Fragment
 				{
 					isCCUPaired = true;
 				}
+				if(zoneEquips.get(i).getProfile().contains("EMR"))
+				{
+					isEMRPaired = true;
+				}
 			}
 		}
 
-		if(!isPLCPaired && !isCCUPaired) {
+		if(!isPLCPaired && !isCCUPaired && !isEMRPaired) {
 			short meshAddress = L.generateSmartNodeAddress();
 			if (mFloorListAdapter.getSelectedPostion() == -1) {
 
@@ -1084,9 +1088,9 @@ public class FloorPlanFragment extends Fragment
 			if (isPLCPaired) {
 				Toast.makeText(getActivity(), "Pi Loop Module is already paired in this zone", Toast.LENGTH_LONG).show();
 			}
-			//if (isEMRPaired) {
-			//	Toast.makeText(getActivity(), "Energy Meter Module is already paired in this zone", Toast.LENGTH_LONG).show();
-			//}
+			if (isEMRPaired) {
+				Toast.makeText(getActivity(), "Energy Meter Module is already paired in this zone", Toast.LENGTH_LONG).show();
+			}
 			if (isCCUPaired) {
 				Toast.makeText(getActivity(), "CCU as Zone is already paired in this zone", Toast.LENGTH_LONG).show();
 			}

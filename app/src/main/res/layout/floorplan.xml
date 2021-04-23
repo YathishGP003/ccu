@@ -218,8 +218,6 @@
 					android:text="@string/label_modbus_energy_meter"
 					android:gravity="center_horizontal|center_vertical"
 					android:textAppearance="@style/label_black"/>
-<<<<<<< HEAD
-=======
 
 				<View
 					android:layout_width="match_parent"
@@ -245,7 +243,6 @@
 					android:text="@string/label_modbus_btu_meter"
 					android:gravity="center_horizontal|center_vertical"
 					android:textAppearance="@style/label_black"/>
->>>>>>> 8b3674075fe7df2b1b9c5568bc7c752327a6652f
 
 				<View
 					android:layout_width="match_parent"

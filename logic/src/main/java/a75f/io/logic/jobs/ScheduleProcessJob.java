@@ -187,10 +187,6 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
                 Log.d(L.TAG_CCU_JOB, " Equip "+equip.getDisplayName());
                 Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
-<<<<<<< HEAD
-=======
-
->>>>>>> 8b3674075fe7df2b1b9c5568bc7c752327a6652f
                 if(equipSchedule == null || equip.getRoomRef().contains("SYSTEM"))
                 {
                     CcuLog.d(L.TAG_CCU_JOB,"<- *no schedule*");
@@ -978,25 +974,12 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }else{
             cpuPoints.put("Fan High Humidity",0);
         }
-<<<<<<< HEAD
-
         if((isCooling1On || isCooling2On) && (!isHeating1On && !isHeating2On))
             cpuPoints.put("condEnabled","Cool Only");
         else if((!isCooling1On && !isCooling2On) && (isHeating1On || isHeating2On))
             cpuPoints.put("condEnabled","Heat Only");
         else if((!isCooling1On && !isCooling2On) && (!isHeating1On && !isHeating2On))
             cpuPoints.put("condEnabled","Off");
-
-=======
-
-        if((isCooling1On || isCooling2On) && (!isHeating1On && !isHeating2On))
-            cpuPoints.put("condEnabled","Cool Only");
-        else if((!isCooling1On && !isCooling2On) && (isHeating1On || isHeating2On))
-            cpuPoints.put("condEnabled","Heat Only");
-        else if((!isCooling1On && !isCooling2On) && (!isHeating1On && !isHeating2On))
-            cpuPoints.put("condEnabled","Off");
-
->>>>>>> 8b3674075fe7df2b1b9c5568bc7c752327a6652f
         if(isFanLowEnabled && !isFanHighEnabled)
             cpuPoints.put("fanEnabled","No High Fan");
         else if(!isFanLowEnabled && !isFanHighEnabled)

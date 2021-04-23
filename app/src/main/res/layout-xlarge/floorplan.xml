@@ -219,25 +219,6 @@
 					android:gravity="center_horizontal|center_vertical"
 					android:textAppearance="@style/label_black"/>
 
-<<<<<<< HEAD
-=======
-			<RelativeLayout
-				android:id="@+id/rl_modbus_energy_meter"
-				android:layout_width="wrap_content"
-				android:layout_height="85dp"
-				android:background="@color/white">
-
-				<TextView
-					android:id="@+id/textModbusEnergyMeter"
-					android:layout_width="match_parent"
-					android:layout_centerVertical="true"
-					android:layout_centerInParent="true"
-					android:layout_height="wrap_content"
-					android:minHeight="42dp"
-					android:text="@string/label_modbus_energy_meter"
-					android:gravity="center_horizontal|center_vertical"
-					android:textAppearance="@style/label_black"/>
-
 				<View
 					android:layout_width="match_parent"
 					android:layout_height="0.1dp"
@@ -263,7 +244,6 @@
 					android:gravity="center_horizontal|center_vertical"
 					android:textAppearance="@style/label_black"/>
 
->>>>>>> 8b3674075fe7df2b1b9c5568bc7c752327a6652f
 				<View
 					android:layout_width="match_parent"
 					android:layout_height="0.1dp"

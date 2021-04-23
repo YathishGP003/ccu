@@ -171,35 +171,21 @@
             android:layout_marginEnd="65dp"
             app:layout_constraintTop_toBottomOf="@+id/paramHeader"/>
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 8b3674075fe7df2b1b9c5568bc7c752327a6652f
         <TextView
             android:id="@+id/header_for_floors"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
-<<<<<<< HEAD
             android:layout_marginTop="38dp"
             android:layout_marginEnd="65dp"
             android:layout_weight="1"
-=======
-            android:layout_weight="1"
-            android:layout_marginTop="38dp"
-            android:layout_marginEnd="65dp"
->>>>>>> 8b3674075fe7df2b1b9c5568bc7c752327a6652f
             android:textAllCaps="true"
             android:visibility="invisible"
             android:text="@string/title_modbus_energy_proportional_distribution"
             android:textAppearance="@style/text_label"
             app:layout_constraintBottom_toTopOf="@+id/floorList"
             app:layout_constraintEnd_toEndOf="parent"
-<<<<<<< HEAD
-            app:layout_constraintHorizontal_bias="0.18"
-=======
             app:layout_constraintHorizontal_bias="0.094"
->>>>>>> 8b3674075fe7df2b1b9c5568bc7c752327a6652f
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/recyclerParams"
             app:layout_constraintVertical_bias="0.0" />
@@ -233,11 +219,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.953"
             app:layout_constraintStart_toStartOf="parent"
-<<<<<<< HEAD
-            app:layout_constraintTop_toBottomOf="@+id/floorList"
-=======
             app:layout_constraintTop_toBottomOf="@+id/recyclerView"
->>>>>>> 8b3674075fe7df2b1b9c5568bc7c752327a6652f
             app:layout_constraintVertical_bias="0.466" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

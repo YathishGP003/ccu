@@ -490,12 +490,22 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
          */
         if (profileType == ProfileType.MODBUS_EMR) {
             textTitleFragment.setText(getString(R.string.label_modbus_energy_meter));
+            floorList = HSUtil.getFloors();
+            if(floorList.size()>0) {
+                Collections.sort(floorList, floorComparator);
+                floorViewheader.setVisibility(View.VISIBLE);
+                floorListView.setVisibility(View.VISIBLE);
+                this.energyDistributionAdapter = new EnergyDistributionAdapter(floorList, getContext(), this);
+                floorListView.setLayoutManager(new LinearLayoutManager(getContext()));
+                floorListView.setAdapter(energyDistributionAdapter);
+            }
+        }
             /* * If Profile type is BTU meter then only enable the energy distribution details
              */
             if (profileType == ProfileType.MODBUS_BTU) {
                 textTitleFragment.setText(getString(R.string.label_modbus_btu_meter));
                 floorList = HSUtil.getFloors();
-                if (floorList.size() > 0) {
+                if(floorList.size()>0) {
                     Collections.sort(floorList, floorComparator);
                     floorViewheader.setVisibility(View.VISIBLE);
                     floorListView.setVisibility(View.VISIBLE);
@@ -504,6 +514,26 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                     floorListView.setAdapter(energyDistributionAdapter);
                 }
             }
+        }
+    /**
+     * Validate the energy distribution value for each floor
+     * @param energyDistribution
+     */
+    public void validateEnergyDistributionValue(Map<Integer, Integer> energyDistribution) {
+        int total = 0;
+        for (Integer key : energyDistribution.keySet()) {
+            total += energyDistribution.get(key);
+        }
+
+        boolean isValue100Percent = (total == 100);
+        if(isValue100Percent)
+        {
+            setBtn.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            Toast.makeText(getContext(), getContext().getString(R.string.energy_distribution_validation_error), Toast.LENGTH_LONG).show();
+            setBtn.setVisibility(View.INVISIBLE);
         }
     }
     /*public List<EquipmentDevice> loadJSONFromAsset() {

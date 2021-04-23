@@ -869,12 +869,6 @@
         <item>  1 </item>
         <item>  2 </item>
     </string-array>
-
-<<<<<<< HEAD
-    <string name="label_modbus_energy_meter">MODBUS ENERGY METER</string>
-    <string name="title_modbus_energy_proportional_distribution">Energy Proportional Distribution</string>
-=======
->>>>>>> 8b3674075fe7df2b1b9c5568bc7c752327a6652f
     <string-array name="energy_distribution_values">
         <item> 0% </item>
         <item> 10% </item>
@@ -888,9 +882,7 @@
         <item> 90% </item>
         <item> 100% </item>
     </string-array>
-<<<<<<< HEAD
-=======
+
 
     <string name="energy_distribution_validation_error">Energy Proportional Distribution combining all floors should be equal to 100%</string>
->>>>>>> 8b3674075fe7df2b1b9c5568bc7c752327a6652f
 </resources>

@@ -186,8 +186,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		systemModePicker = view.findViewById(R.id.systemModePicker);
 		coolingAvailable = L.ccu().systemProfile.isCoolingAvailable();
 		heatingAvailable = L.ccu().systemProfile.isHeatingAvailable();
-		energyMeterParams = view.findViewById(R.id.energyMeterParams);
-		energyMeterModelDetails = view.findViewById(R.id.energyMeterModelDetails);
+
 		
 		modesAvailable.add(SystemMode.OFF.displayName);
 		if (coolingAvailable && heatingAvailable) {

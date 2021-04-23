@@ -425,6 +425,19 @@ public class Globals {
             mbProfile.addMbEquip(Short.valueOf( address), ProfileType.MODBUS_BTU);
             L.ccu().zoneProfiles.add(mbProfile);
         }
+
+        /**
+         * Get all the default BTU_Meter profile details
+         */
+        ArrayList<HashMap> emEquips = CCUHsApi.getInstance().readAll("equip and emr");
+
+        for (HashMap m : emEquips)
+        {
+            ModbusProfile mbProfile = new ModbusProfile();
+            short address =Short.parseShort(m.get("group").toString());
+            mbProfile.addMbEquip(Short.valueOf( address), ProfileType.MODBUS_EMR);
+            L.ccu().zoneProfiles.add(mbProfile);
+        }
     }
 
     public String getSmartNodeBand() {

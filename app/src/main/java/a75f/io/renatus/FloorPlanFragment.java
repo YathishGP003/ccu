@@ -1192,12 +1192,15 @@ public class FloorPlanFragment extends Fragment {
                 }
             }
             if (priviousSelectedDevice == 2) {
-
                 /**
                  * Modbus energy meter selection
                  */
-                showDialogFragment(FragmentModbusConfiguration
-                        .newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EM), FragmentModbusConfiguration.ID);
+                if(L.ccu().zoneProfiles.size() > 0){
+                    Toast.makeText(getActivity(), " Energy Meter already paired", Toast.LENGTH_LONG).show();
+                }else {
+                    showDialogFragment(FragmentModbusConfiguration
+                            .newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
+                }
             }
             if (priviousSelectedDevice == 3) {
                 /**

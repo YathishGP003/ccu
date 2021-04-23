@@ -889,10 +889,10 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             Equip systemEquip = new Equip.Builder().setHashMap(equipMap).build();
             switch (tags){
                 case Tags.ANALOG1:
-                    HashMap cmdCool = CCUHsApi.getInstance().read("point and system and cmd and valve");
-                    if(cmdCool != null && cmdCool.size() > 0) {
+                    HashMap cmdValve = CCUHsApi.getInstance().read("point and system and cmd and valve");
+                    if(!cmdValve.isEmpty()) {
                         if(val == 0.0) {
-                            CCUHsApi.getInstance().deleteEntityTree(cmdCool.get("id").toString());
+                            CCUHsApi.getInstance().deleteEntityTree(cmdValve.get("id").toString());
                         }
                     }else {
                         Point valveSignal = new Point.Builder()
@@ -913,7 +913,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                     String loopTag = loopType == 0 ? Tags.COOLING : Tags.CO2;
                     HashMap cmd = CCUHsApi.getInstance().read("point and system and cmd and "+loopTag);
                     
-                    if(cmd != null && cmd.size() > 0) {
+                    if(!cmd.isEmpty()) {
                         if(val == 0.0) {
                             CCUHsApi.getInstance().deleteEntityTree(cmd.get("id").toString());
                         }

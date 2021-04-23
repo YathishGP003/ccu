@@ -95,6 +95,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     RecyclerModbusParamAdapter recyclerModbusParamAdapter;
     boolean isEditConfig = false;
     private short curSelectedSlaveId;
+    String message;
 
     public static FragmentModbusConfiguration newInstance(short meshAddress, String roomName, String floorName, ProfileType profileType) {
         FragmentModbusConfiguration f = new FragmentModbusConfiguration();
@@ -119,6 +120,16 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         profileType = ProfileType.values()[profileOriginalValue];
         View view = inflater.inflate(R.layout.fragment_modbus_config, container, false);
         ButterKnife.bind(this, view);
+        textTitleFragment = view.findViewById(R.id.textTitleFragment);
+        message = getString(R.string.save_mb);
+
+        if(profileType == ProfileType.MODBUS_EMR){
+            textTitleFragment.setText(R.string.label_modbus_energy_meter);
+            message = getString(R.string.save_em_mb);
+        }else if(profileType == ProfileType.MODBUS_BTU){
+            textTitleFragment.setText(R.string.label_modbus_btu_meter);
+            message = getString(R.string.save_btu_mb);
+        }
 
         setBtn.setOnClickListener(view1 -> {
             if (!isEditConfig && L.isModbusSlaveIdExists((short) (spAddress.getSelectedItemPosition() + 1))) {
@@ -285,7 +296,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 setBtn.setEnabled(false);
                 if (ProgressDialogUtils.isDialogShowing())
                     ProgressDialogUtils.hideProgressDialog();
-                ProgressDialogUtils.showProgressDialog(getActivity(), "Saving Modbus Configuration");
+                ProgressDialogUtils.showProgressDialog(getActivity(), message);
                 super.onPreExecute();
             }
 

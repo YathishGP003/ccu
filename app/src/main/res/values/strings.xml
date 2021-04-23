@@ -882,7 +882,9 @@
         <item> 90% </item>
         <item> 100% </item>
     </string-array>
-
-
     <string name="energy_distribution_validation_error">Energy Proportional Distribution combining all floors should be equal to 100%</string>
+    <string name="save_mb">Saving Modbus Configuration</string>
+    <string name="save_em_mb">Saving Modbus Energy Meter Configuration</string>
+    <string name="save_btu_mb">Saving Modbus BTU Meter Configuration</string>
+
 </resources>

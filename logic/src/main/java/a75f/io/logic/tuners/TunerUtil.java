@@ -54,6 +54,7 @@ public class TunerUtil
         }
         return BuildingTunerFallback.getDefaultTunerVal(query);
     }
+    
     public static double readBuildingTunerValByQuery(String query) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap tunerPoint = hayStack.read("point and tuner and "+query+" and siteRef == \""+hayStack.getSiteId()+"\"");
@@ -69,21 +70,6 @@ public class TunerUtil
             }
         }
         return BuildingTunerFallback.getDefaultTunerVal(query);
-    }
-    public static String readTunerStrByQuery(String query) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap tunerPoint = hayStack.read("point and tuner and "+query);
-        ArrayList values = hayStack.readPoint(tunerPoint.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("val") != null) {
-                    return valMap.get("val").toString();
-                }
-            }
-        }
-        return "";
     }
     
     public static double readSystemUserIntentVal(String tags) {
@@ -116,18 +102,6 @@ public class TunerUtil
         hayStack.pointWriteForCcuUser(HRef.copy(id), TunerConstants.UI_DEFAULT_VAL_LEVEL, HNum.make(val), HNum.make(0,"ms"));
         hayStack.writeHisValById(id, val);
     }
-
-    public static void writeTunerValByQuery(String query,String equipRef, double dbVal, int level) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and "+query +" and equipRef == \""+equipRef+"\"");
-
-        String id = cdb.get("id").toString();
-        if (id == null || id == "") {
-            throw new IllegalArgumentException();
-        }
-        hayStack.writePointForCcuUser(id, level, dbVal, 0);
-
-    }
     
     public static double getCoolingDeadband(String equipRef) {
         String systemProfile = "";
@@ -145,17 +119,18 @@ public class TunerUtil
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and tuner and deadband "+systemProfile+" and cooling and not adr and not multiplier and equipRef == \""+equipRef+"\"");;
 
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("val") != null) {
-                    return Double.parseDouble(valMap.get("val").toString());
+        if (!cdb.isEmpty()) {
+            ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+            if (values != null && values.size() > 0) {
+                for (int l = 1; l <= values.size(); l++) {
+                    HashMap valMap = ((HashMap) values.get(l - 1));
+                    if (valMap.get("val") != null) {
+                        return Double.parseDouble(valMap.get("val").toString());
+                    }
                 }
             }
         }
-        return 0;
+        return BuildingTunerFallback.getDefaultTunerVal("cooling and deadband");
     }
 
     public static double getZoneCoolingDeadband(String roomRef) {
@@ -166,21 +141,22 @@ public class TunerUtil
         for (Equip q : zoneEquips){
             HashMap cdb = hayStack.read("point and tuner and deadband and cooling and not adr and not multiplier and equipRef == \""+q.getId()+"\"");
 
-            ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-            if (values != null && values.size() > 0)
-            {
-                for (int l = 1; l <= values.size() ; l++ ) {
-                    HashMap valMap = ((HashMap) values.get(l-1));
-                    if (valMap.get("val") != null) {
-                        String val = valMap.get("val").toString();
-                        if (Integer.parseInt(valMap.get("level").toString()) < DEFAULT_INIT_VAL_LEVEL) {
-                            if (maxDb < Double.parseDouble(val)) {
-                                maxDb = Double.parseDouble(val);
-                                isDefault = false;
-                            }
-                        } else if (isDefault){
-                            if (maxDb < Double.parseDouble(val)) {
-                                maxDb = Double.parseDouble(val);
+            if (!cdb.isEmpty()) {
+                ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+                if (values != null && values.size() > 0) {
+                    for (int l = 1; l <= values.size(); l++) {
+                        HashMap valMap = ((HashMap) values.get(l - 1));
+                        if (valMap.get("val") != null) {
+                            String val = valMap.get("val").toString();
+                            if (Integer.parseInt(valMap.get("level").toString()) < DEFAULT_INIT_VAL_LEVEL) {
+                                if (maxDb < Double.parseDouble(val)) {
+                                    maxDb = Double.parseDouble(val);
+                                    isDefault = false;
+                                }
+                            } else if (isDefault) {
+                                if (maxDb < Double.parseDouble(val)) {
+                                    maxDb = Double.parseDouble(val);
+                                }
                             }
                         }
                     }
@@ -225,18 +201,6 @@ public class TunerUtil
         return maxDb;
     }
     
-    public static void setCoolingDeadband(String equipRef, double dbVal, int level) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and deadband and base and cooling and equipRef == \""+equipRef+"\"");
-        
-        String id = cdb.get("id").toString();
-        if (id == null || id == "") {
-            throw new IllegalArgumentException();
-        }
-        hayStack.writePointForCcuUser(id, level, dbVal, 0);
-        
-    }
-    
     public static double getHeatingDeadband(String equipRef) {
         String systemProfile = "";
         if (L.ccu().systemProfile != null) {
@@ -253,29 +217,20 @@ public class TunerUtil
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap hdb = hayStack.read("point and tuner and deadband "+systemProfile+" and heating and not adr and not multiplier and equipRef == \""+equipRef+"\"");
 
-        ArrayList values = hayStack.readPoint(hdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("val") != null) {
-                    return Double.parseDouble(valMap.get("val").toString());
+        if (!hdb.isEmpty()) {
+            ArrayList values = hayStack.readPoint(hdb.get("id").toString());
+            if (values != null && values.size() > 0)
+            {
+                for (int l = 1; l <= values.size() ; l++ ) {
+                    HashMap valMap = ((HashMap) values.get(l-1));
+                    if (valMap.get("val") != null) {
+                        return Double.parseDouble(valMap.get("val").toString());
+                    }
                 }
             }
         }
-        return 0;
-    }
-    
-    public static void setHeatingDeadband(String equipRef, double dbVal, int level) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and deadband and base and heating and equipRef == \""+equipRef+"\"");
         
-        String id = cdb.get("id").toString();
-        if (id == null || id == "") {
-            throw new IllegalArgumentException();
-        }
-        hayStack.writePointForCcuUser(id, level, dbVal, 0);
-        
+        return BuildingTunerFallback.getDefaultTunerVal("heating and deadband");
     }
     
     public static double getProportionalGain(String equipRef) {
@@ -292,94 +247,61 @@ public class TunerUtil
                 }
             }
         }
-        return 0;
-    }
-    
-    public static void setProportionalGain(String equipRef, double pgVal, int level) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and pgain and equipRef == \""+equipRef+"\"");
-        
-        String id = cdb.get("id").toString();
-        if (id == null || id == "") {
-            throw new IllegalArgumentException();
-        }
-        hayStack.writePointForCcuUser(id, level, pgVal, 0);
-        
+        return BuildingTunerFallback.getDefaultTunerVal("pgain");
     }
     
     public static double getIntegralGain(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and igain and equipRef == \""+equipRef+"\"");
+        HashMap integralGain = hayStack.read("point and tuner and igain and equipRef == \""+equipRef+"\"");
         
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("val") != null) {
-                    return Double.parseDouble(valMap.get("val").toString());
+        if (!integralGain.isEmpty()) {
+            ArrayList values = hayStack.readPoint(integralGain.get("id").toString());
+            if (values != null && values.size() > 0) {
+                for (int l = 1; l <= values.size(); l++) {
+                    HashMap valMap = ((HashMap) values.get(l - 1));
+                    if (valMap.get("val") != null) {
+                        return Double.parseDouble(valMap.get("val").toString());
+                    }
                 }
             }
         }
-        return 0;
-    }
-    
-    public static void setIntegralGain(String equipRef, double igVal, int level) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and igain and equipRef == \""+equipRef+"\"");
-        
-        String id = cdb.get("id").toString();
-        if (id == null || id == "") {
-            throw new IllegalArgumentException();
-        }
-        hayStack.writePointForCcuUser(id, level, igVal, 0);
-        
+        return BuildingTunerFallback.getDefaultTunerVal("igain");
     }
     
     public static double getProportionalSpread(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and pspread and equipRef == \""+equipRef+"\"");
+        HashMap proportionalSpread = hayStack.read("point and tuner and pspread and equipRef == \""+equipRef+"\"");
         
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("val") != null) {
-                    return Double.parseDouble(valMap.get("val").toString());
+        if (!proportionalSpread.isEmpty()) {
+            ArrayList values = hayStack.readPoint(proportionalSpread.get("id").toString());
+            if (values != null && values.size() > 0) {
+                for (int l = 1; l <= values.size(); l++) {
+                    HashMap valMap = ((HashMap) values.get(l - 1));
+                    if (valMap.get("val") != null) {
+                        return Double.parseDouble(valMap.get("val").toString());
+                    }
                 }
             }
         }
-        return 0;
-    }
-    
-    public static void setProportionalSpread(String equipRef, double psVal, int level) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and pspread and equipRef == \""+equipRef+"\"");
-        
-        String id = cdb.get("id").toString();
-        if (id == null || id == "") {
-            throw new IllegalArgumentException();
-        }
-        hayStack.writePointForCcuUser(id, level, psVal, 0);
-        
+        return BuildingTunerFallback.getDefaultTunerVal("pspread");
     }
     
     public static double getIntegralTimeout(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and itimeout and equipRef == \""+equipRef+"\"");
+        HashMap itimeout = hayStack.read("point and tuner and itimeout and equipRef == \""+equipRef+"\"");
         
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("val") != null) {
-                    return Double.parseDouble(valMap.get("val").toString());
+        if (!itimeout.isEmpty()) {
+            ArrayList values = hayStack.readPoint(itimeout.get("id").toString());
+            if (values != null && values.size() > 0) {
+                for (int l = 1; l <= values.size(); l++) {
+                    HashMap valMap = ((HashMap) values.get(l - 1));
+                    if (valMap.get("val") != null) {
+                        return Double.parseDouble(valMap.get("val").toString());
+                    }
                 }
             }
         }
-        return 0;
+        return BuildingTunerFallback.getDefaultTunerVal("itimeout");
     }
     
     /**

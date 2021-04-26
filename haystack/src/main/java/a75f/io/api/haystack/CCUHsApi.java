@@ -1166,10 +1166,18 @@ public class CCUHsApi
         }
 
         for (List<HDict> sublist : partitions) {
-            HGrid wa = hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
+            HGrid writableArrayPoints = hClient.call("pointWriteMany",
+                                   HGridBuilder.dictsToGrid(sublist.toArray(new HDict[sublist.size()])));
+            
+            //We cannot proceed adding new CCU to existing Site without fetching all the point array values.
+            if (writableArrayPoints == null) {
+                CcuLog.e(TAG, "Failed to fetch point array values during syncing existing site.");
+                return false;
+            }
+            
             ArrayList<HDict> hDictList = new ArrayList<>();
-
-            Iterator rowIterator = wa.iterator();
+            
+            Iterator rowIterator = writableArrayPoints.iterator();
             while (rowIterator.hasNext()) {
                 HRow row = (HRow) rowIterator.next();
                 String id = row.get("id").toString();
@@ -1212,7 +1220,14 @@ public class CCUHsApi
 
 
     private void importBuildingSchedule(String siteId, HClient hClient){
-
+        
+            HashMap currentBuildingSchedule = read("schedule and building");
+            if (!currentBuildingSchedule.isEmpty()) {
+                //CCU already has a building schedule.
+                CcuLog.i(TAG, " importBuildingSchedule : buildingSchedule exists");
+                return;
+            }
+            
             try {
                 HDict buildingDict = new HDictBuilder().add("filter", "building and schedule and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
                 HGrid buildingSch = hClient.call("read", HGridBuilder.dictToGrid(buildingDict));

@@ -409,6 +409,26 @@
                 </LinearLayout>
                 <TextView
                     android:layout_marginTop="@dimen/margin_20"
+                    android:id="@+id/energyMeterModelDetails"
+                    android:layout_marginBottom="@dimen/fab_margin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    android:text="Energy Meter"
+                    style="@style/label_black"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/energyMeterParams"
+                    android:layout_marginLeft="@dimen/fab_margin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layout_marginBottom="@dimen/margin_20"
+                    />
+                <TextView
+                    android:layout_marginTop="@dimen/margin_20"
                     android:id="@+id/btuMeterModelDetails"
                     android:layout_marginBottom="@dimen/fab_margin"
                     android:layout_width="match_parent"
@@ -430,7 +450,7 @@
 
 
 
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

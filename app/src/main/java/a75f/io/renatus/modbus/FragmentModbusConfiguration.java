@@ -95,6 +95,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     RecyclerModbusParamAdapter recyclerModbusParamAdapter;
     boolean isEditConfig = false;
     private short curSelectedSlaveId;
+    String message;
 
     public static FragmentModbusConfiguration newInstance(short meshAddress, String roomName, String floorName, ProfileType profileType) {
         FragmentModbusConfiguration f = new FragmentModbusConfiguration();
@@ -119,6 +120,16 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         profileType = ProfileType.values()[profileOriginalValue];
         View view = inflater.inflate(R.layout.fragment_modbus_config, container, false);
         ButterKnife.bind(this, view);
+        textTitleFragment = view.findViewById(R.id.textTitleFragment);
+        message = getString(R.string.save_mb);
+
+        if(profileType == ProfileType.MODBUS_EMR){
+            textTitleFragment.setText(R.string.label_modbus_energy_meter);
+            message = getString(R.string.save_em_mb);
+        }else if(profileType == ProfileType.MODBUS_BTU){
+            textTitleFragment.setText(R.string.label_modbus_btu_meter);
+            message = getString(R.string.save_btu_mb);
+        }
 
         setBtn.setOnClickListener(view1 -> {
             if (!isEditConfig && L.isModbusSlaveIdExists((short) (spAddress.getSelectedItemPosition() + 1))) {
@@ -141,13 +152,15 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         });
 
         /**
-         * Check the profile type selected under system device
+         *Check the profile type selected under system device
          */
-        if (profileType == ProfileType.MODBUS_BTU)
-                equipmentDeviceCollection= EquipsManager.getInstance().getAllBtuMeters();
-        else
+        if (profileType == ProfileType.MODBUS_BTU) {
+            equipmentDeviceCollection = EquipsManager.getInstance().getAllBtuMeters();
+        } else if (profileType == ProfileType.MODBUS_EMR) {
+            equipmentDeviceCollection = EquipsManager.getInstance().getEnergyMeterSysEquipments();
+        } else {
             equipmentDeviceCollection = EquipsManager.getInstance().getAllEquipments();
-
+        }
         return view;
     }
 
@@ -167,6 +180,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 case MODBUS_EMS:
                 case MODBUS_ATS:
                 case MODBUS_UPS150:
+                case MODBUS_EMR:
                 case MODBUS_BTU:
                     modbusProfile = (ModbusProfile) L.getProfile(curSelectedSlaveId);
                     if (modbusProfile != null) {
@@ -208,10 +222,6 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     }
 
     private void updateUi(boolean isNewConfig) {
-        /**
-         * Still under progress for specs
-         */
-        // initConfiguration();
         //If multiple slave address occurs
         ArrayList<Integer> slaveAddress = new ArrayList();
         for (int i = 1; i <= 247; i++)
@@ -286,7 +296,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 setBtn.setEnabled(false);
                 if (ProgressDialogUtils.isDialogShowing())
                     ProgressDialogUtils.hideProgressDialog();
-                ProgressDialogUtils.showProgressDialog(getActivity(), "Saving Modbus Configuration");
+                ProgressDialogUtils.showProgressDialog(getActivity(), message);
                 super.onPreExecute();
             }
 
@@ -307,8 +317,8 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     }
 
     private void setUpsModbusProfile() {
-
         String equipType = equipmentDevice.getEquipType();
+        Log.i("equipType", "setUpsModbusProfile: "+equipType);
         ModbusEquipTypes curEquipTypeSelected = ModbusEquipTypes.valueOf(equipType);
         String equipRef = null;
         curSelectedSlaveId = (short) (spAddress.getSelectedItemPosition() + 1);
@@ -419,6 +429,15 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 } else
                     equipRef = updateModbusProfile(curSelectedSlaveId);
                 break;
+            case EMR:
+                CcuLog.d(L.TAG_CCU_UI, "Set modbus Config: MB Profiles - " + L.ccu().zoneProfiles.size() + "," + L.getProfile(curSelectedSlaveId) + "," + curSelectedSlaveId);
+                if (L.getProfile(curSelectedSlaveId) == null) {
+                    modbusProfile.addMbEquip(curSelectedSlaveId, floorRef, zoneRef, equipmentDevice, recyclerModbusParamAdapter.modbusParam, ProfileType.MODBUS_EMR);
+                    L.ccu().zoneProfiles.add(modbusProfile);
+                    equipRef = modbusProfile.getEquip().getId();
+                } else
+                    equipRef = updateModbusProfile(curSelectedSlaveId);
+                break;
 
             case BTU:
                 CcuLog.d(L.TAG_CCU_UI, "Set modbus Config: MB Profiles - " + L.ccu().zoneProfiles.size() + "," + L.getProfile(curSelectedSlaveId) + "," + curSelectedSlaveId);
@@ -476,12 +495,12 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         return ID;
     }
 
-    void initConfiguration() {
+    void initConfiguration(){
         /**
-         * If Profile type is BTU meter then only enable the energy distribution details
+         * If Profile type is ENergy meter then only enable the energy distribution details
          */
-        if (profileType == ProfileType.MODBUS_BTU) {
-            textTitleFragment.setText(getString(R.string.label_modbus_btu_meter));
+        if (profileType == ProfileType.MODBUS_EMR) {
+            textTitleFragment.setText(getString(R.string.label_modbus_energy_meter));
             floorList = HSUtil.getFloors();
             if(floorList.size()>0) {
                 Collections.sort(floorList, floorComparator);
@@ -492,10 +511,21 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 floorListView.setAdapter(energyDistributionAdapter);
             }
         }
-
-    }
-
-
+            /* * If Profile type is BTU meter then only enable the energy distribution details
+             */
+            if (profileType == ProfileType.MODBUS_BTU) {
+                textTitleFragment.setText(getString(R.string.label_modbus_btu_meter));
+                floorList = HSUtil.getFloors();
+                if(floorList.size()>0) {
+                    Collections.sort(floorList, floorComparator);
+                    floorViewheader.setVisibility(View.VISIBLE);
+                    floorListView.setVisibility(View.VISIBLE);
+                    this.energyDistributionAdapter = new EnergyDistributionAdapter(floorList, getContext(), this);
+                    floorListView.setLayoutManager(new LinearLayoutManager(getContext()));
+                    floorListView.setAdapter(energyDistributionAdapter);
+                }
+            }
+        }
     /**
      * Validate the energy distribution value for each floor
      * @param energyDistribution
@@ -505,9 +535,9 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         for (Integer key : energyDistribution.keySet()) {
             total += energyDistribution.get(key);
         }
-        
+
         boolean isValue100Percent = (total == 100);
-        if(isValue100Percent)    
+        if(isValue100Percent)
         {
             setBtn.setVisibility(View.VISIBLE);
         }
@@ -517,7 +547,6 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
             setBtn.setVisibility(View.INVISIBLE);
         }
     }
-
     /*public List<EquipmentDevice> loadJSONFromAsset() {
         List<EquipmentDevice> equipmentDevicesList = new ArrayList<EquipmentDevice>();
         try {

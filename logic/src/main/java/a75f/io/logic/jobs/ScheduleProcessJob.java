@@ -187,7 +187,6 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
                 Log.d(L.TAG_CCU_JOB, " Equip "+equip.getDisplayName());
                 Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
-
                 if(equipSchedule == null || equip.getRoomRef().contains("SYSTEM"))
                 {
                     CcuLog.d(L.TAG_CCU_JOB,"<- *no schedule*");
@@ -197,6 +196,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 //If building vacation is not active, check zone vacations.
                 if (activeSystemVacation == null )
                 {
+                    Log.e(TAG, "processSchedules: "+equip.getRoomRef() );
                     ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);
                     Schedule activeZoneVacationSchedule = getActiveVacation(activeZoneVacationSchedules);
                     Log.d(L.TAG_CCU_JOB, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size()+" activeSystemVacation "+activeSystemVacation);
@@ -974,14 +974,12 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }else{
             cpuPoints.put("Fan High Humidity",0);
         }
-
         if((isCooling1On || isCooling2On) && (!isHeating1On && !isHeating2On))
             cpuPoints.put("condEnabled","Cool Only");
         else if((!isCooling1On && !isCooling2On) && (isHeating1On || isHeating2On))
             cpuPoints.put("condEnabled","Heat Only");
         else if((!isCooling1On && !isCooling2On) && (!isHeating1On && !isHeating2On))
             cpuPoints.put("condEnabled","Off");
-
         if(isFanLowEnabled && !isFanHighEnabled)
             cpuPoints.put("fanEnabled","No High Fan");
         else if(!isFanLowEnabled && !isFanHighEnabled)
@@ -1556,6 +1554,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
     public static void handleScheduleTypeUpdate(Point p){
         CcuLog.d(L.TAG_CCU_JOB, " ScheduleType handleScheduleTypeUpdate and  clearoverides for "+p.getDisplayName()+","+CCUHsApi.getInstance().readDefaultValById(p.getId()));
+        if (p.getRoomRef().contains("SYSTEM")) {
+            return;
+        }
         Zone zone = new Zone.Builder().setHashMap(CCUHsApi.getInstance().readMapById(p.getRoomRef())).build();
         Schedule schedule = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
 

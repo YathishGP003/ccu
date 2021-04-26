@@ -390,6 +390,7 @@ public class Globals {
                         case MODBUS_EMS:
                         case MODBUS_ATS:
                         case MODBUS_UPS150:
+                        case MODBUS_EMR:
                         case MODBUS_BTU:
                             ModbusProfile mbProfile = new ModbusProfile();
                             mbProfile.addMbEquip(Short.valueOf(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
@@ -422,6 +423,19 @@ public class Globals {
             ModbusProfile mbProfile = new ModbusProfile();
             short address =Short.parseShort(m.get("group").toString());
             mbProfile.addMbEquip(Short.valueOf( address), ProfileType.MODBUS_BTU);
+            L.ccu().zoneProfiles.add(mbProfile);
+        }
+
+        /**
+         * Get all the default BTU_Meter profile details
+         */
+        ArrayList<HashMap> emEquips = CCUHsApi.getInstance().readAll("equip and emr");
+
+        for (HashMap m : emEquips)
+        {
+            ModbusProfile mbProfile = new ModbusProfile();
+            short address =Short.parseShort(m.get("group").toString());
+            mbProfile.addMbEquip(Short.valueOf( address), ProfileType.MODBUS_EMR);
             L.ccu().zoneProfiles.add(mbProfile);
         }
     }

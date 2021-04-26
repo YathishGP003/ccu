@@ -36,358 +36,226 @@
         android:layout_height="wrap_content">
 
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginStart="100dp"
-            android:layout_marginBottom="50dp"
-            android:orientation="vertical">
-
-            <a75f.io.renatus.views.OaoArc
-                android:id="@+id/oaoArc"
-                android:layout_width="200dp"
-                android:layout_height="280dp"
-                android:layout_marginBottom="20dp"
-                android:visibility="gone" />
-
-            <NumberPicker
-                android:id="@+id/systemModePicker"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/oaoArc"
-                android:layout_centerInParent="true"
-                android:layout_marginTop="30dp"
-                android:layout_marginBottom="30dp">
-
-            </NumberPicker>
-
-        </RelativeLayout>
-
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="50dp"
-            android:layout_marginRight="50dp"
-            android:orientation="vertical">
+            android:layout_height="match_parent">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="40dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="30dp"
-                    android:text="@string/txt_occupancy_status"
-                    android:textAppearance="@style/label_black" />
-
-                <TextView
-                    android:id="@+id/occupancyStatus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:text=""
-                    android:textSize="20sp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="30dp"
-                    android:text="@string/txt_equipment_status"
-                    android:textAppearance="@style/label_black" />
-
-                <TextView
-                    android:id="@+id/equipmentStatus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:text=""
-                    android:textSize="20sp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="30dp">
-
-                <TextView
-                    android:id="@+id/textView6"
-                    android:layout_width="wrap_content"
-                    android:layout_height="30dp"
-                    android:layout_gravity="bottom"
-                    android:layout_weight="1"
-                    android:alpha="0.87"
-                    android:text="@string/txt_economy"
-                    android:textAppearance="@style/label_black"
-                    android:textSize="19.5sp" />
-
-                <TextView
-                    android:id="@+id/textView5"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:layout_marginEnd="8dp"
-                    android:layout_weight="1"
-                    android:alpha="0.87"
-                    android:gravity="end"
-                    android:text="@string/txt_comfort"
-                    android:textColor="#202020"
-                    android:textSize="19.5sp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="24dp"
-                android:layout_marginTop="24dp"
-                android:layout_marginRight="24dp">
-
-                <SeekBar
-                    android:id="@+id/systemComfortValue"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:max="3" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
-                android:baselineAligned="false"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="start"
-                    android:layout_weight="1"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="30dp"
-                        android:layout_gravity="center_vertical"
-                        android:text="@string/txt_min_humidity"
-                        android:textAppearance="@style/label_black" />
-
-                    <Spinner
-                        android:id="@+id/targetMinInsideHumidity"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginStart="42dp"
-                        android:entries="@array/hvac_stage_selector"
-                        tools:listitem="@layout/spinner_dropdown_item" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="30dp"
-                        android:layout_gravity="center_vertical"
-                        android:gravity="bottom"
-                        android:paddingBottom="5dp"
-                        android:text="@string/txt_symbol_percent"
-                        android:textAppearance="@style/title_grey"
-                        android:textSize="16sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="end"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="30dp"
-                        android:layout_gravity="center_vertical"
-                        android:text="@string/txt_max_humidity"
-                        android:textAppearance="@style/label_black" />
-
-                    <Spinner
-                        android:id="@+id/targetMaxInsideHumidity"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginStart="42dp"
-                        android:entries="@array/hvac_stage_selector"
-                        tools:listitem="@layout/spinner_dropdown_item" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="30dp"
-                        android:layout_gravity="center_vertical"
-                        android:gravity="bottom"
-                        android:paddingBottom="5dp"
-                        android:text="@string/txt_symbol_percent"
-                        android:textAppearance="@style/title_grey"
-                        android:textSize="16sp" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
-                android:orientation="horizontal"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="30dp"
-                    android:layout_gravity="start"
-                    android:text="@string/txt_compensate_humidity"
-                    android:textAppearance="@style/label_black" />
-
-                <Space
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
-
-                <ToggleButton
-                    android:id="@+id/tbCompHumidity"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
-                    android:layout_gravity="end"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
-                android:orientation="horizontal"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="30dp"
-                    android:layout_gravity="start"
-                    android:text="@string/txt_demand_response_mode"
-                    android:textAppearance="@style/label_black" />
-
-                <Space
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
-
-                <ToggleButton
-                    android:id="@+id/tbDemandResponse"
-                    android:layout_width="46.12dp"
-                    android:layout_height="27.42dp"
-                    android:layout_gravity="end"
-                    android:background="@drawable/toggle_selector"
-                    android:checked="false"
-                    android:textOff=""
-                    android:textOn="" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/purgelayout"
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="100dp"
+                android:layout_marginBottom="50dp"
                 android:orientation="vertical">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margin_20"
-                    android:textStyle="bold"
-                     app:layout_constraintLeft_toLeftOf="parent"
-                    android:text="@string/lable_epidemic_settings_text"
-                    style="@style/label_black"/>
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginLeft="@dimen/fab_margin"
-                    android:orientation="horizontal">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="32dp"
-                        android:layout_gravity="start"
-                        android:text="@string/lable_smart_prepurge"
-                        android:textAppearance="@style/label_black" />
+                <a75f.io.renatus.views.OaoArc
+                    android:id="@+id/oaoArc"
+                    android:layout_width="200dp"
+                    android:layout_height="280dp"
+                    android:layout_marginBottom="20dp"
+                    android:visibility="gone" />
 
-                    <Space
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1" />
-
-                    <ToggleButton
-                        android:id="@+id/tbSmartPrePurge"
-                        android:layout_width="46.12dp"
-                        android:layout_height="27.42dp"
-                        android:layout_gravity="end"
-                        android:background="@drawable/toggle_selector"
-                        android:checked="false"
-                        android:textOff=""
-                        android:textOn="" />
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <NumberPicker
+                    android:id="@+id/systemModePicker"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_below="@+id/oaoArc"
+                    android:layout_centerInParent="true"
                     android:layout_marginTop="30dp"
-                    android:layout_marginLeft="@dimen/fab_margin"
-                    android:orientation="horizontal">
+                    android:layout_marginBottom="30dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="32dp"
-                        android:layout_gravity="start"
-                        android:text="@string/lable_smart_postpurge"
-                        android:textAppearance="@style/label_black" />
+                </NumberPicker>
 
-                    <Space
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1" />
+            </RelativeLayout>
 
-                    <ToggleButton
-                        android:id="@+id/tbSmartPostPurge"
-                        android:layout_width="46.12dp"
-                        android:layout_height="27.42dp"
-                        android:layout_gravity="end"
-                        android:background="@drawable/toggle_selector"
-                        android:checked="false"
-                        android:textOff=""
-                        android:textOn="" />
-                </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="50dp"
+                android:layout_marginRight="50dp"
+                android:orientation="vertical">
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="30dp"
-                    android:layout_marginBottom="@dimen/margin_20"
-                    android:layout_marginLeft="@dimen/fab_margin"
+                    android:layout_marginTop="40dp"
                     android:orientation="horizontal">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="30dp"
+                        android:text="@string/txt_occupancy_status"
+                        android:textAppearance="@style/label_black" />
+
+                    <TextView
+                        android:id="@+id/occupancyStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:text=""
+                        android:textSize="20sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="30dp"
+                        android:text="@string/txt_equipment_status"
+                        android:textAppearance="@style/label_black" />
+
+                    <TextView
+                        android:id="@+id/equipmentStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:text=""
+                        android:textSize="20sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp">
+
+                    <TextView
+                        android:id="@+id/textView6"
+                        android:layout_width="wrap_content"
+                        android:layout_height="30dp"
+                        android:layout_gravity="bottom"
+                        android:layout_weight="1"
+                        android:alpha="0.87"
+                        android:text="@string/txt_economy"
+                        android:textAppearance="@style/label_black"
+                        android:textSize="19.5sp" />
+
+                    <TextView
+                        android:id="@+id/textView5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:alpha="0.87"
+                        android:gravity="end"
+                        android:text="@string/txt_comfort"
+                        android:textColor="#202020"
+                        android:textSize="19.5sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="24dp"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginRight="24dp">
+
+                    <SeekBar
+                        android:id="@+id/systemComfortValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:max="3" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_gravity="start"
-                        android:text="@string/lable_enhanced_ventilation"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center_vertical"
+                            android:text="@string/txt_min_humidity"
+                            android:textAppearance="@style/label_black" />
+
+                        <Spinner
+                            android:id="@+id/targetMinInsideHumidity"
+                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginStart="42dp"
+                            android:entries="@array/hvac_stage_selector"
+                            tools:listitem="@layout/spinner_dropdown_item" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center_vertical"
+                            android:gravity="bottom"
+                            android:paddingBottom="5dp"
+                            android:text="@string/txt_symbol_percent"
+                            android:textAppearance="@style/title_grey"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center_vertical"
+                            android:text="@string/txt_max_humidity"
+                            android:textAppearance="@style/label_black" />
+
+                        <Spinner
+                            android:id="@+id/targetMaxInsideHumidity"
+                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginStart="42dp"
+                            android:entries="@array/hvac_stage_selector"
+                            tools:listitem="@layout/spinner_dropdown_item" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center_vertical"
+                            android:gravity="bottom"
+                            android:paddingBottom="5dp"
+                            android:text="@string/txt_symbol_percent"
+                            android:textAppearance="@style/title_grey"
+                            android:textSize="16sp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="30dp"
+                        android:layout_gravity="start"
+                        android:text="@string/txt_compensate_humidity"
                         android:textAppearance="@style/label_black" />
 
                     <Space
@@ -396,7 +264,7 @@
                         android:layout_weight="1" />
 
                     <ToggleButton
-                        android:id="@+id/tbEnhancedVentilation"
+                        android:id="@+id/tbCompHumidity"
                         android:layout_width="46.12dp"
                         android:layout_height="27.42dp"
                         android:layout_gravity="end"
@@ -405,28 +273,184 @@
                         android:textOff=""
                         android:textOn="" />
                 </LinearLayout>
-            </LinearLayout>
-            <TextView
-                android:layout_marginTop="@dimen/margin_20"
-                android:id="@+id/btuMeterModelDetails"
-                android:layout_marginBottom="@dimen/fab_margin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:visibility="gone"
-                app:layout_constraintLeft_toLeftOf="parent"
-                android:text="BTU Meter"
-                style="@style/label_black"/>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/btuMeterParams"
-                android:layout_marginLeft="@dimen/fab_margin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                android:layout_marginBottom="@dimen/margin_20"
-                />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="30dp"
+                        android:layout_gravity="start"
+                        android:text="@string/txt_demand_response_mode"
+                        android:textAppearance="@style/label_black" />
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                    <ToggleButton
+                        android:id="@+id/tbDemandResponse"
+                        android:layout_width="46.12dp"
+                        android:layout_height="27.42dp"
+                        android:layout_gravity="end"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="false"
+                        android:textOff=""
+                        android:textOn="" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/purgelayout"
+
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margin_20"
+                        android:textStyle="bold"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        android:text="@string/lable_epidemic_settings_text"
+                        style="@style/label_black"/>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginLeft="@dimen/fab_margin"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:layout_gravity="start"
+                            android:text="@string/lable_smart_prepurge"
+                            android:textAppearance="@style/label_black" />
+
+                        <Space
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1" />
+
+                        <ToggleButton
+                            android:id="@+id/tbSmartPrePurge"
+                            android:layout_width="46.12dp"
+                            android:layout_height="27.42dp"
+                            android:layout_gravity="end"
+                            android:background="@drawable/toggle_selector"
+                            android:checked="false"
+                            android:textOff=""
+                            android:textOn="" />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="30dp"
+                        android:layout_marginLeft="@dimen/fab_margin"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:layout_gravity="start"
+                            android:text="@string/lable_smart_postpurge"
+                            android:textAppearance="@style/label_black" />
+
+                        <Space
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1" />
+
+                        <ToggleButton
+                            android:id="@+id/tbSmartPostPurge"
+                            android:layout_width="46.12dp"
+                            android:layout_height="27.42dp"
+                            android:layout_gravity="end"
+                            android:background="@drawable/toggle_selector"
+                            android:checked="false"
+                            android:textOff=""
+                            android:textOn="" />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="30dp"
+                        android:layout_marginBottom="@dimen/margin_20"
+                        android:layout_marginLeft="@dimen/fab_margin"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:layout_gravity="start"
+                            android:text="@string/lable_enhanced_ventilation"
+                            android:textAppearance="@style/label_black" />
+
+                        <Space
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1" />
+
+                        <ToggleButton
+                            android:id="@+id/tbEnhancedVentilation"
+                            android:layout_width="46.12dp"
+                            android:layout_height="27.42dp"
+                            android:layout_gravity="end"
+                            android:background="@drawable/toggle_selector"
+                            android:checked="false"
+                            android:textOff=""
+                            android:textOn="" />
+                    </LinearLayout>
+                </LinearLayout>
+                <TextView
+                    android:layout_marginTop="@dimen/margin_20"
+                    android:id="@+id/energyMeterModelDetails"
+                    android:layout_marginBottom="@dimen/fab_margin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    android:text="Energy Meter"
+                    style="@style/label_black"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/energyMeterParams"
+                    android:layout_marginLeft="@dimen/fab_margin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layout_marginBottom="@dimen/margin_20"
+                    />
+                <TextView
+                    android:layout_marginTop="@dimen/margin_20"
+                    android:id="@+id/btuMeterModelDetails"
+                    android:layout_marginBottom="@dimen/fab_margin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    android:text="BTU Meter"
+                    style="@style/label_black"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/btuMeterParams"
+                    android:layout_marginLeft="@dimen/fab_margin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layout_marginBottom="@dimen/margin_20"
+                    />
+
+
+
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

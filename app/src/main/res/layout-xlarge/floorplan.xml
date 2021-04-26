@@ -188,7 +188,7 @@
 					android:layout_height="wrap_content"
 					android:minHeight="42dp"
 					android:layout_centerVertical="true"
-					android:layout_centerHorizontal="true"
+					android:layout_centerInParent="true"
 					android:text="@string/label_oao"
 					android:gravity="center_horizontal|center_vertical"
 					android:textAppearance="@style/label_black">
@@ -202,7 +202,6 @@
 					android:layout_marginLeft="60dp"
 					android:layout_alignParentBottom="true" />
 			</RelativeLayout>
-
 			<RelativeLayout
 				android:id="@+id/rl_modbus_energy_meter"
 				android:layout_width="wrap_content"

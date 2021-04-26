@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.webkit.HttpAuthHandler;
 import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
@@ -474,27 +475,24 @@ public class CCUHsApi
      */
     public void writeDefaultVal(String query, Double val)
     {
-        try {
-            ArrayList points = readAll(query);
-            String id = ((HashMap) points.get(0)).get("id").toString();
-            if (id == null || id == "") {
-                throw new IllegalArgumentException();
-            }
+        HashMap<Object, Object> point = readEntity(query);
+        if (!point.isEmpty()) {
+            String id = point.get("id").toString();
             pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, getCCUUserName(), HNum.make(val), HNum.make(0));
-        }catch (Exception e){
-            e.printStackTrace();
+        } else {
+            CcuLog.d("CCU_HS", "Invalid point write attempt: "+query);
         }
     }
 
     public void writeDefaultVal(String query, String val)
     {
-        ArrayList points = readAll(query);
-        String    id     = ((HashMap) points.get(0)).get("id").toString();
-        if (id == null || id == "")
-        {
-            throw new IllegalArgumentException();
+        HashMap<Object, Object> point = readEntity(query);
+        if (!point.isEmpty()) {
+            String id = point.get("id").toString();
+            pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, getCCUUserName(), HStr.make(val), HNum.make(0));
+        } else {
+            CcuLog.d("CCU_HS", "Invalid point write attempt: "+query);
         }
-        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, getCCUUserName(), HStr.make(val), HNum.make(0));
     }
 
     public void writeDefaultValById(String id, Double val)
@@ -570,16 +568,15 @@ public class CCUHsApi
     public Double readDefaultVal(String query)
     {
 
-        ArrayList points = readAll(query);
-        if((points != null) && (points.size() > 0)) {
-            String id = ((HashMap) points.get(0)).get("id").toString();
+        HashMap<Object, Object> point = readEntity(query);
+        if(!point.isEmpty()) {
+            String id = point.get("id").toString();
             if (id == null || id == "") {
                 return 0.0;
             }
             ArrayList values = CCUHsApi.getInstance().readPoint(id);
             if (values != null && values.size() > 0) {
                 HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
-                //CcuLog.d("CCU_HS", "" + valMap);
                 return valMap.get("val") == null ? 0 : Double.parseDouble(valMap.get("val").toString());
             } else {
                 return null;
@@ -616,20 +613,16 @@ public class CCUHsApi
     public String readDefaultStrVal(String query)
     {
 
-        ArrayList points = readAll(query);
-        String    id     = ((HashMap) points.get(0)).get("id").toString();
-        if (id == null || id == "")
-        {
+        HashMap<Object, Object> point = readEntity(query);
+        Object id = point.get("id");
+        if (id == null || id == "") {
             return "";
         }
-        ArrayList values = CCUHsApi.getInstance().readPoint(id);
-        if (values != null && values.size() > 0)
-        {
+        ArrayList values = CCUHsApi.getInstance().readPoint(id.toString());
+        if (values != null && values.size() > 0) {
             HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
-            //CcuLog.d("CCU_HS", "" + valMap);
             return valMap.get("val") == null ? "" : valMap.get("val").toString();
-        } else
-        {
+        } else {
             return "";
         }
     }
@@ -690,26 +683,24 @@ public class CCUHsApi
     
     public Double readPointPriorityValByQuery(String query)
     {
-        ArrayList points = readAll(query);
-        String    id     = points.size() == 0 ? null : ((HashMap) points.get(0)).get("id").toString();
-        if (id == null || id == "")
-        {
+        HashMap<Object, Object> point = readEntity(query);
+        Object id = point.get("id");
+        if (id == null || id == "") {
             return null;
         }
         
-        return readPointPriorityVal(id);
+        return readPointPriorityVal(id.toString());
     }
     
     public String readId(String query)
     {
-        ArrayList points = readAll(query);
-        String    id     = points.size() == 0 ? null : ((HashMap) points.get(0)).get("id").toString();
-        if (id == null || id == "")
-        {
+        HashMap<Object, Object> point = readEntity(query);
+        Object id = point.get("id");
+        if (id == null || id == "") {
             return null;
         }
         
-        return id;
+        return id.toString();
     }
 
     public void hisWrite(HisItem item)
@@ -1253,30 +1244,25 @@ public class CCUHsApi
         ArrayList<Equip> equips = new ArrayList<>();
         ArrayList<Point> points = new ArrayList<>();
         try {
-            HDict tunerDict = new HDictBuilder().add("filter", "tuner and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
-            HGrid tunerGrid = hClient.call("read", HGridBuilder.dictToGrid(tunerDict));
-            if (tunerGrid == null) {
-                return;
+            HDict tunerEquipDict = new HDictBuilder().add("filter",
+                                                      "tuner and equip and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+            HGrid tunerEquipGrid = hClient.call("read", HGridBuilder.dictToGrid(tunerEquipDict));
+            if (tunerEquipGrid != null) {
+                tunerEquipGrid.dump();
+            }
+            List<HashMap> equipMaps = HGridToList(tunerEquipGrid);
+            equipMaps.forEach(m -> equips.add(new Equip.Builder().setHashMap(m).build()));
+            
+            HDict tunerPointsDict = new HDictBuilder().add("filter",
+                                                      "tuner and point and default and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
+            HGrid tunerPointsGrid = hClient.call("read", HGridBuilder.dictToGrid(tunerPointsDict));
+            if (tunerPointsGrid != null) {
+                tunerPointsGrid.dump();
             }
             
-            Iterator it = tunerGrid.iterator();
-            while (it.hasNext())
-            {
-                HashMap<Object, Object> map = new HashMap<>();
-                HRow r = (HRow) it.next();
-                HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
-                while (ri.hasNext())
-                {
-                    HDict.MapEntry m = (HDict.MapEntry) ri.next();
-                    map.put(m.getKey(), m.getValue());
-                }
-
-                if (map.get("equip") != null) {
-                    equips.add(new Equip.Builder().setHashMap(map).build());
-                } else if (map.get("point") != null ) {
-                    points.add(new Point.Builder().setHashMap(map).build());
-                }
-            }
+            List<HashMap> pointMaps = HGridToList(tunerPointsGrid);
+            pointMaps.forEach(m -> points.add(new Point.Builder().setHashMap(m).build()));
+            
         } catch (UnknownRecException e) {
             e.printStackTrace();
         }
@@ -1353,28 +1339,31 @@ public class CCUHsApi
         HDict   navIdDict = new HDictBuilder().add(HayStackConstants.ID, HRef.make(siteId)).toDict();
         HGrid   hGrid     = HGridBuilder.dictToGrid(navIdDict);
 
-        HGrid sync = hClient.call(HStdOps.read.name(), hGrid);
+        HGrid siteGrid = hClient.call(HStdOps.read.name(), hGrid);
+        if (siteGrid != null) {
+            siteGrid.dump();
+        } else {
+            CcuLog.e(TAG, "RemoteSite fetch Failed.");
+        }
 
-        sync.dump();
-
-        return sync;
+        return siteGrid;
     }
     
     public Site getRemoteSiteEntity(String siteGuid) {
         HGrid siteGrid = getRemoteSite(siteGuid);
-    
-        Iterator it = siteGrid.iterator();
-        while (it.hasNext()) {
-            HashMap<Object, Object> map = new HashMap<>();
-            HRow r = (HRow) it.next();
-            HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
-            while (ri.hasNext()) {
-                HDict.MapEntry m = (HDict.MapEntry) ri.next();
-                map.put(m.getKey(), m.getValue());
-            }
-        
-            if (map.get("site") != null) {
-                return new Site.Builder().setHashMap(map).build();
+        if (siteGrid != null) {
+            Iterator it = siteGrid.iterator();
+            while (it.hasNext()) {
+                HashMap<Object, Object> map = new HashMap<>();
+                HRow r = (HRow) it.next();
+                HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
+                while (ri.hasNext()) {
+                    HDict.MapEntry m = (HDict.MapEntry) ri.next();
+                    map.put(m.getKey(), m.getValue());
+                }
+                if (map.get("site") != null) {
+                    return new Site.Builder().setHashMap(map).build();
+                }
             }
         }
         return null;
@@ -2126,5 +2115,28 @@ public class CCUHsApi
     public String getTimeZone() {
         HashMap siteMap = read(Tags.SITE);
         return siteMap.get("tz").toString();
+    }
+    
+    /**
+     * Converts a Haystack Grid to Standard Java Collection.
+     * @param grid
+     * @return
+     */
+    public List<HashMap> HGridToList(HGrid grid) {
+        List<HashMap> rowList = new ArrayList<>();
+        if (grid != null) {
+            Iterator it = grid.iterator();
+            while (it != null && it.hasNext()) {
+                HashMap<Object, Object> map = new HashMap<>();
+                HRow r   = (HRow) it.next();
+                HRow.RowIterator        ri  = (HRow.RowIterator) r.iterator();
+                while (ri!= null && ri.hasNext()) {
+                    HDict.MapEntry m = (HDict.MapEntry) ri.next();
+                    map.put(m.getKey(), m.getValue());
+                }
+                rowList.add(map);
+            }
+        }
+        return rowList;
     }
 }

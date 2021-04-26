@@ -74,5 +74,14 @@ public class EquipsManager
     public void deleteEquipByZone(String zoneRef){
         processor.removeDeviceByZone(zoneRef);
     }
+
+
+    public List<EquipmentDevice> getEnergyMeterSysEquipments(){
+        return processor.getAllEMSysEquips();
+    }
+
+    public List<EquipmentDevice> getAllBtuMeters(){
+        return processor.getAllBTUMeterDevicesEquips();
+    }
 }
 

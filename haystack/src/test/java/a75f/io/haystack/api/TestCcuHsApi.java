@@ -92,6 +92,7 @@ public class TestCcuHsApi {
                        .build();
         hayStack.addEquip(v2);
         
+        for (int i = 0; i < 5000 ; i++) {
         Point testPoint = new Point.Builder()
                               .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp")
                               .setEquipRef(equipRef)
@@ -99,13 +100,15 @@ public class TestCcuHsApi {
                               .setRoomRef(zoneRef)
                               .setFloorRef(floorRef)
                               .addMarker("discharge").addMarker("logical")
-                              .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
+                              .addMarker("air").addMarker("temp"+i).addMarker("sensor").addMarker("writable")
                               .setGroup(String.valueOf(nodeAddr))
                               .setTz("Chicago")
                               .setUnit("\u00B0F")
                               .build();
         
         String testPoint1Id = hayStack.addPoint(testPoint);
+        
+        }
         
         Point testPoint2 = new Point.Builder()
                                .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp2")
@@ -148,80 +151,15 @@ public class TestCcuHsApi {
         
         hayStack.addPoint(testRawPoint);
         
-        ArrayList<HashMap> p = hayStack.readAll("point and temp or temp2 and logical");
-        System.out.println(p.size());
-        for(HashMap m:p) {
-            System.out.println(m);
-        }
-
-    /*System.out.println(hayStack.read("site"));
-    Site s1 = new Site.Builder().setHashMap(hayStack.read("site")).build();
-    s1.setSyncStatus(true);
-    hayStack.updateSite(s1, s1.getId());
-    System.out.println(hayStack.read("site"));
-
-    System.out.println(hayStack.read("floor"));
-    Floor f1 = new Floor.Builder().setHashMap(hayStack.read("floor")).build();
-    f1.setSyncStatus(true);
-    hayStack.updateFloor(f1, f1.getId());
-    System.out.println(hayStack.read("floor"));
-
-    System.out.println(hayStack.read("room"));
-    Zone z1 = new Zone.Builder().setHashMap(hayStack.read("room")).build();
-    z1.setSyncStatus(true);
-    hayStack.updateZone(z1, z1.getId());
-    System.out.println(hayStack.read("room"));
-
-    System.out.println(hayStack.read("equip"));
-    Equip q1 = new Equip.Builder().setHashMap(hayStack.read("equip")).build();
-    q1.setSyncStatus(true);
-    hayStack.updateEquip(q1, q1.getId());
-    System.out.println(hayStack.read("equip"));
-
-    System.out.println(hayStack.read("point and logical"));
-    Point p1 = new Point.Builder().setHashMap(hayStack.read("point and logical")).build();
-    p1.setSyncStatus(true);
-    hayStack.updatePoint(p1, p1.getId());
-    System.out.println(hayStack.read("point and logical"));
-
-    System.out.println(hayStack.read("point and physical"));
-    RawPoint r1 = new RawPoint.Builder().setHashMap(hayStack.read("point and physical")).build();
-    r1.setSyncStatus(true);
-    hayStack.updatePoint(r1, r1.getId());
-    System.out.println(hayStack.read("point and physical"));*/
-
-
-    /*System.out.println(hayStack.read("point and physical"));
-    RawPoint p1 = new RawPoint.Builder().setHashMap(hayStack.read("point and physical")).build();
-    CCUHsApi.getInstance().setEntitySynced(p1.getId());
-    System.out.println(hayStack.read("point and physical"));
-    System.out.println("##### Not synced");
+        long time1 = System.currentTimeMillis();
+        ArrayList<HashMap> p = hayStack.readAll("point and temp4000 and logical");
+        long time2 = System.currentTimeMillis();
+        HashMap p1 = hayStack.read("point and temp4000 and logical");
     
-    for(HashMap m : hayStack.readAll("point and not synced")) {
-        System.out.println(m);
-    }
-    System.out.println("##### synced");
-    System.out.println(hayStack.read("point and synced"));*/
+        long time3 = System.currentTimeMillis();
         
-        
-        /*HGrid grid = CCUHsApi.getInstance().hsClient.readAll("(equip and dab) or (equip and ti)");
-        
-        HGridIterator i = new HGridIterator(grid);
-        
-        while (i.hasNext()) {
-            System.out.println(HZincWriter.gridToString(i.next(1)));
-        }*/
-        
-    /*if (i.hasNext()) {
-        System.out.println(HZincWriter.gridToString(i.next(3)));
-    }
-    if (i.hasNext()) {
-        System.out.println(HZincWriter.gridToString(i.next(3)));
-    }
-    if (i.hasNext()) {
-        System.out.println(HZincWriter.gridToString(i.next(3)));
-    }*/
-    
+        System.out.println(time2-time1);
+        System.out.println(time3-time2);
     
     }
     

@@ -52,6 +52,11 @@ public class Tags
     public static final String RELAY6 = "relay6";
     public static final String RELAY7 = "relay7";
     
+    public static final String ANALOG1 = "analog1";
+    public static final String ANALOG2 = "analog2";
+    public static final String ANALOG3 = "analog3";
+    public static final String ANALOG4 = "analog4";
+    
     public static final String TH1 = "th1";
     public static final String TH2 = "th2";
     
@@ -78,5 +83,8 @@ public class Tags
     public static final String MODE = "mode";
     
     public static final String TYPE = "type";
+    public static final String COOLING = "cooling";
+    public static final String HEATING = "heating";
+    public static final String CO2 = "co2";
 
 }

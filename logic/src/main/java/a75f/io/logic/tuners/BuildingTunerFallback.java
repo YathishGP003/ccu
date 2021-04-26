@@ -128,6 +128,7 @@ class BuildingTunerFallback {
     
         tagsValMap.put("target,cumulative,damper",TunerConstants.TARGET_CUMULATIVE_DAMPER);
         tagsValMap.put("reheat,dat,differential",TunerConstants.DEFAULT_REHEAT_ZONE_DAT_MIN_DIFFERENTIAL);
+        tagsValMap.put("adaptive,comfort,margin",TunerConstants.ADAPTIVE_COMFORT_THRESHOLD_MARGIN);
         
         return tagsValMap;
     }

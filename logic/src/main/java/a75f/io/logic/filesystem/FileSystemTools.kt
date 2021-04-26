@@ -40,7 +40,7 @@ class FileSystemTools(private val appContext: Context) {
    @Throws(IOException::class, SecurityException::class)
    fun writeLogCat(fileName: String): File {
 
-      val process = Runtime.getRuntime().exec("logcat -v threadtime -d | grep CCU")
+      val process = Runtime.getRuntime().exec("logcat -v threadtime -b main -m 20000")
       val bufferedReader = BufferedReader(InputStreamReader(process.inputStream))
 
       val log = StringBuilder()

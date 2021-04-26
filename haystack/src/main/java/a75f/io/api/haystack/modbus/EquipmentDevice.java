@@ -216,4 +216,9 @@ public class EquipmentDevice {
     public void setFloorRef(String floorRef) {
         this.floorRef = floorRef;
     }
+
+    public boolean isEmpty(List<EquipmentDevice> e){
+       if( e!=null && e.size()>0) return false;
+       return true;
+    }
 }

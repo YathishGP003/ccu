@@ -21,11 +21,17 @@ public class EquipProcessor
 {
     ArrayList<EquipmentDevice> equipmentDevices;
     ArrayList<EquipmentDevice> energyMeterDevices;
+    /**
+     * Hold the Modbus BTU Meter Device List
+     */
+    ArrayList<EquipmentDevice> modbusBTUMeterDevices;
+
     ModbusParser parser;
     Context mContext;
     private BoxStore boxStore;
     private Box<EquipmentDevice> modbusBox;
     ObjectMapper objectMapper;
+    ArrayList<EquipmentDevice> energyMeterSystemDevices;
 
     EquipProcessor(Context c) {
         mContext = c;
@@ -45,10 +51,19 @@ public class EquipProcessor
 
         equipmentDevices = parser.parseAllEquips(c);
         energyMeterDevices = parser.parseEneryMeterEquips(c);
+        energyMeterSystemDevices = parser.parseEneryMeterSystemEquips(c);
         for(EquipmentDevice equipmentDevice:equipmentDevices){
             addEquips(equipmentDevice);
         }
+        for(EquipmentDevice equipmentDevice:energyMeterSystemDevices){
+                       addEquips(equipmentDevice);
+        }
         for(EquipmentDevice equipmentDevice:energyMeterDevices){
+            addEquips(equipmentDevice);
+        }
+
+        modbusBTUMeterDevices = parser.readBTUMeterDeviceDetails(c);
+        for(EquipmentDevice equipmentDevice:modbusBTUMeterDevices){
             addEquips(equipmentDevice);
         }
     }
@@ -59,16 +74,24 @@ public class EquipProcessor
         }
     }
 
-    public List<EquipmentDevice> getAllEMEquips(){
+    public List<EquipmentDevice> getAllEMEquips() {
         QueryBuilder<EquipmentDevice> mbQuery = modbusBox.query();
         mbQuery.equal(EquipmentDevice_.isPaired, false);
+        mbQuery.equal(EquipmentDevice_.equipType, "EMR");
+        return mbQuery.build().find();
+    }
+    public List<EquipmentDevice> getAllEMSysEquips(){
+        QueryBuilder<EquipmentDevice> mbQuery = modbusBox.query();
         mbQuery.equal(EquipmentDevice_.equipType,"EMR");
+        mbQuery.equal(EquipmentDevice_.isPaired,false);
         return mbQuery.build().find();
     }
 
     public List<EquipmentDevice> getAllEquips(){
         QueryBuilder<EquipmentDevice> mbQuery = modbusBox.query();
         mbQuery.equal(EquipmentDevice_.isPaired,false);
+        mbQuery.notEqual(EquipmentDevice_.equipType,"EMR");
+        mbQuery.notEqual(EquipmentDevice_.equipType,"BTU");
         return mbQuery.build().find();
     }
 
@@ -129,4 +152,12 @@ public class EquipProcessor
        configQuery.equal(EquipmentDevice_.isPaired, true);
        return configQuery.build().find();
    }
+
+    public List<EquipmentDevice> getAllBTUMeterDevicesEquips(){
+        QueryBuilder<EquipmentDevice> configQuery = modbusBox.query();
+        configQuery.equal(EquipmentDevice_.isPaired, false);
+        configQuery.equal(EquipmentDevice_.equipType, "BTU");
+        return  configQuery.build().find();
+    }
+
 }

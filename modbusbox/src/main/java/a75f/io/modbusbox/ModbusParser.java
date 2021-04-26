@@ -1,4 +1,4 @@
- package a75f.io.modbusbox;
+package a75f.io.modbusbox;
 
 import android.content.Context;
 import android.util.Log;
@@ -68,7 +68,7 @@ public class ModbusParser {
                 byte[] buffer = new byte[size];
                 is.read(buffer);
                 is.close();
-                jsonObjects =  new String(buffer, "UTF-8");
+                jsonObjects = new String(buffer, "UTF-8");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -76,19 +76,63 @@ public class ModbusParser {
         return jsonObjects;
     }
 
+    /**
+     * Read all the Energy Meter details JSON file
+     */
     public ArrayList<EquipmentDevice> parseEneryMeterEquips(Context c) {
         ArrayList<EquipmentDevice> assetEquipments = new ArrayList<>();
 
         try {
             String[] fileList;
-            fileList = c.getAssets().list("modbus-em");
+            fileList = c.getAssets().list("modbus-em-zone");
             for (String filename : fileList) {
-                String equipJson = readFileFromAssets(c, "modbus-em/" + filename);
+                String equipJson = readFileFromAssets(c, "modbus-em-zone/" + filename);
                 assetEquipments.add(parseModbusDataFromString(equipJson));
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
         return assetEquipments;
+    }
+
+    /**
+     * Read all the Energy Meter details JSON file
+     */
+    public ArrayList<EquipmentDevice> parseEneryMeterSystemEquips(Context c) {
+        ArrayList<EquipmentDevice> energyMeterDevices = new ArrayList<>();
+        try {
+            String[] fileList = c.getAssets().list("modbus-em-system");
+            for (String filename : fileList) {
+                String equipJson = readFileFromAssets(c, "modbus-em-system/" + filename);
+                energyMeterDevices.add(parseModbusDataFromString(equipJson));
+            }
+        } catch (IOException e) {
+            Log.e("MODBUS PARSER", "File path does not exist");
+            e.printStackTrace();
+        }
+        return energyMeterDevices;
+    }
+
+    /**
+     * Read all the BTU Meter details JSON file
+     *
+     * @param context
+     * @return
+     */
+    public ArrayList<EquipmentDevice> readBTUMeterDeviceDetails(Context context) {
+        ArrayList<EquipmentDevice> btuMeterDevices = new ArrayList<>();
+
+        try {
+            String[] fileList;
+            fileList = context.getAssets().list("modbus-btu");
+            for (String filename : fileList) {
+                String equipJson = readFileFromAssets(context, "modbus-btu/" + filename);
+                btuMeterDevices.add(parseModbusDataFromString(equipJson));
+            }
+        } catch (IOException e) {
+            Log.e("MODBUS PARSER", "File path does not exist");
+            e.printStackTrace();
+        }
+        return btuMeterDevices;
     }
 }

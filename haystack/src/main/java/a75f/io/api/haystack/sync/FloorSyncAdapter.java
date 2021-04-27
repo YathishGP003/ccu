@@ -41,7 +41,7 @@ public class FloorSyncAdapter extends EntitySyncAdapter
         ArrayList<HDict> entities = new ArrayList<>();
         for (Map m: floors)
         {
-            String luid = m.remove("id").toString();
+            String luid = m.get("id").toString();
             if (CCUHsApi.getInstance().getGUID(luid) == null) {
                 floorLUIDList.add(luid);
                 m.put("siteRef", HRef.copy(siteRef));
@@ -68,7 +68,7 @@ public class FloorSyncAdapter extends EntitySyncAdapter
                 String floorGUID = row.get("id").toString();
                 if (floorGUID != null && floorGUID != "")
                 {
-                    CCUHsApi.getInstance().putUIDMap(floorLUIDList.get(index++), floorGUID);
+                    CCUHsApi.getInstance().setSynced(floorLUIDList.get(index++), floorGUID);
                 } else {
                     return false;
                 }

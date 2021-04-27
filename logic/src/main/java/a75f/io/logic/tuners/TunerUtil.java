@@ -10,7 +10,6 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
-import a75f.io.api.haystack.Tags;
 import a75f.io.logic.L;
 
 import static a75f.io.api.haystack.HayStackConstants.DEFAULT_INIT_VAL_LEVEL;
@@ -56,7 +55,7 @@ public class TunerUtil
     }
     public static double readBuildingTunerValByQuery(String query) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap tunerPoint = hayStack.read("point and tuner and "+query+" and siteRef == \""+hayStack.getSiteId()+"\"");
+        HashMap tunerPoint = hayStack.read("point and tuner and "+query+" and siteRef == \""+hayStack.getSiteIdRef()+"\"");
         if(tunerPoint != null && (tunerPoint.get("id" )!= null)) {
             ArrayList values = hayStack.readPoint(tunerPoint.get("id").toString());
             if (values != null && values.size() > 0) {

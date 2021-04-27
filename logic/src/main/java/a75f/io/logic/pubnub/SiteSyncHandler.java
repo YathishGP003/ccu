@@ -17,7 +17,7 @@ public class SiteSyncHandler
             CCUHsApi hayStack = CCUHsApi.getInstance();
             Site remoteSite = hayStack.getRemoteSiteEntity(siteGuid);
             if (remoteSite != null)
-                hayStack.updateSiteLocal(remoteSite, hayStack.getSiteId().toString());
+                hayStack.updateSiteLocal(remoteSite, hayStack.getSiteIdRef().toString());
         }
     
     }

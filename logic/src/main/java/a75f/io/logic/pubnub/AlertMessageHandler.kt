@@ -3,7 +3,6 @@
 package a75f.io.logic.pubnub
 
 import a75f.io.alerts.AlertManager
-import a75f.io.alerts.cloud.ServiceGenerator
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
@@ -70,7 +69,7 @@ class AlertMessageHandler(
       val alertGUID = msgObject[KEY_ALERT_DEF_ID]?.asString
          ?: return CcuLog.e(L.TAG_CCU_PUBNUB, "No $KEY_ALERT_DEF_ID in $CREATE_CUSTOM_ALERT_DEF_CMD message")
 
-      val siteId = haystackApi.globalSiteIdNoAtSign
+      val siteId = haystackApi.siteIdRef?.toVal()
          ?: return CcuLog.w(L.TAG_CCU_PUBNUB, "No siteId in handle alert def message")
 
       // We get the alertService each time rather than save it as a member variable because it

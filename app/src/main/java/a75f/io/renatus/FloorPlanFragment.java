@@ -389,13 +389,13 @@ public class FloorPlanFragment extends Fragment {
                     return null;
                 }
                 HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-                String siteGUID = CCUHsApi.getInstance().getGlobalSiteId();
+                String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
 
-                if (siteGUID == null) {
+                if (siteUID == null) {
                     return null;
                 }
                 //for floor
-                HDict tDict = new HDictBuilder().add("filter", "floor and siteRef == " + siteGUID).toDict();
+                HDict tDict = new HDictBuilder().add("filter", "floor and siteRef == " + siteUID).toDict();
                 HGrid floorPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
                 if (floorPoint == null) {
                     return null;
@@ -417,7 +417,7 @@ public class FloorPlanFragment extends Fragment {
                 }
 
                 //for zones
-                HDict zDict = new HDictBuilder().add("filter", "room and not oao and siteRef == " + siteGUID).toDict();
+                HDict zDict = new HDictBuilder().add("filter", "room and not oao and siteRef == " + siteUID).toDict();
 
                 try {
                     HGrid zonePoint = hClient.call("read", HGridBuilder.dictToGrid(zDict));
@@ -443,6 +443,7 @@ public class FloorPlanFragment extends Fragment {
 
                 return null;
             }
+
 
             @Override
             protected void onPostExecute(Void aVoid) {
@@ -887,9 +888,9 @@ public class FloorPlanFragment extends Fragment {
                         AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
                         adb.setMessage("Floor name already exists in this site,would you like to move all the zones associated with " + floorToRename.getDisplayName() + " to " + hsFloor.getDisplayName() + "?");
                         adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
-                            if (CCUHsApi.getInstance().getLUID(floor.getId()) == null) {
-                                hsFloor.setId(CCUHsApi.getInstance().addFloor(hsFloor));
-                                CCUHsApi.getInstance().putUIDMap(hsFloor.getId(), floor.getId());
+                            if (!CCUHsApi.getInstance().entitySynced(floor.getId())) {
+                                hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor, floor.getId()));
+                                CCUHsApi.getInstance().setSynced(hsFloor.getId(), floor.getId());
                             }
 
                             //move zones and modules under new floor
@@ -897,7 +898,7 @@ public class FloorPlanFragment extends Fragment {
                                 zone.setFloorRef(CCUHsApi.getInstance().getLUID(floor.getId()));
                                 CCUHsApi.getInstance().updateZone(zone, zone.getId());
                                 for (Equip q : HSUtil.getEquips(zone.getId())) {
-                                    q.setFloorRef(CCUHsApi.getInstance().getLUID(floor.getId()));
+                                    q.setFloorRef(floor.getId());
                                     CCUHsApi.getInstance().updateEquip(q, q.getId());
                                 }
                             }
@@ -958,9 +959,9 @@ public class FloorPlanFragment extends Fragment {
                         AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
                         adb.setMessage("Floor name already exists in this site,would you like to continue?");
                         adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
-                            if (CCUHsApi.getInstance().getLUID(floor.getId()) == null) {
-                                hsFloor.setId(CCUHsApi.getInstance().addFloor(hsFloor));
-                                CCUHsApi.getInstance().putUIDMap(hsFloor.getId(), floor.getId());
+                            if (! CCUHsApi.getInstance().entitySynced(floor.getId())) {
+                                hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor, floor.getId()));
+                                CCUHsApi.getInstance().setSynced(hsFloor.getId(), floor.getId());
                             }
                             refreshScreen();
 

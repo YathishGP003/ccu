@@ -208,9 +208,9 @@ public class Globals {
                 if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed())
                 {
                     if (!site.isEmpty()) {
-                        String siteGUID = CCUHsApi.getInstance().getGlobalSiteId();
-                        if (siteGUID != null && siteGUID != "") {
-                                PbSubscriptionHandler.getInstance().registerSite(getApplicationContext(), siteGUID);
+                        if (CCUHsApi.getInstance().siteSynced()) {
+                            String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
+                            PbSubscriptionHandler.getInstance().registerSite(getApplicationContext(), siteUID);
                         }
                     }
                 }

@@ -1,7 +1,7 @@
 package a75f.io.api.haystack;
 
 import android.content.Context;
-import android.util.Log;
+import android.preference.PreferenceManager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -49,6 +49,10 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.Nonnull;
+
+import a75f.io.api.haystack.util.DbStrings;
+import a75f.io.api.haystack.util.Migrations;
 import a75f.io.logger.CcuLog;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
@@ -68,6 +72,7 @@ public class CCUTagsDb extends HServer {
     private static final String PREFS_REMOVE_ID_MAP = "removeIdMap";
     private static final String PREFS_UPDATE_ID_MAP = "updateIdMap";
     private static final String TAG_CCU_HS = "CCU_HS";
+    private static final String PREFS_HAS_MIGRATED_GUID = "hasMigratedGuid";
 
     public ConcurrentHashMap<String, HDict> tagsMap;
     public ConcurrentHashMap<String, WriteArray>      writeArrays;
@@ -145,12 +150,18 @@ public class CCUTagsDb extends HServer {
             removeIdMap = new ConcurrentHashMap();
             updateIdMap = new ConcurrentHashMap();
 
+            CcuLog.d("CCU_HS", "New CCU.  No migration needed");
+            markGuidMigrationComplete();
+
         } else {
             Gson gson = new GsonBuilder()
                     .registerTypeAdapterFactory(hsTypeAdapter).registerTypeAdapter(TimeZone.class, new TimeZoneInstanceCreator())
                     .setPrettyPrinting()
                     .disableHtmlEscaping()
                     .create();
+
+            // Start migration to GUID if that hasn't happened yet
+            DbStrings migrationResult = checkAndStartGuidMigration(gson);
 
             tagsMap = new ConcurrentHashMap<String, HDict>();
             loadGrid(tagsString);
@@ -160,7 +171,61 @@ public class CCUTagsDb extends HServer {
             idMap = gson.fromJson(idMapString, ConcurrentHashMap.class);
             removeIdMap = gson.fromJson(removeIdMapString, ConcurrentHashMap.class);
             updateIdMap = gson.fromJson(updateIdMapString, ConcurrentHashMap.class);
+
+            // Finish the migration (if applicable)
+            if (migrationResult != null) {
+                finishGuidMigration(migrationResult);
+            }
+
+            CcuLog.d("CCU_HS", "checking id map for matching l to g ids");
+            int matchCount = 0;
+            for (String key : idMap.keySet()) {
+                if (key.equals(idMap.get(key))) matchCount++;
+                else {
+                    CcuLog.d("CCU_HS", "Not a match: luid="+key + ", guid="+idMap.get(key));
+                    CcuLog.d("CCU_HS", "entity is: " + tagsMap.get(key));
+                }
+            }
+            CcuLog.d("CCU_HS", "Match check: " + matchCount + " match out of " + idMap.size());
+
         }
+    }
+
+    private DbStrings checkAndStartGuidMigration(Gson gson) {
+        boolean hasMigratedGuid = PreferenceManager.getDefaultSharedPreferences(appContext)
+                                                     .getBoolean(PREFS_HAS_MIGRATED_GUID, false);
+        if (!hasMigratedGuid) {
+
+            DbStrings result = Migrations.migrateGuidsToLuids(
+                    new DbStrings(idMapString, removeIdMapString, updateIdMapString, tagsString, waString, null),
+                    gson
+            );
+            
+            idMapString = result.getIdMapStr();
+            removeIdMapString = result.getRemoveIdMapStr();
+            updateIdMapString = result.getUpdateIdMapStr();
+            tagsString = result.getTagsStr();
+            waString = result.getWaStr();
+
+            return result;
+        } else {
+            CcuLog.i("CCU_HS", "Already migrated Guids");
+            return null;
+        }
+    }
+
+    private void finishGuidMigration(@Nonnull DbStrings migrationResult) {
+
+        Migrations.migrateHisData(this, migrationResult.getMigrationMap());
+
+        saveTags();
+        markGuidMigrationComplete();
+    }
+
+    private void markGuidMigrationComplete() {
+        PreferenceManager.getDefaultSharedPreferences(appContext).edit()
+                         .putBoolean(PREFS_HAS_MIGRATED_GUID, true)
+                         .apply();
     }
     
     public BoxStore getBoxStore() {
@@ -223,7 +288,6 @@ public class CCUTagsDb extends HServer {
 
         updateIdMapString = gson.toJson(updateIdMap);
         appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_UPDATE_ID_MAP, updateIdMapString).apply();
-
     }
 
     private HGrid getGridTagsMap() {
@@ -285,8 +349,12 @@ public class CCUTagsDb extends HServer {
     }
 
     public String addSite(Site s) {
+        return addSiteWithId(s, UUID.randomUUID().toString());
+    }
+
+    public String addSiteWithId(Site s, String id) {
         HDictBuilder site = new HDictBuilder()
-                .add("id", HRef.make(UUID.randomUUID().toString()))
+                .add("id", HRef.make(id))
                 .add("dis", s.getDisplayName())
                 .add("site", HMarker.VAL)
                 .add("geoCity", s.getGeoCity())
@@ -304,9 +372,9 @@ public class CCUTagsDb extends HServer {
             site.add(m);
         }
 
-        HRef id = (HRef) site.get("id");
-        tagsMap.put(id.toVal(), site.toDict());
-        return id.toVal();
+        HRef ref = (HRef) site.get("id");
+        tagsMap.put(ref.toVal(), site.toDict());
+        return ref.toVal();         
     }
 
     public void updateSite(Site s, String i) {
@@ -343,9 +411,14 @@ public class CCUTagsDb extends HServer {
     }
 
 
+
     public String addEquip(Equip q) {
+        return addEquipWithId(q, UUID.randomUUID().toString());
+    }
+
+    public String addEquipWithId(Equip q, String id) {
         HDictBuilder equip = new HDictBuilder()
-                                     .add("id",      HRef.make(UUID.randomUUID().toString()))
+                                     .add("id",      HRef.make(id))
                                      .add("dis",     q.getDisplayName())
                                      .add("equip",     HMarker.VAL)
                                      .add("siteRef", q.getSiteRef())
@@ -371,9 +444,9 @@ public class CCUTagsDb extends HServer {
         for (String m : q.getMarkers()) {
             equip.add(m);
         }
-        HRef id = (HRef) equip.get("id");
-        tagsMap.put(id.toVal(), equip.toDict());
-        return id.toCode();
+        HRef ref = (HRef) equip.get("id");
+        tagsMap.put(ref.toVal(), equip.toDict());
+        return ref.toCode();
     }
 
     public void updateEquip(Equip q, String i) {
@@ -414,8 +487,12 @@ public class CCUTagsDb extends HServer {
     }
 
     public String addPoint(Point p) {
+        return addPointWithId(p, UUID.randomUUID().toString());
+    }
+
+    public String addPointWithId(Point p, String id) {
         HDictBuilder b = new HDictBuilder()
-                .add("id", HRef.make(UUID.randomUUID().toString()))
+                .add("id", HRef.make(id))
                 .add("dis", p.getDisplayName())
                 .add("point", HMarker.VAL)
                 .add("siteRef", p.getSiteRef())
@@ -437,9 +514,9 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-        HRef id = (HRef) b.get("id");
-        tagsMap.put(id.toVal(), b.toDict());
-        return id.toCode();
+        HRef ref = (HRef) b.get("id");
+        tagsMap.put(ref.toVal(), b.toDict());
+        return ref.toCode();
     }
 
     public void updatePoint(Point p, String i) {
@@ -472,8 +549,12 @@ public class CCUTagsDb extends HServer {
     }
 
     public String addPoint(RawPoint p) {
+        return addPointWithId(p, UUID.randomUUID().toString());
+    }
+
+    public String addPointWithId(RawPoint p, String id) {
         HDictBuilder b = new HDictBuilder()
-                .add("id", HRef.make(UUID.randomUUID().toString()))
+                .add("id", HRef.make(id))
                 .add("dis", p.getDisplayName())
                 .add("point", HMarker.VAL)
                 .add("physical", HMarker.VAL)
@@ -500,9 +581,9 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-        HRef id = (HRef) b.get("id");
-        tagsMap.put(id.toVal(), b.toDict());
-        return id.toCode();
+        HRef ref = (HRef) b.get("id");
+        tagsMap.put(ref.toVal(), b.toDict());
+        return ref.toCode();
     }
 
     public void updatePoint(RawPoint p, String i) {
@@ -538,8 +619,12 @@ public class CCUTagsDb extends HServer {
     }
     
     public String addPoint(SettingPoint p) {
+        return addPointWithId(p, UUID.randomUUID().toString());
+    }
+
+    public String addPointWithId(SettingPoint p, String id) {
         HDictBuilder b = new HDictBuilder()
-                                 .add("id", HRef.make(UUID.randomUUID().toString()))
+                                 .add("id", HRef.make(id))
                                  .add("dis", p.getDisplayName())
                                  .add("point", HMarker.VAL)
                                  .add("setting", HMarker.VAL)
@@ -553,9 +638,9 @@ public class CCUTagsDb extends HServer {
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-        HRef id = (HRef) b.get("id");
-        tagsMap.put(id.toVal(), b.toDict());
-        return id.toCode();
+        HRef ref = (HRef) b.get("id");
+        tagsMap.put(ref.toVal(), b.toDict());
+        return ref.toCode();
     }
 
     public String updateSettingPoint(SettingPoint p, String i) {
@@ -578,10 +663,14 @@ public class CCUTagsDb extends HServer {
         tagsMap.put(id.toVal(), b.toDict());
         return id.toCode();
     }
-    
+
     public String addDevice(Device d) {
+        return addDeviceWithId(d, UUID.randomUUID().toString());
+    }
+
+    public String addDeviceWithId(Device d, String id) {
         HDictBuilder b = new HDictBuilder()
-                .add("id", HRef.make(UUID.randomUUID().toString()))
+                .add("id", HRef.make(id))
                 .add("dis", d.getDisplayName())
                 .add("device", HMarker.VAL)
                 .add("addr", d.getAddr())
@@ -593,9 +682,9 @@ public class CCUTagsDb extends HServer {
         for (String m : d.getMarkers()) {
             b.add(m);
         }
-        HRef id = (HRef) b.get("id");
-        tagsMap.put(id.toVal(), b.toDict());
-        return id.toCode();
+        HRef ref = (HRef) b.get("id");
+        tagsMap.put(ref.toVal(), b.toDict());
+        return ref.toCode();
     }
 
     public void updateDevice(Device d, String i) {
@@ -618,8 +707,12 @@ public class CCUTagsDb extends HServer {
     }
 
     public String addFloor(Floor f) {
+        return addFloorWithId(f, UUID.randomUUID().toString());
+    }
+
+    public String addFloorWithId(Floor f, String id) {
         HDictBuilder b = new HDictBuilder()
-                .add("id", HRef.make(UUID.randomUUID().toString()))
+                .add("id", HRef.make(id))
                 .add("dis", f.getDisplayName())
                 .add("floor", HMarker.VAL)
                 .add("siteRef", f.getSiteRef())
@@ -628,9 +721,9 @@ public class CCUTagsDb extends HServer {
         for (String m : f.getMarkers()) {
             b.add(m);
         }
-        HRef id = (HRef) b.get("id");
-        tagsMap.put(id.toVal(), b.toDict());
-        return id.toCode();
+        HRef ref = (HRef) b.get("id");
+        tagsMap.put(ref.toVal(), b.toDict());
+        return ref.toCode();
     }
 
     public void updateFloor(Floor f, String i) {
@@ -648,8 +741,12 @@ public class CCUTagsDb extends HServer {
     }
 
     public String addZone(Zone z) {
+        return addZoneWithId(z, UUID.randomUUID().toString());
+    }
+
+    public String addZoneWithId(Zone z, String id) {
         HDictBuilder b = new HDictBuilder()
-                .add("id", HRef.make(UUID.randomUUID().toString()))
+                .add("id", HRef.make(id))
                 .add("dis", z.getDisplayName())
                 .add("room", HMarker.VAL)
                 .add("siteRef", z.getSiteRef())
@@ -658,9 +755,9 @@ public class CCUTagsDb extends HServer {
         for (String m : z.getMarkers()) {
             b.add(m);
         }
-        HRef id = (HRef) b.get("id");
-        tagsMap.put(id.toVal(), b.toDict());
-        return id.toCode();
+        HRef ref = (HRef) b.get("id");
+        tagsMap.put(ref.toVal(), b.toDict());
+        return ref.toCode();
     }
     
     public void updateZone(Zone z, String i) {
@@ -973,6 +1070,20 @@ public class CCUTagsDb extends HServer {
             item.setSyncStatus(true);
             hisBox.put(item);
         }
+    }
+
+    public void updateHisItems(List<HisItem> hisItems) {
+        for (HisItem item : hisItems) {
+            hisBox.put(item);
+        }
+    }
+
+    public List<HisItem> getHisItemsForMigration(HRef id, int offset, int limit) {
+
+        QueryBuilder<HisItem> hisQuery = hisBox.query();
+        hisQuery.equal(HisItem_.rec, id.toString())
+                .orderDesc(HisItem_.date);
+        return hisQuery.build().find(offset, limit);
     }
 
     public List<HisItem> getHisItems(HRef id, int offset, int limit) {

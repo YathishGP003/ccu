@@ -6,8 +6,6 @@ import org.projecthaystack.io.HGridFormat;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Iterator;
-import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -37,8 +35,8 @@ public class EntityPullHandler
         CCUHsApi hsApi = CCUHsApi.getInstance();
         if (parser.getSite() != null) {
             Site site = parser.getSite();
-            String siteLuid = hsApi.addSite(site);
-            hsApi.putUIDMap(siteLuid, site.getId());
+            String siteLuid = hsApi.addRemoteSite(site, site.getId().replace("@",""));
+            hsApi.setSynced(siteLuid, site.getId());
 
             doPullFloorTree(siteLuid, grid);
         }
@@ -51,8 +49,8 @@ public class EntityPullHandler
         if (parser.getSite() != null)
         {
             Site site = parser.getSite();
-            String siteLuid = hsApi.addSite(site);
-            hsApi.putUIDMap(siteLuid, site.getId());
+            String siteLuid = hsApi.addRemoteSite(site, site.getId().replace("@",""));
+            hsApi.setSynced(siteLuid, site.getId());
         }
     }
     
@@ -62,23 +60,23 @@ public class EntityPullHandler
         //Floors
         for (Floor f : parser.getFloors()) {
             f.setSiteRef(siteLuid);
-            String floorLuid = hsApi.addFloor(f);
-            hsApi.putUIDMap(floorLuid, f.getId());
+            String floorLuid = hsApi.addRemoteFloor(f, f.getId().replace("@", ""));
+            hsApi.setSynced(floorLuid, f.getId());
             //Zones
             for (Zone z : parser.getZones()) {
                 if (z.getFloorRef().equals(f.getId())) {
                     z.setSiteRef(siteLuid);
                     z.setFloorRef(floorLuid);
-                    String zoneLuid = hsApi.addZone(z);
-                    hsApi.putUIDMap(zoneLuid, z.getId());
+                    String zoneLuid = hsApi.addRemoteZone(z, z.getId().replace("@", ""));
+                    hsApi.setSynced(zoneLuid, z.getId());
                     //Equips
                     for (Equip q : parser.getEquips()) {
                         if (q.getRoomRef().equals(z.getId())) {
                             q.setSiteRef(siteLuid);
                             q.setFloorRef(floorLuid);
                             q.setRoomRef(zoneLuid);
-                            String equipLuid = hsApi.addEquip(q);
-                            hsApi.putUIDMap(equipLuid, q.getId());
+                            String equipLuid = hsApi.addRemoteEquip(q, q.getId().replace("@", ""));
+                            hsApi.setSynced(equipLuid, q.getId());
                             //Points
                             for (Point p : parser.getPoints()) {
                                 if (p.getEquipRef().equals(q.getId()))
@@ -87,7 +85,7 @@ public class EntityPullHandler
                                     p.setFloorRef(floorLuid);
                                     p.setRoomRef(zoneLuid);
                                     p.setEquipRef(equipLuid);
-                                    hsApi.putUIDMap(hsApi.addPoint(p), p.getId());
+                                    hsApi.setSynced(hsApi.addRemotePoint(p, p.getId().replace("@", "")), p.getId());
                                 }
                             }
     
@@ -102,8 +100,8 @@ public class EntityPullHandler
                                     d.setFloorRef(floorLuid);
                                     d.setRoomRef(zoneLuid);
                                     d.setEquipRef(equipLuid);
-                                    String deviceLuid = hsApi.addDevice(d);
-                                    hsApi.putUIDMap(deviceLuid, d.getId());
+                                    String deviceLuid = hsApi.addRemoteDevice(d, d.getId().replace("@", ""));
+                                    hsApi.setSynced(deviceLuid, d.getId());
                                     //Physical Points
                                     for (RawPoint p : parser.getPhyPoints()) {
                                         if (p.getDeviceRef().equals(d.getId()))
@@ -113,8 +111,8 @@ public class EntityPullHandler
                                             p.setFloorRef(floorLuid);
                                             p.setRoomRef(zoneLuid);
                                             p.setDeviceRef(deviceLuid);
-                                            p.setPointRef(getLuid(p.getDeviceRef()));
-                                            hsApi.putUIDMap(hsApi.addPoint(p), p.getId());
+                                            p.setPointRef(p.getDeviceRef());
+                                            hsApi.setSynced(hsApi.addRemotePoint(p, p.getId().replace("@", "")), p.getId());
                                         }
                                     }
                                 }
@@ -123,8 +121,8 @@ public class EntityPullHandler
                             q.setSiteRef(siteLuid);
                             q.setFloorRef("@SYSTEM");
                             q.setRoomRef("@SYSTEM");
-                            String equipLuid = hsApi.addEquip(q);
-                            hsApi.putUIDMap(equipLuid, q.getId());
+                            String equipLuid = hsApi.addRemoteEquip(q, q.getId().replace("@", ""));
+                            hsApi.setSynced(equipLuid, q.getId());
                             //Points
                             for (Point p : parser.getPoints()) {
                                 if (p.getEquipRef().equals(q.getId()))
@@ -133,7 +131,7 @@ public class EntityPullHandler
                                     p.setFloorRef("@SYSTEM");
                                     p.setRoomRef("@SYSTEM");
                                     p.setEquipRef(equipLuid);
-                                    hsApi.putUIDMap(hsApi.addPoint(p), p.getId());
+                                    hsApi.setSynced(hsApi.addRemotePoint(p, p.getId().replace("@", "")), p.getId());
                                 }
                             }
                         }
@@ -149,15 +147,15 @@ public class EntityPullHandler
             if (d.getMarkers().contains("cm"))
             {
                 d.setSiteRef(siteLuid);
-                String deviceLuid = hsApi.addDevice(d);
-                hsApi.putUIDMap(deviceLuid, d.getId());
+                String deviceLuid = hsApi.addRemoteDevice(d, d.getId().replace("@", ""));
+                hsApi.setSynced(deviceLuid, d.getId());
                 for (SettingPoint p : parser.getSettingPoints())
                 {
                     if (p.getDeviceRef().equals(d.getId()))
                     {
                         p.setSiteRef(siteLuid);
                         p.setDeviceRef(deviceLuid);
-                        hsApi.putUIDMap(hsApi.addPoint(p), p.getId());
+                        hsApi.setSynced(hsApi.addPointWithId(p, p.getId().replace("@", "")), p.getId());
                     }
                 }
             }
@@ -169,22 +167,10 @@ public class EntityPullHandler
             if (d.getMarkers().contains("ccu"))
             {
                 d.setSiteRef(siteLuid);
-                String deviceLuid = hsApi.addDevice(d);
-                hsApi.putUIDMap(deviceLuid, d.getId());
+                String deviceLuid = hsApi.addRemoteDevice(d, d.getId().replace("@", ""));
+                hsApi.setSynced(deviceLuid, d.getId());
                 hsApi.addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.copy(deviceLuid));
             }
         }
-    }
-    
-    public String getLuid(String guid) {
-        Iterator it = CCUHsApi.getInstance().tagsDb.idMap.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry entry = (Map.Entry) it.next();
-            if (entry.getValue().equals(guid))
-            {
-                return entry.getKey().toString();
-            }
-        }
-        return null;
     }
 }

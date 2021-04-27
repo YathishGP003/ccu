@@ -9,7 +9,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -19,7 +19,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -121,11 +120,11 @@ public class AboutFragment extends Fragment {
             e.printStackTrace();
         }
 
-        String siteGUID = CCUHsApi.getInstance().getGlobalSiteId();
-        tvSiteId.setText(siteGUID == null? site.get("id").toString() :siteGUID);
+        String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
+        tvSiteId.setText(siteUID == null? site.get("id").toString() :siteUID);
 
-        String ccuGUID = CCUHsApi.getInstance().getGUID(CCUHsApi.getInstance().getCcuId().toString());
-        tvSerialNumber.setText(ccuGUID == null ? CCUHsApi.getInstance().getCcuId().toString() :ccuGUID);
+        String ccuUID = CCUHsApi.getInstance().getCcuRef().toString();
+        tvSerialNumber.setText(ccuUID == null ? CCUHsApi.getInstance().getCcuRef().toString() :ccuUID);
 
         return rootView;
     }

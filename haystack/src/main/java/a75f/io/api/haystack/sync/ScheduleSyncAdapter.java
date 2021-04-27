@@ -40,7 +40,7 @@ public class ScheduleSyncAdapter extends EntitySyncAdapter
 
         for (Map m: schedules)
         {
-            String luid = m.remove("id").toString();
+            String luid = m.get("id").toString();
             if (CCUHsApi.getInstance().getGUID(luid) == null) {
                 scheduleLUIDList.add(luid);
                 m.put("siteRef", HRef.copy(siteRef));
@@ -77,7 +77,7 @@ public class ScheduleSyncAdapter extends EntitySyncAdapter
                 if (scheduleGUID != "")
                 {
                     String scheduleLuid = scheduleLUIDList.get(index++);
-                    CCUHsApi.getInstance().putUIDMap(scheduleLuid, scheduleGUID);
+                    CCUHsApi.getInstance().setSynced(scheduleLuid, scheduleGUID);
                     markZoneUpdated(scheduleLuid);
                 }
             }
@@ -91,7 +91,7 @@ public class ScheduleSyncAdapter extends EntitySyncAdapter
         Schedule s = CCUHsApi.getInstance().getScheduleById(scheduleLuid);
         if (s.isZoneSchedule() && s.getRoomRef() != null && s.getRoomRef() != "")
         {
-            CCUHsApi.getInstance().tagsDb.updateIdMap.put(s.getRoomRef(), CCUHsApi.getInstance().tagsDb.idMap.get(s.getRoomRef()));
+            CCUHsApi.getInstance().tagsDb.updateIdMap.put(s.getRoomRef(), s.getRoomRef());
         }
     }
 }

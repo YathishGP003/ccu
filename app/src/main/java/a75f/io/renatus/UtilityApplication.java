@@ -22,7 +22,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 
-import a75f.io.logger.CcuLog;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
 import androidx.annotation.RequiresApi;
@@ -77,7 +76,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.alerts.AlertManager;
@@ -559,8 +557,8 @@ public abstract class UtilityApplication extends Application {
             }
             localDevice = new LocalDevice(L.ccu().getSmartNodeAddressBand() + 99, ccuName, defaultTransport);
             localDevice.writePropertyInternal(PropertyIdentifier.firmwareRevision, new CharacterString("4.13"));
-            String ccuGUID = CCUHsApi.getInstance().getGUID(CCUHsApi.getInstance().getCcuId().toString());
-            localDevice.writePropertyInternal(PropertyIdentifier.serialNumber, new CharacterString(ccuGUID));
+            String ccuUID = CCUHsApi.getInstance().getCcuRef().toString();
+            localDevice.writePropertyInternal(PropertyIdentifier.serialNumber, new CharacterString(ccuUID));
             localDevice.writePropertyInternal(PropertyIdentifier.applicationSoftwareVersion, new CharacterString(Integer.toString(BuildConfig.VERSION_CODE)));
 
             localDevice.writePropertyInternal(PropertyIdentifier.segmentationSupported, Segmentation.noSegmentation);
@@ -597,9 +595,9 @@ public abstract class UtilityApplication extends Application {
             defaultTransport.setLocalDevice(localDevice);
             localDevice.writePropertyInternal(PropertyIdentifier.firmwareRevision, new CharacterString("4.13"));
             HashMap site = CCUHsApi.getInstance().read("site");
-            String siteGUID = CCUHsApi.getInstance().getGlobalSiteId();
-            String ccuGUID = CCUHsApi.getInstance().getGUID(CCUHsApi.getInstance().getCcuId().toString());
-            localDevice.writePropertyInternal(PropertyIdentifier.serialNumber, new CharacterString(ccuGUID));
+            String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
+            String ccuUID = CCUHsApi.getInstance().getCcuRef().toString();
+            localDevice.writePropertyInternal(PropertyIdentifier.serialNumber, new CharacterString(ccuUID));
             localDevice.writePropertyInternal(PropertyIdentifier.applicationSoftwareVersion, new CharacterString(Integer.toString(BuildConfig.VERSION_CODE)));
             localDevice.writePropertyInternal(PropertyIdentifier.segmentationSupported, Segmentation.noSegmentation);
             localDevice.writePropertyInternal(PropertyIdentifier.location, new CharacterString("Floor 1 at this building in this site"));
@@ -607,7 +605,7 @@ public abstract class UtilityApplication extends Application {
             localDevice.getServicesSupported().setTimeSynchronization(true);
             localDevice.writePropertyInternal(PropertyIdentifier.utcOffset, new SignedInteger(BACnetUtils.getUtcOffset()));
             localDevice.getServicesSupported();
-            Log.i(LOG_PREFIX, "Device Number:" + localDevice.getInstanceNumber() + " Device Name:" + ccuName + " Serial:" + site.get("id").toString() + " GUID:" + siteGUID);
+            Log.i(LOG_PREFIX, "Device Number:" + localDevice.getInstanceNumber() + " Device Name:" + ccuName + " Serial:" + site.get("id").toString() + " GUID:" + siteUID);
             localDevice.getEventHandler().addListener(new Listener());
             localDevice.withPassword(BACnetUtils.PASSWORD);
         } catch (Exception e) {

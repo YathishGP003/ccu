@@ -557,7 +557,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 if (val == null){
                     CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(id), (int) level, CCUHsApi.getInstance().getCCUUserName(), HNum.make(getTuner(id)), HNum.make(1));
                     HDictBuilder b = new HDictBuilder()
-                            .add("id", HRef.copy(CCUHsApi.getInstance().getGUID(id)))
+                            .add("id", HRef.copy(id))
                             .add("level",level)
                             .add("who",CCUHsApi.getInstance().getCCUUserName())
                             .add("duration", HNum.make(0, "ms"))

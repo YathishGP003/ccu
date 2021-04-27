@@ -56,7 +56,7 @@ public class PointSyncAdapter extends EntitySyncAdapter
             for (Map m : points)
             {
                 //CcuLog.i("CCU", m);
-                String luid = m.remove("id").toString();
+                String luid = m.get("id").toString();
                 if (CCUHsApi.getInstance().getGUID(luid) == null)
                 {
                     pointLUIDList.add(luid);
@@ -105,7 +105,7 @@ public class PointSyncAdapter extends EntitySyncAdapter
                     if (guid != null && guid != "")
                     {
                         String pointLuid = pointLUIDList.get(index++);
-                        CCUHsApi.getInstance().putUIDMap(pointLuid, guid);
+                        CCUHsApi.getInstance().setSynced(pointLuid, guid);
                         syncedPoints.add(pointLuid);
                     } else {
                         return false;

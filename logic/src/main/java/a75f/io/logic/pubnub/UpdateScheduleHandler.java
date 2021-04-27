@@ -18,7 +18,6 @@ import org.projecthaystack.io.HZincWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.UUID;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.MockTime;
@@ -34,8 +33,8 @@ public class UpdateScheduleHandler
     
     public static void handleMessage(JsonObject msgObject)
     {
-        String guid = msgObject.get("id").getAsString();
-        HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid));
+        String uid = msgObject.get("id").getAsString();
+        HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));
         HDict[] dictArr = {b.toDict()};
         String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
         CcuLog.d(L.TAG_CCU_PUBNUB, "Read Schedule : " + response);
@@ -46,20 +45,18 @@ public class UpdateScheduleHandler
         HGrid sGrid = new HZincReader(response).readGrid();
         if (sGrid == null)
         {
-            CcuLog.d(L.TAG_CCU_PUBNUB, "Failed to read remote schedule : " + guid);
+            CcuLog.d(L.TAG_CCU_PUBNUB, "Failed to read remote schedule : " + uid);
             return;
         }
         Iterator it = sGrid.iterator();
         while (it.hasNext())
         {
             HRow r = (HRow) it.next();
-            String luid = CCUHsApi.getInstance().getLUID("@" + guid);
-            if (luid != null && luid != "")
+            if (CCUHsApi.getInstance().entitySynced("@" + uid))
             {
                 final Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
-                s.setId(luid.replace("@", ""));
-                s.setmSiteId(CCUHsApi.getInstance().getSiteId().toString());
-                s.setRoomRef(CCUHsApi.getInstance().getLUID(s.getRoomRef()));
+                s.setId(uid);
+                s.setmSiteId(CCUHsApi.getInstance().getSiteIdRef().toString());
                 if (s.isVacation()) {
                     CCUHsApi.getInstance().updateScheduleNoSync(s, null);
                     if (s.getRoomRef()!= null)
@@ -94,22 +91,18 @@ public class UpdateScheduleHandler
             {
                 //New schedule/vacation added by apps.
                 Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
-                s.setmSiteId(CCUHsApi.getInstance().getSiteId().toString());
-                luid = UUID.randomUUID().toString();
-                s.setId(luid);
+                s.setmSiteId(CCUHsApi.getInstance().getSiteIdRef().toString());
+                s.setId(uid);
                 if (s.getRoomRef() != null && s.isZoneSchedule())
                 {
-                    String lroomRef = CCUHsApi.getInstance().getLUID(s.getRoomRef());
-                    s.setRoomRef(lroomRef);
-                    if (lroomRef != null)
-                    CCUHsApi.getInstance().addSchedule(luid, s.getZoneScheduleHDict(lroomRef));
+                    if (CCUHsApi.getInstance().entitySynced(s.getRoomRef()))
+                        CCUHsApi.getInstance().addSchedule(uid, s.getZoneScheduleHDict(s.getRoomRef()));
                 }
                 else if (s.isBuildingSchedule()&& !s.isZoneSchedule())
                 {
-                    CCUHsApi.getInstance().addSchedule(luid, s.getScheduleHDict());
+                    CCUHsApi.getInstance().addSchedule(uid, s.getScheduleHDict());
                 }
-                if (luid != null && guid != null)
-                CCUHsApi.getInstance().putUIDMap("@" + luid, "@" + guid);
+                CCUHsApi.getInstance().setSynced("@" + uid, "@" + uid);
             }
             ScheduleProcessJob.updateSchedules();
         }

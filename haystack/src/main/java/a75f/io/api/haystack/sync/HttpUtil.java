@@ -61,6 +61,8 @@ public class HttpUtil
 
     public static void executePostAsync(String targetURL, String urlParameters) {
 
+        CcuLog.d("CCU_HS","Posting to " + targetURL + ": " + urlParameters);
+
         post(targetURL, urlParameters, CCUHsApi.getInstance().getJwt(), new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {

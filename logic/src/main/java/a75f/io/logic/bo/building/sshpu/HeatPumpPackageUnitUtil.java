@@ -254,7 +254,7 @@ public class HeatPumpPackageUnitUtil {
                                               .build();
         String r6HumidID = CCUHsApi.getInstance().addPoint(humidifier);
         CCUHsApi.getInstance().writeHisValById(r6HumidID, 0.0);
-        SmartStat.updatePhysicalPointRef(Integer.valueOf(equip.getGroup()), Port.RELAY_SIX.name(), r6HumidID);
+        SmartStat.updatePhysicalPointRef(Integer.valueOf(equip.getGroup()), Port.RELAY_FIVE.name(), r6HumidID);
     }
     
     private static void createDeHumidifierPoint(Equip equip) {
@@ -272,7 +272,7 @@ public class HeatPumpPackageUnitUtil {
                                                 .build();
         String r6DeHumidID = CCUHsApi.getInstance().addPoint(dehumidifier);
         CCUHsApi.getInstance().writeHisValById(r6DeHumidID, 0.0);
-        SmartStat.updatePhysicalPointRef(Integer.valueOf(equip.getGroup()), Port.RELAY_SIX.name(), r6DeHumidID);
+        SmartStat.updatePhysicalPointRef(Integer.valueOf(equip.getGroup()), Port.RELAY_FIVE.name(), r6DeHumidID);
     }
     
     private static void createFanStage2Point(Equip equip) {
@@ -290,7 +290,7 @@ public class HeatPumpPackageUnitUtil {
                                              .build();
         String r6ID = CCUHsApi.getInstance().addPoint(fanStage2);
         CCUHsApi.getInstance().writeHisValById(r6ID, 0.0);
-        SmartStat.updatePhysicalPointRef(Integer.parseInt(equip.getGroup()), Port.RELAY_SIX.name(), r6ID);
+        SmartStat.updatePhysicalPointRef(Integer.parseInt(equip.getGroup()), Port.RELAY_FIVE.name(), r6ID);
     }
     
     private static void deleteCoolingChangeOverPoint(String equipRef) {

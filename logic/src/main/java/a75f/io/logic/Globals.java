@@ -392,6 +392,7 @@ public class Globals {
                         case MODBUS_UPS150:
                         case MODBUS_EMR:
                         case MODBUS_BTU:
+                        case MODBUS_EMR_ZONE:
                             ModbusProfile mbProfile = new ModbusProfile();
                             mbProfile.addMbEquip(Short.valueOf(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
                             L.ccu().zoneProfiles.add(mbProfile);

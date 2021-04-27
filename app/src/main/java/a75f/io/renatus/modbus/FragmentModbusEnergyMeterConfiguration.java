@@ -126,7 +126,7 @@ public class FragmentModbusEnergyMeterConfiguration extends BaseDialogFragment {
             switch (profileType) {
                 case MODBUS_EM:
                 case MODBUS_EMS:
-                case MODBUS_EMR:
+                case MODBUS_EMR_ZONE:
                     modbusProfile = (ModbusProfile) L.getProfile(curSelectedSlaveId);
                     if(modbusProfile != null){
                         curSelectedSlaveId = modbusProfile.getSlaveId();
@@ -378,10 +378,10 @@ public class FragmentModbusEnergyMeterConfiguration extends BaseDialogFragment {
                 } else
                     equipRef = updateModbusProfile(curSelectedSlaveId);
                 break;
-            case EMR:
+            case EMR_ZONE:
                 CcuLog.d(L.TAG_CCU_UI, "Set modbus energy meter Config: MB Profiles - " + L.ccu().zoneProfiles.size() + "," + L.getProfile((short) curSelectedSlaveId) + "," + curSelectedSlaveId);
                 if (L.getProfile((short) curSelectedSlaveId) == null) {
-                    modbusProfile.addMbEquip((short) curSelectedSlaveId, floorRef, zoneRef, equipmentDevice, recyclerModbusParamAdapter.modbusParam, ProfileType.MODBUS_EMR);
+                    modbusProfile.addMbEquip((short) curSelectedSlaveId, floorRef, zoneRef, equipmentDevice, recyclerModbusParamAdapter.modbusParam, ProfileType.MODBUS_EMR_ZONE);
                     L.ccu().zoneProfiles.add(modbusProfile);
                     equipRef = modbusProfile.getEquip().getId();
                 } else

@@ -1228,13 +1228,14 @@ public class FloorPlanFragment extends Fragment {
         boolean isEMRPaired = false;
         boolean isCCUPaired = false;
         boolean isPaired = false;
+
         if (zoneEquips.size() > 0) {
             isPaired = true;
             for (int i = 0; i < zoneEquips.size(); i++) {
                 if (zoneEquips.get(i).getProfile().contains("PLC")) {
                     isPLCPaired = true;
                 }
-                if (zoneEquips.get(i).getProfile().contains("EMR")) {
+                if (zoneEquips.get(i).getProfile().contains("EMR_ZONE")) {
                     isEMRPaired = true;
                 }
                 if (zoneEquips.get(i).getProfile().contains("TEMP_INFLUENCE")) {
@@ -1399,7 +1400,7 @@ public class FloorPlanFragment extends Fragment {
                     showDialogFragment(FragmentSSEConfiguration
                             .newInstance(Short.parseShort(nodeAddr), zone.getId(), NodeType.SMART_NODE, floor.getId(), profile.getProfileType()), FragmentSSEConfiguration.ID);
                     break;
-                case MODBUS_EMR:
+                case MODBUS_EMR_ZONE:
                     showDialogFragment(FragmentModbusEnergyMeterConfiguration
                             .newInstance(Short.parseShort(nodeAddr), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusEnergyMeterConfiguration.ID);
                     break;

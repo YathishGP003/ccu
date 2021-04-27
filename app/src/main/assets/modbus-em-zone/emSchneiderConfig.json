@@ -2,7 +2,7 @@
   "modbusEquipId (_id)": "5f1f30ad18bcbf4f1d9a2se1",
   "name": "Energy Meter Schneider",
   "description": "This document contains the configuration necessary to manage Energy meters",
-  "equipType": "EMR",
+  "equipType": "EMR_ZONE",
   "vendor": "Schneider",
   "model": [
     "Multi Function Meters (iEM 3150)"

@@ -887,6 +887,7 @@
     <string name="save_em_mb">Saving Modbus Energy Meter Configuration</string>
     <string name="save_btu_mb">Saving Modbus BTU Meter Configuration</string>
 
+    <string name="usb_permission_priv_app_msg">USB Permission not granted, Renatus App may need to be reinstalled with System Privileges</string>
     <!-- Modbus Module type screen-->
     <string name="label_modbusselectdevicetype">MODBUS | SELECT DEVICE TYPE</string>
     <string name="title_modbusequipment">Modbus Equipment</string>

@@ -231,8 +231,10 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         ArrayAdapter slaveAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_spinner_item, slaveAddress);
         slaveAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spAddress.setAdapter(slaveAdapter);
-        if (Objects.nonNull(equipmentDevice.getSlaveId()) && equipmentDevice.getSlaveId() > 0) {
-            curSelectedSlaveId = (short) (equipmentDevice.getSlaveId() - 1);
+        Log.d("Modbus","updateUi="+equipmentDevice.getName()+","+equipmentDevice.getSlaveId());
+
+        if(Objects.nonNull(equipmentDevice.getSlaveId()) && equipmentDevice.getSlaveId() > 0) {
+            curSelectedSlaveId = (short) (equipmentDevice.getSlaveId() -1);
             spAddress.setSelection(curSelectedSlaveId, false);
             spAddress.setEnabled(false);
         } else

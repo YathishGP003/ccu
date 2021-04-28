@@ -154,8 +154,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         if (isNotModbus()){
             return;
         }
-        FragmentModbusConfiguration modBusConfiguration = FragmentModbusConfiguration.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_UPS30);
-        showDialogFragment(modBusConfiguration, FragmentModbusConfiguration.ID);
+        showDialogFragment(FragmentModbusType.newInstance(mNodeAddress, mRoomName, mFloorName, misPaired),FragmentModbusType.MID);
     }
 
     @OnClick(R.id.first_button) void onFirstButtonClick() {

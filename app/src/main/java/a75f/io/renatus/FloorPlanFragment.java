@@ -62,6 +62,7 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.renatus.modbus.FragmentModbusConfiguration;
+import a75f.io.renatus.modbus.FragmentModbusEnergyMeterConfiguration;
 import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -1196,9 +1197,8 @@ public class FloorPlanFragment extends Fragment {
                 /**
                  * Modbus energy meter selection
                  */
-                if(L.ccu().zoneProfiles.size() > 0){
-                    for (Iterator<ZoneProfile> it = L.ccu().zoneProfiles.iterator(); it.hasNext();)
-                    {
+                if (L.ccu().zoneProfiles.size() > 0) {
+                    for (Iterator<ZoneProfile> it = L.ccu().zoneProfiles.iterator(); it.hasNext(); ) {
                         ZoneProfile p = it.next();
                         if (p.getProfileType() == ProfileType.MODBUS_EMR) {
                             Toast.makeText(getActivity(), " Energy Meter already paired", Toast.LENGTH_LONG).show();
@@ -1208,7 +1208,7 @@ public class FloorPlanFragment extends Fragment {
                                     .newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
                         }
                     }
-                }else {
+                } else {
                     showDialogFragment(FragmentModbusConfiguration
                             .newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
                 }
@@ -1229,13 +1229,14 @@ public class FloorPlanFragment extends Fragment {
         boolean isEMRPaired = false;
         boolean isCCUPaired = false;
         boolean isPaired = false;
+
         if (zoneEquips.size() > 0) {
             isPaired = true;
             for (int i = 0; i < zoneEquips.size(); i++) {
                 if (zoneEquips.get(i).getProfile().contains("PLC")) {
                     isPLCPaired = true;
                 }
-                if (zoneEquips.get(i).getProfile().contains("EMR")) {
+                if (zoneEquips.get(i).getProfile().contains("EMR_ZONE")) {
                     isEMRPaired = true;
                 }
                 if (zoneEquips.get(i).getProfile().contains("TEMP_INFLUENCE")) {
@@ -1345,19 +1346,12 @@ public class FloorPlanFragment extends Fragment {
             return;
         }
 
-
         Floor floor = getSelectedFloor();
         Zone zone = getSelectedZone();
-
-
         ZoneProfile profile = L.getProfile(Short.parseShort(nodeAddr));
         if (profile != null) {
 
             switch (profile.getProfileType()) {
-			/*case HMP:
-				showDialogFragment(FragmentHMPConfiguration
-						                   .newInstance(nodeAddr,getSelectedZone().roomName, config.getNodeType(), getSelectedFloor().mFloorName), FragmentHMPConfiguration.ID);
-				break;*/
                 case VAV_REHEAT:
                 case VAV_SERIES_FAN:
                 case VAV_PARALLEL_FAN:
@@ -1407,6 +1401,10 @@ public class FloorPlanFragment extends Fragment {
                     showDialogFragment(FragmentSSEConfiguration
                             .newInstance(Short.parseShort(nodeAddr), zone.getId(), NodeType.SMART_NODE, floor.getId(), profile.getProfileType()), FragmentSSEConfiguration.ID);
                     break;
+                case MODBUS_EMR_ZONE:
+                    showDialogFragment(FragmentModbusEnergyMeterConfiguration
+                            .newInstance(Short.parseShort(nodeAddr), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusEnergyMeterConfiguration.ID);
+                    break;
                 case MODBUS_UPS30:
                 case MODBUS_UPS80:
                 case MODBUS_UPS400:
@@ -1430,24 +1428,24 @@ public class FloorPlanFragment extends Fragment {
 
     }
 
-class FloorComparator implements Comparator<Floor> {
-    @Override
-    public int compare(Floor a, Floor b) {
-        return a.getDisplayName().compareToIgnoreCase(b.getDisplayName());
-    }
-}
-
-class ZoneComparator implements Comparator<Zone> {
-    @Override
-    public int compare(Zone a, Zone b) {
-        return a.getDisplayName().compareToIgnoreCase(b.getDisplayName());
-    }
-}
-
-class ModuleComparator implements Comparator<Equip> {
-    @Override
-    public int compare(Equip a, Equip b) {
-        return a.getGroup().compareToIgnoreCase(b.getGroup());
-    }
-}
+    class FloorComparator implements Comparator<Floor> {
+        @Override
+        public int compare(Floor a, Floor b) {
+            return a.getDisplayName().compareToIgnoreCase(b.getDisplayName());
         }
+    }
+
+    class ZoneComparator implements Comparator<Zone> {
+        @Override
+        public int compare(Zone a, Zone b) {
+            return a.getDisplayName().compareToIgnoreCase(b.getDisplayName());
+        }
+    }
+
+    class ModuleComparator implements Comparator<Equip> {
+        @Override
+        public int compare(Equip a, Equip b) {
+            return a.getGroup().compareToIgnoreCase(b.getGroup());
+        }
+    }
+}

@@ -76,6 +76,10 @@ public class EquipsManager
     }
 
 
+    public List<EquipmentDevice> getEnergyMeterEquipments() {
+        return processor.getAllEMEquips();
+    }
+
     public List<EquipmentDevice> getEnergyMeterSysEquipments(){
         return processor.getAllEMSysEquips();
     }

@@ -182,6 +182,12 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 case MODBUS_UPS150:
                 case MODBUS_EMR:
                 case MODBUS_BTU:
+
+                case MODBUS_UPS40K:
+                case MODBUS_UPSL:
+                case MODBUS_UPSV:
+                case MODBUS_UPSVL:
+                case MODBUS_VAV:
                     modbusProfile = (ModbusProfile) L.getProfile(curSelectedSlaveId);
                     if (modbusProfile != null) {
                         curSelectedSlaveId = modbusProfile.getSlaveId();
@@ -448,6 +454,54 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 } else
                     equipRef = updateModbusProfile(curSelectedSlaveId);
                 break;
+
+            case UPS40K:
+                CcuLog.d(L.TAG_CCU_UI, "Set modbus Config: MB Profiles - " + L.ccu().zoneProfiles.size() + "," + L.getProfile(curSelectedSlaveId) + "," + curSelectedSlaveId);
+                if (L.getProfile(curSelectedSlaveId) == null) {
+                    modbusProfile.addMbEquip(curSelectedSlaveId, floorRef, zoneRef, equipmentDevice, recyclerModbusParamAdapter.modbusParam, ProfileType.MODBUS_UPS40K);
+                    L.ccu().zoneProfiles.add(modbusProfile);
+                    equipRef = modbusProfile.getEquip().getId();
+                } else
+                    equipRef = updateModbusProfile(curSelectedSlaveId);
+                break;
+
+            case UPSL:
+                CcuLog.d(L.TAG_CCU_UI, "Set modbus Config: MB Profiles - " + L.ccu().zoneProfiles.size() + "," + L.getProfile(curSelectedSlaveId) + "," + curSelectedSlaveId);
+                if (L.getProfile(curSelectedSlaveId) == null) {
+                    modbusProfile.addMbEquip(curSelectedSlaveId, floorRef, zoneRef, equipmentDevice, recyclerModbusParamAdapter.modbusParam, ProfileType.MODBUS_UPSL);
+                    L.ccu().zoneProfiles.add(modbusProfile);
+                    equipRef = modbusProfile.getEquip().getId();
+                } else
+                    equipRef = updateModbusProfile(curSelectedSlaveId);
+                break;
+            case UPSV:
+                CcuLog.d(L.TAG_CCU_UI, "Set modbus Config: MB Profiles - " + L.ccu().zoneProfiles.size() + "," + L.getProfile(curSelectedSlaveId) + "," + curSelectedSlaveId);
+                if (L.getProfile(curSelectedSlaveId) == null) {
+                    modbusProfile.addMbEquip(curSelectedSlaveId, floorRef, zoneRef, equipmentDevice, recyclerModbusParamAdapter.modbusParam, ProfileType.MODBUS_UPSV);
+                    L.ccu().zoneProfiles.add(modbusProfile);
+                    equipRef = modbusProfile.getEquip().getId();
+                } else
+                    equipRef = updateModbusProfile(curSelectedSlaveId);
+                break;
+            case UPSVL:
+                CcuLog.d(L.TAG_CCU_UI, "Set modbus Config: MB Profiles - " + L.ccu().zoneProfiles.size() + "," + L.getProfile(curSelectedSlaveId) + "," + curSelectedSlaveId);
+                if (L.getProfile(curSelectedSlaveId) == null) {
+                    modbusProfile.addMbEquip(curSelectedSlaveId, floorRef, zoneRef, equipmentDevice, recyclerModbusParamAdapter.modbusParam, ProfileType.MODBUS_UPSVL);
+                    L.ccu().zoneProfiles.add(modbusProfile);
+                    equipRef = modbusProfile.getEquip().getId();
+                } else
+                    equipRef = updateModbusProfile(curSelectedSlaveId);
+                break;
+            case VAV:
+                CcuLog.d(L.TAG_CCU_UI, "Set modbus Config: MB Profiles - " + L.ccu().zoneProfiles.size() + "," + L.getProfile(curSelectedSlaveId) + "," + curSelectedSlaveId);
+                if (L.getProfile(curSelectedSlaveId) == null) {
+                    modbusProfile.addMbEquip(curSelectedSlaveId, floorRef, zoneRef, equipmentDevice, recyclerModbusParamAdapter.modbusParam, ProfileType.MODBUS_VAV);
+                    L.ccu().zoneProfiles.add(modbusProfile);
+                    equipRef = modbusProfile.getEquip().getId();
+                } else
+                    equipRef = updateModbusProfile(curSelectedSlaveId);
+                break;
+
         }
         saveToBox(zoneRef, equipRef, equipmentDevice, curSelectedSlaveId, isNewDevice, floorRef);
     }

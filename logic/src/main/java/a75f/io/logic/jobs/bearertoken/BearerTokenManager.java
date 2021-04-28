@@ -45,7 +45,7 @@ public class BearerTokenManager{
     public void fetchToken(CCUHsApi hayStack) {
         
         CaretakerService service = CaretakerServiceGenerator.createService(CaretakerService.class, hayStack.getJwt());
-        Call<BearerToken> callAsync = service.getAccessToken(hayStack.getCCUGuid());
+        Call<BearerToken> callAsync = service.getAccessToken(hayStack.getCcuId());
         
         callAsync.enqueue(new Callback<BearerToken>() {
             @Override

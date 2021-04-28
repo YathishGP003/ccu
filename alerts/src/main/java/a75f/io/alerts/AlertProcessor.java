@@ -143,10 +143,10 @@ public class AlertProcessor
      */
     public void fetchPredefinedAlerts() {
 
-        String siteId = CCUHsApi.getInstance().getGlobalSiteIdNoAtSign();
-        if (siteId == null) {
+        if (! CCUHsApi.getInstance().siteSynced()) {
             return;
         }
+        String siteId = CCUHsApi.getInstance().getSiteIdRef().val;
 
         fetchDisposable =
             alertsService.getSiteDefinitions(siteId)

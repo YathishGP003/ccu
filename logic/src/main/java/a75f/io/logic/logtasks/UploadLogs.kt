@@ -43,7 +43,7 @@ class UploadLogs(
     */
    fun saveCcuLogs() {
       val dateStr = fileSystemTools.timeStamp()
-      val ccuGuid = haystackApi.globalCcuId ?: "ccu-id-missing"
+      val ccuGuid = haystackApi.ccuId ?: "ccu-id-missing"
       val ccuGuidTrimmed = if (ccuGuid.startsWith("@")) ccuGuid.drop(1) else ccuGuid
 
       val logFile = fileSystemTools.writeLogCat("Renatus_Logs_$dateStr.txt")
@@ -53,7 +53,7 @@ class UploadLogs(
       val fileId = ccuGuidTrimmed + "_" + dateStr + ".zip"
       val zipFile = fileSystemTools.zipFiles(listOf(logFile, prefsFile), fileId)
 
-      val siteRef = haystackApi.globalSiteId
+      val siteRef = haystackApi.siteIdRef.toString()
 
       if (siteRef == null) {
          // not the exact way I intended to use reportNull, but it works to report a bug

@@ -33,21 +33,19 @@ class TunerUpdateHandler {
     
     public static void updateBuildingTuner(final JsonObject msgObject, CCUHsApi hayStack) {
         
-        String pointGuid = msgObject.get(HayStackConstants.ID).getAsString();
+        String pointUid = "@" + msgObject.get(HayStackConstants.ID).getAsString();
         int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();
     
-        CcuLog.i(L.TAG_CCU_PUBNUB, "BuildingTuner level "+level+" update received for point : " + pointGuid);
+        CcuLog.i(L.TAG_CCU_PUBNUB, "BuildingTuner level "+level+" update received for point : " + pointUid);
         if (level != TunerConstants.TUNER_BUILDING_VAL_LEVEL) {
             return;
         }
         
-        String pointLuid = CCUHsApi.getInstance().getLUID("@" + pointGuid);
-        
         //Do a local write to building level of BuildingTuner equip point
-        writePointFromJson(pointLuid, msgObject, hayStack, true);
+        writePointFromJson(pointUid, msgObject, hayStack, true);
     
         //Propagate the updated tuner value to building level of corresponding system/zone equips
-        propagateTuner(pointLuid, msgObject, hayStack);
+        propagateTuner(pointUid, msgObject, hayStack);
         
     }
     

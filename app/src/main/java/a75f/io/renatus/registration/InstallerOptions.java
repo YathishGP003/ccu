@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -45,15 +44,12 @@ import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Tags;
-import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -63,7 +59,6 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.util.Prefs;
-import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
 import a75f.io.renatus.views.TempLimit.TempLimitView;
 
@@ -209,13 +204,13 @@ public class InstallerOptions extends Fragment {
         textNetworkError = rootView.findViewById(R.id.textNetworkError);
         relativeLayoutBACnet.setVisibility(View.GONE);
         buttonSendIAM.setVisibility(View.GONE);
-		HRef ccuId = CCUHsApi.getInstance().getCcuId();
-        String ccuGuid = null;
+		HRef ccuId = CCUHsApi.getInstance().getCcuRef();
+        String ccuUid = null;
 
         if (ccuId != null) {
-            ccuGuid = CCUHsApi.getInstance().getGUID(CCUHsApi.getInstance().getCcuId().toString());
+            ccuUid = CCUHsApi.getInstance().getCcuRef().toString();
         }
-        if(CCUHsApi.getInstance().isCCURegistered() && ccuGuid != null){
+        if(CCUHsApi.getInstance().isCCURegistered() && ccuUid != null){
             textBacnetEnable.setVisibility(View.VISIBLE);
             toggleBACnet.setVisibility(View.VISIBLE);
         }else {

@@ -157,8 +157,8 @@ public class CongratsFragment extends Fragment {
         }
 
         mCCUName.setText(ccu.get("dis").toString());
-        String ccuGUID = CCUHsApi.getInstance().getGUID(CCUHsApi.getInstance().getCcuId().toString());
-        mSerialNo.setText(ccuGUID == null ? CCUHsApi.getInstance().getCcuId().toString() :ccuGUID);
+        String ccuUID = CCUHsApi.getInstance().getCcuRef().toString();
+        mSerialNo.setText(ccuUID == null ? CCUHsApi.getInstance().getCcuRef().toString() :ccuUID);
         mCMFirwareVer.setText("NA");
         mBuildingLimits.setText(buldingLimit);
         mHeatingLimits.setText(heatingLimit);

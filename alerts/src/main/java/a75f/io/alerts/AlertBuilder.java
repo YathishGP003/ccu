@@ -52,7 +52,7 @@ public class AlertBuilder
         alert.setmNotificationMsg(message);
         alert.setmSeverity(def.alert.mSeverity);
         alert.setmAlertType(def.alert.mAlertType);
-        alert.setDeviceRef(CCUHsApi.getInstance().getCcuId().toString());
+        alert.setDeviceRef(CCUHsApi.getInstance().getCcuRef().toString());
         alert.setmEnabled(true);
         alert.setSyncStatus(false);
         return alert;
@@ -68,7 +68,7 @@ public class AlertBuilder
         alert.setmSeverity(def.alert.mSeverity);
         alert.setmAlertType(def.alert.mAlertType);
         alert.setRef(id);
-        alert.setDeviceRef(CCUHsApi.getInstance().getCcuId().toString());
+        alert.setDeviceRef(CCUHsApi.getInstance().getCcuRef().toString());
         alert.setmEnabled(true);
         alert.setSyncStatus(false);
         return alert;

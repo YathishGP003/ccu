@@ -15,7 +15,7 @@
       "parameterDefinitionType": "boolean",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7001",
+          "parameterId": "5f1f30ad18bcbf4f1d9a70011",
           "name": "Power supply mode",
           "startBit": 0,
           "endBit": 15,
@@ -66,7 +66,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7002",
+          "parameterId": "5f1f30ad18bcbf4f1d9a70022",
           "name": "Rectifier status",
           "startBit": 0,
           "endBit": 15,
@@ -116,7 +116,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7003",
+          "parameterId": "5f1f30ad18bcbf4f1d9a70033",
           "name": "Inverter status",
           "startBit": 0,
           "endBit": 15,
@@ -166,7 +166,7 @@
       "parameterDefinitionType": "boolean",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7004",
+          "parameterId": "5f1f30ad18bcbf4f1d9a70044",
           "name": "Power supply status",
           "startBit": 0,
           "endBit": 15,
@@ -229,7 +229,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7005",
+          "parameterId": "5f1f30ad18bcbf4f1d9a70055",
           "name": "Low Battery Warning",
           "startBit": 0,
           "endBit": 15,
@@ -282,7 +282,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7006",
+          "parameterId": "5f1f30ad18bcbf4f1d9a70066",
           "name": "Single Unit Output Overload",
           "startBit": 0,
           "endBit": 15,
@@ -329,7 +329,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7007",
+          "parameterId": "5f1f30ad18bcbf4f1d9a70077",
           "name": "Bypass SCR Fan",
           "startBit": 0,
           "endBit": 15,
@@ -382,7 +382,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7008",
+          "parameterId": "5f1f30ad18bcbf4f1d9a70088",
           "name": "Common Alarm",
           "startBit": 0,
           "endBit": 15,
@@ -432,7 +432,7 @@
       "parameterDefinitionType": "boolean",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7009",
+          "parameterId": "5f1f30ad18bcbf4f1d9a70099",
           "name": "UPS Battery status",
           "startBit": 0,
           "endBit": 15,
@@ -495,7 +495,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7010",
+          "parameterId": "5f1f30ad18bcbf4f1d9a701010",
           "name": "Turning To Bypass Due To Load Impact",
           "startBit": 0,
           "endBit": 15,
@@ -545,7 +545,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7011",
+          "parameterId": "5f1f30ad18bcbf4f1d9a701111",
           "name": "Battery Charger",
           "startBit": 0,
           "endBit": 15,
@@ -595,7 +595,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7012",
+          "parameterId": "5f1f30ad18bcbf4f1d9a701212",
           "name": "Battery Maintenance",
           "startBit": 0,
           "endBit": 15,
@@ -645,7 +645,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7013",
+          "parameterId": "5f1f30ad18bcbf4f1d9a701313",
           "name": "Combined System overload",
           "startBit": 0,
           "endBit": 15,
@@ -698,7 +698,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7014",
+          "parameterId": "5f1f30ad18bcbf4f1d9a701414",
           "name": "Communication Failure Status",
           "startBit": 0,
           "endBit": 15,
@@ -748,7 +748,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7015",
+          "parameterId": "5f1f30ad18bcbf4f1d9a701515",
           "name": "Output Fuse Broken",
           "startBit": 0,
           "endBit": 15,
@@ -798,7 +798,7 @@
       "parameterDefinitionType": "binary",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7016",
+          "parameterId": "5f1f30ad18bcbf4f1d9a701616",
           "name": "Master Channel Frequency Status",
           "startBit": 0,
           "endBit": 15,
@@ -851,7 +851,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7017",
+          "parameterId": "5f1f30ad18bcbf4f1d9a701717",
           "name": "Input Phase Voltage L1",
           "startBit": 0,
           "endBit": 15,
@@ -900,7 +900,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7018",
+          "parameterId": "5f1f30ad18bcbf4f1d9a701818",
           "name": "Input Phase Voltage L2",
           "startBit": 0,
           "endBit": 15,
@@ -949,7 +949,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7019",
+          "parameterId": "5f1f30ad18bcbf4f1d9a701919",
           "name": "Input Phase Voltage L3",
           "startBit": 0,
           "endBit": 15,
@@ -998,7 +998,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7020",
+          "parameterId": "5f1f30ad18bcbf4f1d9a702020",
           "name": "Output Phase Voltage L1",
           "startBit": 0,
           "endBit": 15,
@@ -1047,7 +1047,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7021",
+          "parameterId": "5f1f30ad18bcbf4f1d9a702121",
           "name": "Output Phase Voltage L2",
           "startBit": 0,
           "endBit": 15,
@@ -1096,7 +1096,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7022",
+          "parameterId": "5f1f30ad18bcbf4f1d9a702222",
           "name": "Output Phase Voltage L3",
           "startBit": 0,
           "endBit": 15,
@@ -1145,7 +1145,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7023",
+          "parameterId": "5f1f30ad18bcbf4f1d9a702323",
           "name": "Output Phase Current L1",
           "startBit": 0,
           "endBit": 15,
@@ -1194,7 +1194,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7024",
+          "parameterId": "5f1f30ad18bcbf4f1d9a702424",
           "name": "Output Phase Current L2",
           "startBit": 0,
           "endBit": 15,
@@ -1243,7 +1243,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7025",
+          "parameterId": "5f1f30ad18bcbf4f1d9a702525",
           "name": "Output Phase Current L3",
           "startBit": 0,
           "endBit": 15,
@@ -1292,7 +1292,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7026",
+          "parameterId": "5f1f30ad18bcbf4f1d9a702626",
           "name": "DC Input Voltage (Battery 1 Voltage)",
           "startBit": 0,
           "endBit": 15,
@@ -1341,7 +1341,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7027",
+          "parameterId": "5f1f30ad18bcbf4f1d9a702727",
           "name": "Output Frequency (Consistency In Three Phases)",
           "startBit": 0,
           "endBit": 15,
@@ -1387,7 +1387,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7028",
+          "parameterId": "5f1f30ad18bcbf4f1d9a702828",
           "name": "Input Cable Voltage L1-L2",
           "startBit": 0,
           "endBit": 15,
@@ -1433,7 +1433,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7029",
+          "parameterId": "5f1f30ad18bcbf4f1d9a702929",
           "name": "Input Cable Voltage L2-L3",
           "startBit": 0,
           "endBit": 15,
@@ -1479,7 +1479,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7030",
+          "parameterId": "5f1f30ad18bcbf4f1d9a703030",
           "name": "Input Cable Voltage L3-L1",
           "startBit": 0,
           "endBit": 15,
@@ -1525,7 +1525,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7031",
+          "parameterId": "5f1f30ad18bcbf4f1d9a703131",
           "name": "Input Phase Current L1",
           "startBit": 0,
           "endBit": 15,
@@ -1571,7 +1571,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7032",
+          "parameterId": "5f1f30ad18bcbf4f1d9a703232",
           "name": "Input Phase Current L2",
           "startBit": 0,
           "endBit": 15,
@@ -1617,7 +1617,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7033",
+          "parameterId": "5f1f30ad18bcbf4f1d9a703333",
           "name": "Input Phase Current L3",
           "startBit": 0,
           "endBit": 15,
@@ -1663,7 +1663,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7034",
+          "parameterId": "5f1f30ad18bcbf4f1d9a703434",
           "name": "Input Frequency (Consistency In Three Phases)",
           "startBit": 0,
           "endBit": 15,
@@ -1709,7 +1709,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7035",
+          "parameterId": "5f1f30ad18bcbf4f1d9a703535",
           "name": "Phase L1 Input Power Factor",
           "startBit": 0,
           "endBit": 15,
@@ -1754,7 +1754,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7036",
+          "parameterId": "5f1f30ad18bcbf4f1d9a703636",
           "name": "Phase L2 Input Power Factor",
           "startBit": 0,
           "endBit": 15,
@@ -1799,7 +1799,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7037",
+          "parameterId": "5f1f30ad18bcbf4f1d9a703737",
           "name": "Phase L3 Input Power Factor",
           "startBit": 0,
           "endBit": 15,
@@ -1844,7 +1844,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7038",
+          "parameterId": "5f1f30ad18bcbf4f1d9a703838",
           "name": "Bypass Phase Voltage L1",
           "startBit": 0,
           "endBit": 15,
@@ -1890,7 +1890,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7039",
+          "parameterId": "5f1f30ad18bcbf4f1d9a703939",
           "name": "Bypass Phase Voltage L2",
           "startBit": 0,
           "endBit": 15,
@@ -1936,7 +1936,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7040",
+          "parameterId": "5f1f30ad18bcbf4f1d9a704040",
           "name": "Bypass Phase Voltage L3",
           "startBit": 0,
           "endBit": 15,
@@ -1982,7 +1982,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7041",
+          "parameterId": "5f1f30ad18bcbf4f1d9a704141",
           "name": "Bypass Frequency",
           "startBit": 0,
           "endBit": 15,
@@ -2025,7 +2025,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7042",
+          "parameterId": "5f1f30ad18bcbf4f1d9a704242",
           "name": "Phase L1 Output Power Factor",
           "startBit": 0,
           "endBit": 15,
@@ -2070,7 +2070,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7043",
+          "parameterId": "5f1f30ad18bcbf4f1d9a704343",
           "name": "Phase L2 Output Power Factor",
           "startBit": 0,
           "endBit": 15,
@@ -2115,7 +2115,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7044",
+          "parameterId": "5f1f30ad18bcbf4f1d9a704444",
           "name": "Phase L3 Output Power Factor",
           "startBit": 0,
           "endBit": 15,
@@ -2160,7 +2160,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7045",
+          "parameterId": "5f1f30ad18bcbf4f1d9a704545",
           "name": "Phase L1 Output Peak Ratio",
           "startBit": 0,
           "endBit": 15,
@@ -2205,7 +2205,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7046",
+          "parameterId": "5f1f30ad18bcbf4f1d9a704646",
           "name": "Phase L2 Output Peak Ratio",
           "startBit": 0,
           "endBit": 15,
@@ -2250,7 +2250,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7047",
+          "parameterId": "5f1f30ad18bcbf4f1d9a704747",
           "name": "Phase L3 Output Peak Ratio",
           "startBit": 0,
           "endBit": 15,
@@ -2295,7 +2295,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7048",
+          "parameterId": "5f1f30ad18bcbf4f1d9a704848",
           "name": "Phase L1 Output Active Power",
           "startBit": 0,
           "endBit": 15,
@@ -2344,7 +2344,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7049",
+          "parameterId": "5f1f30ad18bcbf4f1d9a704949",
           "name": "Phase L2 Output Active Power",
           "startBit": 0,
           "endBit": 15,
@@ -2393,7 +2393,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7050",
+          "parameterId": "5f1f30ad18bcbf4f1d9a705050",
           "name": "Phase L3 Output Active Power",
           "startBit": 0,
           "endBit": 15,
@@ -2442,7 +2442,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7051",
+          "parameterId": "5f1f30ad18bcbf4f1d9a705151",
           "name": "Phase L1 Output Reactive Power",
           "startBit": 0,
           "endBit": 15,
@@ -2491,7 +2491,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7052",
+          "parameterId": "5f1f30ad18bcbf4f1d9a705252",
           "name": "Phase L2 Output Reactive Power",
           "startBit": 0,
           "endBit": 15,
@@ -2540,7 +2540,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7053",
+          "parameterId": "5f1f30ad18bcbf4f1d9a705353",
           "name": "Phase L3 Output Reactive Power",
           "startBit": 0,
           "endBit": 15,
@@ -2589,7 +2589,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7054",
+          "parameterId": "5f1f30ad18bcbf4f1d9a705454",
           "name": "Phase L1 Output Apparent Power",
           "startBit": 0,
           "endBit": 15,
@@ -2638,7 +2638,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7055",
+          "parameterId": "5f1f30ad18bcbf4f1d9a705555",
           "name": "Phase L2 Output Apparent Power",
           "startBit": 0,
           "endBit": 15,
@@ -2687,7 +2687,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7056",
+          "parameterId": "5f1f30ad18bcbf4f1d9a705656",
           "name": "Phase L3 Output Apparent Power",
           "startBit": 0,
           "endBit": 15,
@@ -2736,7 +2736,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7057",
+          "parameterId": "5f1f30ad18bcbf4f1d9a705757",
           "name": "Battery Backup Time",
           "startBit": 0,
           "endBit": 15,
@@ -2779,7 +2779,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7058",
+          "parameterId": "5f1f30ad18bcbf4f1d9a705858",
           "name": "Positive Battery Voltage",
           "startBit": 0,
           "endBit": 15,
@@ -2822,7 +2822,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7059",
+          "parameterId": "5f1f30ad18bcbf4f1d9a705959",
           "name": "Positive Battery Current",
           "startBit": 0,
           "endBit": 15,
@@ -2865,7 +2865,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7060",
+          "parameterId": "5f1f30ad18bcbf4f1d9a706060",
           "name": "Negative Battery Voltage",
           "startBit": 0,
           "endBit": 15,
@@ -2908,7 +2908,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7061",
+          "parameterId": "5f1f30ad18bcbf4f1d9a706161",
           "name": "Negative Battery Current",
           "startBit": 0,
           "endBit": 15,
@@ -2951,7 +2951,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7062",
+          "parameterId": "5f1f30ad18bcbf4f1d9a706262",
           "name": "Battery Aging Coefficient",
           "startBit": 0,
           "endBit": 15,
@@ -2990,7 +2990,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7063",
+          "parameterId": "5f1f30ad18bcbf4f1d9a706363",
           "name": "Battery Temperature",
           "startBit": 0,
           "endBit": 15,
@@ -3030,7 +3030,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7064",
+          "parameterId": "5f1f30ad18bcbf4f1d9a706464",
           "name": "Environmental Temperature",
           "startBit": 0,
           "endBit": 15,
@@ -3070,7 +3070,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7065",
+          "parameterId": "5f1f30ad18bcbf4f1d9a706565",
           "name": "Phase L1 Output load level",
           "startBit": 0,
           "endBit": 15,
@@ -3115,7 +3115,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7066",
+          "parameterId": "5f1f30ad18bcbf4f1d9a706666",
           "name": "Phase L2 Output load level",
           "startBit": 0,
           "endBit": 15,
@@ -3160,7 +3160,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7067",
+          "parameterId": "5f1f30ad18bcbf4f1d9a706767",
           "name": "Phase L3 Output load level",
           "startBit": 0,
           "endBit": 15,

@@ -15,7 +15,7 @@
       "parameterDefinitionType": "boolean",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7001",
+          "parameterId": "5f1f30ad18bcbf4f1d9a9001",
           "name": "Power supply mode",
           "startBit": 0,
           "endBit": 15,
@@ -845,7 +845,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1d9a9017",
+          "parameterId": "5f1f30ad18bcbf4f1d9a9019",
           "name": "Input Phase Voltage L1",
           "startBit": 0,
           "endBit": 15,

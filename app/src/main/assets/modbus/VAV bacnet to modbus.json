@@ -1,8 +1,8 @@
 {
   "modbusEquipId (_id)": "5f1f30ad18b11f4f1b9a727",
-  "name": "VAV",
+  "name": "VAV_BACnet",
   "description": "This document contains the configuration necessary to manage any BACnet VAV with Protocol Convertor.",
-  "equipType": "VAV",
+  "equipType": "VAV_BACnet",
   "vendor": "BACnet VAV",
   "model": [
     "VAV"
@@ -15,7 +15,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1db07381",
+          "parameterId": "5f1f30ad18bcbf4f1db09881",
           "name": "VAV Temperature sp",
           "startBit": 0,
           "endBit": 15,
@@ -105,7 +105,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1db07382",
+          "parameterId": "5f1f30ad18bcbf4f1db09882",
           "name": "Room Temperature",
           "startBit": 0,
           "endBit": 15,
@@ -142,7 +142,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1db07383",
+          "parameterId": "5f1f30ad18bcbf4f1db09883",
           "name": "VAV Air Flow",
           "startBit": 0,
           "endBit": 15,
@@ -179,7 +179,7 @@
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
-          "parameterId": "5f1f30ad18bcbf4f1db07384",
+          "parameterId": "5f1f30ad18bcbf4f1db09884",
           "name": "VAV Damper Position",
           "startBit": 0,
           "endBit": 15,

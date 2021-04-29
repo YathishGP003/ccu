@@ -42,7 +42,7 @@ public class ZoneSyncAdapter extends EntitySyncAdapter
             for (Map m : zones)
             {
                 CcuLog.i("CCU_HS_SYNC", m.toString());
-                String luid = m.remove("id").toString();
+                String luid = m.get("id").toString();
                 if (CCUHsApi.getInstance().getGUID(luid) == null)
                 {
                     zoneLUIDList.add(luid);
@@ -82,7 +82,7 @@ public class ZoneSyncAdapter extends EntitySyncAdapter
                 String zoneGUID = row.get("id").toString();
                 if (zoneGUID != null && zoneGUID != "")
                 {
-                    CCUHsApi.getInstance().putUIDMap(zoneLUIDList.get(index++), zoneGUID);
+                    CCUHsApi.getInstance().setSynced(zoneLUIDList.get(index++), zoneGUID);
                 } else {
                     return false;
                 }

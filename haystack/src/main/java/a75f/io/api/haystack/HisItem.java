@@ -29,7 +29,7 @@ public class HisItem
     
     public HisItem(){
     }
-    
+
     public HisItem(long id, Date date, Double val) {
         this.id = id;
         this.date = date.getTime();

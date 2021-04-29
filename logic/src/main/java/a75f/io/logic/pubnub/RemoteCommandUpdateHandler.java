@@ -11,7 +11,6 @@ import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
-import a75f.io.logic.bo.building.CCUApplication;
 
 public class RemoteCommandUpdateHandler
 {
@@ -32,13 +31,13 @@ public class RemoteCommandUpdateHandler
             String cmdType = msgObject.get("remoteCmdType").getAsString();
             String cmdLevel = msgObject.get("level").getAsString();
             String systemId = cmdLevel.equals("system")? (msgObject.get("id").isJsonNull() ? "":msgObject.get("id").getAsString()) : "";
-            String ccuGUID = CCUHsApi.getInstance().getGUID(CCUHsApi.getInstance().getCcuId().toString()).replace("@","");
+            String ccuUID = CCUHsApi.getInstance().getCcuRef().toString().replace("@","");
             CcuLog.d("RemoteCommand","PUBNUB handle Msgs="+cmdType+","+cmdLevel+","+remoteCommandInterface);
 
             switch (cmdLevel){
                 case "site":
                 case "system":
-                    if(cmdLevel.equals("site") || (!systemId.isEmpty() && systemId.equals(ccuGUID) )) {
+                    if(cmdLevel.equals("site") || (!systemId.isEmpty() && systemId.equals(ccuUID) )) {
                         switch (cmdType) {
 
                             case RESTART_CCU:

@@ -187,7 +187,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 case MODBUS_UPSL:
                 case MODBUS_UPSV:
                 case MODBUS_UPSVL:
-                case MODBUS_VAV:
+                case MODBUS_VAV_BACnet:
                     modbusProfile = (ModbusProfile) L.getProfile(curSelectedSlaveId);
                     if (modbusProfile != null) {
                         curSelectedSlaveId = modbusProfile.getSlaveId();
@@ -237,8 +237,10 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
         ArrayAdapter slaveAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_spinner_item, slaveAddress);
         slaveAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spAddress.setAdapter(slaveAdapter);
-        if (Objects.nonNull(equipmentDevice.getSlaveId()) && equipmentDevice.getSlaveId() > 0) {
-            curSelectedSlaveId = (short) (equipmentDevice.getSlaveId() - 1);
+        Log.d("Modbus","updateUi="+equipmentDevice.getName()+","+equipmentDevice.getSlaveId());
+
+        if(Objects.nonNull(equipmentDevice.getSlaveId()) && equipmentDevice.getSlaveId() > 0) {
+            curSelectedSlaveId = (short) (equipmentDevice.getSlaveId() -1);
             spAddress.setSelection(curSelectedSlaveId, false);
             spAddress.setEnabled(false);
         } else
@@ -492,10 +494,10 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 } else
                     equipRef = updateModbusProfile(curSelectedSlaveId);
                 break;
-            case VAV:
+            case VAV_BACnet:
                 CcuLog.d(L.TAG_CCU_UI, "Set modbus Config: MB Profiles - " + L.ccu().zoneProfiles.size() + "," + L.getProfile(curSelectedSlaveId) + "," + curSelectedSlaveId);
                 if (L.getProfile(curSelectedSlaveId) == null) {
-                    modbusProfile.addMbEquip(curSelectedSlaveId, floorRef, zoneRef, equipmentDevice, recyclerModbusParamAdapter.modbusParam, ProfileType.MODBUS_VAV);
+                    modbusProfile.addMbEquip(curSelectedSlaveId, floorRef, zoneRef, equipmentDevice, recyclerModbusParamAdapter.modbusParam, ProfileType.MODBUS_VAV_BACnet);
                     L.ccu().zoneProfiles.add(modbusProfile);
                     equipRef = modbusProfile.getEquip().getId();
                 } else

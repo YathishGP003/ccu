@@ -62,6 +62,7 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.renatus.modbus.FragmentModbusConfiguration;
+import a75f.io.renatus.modbus.FragmentModbusEnergyMeterConfiguration;
 import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -389,13 +390,13 @@ public class FloorPlanFragment extends Fragment {
                     return null;
                 }
                 HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-                String siteGUID = CCUHsApi.getInstance().getGlobalSiteId();
+                String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
 
-                if (siteGUID == null) {
+                if (siteUID == null) {
                     return null;
                 }
                 //for floor
-                HDict tDict = new HDictBuilder().add("filter", "floor and siteRef == " + siteGUID).toDict();
+                HDict tDict = new HDictBuilder().add("filter", "floor and siteRef == " + siteUID).toDict();
                 HGrid floorPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
                 if (floorPoint == null) {
                     return null;
@@ -417,7 +418,7 @@ public class FloorPlanFragment extends Fragment {
                 }
 
                 //for zones
-                HDict zDict = new HDictBuilder().add("filter", "room and not oao and siteRef == " + siteGUID).toDict();
+                HDict zDict = new HDictBuilder().add("filter", "room and not oao and siteRef == " + siteUID).toDict();
 
                 try {
                     HGrid zonePoint = hClient.call("read", HGridBuilder.dictToGrid(zDict));
@@ -443,6 +444,7 @@ public class FloorPlanFragment extends Fragment {
 
                 return null;
             }
+
 
             @Override
             protected void onPostExecute(Void aVoid) {
@@ -887,9 +889,9 @@ public class FloorPlanFragment extends Fragment {
                         AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
                         adb.setMessage("Floor name already exists in this site,would you like to move all the zones associated with " + floorToRename.getDisplayName() + " to " + hsFloor.getDisplayName() + "?");
                         adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
-                            if (CCUHsApi.getInstance().getLUID(floor.getId()) == null) {
-                                hsFloor.setId(CCUHsApi.getInstance().addFloor(hsFloor));
-                                CCUHsApi.getInstance().putUIDMap(hsFloor.getId(), floor.getId());
+                            if (!CCUHsApi.getInstance().entitySynced(floor.getId())) {
+                                hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor, floor.getId()));
+                                CCUHsApi.getInstance().setSynced(hsFloor.getId(), floor.getId());
                             }
 
                             //move zones and modules under new floor
@@ -897,7 +899,7 @@ public class FloorPlanFragment extends Fragment {
                                 zone.setFloorRef(CCUHsApi.getInstance().getLUID(floor.getId()));
                                 CCUHsApi.getInstance().updateZone(zone, zone.getId());
                                 for (Equip q : HSUtil.getEquips(zone.getId())) {
-                                    q.setFloorRef(CCUHsApi.getInstance().getLUID(floor.getId()));
+                                    q.setFloorRef(floor.getId());
                                     CCUHsApi.getInstance().updateEquip(q, q.getId());
                                 }
                             }
@@ -958,9 +960,9 @@ public class FloorPlanFragment extends Fragment {
                         AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
                         adb.setMessage("Floor name already exists in this site,would you like to continue?");
                         adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
-                            if (CCUHsApi.getInstance().getLUID(floor.getId()) == null) {
-                                hsFloor.setId(CCUHsApi.getInstance().addFloor(hsFloor));
-                                CCUHsApi.getInstance().putUIDMap(hsFloor.getId(), floor.getId());
+                            if (! CCUHsApi.getInstance().entitySynced(floor.getId())) {
+                                hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor, floor.getId()));
+                                CCUHsApi.getInstance().setSynced(hsFloor.getId(), floor.getId());
                             }
                             refreshScreen();
 
@@ -1195,9 +1197,8 @@ public class FloorPlanFragment extends Fragment {
                 /**
                  * Modbus energy meter selection
                  */
-                if(L.ccu().zoneProfiles.size() > 0){
-                    for (Iterator<ZoneProfile> it = L.ccu().zoneProfiles.iterator(); it.hasNext();)
-                    {
+                if (L.ccu().zoneProfiles.size() > 0) {
+                    for (Iterator<ZoneProfile> it = L.ccu().zoneProfiles.iterator(); it.hasNext(); ) {
                         ZoneProfile p = it.next();
                         if (p.getProfileType() == ProfileType.MODBUS_EMR) {
                             Toast.makeText(getActivity(), " Energy Meter already paired", Toast.LENGTH_LONG).show();
@@ -1207,7 +1208,7 @@ public class FloorPlanFragment extends Fragment {
                                     .newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
                         }
                     }
-                }else {
+                } else {
                     showDialogFragment(FragmentModbusConfiguration
                             .newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
                 }
@@ -1228,13 +1229,14 @@ public class FloorPlanFragment extends Fragment {
         boolean isEMRPaired = false;
         boolean isCCUPaired = false;
         boolean isPaired = false;
+
         if (zoneEquips.size() > 0) {
             isPaired = true;
             for (int i = 0; i < zoneEquips.size(); i++) {
                 if (zoneEquips.get(i).getProfile().contains("PLC")) {
                     isPLCPaired = true;
                 }
-                if (zoneEquips.get(i).getProfile().contains("EMR")) {
+                if (zoneEquips.get(i).getProfile().contains("EMR_ZONE")) {
                     isEMRPaired = true;
                 }
                 if (zoneEquips.get(i).getProfile().contains("TEMP_INFLUENCE")) {
@@ -1344,19 +1346,12 @@ public class FloorPlanFragment extends Fragment {
             return;
         }
 
-
         Floor floor = getSelectedFloor();
         Zone zone = getSelectedZone();
-
-
         ZoneProfile profile = L.getProfile(Short.parseShort(nodeAddr));
         if (profile != null) {
 
             switch (profile.getProfileType()) {
-			/*case HMP:
-				showDialogFragment(FragmentHMPConfiguration
-						                   .newInstance(nodeAddr,getSelectedZone().roomName, config.getNodeType(), getSelectedFloor().mFloorName), FragmentHMPConfiguration.ID);
-				break;*/
                 case VAV_REHEAT:
                 case VAV_SERIES_FAN:
                 case VAV_PARALLEL_FAN:
@@ -1406,6 +1401,10 @@ public class FloorPlanFragment extends Fragment {
                     showDialogFragment(FragmentSSEConfiguration
                             .newInstance(Short.parseShort(nodeAddr), zone.getId(), NodeType.SMART_NODE, floor.getId(), profile.getProfileType()), FragmentSSEConfiguration.ID);
                     break;
+                case MODBUS_EMR_ZONE:
+                    showDialogFragment(FragmentModbusEnergyMeterConfiguration
+                            .newInstance(Short.parseShort(nodeAddr), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusEnergyMeterConfiguration.ID);
+                    break;
                 case MODBUS_UPS30:
                 case MODBUS_UPS80:
                 case MODBUS_UPS400:
@@ -1422,7 +1421,7 @@ public class FloorPlanFragment extends Fragment {
                 case MODBUS_UPSL:
                 case MODBUS_UPSV:
                 case MODBUS_UPSVL:
-                case MODBUS_VAV:
+                case MODBUS_VAV_BACnet:
                     showDialogFragment(FragmentModbusConfiguration
                             .newInstance(Short.parseShort(nodeAddr), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusConfiguration.ID);
                     break;
@@ -1434,24 +1433,24 @@ public class FloorPlanFragment extends Fragment {
 
     }
 
-class FloorComparator implements Comparator<Floor> {
-    @Override
-    public int compare(Floor a, Floor b) {
-        return a.getDisplayName().compareToIgnoreCase(b.getDisplayName());
-    }
-}
-
-class ZoneComparator implements Comparator<Zone> {
-    @Override
-    public int compare(Zone a, Zone b) {
-        return a.getDisplayName().compareToIgnoreCase(b.getDisplayName());
-    }
-}
-
-class ModuleComparator implements Comparator<Equip> {
-    @Override
-    public int compare(Equip a, Equip b) {
-        return a.getGroup().compareToIgnoreCase(b.getGroup());
-    }
-}
+    class FloorComparator implements Comparator<Floor> {
+        @Override
+        public int compare(Floor a, Floor b) {
+            return a.getDisplayName().compareToIgnoreCase(b.getDisplayName());
         }
+    }
+
+    class ZoneComparator implements Comparator<Zone> {
+        @Override
+        public int compare(Zone a, Zone b) {
+            return a.getDisplayName().compareToIgnoreCase(b.getDisplayName());
+        }
+    }
+
+    class ModuleComparator implements Comparator<Equip> {
+        @Override
+        public int compare(Equip a, Equip b) {
+            return a.getGroup().compareToIgnoreCase(b.getGroup());
+        }
+    }
+}

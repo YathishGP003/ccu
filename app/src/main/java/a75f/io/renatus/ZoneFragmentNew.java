@@ -1504,6 +1504,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 nonTempControl.setImage(R.drawable.ic_zone_modbus);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_modbus_mx);
             }
+            if ((zoneEquips.get("profile").toString()).contains("MODBUS") && (zoneEquips.get("profile").toString()).contains("EMR")) {
+                nonTempControl.setEquipType(2);
+                nonTempControl.setImage(R.drawable.ic_zone_em);
+                nonTempControl.setImageViewExpanded(R.drawable.ic_zone_em_max);
+            }
         }else{
             //No devices paired zone
             nonTempControl.setEquipType(2);

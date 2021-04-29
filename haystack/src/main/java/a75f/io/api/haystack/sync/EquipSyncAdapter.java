@@ -51,7 +51,7 @@ public class EquipSyncAdapter extends EntitySyncAdapter
         for (Map m: equips)
         {
             CcuLog.i("CCU_HS_SYNC", m.toString());
-            String luid = m.remove("id").toString();
+            String luid = m.get("id").toString();
             if (CCUHsApi.getInstance().getGUID(luid) == null) {
                 equipLUIDList.add(luid);
                 m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteLUID)));
@@ -108,7 +108,7 @@ public class EquipSyncAdapter extends EntitySyncAdapter
                 equipGUID = row.get("id").toString();
                 if (equipGUID != null && equipGUID != "")
                 {
-                    CCUHsApi.getInstance().putUIDMap(equipLUIDList.get(index++), equipGUID);
+                    CCUHsApi.getInstance().setSynced(equipLUIDList.get(index++), equipGUID);
                 } else {
                     return false;
                 }
@@ -129,7 +129,7 @@ public class EquipSyncAdapter extends EntitySyncAdapter
         builder.add(systemEquip);
         builder.add("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteRef)));
 
-        String equipLUID = builder.remove("id").toString();
+        String equipLUID = builder.get("id").toString();
 
         if (CCUHsApi.getInstance().getGUID(equipLUID) != null) {
             return true;
@@ -153,7 +153,7 @@ public class EquipSyncAdapter extends EntitySyncAdapter
             String equipGUID = row.get("id").toString();
             if (equipGUID != null && equipGUID != "")
             {
-                CCUHsApi.getInstance().putUIDMap(equipLUID, equipGUID);
+                CCUHsApi.getInstance().setSynced(equipLUID, equipGUID);
             } else {
                 return false;
             }

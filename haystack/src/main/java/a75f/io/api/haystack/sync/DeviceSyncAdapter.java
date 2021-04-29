@@ -4,7 +4,7 @@ import a75f.io.api.haystack.BuildConfig;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.DeviceFieldConstants;
 import a75f.io.constants.HttpConstants;
-import com.google.gson.JsonObject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.projecthaystack.HDict;
@@ -35,7 +35,7 @@ public class DeviceSyncAdapter extends EntitySyncAdapter {
         boolean synced = false;
 
         if (CCUHsApi.getInstance().isCCURegistered()) {
-            String siteRef = CCUHsApi.getInstance().getGlobalSiteId();
+            String siteRef = CCUHsApi.getInstance().getRemoteSiteIdWithRefSign();
 
             if (StringUtils.isNotBlank(siteRef)) {
                 synced = syncCcuDevice(siteRef);
@@ -85,6 +85,7 @@ public class DeviceSyncAdapter extends EntitySyncAdapter {
                 && StringUtils.isNotBlank(installerEmail)) {
 
             JSONObject ccuUpdateJson = CCUHsApi.getInstance().getCcuRegisterJson(
+                    null,     // not posting ccuId for sync call
                     siteRef,
                     dis,
                     ahuRef,
@@ -129,7 +130,7 @@ public class DeviceSyncAdapter extends EntitySyncAdapter {
 
         for (Map nonCcuDevice : nonCcuDeviceList) {
 
-            String luid = nonCcuDevice.remove(DeviceFieldConstants.ID).toString();
+            String luid = nonCcuDevice.get(DeviceFieldConstants.ID).toString();
             String deviceId = CCUHsApi.getInstance().getGUID(luid);
             if (StringUtils.isBlank(deviceId)) {
                 deviceLUIDList.add(luid);
@@ -193,7 +194,7 @@ public class DeviceSyncAdapter extends EntitySyncAdapter {
                 HRow row = (HRow) it.next();
                 String deviceGUID = row.get(DeviceFieldConstants.ID).toString();
                 if (StringUtils.isNotBlank(deviceGUID)) {
-                    CCUHsApi.getInstance().putUIDMap(deviceLUIDList.get(index++), deviceGUID);
+                    CCUHsApi.getInstance().setSynced(deviceLUIDList.get(index++), deviceGUID);
                 } else {
                     return false;
                 }

@@ -5,17 +5,12 @@ import android.content.Context;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import a75f.io.alerts.cloud.AlertSyncDto;
 import a75f.io.alerts.cloud.AlertsService;
-import a75f.io.alerts.cloud.ServiceGenerator;
 import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.functions.Function;
-import io.reactivex.rxjava3.functions.Predicate;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import retrofit2.HttpException;
 
@@ -36,14 +31,14 @@ public class AlertSyncHandler
 
         // We are not doing anything with these rx disposables, but we could...
         AlertsService alertService = AlertManager.getInstance().getAlertsService();
-        String siteId = CCUHsApi.getInstance().getGlobalSiteIdNoAtSign();
-        if (siteId == null) {
+        if (! CCUHsApi.getInstance().siteSynced()) {
             return syncedAlerts;
         }
+        String siteId = CCUHsApi.getInstance().getSiteIdRef().val;
 
         for (Alert a : alerts)
         {
-            String deviceId = CCUHsApi.getInstance().getGUID(a.deviceRef);
+            String deviceId = a.deviceRef;
             
             if (deviceId == null) {
                 continue;
@@ -91,7 +86,7 @@ public class AlertSyncHandler
      */
     public Completable delete(String id) {
         CcuLog.w("CCU_ALERTS", "called delete on service");
-        return alertsService.deleteAlert(CCUHsApi.getInstance().getGlobalSiteIdNoAtSign(), id)
+        return alertsService.deleteAlert(CCUHsApi.getInstance().getSiteIdRef().val, id)
                             // return normally if the alert to be deleted is missing on the server
                             .onErrorComplete(throwable -> throwable instanceof HttpException &&
                                     throwable.getLocalizedMessage().contains("404"))

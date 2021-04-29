@@ -208,9 +208,9 @@ public class Globals {
                 if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed())
                 {
                     if (!site.isEmpty()) {
-                        String siteGUID = CCUHsApi.getInstance().getGlobalSiteId();
-                        if (siteGUID != null && siteGUID != "") {
-                                PbSubscriptionHandler.getInstance().registerSite(getApplicationContext(), siteGUID);
+                        if (CCUHsApi.getInstance().siteSynced()) {
+                            String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
+                            PbSubscriptionHandler.getInstance().registerSite(getApplicationContext(), siteUID);
                         }
                     }
                 }
@@ -392,12 +392,12 @@ public class Globals {
                         case MODBUS_UPS150:
                         case MODBUS_EMR:
                         case MODBUS_BTU:
-
                         case MODBUS_UPS40K:
                         case MODBUS_UPSL:
                         case MODBUS_UPSV:
                         case MODBUS_UPSVL:
-                        case MODBUS_VAV:
+                        case MODBUS_VAV_BACnet:
+                        case MODBUS_EMR_ZONE:
                             ModbusProfile mbProfile = new ModbusProfile();
                             mbProfile.addMbEquip(Short.valueOf(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
                             L.ccu().zoneProfiles.add(mbProfile);

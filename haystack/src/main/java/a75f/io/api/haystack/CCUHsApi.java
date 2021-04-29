@@ -768,16 +768,7 @@ public class CCUHsApi
      */
     public HisItem curRead(String id)
     {
-        /*HGrid resGrid = hsClient.hisRead(HRef.copy(id), "current");
-        if (resGrid == null || (resGrid != null && resGrid.isEmpty()))
-        {
-            return null;
-        }
-        HRow      r    = resGrid.row(resGrid.numRows() - 1);
-        HDateTime date = (HDateTime) r.get("ts");
-        HNum      val  = (HNum) r.get("val");
-        return new HisItem("", new Date(date.millis()), Double.parseDouble(val.toString()));*/
-        return tagsDb.getLastHisItem(HRef.copy(id));
+        return id != null ? tagsDb.getLastHisItem(HRef.copy(id)) : null;
     }
 
     public Double readHisValById(String id)

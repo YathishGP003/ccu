@@ -1,6 +1,5 @@
 package a75f.io.api.haystack.sync;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 
@@ -17,13 +16,10 @@ import org.projecthaystack.HStr;
 import org.projecthaystack.HTimeZone;
 import org.projecthaystack.HVal;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -47,12 +43,12 @@ public class HisSyncHandler
 
         HashMap site = CCUHsApi.getInstance().read("site");
         if (site.size() > 0) {
-            String siteGUID = CCUHsApi.getInstance().getGlobalSiteId();
+            String siteUID = CCUHsApi.getInstance().getRemoteSiteIdWithRefSign();
 
             CcuLog.d(TAG,"Site is found during sync.");
 
-            if (StringUtils.isNotBlank(siteGUID)) {
-                CcuLog.d(TAG,"Site GUID" + siteGUID + " is found");
+            if (StringUtils.isNotBlank(siteUID)) {
+                CcuLog.d(TAG,"Site GUID" + siteUID + " is found");
 
                 DateTime now = new DateTime();
                 boolean timeForQuarterHourSync = now.getMinuteOfDay() % 15 == 0 ? true : false;
@@ -190,7 +186,16 @@ public class HisSyncHandler
 
             String response = CCUHsApi.getInstance().hisWriteManyToHaystackService(hisWriteMetadata, hDicts);
             if (response != null && !hisItemsToSyncForDeviceOrEquip.isEmpty()) {
-                ccuHsApi.tagsDb.updateHisItemSynced(hisItemsToSyncForDeviceOrEquip);
+                try {
+                    ccuHsApi.tagsDb.updateHisItemSynced(hisItemsToSyncForDeviceOrEquip);
+                } catch (IllegalArgumentException e) {
+                    /* There is a corner case where this HisItem might have been removed from Objectbox since the
+                     * PruneJob runs on a different thread. Object box throws IllegalArgumentException in that
+                     * situation.It appears to be safe to ignore now. But we will still track by printing the stack trace to
+                     * monitor how frequently this is happening or there is more to it than what we see now.
+                     */
+                    CcuLog.e(TAG, "Failed to update HisItem !", e);
+                }
             }
         }
     }

@@ -407,7 +407,7 @@ public class CreateNewSite extends Fragment {
             } else {
                 btnEditSite.setEnabled(true);
                 btnUnregisterSite.setEnabled(false);
-                CCUHsApi.getInstance().deleteEntity(CCUHsApi.getInstance().getCcuId().toString());
+                CCUHsApi.getInstance().deleteEntity(CCUHsApi.getInstance().getCcuRef().toString());
 
                 ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU...");
                 String facilityManagerEmail = mSiteEmailId.getText().toString();
@@ -426,9 +426,8 @@ public class CreateNewSite extends Fragment {
                     public void run() {
                         HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
                         String ccuId = ccu.get("id").toString();
-                        String ccuGuid = CCUHsApi.getInstance().getGUID(ccuId);
 
-                        if (StringUtils.isBlank(ccuGuid)) {
+                        if (StringUtils.isBlank(ccuId)) {
                             prefs.setString("installerEmail", installerEmail);
                             CCUHsApi.getInstance().registerCcu(installerEmail);
                             ProgressDialogUtils.hideProgressDialog();
@@ -438,7 +437,7 @@ public class CreateNewSite extends Fragment {
                             btnUnregisterSite.setEnabled(true);
                             btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
                             setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
-                            Toast.makeText(getActivity(), "CCU Registered Successfully "+ ccuGuid, Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), "CCU Registered Successfully "+ ccuId, Toast.LENGTH_LONG).show();
                             CCUHsApi.getInstance().resetSync();
                             ccuRegistrationHandler.removeCallbacks(this);
                         }
@@ -507,9 +506,9 @@ public class CreateNewSite extends Fragment {
 
             ProgressDialogUtils.showProgressDialog(getActivity(), "UnRegistering CCU...");
 
-            String ccuGUID = CCUHsApi.getInstance().getGUID(ccu.get("id").toString());
+            String ccuUID = ccu.get("id").toString();
             new Handler().postDelayed(() -> {
-                removeCCU(ccuGUID);
+                removeCCU(ccuUID);
 
             }, 10000);
 

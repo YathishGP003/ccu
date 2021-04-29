@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,6 +35,8 @@ public class AlertParser
         objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        objectMapper.registerModule(new JodaModule());
+        objectMapper.registerModule(new KotlinModule());
     }
 
     public ArrayList<AlertDefinition> parseAlertsString(String json) {

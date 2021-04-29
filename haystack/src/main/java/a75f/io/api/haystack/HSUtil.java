@@ -234,7 +234,7 @@ public class HSUtil
     //is building tuner.
     public static boolean isBuildingTunerPoint(String id, CCUHsApi hayStack) {
         HashMap pointMap = hayStack.readMapById(id);
-        return pointMap.get("dis").toString().contains("Building");
+        return pointMap.isEmpty() ? false : pointMap.get("dis").toString().contains("Building");
     }
 
     public static boolean isSystemConfigIEAddress(String id, CCUHsApi hayStack) {

@@ -50,10 +50,10 @@ import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 
-import static a75f.io.device.alerts.AlertGenerateHandler.CM_DEAD;
-import static a75f.io.device.alerts.AlertGenerateHandler.DEVICE_DEAD;
-import static a75f.io.device.alerts.AlertGenerateHandler.DEVICE_LOW_SIGNAL;
-import static a75f.io.device.alerts.AlertGenerateHandler.DEVICE_REBOOT;
+import static a75f.io.alerts.AlertsConstantsKt.CM_DEAD;
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_DEAD;
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_LOW_SIGNAL;
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_REBOOT;
 import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
 

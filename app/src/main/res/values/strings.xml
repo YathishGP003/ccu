@@ -415,6 +415,39 @@
     <string name="label_a4minheat">Analog-out4 \nAt Min Heating</string>
     <string name="label_a4maxheat">Analog-out4 \nAt Max Heating</string>
 
+    <!---DCWB Profile-->
+    <string name="label_dcwb_enable">DCWB Enable</string>
+    <string name="label_dcwb_enabled">DCWB Enabled</string>
+
+    <string name="label_btu_meter_status">BTU Meter \nStatus</string>
+    <string name="text_btu_meter_status">BTU meter configured</string>
+    <string name="text_btu_meter_error_status">BTU meter is not configured. DCWB will not work correctly</string>
+    <string name="label_adaptive_delta_t">Adaptive Delta T</string>
+    <string name="label_max_exit_water_temp">Maximized Exit Water Temperature</string>
+
+    <string name="label_chilled_water_target_delta_t">Chilled water target Delta T (F)</string>
+    <string name="label_chilled_water_exit_temp_margin">Chilled water Exit Temperature Margin (F)</string>
+    <string name="label_chilled_water_max_flow_rate">Chilled water Max FLow rate (GPM) </string>
+    <string name="label_analog_in1_at_valve_closed_position">Analog-In 1 at Valve Closed Position </string>
+    <string name="label_analog_in1_at_valve_full_position">Analog-In 1 at Valve Full Position </string>
+    <string name="label_analog_out1_at_min_chw_valve">Analog-out 1 at Min CHW Valve </string>
+    <string name="label_analog_out1_at_max_chw_valve">Analog-out 1 at Max CHW Valve </string>
+    <string name="label_analog_out2_at_min_fan_speed">Analog-out 2 at Min Fan Speed </string>
+    <string name="label_analog_out2_at_max_fan_speed">Analog-out 2 at Max Fan Speed </string>
+    <string name="label_analog_out3_at_min_heating">Analog-out 3 at Min Heating </string>
+    <string name="label_analog_out3_at_max_heating">Analog-out 3 at Max Heating </string>
+    <string name="label_analog_out4_at_min_cooling">Analog-out 4 at Min Cooling Loop </string>
+    <string name="label_analog_out4_at_max_cooling">Analog-out 4 at Max Cooling Loop </string>
+    <string name="label_analog_out4_at_min_co2">Analog-out 4 at Min CO2 </string>
+    <string name="label_analog_out4_at_max_co2">Analog-out 4 at Max CO2 </string>
+
+    <string name="label_configure_btu">Please Configure the BTU meter\'s \nModbus parameters.</string>
+    <string-array name="dcwb_analog4_options">
+        <item>  Cooling Loop </item>
+        <item>  CO2 Loop </item>
+    </string-array>
+
+    <string name="label_analog1_dcwb">CHW valve</string>
     <!--Heat Pump Input-->
     <string name="title_enable">ENABLE</string>
     <string name="title_testsignal">TEST SIGNAL</string>
@@ -586,6 +619,8 @@
     <string name="label_selectdevicetype">SELECT DEVICE TYPE</string>
     <string name="label_systemdevice">SYSTEM DEVICES</string>
     <string name="label_oao">OAO</string>
+    <string name="label_modbus_btu_meter">MODBUS BTU METER</string>
+    <string name="label_modbus_energy_meter">MODBUS ENERGY METER</string>
     <string name="title_oao">OUTSIDE AIR OPTIMIZER (OAO)</string>
     <string name="label_oadamper_at_min">Outside Damper at Min Drive (V)</string>
     <string name="label_oadamper_at_max">Outside Damper at Max Drive (V)</string>
@@ -744,7 +779,7 @@
     <string name="txt_itm_hia">ITM-HIA</string>
     <string name="txt_itm_lpi">ITM-LPI</string>
     <string name="txt_modbus_config">Modbus Config</string>
-
+    <string name="txt_cancel_uppercase">CANCEL</string>
     <string name="toast_msg_permission_denial">"All the required permissions are not granted. CCU may not work as
         expected.\nYou may grant missing permissions to Renatus app from System Settings"</string>
 
@@ -765,6 +800,7 @@
     <!--Modbus Option-->
     <string name="title_mb">MB</string>
     <string name="title_modbus">MODBUS</string>
+    <string name="title_modbus_energy_proportional_distribution">Energy Proportional Distribution</string>
     <string name="title_equipment_type">Equipment Type</string>
     <string name="title_start_address">Slave Id</string>
     <string name="title_param">PARAMETER</string>
@@ -833,6 +869,31 @@
         <item>  1 </item>
         <item>  2 </item>
     </string-array>
+    <string-array name="energy_distribution_values">
+        <item> 0% </item>
+        <item> 10% </item>
+        <item> 20% </item>
+        <item> 30% </item>
+        <item> 40% </item>
+        <item> 50% </item>
+        <item> 60% </item>
+        <item> 70% </item>
+        <item> 80% </item>
+        <item> 90% </item>
+        <item> 100% </item>
+    </string-array>
+    <string name="energy_distribution_validation_error">Energy Proportional Distribution combining all floors should be equal to 100%</string>
+    <string name="save_mb">Saving Modbus Configuration</string>
+    <string name="save_em_mb">Saving Modbus Energy Meter Configuration</string>
+    <string name="save_btu_mb">Saving Modbus BTU Meter Configuration</string>
+
+    <string name="usb_permission_priv_app_msg">USB Permission not granted, Renatus App may need to be reinstalled with System Privileges</string>
+    <!-- Modbus Module type screen-->
+    <string name="label_modbusselectdevicetype">MODBUS | SELECT DEVICE TYPE</string>
+    <string name="title_modbusequipment">Modbus Equipment</string>
+    <string name="description_modbusequipment">Hook up a Modbus equipment to monitor electricity consumption</string>
+    <string name="title_modbusenergymeter">Modbus Energy Meter</string>
+    <string name="description_modbusenergymeter">Hook up a Modbus energy meter to monitor electricity consumption</string>
 
     <string name="label_modbus_energy_meter">MODBUS ENERGY METER</string>
     <string name="title_modbus_energy_proportional_distribution">Energy Proportional Distribution</string>

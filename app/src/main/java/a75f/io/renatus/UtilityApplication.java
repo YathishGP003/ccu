@@ -21,8 +21,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-
-import a75f.io.logger.CcuLog;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
 import androidx.annotation.RequiresApi;
@@ -77,25 +75,30 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.device.DeviceUpdateJob;
 import a75f.io.device.bacnet.BACnetScheduler;
 import a75f.io.device.bacnet.BACnetUpdateJob;
-import a75f.io.device.DeviceUpdateJob;
 import a75f.io.device.bacnet.BACnetUtils;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.cloud.RenatusServicesEnvironment;
+import a75f.io.logic.cloud.RenatusServicesUrls;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbModbusService;
 import a75f.io.usbserial.UsbService;
+import a75f.io.usbserial.UsbServiceActions;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatDelegate;
 
+import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_PRIV_APP_PERMISSION_DENIED;
 
 /**
  * Created by rmatt isOn 7/19/2017.
@@ -136,6 +139,10 @@ public abstract class UtilityApplication extends Application {
                 case UsbService.ACTION_USB_NOT_SUPPORTED: // USB NOT SUPPORTED
                     NotificationHandler.setCMConnectionStatus(false);
                     Toast.makeText(context, "USB device not supported", Toast.LENGTH_SHORT).show();
+                    break;
+                case ACTION_USB_PRIV_APP_PERMISSION_DENIED:
+                    NotificationHandler.setCMConnectionStatus(false);
+                    Toast.makeText(context, R.string.usb_permission_priv_app_msg, Toast.LENGTH_LONG).show();
                     break;
             }
         }
@@ -285,6 +292,7 @@ public abstract class UtilityApplication extends Application {
         filter.addAction(UsbService.ACTION_USB_NOT_SUPPORTED);
         filter.addAction(UsbService.ACTION_USB_PERMISSION_NOT_GRANTED);
         filter.addAction(UsbModbusService.ACTION_USB_MODBUS_DISCONNECTED);
+        filter.addAction(UsbServiceActions.ACTION_USB_PRIV_APP_PERMISSION_DENIED);
         registerReceiver(mUsbReceiver, filter);
     }
 
@@ -559,8 +567,8 @@ public abstract class UtilityApplication extends Application {
             }
             localDevice = new LocalDevice(L.ccu().getSmartNodeAddressBand() + 99, ccuName, defaultTransport);
             localDevice.writePropertyInternal(PropertyIdentifier.firmwareRevision, new CharacterString("4.13"));
-            String ccuGUID = CCUHsApi.getInstance().getGUID(CCUHsApi.getInstance().getCcuId().toString());
-            localDevice.writePropertyInternal(PropertyIdentifier.serialNumber, new CharacterString(ccuGUID));
+            String ccuUID = CCUHsApi.getInstance().getCcuRef().toString();
+            localDevice.writePropertyInternal(PropertyIdentifier.serialNumber, new CharacterString(ccuUID));
             localDevice.writePropertyInternal(PropertyIdentifier.applicationSoftwareVersion, new CharacterString(Integer.toString(BuildConfig.VERSION_CODE)));
 
             localDevice.writePropertyInternal(PropertyIdentifier.segmentationSupported, Segmentation.noSegmentation);
@@ -597,9 +605,9 @@ public abstract class UtilityApplication extends Application {
             defaultTransport.setLocalDevice(localDevice);
             localDevice.writePropertyInternal(PropertyIdentifier.firmwareRevision, new CharacterString("4.13"));
             HashMap site = CCUHsApi.getInstance().read("site");
-            String siteGUID = CCUHsApi.getInstance().getGlobalSiteId();
-            String ccuGUID = CCUHsApi.getInstance().getGUID(CCUHsApi.getInstance().getCcuId().toString());
-            localDevice.writePropertyInternal(PropertyIdentifier.serialNumber, new CharacterString(ccuGUID));
+            String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
+            String ccuUID = CCUHsApi.getInstance().getCcuRef().toString();
+            localDevice.writePropertyInternal(PropertyIdentifier.serialNumber, new CharacterString(ccuUID));
             localDevice.writePropertyInternal(PropertyIdentifier.applicationSoftwareVersion, new CharacterString(Integer.toString(BuildConfig.VERSION_CODE)));
             localDevice.writePropertyInternal(PropertyIdentifier.segmentationSupported, Segmentation.noSegmentation);
             localDevice.writePropertyInternal(PropertyIdentifier.location, new CharacterString("Floor 1 at this building in this site"));
@@ -607,7 +615,7 @@ public abstract class UtilityApplication extends Application {
             localDevice.getServicesSupported().setTimeSynchronization(true);
             localDevice.writePropertyInternal(PropertyIdentifier.utcOffset, new SignedInteger(BACnetUtils.getUtcOffset()));
             localDevice.getServicesSupported();
-            Log.i(LOG_PREFIX, "Device Number:" + localDevice.getInstanceNumber() + " Device Name:" + ccuName + " Serial:" + site.get("id").toString() + " GUID:" + siteGUID);
+            Log.i(LOG_PREFIX, "Device Number:" + localDevice.getInstanceNumber() + " Device Name:" + ccuName + " Serial:" + site.get("id").toString() + " GUID:" + siteUID);
             localDevice.getEventHandler().addListener(new Listener());
             localDevice.withPassword(BACnetUtils.PASSWORD);
         } catch (Exception e) {

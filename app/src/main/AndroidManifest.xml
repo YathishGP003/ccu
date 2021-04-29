@@ -100,8 +100,12 @@
 
         <service android:name="com.raygun.raygun4android.services.CrashReportingPostService"
            android:exported="false"
-           android:permission="android.permission.BIND_JOB_SERVICE"
-           android:process=":crashreportingpostservice"/>
+           android:permission="android.permission.BIND_JOB_SERVICE"/>
+
+<!--        Comment next line out so raygun stays in current process, not firing up its own process and application instance. -->
+<!--        This may cause some crash reports to not make it to the server. -->
+<!--        Can uncomment once Application is a lot lighter, i.e. new ProcessJob instances don't automatically kickoff etc. -->
+<!--           android:process=":crashreportingpostservice"/>-->
 
         <service android:name="com.raygun.raygun4android.services.RUMPostService"
            android:exported="false"

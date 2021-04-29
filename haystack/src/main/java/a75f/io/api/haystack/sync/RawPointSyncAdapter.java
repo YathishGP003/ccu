@@ -46,7 +46,7 @@ public class RawPointSyncAdapter extends EntitySyncAdapter
             for (Map m : points)
             {
                 //CcuLog.i("CCU", m);
-                String luid = m.remove("id").toString();
+                String luid = m.get("id").toString();
                 if (CCUHsApi.getInstance().getGUID(luid) == null
                     && CCUHsApi.getInstance().getGUID(deviceLUID) != null)
                 {
@@ -99,7 +99,7 @@ public class RawPointSyncAdapter extends EntitySyncAdapter
                     String guid = row.get("id").toString();
                     if (guid != null && guid != "")
                     {
-                        CCUHsApi.getInstance().putUIDMap(pointLUIDList.get(index++), guid);
+                        CCUHsApi.getInstance().setSynced(pointLUIDList.get(index++), guid);
                     } else {
                         return false;
                     }

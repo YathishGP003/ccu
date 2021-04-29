@@ -26,7 +26,7 @@ public class DefaultSchedules {
 
     public static String generateDefaultSchedule(boolean zone, String zoneId) {
 
-        HRef siteId = CCUHsApi.getInstance().getSiteId();
+        HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
 
         HDict[] days = new HDict[5];
 
@@ -78,7 +78,7 @@ public class DefaultSchedules {
 
     public static void upsertVacation(String id, String vacationName, DateTime startDate, DateTime endDate)
     {
-        HRef siteId = CCUHsApi.getInstance().getSiteId();
+        HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
         HRef localId;
 
         if(id == null) {
@@ -115,7 +115,7 @@ public class DefaultSchedules {
     
     public static void upsertZoneVacation(String id, String vacationName, DateTime startDate, DateTime endDate, String roomRef)
     {
-        HRef siteId = CCUHsApi.getInstance().getSiteId();
+        HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
         HRef localId;
         
         if(id == null) {

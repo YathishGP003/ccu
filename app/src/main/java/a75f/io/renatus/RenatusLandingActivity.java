@@ -564,7 +564,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     }
                     break;
                 case "zone":
-                    for(Device d : HSUtil.getDevices(CCUHsApi.getInstance().getLUID("@"+id))) {
+                    for(Device d : HSUtil.getDevices("@"+id)) {
                         if(d.getMarkers().contains("smartstat")) {
                             CcuToCmOverUsbSmartStatControlsMessage_t ssControlsMessage_t = new CcuToCmOverUsbSmartStatControlsMessage_t();
                             ssControlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);
@@ -581,7 +581,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     }
                     break;
                 case "module":
-                    Equip equip = HSUtil.getEquipInfo(CCUHsApi.getInstance().getLUID("@"+id));
+                    Equip equip = HSUtil.getEquipInfo("@"+id);
                     if(equip.getMarkers().contains("smartstat")) {
                         CcuToCmOverUsbSmartStatControlsMessage_t ssControlsMessage_t = new CcuToCmOverUsbSmartStatControlsMessage_t();
                         ssControlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);

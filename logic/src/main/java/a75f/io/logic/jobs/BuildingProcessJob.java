@@ -23,8 +23,6 @@ import a75f.io.logic.watchdog.WatchdogMonitor;
 
 public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
 {
-    HashMap<String, String> tsData;
-    
     boolean watchdogMonitor = false;
     
     @Override
@@ -55,8 +53,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
             return;
         }
         L.pingCloudServer();
-    
-        tsData = new HashMap();
+        
         DiagEquip.getInstance().updatePoints();
 
         try {
@@ -67,9 +64,9 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
 
             if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed()) {
                 CCUHsApi.getInstance().syncEntityTree();
-                String siteGUID = CCUHsApi.getInstance().getGlobalSiteId();
-                if (siteGUID != null && !siteGUID.equals("")) {
-                    PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(), siteGUID);
+                if (CCUHsApi.getInstance().siteSynced()) {
+                    String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
+                    PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(), siteUID);
                 }
             }
     
@@ -88,8 +85,14 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
             new Thread() {
                 @Override
                 public void run() {
-                    super.run();
-                    CCUHsApi.getInstance().syncHisData();
+                    try {
+                        CCUHsApi.getInstance().syncHisData();
+                    } catch (Exception e) {
+                        //We do understand the consequences of doing this.
+                        //But the system could still continue to work in standalone mode controlling the hvac system
+                        //even if there are failures in data synchronization with backend.
+                        CcuLog.e(L.TAG_CCU_JOB, "His Sync Failed !", e);
+                    }
                 }
             }.start();
     
@@ -100,8 +103,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
             }
             
         }catch (Exception e){
-            Log.d(L.TAG_CCU_JOB,"BuildingProcessJob Sync Exception = "+e.getMessage());
-            e.printStackTrace();
+            CcuLog.e(L.TAG_CCU_JOB,"BuildingProcessJob Failed ! ", e);
         }
         CcuLog.d(L.TAG_CCU_JOB,"<- BuildingProcessJob");
     }

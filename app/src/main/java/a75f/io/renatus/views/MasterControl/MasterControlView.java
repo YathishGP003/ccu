@@ -177,7 +177,7 @@ public class MasterControlView extends LinearLayout {
             return;
         }
 
-        getSchedule(CCUHsApi.getInstance().getGUID(p.getSiteRef()), dialog);
+        getSchedule(p.getSiteRef(), dialog);
     }
 
     private void checkForSchedules(Dialog dialog, ArrayList<Schedule> schedulesList) {
@@ -349,16 +349,12 @@ public class MasterControlView extends LinearLayout {
     private void saveScheduleData(ArrayList<Schedule> schedules, Dialog masterControlDialog) {
         for (Schedule schedule : schedules) {
             if (schedule.isZoneSchedule() && schedule.getRoomRef() != null) {
-                String scheduleLuid = CCUHsApi.getInstance().getLUID("@" + schedule.getId());
-                if (scheduleLuid != null && schedule.getRoomRef() != null) {
-                    schedule.setId(scheduleLuid.replace("@", ""));
+                if (CCUHsApi.getInstance().entitySynced("@" + schedule.getId()) && schedule.getRoomRef() != null) {
                     CCUHsApi.getInstance().updateZoneSchedule(schedule, schedule.getRoomRef());
                 }
                 syncZoneSchedules(schedule);
             } else {
-                String scheduleLuid = CCUHsApi.getInstance().getLUID("@" + schedule.getId());
-                if (scheduleLuid != null) {
-                    schedule.setId(scheduleLuid.replace("@", ""));
+                if (CCUHsApi.getInstance().entitySynced("@" + schedule.getId())) {
                     CCUHsApi.getInstance().updateSchedule(schedule);
                 }
                 syncBuildingSchedules(schedule);
@@ -371,10 +367,6 @@ public class MasterControlView extends LinearLayout {
     @SuppressLint("StaticFieldLeak")
     private void syncZoneSchedules(Schedule schedule) {
         ArrayList<HDict> entities = new ArrayList<>();
-        String scheduleguid = CCUHsApi.getInstance().getGUID("@" + schedule.getId());
-        if (scheduleguid != null) {
-            schedule.setId(scheduleguid.replace("@", ""));
-        }
 
         HDict[] days = new HDict[schedule.getDays().size()];
 
@@ -437,10 +429,6 @@ public class MasterControlView extends LinearLayout {
     @SuppressLint("StaticFieldLeak")
     private void syncBuildingSchedules(Schedule schedule) {
         ArrayList<HDict> entities = new ArrayList<>();
-        String scheduleguid = CCUHsApi.getInstance().getGUID("@" + schedule.getId());
-        if (scheduleguid != null) {
-            schedule.setId(scheduleguid.replace("@", ""));
-        }
 
         HDict[] days = new HDict[schedule.getDays().size()];
 

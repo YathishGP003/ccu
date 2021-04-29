@@ -187,7 +187,6 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
                 Log.d(L.TAG_CCU_JOB, " Equip "+equip.getDisplayName());
                 Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
-
                 if(equipSchedule == null || equip.getRoomRef().contains("SYSTEM"))
                 {
                     CcuLog.d(L.TAG_CCU_JOB,"<- *no schedule*");
@@ -224,7 +223,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
             Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
 
-            if(equipSchedule == null)
+            if(equipSchedule == null || equip.getRoomRef().contains("SYSTEM"))
             {
                 CcuLog.d(L.TAG_CCU_JOB,"<- *no schedule*");
                 return;
@@ -975,14 +974,12 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }else{
             cpuPoints.put("Fan High Humidity",0);
         }
-
         if((isCooling1On || isCooling2On) && (!isHeating1On && !isHeating2On))
             cpuPoints.put("condEnabled","Cool Only");
         else if((!isCooling1On && !isCooling2On) && (isHeating1On || isHeating2On))
             cpuPoints.put("condEnabled","Heat Only");
         else if((!isCooling1On && !isCooling2On) && (!isHeating1On && !isHeating2On))
             cpuPoints.put("condEnabled","Off");
-
         if(isFanLowEnabled && !isFanHighEnabled)
             cpuPoints.put("fanEnabled","No High Fan");
         else if(!isFanLowEnabled && !isFanHighEnabled)
@@ -1288,7 +1285,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     } else {
                         SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("conditioning and mode")];
                         boolean isZoneHasStandaloneEquip = (equip.getMarkers().contains("smartstat") || equip.getMarkers().contains("sse"));
-                        if ((systemMode != SystemMode.OFF) && (isZonePreconditioningActive(equip.getId(), cachedOccupied, isZoneHasStandaloneEquip) || cachedOccupied.isPreconditioning())) {
+                        
+                        //Standalone zones could operate in preconditioning with system being OFF.
+                        if (isZonePreconditioningActive(equip.getId(), cachedOccupied, isZoneHasStandaloneEquip)) {
+                            c = PRECONDITIONING;
+                        }else if ((systemMode != SystemMode.OFF) && cachedOccupied.isPreconditioning()) {
                             c = PRECONDITIONING;
                         } else if (!isZoneHasStandaloneEquip && getSystemOccupancy() == PRECONDITIONING){
                             c = PRECONDITIONING;
@@ -1638,7 +1639,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             double currentTemp = CCUHsApi.getInstance().readHisValByQuery("zone and point and current and air and temp and equipRef == \""+equipId+"\"");
             double desiredTemp = CCUHsApi.getInstance().readHisValByQuery("zone and point and desired and air and temp and average and equipRef == \""+equipId+"\"");
             double tempDiff = currentTemp - desiredTemp;
-            double preconRate = CCUHsApi.getInstance().getPredictedPreconRate(equipId);
+            double preconRate = TunerUtil.readTunerValByQuery("standalone and preconditioning and rate and "+
+                                                                             (tempDiff >= 0 ? "cooling" : "heating"));
             if (preconRate == 0) {
                 //TODO - if no specific equip id precond rate, get system wide precon rate
                 equipId = L.ccu().systemProfile.getSystemEquipRef();//get System default preconditioning rate

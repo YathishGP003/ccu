@@ -4,6 +4,7 @@ import android.content.Context;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -207,9 +208,9 @@ public class Globals {
                 if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed())
                 {
                     if (!site.isEmpty()) {
-                        String siteGUID = CCUHsApi.getInstance().getGlobalSiteId();
-                        if (siteGUID != null && siteGUID != "") {
-                                PbSubscriptionHandler.getInstance().registerSite(getApplicationContext(), siteGUID);
+                        if (CCUHsApi.getInstance().siteSynced()) {
+                            String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
+                            PbSubscriptionHandler.getInstance().registerSite(getApplicationContext(), siteUID);
                         }
                     }
                 }
@@ -389,6 +390,9 @@ public class Globals {
                         case MODBUS_EMS:
                         case MODBUS_ATS:
                         case MODBUS_UPS150:
+                        case MODBUS_EMR:
+                        case MODBUS_BTU:
+                        case MODBUS_EMR_ZONE:
                             ModbusProfile mbProfile = new ModbusProfile();
                             mbProfile.addMbEquip(Short.valueOf(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
                             L.ccu().zoneProfiles.add(mbProfile);
@@ -408,7 +412,33 @@ public class Globals {
             oao.addOaoEquip(Short.parseShort(oaoEquip.get("group").toString()));
             L.ccu().oaoProfile = oao;
         }
-        
+
+
+        /**
+         * Get all the default BTU_Meter profile details
+         */
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and btu");
+
+        for (HashMap m : equips)
+        {
+            ModbusProfile mbProfile = new ModbusProfile();
+            short address =Short.parseShort(m.get("group").toString());
+            mbProfile.addMbEquip(Short.valueOf( address), ProfileType.MODBUS_BTU);
+            L.ccu().zoneProfiles.add(mbProfile);
+        }
+
+        /**
+         * Get all the default BTU_Meter profile details
+         */
+        ArrayList<HashMap> emEquips = CCUHsApi.getInstance().readAll("equip and emr");
+
+        for (HashMap m : emEquips)
+        {
+            ModbusProfile mbProfile = new ModbusProfile();
+            short address =Short.parseShort(m.get("group").toString());
+            mbProfile.addMbEquip(Short.valueOf( address), ProfileType.MODBUS_EMR);
+            L.ccu().zoneProfiles.add(mbProfile);
+        }
     }
 
     public String getSmartNodeBand() {

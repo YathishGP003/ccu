@@ -3,15 +3,20 @@ package a75f.io.alerts.cloud
 import a75f.io.alerts.AlertDefinition
 import a75f.io.api.haystack.Alert
 import a75f.io.logger.CcuLog
+import com.google.gson.*
 import hu.akarnokd.rxjava3.retrofit.RxJava3CallAdapterFactory
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.joda.time.DateTime
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
+import java.lang.reflect.Type
+import java.util.*
+
 
 /**
  * Service calls for AlertsService V2.
@@ -84,12 +89,15 @@ data class DefinitionsResponse(
 
 /** Create a separate dto for put and create for slight difference from Alert class, e.g. these must not have _id field */
 data class AlertSyncDto(
-   // val definitionId:	String,  // never present currently
-   val deviceRef: String,
+   val definitionId: String,
+   val siteId: String,
+   val siteName: String,
+   val ccuId: String,
+   val ccuName: String,
+   val equipId: String?,
+   val equipName: String?,
    val startTime: Long,
    val endTime: Long,
-   val ref: String,
-   val id: Int,
    val mTitle: String,
    val mAlertType: String,
    val mSeverity: String,
@@ -97,17 +105,18 @@ data class AlertSyncDto(
    val mNotificationMsg: String,
    val mEnabled: Boolean,
    val isFixed: Boolean,
-   val syncStatus: Boolean
 ) {
    companion object {
 
       @JvmStatic
-      fun fromAlert(alert: Alert, globalDeviceId: String): AlertSyncDto {
+      fun fromAlert(alert: Alert): AlertSyncDto {
          with(alert) {
             // we can/should take the placeholder out once Madhu updates server.
-            val refForSync = if (ref.isNullOrBlank()) "placeholder-id" else ref!!
-            return AlertSyncDto(globalDeviceId, startTime, endTime, refForSync, id.toInt(), mTitle, mAlertType,
-               mSeverity.name, mMessage, mNotificationMsg, mEnabled, isFixed, syncStatus)
+            return AlertSyncDto(alertDefId,
+               siteIdNoAt, siteName, ccuIdNoAt, ccuName, equipId, equipName,
+               startTime, endTime,
+               mTitle, mAlertType, mSeverity.name, mMessage, mNotificationMsg,
+               mEnabled, isFixed)
          }
       }
    }
@@ -158,10 +167,14 @@ class ServiceGenerator {
          )
       }.build()
 
+      val gson = GsonBuilder()
+         .registerTypeAdapter(DateTime::class.java, DateTimeTypeConverter())
+         .create()
+
       return Retrofit.Builder()
          .baseUrl(baseUrl)
          .client(okHttpClient)
-         .addConverterFactory(GsonConverterFactory.create())
+         .addConverterFactory(GsonConverterFactory.create(gson))
          .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
          .build()
    }
@@ -173,3 +186,21 @@ data class HttpHeaders(
    val token: String? = null,
    val apiKey: String? = null
 )
+
+private class DateTimeTypeConverter : JsonSerializer<DateTime>, JsonDeserializer<DateTime?> {
+   override fun serialize(src: DateTime, srcType: Type?, context: JsonSerializationContext?): JsonElement {
+      return JsonPrimitive(src.toString())
+   }
+
+   @Throws(JsonParseException::class)
+   override fun deserialize(json: JsonElement, type: Type?, context: JsonDeserializationContext): DateTime {
+      return try {
+         DateTime(json.asString)
+      } catch (e: IllegalArgumentException) {
+         // May be it came in formatted as a java.util.Date, so try that
+         val date: Date = context.deserialize(json, Date::class.java)
+         DateTime(date)
+      }
+   }
+}
+

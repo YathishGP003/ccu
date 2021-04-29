@@ -737,9 +737,10 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
         msg.analog2.set(getAnalogVal(systemProfile.getConfigVal("analog3 and min"), systemProfile.getConfigVal(
             "analog3 and max"), Double.parseDouble(ahuAnalog3Test.getSelectedItem().toString())));
     
-        msg.analog3.set(getAnalogVal(systemProfile.getConfigVal("analog4 and min"), systemProfile.getConfigVal(
-            "analog4 and max"), Double.parseDouble(ahuAnalog3Test.getSelectedItem().toString())));
-    
+        if (systemProfile.isDcwbEnabled()) {
+            msg.analog3.set(getAnalogVal(systemProfile.getConfigVal("analog4 and min"), systemProfile.getConfigVal(
+                            "analog4 and max"), Double.parseDouble(ahuAnalog3Test.getSelectedItem().toString())));
+        }
         short relayStatus = (short) ((relay3Test.isChecked() ? 1 << 2 : 0) | (relay7Test.isChecked() ? 1 << 6 : 0));
         msg.relayBitmap.set(relayStatus);
         MeshUtil.sendStructToCM(msg);

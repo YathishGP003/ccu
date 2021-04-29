@@ -42,8 +42,8 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.bo.util.ByteArrayUtils;
 import a75f.io.usbserial.UsbService;
 
-import static a75f.io.device.alerts.AlertGenerateHandler.FIRMWARE_OTA_UPDATE_ENDED;
-import static a75f.io.device.alerts.AlertGenerateHandler.FIRMWARE_OTA_UPDATE_STARTED;
+import static a75f.io.alerts.AlertsConstantsKt.FIRMWARE_OTA_UPDATE_ENDED;
+import static a75f.io.alerts.AlertsConstantsKt.FIRMWARE_OTA_UPDATE_STARTED;
 
 public class OTAUpdateService extends IntentService {
 

@@ -1,8 +1,7 @@
 package a75f.io.renatus.ENGG.alertdefs
 
-import a75f.io.alerts.AlertDefinition
-import a75f.io.alerts.AlertManager
-import a75f.io.alerts.conditionEvaluationText
+import a75f.io.alerts.*
+import a75f.io.alerts.model.AlertDefOccurrence
 import a75f.io.api.haystack.Alert
 import a75f.io.api.haystack.Alert.AlertSeverity.*
 import a75f.io.renatus.R
@@ -10,6 +9,9 @@ import android.text.SpannableStringBuilder
 import androidx.annotation.ColorRes
 import androidx.lifecycle.ViewModel
 import io.reactivex.rxjava3.subjects.BehaviorSubject
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * ViewModel for AlertDefinitions screen.
@@ -31,20 +33,17 @@ class AlertDefsViewModel: ViewModel() {
    }
 
    fun retrieveAlertDefs() {
-      // title Mapping
       viewState.onNext(AlertDefsViewState(emptyList()))
 
-      val titleMapping = alertManager.alertDefinitions
-         .associateBy { it.alert.mTitle }
-
       // Initialize empty map of AlertDefs to all their Alerts & Offset Status
-      val alertDefsMap = alertManager.alertDefinitions
-         .associateWithTo(mutableMapOf<AlertDefinition, AlertDefStatus>(), { AlertDefStatus() })
+      val occurrences = alertManager.alertDefOccurrences
+      val alertDefsMap = occurrences
+         .associateWithTo(mutableMapOf<AlertDefOccurrence, AlertDefStatus>(), { AlertDefStatus() })
 
       // Add current alerts to alertDefsMap, first to last so that older alerts are overwritten.
       alertManager.allAlertsOldestFirst
          .forEach { alert ->
-            val alertDef = titleMapping[ alert.mTitle ]
+            val alertDef = occurrences.findOccurrenceForAlert(alert)
             alertDef?.let {
                alertDefsMap[it] = alertDefsMap[it]!!.copy(latestAlert = alert)
             }
@@ -52,32 +51,40 @@ class AlertDefsViewModel: ViewModel() {
 
       // Add offset counter values, if any, to alertDefsMap.
       alertManager.offsetCounter
-         .forEach { keyValue ->
-            val title = keyValue.key
-            var alertDef = titleMapping[ title ]
-
-            if (alertDef == null) {
-               val key = titleMapping.keys.firstOrNull { title.startsWith(it) } ?: return@forEach
-               alertDef = titleMapping[ key ]
+         .forEach { (occurrence, count) ->
+            val alertDef = occurrence.alertDef
+            val offsetStatusStr = "Cond met: " + count.toString() + " of " + alertDef.offset + " min"
+            val existingOccurrence = alertDefsMap[occurrence]
+            if (existingOccurrence != null) {
+               alertDefsMap[occurrence] = existingOccurrence.copy(offsetStatus = offsetStatusStr)
+            } else {
+               alertDefsMap[occurrence] = AlertDefStatus(offsetStatus = offsetStatusStr)
             }
 
-            alertDef?.let {
-               val status = alertDefsMap[it]
-               val offsetStatusStr = "Cond met: " + keyValue.value.toString() + " of " + it.offset + " min"
-               alertDefsMap[it] = status!!.copy(offsetStatus = offsetStatusStr)
-            }
+            alertDefsMap[occurrence] = alertDefsMap[occurrence]!!.copy(offsetStatus = offsetStatusStr)
          }
 
       viewState.onNext(AlertDefsViewState(
-         alertDefsMap
-            .toList()
-            .map { createViewRow(it)  }
-         )
-      )
+         alertDefsMap.toList()
+            .map { createViewRow(it) }
+      ))
    }
 
-   private fun createViewRow(pair: Pair<AlertDefinition, AlertDefStatus>): AlertDefRow {
-      val alertDef = pair.first
+   private fun List<AlertDefOccurrence>.findOccurrenceForAlert(alert: Alert): AlertDefOccurrence? {
+      forEach {
+         if ( it.alertDef.alert.mTitle == alert.mTitle &&
+            (it.pointId == alert.ref || it.pointId == null)) {
+            return it
+         }
+      }
+      return null
+   }
+
+   private fun createViewRow(pair: Pair<AlertDefOccurrence, AlertDefStatus>): AlertDefRow {
+      val occurrence = pair.first
+      val status = pair.second
+      val latestAlert = status.latestAlert
+      val alertDef = occurrence.alertDef
       val severity = alertDef.alert.mSeverity
       val title = if (alertDef.custom) {
          "(c) " + alertDef.alert.mTitle
@@ -85,17 +92,39 @@ class AlertDefsViewModel: ViewModel() {
          alertDef.alert.mTitle
       }
 
+      var statusString = status.statusString()
+      if (statusString.isBlank() || statusString == "Resolved") {
+         if (occurrence.isMuted) statusString = "MUTED"
+      }
+
       return AlertDefRow(
          title = title,
          notificationMsg = alertDef.alert.mNotificationMsg,
-         isActive = pair.second.latestAlert?.isActive ?: false,
-         isFixed = pair.second.latestAlert?.isFixed ?: false,
+         isActive = latestAlert?.isActive ?: false,
+         isEnabled = alertDef.alert.mEnabled,
+         isFixed = latestAlert?.isFixed ?: false,
+         alertPopup = status.latestAlert?.formatTimes(),
          isCustom = alertDef.custom,
-         severity = severity.name.replace("INTERNAL_","I/"),
+         severity = severity.name.replace("INTERNAL_", "I/"),
          conditional = alertDef.conditionEvaluationText(),
          colorRes = severity.color(),
-         status = pair.second.statusString()
+         status = statusString,
+         evalString = occurrence.evaluationString
       )
+   }
+
+   private fun Alert.formatTimes(): String {
+      return "Alert Generated at " + getFormattedDate(getStartTime()) +
+            "\nAlert Fixed at "+getFormattedDate(getEndTime())
+   }
+
+   private fun getFormattedDate(millis: Long): String? {
+      if (millis == 0L) {
+         return ""
+      }
+      val sdf: DateFormat = SimpleDateFormat("dd MMM yyyy HH:mm")
+      val date = Date(millis)
+      return sdf.format(date)
    }
 }
 
@@ -117,7 +146,6 @@ private fun AlertDefStatus.statusString(): String {
       "Active"
    }
 }
-
 
 
 @ColorRes fun Alert.AlertSeverity.color(): Int {
@@ -154,8 +182,10 @@ data class AlertDefRow(
    val isCustom: Boolean = false,
    val isActive: Boolean = false,
    val isFixed: Boolean = false,
+   val alertPopup: String? = null,
    val severity: String,
    val conditional: SpannableStringBuilder,
    @ColorRes val colorRes: Int,
-   val status: String
+   val status: String,
+   val evalString: String
 )

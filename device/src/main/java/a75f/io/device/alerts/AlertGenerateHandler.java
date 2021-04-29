@@ -1,7 +1,18 @@
 package a75f.io.device.alerts;
 
 import a75f.io.alerts.AlertManager;
-import a75f.io.logic.Globals;
+
+import static a75f.io.alerts.AlertsConstantsKt.CM_DEAD;
+import static a75f.io.alerts.AlertsConstantsKt.CM_ERROR_REPORT;
+import static a75f.io.alerts.AlertsConstantsKt.CM_RESET;
+import static a75f.io.alerts.AlertsConstantsKt.CM_TO_CCU_OVER_USB_SN_REBOOT;
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_DEAD;
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_LOW_SIGNAL;
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_REBOOT;
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_RESTART;
+import static a75f.io.alerts.AlertsConstantsKt.FIRMWARE_OTA_UPDATE_ENDED;
+import static a75f.io.alerts.AlertsConstantsKt.FIRMWARE_OTA_UPDATE_STARTED;
+import static a75f.io.alerts.AlertsConstantsKt.FSV_REBOOT;
 
 /**
  * Created by mahesh on 26-11-2019.
@@ -9,18 +20,10 @@ import a75f.io.logic.Globals;
 public class AlertGenerateHandler {
 
    //
-    public static final String FSV_REBOOT = "fsvReboot";
-    public static final String CM_ERROR_REPORT = "CM ERROR REPORT";
-    public static final String CM_TO_CCU_OVER_USB_SN_REBOOT = "snReboot";
-    public static final String DEVICE_RESTART = "DEVICE RESTART COMMAND";
-    public static final String CM_RESET = "CM RESET";
-    public static final String DEVICE_REBOOT = "DEVICE REBOOT";
-    public static final String FIRMWARE_OTA_UPDATE_STARTED = "FIRMWARE OTA UPDATE STARTED";
-    public static final String FIRMWARE_OTA_UPDATE_ENDED = "FIRMWARE OTA UPDATE ENDED";
-    public static final String CM_DEAD = "CM DEAD";
-    public static final String DEVICE_DEAD = "DEVICE DEAD";
-    public static final String DEVICE_LOW_SIGNAL = "DEVICE LOW SIGNAL";
 
+    /** NOTE:  Descriptions of the logic for triggering these alerts is given in AlertDefinition.  If you
+     * add a new trigger, please update the description there.
+     */
     public static void handleMessage(String cmd, String msg) {
             switch (cmd) {
                 case FSV_REBOOT:

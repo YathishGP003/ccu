@@ -94,6 +94,8 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.8.6'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.8.6'
     implementation 'org.apache.commons:commons-lang3:3.6'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.12.3'
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3'
 
     implementation project(':haystack')
     implementation 'info.guardianproject.netcipher:netcipher:1.2'

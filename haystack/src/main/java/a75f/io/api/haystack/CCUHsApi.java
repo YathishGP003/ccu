@@ -1450,6 +1450,23 @@ public class CCUHsApi
         return null;
     }
 
+    public @Nullable String getSiteName() {
+        HashMap site = CCUHsApi.getInstance().read("site");
+        if (site.size() > 0) {
+            return site.get("dis").toString();
+        } else {
+            return null;
+        }
+    }
+
+    public @Nullable String getCcuName() {
+        HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
+        if (ccu.size() > 0) {
+            return ccu.get("dis").toString();
+        } else {
+            return null;
+        }
+    }
 
     public void log()
     {

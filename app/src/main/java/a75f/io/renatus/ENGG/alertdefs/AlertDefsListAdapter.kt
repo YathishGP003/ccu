@@ -55,9 +55,9 @@ class AlertDefViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
    private val conditionalView: TextView = itemView.findViewById(R.id.conditionalText)
    private val statusView: TextView = itemView.findViewById(R.id.stateText)
 
-   fun bind(alertDef: AlertDefRow) {
+   fun bind(alertDefRow: AlertDefRow) {
 
-      with (alertDef) {
+      with (alertDefRow) {
          val color = ContextCompat.getColor(itemView.context, colorRes)
          titleView.text = title
          severityView.text = severity
@@ -89,11 +89,29 @@ class AlertDefViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
             severityView.setTypeface(null, Typeface.NORMAL)
          }
 
+         conditionalView.setOnClickListener {
+            AlertDialog.Builder(itemView.context)
+               .setTitle("Evaluation")
+               .setMessage(evalString)
+               .show()
+         }
+
          itemView.setOnClickListener {
             AlertDialog.Builder(itemView.context)
                .setTitle(title)
                .setMessage(notificationMsg)
                .show()
+         }
+
+         if (alertPopup == null) {
+            statusView.setOnClickListener(null)
+         } else {
+            statusView.setOnClickListener {
+               AlertDialog.Builder(itemView.context)
+                  .setTitle("Alert!")
+                  .setMessage(alertPopup)
+                  .show()
+            }
          }
       }
    }

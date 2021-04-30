@@ -119,7 +119,7 @@ public abstract class HProj
     public final HDict read(String filter, boolean checked)
     {
         HGrid grid = readAll(filter, 1);
-        if (grid.numRows() > 0) return grid.row(0);
+        if (grid != null && grid.numRows() > 0) return grid.row(0);
         if (checked) throw new UnknownRecException(filter);
         return null;
     }

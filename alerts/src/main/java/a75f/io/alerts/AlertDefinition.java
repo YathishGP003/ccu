@@ -6,8 +6,12 @@ package a75f.io.alerts;
 
 import android.content.SharedPreferences;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 
+import a75f.io.alerts.model.AlertScope;
+import a75f.io.alerts.model.AlertsModelUtilKt;
 import a75f.io.api.haystack.Alert;
 import a75f.io.logger.CcuLog;
 /**
@@ -58,6 +62,7 @@ public class AlertDefinition
     public String                 offset;
     public Alert                  alert;
     public boolean                custom;
+    public AlertScope             alertScope;
 
     public AlertDefinition(){
     
@@ -105,7 +110,62 @@ public class AlertDefinition
     private void logValidatation(String msg) {
         CcuLog.e("CCU_ALERTS","Invalid Alert Definition : "+msg);
     }
-    
+
+    private boolean isInternalLogic() {
+        return conditionals.get(0).grpOperation.equals("alert");
+    }
+
+    private String logicDescription() {
+        switch (alert.mTitle) {
+            case AlertsConstantsKt.FSV_REBOOT:
+            case AlertsConstantsKt.CM_ERROR_REPORT:
+            case AlertsConstantsKt.CM_TO_CCU_OVER_USB_SN_REBOOT:
+            case AlertsConstantsKt.DEVICE_RESTART:
+            case AlertsConstantsKt.CM_RESET:
+                return "No internal logic to trigger alert.";
+            case AlertsConstantsKt.CM_DEAD:
+                return "Device system logic triggers alerts after 15 minutes if USBService reporting not " +
+                        "connected.";
+            case AlertsConstantsKt.DEVICE_REBOOT:
+                return "Triggered when Device system logic receives a device reboot message from the control mote, or a smart devices reboot message over the network.";
+            case AlertsConstantsKt.FIRMWARE_OTA_UPDATE_STARTED:
+                return "Triggered by the OTA Service during update, if the update seems to be going successfully.  (Logic there is murky.)";
+            case AlertsConstantsKt.FIRMWARE_OTA_UPDATE_ENDED:
+                return "Triggered by the OTA Service during update, during the latter part of an OTA update";
+            case AlertsConstantsKt.DEVICE_DEAD:
+                return "Triggered by the device system if a device has given no update in the last zoneDeadTime(def=15) minutes.";
+            case AlertsConstantsKt.DEVICE_LOW_SIGNAL:
+                return "Triggered by the device system when either a SmartNode or SmartStat has many messages indicating low signal.";
+            default:
+                return "Undefined.";
+        }
+    }
+
+    /** Build a string for debugging using the conditionals' debugging strings */
+    public String evaluationString() {
+        if (isInternalLogic()) return logicDescription();
+
+        StringBuilder sb = new StringBuilder();
+        for (int i=0; i < conditionals.size(); i++) {
+            Conditional c = conditionals.get(i);
+            sb.append("Condition ").append(i+1);
+            if (i%2 == 1) {
+                sb.append(": ");
+                if (c.operator != null) sb.append(c.operator);
+                else if (c.keyValueConditionAllEmpty()) sb.append("?? ");
+                else sb.append(c.toString());
+            }
+            else if (c.keyValueConditionAllEmpty()) sb.append(": Empty");
+            else {
+                sb.append(" --- ").append("\n");
+                sb.append(c.sb.toString());
+            }
+            sb.append("\n");
+        }
+        sb.append("\n");
+        return sb.toString();
+    }
+
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
@@ -113,6 +173,21 @@ public class AlertDefinition
         for (Conditional c : conditionals) {
             b.append("{"+c.toString()+"} ");
         }
+        b.append(", AlertScope=").append(alertScope);
         return b.toString();
+    }
+
+    /** Whether this alert definition is currently muted for given ccuId and equipId, if any. */
+    public boolean isMuted(@Nullable String ccuId, @Nullable String equipId) {
+        if (alertScope != null) {
+            return alertScope.isMuted(ccuId, equipId);
+        }
+        return false;
+    }
+
+    /** Return string description of when current deep muting ends for ccuId and equipId */
+    public String deepMuteEndTimeString(@Nullable String ccuId, @Nullable String equipId) {
+        if (alertScope == null) return "none";
+        else return alertScope.deepMuteEndTimeString(ccuId, equipId);
     }
 }

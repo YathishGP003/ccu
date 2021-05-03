@@ -41,16 +41,12 @@ public class AlertSyncHandler
                 continue;
             }
 
-            // create or update local datastore regardless of remote success.
-            dataStore.updateAlert(a);
-
             AlertSyncDto dto = AlertSyncDto.fromAlert(a);
 
             // Alert not present on service if no guid.  If none, create.  Else, update
             if (a.getGuid().equals(""))
             {
-                // No schedulers for the rx calls: need to keep everything on this method on same thread
-                // to keep this method working under existing pattern.
+                CcuLog.d("CCU_ALERTS", "Creating alert to alerts-service: " + a);
 
                 alertService.createAlert(siteId, dto)
                             .subscribe(
@@ -58,15 +54,19 @@ public class AlertSyncHandler
                                         a.setGuid(alert._id);
                                         a.setSyncStatus(true);
                                         syncedAlerts.add(a);
+                                        dataStore.updateAlert(a);
                                     },
                                     error -> CcuLog.w("CCU_ALERTS", "Unexpected error posting alert.", error)
                             );
             }else {
+                CcuLog.d("CCU_ALERTS", "Updating alert on alerts-service: " + a);
+
                 alertService.updateAlert(siteId, a.getGuid(), dto)
                             .subscribe(
                                     alert -> {
                                         a.setSyncStatus(true);
                                         syncedAlerts.add(a);
+                                        dataStore.updateAlert(a);
                                     },
                                     error -> CcuLog.w("CCU_ALERTS", "Unexpected error updating alert.", error)
                             );

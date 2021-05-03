@@ -428,7 +428,7 @@ public class Conditional
     }
 
     public boolean isValueNumeric() {
-        return isNumeric(value);
+        return value != null && isNumeric(value);
     }
 
     public static boolean isNumeric(String strNum) {

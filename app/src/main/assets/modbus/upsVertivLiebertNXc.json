@@ -1,6 +1,6 @@
 {
   "modbusEquipId (_id)": "5f1f30ad18beef4f1d9a332",
-  "name": "UPS-Vertiv",
+  "name": "UPS - Vertiv Liebert NXc",
   "description": "This document contains the configuration necessary to ups Vertiv Liebert NXc",
   "equipType": "UPSVL",
   "vendor": "Vertiv",

@@ -1417,6 +1417,11 @@ public class FloorPlanFragment extends Fragment {
                 case MODBUS_ATS:
                 case MODBUS_UPS150:
                 case MODBUS_BTU:
+                case MODBUS_UPS40K:
+                case MODBUS_UPSL:
+                case MODBUS_UPSV:
+                case MODBUS_UPSVL:
+                case MODBUS_VAV_BACnet:
                     showDialogFragment(FragmentModbusConfiguration
                             .newInstance(Short.parseShort(nodeAddr), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusConfiguration.ID);
                     break;

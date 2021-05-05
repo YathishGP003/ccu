@@ -1193,21 +1193,23 @@ public class FloorPlanFragment extends Fragment {
                     showDialogFragment(FragmentBLEInstructionScreen.getInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.OAO, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
                 }
             }
+            /**
+             * Modbus energy meter selection
+             **/
             if (priviousSelectedDevice == 2) {
-                /**
-                 * Modbus energy meter selection
-                 */
+                //only one energymeter module is allowed.
+                boolean isPaired = false;
                 if (L.ccu().zoneProfiles.size() > 0) {
                     for (Iterator<ZoneProfile> it = L.ccu().zoneProfiles.iterator(); it.hasNext(); ) {
                         ZoneProfile p = it.next();
                         if (p.getProfileType() == ProfileType.MODBUS_EMR) {
-                            Toast.makeText(getActivity(), " Energy Meter already paired", Toast.LENGTH_LONG).show();
-                            return;
-                        } else {
-                            showDialogFragment(FragmentModbusConfiguration
-                                    .newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
+                            isPaired = true;
                         }
                     }
+                }
+                if (isPaired) {
+                    Toast.makeText(getActivity(), " Energy Meter already paired", Toast.LENGTH_LONG).show();
+                    return;
                 } else {
                     showDialogFragment(FragmentModbusConfiguration
                             .newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);

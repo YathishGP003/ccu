@@ -32,6 +32,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
@@ -890,8 +891,10 @@ public class FloorPlanFragment extends Fragment {
                         adb.setMessage("Floor name already exists in this site,would you like to move all the zones associated with " + floorToRename.getDisplayName() + " to " + hsFloor.getDisplayName() + "?");
                         adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
                             if (!CCUHsApi.getInstance().entitySynced(floor.getId())) {
-                                hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor, floor.getId()));
-                                CCUHsApi.getInstance().setSynced(hsFloor.getId(), floor.getId());
+                                hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor,
+                                        StringUtils.stripStart(floor.getId(), "@")));
+                                CCUHsApi.getInstance().setSynced(hsFloor.getId(),
+                                        StringUtils.prependIfMissing(floor.getId(), "@"));
                             }
 
                             //move zones and modules under new floor
@@ -961,8 +964,10 @@ public class FloorPlanFragment extends Fragment {
                         adb.setMessage("Floor name already exists in this site,would you like to continue?");
                         adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
                             if (! CCUHsApi.getInstance().entitySynced(floor.getId())) {
-                                hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor, floor.getId()));
-                                CCUHsApi.getInstance().setSynced(hsFloor.getId(), floor.getId());
+                                hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor,
+                                        StringUtils.stripStart(floor.getId(), "@")));
+                                CCUHsApi.getInstance().setSynced(hsFloor.getId(),
+                                        StringUtils.prependIfMissing(floor.getId(), "@"));
                             }
                             refreshScreen();
 

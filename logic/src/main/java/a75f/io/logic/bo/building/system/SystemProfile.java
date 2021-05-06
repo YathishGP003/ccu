@@ -686,27 +686,6 @@ public abstract class SystemProfile
         hayStack.writeHisValById(humidityCompensationOffsetId, HSUtil.getPriorityVal(humidityCompensationOffsetId));
     }
 
-    public void updateGatewayRef(String systemEquipId) {
-        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
-        if (L.ccu().oaoProfile != null) {
-            equips.add(CCUHsApi.getInstance().read("equip and oao"));
-        }
-
-        for (HashMap m : equips) {
-            Equip q = new Equip.Builder().setHashMap(m).build();
-            if (q.getMarkers().contains("dab") || q.getMarkers().contains("vav") || q.getMarkers().contains("ti") || q.getMarkers().contains("oao") || q.getMarkers().contains("sse")) {
-                q.setAhuRef(systemEquipId);
-            } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid")) {
-                q.setGatewayRef(systemEquipId);
-            } else {
-                Toast.makeText(Globals.getInstance().getApplicationContext(), "Invalid profile, AhuRef is not updated for " + q.getDisplayName(), Toast.LENGTH_SHORT);
-            }
-            CCUHsApi.getInstance().updateEquip(q, q.getId());
-        }
-        CCUHsApi.getInstance().updateDiagGatewayRef(systemEquipId);
-        CCUHsApi.getInstance().updateCCUahuRef(systemEquipId);
-    }
-
     public void addCMPoints(String siteRef, String equipref, String equipDis , String tz) {
         Point cmCoolDesiredTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmCoolingDesiredTemp").setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("cm").addMarker("cooling").addMarker("desired").addMarker("temp").addMarker("writable").addMarker("his").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
         String cmCoolDesiredTempId = CCUHsApi.getInstance().addPoint(cmCoolDesiredTemp);

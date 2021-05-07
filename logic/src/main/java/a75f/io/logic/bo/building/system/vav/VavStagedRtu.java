@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.system.vav;
 
 import android.content.Intent;
+import android.util.Log;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -270,6 +271,7 @@ public class VavStagedRtu extends VavSystemProfile
     
         setSystemPoint("operating and mode", VavSystemController.getInstance().systemState.ordinal());
         String systemStatus = getStatusMessage();
+        Log.i("TAG", "getSystemStatusString:Vav ");
         String scheduleStatus =  ScheduleProcessJob.getSystemStatusString();
         CcuLog.d(L.TAG_CCU_SYSTEM, "StatusMessage: "+systemStatus);
         CcuLog.d(L.TAG_CCU_SYSTEM, "ScheduleStatus: " +scheduleStatus);

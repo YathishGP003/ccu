@@ -494,6 +494,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						systemModePicker.setValue((int) TunerUtil.readSystemUserIntentVal("conditioning and mode"));
 
 						equipmentStatus.setText(status.equals("") ? Html.fromHtml("<font color='#e24725'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='#e24725'>ON</font>").replace("OFF","<font color='#e24725'>OFF</font>")));
+						Log.i(TAG, "getSystemStatusString: Before system fragement");
 						occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());
 						tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
 						tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);

@@ -1,36 +1,16 @@
- - Merged PR 796: Bug 6083 - CCU: App crash observed once user tries to pair dab dual duct module in DCWB integrated build
- - Merged PR 806: NPE protection
- - NPE protection
- - Merged PR 768: Alerts:  Deep Muting and createAlert Dto changes
- - Merged PR 803: Correct relay mapping for humidifier/dehumidifier points
- - Merged PR 781: Handle few crashes and Exceptions
- - Merge master
- - Merged PR 801: Fix raygun starting own process and application instance.
- - Merged PR 662: modbus-zone level energy meter changes.
- - Merged PR 749: 5160 Updated the Tuners cooling and heating min max range values
- - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
- - Correct relay mapping for humidifier/dehumidifier points
- - Merged PR 691: 1750:  CCU ID Mapping Refactor
- - MODBUS Zone level Energy Meter
- - Security exception handler
- - Fix issues during syncing exisitng site
- - Zone level Energy meter
- - Merged PR 703: System level Modbus Energy Meter
- - Modbus Zone level energy meter
- - Merge branch 'master' into story/sdev/5243_CCU_Modbus_Sysytem_Level_Energy_Meter
- - Modbus Energy Meter System level
- - System Energy Meter
- - System Energy Meter
- - Zone level Energy Meter
- - System level Energy Meter
- - System Energy Meter
- - Systemlevel emergy meter
- - Tuners values are updated
- - Tuners heatingUserLimitMin values changed to 65-75 to meet the default value condition
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/sdev/5242_CCU_Modbus_Energy_Meter_Zone_Level
- - System level Energy Meter
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/sdev/5243_CCU_Modbus_Sysytem_Level_Energy_Meter
- - System level changes
- - Zone level energy meter
- - System Energy Meter
- - modbus-zone level energy meter changes.
+ - Merged PR 834: Fix NPE in Globals#getSmartNodeBand()
+ - Merged PR 824: Fix crash while adding floor on second ccu with same name as floor in existing site
+ - Merged PR 842: System testing issues fix.
+ - Fix for analog reset and forced-occupied clear
+ - Merged PR 727: New Jsons added for modbus equipment
+ - Modbus configuration for new Jsons
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/sdev/5861_Modbus_Configuration_UI_for_PAC_UPS_BTU_Meters_using_JSON_files
+ - Merged PR 809: Fix alert sync
+ - Modbus new json configuration
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/sdev/5861_Modbus_Configuration_UI_for_PAC_UPS_BTU_Meters_using_JSON_files
+ - Modbus Configuration with new Jsons
+ - Modbus Configuration with new jsons
+ - Modbus Configuration for new jsons
+ - New Jsons for Equipment
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/sdev/5861_Modbus_Configuration_UI_for_PAC_UPS_BTU_Meters_using_JSON_files
+ - New Jsons added for modbus equipment

@@ -20,11 +20,7 @@ public class StandaloneConfigHandler {
     public static void updateConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateStandaloneConfigPoint " + msgObject.toString());
     
-        if (configPoint.getMarkers().contains(Tags.DESIRED)) {
-            ScheduleProcessJob.handleDesiredTempUpdate(configPoint, false, 0);
-        } else if (configPoint.getMarkers().contains(Tags.SCHEDULE_TYPE)) {
-            ScheduleProcessJob.handleScheduleTypeUpdate(configPoint);
-        } else if (configPoint.getMarkers().contains(Tags.FCU)) {
+        if (configPoint.getMarkers().contains(Tags.FCU)) {
             FanCoilUnitUtil.updateFCUProfile(configPoint, msgObject, hayStack);
         } else if (HSUtil.isCPUEquip(configPoint.getId(), hayStack)) {
             //CPU config points do not seem to have 'cpu' tag. Hence checking the equip type to identify profile.

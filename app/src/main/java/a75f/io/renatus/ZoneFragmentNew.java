@@ -547,7 +547,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             for (HashMap equipTypes : equipZones) {
                                 profileType = equipTypes.get("profile").toString();
                                 Log.e("RoomData", "ProfileType:" + profileType);
-                                 if (profileType.contains(profileVAV) ||
+                                 if ( !profileType.contains(profileModBus) &&
+                                     profileType.contains(profileVAV) ||
                                      profileType.contains(profileDAB) ||
                                      profileType.contains(profileSSE) ||
                                      profileType.contains(profileSmartStat) ||

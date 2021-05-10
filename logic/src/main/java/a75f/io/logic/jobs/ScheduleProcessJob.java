@@ -1606,7 +1606,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     }
 
     public static long getTemporaryHoldExpiry(Equip q) {
-
+        
         HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \""+q.getId()+"\"");
         if (coolDT.size() > 0) {
             HashMap thMap = HSUtil.getPriorityLevel(coolDT.get("id").toString(), 4);
@@ -1686,8 +1686,12 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
         HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \"" + equipId + "\"");
         HashMap heatDT = CCUHsApi.getInstance().read("point and desired and heating and temp and equipRef == \"" + equipId + "\"");
+        HashMap averageDT = CCUHsApi.getInstance().read("point and desired and average and temp and equipRef == \"" + equipId + "\"");
         CCUHsApi.getInstance().pointWrite(HRef.copy(coolDT.get("id").toString()), 4, "manual", HNum.make(0), HNum.make(1, "ms"));
         CCUHsApi.getInstance().pointWrite(HRef.copy(heatDT.get("id").toString()), 4, "manual", HNum.make(0), HNum.make(1, "ms"));
+        if (!averageDT.isEmpty()) {
+            CCUHsApi.getInstance().pointWrite(HRef.copy(averageDT.get("id").toString()), 4, "manual", HNum.make(0), HNum.make(1, "ms"));
+        }
         systemOccupancy = UNOCCUPIED;
     }
 }

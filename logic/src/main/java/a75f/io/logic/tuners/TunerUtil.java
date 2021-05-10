@@ -171,32 +171,33 @@ public class TunerUtil
         ArrayList<Equip> zoneEquips  = HSUtil.getEquips(roomRef);
         double maxDb = 0;
         boolean isDefault = true;
-        for (Equip q : zoneEquips){
-            HashMap hdb = hayStack.read("point and tuner and deadband and heating and not adr and not multiplier and equipRef == \""+q.getId()+"\"");
 
-            ArrayList values = hayStack.readPoint(hdb.get("id").toString());
-            if (values != null && values.size() > 0)
-            {
-                for (int l = 1; l <= values.size() ; l++ ) {
-                    HashMap valMap = ((HashMap) values.get(l-1));
-                    if (valMap.get("val") != null) {
-                        String val = valMap.get("val").toString();
-                        if (Integer.parseInt(valMap.get("level").toString()) < DEFAULT_INIT_VAL_LEVEL){
-                            if (maxDb < Double.parseDouble(val)){
-                                maxDb = Double.parseDouble(val);
-                            }
-                            isDefault = false;
+        for (Equip q : zoneEquips) {
+            HashMap hdb = hayStack.read("point and tuner and deadband and heating and not adr and not multiplier and equipRef == \"" + q.getId() + "\"");
 
-                        } else if (isDefault){
-                            if (maxDb < Double.parseDouble(val)) {
-                                maxDb = Double.parseDouble(val);
+            if (!hdb.isEmpty()) {
+                ArrayList values = hayStack.readPoint(hdb.get("id").toString());
+                if (values != null && values.size() > 0) {
+                    for (int l = 1; l <= values.size(); l++) {
+                        HashMap valMap = ((HashMap) values.get(l - 1));
+                        if (valMap.get("val") != null) {
+                            String val = valMap.get("val").toString();
+                            if (Integer.parseInt(valMap.get("level").toString()) < DEFAULT_INIT_VAL_LEVEL) {
+                                if (maxDb < Double.parseDouble(val)) {
+                                    maxDb = Double.parseDouble(val);
+                                }
+                                isDefault = false;
+
+                            } else if (isDefault) {
+                                if (maxDb < Double.parseDouble(val)) {
+                                    maxDb = Double.parseDouble(val);
+                                }
                             }
                         }
                     }
                 }
             }
         }
-        
         return maxDb;
     }
     

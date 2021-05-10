@@ -1,0 +1,1645 @@
+{
+  "modbusEquipId (_id)": "5f1f30ad18bcbf4f3d6a3da4",
+  "name": "PAC Stulz",
+  "description": "This document contains the configuration necessary to manage a Stulz PAC system ",
+  "vendor": "Stulz IEC 652",
+  "equipType": "PAC",
+  "model": [
+    "Stulz IEC 652"
+  ],
+  "registers": [
+    {
+      "registerAddress": 1013,
+      "registerNumber": "11014",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada31",
+          "name": "Unit On & Off",
+		   "conditions": [
+            {
+              "name": "off",
+              "bitValues": 0
+            },
+            {
+              "name": "on",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "unit"
+            },
+            {
+              "tagName": "pac"
+            },
+			{
+              "tagName": "on"
+            },
+			{
+              "tagName": "off"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+	{
+      "registerAddress": 1001,
+      "registerNumber": "11002",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada45",
+          "name": "Remote On & Off",
+		   "conditions": [
+            {
+              "name": "off",
+              "bitValues": 0
+            },
+            {
+              "name": "on",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "remote"
+            },
+            {
+              "tagName": "pac"
+            },
+			{
+              "tagName": "on"
+            },
+			{
+              "tagName": "off"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+	{
+      "registerAddress": 1000,
+      "registerNumber": "11001",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada46",
+          "name": "Global On & Off",
+		   "conditions": [
+            {
+              "name": "off",
+              "bitValues": 0
+            },
+            {
+              "name": "on",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "global"
+            },
+            {
+              "tagName": "pac"
+            },
+			{
+              "tagName": "on"
+            },
+			{
+              "tagName": "off"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 6904,
+      "registerNumber": "16905",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada41",
+          "name": "Filter Clog Alarm",
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Alarm",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "clog"
+            },
+            {
+              "tagName": "pac"
+            },
+			{
+              "tagName": "alarm"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "filter"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 4505,
+      "registerNumber": "14506",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada44",
+          "name": "Compressor-2 Low Pressure Alarm",
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Alarm",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "compressor"
+            },
+			{
+              "tagName": "low"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "pressure"
+            },
+            {
+              "tagName": "alarm"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 4405,
+      "registerNumber": "14406",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada43",
+          "name": "Compressor-1 Low Pressure Alarm",
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Alarm",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "compressor"
+            },
+			{
+              "tagName": "high"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "pressure"
+            },
+            {
+              "tagName": "alarm"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+	{
+      "registerAddress": 8513,
+      "registerNumber": "18514",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada49",
+          "name": "Return Air Temperature Low",
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Alarm",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "return"
+            },
+			{
+              "tagName": "air"
+            },
+			{
+              "tagName": "low"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "temp"
+            },
+            {
+              "tagName": "alarm"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 8508,
+      "registerNumber": "18509",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada48",
+          "name": "Return Air Temperature High",
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Alarm",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "return"
+            },
+			{
+              "tagName": "air"
+            },
+			{
+              "tagName": "high"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "temp"
+            },
+            {
+              "tagName": "alarm"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+	{
+      "registerAddress": 8514,
+      "registerNumber": "18515",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada51",
+          "name": "Return Air Humidity Low",
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Alarm",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "return"
+            },
+			{
+              "tagName": "air"
+            },
+			{
+              "tagName": "low"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "humidity"
+            },
+            {
+              "tagName": "alarm"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 8509,
+      "registerNumber": "18510",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada50",
+          "name": "Return Air Humidity High",
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Alarm",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "return"
+            },
+			{
+              "tagName": "air"
+            },
+			{
+              "tagName": "high"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "humidity"
+            },
+            {
+              "tagName": "alarm"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 8576,
+      "registerNumber": "18577",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada38",
+          "name": "Humidifier Failure Alarm",
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Alarm",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "humidifier"
+            },
+            {
+              "tagName": "pac"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "failure"
+            },
+			{
+              "tagName": "alarm"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 8697,
+      "registerNumber": "18698",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada32",
+          "name": "Compressor Failure Alarm",
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Alarm",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "compressor"
+            },
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "failure"
+            },
+			{
+              "tagName": "alarm"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+	{
+      "registerAddress": 8506,
+      "registerNumber": "18507",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada53",
+          "name": "Phase Failure Alarm",
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Alarm",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "phase"
+            },
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "failure"
+            },
+			{
+              "tagName": "alarm"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+	{
+      "registerAddress": 4500,
+      "registerNumber": "14501",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada42",
+          "name": "Compressor-2 Status",
+          "conditions": [
+            {
+              "name": "Off",
+              "bitValues": 0
+            },
+            {
+              "name": "On",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "compressor"
+            },
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "status"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 6402,
+      "registerNumber": "16403",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada35",
+          "name": "Humidifier Status",
+          "conditions": [
+            {
+              "name": "Off",
+              "bitValues": 0
+            },
+            {
+              "name": "On",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "humidifier"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "status"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+	{
+      "registerAddress": 6402,
+      "registerNumber": "16403",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada52",
+          "name": "Dehumidifier Status",
+          "conditions": [
+            {
+              "name": "Off",
+              "bitValues": 0
+            },
+            {
+              "name": "On",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "dehumidifier"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "status"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+	{
+      "registerAddress": 4803,
+      "registerNumber": "14804",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada34",
+          "name": "Heater Status",
+          "conditions": [
+            {
+              "name": "Off",
+              "bitValues": 0
+            },
+            {
+              "name": "On",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "heater"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "status"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 2206,
+      "registerNumber": "12207",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada39",
+          "name": "WLD Alarm",
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Alarm",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "wld"
+            },
+            {
+              "tagName": "pac"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "alarm"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+	{
+      "registerAddress": 2206,
+      "registerNumber": "12207",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada47",
+          "name": "Fire Alarm",
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Alarm",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "fire"
+            },
+            {
+              "tagName": "pac"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "alarm"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+	{
+      "registerAddress": 1010,
+      "registerNumber": "11011",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada40",
+          "name": "Common Alarm",
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Alarm",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "common"
+            },
+            {
+              "tagName": "pac"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "alarm"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+	{
+      "registerAddress": 6903,
+      "registerNumber": "16904",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada36",
+          "name": "Air Flow Alarm",
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Alarm",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "air"
+            },
+			{
+              "tagName": "flow"
+            },
+            {
+              "tagName": "pac"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "alarm"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+	{
+      "registerAddress": 4802,
+      "registerNumber": "14803",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada37",
+          "name": "Heater Failure Alarm",
+          "conditions": [
+            {
+              "name": "Normal",
+              "bitValues": 0
+            },
+            {
+              "name": "Alarm",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "heater"
+            },
+            {
+              "tagName": "pac"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "failure"
+            },
+			{
+              "tagName": "alarm"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 6902,
+      "registerNumber": "16903",
+      "registerType": "discreteInput",
+      "parameterDefinitionType": "binary",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada33",
+          "name": "Fan Status",
+          "conditions": [
+            {
+              "name": "Off",
+              "bitValues": 0
+            },
+            {
+              "name": "On",
+              "bitValues": 1
+            }
+          ],
+          "logicalPointTags": [
+            {
+              "tagName": "status"
+            },
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "fan"
+            },
+			{
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 2384,
+      "registerNumber": "42385",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+	  "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada59",
+          "name": "Return Air Temperature",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "return"
+            },
+			{
+              "tagName": "air"
+            },
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "temp"
+            },
+			{
+              "tagName": "unit",
+              "value": "C"
+            },
+			{
+              "tagName": "value"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 2388,
+      "registerNumber": "42389",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+	  "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "name": "Return Air humidity",
+          "parameterId": "5f1f30ad18bcbf4f3d6ada60",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "return"
+            },
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "air"
+            },
+            {
+              "tagName": "humidity"
+            },
+			{
+              "tagName": "unit",
+              "value": "%"
+            },
+			{
+              "tagName": "value"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+	{
+      "registerAddress": 22828,
+      "registerNumber": "422829",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+	  "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "name": "Chilled water valve position",
+          "parameterId": "5f1f30ad18bcbf4f3d6ada61",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "chilled"
+            },
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "water"
+            },
+            {
+              "tagName": "valve"
+            },
+			{
+              "tagName": "position"
+            },
+			{
+              "tagName": "unit",
+              "value": "%"
+            },
+			{
+              "tagName": "value"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 13862,
+      "registerNumber": "413863",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+	  "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada56",
+          "name": "Fan Run Time",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "fan"
+            },
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "run"
+            },
+            {
+              "tagName": "time"
+            },
+			{
+              "tagName": "unit",
+              "value": "hours"
+            },
+			{
+              "tagName": "value"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+	{
+      "registerAddress": 13862,
+      "registerNumber": "413863",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+	  "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada62",
+          "name": "Unit Run Time",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "unit"
+            },
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "run"
+            },
+            {
+              "tagName": "time"
+            },
+			{
+              "tagName": "unit",
+              "value": "hours"
+            },
+			{
+              "tagName": "value"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 9056,
+      "registerNumber": "49057",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+	  "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada57",
+          "name": "Compressor 2 Run Time",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "compressor"
+            },
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "run"
+            },
+            {
+              "tagName": "time"
+            },
+			{
+              "tagName": "unit",
+              "value": "hours"
+            },
+			{
+              "tagName": "value"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 23052,
+      "registerNumber": "423053",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+	  "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada58",
+          "startBit": 0,
+          "endBit": 15,
+          "name": "Compressor 1 Speed",
+          "logicalPointTags": [
+            {
+              "tagName": "compressor"
+            },
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "speed"
+            },
+			{
+              "tagName": "unit",
+              "value": "%"
+            },
+			{
+              "tagName": "value"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+	{
+      "registerAddress": 23052,
+      "registerNumber": "423053",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "float",
+	  "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada63",
+          "startBit": 0,
+          "endBit": 15,
+          "name": "Fan Speed",
+          "logicalPointTags": [
+            {
+              "tagName": "fan"
+            },
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "speed"
+            },
+			{
+              "tagName": "unit",
+              "value": "%"
+            },
+			{
+              "tagName": "value"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 2346,
+      "registerNumber": "42347",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "range",
+	  "wordOrder": "littleEndian",
+	  "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada54",
+          "name": "Return Air Temperature Setpoint",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "setpoint"
+            },
+            {
+              "tagName": "pac"
+            },
+			{
+              "tagName": "return"
+            },
+			{
+              "tagName": "air"
+			},
+            {
+              "tagName": "temp"
+            },
+            {
+              "tagName": "minVal",
+              "value": 5
+            },
+            {
+              "tagName": "maxVal",
+              "value": 35
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.10
+            },
+            {
+              "tagName": "sp"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ],
+          "userIntentPointTags": [
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "desired"
+            },
+			{
+              "tagName": "return"
+            },
+			{
+              "tagName": "air"
+			},
+            {
+              "tagName": "temp"
+            },
+            {
+              "tagName": "minVal",
+              "value": 5
+            },
+            {
+              "tagName": "maxVal",
+              "value": 35
+            },
+            {
+              "tagName": "incrementVal",
+              "value":0.10
+            },
+            {
+              "tagName": "unit",
+              "value": "C"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "writable"
+            },
+            {
+              "tagName": "sp"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registerAddress": 2352,
+      "registerNumber": "42353",
+      "registerType": "holdingRegister",
+      "parameterDefinitionType": "range",
+	  "wordOrder": "littleEndian",
+      "parameters": [
+        {
+          "parameterId": "5f1f30ad18bcbf4f3d6ada55",
+          "name": "Return Air Humidity Setpoint",
+          "startBit": 0,
+          "endBit": 15,
+          "logicalPointTags": [
+            {
+              "tagName": "humidity"
+            },
+            {
+              "tagName": "pac"
+            },
+			{
+              "tagName": "return"
+            },
+			{
+              "tagName": "air"
+			},
+			{
+              "tagName": "sp"
+            },
+            {
+              "tagName": "minVal",
+              "value": 5
+            },
+            {
+              "tagName": "maxVal",
+              "value": 99
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.10
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            }
+          ],
+          "userIntentPointTags": [
+            {
+              "tagName": "pac"
+            },
+            {
+              "tagName": "humidity"
+            },
+            {
+              "tagName": "sp"
+            },
+			{
+              "tagName": "return"
+            },
+			{
+              "tagName": "air"
+			},
+            {
+              "tagName": "minVal",
+              "value": 5
+            },
+            {
+              "tagName": "maxVal",
+              "value":99
+            },
+            {
+              "tagName": "incrementVal",
+              "value": 0.1
+            },
+            {
+              "tagName": "unit",
+              "value": "%"
+            },
+            {
+              "tagName": "kind",
+              "value": "Number"
+            },
+            {
+              "tagName": "his"
+            },
+            {
+              "tagName": "hisInterpolate",
+              "value": "cov"
+            },
+            {
+              "tagName": "writable"
+            },
+            {
+              "tagName": "sp"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

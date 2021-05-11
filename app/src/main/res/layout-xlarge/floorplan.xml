@@ -72,7 +72,7 @@
 				android:gravity="center_vertical"
 				android:background="@color/progress_gray"
 				android:textSize="30dp"
-				android:textColor="@color/accent"/>
+				android:textColor="@color/accent75F"/>
 
 			<RelativeLayout
 				android:id="@+id/rl_systemdevice"
@@ -104,11 +104,10 @@
 
 			<ListView
 				android:id="@+id/floorList"
-				android:animateLayoutChanges="true"
 				android:layout_width="match_parent"
-				android:overScrollMode="never"
-				android:layout_height="wrap_content">
-			</ListView>
+				android:layout_height="wrap_content"
+				android:animateLayoutChanges="true"
+				android:overScrollMode="never"></ListView>
 		</LinearLayout>
 		<View
 			android:layout_width="0.1dp"
@@ -173,7 +172,7 @@
 				android:background="@color/progress_gray"
 				android:text="Rooms"
 				android:visibility="gone"
-				android:textColor="@color/accent"
+				android:textColor="@color/accent75F"
 				android:textSize="30dp" />
 
 			<RelativeLayout
@@ -321,7 +320,7 @@
 				android:textSize="30dp"
 				android:visibility="gone"
 				android:background="@color/progress_gray"
-				android:textColor="@color/accent"/>
+				android:textColor="@color/accent75F"/>
 
 			<ListView
 				android:id="@+id/moduleList"

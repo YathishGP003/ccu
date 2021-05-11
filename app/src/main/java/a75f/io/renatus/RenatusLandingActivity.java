@@ -34,7 +34,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.io.IOException;
+
 import java.util.HashMap;
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
@@ -50,7 +50,6 @@ import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.filesystem.FileSystemTools;
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.logtasks.UploadLogs;
@@ -372,7 +371,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         String password = getSavedPassword(key);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         SpannableString spannable = new SpannableString(title);
-        spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.accent)), 0, title.length(), 0);
+        spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.accent75F)), 0, title.length(), 0);
         builder.setTitle(spannable);
         builder.setCancelable(false);
 

@@ -107,7 +107,7 @@ public class OaoArc extends View {
 
         // Defaults, may need to link this into theme settings
         int arcColor = res.getColor(R.color.progress_gray);
-        int progressColor = res.getColor(R.color.accent);
+        int progressColor = res.getColor(R.color.accent75F);
         mThumb = BitmapUtil.getBitmapFromVectorDrawable(getContext(), R.drawable.ic_divider_black);
         // Convert progress width to pixels for current density
         mProgressWidth = (int) (mProgressWidth * density);

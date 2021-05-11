@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -475,9 +476,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 				@Override
 				public void run() {
+					String colorHex = "#" + Integer.toHexString(ContextCompat.getColor(getActivity(), R.color.orange_75f) & 0x00ffffff);
 					String status = L.ccu().systemProfile.getStatusMessage();
 					if (L.ccu().systemProfile instanceof DefaultSystem) {
-						equipmentStatus.setText(status.equals("") ? "System is in gateway mode" : Html.fromHtml(status.replace("ON", "<font color='#e24725'>ON</font>")));
+						equipmentStatus.setText(status.equals("") ? "System is in gateway mode" : Html.fromHtml(status.replace("ON", "<font color='"+colorHex+"'>ON</font>")));
 						occupancyStatus.setText("No Central equipment connected.");
 						tbCompHumidity.setChecked(false);
 						tbDemandResponse.setChecked(false);
@@ -493,7 +495,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					}else{
 						systemModePicker.setValue((int) TunerUtil.readSystemUserIntentVal("conditioning and mode"));
 
-						equipmentStatus.setText(status.equals("") ? Html.fromHtml("<font color='#e24725'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='#e24725'>ON</font>").replace("OFF","<font color='#e24725'>OFF</font>")));
+						equipmentStatus.setText(status.equals("") ? Html.fromHtml("<font color='"+colorHex+"'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='"+colorHex+"'>ON</font>").replace("OFF","<font color='"+colorHex+"'>OFF</font>")));
 						Log.i(TAG, "getSystemStatusString: Before system fragement");
 						occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());
 						tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);

@@ -51,7 +51,7 @@
 					<ImageView
 						android:layout_width="21dp"
 						android:layout_height="21dp"
-						android:src="@drawable/ic_add"
+						android:src="@drawable/ic_baseline_add_24"
 						android:layout_marginRight="20dp"
 						android:layout_gravity="center_vertical"/>
 				</LinearLayout>
@@ -72,7 +72,7 @@
 				android:gravity="center_vertical"
 				android:background="@color/progress_gray"
 				android:textSize="30dp"
-				android:textColor="@color/accent"/>
+				android:textColor="@color/accent75F"/>
 
 			<RelativeLayout
 				android:id="@+id/rl_systemdevice"
@@ -147,7 +147,7 @@
 					<ImageView
 						android:layout_width="21dp"
 						android:layout_height="21dp"
-						android:src="@drawable/ic_add"
+						android:src="@drawable/ic_baseline_add_24"
 						android:layout_gravity="center_vertical"
 						android:layout_marginRight="20dp"/>
 				</LinearLayout>
@@ -173,7 +173,7 @@
 				android:background="@color/progress_gray"
 				android:text="Rooms"
 				android:visibility="gone"
-				android:textColor="@color/accent"
+				android:textColor="@color/accent75F"
 				android:textSize="30dp" />
 
 			<RelativeLayout
@@ -296,7 +296,7 @@
 					<ImageView
 						android:layout_width="21dp"
 						android:layout_height="21dp"
-						android:src="@drawable/ic_add"
+						android:src="@drawable/ic_baseline_add_24"
 						android:layout_marginRight="20dp"
 						android:layout_gravity="center_vertical"/>
 				</LinearLayout>
@@ -321,7 +321,7 @@
 				android:textSize="30dp"
 				android:visibility="gone"
 				android:background="@color/progress_gray"
-				android:textColor="@color/accent"/>
+				android:textColor="@color/accent75F"/>
 
 			<ListView
 				android:id="@+id/moduleList"

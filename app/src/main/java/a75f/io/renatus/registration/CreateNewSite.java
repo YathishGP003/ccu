@@ -10,8 +10,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+
 import com.google.android.material.textfield.TextInputLayout;
+
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextUtils;
@@ -59,40 +63,30 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 
 public class CreateNewSite extends Fragment {
+    private static final String TAG = CreateNewSite.class.getSimpleName();
     TextInputLayout mTextInputSitename;
     EditText mSiteName;
-
     Spinner mTimeZoneSelector;
     TextView mTextTimeZone;
     ArrayAdapter<String> timeZoneAdapter;
-
     TextInputLayout mTextInputStreetAdd;
     EditText mStreetAdd;
-
     TextInputLayout mTextInputCity;
     EditText mSiteCity;
-
     TextInputLayout mTextInputState;
     EditText mSiteState;
-
     TextInputLayout mTextInputCountry;
     EditText mSiteCountry;
-
     TextInputLayout mTextInputZip;
     EditText mSiteZip;
-
     TextInputLayout mTextInputCCU;
     EditText mSiteCCU;
-
     TextInputLayout mTextInputEmail;
     EditText mSiteEmailId;
-
     TextInputLayout mTextInputInstallerEmail;
     EditText mSiteInstallerEmailId;
-
     TextInputLayout mTextInputOrg;
     EditText mSiteOrg;
-
     Button mNext;
     TextView btnEditSite;
     TextView btnUnregisterSite;
@@ -100,7 +94,6 @@ public class CreateNewSite extends Fragment {
     LinearLayout btnSetting;
     Prefs prefs;
     private boolean isFreshRegister;
-    private static final String TAG = CreateNewSite.class.getSimpleName();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -173,33 +166,31 @@ public class CreateNewSite extends Fragment {
             enableViews(false);
         }
         populateAndUpdateTimeZone();
-
-        mSiteName.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_sitename) + "</font></big>"));
-        mStreetAdd.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_streetadd) + "</font></big>"));
-        mSiteCity.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_city) + "</font></big>"));
-        mSiteState.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_state) + "</font></big>"));
-        mSiteCountry.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_country) + "</font></big>"));
-        mSiteZip.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_zip) + "</font></big>"));
-        mSiteCCU.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_ccuname) + "</font></big>"));
-        mSiteEmailId.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_facilityemail) + "</font></big>"));
-        mSiteOrg.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_facilityorg) + "</font></big>"));
-        mSiteInstallerEmailId.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_installer_email) + "</font></big>"));
+        String colorHex = "#" + Integer.toHexString(ContextCompat.getColor(getActivity(), R.color.orange_75f) & 0x00ffffff);
+        mSiteName.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_sitename) + "</font></big>"));
+        mStreetAdd.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_streetadd) + "</font></big>"));
+        mSiteCity.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_city) + "</font></big>"));
+        mSiteState.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_state) + "</font></big>"));
+        mSiteCountry.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_country) + "</font></big>"));
+        mSiteZip.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_zip) + "</font></big>"));
+        mSiteCCU.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_ccuname) + "</font></big>"));
+        mSiteEmailId.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_facilityemail) + "</font></big>"));
+        mSiteOrg.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_facilityorg) + "</font></big>"));
+        mSiteInstallerEmailId.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_installer_email) + "</font></big>"));
 
         if (CCUHsApi.getInstance().isCCURegistered()) {
             btnUnregisterSite.setText("Unregister");
             btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
             }
             btnEditSite.setEnabled(true);
         } else {
             btnEditSite.setEnabled(false);
             btnUnregisterSite.setText("Register");
-            btnUnregisterSite.setTextColor(getResources().getColor(R.color.accent));
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            {
-                setCompoundDrawableColor(btnUnregisterSite, R.color.accent);
+            btnUnregisterSite.setTextColor(getResources().getColor(R.color.accent75F));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                setCompoundDrawableColor(btnUnregisterSite, R.color.accent75F);
             }
         }
 
@@ -258,8 +249,8 @@ public class CreateNewSite extends Fragment {
                                 R.id.editInstallerEmail,
                         };
                 if (!validateEditText(mandotaryIds) && Patterns.EMAIL_ADDRESS.matcher(mSiteEmailId.getText().toString()).matches()
-                    && Patterns.EMAIL_ADDRESS.matcher(mSiteInstallerEmailId.getText().toString()).matches()) {
-                    ProgressDialogUtils.showProgressDialog(getActivity(),"Adding New Site...");
+                        && Patterns.EMAIL_ADDRESS.matcher(mSiteInstallerEmailId.getText().toString()).matches()) {
+                    ProgressDialogUtils.showProgressDialog(getActivity(), "Adding New Site...");
                     String siteName = mSiteName.getText().toString();
                     String siteCity = mSiteCity.getText().toString();
                     String siteZip = mSiteZip.getText().toString();
@@ -274,9 +265,9 @@ public class CreateNewSite extends Fragment {
 
                     if (site.size() > 0) {
                         String siteId = site.get("id").toString();
-                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId,installerOrg, installerEmail, managerEmail);
+                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId, installerOrg, installerEmail, managerEmail);
                     } else {
-                        saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, installerOrg, installerEmail,managerEmail);
+                        saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, installerOrg, installerEmail, managerEmail);
                     }
 
                     if (ccu.size() > 0) {
@@ -284,7 +275,7 @@ public class CreateNewSite extends Fragment {
                         CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, managerEmail);
                         L.ccu().setCCUName(ccuName);
                     } else {
-                        String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(),managerEmail);
+                        String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(), managerEmail);
                         L.ccu().setCCUName(ccuName);
                         CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                     }
@@ -339,7 +330,7 @@ public class CreateNewSite extends Fragment {
                         String siteId = site.get("id").toString();
                         updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId, installerOrg, installerEmail, facilityManagerEmail);
                     } else {
-                        saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry,installerOrg, installerEmail,facilityManagerEmail);
+                        saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, installerOrg, installerEmail, facilityManagerEmail);
                     }
 
                     if (ccu.size() > 0) {
@@ -354,7 +345,7 @@ public class CreateNewSite extends Fragment {
                 }
                 L.saveCCUState();
                 CCUHsApi.getInstance().syncEntityTree();
-                Toast.makeText(getActivity(),"Edited details saved successfully",Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "Edited details saved successfully", Toast.LENGTH_LONG).show();
             }
         });
 
@@ -367,10 +358,10 @@ public class CreateNewSite extends Fragment {
             String siteState = site.get("geoState").toString();
             String siteCountry = site.get("geoCountry").toString();
             String siteZipCode = site.get("geoPostalCode").toString();
-            String ccuFmEmail = site.get("fmEmail") != null ?  site.get("fmEmail").toString() : "";
+            String ccuFmEmail = site.get("fmEmail") != null ? site.get("fmEmail").toString() : "";
             String ccuInstallerEmail = site.get("installerEmail") != null ? site.get("installerEmail").toString() : "";
             String siteTz = site.get("tz").toString();
-            String siteOrg = site.get("organization") != null ? site.get("organization").toString(): "";
+            String siteOrg = site.get("organization") != null ? site.get("organization").toString() : "";
 
             mSiteName.setText(siteName);
             mStreetAdd.setText(siteAdd);
@@ -402,7 +393,7 @@ public class CreateNewSite extends Fragment {
         }
 
         btnUnregisterSite.setOnClickListener(view -> {
-            if (CCUHsApi.getInstance().isCCURegistered()){
+            if (CCUHsApi.getInstance().isCCURegistered()) {
                 showUnregisterAlertDialog();
             } else {
                 btnEditSite.setEnabled(true);
@@ -414,7 +405,7 @@ public class CreateNewSite extends Fragment {
                 String installerEmail = mSiteInstallerEmailId.getText().toString();
                 String ccuName = mSiteCCU.getText().toString();
                 HashMap diagEquip = CCUHsApi.getInstance().read("equip and diag");
-                String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail,diagEquip.get("id").toString(),facilityManagerEmail);
+                String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, diagEquip.get("id").toString(), facilityManagerEmail);
                 L.ccu().setCCUName(ccuName);
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                 L.saveCCUState();
@@ -437,7 +428,7 @@ public class CreateNewSite extends Fragment {
                             btnUnregisterSite.setEnabled(true);
                             btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
                             setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
-                            Toast.makeText(getActivity(), "CCU Registered Successfully "+ ccuId, Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), "CCU Registered Successfully " + ccuId, Toast.LENGTH_LONG).show();
                             CCUHsApi.getInstance().resetSync();
                             ccuRegistrationHandler.removeCallbacks(this);
                         }
@@ -477,10 +468,8 @@ public class CreateNewSite extends Fragment {
 
     private void setCompoundDrawableColor(TextView textView, int color) {
         for (Drawable drawable : textView.getCompoundDrawablesRelative()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            {
-                if (drawable != null)
-                {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (drawable != null) {
                     drawable.setTint(getResources().getColor(color));
                 }
             }
@@ -492,7 +481,7 @@ public class CreateNewSite extends Fragment {
 
         builder.setIcon(R.drawable.ic_warning);
         builder.setTitle("Unregister CCU");
-        builder.setMessage("\n"+"Are you sure you want to unregister ccu?");
+        builder.setMessage("\n" + "Are you sure you want to unregister ccu?");
         builder.setCancelable(false);
         builder.setPositiveButton("YES", (dialog, which) -> {
 
@@ -541,27 +530,25 @@ public class CreateNewSite extends Fragment {
             protected void onPostExecute(String response) {
                 super.onPostExecute(response);
                 ProgressDialogUtils.hideProgressDialog();
-                if( (response != null) && (!response.equals(""))){
-                        HZincReader zReader = new HZincReader(response);
-                        Iterator it = zReader.readGrid().iterator();
-                        while (it.hasNext())
-                        {
-                            HRow row = (HRow) it.next();
-                            String ccuId = row.get("removeCCUId").toString();
-                            if (ccuId != null && ccuId != "")
-                            {
-                                btnUnregisterSite.setText("Register");
-                                btnUnregisterSite.setTextColor(getResources().getColor(R.color.accent));
-                                btnEditSite.setEnabled(false);
-                                setCompoundDrawableColor(btnUnregisterSite, R.color.accent);
+                if ((response != null) && (!response.equals(""))) {
+                    HZincReader zReader = new HZincReader(response);
+                    Iterator it = zReader.readGrid().iterator();
+                    while (it.hasNext()) {
+                        HRow row = (HRow) it.next();
+                        String ccuId = row.get("removeCCUId").toString();
+                        if (ccuId != null && ccuId != "") {
+                            btnUnregisterSite.setText("Register");
+                            btnUnregisterSite.setTextColor(getResources().getColor(R.color.accent75F));
+                            btnEditSite.setEnabled(false);
+                            setCompoundDrawableColor(btnUnregisterSite, R.color.accent75F);
 
-                                CCUHsApi.getInstance().setJwt("");
-                                CCUHsApi.getInstance().setCcuUnregistered();
-                                Toast.makeText(getActivity(), "CCU unregistered successfully " +ccuId, Toast.LENGTH_LONG).show();
-                            } else {
-                                Toast.makeText(getActivity(), "Failed to unregistered the CCU", Toast.LENGTH_LONG).show();
-                            }
+                            CCUHsApi.getInstance().setJwt("");
+                            CCUHsApi.getInstance().setCcuUnregistered();
+                            Toast.makeText(getActivity(), "CCU unregistered successfully " + ccuId, Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(getActivity(), "Failed to unregistered the CCU", Toast.LENGTH_LONG).show();
                         }
+                    }
                 } else {
                     Toast.makeText(getActivity(), "Fails to remove CCU", Toast.LENGTH_LONG).show();
                 }
@@ -590,7 +577,7 @@ public class CreateNewSite extends Fragment {
 
 
     private void populateAndUpdateTimeZone() {
-        
+
         timeZoneAdapter = new ArrayAdapter<String>(mContext, R.layout.spinner_item, getSupportedTimeZones());
         timeZoneAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         mTimeZoneSelector.setAdapter(timeZoneAdapter);
@@ -599,12 +586,12 @@ public class CreateNewSite extends Fragment {
         mTextTimeZone.setTextColor(getResources().getColor(R.color.hint_color));
 
     }
-    
+
     private ArrayList<String> getSupportedTimeZones() {
         String[] tzIds = TimeZone.getAvailableIDs();
         ArrayList<String> supportedTimeZones = new ArrayList<>();
         HashSet<String> regions = CCUHsApi.getInstance().getSupportedRegions();
-        
+
         for (String tz : tzIds) {
             String[] parts = tz.split("/");
             String region = parts[0];
@@ -612,13 +599,114 @@ public class CreateNewSite extends Fragment {
                 supportedTimeZones.add(tz);
             }
         }
-        
+
         return supportedTimeZones;
+    }
+
+    public boolean validateEditText(int[] ids) {
+        boolean isEmpty = false;
+
+        for (int id : ids) {
+            EditText et = (EditText) getView().findViewById(id);
+
+            if (TextUtils.isEmpty(et.getText().toString())) {
+                et.setError("Must enter Value");
+                isEmpty = true;
+            }
+        }
+
+        return isEmpty;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+    }
+
+    public String saveSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState, String siteCountry, String org, String installer, String fcManager) {
+        String tzID = mTimeZoneSelector.getSelectedItem().toString();
+        AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        am.setTimeZone(tzID);
+
+        Site s75f = new Site.Builder()
+                .setDisplayName(siteName)
+                .addMarker("site")
+                .setGeoCity(siteCity)
+                .setGeoState(siteState)
+                .setTz(tzID.substring(tzID.lastIndexOf("/") + 1))
+                .setGeoZip(siteZip)
+                .setGeoCountry(siteCountry)
+                .setOrgnization(org)
+                .setInstaller(installer)
+                .setFcManager(fcManager)
+                .setGeoAddress(geoAddress)
+                .setGeoFence("2.0")
+                .setArea(10000).build();
+
+        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
+        String localSiteId = ccuHsApi.addSite(s75f);
+        CCUHsApi.getInstance().setPrimaryCcu(true);
+        BuildingTuners.getInstance().updateBuildingTuners();
+        //SystemEquip.getInstance();
+        Log.i(TAG, "LocalSiteID: " + localSiteId);
+        ccuHsApi.log();
+        L.ccu().systemProfile = new DefaultSystem();
+        ccuHsApi.saveTagsData();
+
+        prefs.setString("SITE_ID", localSiteId);
+        return localSiteId;
+    }
+    /* This site never existed we are creating a new orphaned site. */
+
+    public void updateSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState, String siteCountry, String siteId, String org, String installer, String fcManager) {
+
+        String tzID = mTimeZoneSelector.getSelectedItem().toString();
+        AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        am.setTimeZone(tzID);
+
+        HashMap site = CCUHsApi.getInstance().read("site");
+        String curTz = site.get("tz").toString();
+
+        Site s75f = new Site.Builder()
+                .setDisplayName(siteName)
+                .addMarker("site")
+                .setGeoCity(siteCity)
+                .setGeoState(siteState)
+                .setTz(tzID.substring(tzID.lastIndexOf("/") + 1))
+                .setGeoZip(siteZip)
+                .setGeoCountry(siteCountry)
+                .setGeoAddress(geoAddress)
+                .setOrgnization(org)
+                .setInstaller(installer)
+                .setFcManager(fcManager)
+                .setArea(10000).build();
+
+        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
+        ccuHsApi.updateSite(s75f, siteId);
+        CcuLog.d(TAG, "Update Site curTz " + curTz + " newTz " + s75f.getTz());
+        if (!curTz.equals(s75f.getTz())) {
+            CCUHsApi.getInstance().updateTimeZone(s75f.getTz());
+        }
+        BuildingTuners.getInstance();
+        ccuHsApi.log();
+        //  L.ccu().systemProfile = new DefaultSystem();
+        ccuHsApi.saveTagsData();
+
+    }
+
+    private void goTonext() {
+        prefs.setBoolean("CCU_SETUP", false);
+        ((FreshRegistration) getActivity()).selectItem(4);
     }
 
     private class EditTextWatcher implements TextWatcher {
 
-        private View view;
+        private final View view;
 
         private EditTextWatcher(View view) {
             this.view = view;
@@ -734,108 +822,6 @@ public class CreateNewSite extends Fragment {
                     }
             }
         }
-    }
-
-
-    public boolean validateEditText(int[] ids) {
-        boolean isEmpty = false;
-
-        for (int id : ids) {
-            EditText et = (EditText) getView().findViewById(id);
-
-            if (TextUtils.isEmpty(et.getText().toString())) {
-                et.setError("Must enter Value");
-                isEmpty = true;
-            }
-        }
-
-        return isEmpty;
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-    }
-    /* This site never existed we are creating a new orphaned site. */
-
-    public String saveSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState, String siteCountry, String org, String installer, String fcManager) {
-        String tzID = mTimeZoneSelector.getSelectedItem().toString();
-        AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        am.setTimeZone(tzID);
-
-        Site s75f = new Site.Builder()
-                .setDisplayName(siteName)
-                .addMarker("site")
-                .setGeoCity(siteCity)
-                .setGeoState(siteState)
-                .setTz(tzID.substring(tzID.lastIndexOf("/") + 1))
-                .setGeoZip(siteZip)
-                .setGeoCountry(siteCountry)
-                .setOrgnization(org)
-                .setInstaller(installer)
-                .setFcManager(fcManager)
-                .setGeoAddress(geoAddress)
-                .setGeoFence("2.0")
-                .setArea(10000).build();
-
-        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
-        String localSiteId = ccuHsApi.addSite(s75f);
-        CCUHsApi.getInstance().setPrimaryCcu(true);
-        BuildingTuners.getInstance().updateBuildingTuners();
-        //SystemEquip.getInstance();
-        Log.i(TAG, "LocalSiteID: " + localSiteId);
-        ccuHsApi.log();
-        L.ccu().systemProfile = new DefaultSystem();
-        ccuHsApi.saveTagsData();
-
-        prefs.setString("SITE_ID", localSiteId);
-        return localSiteId;
-    }
-
-    public void updateSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState, String siteCountry, String siteId, String org, String installer, String fcManager) {
-
-        String tzID = mTimeZoneSelector.getSelectedItem().toString();
-        AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        am.setTimeZone(tzID);
-    
-        HashMap site = CCUHsApi.getInstance().read("site");
-        String curTz = site.get("tz").toString();
-        
-        Site s75f = new Site.Builder()
-                .setDisplayName(siteName)
-                .addMarker("site")
-                .setGeoCity(siteCity)
-                .setGeoState(siteState)
-                .setTz(tzID.substring(tzID.lastIndexOf("/") + 1))
-                .setGeoZip(siteZip)
-                .setGeoCountry(siteCountry)
-                .setGeoAddress(geoAddress)
-                .setOrgnization(org)
-                .setInstaller(installer)
-                .setFcManager(fcManager)
-                .setArea(10000).build();
-
-        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
-        ccuHsApi.updateSite(s75f, siteId);
-        CcuLog.d(TAG, "Update Site curTz "+curTz+" newTz "+s75f.getTz());
-        if (!curTz.equals(s75f.getTz())) {
-            CCUHsApi.getInstance().updateTimeZone(s75f.getTz());
-        }
-        BuildingTuners.getInstance();
-        ccuHsApi.log();
-      //  L.ccu().systemProfile = new DefaultSystem();
-        ccuHsApi.saveTagsData();
-
-    }
-
-    private void goTonext() {
-        prefs.setBoolean("CCU_SETUP", false);
-        ((FreshRegistration) getActivity()).selectItem(4);
     }
 
 }

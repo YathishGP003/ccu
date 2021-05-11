@@ -215,17 +215,17 @@ public class SeekArc extends View implements RoomDataInterface
         // Defaults, may need to link this into theme settings
         int arcColor = res.getColor(R.color.outer_temp_text_darker_gray);
         //int progressColor = res.getColor(R.color.progress_color_orange);
-        int progressColor = res.getColor(R.color.accent);
+        int progressColor = res.getColor(R.color.accent75F);
         int graycolor = res.getColor(R.color.dark_gray);
         int userLimitProgressColor = res.getColor(R.color.userlimit_outbound_color);
-        //int thumbOuterColor = res.getColor(R.color.thummb_outer_orange);
-        int thumbOuterColor = res.getColor(R.color.accent);
+        //int thumbOuterColor = res.getColor(R.color.accent75F);
+        int thumbOuterColor = res.getColor(R.color.accent75F);
         int thumbInnerColor = res.getColor(R.color.thumb_inner_white);
         delimeterColor = res.getColor(R.color.progress_delimeter_white);
         @ColorInt int statusTempText =
                 ContextCompat.getColor(context, R.color.outer_temp_text_darker_gray);
         //int outerTempText = res.getColor(R.color.progress_color_orange);
-        int outerTempText = res.getColor(R.color.accent);
+        int outerTempText = res.getColor(R.color.accent75F);
         int thumbOuterLimitColor = res.getColor(R.color.userlimit_outbound_color);
         int thumbHalfheight = 0;
         int thumbHalfWidth = 0;

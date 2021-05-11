@@ -2,29 +2,22 @@
 <resources>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
-
     <color name="transparent">#0FFF</color>
     <color name="button_bordercolor">#CDCED2</color>
-    <!--<color name="blue_progress">#1F77B4</color>-->
     <color name="grey_select">#666666</color>
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>
     <color name="listview_divider_color">#cccccc</color>
     <color name="black_listviewtext">#6D7780</color>
-
     <color name="my_green">#77D065</color>
     <color name="my_purple">#B455B6</color>
     <color name="my_gray">#738182</color>
     <color name="blue_light">#E0E0E0</color>
     <color name="primary">#673ab7</color>
     <color name="primary_dark">#000000</color>
-    <color name="accent1">#e24725</color>
-    <color name="accent">#0099CC</color>
     <color name="text_secondary">#D9000000</color>
     <color name="orange">#a0D77B64</color>
     <color name="orange_multi">#ececec</color>
-    <!--<color name="orange_multi">#fcf8e7</color>-->
     <color name="dark_gray">#1a1a1a</color>
     <color name="PerceivedComfort">#C9CC84</color>
     <color name="ComfortIndex">#C8C8C8</color>
@@ -41,10 +34,8 @@
     <color name="outer_temp_text_darker_gray">#8E8E93</color>
     <color name="userlimit_outbound_color">#4A4A4A</color>
     <color name="progress_color_orange1">#FFE46B43</color>
-    <color name="progress_color_orange">#0099CC</color>
+    <color name="progress_color_orange2">#0099CC</color>
     <color name="thumb_inner_white">#F7F7F7</color>
-    <color name="thummb_outer_orange1">#E46B43</color>
-    <color name="thummb_outer_orange">#0099CC</color>
     <color name="background_holo_light">#f3f3f3</color>
     <color name="floor_plan_rect">#8080ff80</color>
     <color name="safe_status">#00A000</color>
@@ -62,10 +53,17 @@
 
     <color name="black_overlay">#66000000</color>
 
-    <color name="orange_75f1">#E24301</color>
-    <color name="orange_75f">#0099CC</color>
-    <color name="min_temp1">#E24301</color>
-    <color name="min_temp">#0099CC</color>
+
+    <!--75F Smart Color   -->
+    <color name="orange_75f">#E24301</color>
+    <color name="accent75F">#e24725</color>
+
+    <!--DAIKIN Theme Color-->
+    <color name="daikin_75f">#0099CC</color>
+    <color name="accentDaikin_75f">#0099CC</color>
+
+
+    <color name="min_temp">#E24301</color>
     <color name="max_temp">#5990B4</color>
     <color name="bg_temp">#1A000000</color>
 

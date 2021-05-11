@@ -15,7 +15,7 @@
         android:max="100"
         android:backgroundTint="@color/white"
         android:layout_gravity="bottom"
-        android:indeterminateTint="@color/accent"
+        android:indeterminateTint="@color/accent75F"
         android:layout_marginTop="-7dp"/>
 
     <EditText
@@ -61,7 +61,7 @@
         android:id="@+id/create_new"
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:background="@color/accent"
+        android:background="@color/accent75F"
         android:textColor="@color/white"
         android:text="Create New" />
 

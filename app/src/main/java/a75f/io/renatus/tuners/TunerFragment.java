@@ -8,6 +8,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import com.google.android.material.button.MaterialButton;
+
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
 import android.text.Html;
@@ -121,7 +123,8 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         //getSystemTuners();
 
         reasonLabel = view.findViewById(R.id.textReasonLabel);
-        String text = "<font color=#E24301>*</font> <font color=#999999>Reason for Change</font>";
+        String colorHex = "#" + Integer.toHexString(ContextCompat.getColor(getActivity(), R.color.orange_75f) & 0x00ffffff);
+        String text = "<font color="+colorHex+">*</font> <font color=#999999>Reason for Change</font>";
         reasonLabel.setText(Html.fromHtml(text));
 
         cancelTunerUpdate.setOnClickListener(view1 -> {

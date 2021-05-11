@@ -56,7 +56,7 @@
             android:layout_height="match_parent"
             app:tabGravity="fill"
             android:layout_marginStart="12dp"
-            app:tabIndicator="@color/accent"
+            app:tabIndicator="@color/accent75F"
             app:tabIndicatorHeight="6dp"
             app:tabMode="fixed" />
 
@@ -81,7 +81,7 @@
             android:layout_height="?actionBarSize"
             app:tabBackground = "@null"
             app:tabRippleColor="@null"
-            app:tabIndicator="@color/accent"
+            app:tabIndicator="@color/accent75F"
             app:tabIndicatorHeight="6dp"
             app:tabMaxWidth="70dp"
             app:tabGravity="fill"

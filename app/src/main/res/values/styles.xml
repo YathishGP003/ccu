@@ -5,9 +5,17 @@
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/grey_select</item>
         <item name="colorPrimaryDark">@color/grey_select</item>
-        <item name="colorAccent">@color/accent</item>
+        <item name="colorAccent">@color/accent75F</item>
+        <item name="orange_75f">@color/orange_75f</item>
     </style>
 
+    <style name="RenatusAppDaikinTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/grey_select</item>
+        <item name="colorPrimaryDark">@color/grey_select</item>
+        <item name="orange_75f">@color/daikin_75f</item>
+        <item name="colorAccent">@color/accentDaikin_75f</item>
+    </style>
     <style name="RenatusAppTheme.NoActionBar">
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
@@ -25,14 +33,14 @@
     <style name="RenatusTabStyle" parent="Base.Widget.Design.TabLayout">
         <item name="tabSelectedTextColor">@color/white</item>
         <item name="tabTextColor">@color/light_gray</item>
-        <item name="tabIndicatorColor">@color/accent</item>
+        <item name="tabIndicatorColor">@color/accent75F</item>
         <item name="tabTextAppearance">@style/RenatusTabTextStyle</item>
     </style>
 
     <style name="RenatusLandingTabStyle" parent="Base.Widget.Design.TabLayout">
         <item name="tabSelectedTextColor">@color/white</item>
         <item name="tabTextColor">@color/white</item>
-        <item name="tabIndicatorColor">@color/accent</item>
+        <item name="tabIndicatorColor">@color/accent75F</item>
         <item name="tabTextAppearance">@style/RenatusLandingTabTextStyle</item>
     </style>
 
@@ -59,7 +67,7 @@
     </style>
 
     <style name="WindowTextStyle">
-        <item name="android:textColor">@color/accent</item>
+        <item name="android:textColor">@color/accent75F</item>
         <item name="android:textSize">@dimen/text_medium</item>
         <item name="android:textAppearance">@style/TextAppearance.AppCompat.Title</item>
     </style>
@@ -85,7 +93,7 @@
     </style>
 
     <style name="SwitchTheme" parent="ThemeOverlay.AppCompat.Light">
-        <item name="colorAccent">@color/accent</item>
+        <item name="colorAccent">@color/accent75F</item>
 
     </style>
 
@@ -205,7 +213,7 @@
     </style>
 
     <style name="action_text_appearance" parent="@android:style/TextAppearance">
-        <item name="android:textColor">@color/accent</item>
+        <item name="android:textColor">@color/accent75F</item>
         <item name="android:textSize">24sp</item>
         <item name="android:textAllCaps"> true</item>
         <item name="android:fontFamily">@font/lato_bold</item>
@@ -298,7 +306,7 @@
         <item name="android:gravity">center_vertical</item>
     </style>
     <style name="tuner_text_value" parent="@android:style/TextAppearance">
-        <item name="android:textColor">@color/accent</item>
+        <item name="android:textColor">@color/accent75F</item>
         <item name="android:textSize">19.5sp</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:fontFamily">@font/lato_regular</item>

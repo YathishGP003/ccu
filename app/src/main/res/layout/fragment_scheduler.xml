@@ -676,7 +676,7 @@
                 android:textSize="28sp"
                 android:enabled="true"
                 android:drawablePadding="12dp"
-                android:drawableEnd="@drawable/ic_add"
+                android:drawableEnd="@drawable/ic_baseline_add_24"
                 android:fontFamily="@font/lato_bold"
                 android:text="Add Vacation"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"

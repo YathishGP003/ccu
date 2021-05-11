@@ -1097,7 +1097,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         double analog1sensorType = CCUHsApi.getInstance().readPointPriorityValByQuery("point and analog1 and config and input and sensor and equipRef == \""+equipID+"\"");
         double analog2sensorType = CCUHsApi.getInstance().readPointPriorityValByQuery("point and analog2 and config and input and sensor and equipRef == \""+equipID+"\"");
         double offsetValue = CCUHsApi.getInstance().readDefaultVal("point and config and setpoint and sensor and offset and equipRef == \""+equipID+"\"");
-
+        double loopOutput =
+            CCUHsApi.getInstance().readHisValByQuery("point and control and variable and equipRef == \""+equipID+"\"");
+    
         if (equipStatusPoint != null && equipStatusPoint.size() > 0)
         {
             String id = ((HashMap) equipStatusPoint.get(0)).get("id").toString();
@@ -1112,6 +1114,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             double inputVal = CCUHsApi.getInstance().readHisValById(id);
             plcPoints.put("Input Value",inputVal);
         }
+    
+        plcPoints.put("LoopOutput",loopOutput);
 
         plcPoints.put("Offset Value",offsetValue);
 

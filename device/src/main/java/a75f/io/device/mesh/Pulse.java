@@ -846,6 +846,12 @@ public class Pulse
 						if (desiredTemp > 0 && (curValue != desiredTemp)) {
 							hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
 							updateDesiredTemp(nodeAddr, desiredTemp);
+							CcuLog.d(L.TAG_CCU_DEVICE,
+							         "updateSetTempFromSmartStat : desiredTemp updated" +curValue+"->"+ desiredTemp);
+						} else {
+							sendSetTemperatureAck((short)nodeAddr);
+							CcuLog.d(L.TAG_CCU_DEVICE,
+							         "updateSetTempFromSmartStat : desiredTemp not changed" +curValue+"->"+ desiredTemp);
 						}
 					break;
 				}
@@ -921,8 +927,14 @@ public class Pulse
 						if (desiredTemp > 0 && (curValue != desiredTemp)) {
 							hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
 							updateSmartStatDesiredTemp(nodeAddr, desiredTemp, true);
+							CcuLog.d(L.TAG_CCU_DEVICE,
+							         "updateSetTempFromSmartStat : desiredTemp updated" +curValue+"->"+ desiredTemp);
+						} else {
+							sendSetTemperatureAck((short)nodeAddr);
+							CcuLog.d(L.TAG_CCU_DEVICE,
+							         "updateSetTempFromSmartStat : desiredTemp not changed" + desiredTemp+"->"+curValue);
 						}
-						CcuLog.d(L.TAG_CCU_DEVICE, "updateSetTempFromSmartStat : desiredTemp " + desiredTemp+","+curValue);
+						
 						break;
 				}
 			}

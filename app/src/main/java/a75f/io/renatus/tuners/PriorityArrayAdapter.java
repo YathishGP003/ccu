@@ -3,6 +3,8 @@ package a75f.io.renatus.tuners;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
+
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -232,7 +234,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
     }
 
     public void setOrangeTextColor(TextView textView) {
-        textView.setTextColor(Color.parseColor("#E24301"));
+        textView.setTextColor(ContextCompat.getColor(context, R.color.orange_75f));
     }
 
     public void setBlackTextColor(TextView textView) {

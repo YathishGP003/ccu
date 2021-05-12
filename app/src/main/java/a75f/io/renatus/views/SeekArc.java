@@ -214,7 +214,7 @@ public class SeekArc extends View implements RoomDataInterface
         float density = context.getResources().getDisplayMetrics().density;
         // Defaults, may need to link this into theme settings
         int arcColor = res.getColor(R.color.outer_temp_text_darker_gray);
-        //int progressColor = res.getColor(R.color.progress_color_orange);
+        //int progressColor = res.getColor(R.color.accent75F);
         int progressColor = res.getColor(R.color.accent75F);
         int graycolor = res.getColor(R.color.dark_gray);
         int userLimitProgressColor = res.getColor(R.color.userlimit_outbound_color);
@@ -224,7 +224,7 @@ public class SeekArc extends View implements RoomDataInterface
         delimeterColor = res.getColor(R.color.progress_delimeter_white);
         @ColorInt int statusTempText =
                 ContextCompat.getColor(context, R.color.outer_temp_text_darker_gray);
-        //int outerTempText = res.getColor(R.color.progress_color_orange);
+        //int outerTempText = res.getColor(R.color.accent75F);
         int outerTempText = res.getColor(R.color.accent75F);
         int thumbOuterLimitColor = res.getColor(R.color.userlimit_outbound_color);
         int thumbHalfheight = 0;

@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.Html;
@@ -392,11 +393,13 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             if (tunerItemSelected.containsKey("reset")) {
                 tunerItemSelected.remove("reset");
             }
+            String colorHex = "#" + Integer.toHexString(ContextCompat.getColor(getContext(), R.color.orange_75f) & 0x00ffffff);
+
             String text = "Level " + (position + 1) + " " + levelName;
-            text = text.replaceAll("System", "<font color='#E24301'>System</font>");
-            text = text.replaceAll(getString(R.string.txt_tunersModule), "<font color='#E24301'>Module</font>");
-            text = text.replaceAll("Zone", "<font color='#E24301'>Zone</font>");
-            text = text.replaceAll("Building", "<font color='#E24301'>Building</font>");
+            text = text.replaceAll("System", "<font color='"+colorHex+"'>System</font>");
+            text = text.replaceAll(getString(R.string.txt_tunersModule), "<font color='"+colorHex+"'>Module</font>");
+            text = text.replaceAll("Zone", "<font color='"+colorHex+"'>Zone</font>");
+            text = text.replaceAll("Building", "<font color='"+colorHex+"'>Building</font>");
             textViewLevel.setText(Html.fromHtml(text));
 
             if (tunerItemSelected.containsKey("minVal") && tunerItemSelected.containsKey("maxVal")) {

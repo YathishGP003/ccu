@@ -16,7 +16,7 @@
     <color name="primary">#673ab7</color>
     <color name="primary_dark">#000000</color>
     <color name="text_secondary">#D9000000</color>
-    <color name="orange">#a0D77B64</color>
+    <!--<color name="orange">#a0D77B64</color>-->
     <color name="orange_multi">#ececec</color>
     <color name="dark_gray">#1a1a1a</color>
     <color name="PerceivedComfort">#C9CC84</color>
@@ -33,8 +33,8 @@
     <color name="progress_delimeter_white">#F7F7F7</color>
     <color name="outer_temp_text_darker_gray">#8E8E93</color>
     <color name="userlimit_outbound_color">#4A4A4A</color>
-    <color name="progress_color_orange1">#FFE46B43</color>
-    <color name="progress_color_orange2">#0099CC</color>
+    <!--<color name="progress_color_orange">#FFE46B43</color>
+    <color name="progress_color_orange2">#0099CC</color>-->
     <color name="thumb_inner_white">#F7F7F7</color>
     <color name="background_holo_light">#f3f3f3</color>
     <color name="floor_plan_rect">#8080ff80</color>
@@ -55,8 +55,11 @@
 
 
     <!--75F Smart Color   -->
-    <color name="orange_75f">#E24301</color>
-    <color name="accent75F">#e24725</color>
+   <!-- <color name="orange_75f">#E24301</color>
+    <color name="accent75F">#e24725</color>-->
+
+    <color name="orange_75f">#0099CC</color>
+    <color name="accent75F">#0099CC</color>
 
     <!--DAIKIN Theme Color-->
     <color name="daikin_75f">#0099CC</color>

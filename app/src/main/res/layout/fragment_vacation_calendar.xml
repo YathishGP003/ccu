@@ -38,7 +38,7 @@
         android:id="@+id/calendarView"
         android:layout_width="wrap_content"
         android:layout_height="300dp"
-        app:mcv_selectionColor="@color/orange"
+        app:mcv_selectionColor="@color/orange_75f"
         app:mcv_selectionMode="range"
         android:layout_gravity="center"
         app:mcv_showOtherDates="all"

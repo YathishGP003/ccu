@@ -225,7 +225,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         if(titleView != null)
         {
             titleView.setGravity(Gravity.CENTER);
-            titleView.setTextColor(getResources().getColor(R.color.progress_color_orange));
+            titleView.setTextColor(getResources().getColor(R.color.accent75F));
         }
         int titleDividerId = getContext().getResources()
                 .getIdentifier("titleDivider", "id", "android");

@@ -127,7 +127,6 @@ public class FloorPlanFragment extends Fragment {
     @BindView(R.id.rl_modbus_btu_meter)
     RelativeLayout rl_modbus_btu_meter;
 
-
     @BindView(R.id.textSystemDevice)
     TextView textViewSystemDevice;
     @BindView(R.id.textOAO)
@@ -644,6 +643,11 @@ public class FloorPlanFragment extends Fragment {
 
     @OnClick(R.id.rl_systemdevice)
     public void systemDeviceOnClick() {
+
+        rl_oao.setVisibility(View.VISIBLE);
+        rl_modbus_energy_meter.setVisibility(View.VISIBLE);
+        rl_modbus_btu_meter.setVisibility(View.VISIBLE);
+
         setSystemSelection(1);
         if (floorList.size() > 0) {
             if (roomList.size() > 0) {
@@ -1304,6 +1308,10 @@ public class FloorPlanFragment extends Fragment {
 
     @OnItemClick(R.id.floorList)
     public void setFloorListView(AdapterView<?> parent, View view, int position, long id) {
+        rl_oao.setVisibility(View.GONE);
+        rl_modbus_energy_meter.setVisibility(View.GONE);
+        rl_modbus_btu_meter.setVisibility(View.GONE);
+
         selectFloor(position);
         setSystemUnselection();
     }

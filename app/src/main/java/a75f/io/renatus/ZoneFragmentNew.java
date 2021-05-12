@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 
+import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.plc.PlcProfile;
 import androidx.annotation.Nullable;
@@ -72,12 +73,15 @@ import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
+import a75f.io.logic.bo.building.sshpu.HeatPumpUnitConfiguration;
+import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.modbusbox.EquipsManager;
+import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
@@ -153,6 +157,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     Prefs prefs;
     HashMap<String, EquipmentDevice> modbusZones = new HashMap<>();
     String MODBUS_ZONE = "MODBUS_CONFIG";
+
     public ZoneFragmentNew()
     {
     }
@@ -172,8 +177,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
-    {
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         expandableListView = view.findViewById(R.id.expandableListView);
         mDrawerLayout = view.findViewById(R.id.drawer_layout);
         drawer_screen = view.findViewById(R.id.drawer_screen);
@@ -189,9 +193,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         note = (TextView) getView().findViewById(R.id.note);
 
         scrollViewParent = view.findViewById(R.id.scrollView_zones);
-        tableLayout = (TableLayout) view.findViewById( R.id.tableRoot );
+        tableLayout = (TableLayout) view.findViewById(R.id.tableRoot);
         gridlayout = (GridLayout) view.findViewById(R.id.gridview);
-        recyclerView = (RecyclerView)view.findViewById(R.id.recyclerEquip);
+        recyclerView = (RecyclerView) view.findViewById(R.id.recyclerEquip);
 
         recyclerView.setVisibility(View.GONE);
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 4));
@@ -209,10 +213,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         floorList = HSUtil.getFloors();
         Collections.sort(floorList, new FloorComparator());
 
-        mFloorListAdapter = new DataArrayAdapter<Floor>(getActivity(), R.layout.listviewitem,floorList);
+        mFloorListAdapter = new DataArrayAdapter<Floor>(getActivity(), R.layout.listviewitem, floorList);
         lvFloorList.setAdapter(mFloorListAdapter);
         loadGrid(parentRootView);
-        if(floorList != null && floorList.size()>0){
+        if (floorList != null && floorList.size() > 0) {
             lvFloorList.setContentDescription(floorList.get(0).getDisplayName());
         }
         floorMenu = (ImageView) view.findViewById(R.id.floorMenu);
@@ -2212,6 +2216,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         linearLayoutZonePoints.addView(viewStatus);
 
         double fanHighHumdOption = (double)hpuEquipPoints.get("Fan High Humidity");
+        //Log.e("fanHighHumdOption","insideZoneFragmentNew "+fanHighHumdOption);
         double targetHumidity = 0;
         double targetDeHumidity = 0;
         if(fanHighHumdOption > 1.0)
@@ -2234,14 +2239,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
             humiditySpinner.setAdapter(humidityTargetAdapter);
 
-            if(fanHighHumdOption == 2.0) {
-                textViewLabel3.setText("Target Humidity : ");
-                targetHumidity = (double)hpuEquipPoints.get("Target Humidity");
-                humiditySpinner.setSelection((int)targetHumidity -1, false);
-            }else {
-                textViewLabel3.setText("Target Dehumidity : ");
-                targetDeHumidity = (double)hpuEquipPoints.get("Target Dehumidity");
-                humiditySpinner.setSelection((int)targetDeHumidity - 1, false);
+            if (HeatPumpUnitConfiguration.enableRelay5) {
+                if (fanHighHumdOption == 2.0) {
+                    textViewLabel3.setText("Target Humidity : ");
+                    targetHumidity = (double) hpuEquipPoints.get("Target Humidity");
+                    Log.e("targetHumidity", "insideZoneFragment" + targetHumidity);
+                    humiditySpinner.setSelection((int) targetHumidity - 1, false);
+                } else {
+                    textViewLabel3.setText("Target Dehumidity : ");
+                    targetDeHumidity = (double) hpuEquipPoints.get("Target Dehumidity");
+                    humiditySpinner.setSelection((int) targetDeHumidity - 1, false);
+                }
             }
 
             linearLayoutZonePoints.addView(viewPointRow2);

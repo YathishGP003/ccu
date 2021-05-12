@@ -1,16 +1,21 @@
- - Merged PR 834: Fix NPE in Globals#getSmartNodeBand()
- - Merged PR 824: Fix crash while adding floor on second ccu with same name as floor in existing site
- - Merged PR 842: System testing issues fix.
- - Fix for analog reset and forced-occupied clear
- - Merged PR 727: New Jsons added for modbus equipment
- - Modbus configuration for new Jsons
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/sdev/5861_Modbus_Configuration_UI_for_PAC_UPS_BTU_Meters_using_JSON_files
- - Merged PR 809: Fix alert sync
- - Modbus new json configuration
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/sdev/5861_Modbus_Configuration_UI_for_PAC_UPS_BTU_Meters_using_JSON_files
- - Modbus Configuration with new Jsons
- - Modbus Configuration with new jsons
- - Modbus Configuration for new jsons
- - New Jsons for Equipment
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/sdev/5861_Modbus_Configuration_UI_for_PAC_UPS_BTU_Meters_using_JSON_files
- - New Jsons added for modbus equipment
+ - Merged PR 878: Bug 6176: CCU - DCWB : For Adaptive Comfort Threshold margin point unit needs to be removed .
+ - Merged PR 871: PI profile UI update
+ - Merged PR 874: Desired temp override and preconditioning fixes
+ - Remove unwanted imports
+ - Preconditioning time descrepency fix
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - Merged PR 873: Local override fix.
+ - PI profile UI update
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Handle smartstat profile pubnub updates
+ - Merged PR 862: App Crash observed when schedule is changed from building to Zone in 1.562 version of CCU
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Just added constraint  End instance must be greater than start instance
+ - Temporary tuning of reheat PI loop parameters
+ - Local override ack fix
+ - Merge branches 'bug/akumar2/5815/CCU_Smart_Stat_HPU-Zone_UI_displays_the_Humidifier/Dehumidifier' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/akumar2/5815/CCU_Smart_Stat_HPU-Zone_UI_displays_the_Humidifier/Dehumidifier
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - Merge branches 'bug/akumar2/5815/CCU_Smart_Stat_HPU-Zone_UI_displays_the_Humidifier/Dehumidifier' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/akumar2/5815/CCU_Smart_Stat_HPU-Zone_UI_displays_the_Humidifier/Dehumidifier
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - System Energy Meter

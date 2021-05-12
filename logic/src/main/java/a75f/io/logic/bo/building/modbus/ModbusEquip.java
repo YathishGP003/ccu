@@ -36,6 +36,10 @@ public class ModbusEquip {
     public void init(short slaveId) {
         if (equipRef == null) {
             HashMap equip = hayStack.read("equip and modbus and group == \"" + slaveId + "\"");
+            if (equip.isEmpty()) {
+                Log.e("Modbus","Init Failed : Equip does not exist "+slaveId);
+                return;
+            }
             equipRef = equip.get("id").toString();
         }
     }

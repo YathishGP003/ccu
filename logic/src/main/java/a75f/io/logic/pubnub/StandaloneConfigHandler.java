@@ -1,7 +1,5 @@
 package a75f.io.logic.pubnub;
 
-import android.util.Log;
-
 import com.google.gson.JsonObject;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -13,7 +11,6 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ss2pfcu.FanCoilUnitUtil;
 import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
 import a75f.io.logic.bo.building.sshpu.HeatPumpPackageUnitUtil;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 
 public class StandaloneConfigHandler {
     

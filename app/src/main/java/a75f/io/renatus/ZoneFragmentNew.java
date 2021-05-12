@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
+import a75f.io.logic.bo.building.plc.PlcProfile;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -2708,7 +2709,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
         View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
         View viewPointRow2 = inflater.inflate(R.layout.zones_item_type1, null);
-
+        
+        View loopOpRow = inflater.inflate(R.layout.zones_item_type1, null);
+        TextView loopOpRowLabel = loopOpRow.findViewById(R.id.text_point1label);
+        TextView loopOpRowValue = loopOpRow.findViewById(R.id.text_point1value);
+        loopOpRowLabel.setText("Loop Output : ");
+        loopOpRowValue.setText(plcPoints.get("LoopOutput")+"%");
+    
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
 
@@ -2732,7 +2739,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         double processValue = (double)plcPoints.get("Input Value");
         textViewInputAir.setText(String.format("%.2f",processValue)+" "+plcPoints.get("Unit").toString());
-
         try {
             if((boolean)plcPoints.get("Dynamic Setpoint") == true)
             {
@@ -2743,6 +2749,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     viewPointRow2.setPadding(0,0,0,40);
                     linearLayoutZonePoints.addView(viewTitle);
                     linearLayoutZonePoints.addView(viewStatus);
+                    linearLayoutZonePoints.addView(loopOpRow);
                     linearLayoutZonePoints.addView(viewPointRow1);
                     linearLayoutZonePoints.addView(viewPointRow2);
 
@@ -2752,6 +2759,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     viewPointRow1.setPadding(0,0,0,40);
                     linearLayoutZonePoints.addView(viewTitle);
                     linearLayoutZonePoints.addView(viewStatus);
+                    linearLayoutZonePoints.addView(loopOpRow);
                     linearLayoutZonePoints.addView(viewPointRow1);
             }
         } catch (Exception e) {

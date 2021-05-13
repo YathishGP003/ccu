@@ -1097,7 +1097,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         double analog1sensorType = CCUHsApi.getInstance().readPointPriorityValByQuery("point and analog1 and config and input and sensor and equipRef == \""+equipID+"\"");
         double analog2sensorType = CCUHsApi.getInstance().readPointPriorityValByQuery("point and analog2 and config and input and sensor and equipRef == \""+equipID+"\"");
         double offsetValue = CCUHsApi.getInstance().readDefaultVal("point and config and setpoint and sensor and offset and equipRef == \""+equipID+"\"");
-
+        double loopOutput =
+            CCUHsApi.getInstance().readHisValByQuery("point and control and variable and equipRef == \""+equipID+"\"");
+    
         if (equipStatusPoint != null && equipStatusPoint.size() > 0)
         {
             String id = ((HashMap) equipStatusPoint.get(0)).get("id").toString();
@@ -1112,6 +1114,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             double inputVal = CCUHsApi.getInstance().readHisValById(id);
             plcPoints.put("Input Value",inputVal);
         }
+    
+        plcPoints.put("LoopOutput",loopOutput);
 
         plcPoints.put("Offset Value",offsetValue);
 
@@ -1642,17 +1646,24 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             double preconRate = TunerUtil.readTunerValByQuery("standalone and preconditioning and rate and "+
                                                                              (tempDiff >= 0 ? "cooling" : "heating"));
             if (preconRate == 0) {
-                //TODO - if no specific equip id precond rate, get system wide precon rate
                 equipId = L.ccu().systemProfile.getSystemEquipRef();//get System default preconditioning rate
-                if (tempDiff >= 0)
-                {
-                    tempDiff = currentTemp - occu.getCoolingVal();
+                if (tempDiff >= 0) {
                     preconRate = TunerUtil.readTunerValByQuery("cooling and precon and rate", equipId);
                 } else {
-                    tempDiff = occu.getHeatingVal() - currentTemp;
                     preconRate = TunerUtil.readTunerValByQuery("heating and precon and rate", equipId);
                 }
             }
+            
+            /*
+             *Initial tempDiff based on average temp is used to determine heating/cooling preconditioning required.
+             *Then calculate the absolute tempDiff to determine the preconditioning time.
+             */
+            if (tempDiff > 0) {
+                tempDiff = currentTemp - occu.getCoolingVal();
+            } else {
+                tempDiff = occu.getHeatingVal() - currentTemp;
+            }
+            
             Log.d("ZoneSchedule","isZone in precon = "+preconRate+","+tempDiff +","+occu.getMillisecondsUntilNextChange()+","+currentTemp+","+desiredTemp+","+occu.isPreconditioning());
 
             if(currentTemp == 0) {

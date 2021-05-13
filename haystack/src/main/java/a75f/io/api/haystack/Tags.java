@@ -86,5 +86,7 @@ public class Tags
     public static final String COOLING = "cooling";
     public static final String HEATING = "heating";
     public static final String CO2 = "co2";
+    public static final String DESIRED = "desired";
+    public static final String SCHEDULE_TYPE = "scheduleType";
 
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
@@ -31,8 +32,10 @@
             android:layout_centerVertical="true"
             android:layout_marginStart="64dp"
             android:padding="2.5dp"
+            android:tint="@color/orange_75f"
             android:rotation="180"
-            app:srcCompat="@drawable/icon_arrowright" />
+            app:srcCompat="@drawable/icon_arrowright"
+            tools:ignore="UseAppTint" />
 
         <TextView
             android:id="@+id/textTitleFragment"
@@ -101,7 +104,8 @@
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="96dp"
-                android:src="@drawable/icon_arrowright" />
+                android:src="@drawable/icon_arrowright"
+                app:tint="@color/orange_75f" />
 
             <View
                 android:layout_width="match_parent"
@@ -155,6 +159,7 @@
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="96dp"
+                android:tint="@color/orange_75f"
                 android:src="@drawable/icon_arrowright" />
 
             <View
@@ -210,6 +215,7 @@
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="96dp"
+                android:tint="@color/orange_75f"
                 android:src="@drawable/icon_arrowright" />
 
             <View
@@ -266,6 +272,7 @@
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="96dp"
+                android:tint="@color/orange_75f"
                 android:src="@drawable/icon_arrowright" />
 
             <View
@@ -318,6 +325,7 @@
                 android:layout_height="20dp"
                 android:layout_marginEnd="96dp"
                 android:layout_alignParentEnd="true"
+                android:tint="@color/orange_75f"
                 android:layout_centerVertical="true"
                 android:src="@drawable/icon_arrowright"/>
             <View

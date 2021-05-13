@@ -111,6 +111,7 @@
                 android:layout_weight="0.2"
                 android:padding="8dp"
                 app:srcCompat="@drawable/icon_arrowright"
+                android:tint="@color/orange_75f"
                 tools:ignore="ContentDescription" />
         </LinearLayout>
 
@@ -137,6 +138,7 @@
                 android:layout_weight="0.2"
                 android:padding="8dp"
                 app:srcCompat="@drawable/icon_arrowright"
+                android:tint="@color/orange_75f"
                 tools:ignore="ContentDescription" />
         </LinearLayout>
 
@@ -163,6 +165,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.2"
                 android:padding="8dp"
+                android:tint="@color/orange_75f"
                 app:srcCompat="@drawable/icon_arrowright"
                 tools:ignore="ContentDescription" />
         </LinearLayout>

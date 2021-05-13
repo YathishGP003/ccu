@@ -108,6 +108,7 @@
                     android:layout_width="46.12dp"
                     android:layout_height="27.42dp"
                     android:layout_alignParentRight="true"
+                    android:drawableTint="@color/orange_75f"
                     android:layout_centerVertical="true"
                     android:background="@drawable/toggle_selector"
                     android:checked="false"

@@ -18,6 +18,7 @@
             android:layout_height="32dp"
             android:padding="2.5dp"
             android:layout_centerVertical="true"
+            android:tint="@color/orange_75f"
             android:layout_marginLeft="64dp"
             android:rotation="180"
             app:srcCompat="@drawable/icon_arrowright" />

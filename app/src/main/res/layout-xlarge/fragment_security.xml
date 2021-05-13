@@ -19,6 +19,7 @@
             android:padding="2.5dp"
             android:layout_centerVertical="true"
             android:layout_marginLeft="64dp"
+            android:tint="@color/orange_75f"
             android:rotation="180"
             app:srcCompat="@drawable/icon_arrowright" />
 

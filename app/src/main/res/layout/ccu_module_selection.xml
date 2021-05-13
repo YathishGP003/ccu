@@ -30,6 +30,7 @@
             android:padding="2.5dp"
             android:layout_centerVertical="true"
             android:layout_marginLeft="64dp"
+            android:tint="@color/orange_75f"
             android:rotation="180"
             app:srcCompat="@drawable/icon_arrowright" />
 
@@ -109,6 +110,7 @@
                         android:layout_height="20dp"
                         android:layout_marginRight="92dp"
                         android:layout_alignParentRight="true"
+                        android:tint="@color/orange_75f"
                         android:layout_centerVertical="true"
                         android:src="@drawable/icon_arrowright"/>
                 </RelativeLayout>

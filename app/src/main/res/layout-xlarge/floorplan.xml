@@ -52,6 +52,7 @@
 						android:layout_width="21dp"
 						android:layout_height="21dp"
 						android:src="@drawable/ic_add"
+						android:tint="@color/orange_75f"
 						android:layout_marginRight="20dp"
 						android:layout_gravity="center_vertical"/>
 				</LinearLayout>
@@ -147,6 +148,7 @@
 						android:layout_width="21dp"
 						android:layout_height="21dp"
 						android:src="@drawable/ic_add"
+						android:tint="@color/orange_75f"
 						android:layout_gravity="center_vertical"
 						android:layout_marginRight="20dp"/>
 				</LinearLayout>
@@ -295,6 +297,7 @@
 					<ImageView
 						android:layout_width="21dp"
 						android:layout_height="21dp"
+						android:tint="@color/orange_75f"
 						android:src="@drawable/ic_add"
 						android:layout_marginRight="20dp"
 						android:layout_gravity="center_vertical"/>

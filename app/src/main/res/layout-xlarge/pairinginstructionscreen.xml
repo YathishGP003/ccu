@@ -20,6 +20,7 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="64dp"
             android:rotation="180"
+            android:tint="@color/orange_75f"
             app:srcCompat="@drawable/icon_arrowright" />
 
         <TextView
@@ -74,6 +75,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:background="@null"
+            android:drawableTint="@color/orange_75f"
             android:drawableRight="@drawable/icon_arrowright"
             android:drawablePadding="5dp"
             android:fontFamily="@font/lato_bold"

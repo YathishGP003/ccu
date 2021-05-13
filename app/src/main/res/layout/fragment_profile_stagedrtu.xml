@@ -155,6 +155,7 @@
                             android:layout_weight="1">
 
                             <ToggleButton
+                                android:drawableTint="@color/orange_75f"
                                 android:id="@+id/toggleRelay2"
                                 android:layout_width="46.12dp"
                                 android:layout_height="27.42dp"

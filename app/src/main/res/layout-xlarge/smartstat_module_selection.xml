@@ -32,6 +32,7 @@
             android:layout_marginStart="64dp"
             android:padding="2.5dp"
             android:rotation="180"
+            android:tint="@color/orange_75f"
             app:srcCompat="@drawable/icon_arrowright" />
 
         <TextView
@@ -108,6 +109,7 @@
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="92dp"
+                        android:tint="@color/orange_75f"
                         android:src="@drawable/icon_arrowright" />
 
                     <View
@@ -160,6 +162,7 @@
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="92dp"
+                        android:tint="@color/orange_75f"
                         android:src="@drawable/icon_arrowright" />
 
                     <View
@@ -211,6 +214,7 @@
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="92dp"
+                        android:tint="@color/orange_75f"
                         android:src="@drawable/icon_arrowright" />
 
                     <View
@@ -262,6 +266,7 @@
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="92dp"
+                        android:tint="@color/orange_75f"
                         android:src="@drawable/icon_arrowright" />
 
                     <View
@@ -313,6 +318,7 @@
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="92dp"
+                        android:tint="@color/orange_75f"
                         android:src="@drawable/icon_arrowright" />
 
                     <View

@@ -357,6 +357,7 @@
                 android:layout_alignParentBottom="true"
                 android:layout_marginTop="5dp"
                 android:background="@null"
+                android:backgroundTint="@color/orange_75f"
                 android:drawableRight="@drawable/icon_arrowright"
                 android:drawablePadding="5dp"
                 android:fontFamily="@font/lato_bold"

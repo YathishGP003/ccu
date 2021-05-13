@@ -13,9 +13,11 @@
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/grey_select</item>
         <item name="colorPrimaryDark">@color/grey_select</item>
-        <item name="orange_75f">@color/daikin_75f</item>
         <item name="colorAccent">@color/accentDaikin_75f</item>
+        <item name="orange_75f">@color/daikin_75f</item>
+
     </style>
+
     <style name="RenatusAppTheme.NoActionBar">
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
@@ -215,7 +217,7 @@
     <style name="action_text_appearance" parent="@android:style/TextAppearance">
         <item name="android:textColor">@color/accent75F</item>
         <item name="android:textSize">24sp</item>
-        <item name="android:textAllCaps"> true</item>
+        <item name="android:textAllCaps">true</item>
         <item name="android:fontFamily">@font/lato_bold</item>
         <item name="android:gravity">center_vertical</item>
     </style>
@@ -269,6 +271,7 @@
         <item name="android:fontFamily">@font/lato_regular</item>
         <item name="android:gravity">center_vertical</item>
     </style>
+
     <style name="edittext_grey" parent="@android:style/TextAppearance">
         <item name="android:textSize">22sp</item>
         <item name="android:textColor">@color/hint_textcolor</item>
@@ -290,6 +293,7 @@
         <item name="android:fontFamily">@font/lato_bold</item>
         <item name="android:gravity">center_vertical</item>
     </style>
+
     <style name="label_orange_title" parent="@android:style/TextAppearance">
         <item name="android:textSize">33.5sp</item>
         <item name="android:textColor">@color/orange_75f</item>
@@ -305,6 +309,7 @@
         <item name="android:fontFamily">@font/lato_regular</item>
         <item name="android:gravity">center_vertical</item>
     </style>
+
     <style name="tuner_text_value" parent="@android:style/TextAppearance">
         <item name="android:textColor">@color/accent75F</item>
         <item name="android:textSize">19.5sp</item>
@@ -312,6 +317,7 @@
         <item name="android:fontFamily">@font/lato_regular</item>
         <item name="android:gravity">center_vertical</item>
     </style>
+
     <style name="tuner_text_group" parent="@android:style/TextAppearance">
         <item name="android:textColor">@color/tuner_group</item>
         <item name="android:textSize">19.5sp</item>
@@ -319,6 +325,7 @@
         <item name="android:fontFamily">@font/lato_bold</item>
         <item name="android:gravity">center_vertical</item>
     </style>
+
     <style name="tuner_button_save" parent="@android:style/TextAppearance">
         <item name="android:textColor">@color/tuner_group</item>
         <item name="android:textSize">19.5sp</item>
@@ -326,6 +333,7 @@
         <item name="android:fontFamily">@font/lato_regular</item>
         <item name="android:gravity">center_vertical</item>
     </style>
+
     <style name="tuner_button_cancel" parent="@android:style/TextAppearance">
         <item name="android:textColor">@color/orange_75f</item>
         <item name="android:textSize">19.5sp</item>
@@ -333,6 +341,7 @@
         <item name="android:fontFamily">@font/lato_regular</item>
         <item name="android:gravity">center_vertical</item>
     </style>
+
     <style name="tuner_group_title" parent="@android:style/TextAppearance">
         <item name="android:textColor">@color/orange_75f</item>
         <item name="android:textSize">25sp</item>
@@ -363,6 +372,7 @@
         <item name="android:fontFamily">@font/lato_bold</item>
         <item name="android:gravity">center_vertical</item>
     </style>
+
     <style name="tunerButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
         <item name="android:textColor">@color/tuner_button_text_selector</item>
         <item name="android:textSize">19.5sp</item>

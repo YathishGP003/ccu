@@ -194,6 +194,5 @@
         <attr name="nps_wrapSelectorWheel" format="boolean" />
     </declare-styleable>
     <attr name="orange_75f" format="reference|color" />
-    <attr name="progress_color_orange" format="reference|color" />
 
 </resources>

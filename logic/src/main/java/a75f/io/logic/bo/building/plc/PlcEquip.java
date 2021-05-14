@@ -868,6 +868,7 @@ public class PlcEquip {
                                  config.controlLoopInversion ? 1.0 : 0);
         
         handleRelayConfigUpdate(config);
+        resetRelayOutput(currentConfig, config);
     }
     
     private void handleRelayConfigUpdate(PlcProfileConfiguration config) {
@@ -900,6 +901,24 @@ public class PlcEquip {
         hayStack.writeDefaultVal("point and config and relay2 and off and threshold and equipRef == \"" + equipRef +
                                  "\"", config.relay2OffThresholdVal);
         SmartNode.setPointEnabled(nodeAddr, Port.RELAY_TWO.name(), config.relay2ConfigEnabled);
+    }
+    
+    /**
+     * Reset relay output if relay thresholds have been updated.
+     * @param curConfig
+     * @param newConfig
+     */
+    private void resetRelayOutput(PlcProfileConfiguration curConfig, PlcProfileConfiguration newConfig) {
+        
+        if (curConfig.relay1OnThresholdVal != newConfig.relay1OnThresholdVal
+                || curConfig.relay1OffThresholdVal != newConfig.relay1OffThresholdVal) {
+            setCmdVal(Tags.RELAY1, 0);
+        }
+    
+        if (curConfig.relay2OnThresholdVal != newConfig.relay2OnThresholdVal
+                || curConfig.relay2OffThresholdVal != newConfig.relay2OffThresholdVal) {
+            setCmdVal(Tags.RELAY2, 0);
+        }
     }
     
     /**

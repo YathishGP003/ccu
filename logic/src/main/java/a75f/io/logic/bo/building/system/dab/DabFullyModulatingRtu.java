@@ -352,8 +352,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     private void updateAnalog4Output(DabSystemController dabSystem) {
         double loopType = CCUHsApi.getInstance().readDefaultVal("analog4 and loop and output and type");
         String loopTag = loopType == 0 ? Tags.COOLING : Tags.CO2;
-        HashMap cmd = CCUHsApi.getInstance().read("point and system and cmd and "+loopTag);
-    
+        
         double signal = 0;
         if (dabSystem.getSystemState() == COOLING) {
             systemCoolingLoopOp = dabSystem.getCoolingSignal();
@@ -363,7 +362,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         setSystemLoopOp("cooling", systemCoolingLoopOp);
     
         systemCo2LoopOp = getCo2LoopOp();
-        setSystemLoopOp("co2", systemCoolingLoopOp);
+        setSystemLoopOp("co2", systemCo2LoopOp);
     
         if (getConfigVal("analog4 and output and enabled") > 0) {
             

@@ -427,7 +427,7 @@
 
     <string name="label_chilled_water_target_delta_t">Chilled water target Delta T (F)</string>
     <string name="label_chilled_water_exit_temp_margin">Chilled water Exit Temperature Margin (F)</string>
-    <string name="label_chilled_water_max_flow_rate">Chilled water Max FLow rate (GPM) </string>
+    <string name="label_chilled_water_max_flow_rate">Chilled water Max Flow rate (GPM) </string>
     <string name="label_analog_in1_at_valve_closed_position">Analog-In 1 at Valve Closed Position </string>
     <string name="label_analog_in1_at_valve_full_position">Analog-In 1 at Valve Full Position </string>
     <string name="label_analog_out1_at_min_chw_valve">Analog-out 1 at Min CHW Valve </string>

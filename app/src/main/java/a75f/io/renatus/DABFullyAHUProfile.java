@@ -499,6 +499,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
      */
     private void configureDcwbListeners() {
         cwTargetDeltaTSpinner.setOnItemSelectedListener(this);
+        cwExitTempMarginSpinner.setOnItemSelectedListener(this);
         cwMaxFlowRateSpinner.setOnItemSelectedListener(this);
         analog1InAtValveClosedSpinner.setOnItemSelectedListener(this);
         analog1InAtValveFullSpinner.setOnItemSelectedListener(this);

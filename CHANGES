@@ -1,21 +1,3 @@
- - Merged PR 878: Bug 6176: CCU - DCWB : For Adaptive Comfort Threshold margin point unit needs to be removed .
- - Merged PR 871: PI profile UI update
- - Merged PR 874: Desired temp override and preconditioning fixes
- - Remove unwanted imports
- - Preconditioning time descrepency fix
- - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
- - Merged PR 873: Local override fix.
- - PI profile UI update
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - Handle smartstat profile pubnub updates
- - Merged PR 862: App Crash observed when schedule is changed from building to Zone in 1.562 version of CCU
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - Just added constraint  End instance must be greater than start instance
- - Temporary tuning of reheat PI loop parameters
- - Local override ack fix
- - Merge branches 'bug/akumar2/5815/CCU_Smart_Stat_HPU-Zone_UI_displays_the_Humidifier/Dehumidifier' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/akumar2/5815/CCU_Smart_Stat_HPU-Zone_UI_displays_the_Humidifier/Dehumidifier
- - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
- - Merge branches 'bug/akumar2/5815/CCU_Smart_Stat_HPU-Zone_UI_displays_the_Humidifier/Dehumidifier' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/akumar2/5815/CCU_Smart_Stat_HPU-Zone_UI_displays_the_Humidifier/Dehumidifier
- - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
- - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
- - System Energy Meter
+ - Merged PR 894: Fix crasher on Alert Defs screen
+ - Merged PR 890: Fix for crash with energy meter equip
+ - Fix for crash with energy meter equip

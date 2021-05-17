@@ -159,7 +159,7 @@ public class EquipmentDevice {
         @Override
         public List<Register> convertToEntityProperty(String databaseValue) {
             if (databaseValue == null) {
-                return null;
+                return null;  
             }
 
             return new Gson().fromJson(databaseValue, new TypeToken<List<Register>>() {
@@ -215,5 +215,10 @@ public class EquipmentDevice {
 
     public void setFloorRef(String floorRef) {
         this.floorRef = floorRef;
+    }
+
+    public boolean isEmpty(List<EquipmentDevice> e){
+       if( e!=null && e.size()>0) return false;
+       return true;
     }
 }

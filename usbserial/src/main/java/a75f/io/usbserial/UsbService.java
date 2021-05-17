@@ -13,7 +13,6 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -352,7 +351,15 @@ public class UsbService extends Service
 		UsbService.SERVICE_CONNECTED = true;
 		setFilter();
 		usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-		findSerialPortDevice();
+		
+		try {
+			findSerialPortDevice();
+		} catch (SecurityException e) {
+			//Android throws SecurityException if the application process is not granted android.permission.MANAGE_USB
+			Log.e(TAG, "USB Security Exception", e);
+			Intent intent = new Intent(UsbServiceActions.ACTION_USB_PRIV_APP_PERMISSION_DENIED);
+			UsbService.this.getApplicationContext().sendBroadcast(intent);
+		}
 
 		running.start();
 	}

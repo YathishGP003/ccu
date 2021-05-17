@@ -3,7 +3,6 @@ package a75f.io.api.haystack.sync;
 import android.content.SharedPreferences;
 
 import a75f.io.api.haystack.BuildConfig;
-import a75f.io.api.haystack.Site;
 import a75f.io.constants.HttpConstants;
 import a75f.io.constants.SiteFieldConstants;
 import org.apache.commons.lang3.StringUtils;
@@ -11,14 +10,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
-import org.projecthaystack.HGrid;
-import org.projecthaystack.HGridBuilder;
-import org.projecthaystack.HRow;
-import org.projecthaystack.io.HZincReader;
-import org.projecthaystack.io.HZincWriter;
-
-import java.util.ArrayList;
-import java.util.Iterator;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
@@ -40,7 +31,7 @@ public class SiteSyncAdapter extends EntitySyncAdapter {
 
         boolean synced = false;
 
-        String siteGuid = CCUHsApi.getInstance().getGlobalSiteId();
+        String siteGuid = CCUHsApi.getInstance().getRemoteSiteIdWithRefSign();
 
         HDict sDict =  CCUHsApi.getInstance().readHDict("site");
         if (StringUtils.isBlank(siteGuid)) {
@@ -94,7 +85,7 @@ public class SiteSyncAdapter extends EntitySyncAdapter {
 
                     if (StringUtils.isNotBlank(siteGuid)) {
                         CcuLog.d(LOG_PREFIX, "Got site guid: " + siteGuid);
-                        CCUHsApi.getInstance().putUIDMap(siteLuid, siteGuid);
+                        CCUHsApi.getInstance().setSynced(siteLuid, siteGuid);
                         synced = true;
                     }
 
@@ -145,6 +136,7 @@ public class SiteSyncAdapter extends EntitySyncAdapter {
         JSONObject siteCreationRequestJson = new JSONObject();
 
         try {
+            siteCreationRequestJson.put(SiteFieldConstants.ID, siteDict.get(SiteFieldConstants.ID));
             siteCreationRequestJson.put(SiteFieldConstants.AREA, siteDict.get(SiteFieldConstants.AREA));
             siteCreationRequestJson.put(SiteFieldConstants.DESCRIPTION, siteDict.dis());
             siteCreationRequestJson.put(SiteFieldConstants.FACILITY_MANAGER_EMAIL, siteDict.get(SiteFieldConstants.FACILITY_MANAGER_EMAIL));

@@ -3,7 +3,6 @@ package a75f.io.api.haystack.sync;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
-import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
 import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.io.HGridFormat;
@@ -13,7 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.UUID;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -173,11 +171,9 @@ public class EntityParser
             if (s.getMarkers().contains("building"))
             {
                 String guid = s.getId();
-                s.setmSiteId(CCUHsApi.getInstance().getSiteId().toString());
-                HRef localId = HRef.make(UUID.randomUUID().toString());
-                s.setId(localId.toVal());
-                CCUHsApi.getInstance().addSchedule(localId.toVal(), s.getScheduleHDict());
-                CCUHsApi.getInstance().putUIDMap(localId.toString(), "@" + guid);
+                s.setmSiteId(CCUHsApi.getInstance().getSiteIdRef().toString());
+                CCUHsApi.getInstance().addSchedule(guid, s.getScheduleHDict());
+                CCUHsApi.getInstance().setSynced("@" + guid, "@" + guid);
             }
         }
     }
@@ -188,21 +184,21 @@ public class EntityParser
         for (Equip q : getEquips()) {
             if (q.getMarkers().contains("tuner"))
             {
-                q.setSiteRef(hsApi.getSiteId().toString());
+                q.setSiteRef(hsApi.getSiteIdRef().toString());
                 q.setFloorRef("@SYSTEM");
                 q.setRoomRef("@SYSTEM");
-                String equipLuid = hsApi.addEquip(q);
-                hsApi.putUIDMap(equipLuid, q.getId());
+                String equipLuid = hsApi.addRemoteEquip(q, q.getId().replace("@",""));
+                hsApi.setSynced(equipLuid, q.getId());
                 //Points
                 for (Point p : getPoints())
                 {
                     if (p.getEquipRef().equals(q.getId()))
                     {
-                        p.setSiteRef(hsApi.getSiteId().toString());
+                        p.setSiteRef(hsApi.getSiteIdRef().toString());
                         p.setFloorRef("@SYSTEM");
                         p.setRoomRef("@SYSTEM");
                         p.setEquipRef(equipLuid);
-                        hsApi.putUIDMap(hsApi.addPoint(p), p.getId());
+                        hsApi.setSynced(hsApi.addRemotePoint(p, p.getId().replace("@", "")), p.getId());
                     }
                 }
             }
@@ -215,8 +211,8 @@ public class EntityParser
         if (getSite() != null)
         {
             Site site = getSite();
-            String siteLuid = hsApi.addSite(site);
-            hsApi.putUIDMap(siteLuid, site.getId());
+            String siteLuid = hsApi.addRemoteSite(site, site.getId().replace("@", ""));
+            hsApi.setSynced(siteLuid, site.getId());
         }
     }
     

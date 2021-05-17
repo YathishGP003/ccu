@@ -16,18 +16,28 @@ import io.objectbox.converter.PropertyConverter;
 public class Alert
 {
     @Id
-    public long id;     // like an index (from object box?)
-    public String mTitle; //Short message
-    public String mMessage; //Details
-    public String mNotificationMsg; //Tooltip info message
+    public long id;     // a unique id from object box
+    public String mTitle;           // alertDef DTO
+    public String mMessage;           // alertDef DTO
+    public String mNotificationMsg;          // alertDef DTO
     
     @Convert(converter = SeverityConverter.class, dbType = Integer.class)
-    public AlertSeverity mSeverity;
-    public boolean       mEnabled;
-    
+    public AlertSeverity mSeverity;          // alertDef DTO
+    public boolean       mEnabled;          // alertDef DTO
+    public String mAlertType;           // alertDef DTO
+
     public long startTime;
     public long endTime;
     public boolean  isFixed;
+
+    // new for service upgrade, 04-15-21
+    public String alertDefId;
+    public String siteIdNoAt;
+    public String ccuIdNoAt;
+    public String siteName;
+    public String ccuName;
+    public String equipId;
+    public String equipName;
     
     //Backend guid of the alert
     public String _id;
@@ -38,8 +48,7 @@ public class Alert
 
     // true if the alert has been synced (created or updated) with server
     public boolean syncStatus;
-    public String mAlertType;
-    
+
     public String getmAlertType()
     {
         return mAlertType;

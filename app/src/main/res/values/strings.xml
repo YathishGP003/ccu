@@ -620,7 +620,7 @@
     <string name="label_systemdevice">SYSTEM DEVICES</string>
     <string name="label_oao">OAO</string>
     <string name="label_modbus_btu_meter">MODBUS BTU METER</string>
-    <string name="label_modbus_energy_meter">MODBUS ENERGY METER</string>
+    <!--<string name="label_modbus_energy_meter">MODBUS ENERGY METER</string>-->
     <string name="title_oao">OUTSIDE AIR OPTIMIZER (OAO)</string>
     <string name="label_oadamper_at_min">Outside Damper at Min Drive (V)</string>
     <string name="label_oadamper_at_max">Outside Damper at Max Drive (V)</string>
@@ -800,7 +800,7 @@
     <!--Modbus Option-->
     <string name="title_mb">MB</string>
     <string name="title_modbus">MODBUS</string>
-    <string name="title_modbus_energy_proportional_distribution">Energy Proportional Distribution</string>
+    <!--<string name="title_modbus_energy_proportional_distribution">Energy Proportional Distribution</string>-->
     <string name="title_equipment_type">Equipment Type</string>
     <string name="title_start_address">Slave Id</string>
     <string name="title_param">PARAMETER</string>
@@ -869,7 +869,34 @@
         <item>  1 </item>
         <item>  2 </item>
     </string-array>
+    <!--<string-array name="energy_distribution_values">
+        <item> 0% </item>
+        <item> 10% </item>
+        <item> 20% </item>
+        <item> 30% </item>
+        <item> 40% </item>
+        <item> 50% </item>
+        <item> 60% </item>
+        <item> 70% </item>
+        <item> 80% </item>
+        <item> 90% </item>
+        <item> 100% </item>
+    </string-array>-->
+    <string name="energy_distribution_validation_error">Energy Proportional Distribution combining all floors should be equal to 100%</string>
+    <string name="save_mb">Saving Modbus Configuration</string>
+    <string name="save_em_mb">Saving Modbus Energy Meter Configuration</string>
+    <string name="save_btu_mb">Saving Modbus BTU Meter Configuration</string>
 
+    <string name="usb_permission_priv_app_msg">USB Permission not granted, Renatus App may need to be reinstalled with System Privileges</string>
+    <!-- Modbus Module type screen-->
+    <string name="label_modbusselectdevicetype">MODBUS | SELECT DEVICE TYPE</string>
+    <string name="title_modbusequipment">Modbus Equipment</string>
+    <string name="description_modbusequipment">Hook up a Modbus equipment to monitor electricity consumption</string>
+    <string name="title_modbusenergymeter">Modbus Energy Meter</string>
+    <string name="description_modbusenergymeter">Hook up a Modbus energy meter to monitor electricity consumption</string>
+
+    <string name="label_modbus_energy_meter">MODBUS ENERGY METER</string>
+    <string name="title_modbus_energy_proportional_distribution">Energy Proportional Distribution</string>
     <string-array name="energy_distribution_values">
         <item> 0% </item>
         <item> 10% </item>
@@ -883,6 +910,4 @@
         <item> 90% </item>
         <item> 100% </item>
     </string-array>
-
-    <string name="energy_distribution_validation_error">Energy Proportional Distribution combining all floors should be equal to 100%</string>
 </resources>

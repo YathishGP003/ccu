@@ -42,8 +42,8 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.bo.util.ByteArrayUtils;
 import a75f.io.usbserial.UsbService;
 
-import static a75f.io.device.alerts.AlertGenerateHandler.FIRMWARE_OTA_UPDATE_ENDED;
-import static a75f.io.device.alerts.AlertGenerateHandler.FIRMWARE_OTA_UPDATE_STARTED;
+import static a75f.io.alerts.AlertsConstantsKt.FIRMWARE_OTA_UPDATE_ENDED;
+import static a75f.io.alerts.AlertsConstantsKt.FIRMWARE_OTA_UPDATE_STARTED;
 
 public class OTAUpdateService extends IntentService {
 
@@ -326,7 +326,7 @@ public class OTAUpdateService extends IntentService {
 
             case "zone":
                 //update all nodes in the same zone as the specified node
-                for(Device device : HSUtil.getDevices(CCUHsApi.getInstance().getLUID("@"+id))) {
+                for(Device device : HSUtil.getDevices("@"+id)) {
                     if(device.getMarkers().contains( deviceType.getHsMarkerName() )) {
                         Log.d(TAG, "[VALIDATION] Adding device " + device.getAddr() + " to update");
                         mLwMeshAddresses.add(Integer.parseInt(device.getAddr()));
@@ -336,7 +336,7 @@ public class OTAUpdateService extends IntentService {
 
             case "equip":
                 //update just the one node
-                    Equip equip = HSUtil.getEquipInfo(CCUHsApi.getInstance().getLUID("@"+id));
+                    Equip equip = HSUtil.getEquipInfo("@"+id);
                     if(equip.getMarkers().contains( deviceType.getHsMarkerName() )) {
                         Log.d(TAG, "[VALIDATION] Adding device " + equip.getGroup() + " to update");
                         mLwMeshAddresses.add(Integer.parseInt(equip.getGroup()));

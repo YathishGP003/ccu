@@ -131,7 +131,7 @@ public class CCUStateParser
     
         ArrayList<HashMap> writablePoints = CCUHsApi.getInstance().readAll("point and writable");
         for (HashMap m : writablePoints) {
-            HDict pid = new HDictBuilder().add("id",HRef.copy(CCUHsApi.getInstance().getGUID(m.get("id").toString()))).toDict();
+            HDict pid = new HDictBuilder().add("id",HRef.copy(m.get("id").toString())).toDict();
             System.out.println("Request: "+HZincWriter.gridToString(HGridBuilder.dictToGrid(pid)));
             HGrid wa = hClient.call("pointWrite",HGridBuilder.dictToGrid(pid));
             wa.dump();

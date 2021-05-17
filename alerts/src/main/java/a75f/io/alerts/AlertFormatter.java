@@ -1,5 +1,7 @@
 package a75f.io.alerts;
 
+import org.projecthaystack.ParseException;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -143,7 +145,7 @@ public class AlertFormatter
                         }
                     }
                 }
-                return point != null ? String.valueOf(hs.readHisValByQuery(c.value)) : c.val;
+                return point != null && !c.isValueNumeric() ? String.valueOf(hs.readHisValByQuery(c.value)) : c.val;
         }
         return "";
     }

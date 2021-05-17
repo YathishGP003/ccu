@@ -50,10 +50,10 @@ import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 
-import static a75f.io.device.alerts.AlertGenerateHandler.CM_DEAD;
-import static a75f.io.device.alerts.AlertGenerateHandler.DEVICE_DEAD;
-import static a75f.io.device.alerts.AlertGenerateHandler.DEVICE_LOW_SIGNAL;
-import static a75f.io.device.alerts.AlertGenerateHandler.DEVICE_REBOOT;
+import static a75f.io.alerts.AlertsConstantsKt.CM_DEAD;
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_DEAD;
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_LOW_SIGNAL;
+import static a75f.io.alerts.AlertsConstantsKt.DEVICE_REBOOT;
 import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
 
@@ -846,6 +846,12 @@ public class Pulse
 						if (desiredTemp > 0 && (curValue != desiredTemp)) {
 							hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
 							updateDesiredTemp(nodeAddr, desiredTemp);
+							CcuLog.d(L.TAG_CCU_DEVICE,
+							         "updateSetTempFromSmartStat : desiredTemp updated" +curValue+"->"+ desiredTemp);
+						} else {
+							sendSetTemperatureAck((short)nodeAddr);
+							CcuLog.d(L.TAG_CCU_DEVICE,
+							         "updateSetTempFromSmartStat : desiredTemp not changed" +curValue+"->"+ desiredTemp);
 						}
 					break;
 				}
@@ -921,8 +927,14 @@ public class Pulse
 						if (desiredTemp > 0 && (curValue != desiredTemp)) {
 							hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
 							updateSmartStatDesiredTemp(nodeAddr, desiredTemp, true);
+							CcuLog.d(L.TAG_CCU_DEVICE,
+							         "updateSetTempFromSmartStat : desiredTemp updated" +curValue+"->"+ desiredTemp);
+						} else {
+							sendSetTemperatureAck((short)nodeAddr);
+							CcuLog.d(L.TAG_CCU_DEVICE,
+							         "updateSetTempFromSmartStat : desiredTemp not changed" + desiredTemp+"->"+curValue);
 						}
-						CcuLog.d(L.TAG_CCU_DEVICE, "updateSetTempFromSmartStat : desiredTemp " + desiredTemp+","+curValue);
+						
 						break;
 				}
 			}

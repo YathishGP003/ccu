@@ -1,2 +1,3 @@
- - Merged PR 709: Reheat tweak build
- - OAO tuner upgrade fix
+ - Merged PR 894: Fix crasher on Alert Defs screen
+ - Merged PR 890: Fix for crash with energy meter equip
+ - Fix for crash with energy meter equip

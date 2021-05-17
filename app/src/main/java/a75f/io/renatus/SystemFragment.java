@@ -30,6 +30,7 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import java.lang.reflect.Field;
+import a75f.io.api.haystack.modbus.Parameter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +38,6 @@ import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
-import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -72,8 +72,13 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	ToggleButton tbSmartPostPurge;
 	ToggleButton tbEnhancedVentilation;
 	LinearLayout purgeLayout;
+
+	TextView energyMeterModelDetails;
+	RecyclerView energyMeterParams;
+
 	RecyclerView btuMeterParams;
 	TextView btuMeterModelDetails;
+
 
 	
 	int spinnerInit = 0;
@@ -181,6 +186,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		systemModePicker = view.findViewById(R.id.systemModePicker);
 		coolingAvailable = L.ccu().systemProfile.isCoolingAvailable();
 		heatingAvailable = L.ccu().systemProfile.isHeatingAvailable();
+
 		
 		modesAvailable.add(SystemMode.OFF.displayName);
 		if (coolingAvailable && heatingAvailable) {
@@ -287,12 +293,17 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		tbCompHumidity.setEnabled(false);
 		tbDemandResponse.setEnabled(false);
 
+		energyMeterParams = view.findViewById(R.id.energyMeterParams);
+		energyMeterModelDetails = view.findViewById(R.id.energyMeterModelDetails);
+		configEnergyMeterDetails();
+
 		/**
 		 * init Modbus BTU meter  views
 		 */
 		btuMeterParams = view.findViewById(R.id.btuMeterParams);
 		btuMeterModelDetails = view.findViewById(R.id.btuMeterModelDetails);
 		configBTUMeterDetails();
+
 
 		if (L.ccu().systemProfile instanceof DefaultSystem) {
 			systemModePicker.setEnabled(false);
@@ -595,8 +606,46 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 		}
 	};
+	private void configEnergyMeterDetails(){
+		List<EquipmentDevice> modbusDevices = EquipsManager.getInstance().getAllMbEquips("SYSTEM");
+		if(modbusDevices!=null&&modbusDevices.size()>0){
+			EquipmentDevice  emDevice=null;
+			for (int i = 0; i <modbusDevices.size() ; i++) {
+				if(modbusDevices.get(i).getEquipType().equals("EMR")){
+					emDevice = modbusDevices.get(i);
+				}
+			}
 
+			if(emDevice==null)
+				return;
+			energyMeterParams.setVisibility(View.VISIBLE);
+			energyMeterModelDetails.setVisibility(View.VISIBLE);
 
+			/**
+			 * Assuming there is always only One Energy meter
+			 */
+
+			List<Parameter> parameterList = new ArrayList<>();
+			if (Objects.nonNull(emDevice.getRegisters())) {
+				for (Register registerTemp : emDevice.getRegisters()) {
+					if (registerTemp.getParameters() != null) {
+						for (Parameter p : registerTemp.getParameters()) {
+							if (p.isDisplayInUI()) {
+								p.setParameterDefinitionType(registerTemp.getParameterDefinitionType());
+								parameterList.add(p);
+							}
+						}
+					}
+				}
+			}
+			energyMeterModelDetails.setText(emDevice+ "("+emDevice.getEquipType() + emDevice.getSlaveId() + ")");
+			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+			energyMeterParams.setLayoutManager(gridLayoutManager);
+			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getActivity(), emDevice.getEquipRef(), parameterList);
+			energyMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
+		}
+
+	}
 
 	private void configBTUMeterDetails(){
 		List<EquipmentDevice> modbusDevices = EquipsManager.getInstance().getAllMbEquips("SYSTEM");
@@ -630,12 +679,12 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					}
 				}
 			}
-				btuMeterModelDetails.setText(btuDevice+ "("+btuDevice.getEquipType() + btuDevice.getSlaveId() + ")");
-				GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
-				btuMeterParams.setLayoutManager(gridLayoutManager);
-				ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getActivity(), btuDevice.getEquipRef(), parameterList);
-				btuMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
-			}
-
+			btuMeterModelDetails.setText(btuDevice+ "("+btuDevice.getEquipType() + btuDevice.getSlaveId() + ")");
+			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+			btuMeterParams.setLayoutManager(gridLayoutManager);
+			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getActivity(), btuDevice.getEquipRef(), parameterList);
+			btuMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
 		}
+
+	}
 }

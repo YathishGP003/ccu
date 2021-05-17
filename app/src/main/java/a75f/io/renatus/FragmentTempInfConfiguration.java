@@ -176,6 +176,8 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
                     @Override
                     protected void onPostExecute( final Void result ) {
                         ProgressDialogUtils.hideProgressDialog();
+                        //FragmentTempInfConfiguration.this.dismissProgressDialog();
+                        setRetainInstance(true);
                         FragmentTempInfConfiguration.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                     }

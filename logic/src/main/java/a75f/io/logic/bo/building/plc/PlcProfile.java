@@ -122,7 +122,7 @@ public class PlcProfile extends ZoneProfile
         double relay1Config = hayStack.readDefaultVal("point and relay1 and config and" +
                                                                     " enabled and equipRef == \""+equipID+"\"");
         StringBuilder statusBuilder = new StringBuilder();
-        statusBuilder.append("Output Loop Signal is " + outputSignal + "%");
+        statusBuilder.append("Loop output is " + (outputSignal > 0 ? "active" : "inactive"));
         if (relay1Config > Math.abs(0.01)) {
             double relay1Status = hayStack.readHisValByQuery("point and relay1 and cmd and equipRef" +
                                                                            " == \""+equipID+"\"");

@@ -4,6 +4,7 @@ import android.content.Context;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -118,7 +119,7 @@ public class AlertManager
     }
 
     public boolean hasService() {
-        return alertsService != null;
+        return alertsService != null && repo != null;
     }
 
     public void processAlerts() {
@@ -172,6 +173,8 @@ public class AlertManager
     }
 
     public List<AlertDefOccurrence> getAlertDefOccurrences() {
+        if (! repoCheck()) return new ArrayList<>();
+
         return repo.getCurrentOccurrences();
     }
 

@@ -1,16 +1,3 @@
- - Merged PR 834: Fix NPE in Globals#getSmartNodeBand()
- - Merged PR 824: Fix crash while adding floor on second ccu with same name as floor in existing site
- - Merged PR 842: System testing issues fix.
- - Fix for analog reset and forced-occupied clear
- - Merged PR 727: New Jsons added for modbus equipment
- - Modbus configuration for new Jsons
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/sdev/5861_Modbus_Configuration_UI_for_PAC_UPS_BTU_Meters_using_JSON_files
- - Merged PR 809: Fix alert sync
- - Modbus new json configuration
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/sdev/5861_Modbus_Configuration_UI_for_PAC_UPS_BTU_Meters_using_JSON_files
- - Modbus Configuration with new Jsons
- - Modbus Configuration with new jsons
- - Modbus Configuration for new jsons
- - New Jsons for Equipment
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/sdev/5861_Modbus_Configuration_UI_for_PAC_UPS_BTU_Meters_using_JSON_files
- - New Jsons added for modbus equipment
+ - Merged PR 894: Fix crasher on Alert Defs screen
+ - Merged PR 890: Fix for crash with energy meter equip
+ - Fix for crash with energy meter equip

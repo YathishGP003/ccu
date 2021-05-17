@@ -18,6 +18,7 @@ import java.util.Iterator;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
@@ -61,7 +62,12 @@ public class UpdatePointHandler
             return;
         }
     
-        if (HSUtil.isStandaloneConfig(pointUid, CCUHsApi.getInstance())) {
+        /* Only the config changes require profile specific handling.
+         * DesiredTemp or Schedule type updates are handled using generic implementation below.
+         */
+        if (HSUtil.isStandaloneConfig(pointUid, CCUHsApi.getInstance())
+                        && !localPoint.getMarkers().contains(Tags.DESIRED)
+                        && !localPoint.getMarkers().contains(Tags.SCHEDULE_TYPE)) {
             StandaloneConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
             updateUI(localPoint);
             return;

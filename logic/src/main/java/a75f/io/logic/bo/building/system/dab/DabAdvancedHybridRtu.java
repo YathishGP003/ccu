@@ -222,9 +222,8 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         }
         if (signal != getCmdSignal("composite")) {
             setCmdSignal("composite", signal);
-            ControlMote.setAnalogOut("analog4", signal);
         }
-        
+        ControlMote.setAnalogOut("analog4", signal);
     }
     
     @Override

@@ -16,6 +16,7 @@ import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -282,7 +283,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         double signal = 0;
     
         if (dabSystem.getSystemState() == COOLING) {
-            systemDCWBValveLoopOutput = dcwbAlgoHandler.getChilledWaterValveLoopOutput();
+            systemDCWBValveLoopOutput = CCUUtils.roundToTwoDecimal(dcwbAlgoHandler.getChilledWaterValveLoopOutput());
         } else {
             systemDCWBValveLoopOutput = 0;
             dcwbAlgoHandler.resetChilledWaterValveLoop();

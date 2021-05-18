@@ -178,6 +178,7 @@
 				android:textSize="30dp" />
 
 			<RelativeLayout
+				android:visibility="gone"
 				android:id="@+id/rl_oao"
 				android:layout_width="wrap_content"
 				android:layout_height="85dp"
@@ -204,6 +205,7 @@
 					android:layout_alignParentBottom="true" />
 			</RelativeLayout>
 			<RelativeLayout
+				android:visibility="gone"
 				android:id="@+id/rl_modbus_energy_meter"
 				android:layout_width="wrap_content"
 				android:layout_height="85dp"
@@ -229,6 +231,7 @@
 					android:layout_alignParentBottom="true" />
 			</RelativeLayout>
 			<RelativeLayout
+				android:visibility="gone"
 				android:id="@+id/rl_modbus_btu_meter"
 				android:layout_width="wrap_content"
 				android:layout_height="85dp"

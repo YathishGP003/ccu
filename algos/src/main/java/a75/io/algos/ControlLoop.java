@@ -83,5 +83,9 @@ public class ControlLoop
         piController.dump();
     }
     
+    @Override
+    public String toString() {
+        return piController.toString();
+    }
 
 }

@@ -1187,7 +1187,7 @@ public class FloorPlanFragment extends Fragment {
 
     @OnClick(R.id.pairModuleBtn)
     public void startPairing() {
-        pairModuleBtn.setClickable(false);
+        addModulelt.setVisibility(View.GONE);
         desableForMiliSeconds();
         if (mFloorListAdapter.getSelectedPostion() == -1) {
             short meshAddress = L.generateSmartNodeAddress();
@@ -1471,18 +1471,19 @@ public class FloorPlanFragment extends Fragment {
     }
 
     /**
-     * Desabling the Pair button for 2 seconds then enabling to avoid double click on pair module
+     * Disabling the Pair button for 2 seconds then enabling to avoid double click on pair module
      */
     public void desableForMiliSeconds(){
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try{
-                    Thread.sleep(2000);
+                    int delay = Integer.parseInt(getString(R.string.buttonDesableDelay));
+                    Thread.sleep(delay);
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            pairModuleBtn.setClickable(true);
+                            addModulelt.setVisibility(View.VISIBLE);
                         }
                     });
                 }catch (Exception e){

@@ -76,13 +76,16 @@ class DcwbAlgoHandler {
         if (btuDao.getCWMaxFlowRate(hayStack) < chilledWaterMaxFlowRate) {
             chilledWaterValveLoopOutput = adaptiveDelta ? AdaptiveDeltaTControlAlgo.getChilledWaterAdaptiveDeltaTValveLoop(getAdaptiveDeltaDto(btuDao))
                                             : MaximizedDeltaTControl.getChilledWaterMaximizedDeltaTValveLoop(getMaximizedDeltaTDto(btuDao));
+    
+            //PI Loop may run beyond the normal limits based on the tuner values. Restrict it to the 0-100 range here.
+            chilledWaterValveLoopOutput = Math.max(chilledWaterValveLoopOutput, MIN_PI_LOOP_OUTPUT);
+            chilledWaterValveLoopOutput = Math.min(chilledWaterValveLoopOutput, MAX_PI_LOOP_OUTPUT);
+    
+            //PI loop operates with the intention of maintaining delta T. So we should invert the loop Output.
+            chilledWaterValveLoopOutput = 100 - chilledWaterValveLoopOutput;
         } else {
             chilledWaterValveLoopOutput = hayStack.readHisValByQuery("dcwb and valve and loop and output");
         }
-        
-        //PI Loop may run beyond the normal limits based on the tuner values. Restrict it to the 0-100 range here.
-        chilledWaterValveLoopOutput = Math.max(chilledWaterValveLoopOutput, MIN_PI_LOOP_OUTPUT);
-        chilledWaterValveLoopOutput = Math.min(chilledWaterValveLoopOutput, MAX_PI_LOOP_OUTPUT);
     }
     
     public double getChilledWaterValveLoopOutput() {
@@ -100,8 +103,10 @@ class DcwbAlgoHandler {
     
     private AdaptiveDeltaTInput getAdaptiveDeltaDto(DcwbBtuMeterDao btuDao) {
         double inletWaterTemp = UnitUtils.celsiusToFahrenheit(btuDao.getInletWaterTemperature(hayStack));
+        double outletWaterTemp = UnitUtils.celsiusToFahrenheit(btuDao.getOutletWaterTemperature(hayStack));
         double averageCoolingDesiredTemp = SystemTemperatureUtil.getAverageCoolingDesiredTemp();
         return new AdaptiveDeltaTInput(inletWaterTemp,
+                                 outletWaterTemp,
                                  chilledWaterTargetDelta,
                                  adaptiveComfortThresholdMargin,
                                      averageCoolingDesiredTemp,

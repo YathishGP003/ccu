@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import com.google.android.material.textfield.TextInputLayout;
+
+import a75f.io.renatus.util.RxjavaUtil;
 import androidx.fragment.app.Fragment;
 import android.text.Editable;
 import android.text.Html;
@@ -408,8 +410,7 @@ public class CreateNewSite extends Fragment {
                 btnEditSite.setEnabled(true);
                 btnUnregisterSite.setEnabled(false);
                 CCUHsApi.getInstance().deleteEntity(CCUHsApi.getInstance().getCcuRef().toString());
-
-                ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU...");
+                
                 String facilityManagerEmail = mSiteEmailId.getText().toString();
                 String installerEmail = mSiteInstallerEmailId.getText().toString();
                 String ccuName = mSiteCCU.getText().toString();
@@ -419,31 +420,23 @@ public class CreateNewSite extends Fragment {
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                 L.saveCCUState();
                 CCUHsApi.getInstance().syncEntityTree();
-                
-                Handler ccuRegistrationHandler = new Handler();
-                Runnable ccuRegistrationRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
-                        String ccuId = ccu.get("id").toString();
-
-                        if (!CCUHsApi.getInstance().entitySynced(ccuId)) {
-                            prefs.setString("installerEmail", installerEmail);
-                            CCUHsApi.getInstance().registerCcu(installerEmail);
-                            ProgressDialogUtils.hideProgressDialog();
-                            ccuRegistrationHandler.postDelayed(this, 30000);
+    
+                RxjavaUtil.executeBackgroundTask(
+                    () -> ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU..."),
+                    () -> CCUHsApi.getInstance().registerCcu(installerEmail),
+                    ()-> {
+                        if (!CCUHsApi.getInstance().isCCURegistered()) {
+                            Toast.makeText(getActivity(), "CCU Registration Failed ", Toast.LENGTH_LONG).show();
                         } else {
                             btnUnregisterSite.setText("Unregister");
                             btnUnregisterSite.setEnabled(true);
                             btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
                             setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
-                            Toast.makeText(getActivity(), "CCU Registered Successfully "+ ccuId, Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), "CCU Registered Successfully ", Toast.LENGTH_LONG).show();
                             CCUHsApi.getInstance().resetSync();
-                            ccuRegistrationHandler.removeCallbacks(this);
                         }
-                    }
-                };
-                ccuRegistrationHandler.postDelayed(ccuRegistrationRunnable, 1000);
+                        ProgressDialogUtils.hideProgressDialog();
+                    });
             }
         });
 

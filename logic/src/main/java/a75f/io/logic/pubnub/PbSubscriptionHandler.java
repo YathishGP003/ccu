@@ -72,6 +72,8 @@ public class PbSubscriptionHandler {
         pbInstance.subscribe()
                   .channels(Arrays.asList(siteId.replace("@", ""), BuildConfig.PUBNUB_GLOBAL_CHANNEL))
                   .execute();
+        
+        PbWatchdog.getInstance().startMonitoring(appContext, this);
     }
     
     private PNConfiguration getConfiguration(String siteId) {

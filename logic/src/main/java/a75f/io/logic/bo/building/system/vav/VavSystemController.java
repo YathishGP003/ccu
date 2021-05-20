@@ -904,6 +904,8 @@ public class VavSystemController extends SystemController
             double limitedNormalizedDamperPos = Math.min(normalizedDamperPos, maxLimit);
             limitedNormalizedDamperPos = Math.max(limitedNormalizedDamperPos, minLimit);
             
+            limitedNormalizedDamperPos = CCUUtils.roundToTwoDecimal(limitedNormalizedDamperPos);
+            
             double curNormalisedDamper = hayStack.readHisValById(damperPos.get("id").toString());
             if (curNormalisedDamper != limitedNormalizedDamperPos) {
                 hayStack.writeHisValById(damperPos.get("id").toString() , limitedNormalizedDamperPos);

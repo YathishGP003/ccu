@@ -2750,9 +2750,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         try {
             if((boolean)plcPoints.get("Dynamic Setpoint") == true)
             {
-                    labelTarget.setText("Target "+plcPoints.get("Dynamic Unit Type").toString()+" : ");
+                    labelTarget.setText("Dynamic Target "+plcPoints.get("Dynamic Unit Type").toString()+" : ");
                     textViewTargetAir.setText(plcPoints.get("Target Value").toString()+" "+plcPoints.get("Dynamic Unit").toString());
-                    labelOffsetAir.setText("Offset "+plcPoints.get("Dynamic Unit Type").toString()+" : ");
+                    labelOffsetAir.setText("Offset Dynamic Target "+plcPoints.get("Dynamic Unit Type").toString()+" : ");
                     textViewOffsetAir.setText(plcPoints.get("Offset Value").toString()+" "+plcPoints.get("Dynamic Unit").toString());
                     viewPointRow2.setPadding(0,0,0,40);
                     linearLayoutZonePoints.addView(viewTitle);

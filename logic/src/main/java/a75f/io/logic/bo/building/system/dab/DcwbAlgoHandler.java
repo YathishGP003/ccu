@@ -79,7 +79,9 @@ class DcwbAlgoHandler {
             chilledWaterValveLoopOutput = Math.min(chilledWaterValveLoopOutput, MAX_PI_LOOP_OUTPUT);
     
             //PI loop operates with the intention of maintaining delta T. So we should invert the loop Output.
-            chilledWaterValveLoopOutput = 100 - chilledWaterValveLoopOutput;
+            if (adaptiveDelta) {
+                chilledWaterValveLoopOutput = 100 - chilledWaterValveLoopOutput;
+            }
         } else {
             chilledWaterValveLoopOutput = hayStack.readHisValByQuery("dcwb and valve and loop and output");
         }

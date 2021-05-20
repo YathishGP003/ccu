@@ -32,6 +32,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
@@ -125,7 +126,6 @@ public class FloorPlanFragment extends Fragment {
 
     @BindView(R.id.rl_modbus_btu_meter)
     RelativeLayout rl_modbus_btu_meter;
-
 
     @BindView(R.id.textSystemDevice)
     TextView textViewSystemDevice;
@@ -643,6 +643,11 @@ public class FloorPlanFragment extends Fragment {
 
     @OnClick(R.id.rl_systemdevice)
     public void systemDeviceOnClick() {
+
+        rl_oao.setVisibility(View.VISIBLE);
+        rl_modbus_energy_meter.setVisibility(View.VISIBLE);
+        rl_modbus_btu_meter.setVisibility(View.VISIBLE);
+
         setSystemSelection(1);
         if (floorList.size() > 0) {
             if (roomList.size() > 0) {
@@ -890,8 +895,10 @@ public class FloorPlanFragment extends Fragment {
                         adb.setMessage("Floor name already exists in this site,would you like to move all the zones associated with " + floorToRename.getDisplayName() + " to " + hsFloor.getDisplayName() + "?");
                         adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
                             if (!CCUHsApi.getInstance().entitySynced(floor.getId())) {
-                                hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor, floor.getId()));
-                                CCUHsApi.getInstance().setSynced(hsFloor.getId(), floor.getId());
+                                hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor,
+                                        StringUtils.stripStart(floor.getId(), "@")));
+                                CCUHsApi.getInstance().setSynced(hsFloor.getId(),
+                                        StringUtils.prependIfMissing(floor.getId(), "@"));
                             }
 
                             //move zones and modules under new floor
@@ -961,8 +968,10 @@ public class FloorPlanFragment extends Fragment {
                         adb.setMessage("Floor name already exists in this site,would you like to continue?");
                         adb.setPositiveButton(getResources().getString(R.string.ok), (dialog, which) -> {
                             if (! CCUHsApi.getInstance().entitySynced(floor.getId())) {
-                                hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor, floor.getId()));
-                                CCUHsApi.getInstance().setSynced(hsFloor.getId(), floor.getId());
+                                hsFloor.setId(CCUHsApi.getInstance().addRemoteFloor(hsFloor,
+                                        StringUtils.stripStart(floor.getId(), "@")));
+                                CCUHsApi.getInstance().setSynced(hsFloor.getId(),
+                                        StringUtils.prependIfMissing(floor.getId(), "@"));
                             }
                             refreshScreen();
 
@@ -1193,21 +1202,24 @@ public class FloorPlanFragment extends Fragment {
                     showDialogFragment(FragmentBLEInstructionScreen.getInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.OAO, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
                 }
             }
+            /**
+             * Modbus energy meter selection
+             **/
             if (priviousSelectedDevice == 2) {
-                /**
-                 * Modbus energy meter selection
-                 */
+                //only one energymeter module is allowed.
+                boolean isPaired = false;
                 if (L.ccu().zoneProfiles.size() > 0) {
                     for (Iterator<ZoneProfile> it = L.ccu().zoneProfiles.iterator(); it.hasNext(); ) {
                         ZoneProfile p = it.next();
                         if (p.getProfileType() == ProfileType.MODBUS_EMR) {
-                            Toast.makeText(getActivity(), " Energy Meter already paired", Toast.LENGTH_LONG).show();
-                            return;
-                        } else {
-                            showDialogFragment(FragmentModbusConfiguration
-                                    .newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
+                            isPaired = true;
+                            break;
                         }
                     }
+                }
+                if (isPaired) {
+                    Toast.makeText(getActivity(), " Energy Meter already paired", Toast.LENGTH_LONG).show();
+                    return;
                 } else {
                     showDialogFragment(FragmentModbusConfiguration
                             .newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
@@ -1299,6 +1311,10 @@ public class FloorPlanFragment extends Fragment {
 
     @OnItemClick(R.id.floorList)
     public void setFloorListView(AdapterView<?> parent, View view, int position, long id) {
+        rl_oao.setVisibility(View.GONE);
+        rl_modbus_energy_meter.setVisibility(View.GONE);
+        rl_modbus_btu_meter.setVisibility(View.GONE);
+
         selectFloor(position);
         setSystemUnselection();
     }
@@ -1417,6 +1433,11 @@ public class FloorPlanFragment extends Fragment {
                 case MODBUS_ATS:
                 case MODBUS_UPS150:
                 case MODBUS_BTU:
+                case MODBUS_UPS40K:
+                case MODBUS_UPSL:
+                case MODBUS_UPSV:
+                case MODBUS_UPSVL:
+                case MODBUS_VAV_BACnet:
                     showDialogFragment(FragmentModbusConfiguration
                             .newInstance(Short.parseShort(nodeAddr), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusConfiguration.ID);
                     break;

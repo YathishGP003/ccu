@@ -127,7 +127,7 @@ public class StandAloneTuners {
                                                           .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
                                                           .addMarker("cooling").addMarker("preconditioning").addMarker("rate").addMarker("sp")
                                                           .setMinVal("0").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                                                          .setUnit("\u00B0F")
+                                                          .setUnit("minute")
                                                           .setTz(tz)
                                                           .build();
         String standaloneCoolingPreconditioningRateId = hayStack.addPoint(standaloneCoolingPreconditioningRate);
@@ -141,7 +141,7 @@ public class StandAloneTuners {
                                                           .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
                                                           .addMarker("heating").addMarker("preconditioning").addMarker("rate").addMarker("sp")
                                                           .setMinVal("0").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                                                          .setUnit("\u00B0F")
+                                                          .setUnit("minute")
                                                           .setTz(tz)
                                                           .build();
         String standaloneHeatingPreconditioningRateId = hayStack.addPoint(standaloneHeatingPreconditioningRate);
@@ -350,7 +350,7 @@ public class StandAloneTuners {
                                                          .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
                                                          .addMarker("cooling").addMarker("preconditioning").addMarker("rate").addMarker("sp")
                                                          .setMinVal("0").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                                                         .setUnit("\u00B0F")
+                                                         .setUnit("minute")
                                                          .setTz(tz)
                                                          .build();
         String standaloneCoolingPreconditioningRateId = hayStack.addPoint(standaloneCoolingPreconditioningRate);
@@ -366,7 +366,7 @@ public class StandAloneTuners {
                                                          .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
                                                          .addMarker("heating").addMarker("preconditioning").addMarker("rate").addMarker("sp")
                                                          .setMinVal("0").setMaxVal("60").setIncrementVal("1").setTunerGroup(TunerConstants.GENERIC_TUNER_GROUP)
-                                                         .setUnit("\u00B0F")
+                                                         .setUnit("minute")
                                                          .setTz(tz)
                                                          .build();
         String standaloneHeatingPreconditioningRateId = hayStack.addPoint(standaloneHeatingPreconditioningRate);
@@ -382,7 +382,7 @@ public class StandAloneTuners {
                                                             .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his")
                                                             .addMarker("cooling").addMarker("airflow").addMarker("temp").addMarker("lower").addMarker("offset").addMarker("sp")
                                                             .setMinVal("-150").setMaxVal("0").setIncrementVal("1").setTunerGroup(TunerConstants.ALERT_TUNER)
-                                                            .setUnit("\u00B0F")
+                                                            .setUnit("minute")
                                                             .setTz(tz)
                                                             .build();
         String standaloneCoolingAirflowTempLowerOffsetId = hayStack.addPoint(standaloneCoolingAirflowTempLowerOffset);

@@ -63,6 +63,8 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
     private HeatPumpUnitProfile mHPUProfile;
     private HeatPumpUnitConfiguration mProfileConfig;
 
+    //static boolean isRelay5Enables;
+
 
     ToggleButton switchThermistor1;
     ToggleButton switchCoolingY1;
@@ -243,6 +245,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
                             break;
                         case RELAY_FIVE:
                             switchFanHigh.setChecked(mProfileConfig.isOpConfigured(output.getPort()));
+                            HeatPumpUnitConfiguration.enableRelay5 = mProfileConfig.isOpConfigured(output.getPort());
                             break;
                         case RELAY_SIX:
                             switchHpChangeOver.setChecked(mProfileConfig.isOpConfigured(output.getPort()));
@@ -261,25 +264,31 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
                     Log.d("FragHPU","HPU OnItemSelected ="+position+","+mProfileConfig.fanRelay5Type);
                     if(mProfileConfig.fanRelay5Type > 0) {
                         switchFanHigh.setEnabled(true);
+                        //HeatPumpUnitConfiguration.enableRelay5 = true;
                         if(position == 0 && !switchFanLowG.isChecked())switchFanHigh.setChecked(false);
                     }else{
                         if(switchFanLowG.isChecked()){
                             switchFanHigh.setEnabled(true);
+                            //HeatPumpUnitConfiguration.enableRelay5 = true;
                         }else{
                             switchFanHigh.setEnabled(false);
                             switchFanHigh.setChecked(false);
+                            //HeatPumpUnitConfiguration.enableRelay5 = false;
                         }
                     }
                 }else{
                     if(position > 0){
                         switchFanHigh.setEnabled(true);
+                        //HeatPumpUnitConfiguration.enableRelay5 = true;
                         //switchFanHigh.setChecked(true);
                     }else{
                         if(switchFanLowG.isChecked()){
                             switchFanHigh.setEnabled(true);
+                            //HeatPumpUnitConfiguration.enableRelay5 = true;
                         }else{
                             switchFanHigh.setEnabled(false);
                             switchFanHigh.setChecked(false);
+                            //HeatPumpUnitConfiguration.enableRelay5 = true;
                         }
                     }
                 }
@@ -403,7 +412,10 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
             relay5Op.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyOpen;
             hpuConfig.getOutputs().add(relay5Op);
         }
-        hpuConfig.enableRelay5 = switchFanHigh.isChecked();
+        HeatPumpUnitConfiguration.enableRelay5 = switchFanHigh.isChecked();
+        /*isRelay5Enables = switchFanHigh.isChecked();
+        hpuConfig.enableRelay5 = isRelay5Enables;*/
+        Log.e("isRelay5Enabled","insideFragmentHeatPumpConfig "+switchFanHigh.isChecked());
         if (switchHpChangeOver.isChecked()) {
             Output relay6Op = new Output();
             relay6Op.setAddress(mSmartNodeAddress);

@@ -379,6 +379,7 @@ public class SmartNode
             RawPoint p = new RawPoint.Builder().setHashMap(point).build();
             p.setEnabled(enabled);
             CCUHsApi.getInstance().updatePoint(p,p.getId());
+            CCUHsApi.getInstance().writeHisValById(p.getId(), 0.0);
         }
     }
     

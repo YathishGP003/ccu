@@ -160,7 +160,7 @@ public class DcwbProfileUtil {
                                             .setEquipRef(equip.getId())
                                             .addMarker("system").addMarker("dcwb")
                                             .addMarker("valve").addMarker("loop").addMarker("output")
-                                            .addMarker("his").addMarker("sp").setHisInterpolate("linear")
+                                            .addMarker("his").addMarker("sp").setHisInterpolate("cov")
                                             .setTz(equip.getTz())
                                             .setUnit("%")
                                             .build();
@@ -173,7 +173,7 @@ public class DcwbProfileUtil {
                                               .setEquipRef(equip.getId())
                                               .addMarker("system").addMarker("dcwb")
                                               .addMarker("chilled").addMarker("water").addMarker("exit").addMarker("temp")
-                                              .addMarker("target").addMarker("his").addMarker("sp").setHisInterpolate("linear")
+                                              .addMarker("target").addMarker("his").addMarker("sp").setHisInterpolate("cov")
                                               .setTz(equip.getTz())
                                               .setUnit("\u00B0F")
                                               .build();

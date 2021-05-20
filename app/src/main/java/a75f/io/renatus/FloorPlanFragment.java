@@ -1213,6 +1213,7 @@ public class FloorPlanFragment extends Fragment {
                         ZoneProfile p = it.next();
                         if (p.getProfileType() == ProfileType.MODBUS_EMR) {
                             isPaired = true;
+                            break;
                         }
                     }
                 }

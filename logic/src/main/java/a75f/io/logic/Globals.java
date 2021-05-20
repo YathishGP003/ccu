@@ -392,6 +392,11 @@ public class Globals {
                         case MODBUS_UPS150:
                         case MODBUS_EMR:
                         case MODBUS_BTU:
+                        case MODBUS_UPS40K:
+                        case MODBUS_UPSL:
+                        case MODBUS_UPSV:
+                        case MODBUS_UPSVL:
+                        case MODBUS_VAV_BACnet:
                         case MODBUS_EMR_ZONE:
                             ModbusProfile mbProfile = new ModbusProfile();
                             mbProfile.addMbEquip(Short.valueOf(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
@@ -430,7 +435,7 @@ public class Globals {
         /**
          * Get all the default BTU_Meter profile details
          */
-        ArrayList<HashMap> emEquips = CCUHsApi.getInstance().readAll("equip and emr");
+        ArrayList<HashMap> emEquips = CCUHsApi.getInstance().readAll("equip and emr and modbus");
 
         for (HashMap m : emEquips)
         {
@@ -443,12 +448,12 @@ public class Globals {
 
     public String getSmartNodeBand() {
         HashMap device = CCUHsApi.getInstance().read("device and addr");
-        if (device != null && device.size() > 0 && device.get("modbus") == null) {
+        if (device != null && device.size() > 0 && device.get("modbus") == null && device.get("addr") != null) {
             String nodeAdd = device.get("addr").toString();
             return nodeAdd.substring(0, 2).concat("00");
         } else {
             HashMap band = CCUHsApi.getInstance().read("point and snband");
-            if (band != null && band.size() > 0) {
+            if (band != null && band.size() > 0 && band.get("val") != null) {
                 return band.get("val").toString();
             }
         }

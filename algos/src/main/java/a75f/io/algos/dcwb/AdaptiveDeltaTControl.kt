@@ -4,6 +4,7 @@ import a75.io.algos.ControlLoop
 import android.util.Log
 
 data class AdaptiveDeltaTInput (val inletWaterTemperature : Double,
+                          val outletWaterTemperature : Double,
                           val chilledWaterTargetDeltaT : Double,
                           val adaptiveComfortThresholdMargin : Double,
                           val averageDesiredCoolingTemp : Double,
@@ -29,12 +30,13 @@ class AdaptiveDeltaTControlAlgo {
             val adaptiveComfortThreshold = data.averageDesiredCoolingTemp - data.adaptiveComfortThresholdMargin
 
             val chilledWaterTargetTemp = data.inletWaterTemperature + data.chilledWaterTargetDeltaT
+            val actualDeltaT = data.outletWaterTemperature - data.inletWaterTemperature;
             return if (chilledWaterTargetTemp < adaptiveComfortThreshold) {
                 if (linearModeLoop) {
                     linearModeLoop = false
                     data.piLoop.loopOutput
                 } else {
-                    data.piLoop.getLoopOutput(adaptiveComfortThreshold, chilledWaterTargetTemp)
+                    data.piLoop.getLoopOutput(data.chilledWaterTargetDeltaT, actualDeltaT)
                 }
             } else {
                 linearModeLoop = true

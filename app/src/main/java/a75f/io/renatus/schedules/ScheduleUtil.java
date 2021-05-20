@@ -144,7 +144,8 @@ public class ScheduleUtil {
                     end = r.getEndMillis();
                     endReached = true;
                 }
-                if (start != end) {
+                // End instance must be greater than start instance
+                if (start != end && end > start) {
                     result.add(new Interval(start, end));
                 }
                 if (endReached)

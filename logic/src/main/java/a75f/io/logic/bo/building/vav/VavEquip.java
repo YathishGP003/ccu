@@ -55,8 +55,8 @@ public class VavEquip
     //TODO - Tuners
     int    integralMaxTimeout = 30;
     int proportionalSpread = 20;
-    double proportionalGain = 0.5;
-    double integralGain = 0.5;
+    double proportionalGain = 0.3;
+    double integralGain = 0.7;
     
     double      currentTemp;
     double      humidity;

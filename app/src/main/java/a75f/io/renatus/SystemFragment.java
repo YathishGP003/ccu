@@ -29,6 +29,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.lang.reflect.Field;
 import a75f.io.api.haystack.modbus.Parameter;
 import java.util.ArrayList;
@@ -475,7 +477,13 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 				@Override
 				public void run() {
-					String status = L.ccu().systemProfile.getStatusMessage();
+					String status = CCUHsApi.getInstance().readDefaultStrVal("system and status and message");
+					//If the system status is not updated yet (within a minute of registering the device), generate a
+					//default message.
+					if (StringUtils.isEmpty(status)) {
+						status = L.ccu().systemProfile.getStatusMessage();
+					}
+					
 					if (L.ccu().systemProfile instanceof DefaultSystem) {
 						equipmentStatus.setText(status.equals("") ? "System is in gateway mode" : Html.fromHtml(status.replace("ON", "<font color='#e24725'>ON</font>")));
 						occupancyStatus.setText("No Central equipment connected.");

@@ -409,7 +409,9 @@ public class CreateNewSite extends Fragment {
             } else {
                 btnEditSite.setEnabled(true);
                 btnUnregisterSite.setEnabled(false);
-                CCUHsApi.getInstance().deleteEntity(CCUHsApi.getInstance().getCcuRef().toString());
+                //removeCCU api call would have already deleted this CCU entity from server
+                //We just need to delete it locally before creating a new CCU device.
+                CCUHsApi.getInstance().deleteEntityLocally(CCUHsApi.getInstance().getCcuRef().toString());
                 
                 String facilityManagerEmail = mSiteEmailId.getText().toString();
                 String installerEmail = mSiteInstallerEmailId.getText().toString();

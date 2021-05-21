@@ -84,11 +84,11 @@ public class SystemProfileFragment extends Fragment {
                 }
                 switch (i) {
                     case 0:
-                        if(canAddDABProfile()){
+                        if(canAddDABProfile() && canAddVAVProfile()){
                             getActivity().getSupportFragmentManager().beginTransaction()
                                     .replace(R.id.profileContainer, new DefaultSystemProfile()).commit();
                         } else {
-                            Toast.makeText(getActivity(),"Unpair all VAV Zones and try",Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(),"Unpair all VAV or DAB Zones and try",Toast.LENGTH_LONG).show();
                             spSystemProfile.setSelection(L.ccu().systemProfile != null ?
                                     systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                         }

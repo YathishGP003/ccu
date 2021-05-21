@@ -63,7 +63,11 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     
     @Override
     public boolean isCoolingAvailable() {
-        return (getConfigVal("analog1 and output and enabled") > 0);
+        if (isDcwbEnabled()) {
+            return getConfigVal("analog4 and output and enabled") > 0;
+        } else {
+            return getConfigVal("analog1 and output and enabled") > 0;
+        }
     }
     
     @Override
@@ -102,7 +106,6 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             }
     
             //Analog1 controls water valve when the DCWB enabled.
-            
             updateAnalog1DcwbOutput(dabSystem);
     
             //Could be mapped to cooling or co2 based on configuration.

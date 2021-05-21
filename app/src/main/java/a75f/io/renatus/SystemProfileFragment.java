@@ -84,8 +84,14 @@ public class SystemProfileFragment extends Fragment {
                 }
                 switch (i) {
                     case 0:
-                        getActivity().getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.profileContainer, new DefaultSystemProfile()).commit();
+                        if(canAddDABProfile()){
+                            getActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.profileContainer, new DefaultSystemProfile()).commit();
+                        } else {
+                            Toast.makeText(getActivity(),"Unpair all VAV Zones and try",Toast.LENGTH_LONG).show();
+                            spSystemProfile.setSelection(L.ccu().systemProfile != null ?
+                                    systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
+                        }
                         break;
                     case 1:
                         if (canAddVAVProfile()) {

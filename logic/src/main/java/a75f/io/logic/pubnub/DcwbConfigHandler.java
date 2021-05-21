@@ -17,7 +17,7 @@ public class DcwbConfigHandler {
         
         int val = msgObject.get("val").getAsInt();
         DabFullyModulatingRtu systemProfile = (DabFullyModulatingRtu) L.ccu().systemProfile;
-        if (configPoint.getMarkers().contains(Tags.ENABLED)) {
+        if (configPoint.getMarkers().contains(Tags.DCWB) && configPoint.getMarkers().contains(Tags.ENABLED)) {
             if (val > 0)
                 systemProfile.enableDcwb(hayStack);
             else
@@ -26,13 +26,8 @@ public class DcwbConfigHandler {
                    && configPoint.getMarkers().contains(Tags.LOOP)
                    && configPoint.getMarkers().contains(Tags.TYPE)) {
             systemProfile.updateDcwbAnalog4Mapping(val);
-        } else if (configPoint.getMarkers().contains(Tags.ADAPTIVE)) {
-            //Toggle maximizedTemp algo config based on adaptive delta update.
-            systemProfile.setConfigVal("maximized and exit and temp", val == 0 ? 1 : 0);
-        } else if (configPoint.getMarkers().contains(Tags.MAXIMIZED)) {
-            //Toggle adaptive delta algo config based on maximized temp update
-            systemProfile.setConfigVal("adaptive and delta", val == 0 ? 1 : 0);
         }
+        
         writePointFromJson(configPoint, msgObject, hayStack);
         systemProfile.invalidateAlgorithmLoop();
     }

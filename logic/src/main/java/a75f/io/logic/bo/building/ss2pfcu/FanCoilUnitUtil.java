@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
@@ -34,6 +35,17 @@ public class FanCoilUnitUtil {
                                              CCUHsApi hayStack) {
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateFCUProfile " + configPoint);
         try {
+            
+            String val = msgObject.get(HayStackConstants.WRITABLE_ARRAY_VAL).getAsString();
+            if (val.isEmpty()) {
+                int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();
+                //When a level is deleted, it currently generates a pubnub with empty value.
+                //Handle it here.
+                hayStack.clearPointArrayLevel(configPoint.getId(), level, true);
+                hayStack.writeHisValById(configPoint.getId(), HSUtil.getPriorityVal(configPoint.getId()));
+                return;
+            }
+            
             double configVal = msgObject.get("val").getAsDouble();
             if (configPoint.getMarkers().contains(Tags.CONFIG)) {
                 updateConfig(configVal, configPoint, msgObject, hayStack);

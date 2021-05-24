@@ -984,6 +984,7 @@ public class DabSystemController extends SystemController
             );
             
             double limitedPrimaryDamperPos = normalizedDamperPosMap.get(primaryDamperPosPoint.get("id").toString());
+            limitedPrimaryDamperPos = CCUUtils.roundToTwoDecimal(limitedPrimaryDamperPos);
             
             HashMap<Object, Object> secondoryDamperPosPoint = hayStack.readEntity(
                                                 "point and damper and normalized and secondary and cmd " +
@@ -991,6 +992,7 @@ public class DabSystemController extends SystemController
             );
             
             double limitedSecondaryDamperPos = normalizedDamperPosMap.get(secondoryDamperPosPoint.get("id").toString());
+            limitedSecondaryDamperPos = CCUUtils.roundToTwoDecimal(limitedSecondaryDamperPos);
             
             double minLimit = 0, maxLimit = 0;
             if (getStatus(dabEquip.get("group").toString()) == ZoneState.COOLING.ordinal()) {

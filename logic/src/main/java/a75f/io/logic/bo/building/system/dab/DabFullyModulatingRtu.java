@@ -101,10 +101,6 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                 dcwbAlgoHandler = new DcwbAlgoHandler(isAdaptiveDelta, getSystemEquipRef(), CCUHsApi.getInstance());
             }
     
-            if (dabSystem.getSystemState() == COOLING) {
-                dcwbAlgoHandler.runLoopAlgorithm();
-            }
-    
             //Analog1 controls water valve when the DCWB enabled.
             updateAnalog1DcwbOutput(dabSystem);
     
@@ -283,23 +279,28 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     }
     
     private void updateAnalog1DcwbOutput(DabSystemController dabSystem) {
-        double signal = 0;
+        
+        boolean isAnalog1Enabled = getConfigVal("analog1 and output and enabled") > 0;
     
-        if (dabSystem.getSystemState() == COOLING) {
+        if (isAnalog1Enabled && dabSystem.getSystemState() == COOLING) {
+            dcwbAlgoHandler.runLoopAlgorithm();
             systemDCWBValveLoopOutput = CCUUtils.roundToTwoDecimal(dcwbAlgoHandler.getChilledWaterValveLoopOutput());
         } else {
             systemDCWBValveLoopOutput = 0;
             dcwbAlgoHandler.resetChilledWaterValveLoop();
         }
-        
-        setSystemLoopOp("valve", systemDCWBValveLoopOutput);
     
-        if (getConfigVal("analog1 and output and enabled") > 0) {
+        double signal = 0;
+    
+        if (isAnalog1Enabled) {
             double analogMin = getConfigVal("analog1 and min");
             double analogMax = getConfigVal("analog1 and max");
             CcuLog.d(L.TAG_CCU_SYSTEM, "analog1Min: "+analogMin+" analog1Max: "+analogMax+" systemDCWBValveLoopOutput : "+systemDCWBValveLoopOutput);
             signal = getModulatedAnalogVal(analogMin, analogMax, systemDCWBValveLoopOutput);
         }
+    
+        setSystemLoopOp("valve", systemDCWBValveLoopOutput);
+    
         if (signal != getCmdSignal("valve")) {
             setCmdSignal("valve", signal);
         }

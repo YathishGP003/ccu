@@ -129,4 +129,8 @@ class DcwbAlgoHandler {
         return 0;
     }
     
+    public void resetValveControlLoop() {
+        dcwbControlLoop.reset();
+    }
+    
 }

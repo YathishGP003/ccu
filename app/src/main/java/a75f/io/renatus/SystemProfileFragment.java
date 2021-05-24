@@ -173,36 +173,15 @@ public class SystemProfileFragment extends Fragment {
                         }
                         break;
                     case 9:
-                        getActivity().getSupportFragmentManager().beginTransaction()
-                                     .replace(R.id.profileContainer, new VavIERtuProfile()).commit();
+                        if (canAddVAVProfile()) {
+                            getActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.profileContainer, new VavIERtuProfile()).commit();
+                        } else {
+                            Toast.makeText(getActivity(), "Unpair all DAB Zones and try", Toast.LENGTH_LONG).show();
+                            spSystemProfile.setSelection(L.ccu().systemProfile != null ?
+                                    systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
+                        }
                         break;
-					/*case 0:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new DefaultSystemProfile()).commit();
-						break;
-
-					case 1:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new VavAnalogRtuProfile()).commit();
-						break;
-
-					case 2:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new VavStagedRtuProfile()).commit();
-						break;
-					case 3:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new VavStagedRtuWithVfdProfile()).commit();
-						break;
-					case 4:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new VavHybridRtuProfile()).commit();
-						break;
-					case 5:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new DabAnalogRtuProfile()).commit();
-						break;
-*/
                 }
             }
 

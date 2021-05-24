@@ -55,8 +55,8 @@ public class StandaloneScheduler {
 
         double occuStatus = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and mode and equipRef == \""+equip.getId()+"\"");
 
-        double heatingDeadBand = StandaloneTunerUtil.readTunerValByQuery("heating and deadband", equip.getId());
-        double coolingDeadBand = StandaloneTunerUtil.readTunerValByQuery("cooling and deadband", equip.getId());
+        double heatingDeadBand = StandaloneTunerUtil.readTunerValByQuery("heating and deadband and base", equip.getId());
+        double coolingDeadBand = StandaloneTunerUtil.readTunerValByQuery("cooling and deadband and base", equip.getId());
         double setback = TunerUtil.readTunerValByQuery("unoccupied and setback", equip.getId());
 
         occ.setUnoccupiedZoneSetback(setback);
@@ -70,9 +70,6 @@ public class StandaloneScheduler {
         CcuLog.d("ZoneScheduler", "Equip: " + equip.getDisplayName()+","+occ.isPreconditioning()+","+occ.isForcedOccupied()+","+equip.getId());
         if (occ != null && ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ)) {
             double avgTemp = (occ.getCoolingVal()+occ.getHeatingVal())/2.0;
-            double deadbands = (occ.getCoolingVal() - occ.getHeatingVal()) / 2.0 ;
-            occ.setCoolingDeadBand(deadbands);
-            occ.setHeatingDeadBand(deadbands);
             Double coolingTemp = ((occ.isOccupied() || occ.isPreconditioning() ) ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback()));
             setDesiredTemp(equip, coolingTemp, "cooling",occ.isForcedOccupied());
             Double heatingTemp = (occ.isOccupied() || occ.isPreconditioning() )? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());

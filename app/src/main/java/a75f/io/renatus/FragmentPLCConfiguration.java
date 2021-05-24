@@ -51,97 +51,97 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
 {
     public static final String TAG = "PlcConfig";
     public static final String ID = FragmentPLCConfiguration.class.getSimpleName();
-    
+
     private static final int OFFSET_MIN_LIMIT = -100;
     private static final int OFFSET_MAX_LIMIT = 100;
     private static final double OFFSET_INCREMENT = 0.5;
-    
+
     private static final double DECIMAL_ADJUST_MULTIPLIER = 100.0;
-    
-    
+
+
     @BindView(R.id.analog1InSensor)
     Spinner analog1InSensorSp;
-    
+
     @BindView(R.id.targetVal)
     Spinner targetValSp;
-    
+
     @BindView(R.id.th1InSensor)
     Spinner th1InSensorSp;
-    
+
     @BindView(R.id.nativeSensor)
     Spinner nativeSensorSp;
-    
+
     @BindView(R.id.errorRange)
     Spinner errorRangeSp;
-    
+
     @BindView(R.id.analog2InSensor)
     Spinner analog2InSensorSp;
-    
+
     @BindView(R.id.sensorOffset)
     Spinner sensorOffsetSp;
-    
+
     @BindView(R.id.analogout1AtMin)
     Spinner analogout1AtMinSp;
-    
+
     @BindView(R.id.analogout1AtMax)
     Spinner analogout1AtMaxSp;
-    
+
     @BindView(R.id.analog2DynamicSp)
     ToggleButton analog2DynamicSP;
-    
+
     @BindView(R.id.zeroErrorAtMp)
     ToggleButton zeroErrorAtMP;
-    
+
     @BindView(R.id.invertLoop)
     ToggleButton invertLoop;
-    
+
     @BindView(R.id.relay1Toggle)
     ToggleButton relay1Toggle;
-    
+
     @BindView(R.id.relay1OnThreshold)
     Spinner relay1OnThreshold;
-    
+
     @BindView(R.id.relay1OffThreshold)
     Spinner relay1OffThreshold;
-    
+
     @BindView(R.id.relay2Toggle)
     ToggleButton relay2Toggle;
-    
+
     @BindView(R.id.relay2OnThreshold)
     Spinner relay2OnThreshold;
-    
+
     @BindView(R.id.relay2OffThreshold)
     Spinner relay2OffThreshold;
-    
+
     @BindView(R.id.setBtn)
     Button setButton;
 
     @BindView(R.id.setPointLayout)
     RelativeLayout setPointLayout;
-    
+
     private ProfileType             mProfileType;
     private PlcProfile              mPlcProfile;
     private PlcProfileConfiguration mProfileConfig;
-    
+
     private short    mSmartNodeAddress;
     private NodeType mNodeType;
-    
+
     String floorRef;
     String zoneRef;
-    
+
     private int targetValSelection = 0;
     private int nativeValSelection = 0;
-    
+
     @Override
     public String getIdString()
     {
         return ID;
     }
-    
+
     public FragmentPLCConfiguration()
     {
     }
-    
+
     public static FragmentPLCConfiguration newInstance(short smartNodeAddress, String roomName, NodeType nodeType, String floorName)
     {
         FragmentPLCConfiguration f = new FragmentPLCConfiguration();
@@ -153,7 +153,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         f.setArguments(bundle);
         return f;
     }
-    
+
     @Override
     public void onStart()
     {
@@ -166,10 +166,10 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         }
         //setTitle();
     }
-    
+
     private void setTitle() {
         Dialog dialog = getDialog();
-        
+
         if (dialog == null) {
             return;
         }
@@ -182,14 +182,14 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         }
         int titleDividerId = getContext().getResources()
                                          .getIdentifier("titleDivider", "id", "android");
-        
+
         View titleDivider = dialog.findViewById(titleDividerId);
         if (titleDivider != null) {
             titleDivider.setBackgroundColor(getContext().getResources()
                                                         .getColor(R.color.transparent));
         }
     }
-    
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
@@ -209,14 +209,14 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         }
         return view;
     }
-    
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
-    
+
         mPlcProfile = (PlcProfile) L.getProfile(mSmartNodeAddress);
-    
+
         if (mPlcProfile != null) {
             CcuLog.d(L.TAG_CCU_UI,  "Get PlcConfig: ");
             mProfileConfig = (PlcProfileConfiguration) mPlcProfile.getProfileConfiguration(mSmartNodeAddress);
@@ -225,7 +225,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             CcuLog.d(L.TAG_CCU_UI, "Create Plc Profile: ");
             mPlcProfile = new PlcProfile();
         }
-        
+
         ArrayList<String> analog1InArr = new ArrayList<>();
         analog1InArr.add("Not Used");
         for (Sensor r : SensorManager.getInstance().getExternalSensorList()) {
@@ -236,7 +236,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         for (Thermistor m : Thermistor.getThermistorList()) {
             th1InArr.add(m.sensorName+" "+m.engineeringUnit);
         }
-        
+
         ArrayAdapter<String> analog1InAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, analog1InArr);
         analog1InAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         analog1InSensorSp.setAdapter(analog1InAdapter);
@@ -265,15 +265,15 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 }
                 th1InSensorSp.setSelection(0, false);
                 nativeSensorSp.setSelection(0, false);
-                
+
             }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView)
             {
             }
         });
-        
-        
+
+
         ArrayAdapter<String> th1InAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, th1InArr);
         th1InAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         th1InSensorSp.setAdapter(th1InAdapter);
@@ -308,7 +308,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             {
             }
         });
-        
+
         ArrayList<Double> targetVal = new ArrayList<Double>();
         for (int pos = 1; pos <= 100; pos++) {
             targetVal.add((double)pos/10);
@@ -316,7 +316,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         ArrayAdapter<Double> targetValAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, targetVal);
         targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         targetValSp.setAdapter(targetValAdapter);
-    
+
         targetValSp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
@@ -326,7 +326,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
-        
+
         ArrayList<Double> errRange = new ArrayList<Double>();
         for (double pos = 1; pos <= 10; pos+=1) {
             errRange.add(pos);
@@ -334,14 +334,14 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         ArrayAdapter<Double> errRangeAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, errRange);
         errRangeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         errorRangeSp.setAdapter(errRangeAdapter);
-        
+
         ArrayList<String> analog2InArr = new ArrayList<>();
         for (Sensor r : SensorManager.getInstance().getExternalSensorList()) {
             if (!r.sensorName.contains("ION Meter")) {
                 analog2InArr.add(r.sensorName + " " + r.engineeringUnit);
             }
         }
-        
+
         ArrayAdapter<String> analgo2InAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, analog2InArr);
         analgo2InAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         analog2InSensorSp.setAdapter(analgo2InAdapter);
@@ -353,7 +353,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 Log.d("CCU_UI"," analog2InSensorSp Selected : "+i);
                 ArrayList<Double> targetVal = new ArrayList<Double>();
                 Sensor r = SensorManager.getInstance().getExternalSensorList().get(i);
-                
+
                 /* Dynamically populate the sensor targets based on definitions.
                  * There is a special requirement that when dynamic setpoint is enabled and Generic 0-10 type is
                  * selected, offset should show a range of -100 to +100 ,with 0.5 increments.
@@ -383,9 +383,9 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             {
             }
         });
-        
-        
-        
+
+
+
         ArrayList<Double> analogArray = new ArrayList<>();
         for (double analogVolt = 0; analogVolt <= 10; analogVolt++)
         {
@@ -395,7 +395,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         analogout1AtMinSp.setAdapter(analogAdapter);
         analogout1AtMaxSp.setAdapter(analogAdapter);
-        
+
         ArrayList<Double> offsetArr = new ArrayList<Double>();
         for (double pos = 0.1; pos <= 10; pos+=0.1) {
             offsetArr.add(Math.round(pos * 10) /10.0);
@@ -417,12 +417,12 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 }
             }
         });
-        
+
         ArrayList<String> analogTypes = new ArrayList<>();
         for (OutputAnalogActuatorType actuator : OutputAnalogActuatorType.values()) {
             analogTypes.add(actuator.displayName);
         }
-        
+
         zeroErrorAtMP.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
         {
             @Override
@@ -430,11 +430,11 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             {
             }
         });
-    
+
         configureNativeSensorInputSpinner();
         configureRelay1();
         configureRelay2();
-        
+
         if (mProfileConfig != null) {
             analog1InSensorSp.setSelection(mProfileConfig.analog1InputSensor, false);
             th1InSensorSp.setSelection(mProfileConfig.th1InputSensor, false);
@@ -443,11 +443,11 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             analog2DynamicSP.setChecked(mProfileConfig.useAnalogIn2ForSetpoint);
             sensorOffsetSp.setSelection(offsetAdapter.getPosition(mProfileConfig.setpointSensorOffset), false);
             analog2InSensorSp.setSelection(mProfileConfig.analog2InputSensor, false);
-            
+
             zeroErrorAtMP.setChecked(mProfileConfig.expectZeroErrorAtMidpoint);
             analogout1AtMinSp.setSelection(analogAdapter.getPosition(mProfileConfig.analog1AtMinOutput));
             analogout1AtMaxSp.setSelection(analogAdapter.getPosition(mProfileConfig.analog1AtMaxOutput));
-    
+
             analog2InSensorSp.setEnabled(mProfileConfig.useAnalogIn2ForSetpoint);
             sensorOffsetSp.setEnabled(mProfileConfig.useAnalogIn2ForSetpoint);
             if (mProfileConfig.useAnalogIn2ForSetpoint) {
@@ -456,7 +456,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             nativeSensorSp.setSelection(mProfileConfig.nativeSensorInput, false);
             invertLoop.setChecked(mProfileConfig.controlLoopInversion);
             relay1Toggle.setChecked(mProfileConfig.relay1ConfigEnabled);
-    
+
             ArrayAdapter<Double> percentAdapter = getPercentageSpinnerAdapter();
             relay1OnThreshold.setSelection((int)mProfileConfig.relay1OnThresholdVal);
             relay1OffThreshold.setSelection((int)mProfileConfig.relay1OffThresholdVal);
@@ -474,7 +474,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             targetValSp.setSelection(targetValAdapter.getPosition(5.0), false);
             errorRangeSp.setSelection(errRangeAdapter.getPosition(2.0), false);
         }
-    
+
         setButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -487,7 +487,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                     Toast.makeText(getActivity(), "Select an Input Sensor",Toast.LENGTH_LONG).show();
                     return;
                 }
-            
+
                 new AsyncTask<String, Void, Void>() {
                     @Override
                     protected void onPreExecute() {
@@ -495,14 +495,14 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                         ProgressDialogUtils.showProgressDialog(getActivity(),"Saving PLC Configuration");
                         super.onPreExecute();
                     }
-                
+
                     @Override
                     protected Void doInBackground( final String ... params ) {
                         setupPlcProfile();
                         L.saveCCUState();
                         return null;
                     }
-                
+
                     @Override
                     protected void onPostExecute( final Void result ) {
                         ProgressDialogUtils.hideProgressDialog();
@@ -514,15 +514,15 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             }
         });
     }
-    
+
     private void configureNativeSensorInputSpinner() {
-    
+
         ArrayList<String> onboardSensorInArr = new ArrayList<>();
         onboardSensorInArr.add("Not Used");
         for (NativeSensor sensor : SensorManager.getInstance().getNativeSensorList()) {
             onboardSensorInArr.add(sensor.sensorName+" "+sensor.engineeringUnit);
         }
-        
+
         ArrayAdapter<String> sensorAdapter = new ArrayAdapter<String>(getActivity(),
                                                                       android.R.layout.simple_spinner_item,
                                                                       onboardSensorInArr);
@@ -539,19 +539,19 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 }
                 ArrayList<Double> targetVal = new ArrayList<>();
                 NativeSensor sensor = SensorManager.getInstance().getNativeSensorList().get(position - 1);
-                
+
                 //Populate the value-list of sensor limits with 2 decimals.
                 for (int pos = (int)(DECIMAL_ADJUST_MULTIPLIER * sensor.minEngineeringValue);
                      pos <= (DECIMAL_ADJUST_MULTIPLIER * sensor.maxEngineeringValue);
                      pos+=(DECIMAL_ADJUST_MULTIPLIER*sensor.incrementEngineeringValue)) {
                     targetVal.add(pos/DECIMAL_ADJUST_MULTIPLIER);
                 }
-                
+
                 ArrayAdapter<Double> targetValAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, targetVal);
                 targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 targetValSp.setAdapter(targetValAdapter);
                 targetValSp.invalidate();
-                
+
                 //Initialize targetValueSpinner based on input sensor type.
                 if (mProfileConfig != null) {
                     if (targetValSelection > 0) {
@@ -575,33 +575,35 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             }
         });
     }
-    
+
     private void configureRelay1() {
         ArrayAdapter<String> percentAdapter = getPercentageSpinnerAdapter();
         relay1OnThreshold.setAdapter(percentAdapter);
         relay1OffThreshold.setAdapter(percentAdapter);
-        
+        relay1OnThreshold.setEnabled(relay1Toggle.isChecked());
+        relay1OffThreshold.setEnabled(relay1Toggle.isChecked());
         relay1Toggle.setOnCheckedChangeListener((compoundButton, b) -> {
             relay1OnThreshold.setEnabled(b);
             relay1OffThreshold.setEnabled(b);
         });
-        
+
     }
-    
+
     private void configureRelay2() {
         ArrayAdapter<String> percentAdapter = getPercentageSpinnerAdapter();
         relay2OnThreshold.setAdapter(percentAdapter);
         relay2OffThreshold.setAdapter(percentAdapter);
-    
+        relay2OnThreshold.setEnabled(relay2Toggle.isChecked());
+        relay2OffThreshold.setEnabled(relay2Toggle.isChecked());
         relay2Toggle.setOnCheckedChangeListener((compoundButton, b) -> {
             relay2OnThreshold.setEnabled(b);
             relay2OffThreshold.setEnabled(b);
         });
-        
+
     }
-    
+
     private ArrayAdapter getPercentageSpinnerAdapter() {
-        
+
         ArrayList<String> percentArr = new ArrayList<>();
         for (int percent = 0; percent <= 100; percent+= 1) {
             percentArr.add(percent+"%");
@@ -611,7 +613,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         percentAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         return percentAdapter;
     }
-    
+
     public void setupPlcProfile() {
         PlcProfileConfiguration p = new PlcProfileConfiguration();
         p.analog1InputSensor = analog1InSensorSp.getSelectedItemPosition();
@@ -625,7 +627,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         p.analog1AtMaxOutput = Double.parseDouble(analogout1AtMaxSp.getSelectedItem().toString());
         p.setpointSensorOffset = Double.parseDouble(sensorOffsetSp.getSelectedItem().toString());
         p.nativeSensorInput = nativeSensorSp.getSelectedItemPosition();
-        
+
         p.relay1ConfigEnabled = relay1Toggle.isChecked();
         if (p.relay1ConfigEnabled) {
             p.relay1OnThresholdVal = Double.parseDouble(relay1OnThreshold.getSelectedItem().toString().replace("%",
@@ -633,7 +635,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
             p.relay1OffThresholdVal = Double.parseDouble(relay1OffThreshold.getSelectedItem().toString().replace("%",
                                                                                                                ""));
         }
-    
+
         p.relay2ConfigEnabled = relay2Toggle.isChecked();
         if (p.relay2ConfigEnabled) {
             p.relay2OnThresholdVal = Double.parseDouble(relay2OnThreshold.getSelectedItem().toString().replace("%",

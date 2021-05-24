@@ -1,7 +1,14 @@
 package a75f.io.renatus.util;
 
+import android.util.Log;
+
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class RxjavaUtil {
@@ -20,7 +27,7 @@ public class RxjavaUtil {
     }
     
     /**
-     * RxJava based alternative to async task.
+     * RxJava based alternative to async task. (Risky !- Does not handle Disposable)
      * @param preExecuteFunction  - Executed on main/host thread
      * @param backGroundFunction  - Executed using rx thread pool
      * @param postExecute  - Executed on main thread.
@@ -29,17 +36,42 @@ public class RxjavaUtil {
                                                      Runnable postExecute) {
         
         preExecuteFunction.run();
-        
-        Observable.fromCallable(() -> {
+    
+        Completable.fromCallable(() -> {
                         backGroundFunction.run();
                         return true;
                     })
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
-                  .doOnComplete(()-> {
-                     postExecute.run();
-                  })
-                  .subscribe();
+                  .doOnComplete(()-> postExecute.run())
+                  .subscribe(
+                      () -> { },
+                      e -> CcuLog.e(L.TAG_CCU, "Background task failed : ")
+                  );
     }
     
+    /**
+     * RxJava based alternative to async task.
+     * @param preExecuteFunction  - Executed on main/host thread
+     * @param backGroundFunction  - Executed using rx thread pool
+     * @param postExecute  - Executed on main thread.
+     */
+    public static Disposable executeBackgroundTaskWithDisposable(Runnable preExecuteFunction ,
+                                                                 Runnable backGroundFunction,
+                                                                Runnable postExecute) {
+        
+        preExecuteFunction.run();
+        
+        return Completable.fromCallable(() -> {
+                        backGroundFunction.run();
+                        return true;
+                        })
+                      .subscribeOn(Schedulers.io())
+                      .observeOn(AndroidSchedulers.mainThread())
+                      .doOnComplete(()-> postExecute.run())
+                      .subscribe(
+                          () -> { },
+                          e -> CcuLog.e(L.TAG_CCU, "Background task failed : ")
+                        );
+    }
 }

@@ -257,6 +257,13 @@ public class HSUtil
                && pointEntity.containsKey(Tags.CONFIG);
     }
     
+    public static boolean isDcwbConfig(String id, CCUHsApi hayStack) {
+        HashMap pointEntity = hayStack.readMapById(id);
+        return (pointEntity.containsKey(Tags.DCWB) && pointEntity.containsKey(Tags.CONFIG))
+                || (pointEntity.containsKey(Tags.ADAPTIVE) && pointEntity.containsKey(Tags.DELTA))
+                || (pointEntity.containsKey(Tags.MAXIMIZED) && pointEntity.containsKey(Tags.EXIT));
+    }
+    
     /**
      * Currently checks only FCU type. Will be made generic after other profies
      * support is handled.

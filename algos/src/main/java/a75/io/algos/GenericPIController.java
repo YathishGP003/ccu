@@ -132,4 +132,10 @@ public class GenericPIController
         CcuLog.d("CCU_ZONE","PI-LOOP error: " + error + " limitedErr: " + limitedError + " proportionalErr: " + proportionalError +
         " integralErr: " + integralError + " cumulativeErr: " + cumulativeError + " cv: " + controlVariable);
     }
+    
+    @Override
+    public String toString() {
+        return  "PI-LOOP error: " + error + " limitedErr: " + limitedError + " proportionalErr: " + proportionalError +
+                            " integralErr: " + integralError + " cumulativeErr: " + cumulativeError + " cv: " + controlVariable;
+    }
 }

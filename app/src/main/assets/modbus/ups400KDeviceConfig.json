@@ -6562,7 +6562,7 @@
               "tagName": "battery"
             },
             {
-              "tagName": "room"
+              "tagName": "roomAlarm"
             },
             {
               "tagName": "alarm"

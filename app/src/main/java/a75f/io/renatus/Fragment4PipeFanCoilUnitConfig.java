@@ -243,7 +243,13 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
                 ProgressDialogUtils.hideProgressDialog();
                 Fragment4PipeFanCoilUnitConfig.this.closeAllBaseDialogFragments();
                 getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                LSerial.getInstance().sendSeedMessage(true,false, mSmartNodeAddress, roomRef,floorRef);
+                try {
+                    if (mSmartNodeAddress != 0) {
+                        LSerial.getInstance().sendSeedMessage(true, false, mSmartNodeAddress, roomRef, floorRef);
+                    }
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
             },12000);
 
         });

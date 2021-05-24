@@ -910,4 +910,6 @@
         <item> 90% </item>
         <item> 100% </item>
     </string-array>
+
+    <string name="buttonDesableDelay">2000</string>
 </resources>

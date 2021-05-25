@@ -59,13 +59,25 @@ public class ModbusEquip {
             gatewayRef = systemEquip.get("id").toString();
         }
 
-        Equip.Builder mbEquip = new Equip.Builder().setSiteRef(siteRef)
-                .setDisplayName(equipDis)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef)
-                .setProfile(profileType.name())
-                .addMarker("equip").addMarker("modbus").addMarker(modbusEquipType.toLowerCase()).addMarker("zone")
-                .setGatewayRef(gatewayRef).setTz(tz).setGroup(String.valueOf(slaveId));
+        Equip.Builder mbEquip;
+        if (profileType == ProfileType.MODBUS_EMR_ZONE || profileType == ProfileType.MODBUS_BTU) {
+            mbEquip = new Equip.Builder().setSiteRef(siteRef)
+                    .setDisplayName(equipDis)
+                    .setRoomRef(roomRef)
+                    .setFloorRef(floorRef)
+                    .setProfile(profileType.name())
+                    .addMarker("equip").addMarker("modbus").addMarker(modbusEquipType.toLowerCase())
+                    .setGatewayRef(gatewayRef).setTz(tz).setGroup(String.valueOf(slaveId));
+        } else {
+            mbEquip = new Equip.Builder().setSiteRef(siteRef)
+                    .setDisplayName(equipDis)
+                    .setRoomRef(roomRef)
+                    .setFloorRef(floorRef)
+                    .setProfile(profileType.name())
+                    .addMarker("equip").addMarker("modbus").addMarker(modbusEquipType.toLowerCase()).addMarker("zone")
+                    .setGatewayRef(gatewayRef).setTz(tz).setGroup(String.valueOf(slaveId));
+        }
+
         if (equipmentInfo.getVendor()!= null && !equipmentInfo.getVendor().equals("")) {
             mbEquip.setVendor(equipmentInfo.getVendor());
         }

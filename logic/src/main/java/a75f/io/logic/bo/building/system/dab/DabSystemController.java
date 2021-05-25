@@ -23,6 +23,7 @@ import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.SystemPILoopController;
 import a75f.io.logic.bo.util.CCUUtils;
+import a75f.io.logic.bo.util.SystemScheduleUtil;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
@@ -558,16 +559,20 @@ public class DabSystemController extends SystemController
         if (getEquipCurrentTemp(equipRef) == 0) {
             return p.val;
         }
+    
+        double equipDynamicPriority;
         
-        double zonePrioritySpread = TunerUtil.readTunerValByQuery("point and tuner and zone and priority and spread and " +
-                                                                  "equipRef == \"" + equipRef + "\""
-        );
-        double zonePriorityMultiplier = TunerUtil.readTunerValByQuery("point and tuner and zone and priority and multiplier " +
-                                                                      "and equipRef == \""+equipRef+"\""
-        );
-        double equipDynamicPriority = p.val * Math.pow(zonePriorityMultiplier, (zoneLoad/zonePrioritySpread) > 10 ? 10 :
-                                                                                   (zoneLoad/zonePrioritySpread));
-        equipDynamicPriority = CCUUtils.roundToTwoDecimal(equipDynamicPriority);
+        if (SystemScheduleUtil.isZoneForcedOccupied(equipRef)) {
+            equipDynamicPriority = SystemConstants.FORCED_OCCUPIED_ZONE_PRIORITY_VAL;
+        } else {
+            double zonePrioritySpread = TunerUtil.readTunerValByQuery(
+                "point and tuner and zone and priority and spread and " + "equipRef == \"" + equipRef + "\"");
+            double zonePriorityMultiplier = TunerUtil.readTunerValByQuery(
+                "point and tuner and zone and priority and multiplier " + "and equipRef == \"" + equipRef + "\"");
+            equipDynamicPriority = p.val * Math.pow(zonePriorityMultiplier, (zoneLoad / zonePrioritySpread) > 10 ? 10
+                                                                                : (zoneLoad / zonePrioritySpread));
+            equipDynamicPriority = CCUUtils.roundToTwoDecimal(equipDynamicPriority);
+        }
         try {
             HashMap<Object, Object> zdpPoint =
                 CCUHsApi.getInstance().readEntity("point and zone and dynamic and priority and equipRef == \""

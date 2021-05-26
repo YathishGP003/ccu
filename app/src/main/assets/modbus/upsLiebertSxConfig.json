@@ -787,7 +787,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemOff"
             },
             {
               "tagName": "off"
@@ -1547,7 +1547,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemRestart"
             },
             {
               "tagName": "restart"
@@ -2019,7 +2019,7 @@
               "tagName": "battery"
             },
             {
-              "tagName": "system"
+              "tagName": "systemBattery"
             },
             {
               "tagName": "alarm"

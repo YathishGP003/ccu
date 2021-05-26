@@ -3810,7 +3810,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemOverload"
             },
             {
               "tagName": "status"
@@ -4280,7 +4280,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemTransfer"
             },
             {
               "tagName": "transfer"
@@ -4807,7 +4807,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemBattery"
             },
             {
               "tagName": "battery"
@@ -4857,7 +4857,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemEPO"
             },
             {
               "tagName": "epo"
@@ -4907,7 +4907,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemOvertemp"
             },
             {
               "tagName": "ambient"

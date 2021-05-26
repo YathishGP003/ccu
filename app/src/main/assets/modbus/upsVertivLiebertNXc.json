@@ -665,7 +665,7 @@
               "tagName": "battery"
             },
 			{
-              "tagName": "system"
+              "tagName": "systemBattery"
             },
             {
               "tagName": "alarm"

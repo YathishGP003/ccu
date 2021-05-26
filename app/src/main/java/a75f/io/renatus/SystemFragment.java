@@ -483,7 +483,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				@Override
 				public void run() {
 					String colorHex = "#" + Integer.toHexString(ContextCompat.getColor(getActivity(), R.color.orange_75f) & 0x00ffffff);
-					String status = L.ccu().systemProfile.getStatusMessage();
 					String status = CCUHsApi.getInstance().readDefaultStrVal("system and status and message");
 					//If the system status is not updated yet (within a minute of registering the device), generate a
 					//default message.

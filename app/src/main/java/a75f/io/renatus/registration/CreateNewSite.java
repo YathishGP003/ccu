@@ -13,6 +13,8 @@ import android.os.Looper;
 import com.google.android.material.textfield.TextInputLayout;
 
 import a75f.io.renatus.util.RxjavaUtil;
+
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import android.text.Editable;
 import android.text.Html;
@@ -103,7 +105,7 @@ public class CreateNewSite extends Fragment {
     LinearLayout btnSetting;
     Prefs prefs;
     private boolean isFreshRegister;
-    private static final String TAG = CreateNewSite.class.getSimpleName();
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

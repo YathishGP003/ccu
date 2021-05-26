@@ -540,7 +540,7 @@ public class VavSystemController extends SystemController
         );
     }
     public ZonePriority getEquipPriority(String equipRef) {
-        double priorityVal = CCUHsApi.getInstance().readDefaultVal("point and zone and config and priority and " +
+        double priorityVal = CCUHsApi.getInstance().readPointPriorityVal("point and zone and config and priority and " +
                                                                    "equipRef == \""+equipRef+"\""
         );
         return ZonePriority.values()[(int) priorityVal];

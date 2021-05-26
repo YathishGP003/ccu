@@ -25,10 +25,13 @@ import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
 import a75f.io.api.haystack.modbus.Parameter;
@@ -464,6 +467,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				oaoArc.setContentDescription(String.valueOf(returnAirCO2));
 			}
 		} else {
+			RelativeLayout.LayoutParams layoutParams =(RelativeLayout.LayoutParams)systemModePicker.getLayoutParams();
+			layoutParams.setMargins(0,300,0,0);
+			systemModePicker.setLayoutParams(layoutParams);
 			oaoArc.setVisibility(View.GONE);
 			purgeLayout.setVisibility(View.GONE);
 		}
@@ -478,6 +484,13 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				public void run() {
 					String colorHex = "#" + Integer.toHexString(ContextCompat.getColor(getActivity(), R.color.orange_75f) & 0x00ffffff);
 					String status = L.ccu().systemProfile.getStatusMessage();
+					String status = CCUHsApi.getInstance().readDefaultStrVal("system and status and message");
+					//If the system status is not updated yet (within a minute of registering the device), generate a
+					//default message.
+					if (StringUtils.isEmpty(status)) {
+						status = L.ccu().systemProfile.getStatusMessage();
+					}
+
 					if (L.ccu().systemProfile instanceof DefaultSystem) {
 						equipmentStatus.setText(status.equals("") ? "System is in gateway mode" : Html.fromHtml(status.replace("ON", "<font color='"+colorHex+"'>ON</font>")));
 						occupancyStatus.setText("No Central equipment connected.");

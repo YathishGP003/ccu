@@ -124,7 +124,8 @@
                                 android:layout_centerVertical="true"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item"
+                                android:visibility="visible"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -198,7 +199,8 @@
                                 android:layout_centerVertical="true"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item"
+                                android:visibility="visible"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -272,7 +274,8 @@
                                 android:layout_centerVertical="true"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item"
+                                android:visibility="visible"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -346,7 +349,8 @@
                                 android:layout_centerVertical="true"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item"
+                                android:visibility="visible"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -419,7 +423,8 @@
                                 android:layout_centerVertical="true"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item"
+                                android:visibility="visible"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -494,7 +499,8 @@
                                 android:layout_centerHorizontal="true"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item"
+                                android:visibility="visible"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -569,7 +575,8 @@
                                 android:layout_centerHorizontal="true"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item"
+                                android:visibility="visible"/>
                         </LinearLayout>
 
                         <LinearLayout

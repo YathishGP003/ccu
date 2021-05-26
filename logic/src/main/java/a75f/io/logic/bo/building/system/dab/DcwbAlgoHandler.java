@@ -32,10 +32,6 @@ class DcwbAlgoHandler {
     private ControlLoop dcwbControlLoop;
     private String systemEquipRef;
     private CCUHsApi hayStack;
-    private double proportionalGain = TunerConstants.DEFAULT_PROPORTIONAL_GAIN;
-    private double integralGain =  TunerConstants.DEFAULT_INTEGRAL_GAIN;
-    private double proportionalSpread = TunerConstants.DEFAULT_PROPORTIONAL_SPREAD;
-    private double integralTimeout = TunerConstants.DEFAULT_INTEGRAL_TIMEOUT;
     
     private double chilledWaterTargetDelta;
     private double chilledWaterExitTemperatureMargin;
@@ -53,13 +49,14 @@ class DcwbAlgoHandler {
      * received via pubnub wont be picked till next app-restart.
      */
     private void initializeTuners() {
-        proportionalGain = TunerUtil.readTunerValByQuery("dcwb and pgain", systemEquipRef);
-        integralGain = TunerUtil.readTunerValByQuery("dcwb and igain", systemEquipRef);
-        proportionalSpread = TunerUtil.readTunerValByQuery("dcwb and pspread", systemEquipRef);
-        integralTimeout = TunerUtil.readTunerValByQuery("dcwb and itimeout", systemEquipRef);
+     
+        dcwbControlLoop.setProportionalGain(TunerUtil.readTunerValByQuery("dcwb and pgain", systemEquipRef));
+        dcwbControlLoop.setIntegralGain(TunerUtil.readTunerValByQuery("dcwb and igain", systemEquipRef));
+        dcwbControlLoop.setProportionalSpread((int)TunerUtil.readTunerValByQuery("dcwb and pspread", systemEquipRef));
+        dcwbControlLoop.setIntegralMaxTimeout((int)TunerUtil.readTunerValByQuery("dcwb and itimeout", systemEquipRef));
+        
         adaptiveComfortThresholdMargin = TunerUtil.readTunerValByQuery("dcwb and adaptive and comfort and threshold",
                                                                                systemEquipRef);
-    
         chilledWaterTargetDelta = getChilledWaterConfig("target and delta", hayStack);
         chilledWaterExitTemperatureMargin = getChilledWaterConfig("exit and temp and margin", hayStack);
         chilledWaterMaxFlowRate = getChilledWaterConfig("max and flow and rate", hayStack);
@@ -82,7 +79,9 @@ class DcwbAlgoHandler {
             chilledWaterValveLoopOutput = Math.min(chilledWaterValveLoopOutput, MAX_PI_LOOP_OUTPUT);
     
             //PI loop operates with the intention of maintaining delta T. So we should invert the loop Output.
-            chilledWaterValveLoopOutput = 100 - chilledWaterValveLoopOutput;
+            if (adaptiveDelta) {
+                chilledWaterValveLoopOutput = 100 - chilledWaterValveLoopOutput;
+            }
         } else {
             chilledWaterValveLoopOutput = hayStack.readHisValByQuery("dcwb and valve and loop and output");
         }
@@ -128,6 +127,10 @@ class DcwbAlgoHandler {
             return hayStack.readPointPriorityVal(chilledWaterConfig.get("id").toString());
         }
         return 0;
+    }
+    
+    public void resetValveControlLoop() {
+        dcwbControlLoop.reset();
     }
     
 }

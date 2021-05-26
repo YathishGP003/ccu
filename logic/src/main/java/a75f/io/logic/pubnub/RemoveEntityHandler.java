@@ -19,6 +19,10 @@ public class RemoveEntityHandler
     
     public static void handleMessage(JsonObject msgObject)
     {
+        if (!CCUHsApi.getInstance().isCCURegistered()) {
+            CcuLog.d(L.TAG_CCU_PUBNUB,"CCU does not have active registration, Ignore pubnub");
+            return;
+        }
         try {
             //TODO - Revisit
             Gson gsonBuilder = new GsonBuilder().setPrettyPrinting()

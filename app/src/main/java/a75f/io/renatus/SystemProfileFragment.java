@@ -1,6 +1,8 @@
 package a75f.io.renatus;
 
 import android.os.Bundle;
+
+import a75f.io.api.haystack.CCUHsApi;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
@@ -14,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
@@ -81,11 +84,11 @@ public class SystemProfileFragment extends Fragment {
                 }
                 switch (i) {
                     case 0:
-                        if(canAddDABProfile()){
+                        if(canAddDABProfile() && canAddVAVProfile()){
                             getActivity().getSupportFragmentManager().beginTransaction()
                                     .replace(R.id.profileContainer, new DefaultSystemProfile()).commit();
                         } else {
-                            Toast.makeText(getActivity(),"Unpair all VAV Zones and try",Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(),"Unpair all VAV or DAB Zones and try",Toast.LENGTH_LONG).show();
                             spSystemProfile.setSelection(L.ccu().systemProfile != null ?
                                     systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                         }
@@ -173,36 +176,15 @@ public class SystemProfileFragment extends Fragment {
                         }
                         break;
                     case 9:
-                        getActivity().getSupportFragmentManager().beginTransaction()
-                                     .replace(R.id.profileContainer, new VavIERtuProfile()).commit();
+                        if (canAddVAVProfile()) {
+                            getActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.profileContainer, new VavIERtuProfile()).commit();
+                        } else {
+                            Toast.makeText(getActivity(), "Unpair all DAB Zones and try", Toast.LENGTH_LONG).show();
+                            spSystemProfile.setSelection(L.ccu().systemProfile != null ?
+                                    systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
+                        }
                         break;
-					/*case 0:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new DefaultSystemProfile()).commit();
-						break;
-
-					case 1:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new VavAnalogRtuProfile()).commit();
-						break;
-
-					case 2:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new VavStagedRtuProfile()).commit();
-						break;
-					case 3:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new VavStagedRtuWithVfdProfile()).commit();
-						break;
-					case 4:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new VavHybridRtuProfile()).commit();
-						break;
-					case 5:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new DabAnalogRtuProfile()).commit();
-						break;
-*/
                 }
             }
 
@@ -213,33 +195,25 @@ public class SystemProfileFragment extends Fragment {
         spSystemProfile.setSelection(L.ccu().systemProfile != null ?
                 systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
     }
-
+    
     private boolean canAddVAVProfile() {
-        if (FloorPlanFragment.selectedZone == null){
-            return true;
+        ArrayList<HashMap> zoneEquips = CCUHsApi.getInstance().readAll("equip and zone");
+        for (HashMap equip : zoneEquips) {
+            if (equip.containsKey("dab") || equip.containsKey("dualDuct")) {
+                return false;
+            }
         }
-        ArrayList<Equip> zoneEquips  = HSUtil.getEquips(FloorPlanFragment.selectedZone.getId());
-        if (zoneEquips.size() ==0 ){
-            return true;
-        }
-
-        for(Equip eq: zoneEquips){
-            return !eq.getProfile().contains("DAB");
-        }
-        return false;
+        return true;
     }
-
+    
+    
     private boolean canAddDABProfile() {
-        if (FloorPlanFragment.selectedZone == null){
-            return true;
+        ArrayList<HashMap> zoneEquips = CCUHsApi.getInstance().readAll("equip and zone");
+        for (HashMap equip : zoneEquips) {
+            if (equip.containsKey("vav")) {
+                return false;
+            }
         }
-        ArrayList<Equip> zoneEquips  = HSUtil.getEquips(FloorPlanFragment.selectedZone.getId());
-        if (zoneEquips.size() ==0 ){
-            return true;
-        }
-        for(Equip eq: zoneEquips){
-            return !eq.getProfile().contains("VAV");
-        }
-        return false;
+        return true;
     }
 }

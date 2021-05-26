@@ -17,6 +17,7 @@ import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -63,7 +64,11 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     
     @Override
     public boolean isCoolingAvailable() {
-        return (getConfigVal("analog1 and output and enabled") > 0);
+        if (isDcwbEnabled()) {
+            return getConfigVal("analog4 and output and enabled") > 0;
+        } else {
+            return getConfigVal("analog1 and output and enabled") > 0;
+        }
     }
     
     @Override
@@ -97,12 +102,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                 dcwbAlgoHandler = new DcwbAlgoHandler(isAdaptiveDelta, getSystemEquipRef(), CCUHsApi.getInstance());
             }
     
-            if (dabSystem.getSystemState() == COOLING) {
-                dcwbAlgoHandler.runLoopAlgorithm();
-            }
-    
             //Analog1 controls water valve when the DCWB enabled.
-            
             updateAnalog1DcwbOutput(dabSystem);
     
             //Could be mapped to cooling or co2 based on configuration.
@@ -281,23 +281,28 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     }
     
     private void updateAnalog1DcwbOutput(DabSystemController dabSystem) {
-        double signal = 0;
+        
+        boolean isAnalog1Enabled = getConfigVal("analog1 and output and enabled") > 0;
     
-        if (dabSystem.getSystemState() == COOLING) {
-            systemDCWBValveLoopOutput = dcwbAlgoHandler.getChilledWaterValveLoopOutput();
+        if (isAnalog1Enabled && dabSystem.getSystemState() == COOLING) {
+            dcwbAlgoHandler.runLoopAlgorithm();
+            systemDCWBValveLoopOutput = CCUUtils.roundToTwoDecimal(dcwbAlgoHandler.getChilledWaterValveLoopOutput());
         } else {
             systemDCWBValveLoopOutput = 0;
             dcwbAlgoHandler.resetChilledWaterValveLoop();
         }
-        
-        setSystemLoopOp("valve", systemDCWBValveLoopOutput);
     
-        if (getConfigVal("analog1 and output and enabled") > 0) {
+        double signal = 0;
+    
+        if (isAnalog1Enabled) {
             double analogMin = getConfigVal("analog1 and min");
             double analogMax = getConfigVal("analog1 and max");
             CcuLog.d(L.TAG_CCU_SYSTEM, "analog1Min: "+analogMin+" analog1Max: "+analogMax+" systemDCWBValveLoopOutput : "+systemDCWBValveLoopOutput);
             signal = getModulatedAnalogVal(analogMin, analogMax, systemDCWBValveLoopOutput);
         }
+    
+        setSystemLoopOp("valve", systemDCWBValveLoopOutput);
+    
         if (signal != getCmdSignal("valve")) {
             setCmdSignal("valve", signal);
         }
@@ -354,8 +359,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     private void updateAnalog4Output(DabSystemController dabSystem) {
         double loopType = CCUHsApi.getInstance().readDefaultVal("analog4 and loop and output and type");
         String loopTag = loopType == 0 ? Tags.COOLING : Tags.CO2;
-        HashMap cmd = CCUHsApi.getInstance().read("point and system and cmd and "+loopTag);
-    
+        
         double signal = 0;
         if (dabSystem.getSystemState() == COOLING) {
             systemCoolingLoopOp = dabSystem.getCoolingSignal();
@@ -365,7 +369,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         setSystemLoopOp("cooling", systemCoolingLoopOp);
     
         systemCo2LoopOp = getCo2LoopOp();
-        setSystemLoopOp("co2", systemCoolingLoopOp);
+        setSystemLoopOp("co2", systemCo2LoopOp);
     
         if (getConfigVal("analog4 and output and enabled") > 0) {
             
@@ -891,10 +895,10 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             Equip systemEquip = new Equip.Builder().setHashMap(equipMap).build();
             switch (tags){
                 case Tags.ANALOG1:
-                    HashMap cmdCool = CCUHsApi.getInstance().read("point and system and cmd and valve");
-                    if(cmdCool != null && cmdCool.size() > 0) {
+                    HashMap cmdValve = CCUHsApi.getInstance().read("point and system and cmd and valve");
+                    if(!cmdValve.isEmpty()) {
                         if(val == 0.0) {
-                            CCUHsApi.getInstance().deleteEntityTree(cmdCool.get("id").toString());
+                            CCUHsApi.getInstance().deleteEntityTree(cmdValve.get("id").toString());
                         }
                     }else {
                         Point valveSignal = new Point.Builder()
@@ -915,7 +919,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                     String loopTag = loopType == 0 ? Tags.COOLING : Tags.CO2;
                     HashMap cmd = CCUHsApi.getInstance().read("point and system and cmd and "+loopTag);
                     
-                    if(cmd != null && cmd.size() > 0) {
+                    if(!cmd.isEmpty()) {
                         if(val == 0.0) {
                             CCUHsApi.getInstance().deleteEntityTree(cmd.get("id").toString());
                         }

@@ -680,7 +680,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         vacationStatusTV.setText(vacationStatus);
         scheduleStatus.setText(status);
-        String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \""+ equipId[0] +"\"");
+        String scheduleTypeId = getScheduleTypeId(equipId[0]);
         final Integer mScheduleType = (int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
         Log.d("ScheduleType","mScheduleType=="+mScheduleType+","+(int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId)+","+p.getDisplayName());
         mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
@@ -760,6 +760,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 } else if (position == 1 && (mScheduleType != -1)/*&& (mScheduleType != position)*/)
                 {
                     clearTempOverride(equipId[0]);
+                    boolean isContainment = true;
                     if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled"))
                     {
                         mSchedule.setDisabled(false);
@@ -776,7 +777,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
                             Log.d(L.TAG_CCU_UI," scheduleType changed to ZoneSchedule : "+scheduleTypeId);
                             scheduleById.setDisabled(false);
-                            checkContainment(scheduleById);
+                            isContainment = checkContainment(scheduleTypeId, scheduleById, scheduleSpinner, zoneMap);
                             CCUHsApi.getInstance().updateZoneSchedule(scheduleById, zone.getId());
                         } else if (!zone.hasSchedule())
                         {
@@ -793,7 +794,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         CCUHsApi.getInstance().scheduleSync();
                     }
                     if (mScheduleTypeMap.get(equipId[0]) != ScheduleType.ZONE.ordinal()) {
-                        setScheduleType(scheduleTypeId, ScheduleType.ZONE, zoneMap);
+                        if(isContainment){
+                            setScheduleType(scheduleTypeId, ScheduleType.ZONE, zoneMap);
+                        }
                         mScheduleTypeMap.put(equipId[0], ScheduleType.ZONE.ordinal());
                     }
                 } else if(position == 2 && (mScheduleType != -1)){
@@ -1166,7 +1169,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         vacationStatusTV.setText(vacationStatus);
         scheduleStatus.setText(status);
-        String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \""+equipId+"\"");
+        String scheduleTypeId = getScheduleTypeId(equipId);
         final int mScheduleType = (int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
         Log.d("ScheduleType","update mScheduleType=="+mScheduleType+","+(int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId)+","+p.getDisplayName());
         mScheduleTypeMap.put(equipId, mScheduleType);
@@ -1243,6 +1246,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 } else if (position == 1 && (mScheduleType != -1)/*&& (mScheduleType != position)*/)
                 {
                     clearTempOverride(equipId);
+                    boolean isContainment = true;
                     if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled"))
                     {
                         mSchedule.setDisabled(false);
@@ -1259,7 +1263,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
                             Log.d(L.TAG_CCU_UI," scheduleType changed to ZoneSchedule : "+scheduleTypeId);
                             scheduleById.setDisabled(false);
-                            checkContainment(scheduleById);
+                            isContainment = checkContainment(scheduleTypeId, scheduleById, scheduleSpinner, openZoneMap);
                             CCUHsApi.getInstance().updateZoneSchedule(scheduleById, zone.getId());
                         } else if (!zone.hasSchedule())
                         {
@@ -1276,7 +1280,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         CCUHsApi.getInstance().scheduleSync();
                     }
                     if (mScheduleTypeMap.get(equipId) != ScheduleType.ZONE.ordinal()) {
-                        setScheduleType(scheduleTypeId, ScheduleType.ZONE, openZoneMap);
+                        if(isContainment) {
+                            setScheduleType(scheduleTypeId, ScheduleType.ZONE, openZoneMap);
+                        }
                         mScheduleTypeMap.put(equipId, ScheduleType.ZONE.ordinal());
                     }
                 } else if(position == 2 && (mScheduleType != -1)){
@@ -3004,7 +3010,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 if(zoneMap.size() > 1) {
                     for (int i = 0; i < zoneMap.size(); i++) {
                         Equip equip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
-                        String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \"" + equip.getId() + "\"");
+                        String scheduleTypeId = getScheduleTypeId(equip.getId());
                         CCUHsApi.getInstance().writeDefaultValById(scheduleTypeId, (double) schedule.ordinal());
                         CCUHsApi.getInstance().writeHisValById(scheduleTypeId, (double)schedule.ordinal());
                     }
@@ -3028,9 +3034,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");*/
     }
+
     
-    
-    private boolean checkContainment(Schedule zoneSchedule) {
+    private boolean checkContainment(String scheduleTypeId, Schedule zoneSchedule, Spinner scheduleSpinner, ArrayList<HashMap> zoneMap) {
         Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
         ArrayList<Interval> intervalSpills = new ArrayList<>();
         ArrayList<Interval> systemIntervals = systemSchedule.getMergedIntervals();
@@ -3079,24 +3085,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                    .setCancelable(false)
                    .setTitle("Schedule Errors")
                    .setIcon(android.R.drawable.ic_dialog_alert)
-                   .setNegativeButton("Edit", new DialogInterface.OnClickListener() {
-                       public void onClick(DialogInterface dialog, int id) {
-                           SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance(zoneSchedule.getId());
-                           FragmentManager   childFragmentManager = getFragmentManager();
-                           childFragmentManager.beginTransaction();
-                           schedulerFragment.show(childFragmentManager, "dialog");
-                    
-                           schedulerFragment.setOnExitListener(() -> {
-                               mSchedule = CCUHsApi.getInstance().getScheduleById(zoneSchedule.getId());
-                               if (checkContainment(mSchedule))
-                               {
-                                   ScheduleProcessJob.updateSchedules();
-                               }
-                           });
-                       }
-                   })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            scheduleSpinner.setSelection(0);
+                           dialog.dismiss();
+                        }
+
+                    })
                    .setPositiveButton("Force-Trim", new DialogInterface.OnClickListener() {
                        public void onClick(DialogInterface dialog, int id) {
+                           setScheduleType(scheduleTypeId, ScheduleType.ZONE, zoneMap);
                            HashMap<String, ArrayList<Interval>> spillsMap = new HashMap<>();
                            spillsMap.put(zoneSchedule.getRoomRef(), intervalSpills);
                            ScheduleUtil.trimZoneSchedule(mSchedule, spillsMap);
@@ -3110,6 +3108,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         } else {
             return true;
         }
+    }
+
+    private String getScheduleTypeId(String equipId){
+        return CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \""+equipId+"\"");
     }
     
 }

@@ -978,8 +978,12 @@ public class Pulse
 						}
 						break;
 				}
-				if(isFanModeChanged)
-					CCUHsApi.getInstance().writePoint(fanOpModePoint.get("id").toString(), TunerConstants.UI_DEFAULT_VAL_LEVEL, "manual", (double) fanSpeed_t.ordinal(), 0);
+				if(isFanModeChanged) {
+					CCUHsApi.getInstance().writePoint(fanOpModePoint.get("id").toString(), TunerConstants.UI_DEFAULT_VAL_LEVEL, "manual",
+					                                  (double) fanSpeed_t.ordinal(), 0);
+					CCUHsApi.getInstance().writeHisValById(fanOpModePoint.get("id").toString(),
+					                                       (double)fanSpeed_t.ordinal());
+				}
 			}
 		}
 	}

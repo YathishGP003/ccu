@@ -245,36 +245,19 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
             setButton.setEnabled(false);
             ProgressDialogUtils.showProgressDialog(getActivity(), "Saving 4PFCU Configuration");
 
-            new Thread(() -> {
-                setup4PFCUZoneProfile();
-                L.saveCCUState();
-            }).start();
-
-            /*new Handler().postDelayed(() -> {
-                ProgressDialogUtils.hideProgressDialog();
-                Fragment4PipeFanCoilUnitConfig.this.closeAllBaseDialogFragments();
-                getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                try {
-                    if (mSmartNodeAddress != 0) {
-                        LSerial.getInstance().sendSeedMessage(true, false, mSmartNodeAddress, roomRef, floorRef);
-                    }
-                }catch (Exception ex){
-                    ex.printStackTrace();
-                }
-            },12000);*/
-
-            compositeDisposable = new CompositeDisposable();
             Disposable disposable = RxjavaUtil.executeBackgroundTaskWithDisposable(
+                    ()->{
+                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving 4PFCU Configuration");
+                    },
+                    ()->{
+                        setup4PFCUZoneProfile();
+                        L.saveCCUState();
+                        LSerial.getInstance().sendSeedMessage(true, false, mSmartNodeAddress, roomRef, floorRef);
+                    },
                     ()->{
                         ProgressDialogUtils.hideProgressDialog();
                         Fragment4PipeFanCoilUnitConfig.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                    },
-                    ()->{
-                        LSerial.getInstance().sendSeedMessage(true, false, mSmartNodeAddress, roomRef, floorRef);
-                    },
-                    ()->{
-
                     }
             );
             compositeDisposable.add(disposable);
@@ -293,6 +276,7 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
                 }
             }
         });
+        compositeDisposable = new CompositeDisposable();
     }
 
     private void setup4PFCUZoneProfile() {

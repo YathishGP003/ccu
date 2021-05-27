@@ -235,37 +235,20 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
         setButton.setOnClickListener(v -> {
 
             setButton.setEnabled(false);
-            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving 2PFCU Configuration");
 
-            new Thread(() -> {
-                setup2PFCUZoneProfile();
-                L.saveCCUState();
-            }).start();
-
-            /*new Handler().postDelayed(() -> {
-                ProgressDialogUtils.hideProgressDialog();
-                Fragment2PipeFanCoilUnitConfig.this.closeAllBaseDialogFragments();
-                getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                try {
-                    if (mSmartNodeAddress != 0)
-                        LSerial.getInstance().sendSeedMessage(true, false, mSmartNodeAddress, roomRef, floorRef);
-                }catch (Exception ex){
-                    ex.printStackTrace();
-                }
-            },12000);*/
-
-            compositeDisposable = new CompositeDisposable();
             Disposable disposable = RxjavaUtil.executeBackgroundTaskWithDisposable(
+                    ()->{
+                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving 2PFCU Configuration");
+                    },
+                    ()->{
+                        setup2PFCUZoneProfile();
+                        L.saveCCUState();
+                        LSerial.getInstance().sendSeedMessage(true, false, mSmartNodeAddress, roomRef, floorRef);
+                    },
                     ()->{
                         ProgressDialogUtils.hideProgressDialog();
                         Fragment2PipeFanCoilUnitConfig.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                    },
-                    ()->{
-                        LSerial.getInstance().sendSeedMessage(true, false, mSmartNodeAddress, roomRef, floorRef);
-                    },
-                    ()->{
-
                     }
             );
             compositeDisposable.add(disposable);
@@ -284,6 +267,7 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
                 }
             }
         });
+        compositeDisposable = new CompositeDisposable();
     }
 
     private void setup2PFCUZoneProfile() {

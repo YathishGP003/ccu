@@ -603,11 +603,13 @@ public class DabStagedRtu extends DabSystemProfile
                 .setDisplayName(equipDis+"-"+name)
                 .setSiteRef(siteRef)
                 .setEquipRef(equipref).setHisInterpolate("cov")
-                .addMarker("system").addMarker("cmd").addMarker(relayMap).addMarker("his")
+                .addMarker("system").addMarker("cmd").addMarker(relayMap).addMarker("his").addMarker("runtime")
                 .setEnums("off,on")
                 .setTz(tz)
                 .build();
-        CCUHsApi.getInstance().addPoint(relay1Op);
+        //CCUHsApi.getInstance().addPoint(relay1Op);
+        String cmdPointID = CCUHsApi.getInstance().addPoint(relay1Op);
+        CCUHsApi.getInstance().writeHisValById(cmdPointID,0.0);
     }
     public double getCmdSignal(String cmd) {
         return CCUHsApi.getInstance().readHisValByQuery("point and system and cmd and his and "+cmd);

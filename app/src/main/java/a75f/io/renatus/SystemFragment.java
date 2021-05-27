@@ -24,6 +24,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -465,6 +466,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				oaoArc.setContentDescription(String.valueOf(returnAirCO2));
 			}
 		} else {
+			RelativeLayout.LayoutParams layoutParams =(RelativeLayout.LayoutParams)systemModePicker.getLayoutParams();
+			layoutParams.setMargins(0,300,0,0);
+			systemModePicker.setLayoutParams(layoutParams);
 			oaoArc.setVisibility(View.GONE);
 			purgeLayout.setVisibility(View.GONE);
 		}

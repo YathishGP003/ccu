@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+
+import a75f.io.logger.CcuLog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -34,7 +36,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.Globals;
 import a75f.io.renatus.DABFullyAHUProfile;
@@ -53,7 +54,7 @@ import a75f.io.renatus.VavStagedRtuProfile;
 import a75f.io.renatus.VavStagedRtuWithVfdProfile;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
-import androidx.fragment.app.FragmentTransaction;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 
 public class FreshRegistration extends AppCompatActivity implements VerticalTabAdapter.OnItemClickListener, SwitchFragment {
     VerticalTabAdapter verticalTabAdapter;
@@ -1185,7 +1186,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
     private void updateCCURegistrationInfo() {
         ProgressDialogUtils.showProgressDialog(this,"CCU Registering...");
-        String installerEmail = prefs.getString("installerEmail");
         buttonNext.setEnabled(false);
 
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
@@ -1194,7 +1194,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 ProgressDialogUtils.hideProgressDialog();
                 if (pingCloudServer()){
 
-                    CCUHsApi.getInstance().registerCcu(installerEmail);
+                    registerCcuInBackground();
 
                     Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
                     i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -1206,8 +1206,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                             .setCancelable(false)
                             .setMessage("No network connection, Registration is not complete and Facilisight cannot be accessed unless you connect to network.")
                             .setPositiveButton("Proceed", (dialog, id) -> {
-
-                                CCUHsApi.getInstance().registerCcu(installerEmail);
+                                registerCcuInBackground();
                                 Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
                                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(i);
@@ -1217,6 +1216,32 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 }
             }
         }, 1000);
+    }
+
+    private void registerCcuInBackground() {
+        String installerEmail = prefs.getString("installerEmail");
+        /*
+         * This RxJava here is not a great pattern, but maybe the best in a bad situation.
+         * We should not move on from this screen, or, probably earlier screens,
+         * until we know registration is successful.
+         *
+         * We don't hold onto the Disposable b/c we can't destroy it.  We need to let this call
+         * continue even after the Activity is destroyed!  So that registration is successful.
+         */
+        CCUHsApi.getInstance().registerCcuAsync(installerEmail)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                    () -> { },  // ignore success
+                    error -> {
+                        // A Toast rather than a dialog is necessary since the interface does not wait
+                        // for the response here.  We should fix that when we rewrite Registration.
+                        Context context = FreshRegistration.this;
+                        if (context != null) {
+                            Toast.makeText(context, "Error registering CCU.  Please try again", Toast.LENGTH_LONG).show();
+                        }
+                        CcuLog.w("CCU_HS", "Unexpected error registering CCU.", error);
+                    }
+            );
     }
 
     private synchronized boolean pingCloudServer() {

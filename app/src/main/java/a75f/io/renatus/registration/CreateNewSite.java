@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import com.google.android.material.textfield.TextInputLayout;
+
+import a75f.io.renatus.util.RxjavaUtil;
 import androidx.fragment.app.Fragment;
 import android.text.Editable;
 import android.text.Html;
@@ -407,9 +409,10 @@ public class CreateNewSite extends Fragment {
             } else {
                 btnEditSite.setEnabled(true);
                 btnUnregisterSite.setEnabled(false);
-                CCUHsApi.getInstance().deleteEntity(CCUHsApi.getInstance().getCcuRef().toString());
-
-                ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU...");
+                //removeCCU api call would have already deleted this CCU entity from server
+                //We just need to delete it locally before creating a new CCU device.
+                CCUHsApi.getInstance().deleteEntityLocally(CCUHsApi.getInstance().getCcuRef().toString());
+                
                 String facilityManagerEmail = mSiteEmailId.getText().toString();
                 String installerEmail = mSiteInstallerEmailId.getText().toString();
                 String ccuName = mSiteCCU.getText().toString();
@@ -419,31 +422,23 @@ public class CreateNewSite extends Fragment {
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                 L.saveCCUState();
                 CCUHsApi.getInstance().syncEntityTree();
-
-                Handler ccuRegistrationHandler = new Handler();
-                Runnable ccuRegistrationRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
-                        String ccuId = ccu.get("id").toString();
-
-                        if (StringUtils.isBlank(ccuId)) {
-                            prefs.setString("installerEmail", installerEmail);
-                            CCUHsApi.getInstance().registerCcu(installerEmail);
-                            ProgressDialogUtils.hideProgressDialog();
-                            ccuRegistrationHandler.postDelayed(this, 30000);
+    
+                RxjavaUtil.executeBackgroundTask(
+                    () -> ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU..."),
+                    () -> CCUHsApi.getInstance().registerCcu(installerEmail),
+                    ()-> {
+                        if (!CCUHsApi.getInstance().isCCURegistered()) {
+                            Toast.makeText(getActivity(), "CCU Registration Failed ", Toast.LENGTH_LONG).show();
                         } else {
                             btnUnregisterSite.setText("Unregister");
                             btnUnregisterSite.setEnabled(true);
                             btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
                             setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
-                            Toast.makeText(getActivity(), "CCU Registered Successfully "+ ccuId, Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), "CCU Registered Successfully ", Toast.LENGTH_LONG).show();
                             CCUHsApi.getInstance().resetSync();
-                            ccuRegistrationHandler.removeCallbacks(this);
                         }
-                    }
-                };
-                ccuRegistrationHandler.postDelayed(ccuRegistrationRunnable, 1000);
+                        ProgressDialogUtils.hideProgressDialog();
+                    });
             }
         });
 
@@ -525,6 +520,11 @@ public class CreateNewSite extends Fragment {
     }
 
     private void removeCCU(String ccuId) {
+        //We would consider CCU unregistered from this point itself.
+        //Otherwise pubnubs generated due to unregister may arrive before the response itself and CCU
+        //handling it can lead to inconsistencies.
+        CCUHsApi.getInstance().setCcuUnregistered();
+        
         AsyncTask<Void, Void, String> ccuUnReg = new AsyncTask<Void, Void, String>() {
 
             @Override
@@ -556,14 +556,14 @@ public class CreateNewSite extends Fragment {
                                 setCompoundDrawableColor(btnUnregisterSite, R.color.accent);
 
                                 CCUHsApi.getInstance().setJwt("");
-                                CCUHsApi.getInstance().setCcuUnregistered();
                                 Toast.makeText(getActivity(), "CCU unregistered successfully " +ccuId, Toast.LENGTH_LONG).show();
                             } else {
                                 Toast.makeText(getActivity(), "Failed to unregistered the CCU", Toast.LENGTH_LONG).show();
                             }
                         }
                 } else {
-                    Toast.makeText(getActivity(), "Fails to remove CCU", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), "Failed to remove CCU", Toast.LENGTH_LONG).show();
+                    CCUHsApi.getInstance().setCcuRegistered();
                 }
             }
         };

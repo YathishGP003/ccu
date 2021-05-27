@@ -46,11 +46,17 @@ public class UpdatePointHandler
 
         Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(pointUid)).build();
         CcuLog.d(L.TAG_CCU_PUBNUB, " HandlePubnub for" + Arrays.toString(localPoint.getMarkers().toArray()));
+    
+        //Handle DCWB specific system config here.
+        if (HSUtil.isDcwbConfig(pointUid, CCUHsApi.getInstance())) {
+            DcwbConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
+            updateUI(localPoint);
+            return;
+        }
         
         if (HSUtil.isSystemConfigOutputPoint(pointUid, CCUHsApi.getInstance())
                 || HSUtil.isSystemConfigHumidifierType(pointUid, CCUHsApi.getInstance())
                 || HSUtil.isSystemConfigIEAddress(pointUid, CCUHsApi.getInstance())) {
-            
             ConfigPointUpdateHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
             updatePoints(localPoint);
             return;
@@ -72,34 +78,10 @@ public class UpdatePointHandler
             updateUI(localPoint);
             return;
         }
-    
+        
         if (CCUHsApi.getInstance().entitySynced(pointUid))
         {
-            HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote(pointUid);
-            if (pointGrid == null) {
-                CcuLog.d(L.TAG_CCU_PUBNUB, "Failed to read remote point point : " + pointUid);
-                return;
-            }
-            //CcuLog.d(L.TAG_CCU_PUBNUB+ " REMOTE ARRAY: ", HZincWriter.gridToString(pointGrid));
-            CCUHsApi.getInstance().deletePointArray(pointUid);
-            Iterator it = pointGrid.iterator();
-            while (it.hasNext()) {
-                HRow r = (HRow) it.next();
-                String who = r.get("who").toString();
-
-                try {
-                    double level = Double.parseDouble(r.get("level").toString());
-                    double val = Double.parseDouble(r.get("val").toString());
-                    HVal durHVal = r.get("duration", false);
-                    double duration = durHVal == null ? 0d : Double.parseDouble(durHVal.toString());
-                    //If duration shows it has already expired, then just write 1ms to force-expire it locally.
-                    double dur = (duration == 0 ? 0 : (duration - System.currentTimeMillis() ) > 0 ? (duration - System.currentTimeMillis()) : 1);
-                    CcuLog.d(L.TAG_CCU_PUBNUB, "Remote point:  level " + level + " val " + val + " who " + who + " duration "+duration+" dur "+dur);
-                    CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(pointUid), (int) level, CCUHsApi.getInstance().getCCUUserName(), HNum.make(val), HNum.make(dur));
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
-            }
+            fetchRemotePoint(pointUid);
 
             //TODO- Should be removed one pubnub is stable
             logPointArray(localPoint);
@@ -113,6 +95,37 @@ public class UpdatePointHandler
         
         } else {
             CcuLog.d(L.TAG_CCU_PUBNUB, "Received for invalid local point : " + pointUid);
+        }
+    }
+    
+    /**
+     * Replace local point array with point array values from server
+     */
+    private static void fetchRemotePoint(String pointUid) {
+        HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote(pointUid);
+        if (pointGrid == null) {
+            CcuLog.d(L.TAG_CCU_PUBNUB, "Failed to read remote point point : " + pointUid);
+            return;
+        }
+        //CcuLog.d(L.TAG_CCU_PUBNUB+ " REMOTE ARRAY: ", HZincWriter.gridToString(pointGrid));
+        CCUHsApi.getInstance().deletePointArray(pointUid);
+        Iterator it = pointGrid.iterator();
+        while (it.hasNext()) {
+            HRow r = (HRow) it.next();
+            String who = r.get("who").toString();
+        
+            try {
+                double level = Double.parseDouble(r.get("level").toString());
+                double val = Double.parseDouble(r.get("val").toString());
+                HVal durHVal = r.get("duration", false);
+                double duration = durHVal == null ? 0d : Double.parseDouble(durHVal.toString());
+                //If duration shows it has already expired, then just write 1ms to force-expire it locally.
+                double dur = (duration == 0 ? 0 : (duration - System.currentTimeMillis() ) > 0 ? (duration - System.currentTimeMillis()) : 1);
+                CcuLog.d(L.TAG_CCU_PUBNUB, "Remote point:  level " + level + " val " + val + " who " + who + " duration "+duration+" dur "+dur);
+                CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(pointUid), (int) level, CCUHsApi.getInstance().getCCUUserName(), HNum.make(val), HNum.make(dur));
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
         }
     }
 

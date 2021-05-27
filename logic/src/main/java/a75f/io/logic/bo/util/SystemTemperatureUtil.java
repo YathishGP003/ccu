@@ -94,6 +94,10 @@ public class SystemTemperatureUtil
     public static double getAverageCoolingDesiredTemp() {
         ArrayList<HashMap<Object, Object>> desireTemps = CCUHsApi.getInstance().readAllEntities("point and " +
                                                                                           "zone and desired and temp and cooling");
+        if (desireTemps.isEmpty()) {
+            return 74;//Fallback desired temp cooling value when there are no modules paired.
+        }
+        
         return desireTemps.stream()
                            .map(m -> CCUHsApi.getInstance().readPointPriorityVal(m.get("id").toString()) )
                            .mapToInt(m ->  m.intValue())

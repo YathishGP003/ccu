@@ -538,7 +538,7 @@ public class DabSystemController extends SystemController
     }
     
     public ZonePriority getEquipPriority(String equipRef) {
-        double priorityVal = CCUHsApi.getInstance().readPointPriorityVal("point and zone and config and priority and equipRef == \""
+        double priorityVal = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and config and priority and equipRef == \""
                                                                    +equipRef+"\""
         );
         return ZonePriority.values()[(int) priorityVal];

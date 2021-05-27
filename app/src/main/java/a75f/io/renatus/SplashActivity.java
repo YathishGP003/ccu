@@ -1,9 +1,12 @@
 package a75f.io.renatus;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+
+import a75f.io.logger.CcuLog;
 import androidx.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
@@ -13,6 +16,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.Prefs;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 
 public class SplashActivity extends Activity {
     
@@ -65,8 +69,7 @@ public class SplashActivity extends Activity {
                                 finish();
                             } else if(prefs.getBoolean("REGISTRATION")) {
                                 if (!CCUHsApi.getInstance().isCCURegistered()){
-                                    String installerEmail = prefs.getString("installerEmail");
-                                    CCUHsApi.getInstance().registerCcu(installerEmail);
+                                    registerCcuInBackground();
                                     Log.i("SplashActivity","CCU is not yet registered");
                                 }
                                 Intent i = new Intent(SplashActivity.this, RenatusLandingActivity.class);
@@ -105,6 +108,26 @@ public class SplashActivity extends Activity {
             }
         }
         registrationThread.start();
+    }
+
+    // Yes, this essentially duplicates code in FreshRegistration{Activity}.  It's ok.  It's basically
+    //  UI code in both places -- i.e. handling a network call -- and could deviate.
+    private void registerCcuInBackground() {
+        String installerEmail = prefs.getString("installerEmail");
+        CCUHsApi.getInstance().registerCcuAsync(installerEmail)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        () -> { },  // ignore success
+                        error -> {
+                            // A Toast rather than a dialog is necessary since the interface does not wait
+                            // for the response here.  We should fix that when we rewrite Registration.
+                            Context context = SplashActivity.this;
+                            if (context != null) {
+                                Toast.makeText(context, "Error registering CCU.  Please try again", Toast.LENGTH_LONG).show();
+                            }
+                            CcuLog.w("CCU_HS", "Unexpected error registering CCU.", error);
+                        }
+                );
     }
 
     private int getViewPagerPosition() {

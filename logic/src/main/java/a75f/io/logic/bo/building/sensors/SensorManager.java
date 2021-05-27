@@ -164,7 +164,7 @@ public class SensorManager {
         externalSensors.add(new Sensor("CT 0-10","amps",0,10,0,10,0.1));
         externalSensors.add(new Sensor("CT 0-20","amps",0,10,0,20,0.1));
         externalSensors.add(new Sensor("CT 0-50","amps",0,10,0,50,0.1));
-        externalSensors.add(new Sensor("ION Meter 0-1 Million ions/cc","ions/cc",0,10,0,1000000,1000));
+        externalSensors.add(new Sensor("ION Meter 0-1 Million","ions/cc",0,10,0,1000000,1000));
         return externalSensors;
     }
 }

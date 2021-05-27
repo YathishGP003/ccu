@@ -1,16 +1,8 @@
- - Merged PR 834: Fix NPE in Globals#getSmartNodeBand()
- - Merged PR 824: Fix crash while adding floor on second ccu with same name as floor in existing site
- - Merged PR 842: System testing issues fix.
- - Fix for analog reset and forced-occupied clear
- - Merged PR 727: New Jsons added for modbus equipment
- - Modbus configuration for new Jsons
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/sdev/5861_Modbus_Configuration_UI_for_PAC_UPS_BTU_Meters_using_JSON_files
- - Merged PR 809: Fix alert sync
- - Modbus new json configuration
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/sdev/5861_Modbus_Configuration_UI_for_PAC_UPS_BTU_Meters_using_JSON_files
- - Modbus Configuration with new Jsons
- - Modbus Configuration with new jsons
- - Modbus Configuration for new jsons
- - New Jsons for Equipment
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/sdev/5861_Modbus_Configuration_UI_for_PAC_UPS_BTU_Meters_using_JSON_files
- - New Jsons added for modbus equipment
+ - Merged PR 1016: 6649: CCU: Not able to add CCU to existing site
+ - Merged PR 984: Conditioning mode UI changes
+ - Merged PR 933:  Without a confirmed selection of Zone schedule zone starts following zone schedule.
+ - Merged PR 981: 6312_CCU_Modus_App_crashed_when_UPS-400k,30k80k_is_paired
+ - Json file for UPS-400K was not in valid format, corrected it accordingly.
+ - Added RelativeLayout params for Number picker and added Top margin
+ - Json filefor UPS-400K was not in valid format, corrected it accordingly
+ - Committing code for Bug- 6268 CCU : Without a confirmed selection of Zone schedule zone starts following zone schedule.

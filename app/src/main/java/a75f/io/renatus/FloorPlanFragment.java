@@ -127,7 +127,6 @@ public class FloorPlanFragment extends Fragment {
     @BindView(R.id.rl_modbus_btu_meter)
     RelativeLayout rl_modbus_btu_meter;
 
-
     @BindView(R.id.textSystemDevice)
     TextView textViewSystemDevice;
     @BindView(R.id.textOAO)
@@ -644,6 +643,11 @@ public class FloorPlanFragment extends Fragment {
 
     @OnClick(R.id.rl_systemdevice)
     public void systemDeviceOnClick() {
+
+        rl_oao.setVisibility(View.VISIBLE);
+        rl_modbus_energy_meter.setVisibility(View.VISIBLE);
+        rl_modbus_btu_meter.setVisibility(View.VISIBLE);
+
         setSystemSelection(1);
         if (floorList.size() > 0) {
             if (roomList.size() > 0) {
@@ -1183,6 +1187,8 @@ public class FloorPlanFragment extends Fragment {
 
     @OnClick(R.id.pairModuleBtn)
     public void startPairing() {
+        addModulelt.setVisibility(View.GONE);
+        desableForMiliSeconds();
         if (mFloorListAdapter.getSelectedPostion() == -1) {
             short meshAddress = L.generateSmartNodeAddress();
 
@@ -1198,21 +1204,24 @@ public class FloorPlanFragment extends Fragment {
                     showDialogFragment(FragmentBLEInstructionScreen.getInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.OAO, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
                 }
             }
+            /**
+             * Modbus energy meter selection
+             **/
             if (priviousSelectedDevice == 2) {
-                /**
-                 * Modbus energy meter selection
-                 */
+                //only one energymeter module is allowed.
+                boolean isPaired = false;
                 if (L.ccu().zoneProfiles.size() > 0) {
                     for (Iterator<ZoneProfile> it = L.ccu().zoneProfiles.iterator(); it.hasNext(); ) {
                         ZoneProfile p = it.next();
                         if (p.getProfileType() == ProfileType.MODBUS_EMR) {
-                            Toast.makeText(getActivity(), " Energy Meter already paired", Toast.LENGTH_LONG).show();
-                            return;
-                        } else {
-                            showDialogFragment(FragmentModbusConfiguration
-                                    .newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
+                            isPaired = true;
+                            break;
                         }
                     }
+                }
+                if (isPaired) {
+                    Toast.makeText(getActivity(), " Energy Meter already paired", Toast.LENGTH_LONG).show();
+                    return;
                 } else {
                     showDialogFragment(FragmentModbusConfiguration
                             .newInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR), FragmentModbusConfiguration.ID);
@@ -1289,6 +1298,7 @@ public class FloorPlanFragment extends Fragment {
 
 
     private void showDialogFragment(DialogFragment dialogFragment, String id) {
+
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         Fragment prev = getFragmentManager().findFragmentByTag(id);
         if (prev != null) {
@@ -1304,6 +1314,10 @@ public class FloorPlanFragment extends Fragment {
 
     @OnItemClick(R.id.floorList)
     public void setFloorListView(AdapterView<?> parent, View view, int position, long id) {
+        rl_oao.setVisibility(View.GONE);
+        rl_modbus_energy_meter.setVisibility(View.GONE);
+        rl_modbus_btu_meter.setVisibility(View.GONE);
+
         selectFloor(position);
         setSystemUnselection();
     }
@@ -1457,5 +1471,28 @@ public class FloorPlanFragment extends Fragment {
         public int compare(Equip a, Equip b) {
             return a.getGroup().compareToIgnoreCase(b.getGroup());
         }
+    }
+
+    /**
+     * Disabling the Pair button for 2 seconds then enabling to avoid double click on pair module
+     */
+    public void desableForMiliSeconds(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    int delay = Integer.parseInt(getString(R.string.buttonDesableDelay));
+                    Thread.sleep(delay);
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            addModulelt.setVisibility(View.VISIBLE);
+                        }
+                    });
+                }catch (Exception e){
+
+                }
+            }
+        }).start();
     }
 }

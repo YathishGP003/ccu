@@ -5,8 +5,6 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.webkit.HttpAuthHandler;
-import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -50,6 +48,8 @@ import a75f.io.api.haystack.util.Migrations;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class CCUHsApi
 {
@@ -1940,91 +1940,78 @@ public class CCUHsApi
         return spDefaultPrefs.getBoolean("75fNetworkAvailable", false);
     }
 
-    public void registerCcu(String installerEmail) {
-        registerCcuAsyncTask(installerEmail);
+    public Completable registerCcuAsync(String installerEmail) {
+        return Completable.create(emitter -> {
+            registerCcu(installerEmail);
+            emitter.onComplete();
+        })
+          .subscribeOn(Schedulers.io());
     }
 
-    // TODO Matt Rudd - Too much in this method; need to refactor
-    private void registerCcuAsyncTask(final String installerEmail) {
-        AsyncTask<Void, Void, Boolean> updateCCUReg = new AsyncTask<Void, Void, Boolean>() {
+    public void registerCcu(String installerEmail) {
+        
+        HashMap site = CCUHsApi.getInstance().read("site");
+        Log.d("CCURegInfo","createNewSite Edit backgroundtask");
 
-            @Override
-            protected synchronized Boolean doInBackground(Void... voids) {
-                HashMap site = CCUHsApi.getInstance().read("site");
-
-                boolean ccuSuccessfulRegistration = false;
-
-                Log.d("CCURegInfo","createNewSite Edit backgroundtask");
-
-                if (siteSynced() && CCUHsApi.getInstance().isNetworkConnected()) {
-                    Log.d("CCURegInfo","The CCU is not registered, but the site is created with ID " + getSiteIdRef().toString());
-                    HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
-
-                    String ccuLuid = Objects.toString(ccu.get(CcuFieldConstants.ID),"");
-
-                    if (! entitySynced(ccuLuid)) {
-                        String facilityManagerEmail = site.get("fmEmail").toString();
-                        String installEmail = installerEmail;
-                        if (StringUtils.isBlank(installEmail)) {
-                            installEmail = site.get("installerEmail").toString();
-                        }
-                        String dis = ccu.get("dis").toString();
-                        String ahuRef = ccu.get("ahuRef").toString();
-                        String gatewayRef = ccu.get("gatewayRef").toString();
-                        String equipRef = ccu.get("equipRef").toString();
-
-                        JSONObject ccuRegistrationRequest = getCcuRegisterJson(ccuLuid, getSiteIdRef().toString(), dis, ahuRef, gatewayRef, equipRef, facilityManagerEmail, installEmail);
-
-                        if (ccuRegistrationRequest != null) {
-                            Log.d("CCURegInfo","Sending CCU registration request: " + ccuRegistrationRequest.toString());
-                            String ccuRegistrationResponse = HttpUtil.executeJson(
-                                    CCUHsApi.getInstance().getAuthenticationUrl()+"devices",
-                                    ccuRegistrationRequest.toString(),
-                                    BuildConfig.CARETAKER_API_KEY,
-                                    true,
-                                    HttpConstants.HTTP_METHOD_POST
-                            );
-                            Log.d("CCURegInfo","Registration response: " + ccuRegistrationResponse);
-
-                            if (ccuRegistrationResponse != null) {
-                                try {
-                                    JSONObject ccuRegistrationResponseJson = new JSONObject(ccuRegistrationResponse);
-                                    String ccuGuid = ccuRegistrationResponseJson.getString("id");
-                                    String token = ccuRegistrationResponseJson.getString("token");
-                                    CCUHsApi.getInstance().setSynced(ccuLuid, ccuGuid);
-                                    CCUHsApi.getInstance().setJwt(token);
-                                    CCUHsApi.getInstance().setCcuRegistered();
-                                    ccuSuccessfulRegistration = true;
-                                    Log.d("CCURegInfo","CCU was successfully registered with ID " + ccuGuid + "; token " + token);
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                    } else {
-                        Log.d("CCURegInfo","The CCU is synced, id: " + ccuLuid + " and the token is " + CCUHsApi.getInstance().getJwt());
-                        // TODO Matt Rudd - Need mechanism to handle the token being null here but the GUID existing; may happen in edge cases
-                        CCUHsApi.getInstance().setCcuRegistered();
-
-                        if (StringUtils.isBlank(CCUHsApi.getInstance().getJwt())) {
-                            Log.e("CCURegInfo", "There was a fatal error registering the CCU. The GUID is set, but the token is unavailable.");
+        // tcase 05/26/21 -- this isNetworkConnected check is a bug.
+        //  1) The check gives the wrong answer right after I fix network by connecting to wifi.
+        //  2) If we think there is no network here, we silently fail the registration  :_(  This is like a puppy dying.
+        // I would fix it, i.e. I think it's safe to delete, but I am doing a hotfix for another issue right now, and
+        // this issue is pre-existing.
+        if (siteSynced() && CCUHsApi.getInstance().isNetworkConnected()) {
+            Log.d("CCURegInfo","The CCU is not registered, but the site is created with ID " + getSiteIdRef().toString());
+            HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
+        
+            String ccuLuid = Objects.toString(ccu.get(CcuFieldConstants.ID),"");
+        
+            if (! entitySynced(ccuLuid)) {
+                String facilityManagerEmail = site.get("fmEmail").toString();
+                String installEmail = installerEmail;
+                if (StringUtils.isBlank(installEmail)) {
+                    installEmail = site.get("installerEmail").toString();
+                }
+                String dis = ccu.get("dis").toString();
+                String ahuRef = ccu.get("ahuRef").toString();
+                String gatewayRef = ccu.get("gatewayRef").toString();
+                String equipRef = ccu.get("equipRef").toString();
+            
+                JSONObject ccuRegistrationRequest = getCcuRegisterJson(ccuLuid, getSiteIdRef().toString(), dis, ahuRef, gatewayRef, equipRef, facilityManagerEmail, installEmail);
+            
+                if (ccuRegistrationRequest != null) {
+                    Log.d("CCURegInfo","Sending CCU registration request: " + ccuRegistrationRequest.toString());
+                    String ccuRegistrationResponse = HttpUtil.executeJson(
+                        CCUHsApi.getInstance().getAuthenticationUrl()+"devices",
+                        ccuRegistrationRequest.toString(),
+                        BuildConfig.CARETAKER_API_KEY,
+                        true,
+                        HttpConstants.HTTP_METHOD_POST
+                    );
+                    Log.d("CCURegInfo","Registration response: " + ccuRegistrationResponse);
+                
+                    if (ccuRegistrationResponse != null) {
+                        try {
+                            JSONObject ccuRegistrationResponseJson = new JSONObject(ccuRegistrationResponse);
+                            String ccuGuid = ccuRegistrationResponseJson.getString("id");
+                            String token = ccuRegistrationResponseJson.getString("token");
+                            CCUHsApi.getInstance().setSynced(ccuLuid, ccuGuid);
+                            CCUHsApi.getInstance().setJwt(token);
+                            CCUHsApi.getInstance().setCcuRegistered();
+                            Log.d("CCURegInfo","CCU was successfully registered with ID " + ccuGuid + "; token " + token);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
                     }
                 }
-                return ccuSuccessfulRegistration;
-
-            }
-
-            @Override
-            protected void onPostExecute(Boolean successfulRegistration) {
-                Log.d("CCURegInfo", "createNewSite Edit onPostExecute=" + successfulRegistration);
-                if (successfulRegistration) {
-                    Toast.makeText(context, "Your CCU was registered successfully", Toast.LENGTH_LONG).show();
+            } else {
+                Log.d("CCURegInfo","The CCU is synced, id: " + ccuLuid + " and the token is " + CCUHsApi.getInstance().getJwt());
+                // TODO Matt Rudd - Need mechanism to handle the token being null here but the GUID existing; may happen in edge cases
+                CCUHsApi.getInstance().setCcuRegistered();
+            
+                if (StringUtils.isBlank(CCUHsApi.getInstance().getJwt())) {
+                    Log.e("CCURegInfo", "There was a fatal error registering the CCU. The GUID is set, but the token is unavailable.");
                 }
             }
-        };
-
-        updateCCUReg.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
     }
 
     /**

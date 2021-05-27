@@ -209,6 +209,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
                 getActivity(), R.array.smartstat_relay_fanHumiD, R.layout.spinner_cpu_configure_item);
         fanTypeAdapter.setDropDownViewResource(R.layout.spinner_cpu_configure_item);
         fanHumiDSpinner.setAdapter(fanTypeAdapter);
+        fanHumiDSpinner.setEnabled(false);
 
         ArrayAdapter<CharSequence> hpChangeOverType = ArrayAdapter.createFromResource(
                 getActivity(), R.array.smartstat_relay_hp_changeover, R.layout.spinner_cpu_configure_item);
@@ -506,18 +507,24 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
                 }
                 break;
             case R.id.toggleFanHigh:
-                if(fanHumiDSpinner.getSelectedItemPosition() > 0){
-                    if(!switchFanHigh.isChecked())
-                        switchFanHigh.setChecked(false);
-                    else
-                        switchFanHigh.setChecked(true);
-                    switchFanHigh.setEnabled(true);
-                }else{
-                    if(!switchFanLowG.isChecked()) {
+                if (isChecked){
+                    fanHumiDSpinner.setEnabled(true);
+                    if(fanHumiDSpinner.getSelectedItemPosition() > 0){
+                        if(!switchFanHigh.isChecked())
+                            switchFanHigh.setChecked(false);
+                        else
+                            switchFanHigh.setChecked(true);
+                        switchFanHigh.setEnabled(true);
+                    }else{
+                        if(!switchFanLowG.isChecked()) {
 
-                        switchFanHigh.setEnabled(false);
-                        switchFanHigh.setChecked(false);
+                            switchFanHigh.setEnabled(false);
+                            switchFanHigh.setChecked(false);
+                        }
                     }
+                }
+                else{
+                    fanHumiDSpinner.setEnabled(false);
                 }
                 break;
         }

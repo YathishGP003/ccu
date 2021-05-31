@@ -607,7 +607,6 @@ public class DabStagedRtu extends DabSystemProfile
                 .setEnums("off,on")
                 .setTz(tz)
                 .build();
-        //CCUHsApi.getInstance().addPoint(relay1Op);
         String cmdPointID = CCUHsApi.getInstance().addPoint(relay1Op);
         CCUHsApi.getInstance().writeHisValById(cmdPointID,0.0);
     }

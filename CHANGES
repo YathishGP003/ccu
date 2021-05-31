@@ -1,77 +1,8 @@
- - Merged PR 525: Bug-5108 CCU : Relay mapping are shown as cooling stage1 for few seconds
- - Merged PR 978: Unregister crash and issues
- - Update Rxjava util with error handling and dispobles
- - Merged PR 903: Relay output is not changed based on updated threshold
- - Merged PR 924: DCWB Reconfiguration support
- - Merged PR 977: Switching SystemProfile with incorrect equips
- - Reset valveLoop when analog1 is disabled
- - Merged PR 982: 6234 - User is able to add DAiken IE with DAB profiles
- - Merge branch 'master' into story/samjith/6135_dcwb_reconfig
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - Merged PR 830: 6241 : CCU : Modbus : Able to pair another energy meter at system level
- - User is able to add DAiken IE with DAB profiles
- - Merged PR 918: Disabled the pair module button for 2 seconds and enabled back immediately
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - Merge branch 'master' into Bug/samjith/5777_unregister_crash
- - Merged PR 979: Dont create bacnet objects for Modbus Equips
- - Have module check while switching to Default System
- - Merge branch 'master' into Bug/samjith/5044_switch_vav_with_dualduct
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - Merged PR 820: User will be shown a toast when tried to change the system profile to default
- - Ui adjustment for analog2
- - Fix for dcwb disabled issue
- - Equipment Status is displaying 'System OFF' every time you close and reopen the app, extra page refresh should be performed to view the 'current value'
- - Check for dual duct zones before switching to VAV
- - Exclude modbus equips from bacnet object creation
- - Remove hardcoded delays and refactor
- - Fix unregister-reregister issues
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - Merged PR 964: Merge master
- - Merged PR 963: Merge master
- - update the logic
- - Merge branch 'bug/sdev/6241_CCU_Modbus_Able_to_pair_another_energy_meter_at_system_level' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/sdev/6241_CCU_Modbus_Able_to_pair_another_energy_meter_at_system_level
- - Merged PR 925: Round normalized damper position values to 2 decimal places
- - Restrict pi loop inversion only to Adaptive delta algo
- - Update hisInterpolate to cov
- - Add support for algorithm switch from reconfig
- - Update hisInterpolate for dcwb loop points
- - Merge branch 'master' into story/samjith/6135_dcwb_reconfig
- - Adaptive delta algorithm update
- - Merged PR 869: Correct deadband calculation in Standalone scheduler
- - Updated with Visibility
- - Merge branches 'bug/mkundaragi/4481_Sometimes_whileclickingontheSet_button_navigates_to_the_initial_Pairing_screen' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/4481_Sometimes_whileclickingontheSet_button_navigates_to_the_initial_Pairing_screen
- - Merged PR 905: UI Issue with Relay toggle and removed duplicate sensor unit
- - Merged PR 926: Physical value for composit signal was updated only when logical value was ch...
- - Merged PR 898: CCU: pubnub is not consuming for 4 PFCU raised by portals
- - Make the complete text visible
- - Round valve loop op to two decimals
- - Disabled the pair module button for 2 seconds and enabled back immediately
- - Physical value for composit signal was updated only when logical value was changed. That does not work when analog config changes.
- - Round normalized damper position values to 2 decimal places
- - Merge branch 'bug/6206/CCU_DCWB-Hisinterpolate_tag' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/samjith/6135_dcwb_reconfig
- - exit temp marging point update and spelling correction
- - Merge master
- - Merged PR 882: Updated the UI desgin now When we click on system device then only we are showing the OAO,BTU,EM
- - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
- - updated Icons tint colors
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
- - Relay output not changed based on updated threshold
- - CCU: pubnub is not consuming for 4 PFCU raised by portals
- - Updated the UI desgin now When we click on system device then only we are showing the OAO,BTU,EM On floor selection we are hiding the system device OAO,BTU,EM
- - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
- - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
- - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
- - System Energy Meter
- - Merged PR 849: Fix crash when switching to DefaultProfile with a dualduct equip
- - Fix crash when switching to DefaultProfile with a dualduct equip
- - On the lick of pairmodule,a flag is set to check if there is a energy meter present and based on that decision is taken
- - User will be shown a toast when tried to change the system profile to default
- - DCWB reconfig support
- - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/aniketkumar/5108_CCU_Relay_Mapping_are_showing_as_cooling_stage1_for_few_seconds
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/aniketkumar/5108_CCU_Relay_Mapping_are_showing_as_cooling_stage1_for_few_seconds
- - SystemProfile Bug 5108
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/aniketkumar/5108_CCU_Relay_Mapping_are_showing_as_cooling_stage1_for_few_seconds
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/aniketkumar/5108_CCU_Relay_Mapping_are_showing_as_cooling_stage1_for_few_seconds
- - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
- - Bug-5108 CCU : Relay mapping are shown as cooling stage1 for few seconds
+ - Merged PR 1016: 6649: CCU: Not able to add CCU to existing site
+ - Merged PR 984: Conditioning mode UI changes
+ - Merged PR 933:  Without a confirmed selection of Zone schedule zone starts following zone schedule.
+ - Merged PR 981: 6312_CCU_Modus_App_crashed_when_UPS-400k,30k80k_is_paired
+ - Json file for UPS-400K was not in valid format, corrected it accordingly.
+ - Added RelativeLayout params for Number picker and added Top margin
+ - Json filefor UPS-400K was not in valid format, corrected it accordingly
+ - Committing code for Bug- 6268 CCU : Without a confirmed selection of Zone schedule zone starts following zone schedule.

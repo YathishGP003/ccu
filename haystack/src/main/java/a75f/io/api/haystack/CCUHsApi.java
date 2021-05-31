@@ -5,8 +5,6 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.webkit.HttpAuthHandler;
-import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -50,6 +48,8 @@ import a75f.io.api.haystack.util.Migrations;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
 import a75f.io.logger.CcuLog;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class CCUHsApi
 {
@@ -1939,12 +1939,25 @@ public class CCUHsApi
 
         return spDefaultPrefs.getBoolean("75fNetworkAvailable", false);
     }
-    
+
+    public Completable registerCcuAsync(String installerEmail) {
+        return Completable.create(emitter -> {
+            registerCcu(installerEmail);
+            emitter.onComplete();
+        })
+          .subscribeOn(Schedulers.io());
+    }
+
     public void registerCcu(String installerEmail) {
         
         HashMap site = CCUHsApi.getInstance().read("site");
         Log.d("CCURegInfo","createNewSite Edit backgroundtask");
-    
+
+        // tcase 05/26/21 -- this isNetworkConnected check is a bug.
+        //  1) The check gives the wrong answer right after I fix network by connecting to wifi.
+        //  2) If we think there is no network here, we silently fail the registration  :_(  This is like a puppy dying.
+        // I would fix it, i.e. I think it's safe to delete, but I am doing a hotfix for another issue right now, and
+        // this issue is pre-existing.
         if (siteSynced() && CCUHsApi.getInstance().isNetworkConnected()) {
             Log.d("CCURegInfo","The CCU is not registered, but the site is created with ID " + getSiteIdRef().toString());
             HashMap ccu = CCUHsApi.getInstance().read("device and ccu");

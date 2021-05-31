@@ -57,7 +57,8 @@ public class ZonePoints {
             String zoneName = zone.getDisplayName();
             int zoneAddress = Integer.parseInt(zoneDevice.getAddr());
             Equip zoneEquip =HSUtil.getEquipFromZone(zone.getId());
-            if (!zoneEquip.getMarkers().contains("pid") && !zoneEquip.getMarkers().contains("emr")) {
+            if (!zoneEquip.getMarkers().contains("pid") && !zoneEquip.getMarkers().contains("emr")
+                                                        && !zoneEquip.getMarkers().contains("modbus")) {
                 updateCurrentTemp(localDevice, zoneAddress, zoneName, zoneDescription, zoneDevice);
                 updateDesiredTemp(localDevice, zoneAddress, zoneName, zoneDescription, zoneDevice);
                 if (zoneEquip.getMarkers().contains("vav") || zoneEquip.getMarkers().contains("dab")) {

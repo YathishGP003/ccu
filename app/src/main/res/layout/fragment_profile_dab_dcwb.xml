@@ -153,7 +153,7 @@
 
                 <TextView
                     android:id="@+id/textcwExitTemp"
-                    android:layout_width="200dp"
+                    android:layout_width="280dp"
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
                     android:layout_centerVertical="true"
@@ -166,7 +166,7 @@
                     android:layout_width="120dp"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:layout_marginLeft="86dp"
+                    android:layout_marginLeft="6dp"
                     android:layout_toRightOf="@+id/textcwExitTemp"
                     tools:listitem="@layout/spinner_dropdown_item" />
 

@@ -790,9 +790,6 @@
               "tagName": "systemOff"
             },
             {
-              "tagName": "off"
-            },
-            {
               "tagName": "alarm"
             },
             {
@@ -1550,9 +1547,6 @@
               "tagName": "systemRestart"
             },
             {
-              "tagName": "restart"
-            },
-            {
               "tagName": "pending"
             },
             {
@@ -2014,9 +2008,6 @@
           "logicalPointTags": [
             {
               "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
             },
             {
               "tagName": "systemBattery"

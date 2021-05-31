@@ -4283,9 +4283,6 @@
               "tagName": "systemTransfer"
             },
             {
-              "tagName": "transfer"
-            },
-            {
               "tagName": "kind",
               "value": "Number"
             },
@@ -4810,9 +4807,6 @@
               "tagName": "systemBattery"
             },
             {
-              "tagName": "battery"
-            },
-            {
               "tagName": "low"
             },
             {
@@ -4858,9 +4852,6 @@
             },
             {
               "tagName": "systemEPO"
-            },
-            {
-              "tagName": "epo"
             },
             {
               "tagName": "alarm"
@@ -4911,9 +4902,6 @@
             },
             {
               "tagName": "ambient"
-            },
-            {
-              "tagName": "overtemp"
             },
             {
               "tagName": "kind",

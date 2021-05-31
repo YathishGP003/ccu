@@ -661,9 +661,6 @@
             {
               "tagName": "ups"
             },
-            {
-              "tagName": "battery"
-            },
 			{
               "tagName": "systemBattery"
             },

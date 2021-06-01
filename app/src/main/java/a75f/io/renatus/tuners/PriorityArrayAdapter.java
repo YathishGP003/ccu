@@ -19,6 +19,8 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.renatus.R;
 
+import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
+
 public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdapter.PriorityViewHolder> {
     Context context;
     ArrayList<HashMap> priorityArrayList;
@@ -234,7 +236,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
     }
 
     public void setOrangeTextColor(TextView textView) {
-        textView.setTextColor(ContextCompat.getColor(context, R.color.orange_75f));
+        textView.setTextColor(getPrimaryThemeColor(context));
     }
 
     public void setBlackTextColor(TextView textView) {

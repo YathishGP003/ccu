@@ -21,7 +21,7 @@
             android:fontFamily="@font/lato_bold"
             android:text="@string/installtype"
             android:textAllCaps="true"
-            android:textColor="@color/orange_75f"
+            android:textColor="?orange_75f"
             android:textSize="33.5sp"
             android:textStyle="bold"
             android:visibility="gone" />
@@ -68,8 +68,8 @@
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:layout_marginEnd="90dp"
-                    android:tint="@color/orange_75f"
-                    app:srcCompat="@drawable/icon_arrowright" />
+                    app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
+                    app:tint="?orange_75f" />
             </RelativeLayout>
 
             <View
@@ -118,8 +118,8 @@
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:layout_marginEnd="90dp"
-                    android:tint="@color/orange_75f"
-                    app:srcCompat="@drawable/icon_arrowright" />
+                    app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
+                    app:tint="?orange_75f" />
             </RelativeLayout>
 
             <View
@@ -169,8 +169,8 @@
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:layout_marginEnd="90dp"
-                    android:tint="@color/orange_75f"
-                    app:srcCompat="@drawable/icon_arrowright" />
+                    app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
+                    app:tint="?orange_75f" />
             </RelativeLayout>
 
             <View
@@ -221,8 +221,8 @@
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:layout_marginEnd="90dp"
-                    android:tint="@color/orange_75f"
-                    app:srcCompat="@drawable/icon_arrowright" />
+                    app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
+                    app:tint="?orange_75f" />
             </RelativeLayout>
 
             <View
@@ -274,8 +274,8 @@
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:layout_marginEnd="90dp"
-                    android:tint="@color/orange_75f"
-                    app:srcCompat="@drawable/icon_arrowright" />
+                    app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
+                    app:tint="?orange_75f" />
             </RelativeLayout>
         </LinearLayout>
 

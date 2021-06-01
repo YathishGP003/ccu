@@ -32,6 +32,8 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.RoomDataInterface;
 import a75f.io.renatus.R;
 
+import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
+
 public class SeekArc extends View implements RoomDataInterface
 {
 
@@ -214,18 +216,18 @@ public class SeekArc extends View implements RoomDataInterface
         float density = context.getResources().getDisplayMetrics().density;
         // Defaults, may need to link this into theme settings
         int arcColor = res.getColor(R.color.outer_temp_text_darker_gray);
-        //int progressColor = res.getColor(R.color.accent75F);
-        int progressColor = res.getColor(R.color.accent75F);
+        int progressColor = res.getColor(R.color.renatus_75f_primary);
+       // int progressColor = getPrimaryThemeColor(getContext());
         int graycolor = res.getColor(R.color.dark_gray);
         int userLimitProgressColor = res.getColor(R.color.userlimit_outbound_color);
-        //int thumbOuterColor = res.getColor(R.color.accent75F);
-        int thumbOuterColor = res.getColor(R.color.accent75F);
+        int thumbOuterColor = res.getColor(R.color.renatus_75f_primary);
+       // int thumbOuterColor = getPrimaryThemeColor(getContext());
         int thumbInnerColor = res.getColor(R.color.thumb_inner_white);
         delimeterColor = res.getColor(R.color.progress_delimeter_white);
         @ColorInt int statusTempText =
                 ContextCompat.getColor(context, R.color.outer_temp_text_darker_gray);
-        //int outerTempText = res.getColor(R.color.accent75F);
-        int outerTempText = res.getColor(R.color.accent75F);
+        int outerTempText = res.getColor(R.color.renatus_75f_primary);
+       // int outerTempText = getPrimaryThemeColor(getContext());
         int thumbOuterLimitColor = res.getColor(R.color.userlimit_outbound_color);
         int thumbHalfheight = 0;
         int thumbHalfWidth = 0;

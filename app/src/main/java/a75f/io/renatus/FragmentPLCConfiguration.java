@@ -43,6 +43,8 @@ import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
+
 /**
  * Created by samjithsadasivan on 2/22/19.
  */
@@ -178,7 +180,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         if(titleView != null)
         {
             titleView.setGravity(Gravity.CENTER);
-            titleView.setTextColor(getResources().getColor(R.color.accent75F));
+            titleView.setTextColor(getPrimaryThemeColor(getContext()));
         }
         int titleDividerId = getContext().getResources()
                                          .getIdentifier("titleDivider", "id", "android");

@@ -19,6 +19,8 @@ import java.util.List;
 
 import a75f.io.renatus.R;
 
+import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
+
 public class WifiListAdapter extends RecyclerView.Adapter<WifiListAdapter.WifiViewHolder> {
 
     //private List<ScanResult> wifiList;
@@ -135,9 +137,9 @@ public class WifiListAdapter extends RecyclerView.Adapter<WifiListAdapter.WifiVi
                 if (ssid_connected.equalsIgnoreCase(ssid_scanned)) {
                     holder.textisConnected.setVisibility(View.VISIBLE);
                     holder.textisConnected.setText("CONNECTED");
-                    holder.textWifiNw.setTextColor(mContext.getResources().getColor(R.color.orange_75f));
+                    holder.textWifiNw.setTextColor(getPrimaryThemeColor(mContext));
                     holder.imageSecurity.setVisibility(View.INVISIBLE);
-                    holder.imageWifi.setColorFilter(mContext.getResources().getColor(R.color.orange_75f), PorterDuff.Mode.SRC_IN);
+                    holder.imageWifi.setColorFilter(getPrimaryThemeColor(mContext), PorterDuff.Mode.SRC_IN);
                 }
             }
         }

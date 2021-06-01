@@ -29,7 +29,7 @@
             android:layout_height="match_parent"
             app:tabMode="fixed"
             app:tabGravity="fill"
-            style="@style/RenatusTabStyle"
+            style="?RenatusTabStyle"
             />
     </LinearLayout>
 

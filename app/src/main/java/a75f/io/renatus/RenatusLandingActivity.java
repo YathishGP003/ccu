@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
@@ -70,6 +71,7 @@ import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_MODULE;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_TABLET;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.SAVE_CCU_LOGS;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.UPDATE_CCU;
+import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
 
 public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface {
 
@@ -279,20 +281,22 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         });
 
         mTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @SuppressLint("ResourceType")
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 LinearLayout tabLayout = (LinearLayout)((ViewGroup) mTabLayout.getChildAt(0)).getChildAt(tab.getPosition());
                 TextView tabTextView = (TextView) tabLayout.getChildAt(1);
 
-                tabTextView.setTextAppearance(tabLayout.getContext(), R.style.RenatusTabTextSelected);
+                tabTextView.setTextAppearance(tabLayout.getContext(), R.attr.RenatusTabTextSelected);
             }
 
+            @SuppressLint("ResourceType")
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
                 LinearLayout tabLayout = (LinearLayout)((ViewGroup) mTabLayout.getChildAt(0)).getChildAt(tab.getPosition());
                 TextView tabTextView = (TextView) tabLayout.getChildAt(1);
 
-                tabTextView.setTextAppearance(tabLayout.getContext(), R.style.RenatusLandingTabTextStyle);
+                tabTextView.setTextAppearance(tabLayout.getContext(), R.attr.RenatusLandingTabTextStyle);
             }
 
             @Override
@@ -371,7 +375,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         String password = getSavedPassword(key);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         SpannableString spannable = new SpannableString(title);
-        spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.accent75F)), 0, title.length(), 0);
+        spannable.setSpan(new ForegroundColorSpan(getPrimaryThemeColor(RenatusLandingActivity.this)), 0, title.length(), 0);
         builder.setTitle(spannable);
         builder.setCancelable(false);
 

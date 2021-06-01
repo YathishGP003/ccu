@@ -748,7 +748,7 @@ public class FloorPlanFragment extends Fragment {
     }
 
     private void setSystemSelection(int position) {
-
+        //ic_listselector
         rl_systemdevice.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
         rl_systemdevice.setEnabled(false);
         textViewSystemDevice.setTextColor(getContext().getResources().getColor(R.color.white));

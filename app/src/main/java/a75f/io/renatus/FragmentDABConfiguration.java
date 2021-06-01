@@ -48,6 +48,7 @@ import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.ButterKnife;
 
 import static a75f.io.logic.bo.building.definitions.DamperType.ZeroToTenV;
+import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
 
 /**
  * Created by samjithsadasivan on 3/13/19.
@@ -149,7 +150,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         if(titleView != null)
         {
             titleView.setGravity(Gravity.CENTER);
-            titleView.setTextColor(getResources().getColor(R.color.orange_75f));
+            titleView.setTextColor(getPrimaryThemeColor(getContext()));
             titleView.setTextSize(28);
             titleView.setTypeface(null, Typeface.BOLD);
             
@@ -162,7 +163,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             button.setLayoutParams(layoutParams);
             button.setGravity(Gravity.LEFT);
-            button.setTextColor(getResources().getColor(R.color.orange_75f));
+            button.setTextColor(getPrimaryThemeColor(getContext()));
             button.setOnClickListener(v->removeDialogFragment(ID));
             button.setBackgroundColor(Color.TRANSPARENT);
             viewGroup.addView(button);

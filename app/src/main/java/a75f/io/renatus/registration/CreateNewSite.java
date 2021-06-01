@@ -62,6 +62,8 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 
+import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
+
 public class CreateNewSite extends Fragment {
     private static final String TAG = CreateNewSite.class.getSimpleName();
     TextInputLayout mTextInputSitename;
@@ -178,7 +180,7 @@ public class CreateNewSite extends Fragment {
             enableViews(false);
         }
         populateAndUpdateTimeZone();
-        String colorHex = "#" + Integer.toHexString(ContextCompat.getColor(getActivity(), R.color.orange_75f) & 0x00ffffff);
+        String colorHex = "#" + Integer.toHexString(getPrimaryThemeColor(getContext()) & 0x00ffffff);
         mSiteName.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_sitename) + "</font></big>"));
         mStreetAdd.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_streetadd) + "</font></big>"));
         mSiteCity.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_city) + "</font></big>"));
@@ -200,9 +202,9 @@ public class CreateNewSite extends Fragment {
         } else {
             btnEditSite.setEnabled(false);
             btnUnregisterSite.setText("Register");
-            btnUnregisterSite.setTextColor(getResources().getColor(R.color.accent75F));
+            btnUnregisterSite.setTextColor(getPrimaryThemeColor(getContext()));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                setCompoundDrawableColor(btnUnregisterSite, R.color.accent75F);
+                setCompoundDrawableColor(btnUnregisterSite, getPrimaryThemeColor(getContext()));
             }
         }
 
@@ -550,9 +552,9 @@ public class CreateNewSite extends Fragment {
                             if (ccuId != null && ccuId != "")
                             {
                                 btnUnregisterSite.setText("Register");
-                                btnUnregisterSite.setTextColor(getResources().getColor(R.color.accent75F));
+                                btnUnregisterSite.setTextColor(getPrimaryThemeColor(getContext()));
                                 btnEditSite.setEnabled(false);
-                                setCompoundDrawableColor(btnUnregisterSite, R.color.accent75F);
+                                setCompoundDrawableColor(btnUnregisterSite,getPrimaryThemeColor(getContext()));
 
                                 CCUHsApi.getInstance().setJwt("");
                                 Toast.makeText(getActivity(), "CCU unregistered successfully " +ccuId, Toast.LENGTH_LONG).show();

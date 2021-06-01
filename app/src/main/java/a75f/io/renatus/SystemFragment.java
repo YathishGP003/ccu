@@ -58,6 +58,7 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.views.OaoArc;
 
 import static a75f.io.logic.jobs.ScheduleProcessJob.ACTION_STATUS_CHANGE;
+import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
@@ -482,7 +483,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 				@Override
 				public void run() {
-					String colorHex = "#" + Integer.toHexString(ContextCompat.getColor(getActivity(), R.color.orange_75f) & 0x00ffffff);
+					String colorHex = "#" + Integer.toHexString(getPrimaryThemeColor(getContext()) & 0x00ffffff);
 					String status = CCUHsApi.getInstance().readDefaultStrVal("system and status and message");
 					//If the system status is not updated yet (within a minute of registering the device), generate a
 					//default message.

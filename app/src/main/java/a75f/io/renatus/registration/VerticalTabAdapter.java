@@ -12,6 +12,8 @@ import android.widget.ListView;
 
 import a75f.io.renatus.R;
 
+import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
+
 public class VerticalTabAdapter extends BaseAdapter{
     private final int[] data;
     private final ListView listView;
@@ -90,7 +92,7 @@ public class VerticalTabAdapter extends BaseAdapter{
                 */
             }
         }
-        tabIcon.setColorFilter(mContext.getResources().getColor(R.color.orange_75f), PorterDuff.Mode.SRC_IN);
+        tabIcon.setColorFilter(getPrimaryThemeColor(mContext), PorterDuff.Mode.SRC_IN);
     }
 
     private void setImageviewUnSelected(ImageView tabIcon){

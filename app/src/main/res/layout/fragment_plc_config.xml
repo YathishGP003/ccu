@@ -33,7 +33,7 @@
                         android:fontFamily="@font/lato_bold"
                         android:text="@string/title_piloop"
                         android:textAllCaps="true"
-                        android:textColor="@color/orange_75f"
+                        android:textColor="?orange_75f"
                         android:textSize="33.5dp"
                         android:textStyle="bold" />
 
@@ -579,7 +579,7 @@
                 android:fontFamily="@font/lato_regular"
                 android:text="@string/button_set"
                 android:textAllCaps="true"
-                android:textColor="@color/orange_75f"
+                android:textColor="?orange_75f"
                 android:textSize="19.5dp" />
         </LinearLayout>
     </ScrollView>

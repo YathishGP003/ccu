@@ -4,13 +4,13 @@
         <inset android:insetTop="2dp"
             android:insetBottom="2dp">
         <shape android:shape="rectangle">
-            <solid android:color="@color/orange_75f" />
+            <solid android:color="?orange_75f" />
         </shape>
         </inset>
     </item>
     <item>
         <shape android:shape="oval">
-            <solid android:color="@color/accent75F" />
+            <solid android:color="?orange_75f" />
             <size
                 android:width="40dp"
                 android:height="40dp" />

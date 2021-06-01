@@ -36,7 +36,7 @@
             android:clickable="true"
             android:padding="10dp"
             android:src="@drawable/buttonlist"
-            app:tint="@color/orange_75f" />
+            app:tint="?orange_75f" />
 
         <RelativeLayout
             android:id="@+id/weather_data"
@@ -45,7 +45,7 @@
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
             android:visibility="gone"
-            android:background="@color/accent75F"
+            android:background="?orange_75f"
             android:orientation="horizontal"
             >
 

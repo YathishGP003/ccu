@@ -7,7 +7,7 @@
     android:orientation="vertical">
 
     <TextView
-        style="@style/WindowTextStyle"
+        style="?WindowTextStyle"
         android:id="@+id/default_text_view"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
@@ -31,9 +31,9 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="64dp"
             android:rotation="180"
-            android:tint="@color/orange_75f"
 
-            app:srcCompat="@drawable/icon_arrowright" />
+            app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
+            app:tint="?orange_75f" />
 
         <TextView
             android:id="@+id/textTitleFragment"
@@ -45,7 +45,7 @@
             android:fontFamily="@font/lato_bold"
             android:text="@string/title_wtmmodule"
             android:textAllCaps="true"
-            android:textColor="@color/orange_75f"
+            android:textColor="?orange_75f"
             android:textSize="33.5dp"
             android:textStyle="bold" />
 
@@ -111,8 +111,8 @@
                         android:layout_marginRight="92dp"
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
-                        android:tint="@color/orange_75f"
-                        android:src="@drawable/icon_arrowright"/>
+                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                        app:tint="?orange_75f" />
                     <View
                         android:layout_width="517dp"
                         android:layout_alignParentRight="true"
@@ -158,8 +158,8 @@
                         android:layout_marginRight="92dp"
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
-                        android:tint="@color/orange_75f"
-                        android:src="@drawable/icon_arrowright"/>
+                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                        app:tint="?orange_75f" />
                     <View
                         android:layout_width="517dp"
                         android:layout_alignParentRight="true"
@@ -412,14 +412,14 @@
         android:visibility="gone">
 
         <Button
-            style="@style/buttonstyle"
+            style="?buttonstyle"
             android:id="@+id/first_button"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:text="Cancel"></Button>
 
         <Button
-            style="@style/buttonstyle"
+            style="?buttonstyle"
             android:id="@+id/second_button"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"

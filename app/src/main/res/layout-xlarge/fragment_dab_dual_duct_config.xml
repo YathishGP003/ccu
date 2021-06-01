@@ -29,7 +29,7 @@
                     android:fontFamily="@font/lato_bold"
                     android:text="@string/dab_dual_duct_title"
                     android:textAllCaps="true"
-                    android:textColor="@color/orange_75f"
+                    android:textColor="?orange_75f"
                     android:textSize="33.5sp"
                     android:textStyle="bold" />
 
@@ -586,7 +586,7 @@
                 android:fontFamily="@font/lato_regular"
                 android:text="@string/button_set"
                 android:textAllCaps="true"
-                android:textColor="@color/orange_75f"
+                android:textColor="?orange_75f"
                 android:textSize="19.5sp" />
         </LinearLayout>
 

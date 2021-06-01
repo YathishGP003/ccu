@@ -50,7 +50,7 @@
              app:srcCompat="@drawable/ic_75f_logo" />-->
         <ImageView
             android:id="@+id/logo_75f"
-            android:layout_width="300dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:padding="@dimen/margin_20"
@@ -62,12 +62,12 @@
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"
-            style="@style/RenatusLandingTabStyle"
+            style="?RenatusLandingTabStyle"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             app:tabGravity="fill"
             android:layout_marginStart="12dp"
-            app:tabIndicator="@color/accent75F"
+            app:tabIndicator="?orange_75f"
             app:tabIndicatorHeight="6dp"
             app:tabMode="fixed" />
 
@@ -93,12 +93,12 @@
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/btnTabs"
-            style="@style/RenatusTabStyle"
+            style="?RenatusTabStyle"
             android:layout_width="140dp"
             android:layout_height="?actionBarSize"
             app:tabBackground = "@null"
             app:tabRippleColor="@null"
-            app:tabIndicator="@color/accent75F"
+            app:tabIndicator="?orange_75f"
             app:tabIndicatorHeight="6dp"
             app:tabMaxWidth="70dp"
             app:tabGravity="fill"

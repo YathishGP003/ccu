@@ -3,12 +3,14 @@ package a75f.io.renatus.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.location.Address;
 import android.os.AsyncTask;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.google.android.material.color.MaterialColors;
 import com.google.common.base.Strings;
 
 import org.apache.http.HttpEntity;
@@ -37,6 +39,7 @@ import java.util.TimeZone;
 
 import a75f.io.logic.Globals;
 import a75f.io.renatus.BuildConfig;
+import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.WeatherDataDownloadService;
 import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
@@ -642,5 +645,9 @@ public class CCUUtils {
 
 	public static String getEnvGoogleMapKeys() {
 			return BuildConfig.GOOGLE_MAPS_KEY;
+	}
+
+	public static int getPrimaryThemeColor(Context context){
+		return MaterialColors.getColor(context, R.attr.orange_75f, Color.CYAN);
 	}
 }

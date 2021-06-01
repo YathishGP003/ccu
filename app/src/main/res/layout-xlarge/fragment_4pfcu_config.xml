@@ -19,7 +19,7 @@
         android:textAllCaps="true"
         android:layout_marginTop="32dp"
         android:layout_marginBottom="30dp"
-        android:textColor="@color/orange_75f"
+        android:textColor="?orange_75f"
         android:textSize="33.5dp"
         android:textStyle="bold" />
 
@@ -108,7 +108,7 @@
                     android:layout_width="46.12dp"
                     android:layout_height="27.42dp"
                     android:layout_alignParentRight="true"
-                    android:drawableTint="@color/orange_75f"
+                    android:drawableTint="?orange_75f"
                     android:layout_centerVertical="true"
                     android:background="@drawable/toggle_selector"
                     android:checked="false"
@@ -364,7 +364,7 @@
                 android:fontFamily="@font/lato_regular"
                 android:text="@string/button_set"
                 android:textAllCaps="true"
-                android:textColor="@color/orange_75f"
+                android:textColor="?orange_75f"
                 android:textSize="19.5dp" />
         </RelativeLayout>
     </ScrollView>

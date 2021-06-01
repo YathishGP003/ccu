@@ -2,6 +2,7 @@ package a75f.io.renatus;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import androidx.annotation.Nullable;
@@ -15,6 +16,8 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+
+import com.google.android.material.color.MaterialColors;
 
 import java.util.ArrayList;
 
@@ -33,6 +36,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType.TwoToTenV;
+import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
 
 /**
  * Created by samjithsadasivan on 6/5/18.
@@ -114,8 +118,9 @@ public class DialogOAOProfile extends BaseDialogFragment
         TextView titleView = this.getDialog().findViewById(android.R.id.title);
         if(titleView != null)
         {
+
             titleView.setGravity(Gravity.CENTER);
-            titleView.setTextColor(getResources().getColor(R.color.accent75F));
+            titleView.setTextColor(getPrimaryThemeColor(getContext()));
         }
         int titleDividerId = getContext().getResources()
                                          .getIdentifier("titleDivider", "id", "android");

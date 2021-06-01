@@ -357,11 +357,11 @@
                 android:layout_alignParentBottom="true"
                 android:layout_marginTop="5dp"
                 android:background="@null"
-                android:drawableRight="@drawable/icon_arrowright"
+                android:drawableRight="@drawable/ic_baseline_keyboard_arrow_right_24"
                 android:drawablePadding="5dp"
                 android:fontFamily="@font/lato_bold"
                 android:text="@string/button_next"
-                android:textColor="@color/orange_75f"
+                android:textColor="?orange_75f"
                 android:textSize="24dp" />
         </RelativeLayout>
     </ScrollView>

@@ -452,6 +452,6 @@
             android:background="@color/white"
             android:gravity="center"
             android:text="Set"
-            android:textColor="@color/accent75F" />
+            android:textColor="?orange_75f" />
     </LinearLayout>
 </LinearLayout>

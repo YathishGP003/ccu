@@ -193,6 +193,21 @@
         <attr name="nps_wheelItemCount" format="integer" />
         <attr name="nps_wrapSelectorWheel" format="boolean" />
     </declare-styleable>
+
     <attr name="orange_75f" format="reference|color" />
+
+    <attr name="AppTheme.AppBarOverlay" format="reference" />
+    <attr name="AppTheme.PopupOverlay" format="reference" />
+    <attr name="RenatusTabStyle" format="reference" />
+    <attr name="RenatusLandingTabStyle" format="reference" />
+    <attr name="RenatusLandingTabTextStyle" format="reference" />
+    <attr name="RenatusTabTextStyle" format="reference" />
+    <attr name="RenatusTabTextSelected" format="reference" />
+    <attr name="WindowTextStyle" format="reference" />
+    <attr name="buttonstyle" format="reference" />
+    <attr name="toggle_on_off" format="reference" />
+    <attr name="SwitchTheme" format="reference" />
+
+
 
 </resources>

@@ -40,6 +40,8 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.util.TunerNumberPicker;
 import butterknife.ButterKnife;
 
+import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
+
 
 public class DialogTunerPriorityArray extends BaseDialogFragment implements PriorityItemClickListener, TunerUndoClickListener {
     public static final String ID = DialogTunerPriorityArray.class.getSimpleName();
@@ -393,7 +395,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             if (tunerItemSelected.containsKey("reset")) {
                 tunerItemSelected.remove("reset");
             }
-            String colorHex = "#" + Integer.toHexString(ContextCompat.getColor(getContext(), R.color.orange_75f) & 0x00ffffff);
+            String colorHex = "#" + Integer.toHexString(getPrimaryThemeColor(getContext()) & 0x00ffffff);
 
             String text = "Level " + (position + 1) + " " + levelName;
             text = text.replaceAll("System", "<font color='"+colorHex+"'>System</font>");
@@ -467,7 +469,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     //Toast.makeText(getActivity(), "TunersUI-oldValue:" + oldValue + " newValue:" + newValue, Toast.LENGTH_SHORT).show();
                     if (oldValue != newValue) {
                         buttonSaveAlert.setEnabled(true);
-                        buttonSaveAlert.setTextColor(getActivity().getColor(R.color.orange_75f));
+                        buttonSaveAlert.setTextColor(getPrimaryThemeColor(getContext()));
                         buttonUndo.setVisibility(View.VISIBLE);
                         selectedTunerValue = valueList.get(newValue);
                     }
@@ -490,7 +492,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                             priorityArrayAdapter.notifyItemChanged(position);
                             valueDialog.dismiss();
                             buttonSaveTuner.setEnabled(true);
-                            buttonSaveTuner.setTextColor(getActivity().getColor(R.color.orange_75f));
+                            buttonSaveTuner.setTextColor(getPrimaryThemeColor(getContext()));
                         }
                 );
             } else {
@@ -508,7 +510,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             buttonSaveTuner.setTextColor(getActivity().getColor(R.color.grey_select));
         } else {
             buttonSaveTuner.setEnabled(true);
-            buttonSaveTuner.setTextColor(getActivity().getColor(R.color.orange_75f));
+            buttonSaveTuner.setTextColor(getPrimaryThemeColor(getContext()));
             revertMap = item;
         }
     }

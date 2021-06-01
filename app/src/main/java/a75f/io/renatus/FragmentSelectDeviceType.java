@@ -31,6 +31,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
+
 /**
  * Created by ryant on 9/27/2017.
  */
@@ -225,7 +227,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         if(titleView != null)
         {
             titleView.setGravity(Gravity.CENTER);
-            titleView.setTextColor(getResources().getColor(R.color.accent75F));
+            titleView.setTextColor(getPrimaryThemeColor(getContext()));
         }
         int titleDividerId = getContext().getResources()
                 .getIdentifier("titleDivider", "id", "android");

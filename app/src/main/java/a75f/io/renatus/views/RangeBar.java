@@ -21,6 +21,7 @@ import android.view.View;
 import a75f.io.renatus.R;
 
 import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
+import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
 
 /**
  * Created by mahesh on 15-08-2019.
@@ -112,7 +113,7 @@ public class RangeBar extends View {
         if (stateReflected == RangeBarState.LOWER_COOLING_LIMIT) {
             mTempIconPaint.setColor(getResources().getColor(R.color.max_temp));
         } else {
-            mTempIconPaint.setColor(getResources().getColor(R.color.accent75F));
+            mTempIconPaint.setColor(getResources().getColor(R.color.min_temp));
         }
 
         //force push the text if overlap

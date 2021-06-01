@@ -54,6 +54,8 @@ import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
+
 /**
  * Created by samjithsadasivan on 6/5/18.
  */
@@ -161,7 +163,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         if(titleView != null)
         {
             titleView.setGravity(Gravity.CENTER);
-            titleView.setTextColor(getResources().getColor(R.color.accent75F));
+            titleView.setTextColor(getPrimaryThemeColor(getContext()));
         }
         int titleDividerId = getContext().getResources()
                                          .getIdentifier("titleDivider", "id", "android");

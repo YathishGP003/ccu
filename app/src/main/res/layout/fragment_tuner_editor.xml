@@ -152,7 +152,7 @@
                     android:padding="5sp"
                     android:text="@string/cancel"
                     android:textAppearance="@style/tunerButton"
-                    app:strokeColor="@color/orange_75f" />
+                    app:strokeColor="?orange_75f" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/buttonSave"
@@ -165,7 +165,7 @@
                     android:padding="5sp"
                     android:text="@string/tuner_save"
                     android:textAppearance="@style/tunerButton"
-                    app:strokeColor="@color/orange_75f" />
+                    app:strokeColor="?orange_75f" />
 
 
             </LinearLayout>

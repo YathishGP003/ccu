@@ -96,8 +96,8 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             double roomTemp = hpuDevice.getCurrentTemp();
             double curHumidity = hpuDevice.getHumidity();
             Equip hpuEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
-            
 
+            Log.i("CPUC_Config", "updateZonePoints: "+isZoneDead());
             if(isZoneDead()){
                 resetRelays(hpuEquip.getId(),node,curHumidity, ZoneTempState.TEMP_DEAD);
                 hpuDevice.setStatus(TEMPDEAD.ordinal());
@@ -106,6 +106,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
                 }
                 CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
+                Log.i("CPU_Config", "Zone Temp Dead so continue 3 ");
                 continue;
 
             }

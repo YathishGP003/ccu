@@ -9,7 +9,7 @@
 
     <TextView
         android:id="@+id/default_text_view"
-        style="@style/WindowTextStyle"
+        style="?WindowTextStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingStart="8dp"
@@ -32,9 +32,9 @@
             android:layout_centerVertical="true"
             android:layout_marginStart="64dp"
             android:padding="2.5dp"
-            android:tint="@color/orange_75f"
+            android:tint="?orange_75f"
             android:rotation="180"
-            app:srcCompat="@drawable/icon_arrowright"
+            app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
             tools:ignore="UseAppTint" />
 
         <TextView
@@ -47,7 +47,7 @@
             android:fontFamily="@font/lato_bold"
             android:text="@string/label_selectdevicetype"
             android:textAllCaps="true"
-            android:textColor="@color/orange_75f"
+            android:textColor="?orange_75f"
             android:textSize="33.5sp"
             android:textStyle="bold" />
 
@@ -99,13 +99,13 @@
 
             <ImageView
                 android:id="@+id/nextSN"
-                android:layout_width="12dp"
-                android:layout_height="20dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="96dp"
-                android:src="@drawable/icon_arrowright"
-                app:tint="@color/orange_75f" />
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                app:tint="?orange_75f" />
 
             <View
                 android:layout_width="match_parent"
@@ -154,13 +154,13 @@
 
             <ImageView
                 android:id="@+id/nextSS"
-                android:layout_width="12dp"
-                android:layout_height="20dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="96dp"
-                android:tint="@color/orange_75f"
-                android:src="@drawable/icon_arrowright" />
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                app:tint="?orange_75f" />
 
             <View
                 android:layout_width="match_parent"
@@ -210,13 +210,13 @@
 
             <ImageView
                 android:id="@+id/nextWTM"
-                android:layout_width="12dp"
-                android:layout_height="20dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="96dp"
-                android:tint="@color/orange_75f"
-                android:src="@drawable/icon_arrowright" />
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                app:tint="?orange_75f" />
 
             <View
                 android:layout_width="match_parent"
@@ -267,13 +267,13 @@
 
             <ImageView
                 android:id="@+id/nextCCU"
-                android:layout_width="12dp"
-                android:layout_height="20dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="96dp"
-                android:tint="@color/orange_75f"
-                android:src="@drawable/icon_arrowright" />
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                app:tint="?orange_75f" />
 
             <View
                 android:layout_width="match_parent"
@@ -321,13 +321,13 @@
             </LinearLayout>
             <ImageView
                 android:id="@+id/nextMb"
-                android:layout_width="12dp"
-                android:layout_height="20dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_marginEnd="96dp"
                 android:layout_alignParentEnd="true"
-                android:tint="@color/orange_75f"
                 android:layout_centerVertical="true"
-                android:src="@drawable/icon_arrowright"/>
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                app:tint="?orange_75f" />
             <View
                 android:layout_width="match_parent"
                 android:layout_height="0.1dp"
@@ -410,14 +410,14 @@
 
         <Button
             android:id="@+id/first_button"
-            style="@style/buttonstyle"
+            style="?buttonstyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/txt_cancel" />
 
         <Button
             android:id="@+id/second_button"
-            style="@style/buttonstyle"
+            style="?buttonstyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/txt_pair" />

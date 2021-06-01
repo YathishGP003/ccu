@@ -21,6 +21,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.bo.util.RenatusLogicIntentActions;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
 import androidx.annotation.RequiresApi;
@@ -98,6 +101,7 @@ import a75f.io.usbserial.UsbServiceActions;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
 import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_PRIV_APP_PERMISSION_DENIED;
 
 /**
@@ -144,6 +148,7 @@ public abstract class UtilityApplication extends Application {
                     NotificationHandler.setCMConnectionStatus(false);
                     Toast.makeText(context, R.string.usb_permission_priv_app_msg, Toast.LENGTH_LONG).show();
                     break;
+                
             }
         }
     };
@@ -247,6 +252,9 @@ public abstract class UtilityApplication extends Application {
         mNetworkReceiver = new NetworkChangeReceiver();
         context.registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         InitialiseBACnet();
+    
+        context.registerReceiver(new LocationUpdateEventReceiver(),
+                                 new IntentFilter(ACTION_SITE_LOCATION_UPDATED));
     }
 
     private void initializeCrashReporting() {
@@ -798,6 +806,15 @@ public abstract class UtilityApplication extends Application {
                             Segmentation.noSegmentation, localDevice.get(PropertyIdentifier.vendorIdentifier)));
                 }
             }
+        }
+    }
+    
+    
+    public class LocationUpdateEventReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //Update weather data using new location details.
+            WeatherDataDownloadService.getWeatherData();
         }
     }
 

@@ -101,7 +101,7 @@ public class PbMessageHandler
                 UpdatePointHandler.handleMessage(msg);
                 break;
             case SiteSyncHandler.CMD:
-                SiteSyncHandler.handleMessage(msg);
+                SiteSyncHandler.handleMessage(msg, context);
                 break;
             case UpdateScheduleHandler.CMD:
                 UpdateScheduleHandler.handleMessage(msg);

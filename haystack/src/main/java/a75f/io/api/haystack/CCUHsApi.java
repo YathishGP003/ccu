@@ -1458,6 +1458,15 @@ public class CCUHsApi
             return null;
         }
     }
+    
+    public @Nullable Site getSite() {
+        HashMap site = CCUHsApi.getInstance().read("site");
+        if (!site.isEmpty()) {
+            return new Site.Builder().setHashMap(site).build();
+        } else {
+            return null;
+        }
+    }
 
     public void log()
     {

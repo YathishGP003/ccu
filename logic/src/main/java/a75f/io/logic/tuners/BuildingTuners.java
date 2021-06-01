@@ -62,7 +62,7 @@ public class BuildingTuners
         Equip tunerEquip= new Equip.Builder()
                           .setSiteRef(siteRef)
                           .setDisplayName(siteDis+"-BuildingTuner")
-                          .addMarker("equip").addMarker("tuner").addMarker("his")
+                          .addMarker("equip").addMarker("tuner")
                           .setTz(siteMap.get("tz").toString())
                           .build();
         equipRef = hayStack.addEquip(tunerEquip);

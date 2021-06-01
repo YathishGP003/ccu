@@ -1141,9 +1141,12 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     plcPoints.put("Dynamic Unit", "V");
                     break;
                 case 1:
-                case 2:
                     plcPoints.put("Dynamic Unit Type", "Pressure");
-                    plcPoints.put("Dynamic Unit", "WC");
+                    plcPoints.put("Dynamic Unit", "Inch WC");
+                    break;
+                case 2:
+                    plcPoints.put("Dynamic Unit Type", "Pressure Differential");
+                    plcPoints.put("Dynamic Unit", "Inch WC");
                     break;
                 case 3:
                     plcPoints.put("Dynamic Unit Type", "Airflow");
@@ -1154,21 +1157,27 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     plcPoints.put("Dynamic Unit", "%");
                     break;
                 case 5:
-                    plcPoints.put("Dynamic Unit Type", "CO2");
+                    plcPoints.put("Dynamic Unit Type", "CO2 Level");
                     plcPoints.put("Dynamic Unit", "PPM");
                     break;
                 case 6:
-                    plcPoints.put("Dynamic Unit Type", "CO");
+                    plcPoints.put("Dynamic Unit Type", "CO Level");
                     plcPoints.put("Dynamic Unit", "PPM");
                     break;
                 case 7:
-                    plcPoints.put("Dynamic Unit Type", "NO2");
+                    plcPoints.put("Dynamic Unit Type", "NO2 Level");
                     plcPoints.put("Dynamic Unit", "PPM");
                     break;
                 case 8:
+                    plcPoints.put("Dynamic Unit Type", "Current Draw");
+                    plcPoints.put("Dynamic Unit", "A");
+                    break;
                 case 9:
+                    plcPoints.put("Dynamic Unit Type", "Current Draw");
+                    plcPoints.put("Dynamic Unit", "A");
+                    break;
                 case 10:
-                    plcPoints.put("Dynamic Unit Type", "Current");
+                    plcPoints.put("Dynamic Unit Type", "Current Draw");
                     plcPoints.put("Dynamic Unit", "A");
                     break;
             }

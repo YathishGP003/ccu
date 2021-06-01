@@ -2247,7 +2247,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
             if (HeatPumpUnitConfiguration.enableRelay5) {
                 if (fanHighHumdOption == 2.0) {
-                    textViewLabel3.setText("Target Humidity : ");
+                    textViewLabel3.setText("Dynamic Target Humidity : ");
                     targetHumidity = (double) hpuEquipPoints.get("Target Humidity");
                     Log.e("targetHumidity", "insideZoneFragment" + targetHumidity);
                     humiditySpinner.setSelection((int) targetHumidity - 1, false);
@@ -2756,6 +2756,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         try {
             if((boolean)plcPoints.get("Dynamic Setpoint") == true)
             {
+                Log.e("InsideZoneFragmentNewValue",plcPoints.get("Target Value").toString()+" "+plcPoints.get("Dynamic Unit").toString());
+                Log.e("InsideZoneFragmentNewUnit",plcPoints.get("Dynamic Unit Type").toString());
+
                     labelTarget.setText("Dynamic Target "+plcPoints.get("Dynamic Unit Type").toString()+" : ");
                     textViewTargetAir.setText(plcPoints.get("Target Value").toString()+" "+plcPoints.get("Dynamic Unit").toString());
                     labelOffsetAir.setText("Offset Dynamic Target "+plcPoints.get("Dynamic Unit Type").toString()+" : ");

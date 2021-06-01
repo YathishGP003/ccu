@@ -215,6 +215,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
                 getActivity(), R.array.smartstat_relay_hp_changeover, R.layout.spinner_cpu_configure_item);
         hpChangeOverType.setDropDownViewResource(R.layout.spinner_cpu_configure_item);
         hpChangeOverTypeSpinner.setAdapter(hpChangeOverType);
+        hpChangeOverTypeSpinner.setEnabled(false);
 
 
         switchOccSensor = view.findViewById(R.id.toggleOccupancy);
@@ -481,7 +482,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
     }
 
     @Override
-    @OnCheckedChanged({R.id.testHpuRelay1,R.id.testHpuRelay2,R.id.testHpuRelay3,R.id.testHpuRelay4,R.id.testHpuRelay5,R.id.testHpuRelay6,R.id.toggleFanLow, R.id.toggleFanHigh})
+    @OnCheckedChanged({R.id.testHpuRelay1,R.id.testHpuRelay2,R.id.testHpuRelay3,R.id.testHpuRelay4,R.id.testHpuRelay5,R.id.testHpuRelay6,R.id.toggleFanLow, R.id.toggleFanHigh, R.id.toggleHeatPump})
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         switch (buttonView.getId())
         {
@@ -525,6 +526,13 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
                 }
                 else{
                     fanHumiDSpinner.setEnabled(false);
+                }
+                break;
+            case R.id.toggleHeatPump:
+                if(isChecked) {
+                    hpChangeOverTypeSpinner.setEnabled(true);
+                }else{
+                    hpChangeOverTypeSpinner.setEnabled(false);
                 }
                 break;
         }

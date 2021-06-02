@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import a75f.io.alerts.model.AlertScope;
 import a75f.io.alerts.model.AlertsModelUtilKt;
@@ -75,7 +76,15 @@ public class AlertDefinition
         {
             if (c.operator == null)
             {
-                c.evaluate(sharedPrefs);
+                // if one alert definition conditional throws an unexpected exception, catch it here so
+                // that all of alert defs does not fail.
+                try {
+                    c.evaluate(sharedPrefs);
+                } catch (RuntimeException error) {
+                    CcuLog.e("CCU_ALERTS", "Parsing error in alert def: " + this, error);
+                    c.status = false;
+                    c.error = "Parse Exception - " + error.getClass().getSimpleName() + ", " + error.getLocalizedMessage();
+                }
             }
         }
     }

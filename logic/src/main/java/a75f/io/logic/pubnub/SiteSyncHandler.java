@@ -20,6 +20,7 @@ public class SiteSyncHandler
         String siteGuid = msgObject.get("siteId") != null ? msgObject.get("siteId").getAsString(): "";
         
         if (!siteGuid.isEmpty()) {
+            
             CCUHsApi hayStack = CCUHsApi.getInstance();
             Site remoteSite = hayStack.getRemoteSiteEntity(siteGuid);
             //"sync" pubnubs are generated for other entities in a Site too.

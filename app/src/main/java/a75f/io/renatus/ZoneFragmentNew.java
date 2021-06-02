@@ -547,7 +547,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             boolean nontempModule = false;
                             for (HashMap equipTypes : equipZones) {
                                 profileType = equipTypes.get("profile").toString();
-                                Log.e("RoomData", "ProfileType:" + profileType);
+                                //Log.e("RoomData", "ProfileType:" + profileType);
                                  if ( !profileType.contains(profileModBus) &&
                                      profileType.contains(profileVAV) ||
                                      profileType.contains(profileDAB) ||
@@ -2756,8 +2756,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         try {
             if((boolean)plcPoints.get("Dynamic Setpoint") == true)
             {
-                Log.e("InsideZoneFragmentNewValue",plcPoints.get("Target Value").toString()+" "+plcPoints.get("Dynamic Unit").toString());
-                Log.e("InsideZoneFragmentNewUnit",plcPoints.get("Dynamic Unit Type").toString());
 
                     labelTarget.setText("Dynamic Target "+plcPoints.get("Dynamic Unit Type").toString()+" : ");
                     textViewTargetAir.setText(plcPoints.get("Target Value").toString()+" "+plcPoints.get("Dynamic Unit").toString());

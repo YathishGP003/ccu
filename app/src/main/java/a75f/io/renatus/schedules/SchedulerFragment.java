@@ -1128,4 +1128,10 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     public interface OnExitListener {
         void onExit();
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        new Handler().postDelayed(() -> loadSchedule(),1500);
+    }
 }

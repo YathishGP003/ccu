@@ -321,7 +321,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             Log.d("CCU_UI"," Loaded System Schedule "+schedule.toString());
         }
         
-        if(schedule != null && schedule.isZoneSchedule())
+        if(schedule != null && schedule.isZoneSchedule()||(getArguments() != null && getArguments().containsKey(PARAM_ROOM_REF)))
         {
             textViewScheduletitle.setText("Zone Schedule");
         }

@@ -59,7 +59,7 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
     private TwoPipeFanCoilUnitProfile twoPfcuProfile;
     private TwoPipeFanCoilUnitConfiguration mProfileConfig;
 
-    private static CompositeDisposable compositeDisposable;
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     ToggleButton switchThermistor1;
     ToggleButton switchFanMediumY1;
@@ -236,7 +236,7 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
 
             setButton.setEnabled(false);
 
-            Disposable disposable = RxjavaUtil.executeBackgroundTaskWithDisposable(
+            compositeDisposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
                     ()->{
                         ProgressDialogUtils.showProgressDialog(getActivity(),"Saving 2PFCU Configuration");
                     },
@@ -250,8 +250,7 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
                         Fragment2PipeFanCoilUnitConfig.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                     }
-            );
-            compositeDisposable.add(disposable);
+            ));
 
         });
         view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
@@ -267,7 +266,6 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
                 }
             }
         });
-        compositeDisposable = new CompositeDisposable();
     }
 
     private void setup2PFCUZoneProfile() {

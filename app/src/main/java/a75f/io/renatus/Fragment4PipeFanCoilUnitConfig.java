@@ -60,7 +60,7 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
     private FourPipeFanCoilUnitProfile fourPfcuProfile;
     private FourPipeFanCoilUnitConfiguration mProfileConfig;
 
-    private static CompositeDisposable compositeDisposable;
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     ToggleButton switchThermistor1;
     ToggleButton switchFanMediumY1;
@@ -245,7 +245,7 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
             setButton.setEnabled(false);
             ProgressDialogUtils.showProgressDialog(getActivity(), "Saving 4PFCU Configuration");
 
-            Disposable disposable = RxjavaUtil.executeBackgroundTaskWithDisposable(
+            compositeDisposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
                     ()->{
                         ProgressDialogUtils.showProgressDialog(getActivity(),"Saving 4PFCU Configuration");
                     },
@@ -259,8 +259,7 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
                         Fragment4PipeFanCoilUnitConfig.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                     }
-            );
-            compositeDisposable.add(disposable);
+            ));
 
         });
         view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
@@ -276,7 +275,6 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
                 }
             }
         });
-        compositeDisposable = new CompositeDisposable();
     }
 
     private void setup4PFCUZoneProfile() {

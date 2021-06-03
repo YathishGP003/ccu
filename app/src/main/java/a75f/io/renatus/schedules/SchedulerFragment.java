@@ -20,6 +20,8 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.os.Looper;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
@@ -333,7 +335,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     private void updateUI() {
         schedule.populateIntersections();
 
-        new Handler().post(() -> {
+        new Handler(Looper.getMainLooper()).post(() -> {
 
             hasTextViewChildren();
             ArrayList<Schedule.Days> days = schedule.getDays();

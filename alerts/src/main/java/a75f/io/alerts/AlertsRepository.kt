@@ -9,8 +9,8 @@ import a75f.io.logger.CcuLog
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
-import org.apache.commons.lang3.StringUtils
 import org.joda.time.DateTime
+import java.util.concurrent.TimeUnit
 
 /**
  * Gateway to Alerts and AlertDefinitions data, business logic processing, and backend alerservice.
@@ -124,14 +124,20 @@ class AlertsRepository(
       //_id is empty if the alert is not synced to backend.
       return if (alert._id == "") {
          CcuLog.w("CCU_ALERTS", "empty global Id; just remove in alertBox")
-         dataStore.deleteAlert(alert)
+         removeAlert(alert)
          Completable.complete()
       } else {
          alertSyncHandler.delete(alert._id)
-            .doOnComplete { dataStore.deleteAlert(alert) }
+            .doOnComplete { removeAlert(alert) }
             .doOnError { throwable: Throwable? -> CcuLog.w("CCU_ALERTS", "Delete alert failed " + alert._id, throwable) }
       }
    }
+
+   private fun removeAlert(alert: Alert) {
+      dataStore.deleteAlert(alert)
+      alertDefsState.remove(alert)
+   }
+
 
    fun deleteAlertInternal(id: String) {
       val alert = dataStore.getAlert(id)
@@ -181,33 +187,22 @@ class AlertsRepository(
       // evaluate and raise alert conditions from alert defs
       alertDefOccurrences = alertProcessor.evaluateAlertDefinitions(alertDefs, activeAlerts)
       
-      CcuLog.i("CCU_ALERTS", "Starting with AlertDefsState of ${alertDefsState.niceString()} occurrences")
-
       // update overall state of raised alerts
       alertDefsState += alertDefOccurrences
 
-      CcuLog.i("CCU_ALERTS", "Post AlertDefsState = ${alertDefsState.niceString()}")
+      CcuLog.d("CCU_ALERTS", "New AlertDefsState = ${alertDefsState.niceString()}")
 
       // update active alerts with new state
-      val newAlertsState = dataStore.getActiveAlerts() - alertDefsState
+      val alertsStateChange = dataStore.getActiveAlerts() - alertDefsState
 
-      CcuLog.i("CCU_ALERTS", "New AlertsState = $newAlertsState")
+      CcuLog.d("CCU_ALERTS", "New AlertsState = $alertsStateChange")
 
       // commit changes
-      newAlertsState.newAlerts.forEach {
-         val alert = if (it.pointId != null)
-            AlertBuilder.build(
-               it.alertDef,
-               AlertFormatter.getFormattedMessage(it.alertDef, it.pointId),
-               haystack,
-               it.equipRef,
-               it.pointId)
-         else
-            AlertBuilder.build(it.alertDef, AlertFormatter.getFormattedMessage(it.alertDef), haystack)
-
-         addAlert(alert)
+      alertsStateChange.newAlerts
+         .map { occurrence ->  occurrence.toAlert(haystack) }
+         .forEach { alert -> addAlert(alert)
       }
-      newAlertsState.newlyFixedAlerts.forEach { fixAlert(it) }
+      alertsStateChange.newlyFixedAlerts.forEach { alert -> fixAlert(alert) }
 
       // check for alert time-out
       clearElapsedAlerts()
@@ -241,30 +236,36 @@ class AlertsRepository(
    private fun clearElapsedAlerts() {
       val alertList = dataStore.getAllAlertsNotInternal()
       for (a in alertList) {
-         //clear alerts after 24 hours
-         if (System.currentTimeMillis() - a.getStartTime() >= 86400000) {
-            dataStore.deleteAlert(a)
+         //clear alerts after 24 hours if alert is synced
+         val alertIsSynced = a.syncStatus
+         val alertIsFixed = a.isFixed
+         val alertIsStale = System.currentTimeMillis() - a.getEndTime() >= TimeUnit.DAYS.toMillis(1)
+
+         if (alertIsFixed && alertIsStale && alertIsSynced) {
+            removeAlert(a)
          }
       }
+
       val cmErrorAlertList = dataStore.getCmErrorAlerts()
       for (a in cmErrorAlertList) {
          //clear alerts after every hours
          if (System.currentTimeMillis() - a.getStartTime() >= 3600000) {
-            dataStore.deleteAlert(a)
+            removeAlert(a)
          }
       }
    }
 
    // syncs all alerts in data store with syneced == false
    private fun syncAlerts() {
-      val unsyncedAlerts: List<Alert> = dataStore.getUnSyncedAlerts()
-      CcuLog.d("CCU_ALERTS", " Unsynced Alerts " + unsyncedAlerts.size)
+      // safety check
+      if (!CCUHsApi.getInstance().isCCURegistered) {
+         return
+      }
 
-      // For any unsynced alerts, if ccu registered, sync them and update their state in DB.
+      val unsyncedAlerts: List<Alert> = dataStore.getUnSyncedAlerts()
+      CcuLog.d("CCU_ALERTS", "${unsyncedAlerts.size} alerts to sync")
+
       if (unsyncedAlerts.isNotEmpty()) {
-         if (!CCUHsApi.getInstance().isCCURegistered) {
-            return
-         }
          alertSyncHandler.sync(unsyncedAlerts, dataStore)
       }
    }
@@ -284,7 +285,6 @@ class AlertsRepository(
    private fun saveDefs() {
       dataStore.saveAlertDefinitions(getAlertDefinitions().toArrayList())
    }
-
 
    fun close() {
       fetchDisposable?.dispose()

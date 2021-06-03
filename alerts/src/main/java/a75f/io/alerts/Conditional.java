@@ -99,6 +99,7 @@ public class Conditional
      *  - when grpOperation is max/min/bottom etc , we are comparing multiple points, resulting in single status boolean.
      *  - when grpOperation is oao, similar logic to equip, but don't create pointList and use result from last equip evaluated (perhaps its the only matching equip?)
      *  - when grpOperation is security, special logic evaluating password attempts.
+     *  - when grpOperation is alert, we don't use this engine, custom logic is evaluated elsewhere in system
      */
 
     // NOTE:  algorithm part of the code is formatted normally on the left.

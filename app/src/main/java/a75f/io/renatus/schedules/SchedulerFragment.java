@@ -332,11 +332,10 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
     private void updateUI() {
         schedule.populateIntersections();
-    
-        SchedulerFragment.this.getActivity().runOnUiThread(() ->
-        {
+
+        new Handler().post(() -> {
+
             hasTextViewChildren();
-        
             ArrayList<Schedule.Days> days = schedule.getDays();
             Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
             Collections.sort(days, (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));

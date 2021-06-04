@@ -111,7 +111,7 @@ class AlertsDataStore @JvmOverloads constructor(
    fun getUnSyncedAlerts(): List<Alert> {
       val alertQuery = alertBox.query()
       alertQuery.equal(Alert_.syncStatus, false)
-         .orderDesc(Alert_.startTime)
+         .order(Alert_.startTime)
       return alertQuery.build().find()
    }
 

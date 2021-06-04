@@ -1,8 +1,28 @@
- - Merged PR 1016: 6649: CCU: Not able to add CCU to existing site
- - Merged PR 984: Conditioning mode UI changes
- - Merged PR 933:  Without a confirmed selection of Zone schedule zone starts following zone schedule.
- - Merged PR 981: 6312_CCU_Modus_App_crashed_when_UPS-400k,30k80k_is_paired
- - Json file for UPS-400K was not in valid format, corrected it accordingly.
- - Added RelativeLayout params for Number picker and added Top margin
- - Json filefor UPS-400K was not in valid format, corrected it accordingly
- - Committing code for Bug- 6268 CCU : Without a confirmed selection of Zone schedule zone starts following zone schedule.
+ - Merged PR 1107: Schedule title showing Building schedue for Zone Schedule also
+ - Merged PR 998: Use high dynamic priority value for forced-occupied zones
+ - Updated with Main Looper
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/6733_CCU_When_a_zone_is_assigned_with_zone_schedule_when_we_open_the_schedule_it_still_shows_as_building_schedule
+ - Merged PR 901: Keep Alert after 24 hours if not synced
+ - Merged PR 1093: CCU:  Crasher -- SystemFragment creation, operation on SystemProfile when it is null.
+ - Merge branches 'bug/mkundaragi/6733_CCU_When_a_zone_is_assigned_with_zone_schedule_when_we_open_the_schedule_it_still_shows_as_building_schedule' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/6733_CCU_When_a_zone_is_assigned_with_zone_schedule_when_we_open_the_schedule_it_still_shows_as_building_schedule
+ - Updated with handler
+ - Merged PR 1011: CCU_Modbus_Zone_tag_should_be_removed_for_system_level_modbus_device
+ - Just checking arguments contains room reference for zone schedule
+ - Merged PR 1090: Alert Def conditional evaluation improvements
+ - Merged PR 1039: Alignment issue in building/zone schedule when many schedules are found in a single day.
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - Merged PR 1087: Add littleEndian word order for PELTEK BTU meter
+ - Add littleEndian word order for PELTEK BTU meter
+ - Merged PR 990: Removed building equip tuner his tag
+ - Zone tag needs to be removed
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/sdev/6613_CCU_Modbus_Zone_tag_should_be_removed_for_system_level_modbus_devices
+ - Fix query for reading priority point
+ - onResume method is overridden in SchedularFragment which was causing alignment issue in building and zone schedule
+ - Merge branch 'master' into Bug/samjith/4507_forced_occupied_not_triggered
+ - Zone tag needs to be removed for system devices
+ - Fetch zone priority from priority array
+ - CCU_Modbus_Zone_tag_should_be_removed_for_system_level_modbus_device
+ - Zone tags needs to be removed
+ - Zone tag needs to be removed
+ - Use high dynamic priority value for forced-occupied zones
+ - Zone tag has been removed to Energymeters and BTU meters of system level

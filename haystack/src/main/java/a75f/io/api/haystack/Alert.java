@@ -36,7 +36,7 @@ public class Alert
     public String ccuIdNoAt;
     public String siteName;
     public String ccuName;
-    public String equipId;
+    public @Nullable String equipId;
     public String equipName;
     
     //Backend guid of the alert

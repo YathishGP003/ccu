@@ -82,12 +82,24 @@ public class Conditional
     }
 
     /*
+     * Here are the known values for grpOperation:
+     *
+     * ""         : run the key query system wide and fetch the matching point for evaluation with condition and value
+     * "equip"    : fetch all zone equips matching key query for individual evaluation with condition and value
+     * "delta"    : fetch all zone equips matching key query. For each equip, find the difference between the last two history values and use that for evaluation with condition and value.
+     * "min" or "max" or "ave"   : find all points matching the key query system wide, and take their min/max/ave for evaluation with condition and value.
+     * "bottom NN" or "top NN"  : (where NN is a percentage) find the values of all points matching the key query system wide. Take the bottom or top NN percent of the points. Use the closest value to that percentage and evaluate with condition and value.
+     * "oao"      : fetch all zone equips matching key query with the "oao" tag. For each, evaluate with condition and the history value of the point for the same equip matching the value query.
+     * "security" : Special logic evaluating the number of password attempts against value with condition.
+     * "alert"    : Special hard-coded logic on the CCU defines these alerts
+     *
      * Evaluation produces 3 types results for a conditional
      *  - when grpOperation is empty (run the query system wide and fetch the matching point) , update the status boolean
      *  - when grpOperation is equip/delta , create pointList having all the points satisfying the conditional
      *  - when grpOperation is max/min/bottom etc , we are comparing multiple points, resulting in single status boolean.
      *  - when grpOperation is oao, similar logic to equip, but don't create pointList and use result from last equip evaluated (perhaps its the only matching equip?)
      *  - when grpOperation is security, special logic evaluating password attempts.
+     *  - when grpOperation is alert, we don't use this engine, custom logic is evaluated elsewhere in system
      */
 
     // NOTE:  algorithm part of the code is formatted normally on the left.
@@ -123,7 +135,7 @@ public class Conditional
         CcuLog.d("CCU_ALERTS"," Evaluate Conditional : "+key+ " "+condition+" "+val + (isNumeric(value) ? "" : "("+value+")" ));
 
         if (grpOperation == null || grpOperation.equals("")) {
-                                    sb.append("  -- find point from haystack");
+                                    sb.append("  -- find point from haystack for " + key);
             HashMap point = CCUHsApi.getInstance().read(key);
             if (point.size() == 0) {
                                      error = "no point for " + key;
@@ -232,6 +244,13 @@ public class Conditional
             equipList = null;
             pointValList = new ArrayList<>();
             ArrayList<HashMap> points = CCUHsApi.getInstance().readAll(key);
+            boolean noPoints = points.size() == 0;
+            if (noPoints) {
+                error = "no points for " + key;
+                sb.append("\nNo points for key. Possibly ending evaluation.");
+                status = false;
+            }
+
             for (HashMap m : points)
             {
                 pointValList.add(new PointVal(m.get("id").toString(),CCUHsApi.getInstance().readHisValById(m.get("id").toString())));
@@ -244,6 +263,7 @@ public class Conditional
 
             if (grpOperation.contains("top"))
             {
+                if (noPoints) return;
                 Collections.sort(pointValList, new PointValDesComparator());
                 int percent = Integer.parseInt(grpOperation.replaceAll("[^0-9]", ""));
                                             sb.append("\nparsed percent threshold is ").append(percent);
@@ -263,6 +283,7 @@ public class Conditional
             }
             else if (grpOperation.contains("bottom"))
             {
+                if (noPoints) return;
                 Collections.sort(pointValList, new PointValAscComparator());
                 int percent = Integer.parseInt(grpOperation.replaceAll("[^0-9]", ""));
                                           sb.append("\nparsed percent threshold is ").append(percent);
@@ -282,6 +303,7 @@ public class Conditional
             }
             else if (grpOperation.contains("average"))
             {
+                if (noPoints) return;
                 double valSum = 0;
                 for (PointVal v : pointValList)
                 {
@@ -295,6 +317,7 @@ public class Conditional
             }
             else if (grpOperation.contains("min"))
             {
+                if (noPoints) return;
                 Collections.sort(pointValList, new PointValAscComparator());
                 resVal = pointValList.get(0).val;
                                             sb.append("\nMin of ").append(pointValList.size()).append(" points calculated to ").append(resVal);
@@ -304,6 +327,7 @@ public class Conditional
             }
             else if (grpOperation.contains("max"))
             {
+                if (noPoints) return;
                 Collections.sort(pointValList, new PointValDesComparator());
                 resVal = pointValList.get(0).val;
                                             sb.append("\nMax of ").append(pointValList.size()).append(" points calculated to ").append(resVal);

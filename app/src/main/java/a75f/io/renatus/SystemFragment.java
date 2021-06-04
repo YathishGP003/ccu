@@ -189,8 +189,11 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		oaoArc = view.findViewById(R.id.oaoArc);
 		purgeLayout = view.findViewById(R.id.purgelayout);
 		systemModePicker = view.findViewById(R.id.systemModePicker);
-		coolingAvailable = L.ccu().systemProfile.isCoolingAvailable();
-		heatingAvailable = L.ccu().systemProfile.isHeatingAvailable();
+
+		if (L.ccu().systemProfile != null) {
+			coolingAvailable = L.ccu().systemProfile.isCoolingAvailable();
+			heatingAvailable = L.ccu().systemProfile.isHeatingAvailable();
+		}
 
 		
 		modesAvailable.add(SystemMode.OFF.displayName);

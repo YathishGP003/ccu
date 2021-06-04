@@ -50,9 +50,16 @@ class AlertsRepository(
 
    fun deleteAlertDefinition(id: String) {
       val title = alertDefsMap.findTitleById(id)
-      title?.let {
-         alertDefsMap.remove(it)
+      if (title == null) {
+         CcuLog.w("CCU_ALERTS", "Could not find alert definition for id to delete: $id")
+         return
       }
+      val alertDef = alertDefsMap.remove(title)
+      alertDef?.let {
+         alertDefsState.removeAll(alertDef)
+         dataStore.deleteAlertsForDef(alertDef)
+      }
+      saveDefs()
    }
 
    fun fetchAlertsDefinitions() {
@@ -271,6 +278,7 @@ class AlertsRepository(
    }
 
    private fun handleRetrievedDefsAlerts(retrievedAlertDefs: List<AlertDefinition>) {
+      alertDefsMap.clear()
       alertDefsMap.putAll(retrievedAlertDefs.associateBy { it.alert.mTitle })
 
       //log
@@ -278,8 +286,7 @@ class AlertsRepository(
       alertDefsMap.values.forEach {
          CcuLog.d("CCU_ALERTS", "Predefined alertDef Fetched: $it")
       }
-
-      dataStore.saveAlertDefinitions(getAlertDefinitions().toArrayList())
+      saveDefs()
    }
 
    private fun saveDefs() {

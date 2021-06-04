@@ -81,6 +81,16 @@ class AlertsDataStore @JvmOverloads constructor(
       alertBox.remove(alert)
    }
 
+   fun deleteAlertsForDef(alertDef: AlertDefinition) {
+
+      val alertQuery = alertBox.query()
+      val matchingAlerts = alertQuery
+         .equal(Alert_.mTitle, alertDef.alert.mTitle)
+         .build().find()
+      matchingAlerts
+         .forEach { deleteAlert(it) }
+   }
+
    fun cancelAppRestarted() {
       alertsSharedPrefs.edit().putBoolean(PREFS_ALERTS_APP_RESTART, false).apply()
    }

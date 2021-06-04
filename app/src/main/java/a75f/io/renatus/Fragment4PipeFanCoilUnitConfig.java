@@ -42,9 +42,12 @@ import a75f.io.logic.bo.building.ss4pfcu.FourPipeFanCoilUnitProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.util.RxjavaUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.disposables.Disposable;
 
 public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implements CompoundButton.OnCheckedChangeListener {
     public static final String ID = Fragment4PipeFanCoilUnitConfig.class.getSimpleName();
@@ -56,6 +59,8 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
     private NodeType mNodeType;
     private FourPipeFanCoilUnitProfile fourPfcuProfile;
     private FourPipeFanCoilUnitConfiguration mProfileConfig;
+
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     ToggleButton switchThermistor1;
     ToggleButton switchFanMediumY1;
@@ -157,6 +162,12 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        compositeDisposable.dispose();
+    }
+
+    @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
 
         fourPfcuProfile = (FourPipeFanCoilUnitProfile) L.getProfile(mSmartNodeAddress);
@@ -234,17 +245,21 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
             setButton.setEnabled(false);
             ProgressDialogUtils.showProgressDialog(getActivity(), "Saving 4PFCU Configuration");
 
-            new Thread(() -> {
-                setup4PFCUZoneProfile();
-                L.saveCCUState();
-            }).start();
-
-            new Handler().postDelayed(() -> {
-                ProgressDialogUtils.hideProgressDialog();
-                Fragment4PipeFanCoilUnitConfig.this.closeAllBaseDialogFragments();
-                getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                LSerial.getInstance().sendSeedMessage(true,false, mSmartNodeAddress, roomRef,floorRef);
-            },12000);
+            compositeDisposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+                    ()->{
+                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving 4PFCU Configuration");
+                    },
+                    ()->{
+                        setup4PFCUZoneProfile();
+                        L.saveCCUState();
+                        LSerial.getInstance().sendSeedMessage(true, false, mSmartNodeAddress, roomRef, floorRef);
+                    },
+                    ()->{
+                        ProgressDialogUtils.hideProgressDialog();
+                        Fragment4PipeFanCoilUnitConfig.this.closeAllBaseDialogFragments();
+                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                    }
+            ));
 
         });
         view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {

@@ -34,7 +34,7 @@ public class PbWatchdog {
      * @param context
      */
     public void startMonitoring(Context context, PbSubscriptionHandler pbSubscription) {
-        Observable.timer(30, TimeUnit.MINUTES)
+        Observable.interval(5, TimeUnit.MINUTES)
                   .subscribeOn(Schedulers.io())
                   .subscribe ( i -> {
                       //PubNub timeToken is in multiples of 10000.
@@ -46,8 +46,11 @@ public class PbWatchdog {
                       Long watchdogBiteTimeToken = System.currentTimeMillis() - 60 * 60 * 1000;
                       
                       if (pbSubscription.isPubnubSubscribed() && lastHandledPbToken < watchdogBiteTimeToken) {
-                          CcuLog.d(L.TAG_CCU_PUBNUB, "!!!! PubNub not received for 60 minutes. Restart the app !!!!");
+                          CcuLog.d(L.TAG_CCU_PUBNUB, "PbWatchdog bite! PubNub not received for 60 minutes. " +
+                                                     "Restart the app !!!!");
                           killRenatusApp();
+                      } else {
+                          CcuLog.d(L.TAG_CCU_PUBNUB,"PbWatchdog bark");
                       }
                   });
     }

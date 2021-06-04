@@ -19,7 +19,6 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -96,25 +95,6 @@ public class DABStagedProfile extends Fragment implements AdapterView.OnItemSele
         if(getArguments() != null) {
             isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
         }
-        if (systemProfile != null) {
-            systemProfile.deleteSystemEquip();
-            L.ccu().systemProfile = null;
-        }
-        systemProfile = new DabStagedRtu();
-        systemProfile.addSystemEquip();
-        L.ccu().systemProfile = systemProfile;
-        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_RTU) {
-            systemProfile = (DabStagedRtu) L.ccu().systemProfile;
-            relay1Cb.setChecked(systemProfile.getConfigEnabled("relay1") > 0);
-            relay2Cb.setChecked(systemProfile.getConfigEnabled("relay2") > 0);
-            relay3Cb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
-            relay4Cb.setChecked(systemProfile.getConfigEnabled("relay4") > 0);
-            relay5Cb.setChecked(systemProfile.getConfigEnabled("relay5") > 0);
-            relay6Cb.setChecked(systemProfile.getConfigEnabled("relay6") > 0);
-            relay7Cb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
-            setUpCheckBoxes();
-            setUpSpinners();
-        }
         return rootView;
     }
     
@@ -166,7 +146,6 @@ public class DABStagedProfile extends Fragment implements AdapterView.OnItemSele
                     CCUHsApi.getInstance().syncEntityTree();
                 }
             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
-            //Toast.makeText(getContext(), "Testing...", Toast.LENGTH_SHORT).show();
         }
 
 
@@ -239,14 +218,6 @@ public class DABStagedProfile extends Fragment implements AdapterView.OnItemSele
     }
     
     private void setUpSpinners() {
-        /*relay1Spinner.setVisibility(View.VISIBLE);
-        relay2Spinner.setVisibility(View.VISIBLE);
-        relay3Spinner.setVisibility(View.VISIBLE);
-        relay4Spinner.setVisibility(View.VISIBLE);
-        relay5Spinner.setVisibility(View.VISIBLE);
-        relay6Spinner.setVisibility(View.VISIBLE);
-        relay7Spinner.setVisibility(View.VISIBLE);*/
-
         relay1Spinner.setSelection((int)systemProfile.getConfigAssociation("relay1"), false);
         relay2Spinner.setSelection((int)systemProfile.getConfigAssociation("relay2"), false);
         relay3Spinner.setSelection((int)systemProfile.getConfigAssociation("relay3"), false);

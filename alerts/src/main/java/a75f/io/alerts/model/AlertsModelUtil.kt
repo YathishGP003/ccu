@@ -40,6 +40,16 @@ fun AlertDefsState.remove(alert: Alert) {
    remove(key)
 }
 
+   /**
+ * Call when an alert definition is to be removed from the system.
+ * This removes all instances of it from AlertDefsState.
+ */
+fun AlertDefsState.removeAll(alertDefinition: AlertDefinition) {
+
+   val matchingKeys = keys.filter { it.title == alertDefinition.alert.mTitle }
+   matchingKeys.forEach { remove(it) }
+}
+
 
 /** Represents change (delta) in Alerts state resulting from one alerts def processing to another */
 data class AlertsStateChange(

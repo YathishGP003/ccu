@@ -241,6 +241,9 @@ public class ConventionalUnitProfile extends ZoneProfile {
                             relayStages.put("FanStage2",1);
                             if(getCmdSignal("fan and stage2",node) == 0)
                                 setCmdSignal("fan and stage2",1.0,node);
+                        }else{
+                            if(getCmdSignal("fan and stage2",node) != 0)
+                                setCmdSignal("fan and stage2",0,node);
                         }
                     } else{
                         if (roomTemp <= setTempCooling) {//Turn off stage 2
@@ -343,6 +346,9 @@ public class ConventionalUnitProfile extends ZoneProfile {
                             relayStages.put("FanStage2",1);
                             if(getCmdSignal("fan and stage2", node) == 0)
                                 setCmdSignal("fan and stage2",1.0,node);
+                        }else{
+                            if(getCmdSignal("fan and stage2",node) != 0)
+                                setCmdSignal("fan and stage2",0,node);
                         }
                         relayStages.put("HeatingStage2",1);
                     } else {

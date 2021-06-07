@@ -34,7 +34,8 @@ public class PbWatchdog {
      * @param context
      */
     public void startMonitoring(Context context, PbSubscriptionHandler pbSubscription) {
-        Observable.interval(5, TimeUnit.MINUTES)
+
+        Observable.interval(30, TimeUnit.MINUTES)
                   .subscribeOn(Schedulers.io())
                   .subscribe ( i -> {
                       //PubNub timeToken is in multiples of 10000.

@@ -86,24 +86,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         if(getArguments() != null) {
             isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
         }
-        if (systemProfile != null) {
-            systemProfile.deleteSystemEquip();
-            L.ccu().systemProfile = null; //Makes sure that System Algos dont run until new profile is ready.
-        }
-        systemProfile = new VavIERtu();
-        systemProfile.addSystemEquip();
-        L.ccu().systemProfile = systemProfile;
-        if ((L.ccu().systemProfile instanceof VavIERtu))
-        {
-            systemProfile = (VavIERtu) L.ccu().systemProfile;
-            analog1Cb.setChecked(systemProfile.getConfigEnabled("analog1") > 0);
-            analog2Cb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
-            analog3Cb.setChecked(systemProfile.getConfigEnabled("analog3") > 0);
-            humidificationCb.setChecked(systemProfile.getConfigEnabled("humidification") > 0);
-            setupAnalogLimitSelectors();
-            setupEquipAddrEditor();
 
-        }
         btnEditIp.setOnClickListener(view1 -> equipAddr.setEnabled(true));
         return rootView;
     }

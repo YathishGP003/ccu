@@ -661,7 +661,6 @@ public class VavStagedRtu extends VavSystemProfile
                 .setEnums("off,on")
                 .setTz(tz)
                 .build();
-        //CCUHsApi.getInstance().addPoint(relay1Op);
         String cmdPointId = CCUHsApi.getInstance().addPoint(relay1Op);
         CCUHsApi.getInstance().writeHisValById(cmdPointId,0.0);
     }

@@ -15,6 +15,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.alerts.AlertGenerateHandler;
 import a75f.io.device.serial.CcuToCmOverUsbCmResetMessage_t;
@@ -56,6 +57,8 @@ import static a75f.io.alerts.AlertsConstantsKt.DEVICE_LOW_SIGNAL;
 import static a75f.io.alerts.AlertsConstantsKt.DEVICE_REBOOT;
 import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
+import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH;
+import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH2;
 
 /**
  * Created by Yinten on 9/15/2017.
@@ -944,7 +947,18 @@ public class Pulse
 
 			CcuLog.d(L.TAG_CCU_DEVICE, "updateSetTempFromSmartStat : FanMode " + fanSpeed.name()+","+curFanSpeeds.name());
 			boolean isFanModeChanged = false;
+			
 			if(fanOpModePoint != null && fanOpModePoint.size() > 0) {
+				
+				//FCU profiles on SmartStat extended the serial protocol to support medium Fan levels.
+				//FanHigh2 when comes from an FCU device, it is in fact Medium.
+				if (fanOpModePoint.containsKey(Tags.FCU)) {
+					if (fanSpeed == FAN_SPEED_HIGH2) {
+						fanSpeed = FAN_SPEED_HIGH;
+					} else if (fanSpeed == FAN_SPEED_HIGH) {
+						fanSpeed = FAN_SPEED_HIGH2;
+					}
+				}
 				StandaloneLogicalFanSpeeds fanSpeed_t = StandaloneLogicalFanSpeeds.AUTO;
 				switch (fanSpeed){
 					case FAN_SPEED_LOW:

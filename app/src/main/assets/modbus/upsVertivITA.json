@@ -668,10 +668,7 @@
               "tagName": "combined"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "overload"
+              "tagName": "systemoverload"
             },
             {
               "tagName": "alarm"

@@ -20,6 +20,8 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.os.Looper;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
@@ -321,7 +323,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             Log.d("CCU_UI"," Loaded System Schedule "+schedule.toString());
         }
         
-        if(schedule != null && schedule.isZoneSchedule())
+        if(schedule != null && schedule.isZoneSchedule()||(getArguments() != null && getArguments().containsKey(PARAM_ROOM_REF)))
         {
             textViewScheduletitle.setText("Zone Schedule");
         }
@@ -332,11 +334,10 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
     private void updateUI() {
         schedule.populateIntersections();
-    
-        SchedulerFragment.this.getActivity().runOnUiThread(() ->
-        {
+
+        new Handler(Looper.getMainLooper()).post(() -> {
+
             hasTextViewChildren();
-        
             ArrayList<Schedule.Days> days = schedule.getDays();
             Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
             Collections.sort(days, (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
@@ -1127,5 +1128,11 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
     public interface OnExitListener {
         void onExit();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        new Handler().postDelayed(() -> loadSchedule(),1500);
     }
 }

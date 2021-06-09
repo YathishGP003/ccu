@@ -17,4 +17,6 @@ public class SystemConstants
     
     public static final int DEFAULT_DAMPER_ADJ_INCREMENT = 1;
     public static final int DAMPER_POSITION_MAX = 100;
+    
+    public static final int FORCED_OCCUPIED_ZONE_PRIORITY_VAL = 50000;
 }

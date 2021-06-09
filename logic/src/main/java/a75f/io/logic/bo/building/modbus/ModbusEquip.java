@@ -60,12 +60,16 @@ public class ModbusEquip {
         }
 
         Equip.Builder mbEquip = new Equip.Builder().setSiteRef(siteRef)
-                .setDisplayName(equipDis)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef)
-                .setProfile(profileType.name())
-                .addMarker("equip").addMarker("modbus").addMarker(modbusEquipType.toLowerCase()).addMarker("zone")
-                .setGatewayRef(gatewayRef).setTz(tz).setGroup(String.valueOf(slaveId));
+                    .setDisplayName(equipDis)
+                    .setRoomRef(roomRef)
+                    .setFloorRef(floorRef)
+                    .setProfile(profileType.name())
+                    .addMarker("equip").addMarker("modbus").addMarker(modbusEquipType.toLowerCase())
+                    .setGatewayRef(gatewayRef).setTz(tz).setGroup(String.valueOf(slaveId));
+        if (profileType != ProfileType.MODBUS_EMR && profileType != ProfileType.MODBUS_BTU) {
+            mbEquip.addMarker("zone");
+        }
+
         if (equipmentInfo.getVendor()!= null && !equipmentInfo.getVendor().equals("")) {
             mbEquip.setVendor(equipmentInfo.getVendor());
         }
@@ -75,18 +79,22 @@ public class ModbusEquip {
         }
         equipRef = hayStack.addEquip(mbEquip.build());
 
-
+        String zoneMarker = "";
+        if (profileType != ProfileType.MODBUS_EMR && profileType != ProfileType.MODBUS_BTU) {
+            zoneMarker = "zone";
+        }
         Point equipScheduleType = new Point.Builder()
-                .setDisplayName(siteDis+"-"+modbusEquipType+"-"+slaveId+"-scheduleType")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("zone").addMarker(modbusEquipType.toLowerCase()).addMarker("modbus").addMarker("scheduleType").addMarker("writable").addMarker("his")
-                .setGroup(String.valueOf(slaveId))
-                .setEnums("building,zone,named")
-                .setTz(tz)
-                .build();
+                    .setDisplayName(siteDis+"-"+modbusEquipType+"-"+slaveId+"-scheduleType")
+                    .setEquipRef(equipRef)
+                    .setSiteRef(siteRef)
+                    .setRoomRef(roomRef)
+                    .setFloorRef(floorRef).setHisInterpolate("cov")
+                    .addMarker(modbusEquipType.toLowerCase()).addMarker("modbus").addMarker("scheduleType").addMarker("writable").addMarker("his")
+                    .addMarker(zoneMarker)
+                    .setGroup(String.valueOf(slaveId))
+                    .setEnums("building,named")
+                    .setTz(tz).build();
+
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
         CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
@@ -104,14 +112,17 @@ public class ModbusEquip {
 
         for(Parameter configParam : configParams){
             Point.Builder logicalParamPoint = new Point.Builder()
-                    .setDisplayName(equipDis+"-"+configParam.getName())
-                    .setShortDis(configParam.getName())
-                    .setEquipRef(equipRef)
-                    .setSiteRef(siteRef)
-                    .setRoomRef(roomRef)
-                    .setFloorRef(floorRef).addMarker("logical").addMarker("zone").addMarker("modbus")
-                    .setGroup(String.valueOf(slaveId))
-                    .setTz(tz);
+                        .setDisplayName(equipDis+"-"+configParam.getName())
+                        .setShortDis(configParam.getName())
+                        .setEquipRef(equipRef)
+                        .setSiteRef(siteRef)
+                        .setRoomRef(roomRef)
+                        .setFloorRef(floorRef).addMarker("logical").addMarker("modbus")
+                        .setGroup(String.valueOf(slaveId))
+                        .setTz(tz);
+            if (profileType != ProfileType.MODBUS_EMR && profileType != ProfileType.MODBUS_BTU) {
+                 logicalParamPoint.addMarker("zone");
+            }
             RawPoint.Builder physicalParamPoint = new RawPoint.Builder()
                     .setDisplayName("register"+configParam.getRegisterAddress()+"-bits-"+configParam.getStartBit()+"-"+configParam.getEndBit())
                     .setShortDis(configParam.getName())

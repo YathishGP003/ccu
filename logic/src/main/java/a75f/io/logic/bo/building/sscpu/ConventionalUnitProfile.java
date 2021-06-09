@@ -128,6 +128,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
             Occupied occuStatus = ScheduleProcessJob.getOccupiedModeCache(zoneId);
             double coolingDeadband = 2.0;
             double heatingDeadband = 2.0;
+
             if(occuStatus != null){
                 coolingDeadband = occuStatus.getCoolingDeadBand();
                 heatingDeadband = occuStatus.getHeatingDeadBand();
@@ -145,6 +146,12 @@ public class ConventionalUnitProfile extends ZoneProfile {
             StandaloneLogicalFanSpeeds fanSpeed = StandaloneLogicalFanSpeeds.values()[(int)ssFanOpMode];
             SmartStatFanRelayType fanHighType = SmartStatFanRelayType.values()[(int)fanStage2Type];
             int fanModeSaved = Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).getInt(cpuEquip.getId(),0);
+            boolean isFanSpeedHigh = ((fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) ||
+                                 (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) ||
+                                 (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED));
+
+            Log.d("6670-log","CPU profile - fanmodesaved="+fanModeSaved+","+fanSpeed.name()+","+occupied);
+
             Log.d("FANMODE","CPU profile - fanmodesaved="+fanModeSaved+","+fanSpeed.name()+","+occupied);
             if(!occupied &&(fanSpeed != OFF ) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_LOW_ALL_TIMES) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES)&& (fanSpeed != StandaloneLogicalFanSpeeds.FAN_HIGH2_ALL_TIMES)){
                 //Reset to auto during unoccupied hours, if it is not all times set
@@ -237,7 +244,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                         if(getCmdSignal("cooling and stage2",node) == 0)
                             setCmdSignal("cooling and stage2", 1.0, node);
                         relayStages.put("CoolingStage2",1);
-                        if(((isFanStage2Enabled  && ((fanSpeed == AUTO) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED)) ) ||  (occupied && enableFanStage1DuringOccupied))&& (fanHighType == SmartStatFanRelayType.FAN_STAGE2)){
+                        if(((isFanStage2Enabled  && ((fanSpeed == AUTO) || isFanSpeedHigh) ) ||  (occupied && enableFanStage1DuringOccupied && isFanSpeedHigh))&& (fanHighType == SmartStatFanRelayType.FAN_STAGE2)){
                             relayStages.put("FanStage2",1);
                             if(getCmdSignal("fan and stage2",node) == 0)
                                 setCmdSignal("fan and stage2",1.0,node);

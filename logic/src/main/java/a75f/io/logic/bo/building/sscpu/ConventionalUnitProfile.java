@@ -150,8 +150,6 @@ public class ConventionalUnitProfile extends ZoneProfile {
                                  (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) ||
                                  (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED));
 
-            Log.d("6670-log","CPU profile - fanmodesaved="+fanModeSaved+","+fanSpeed.name()+","+occupied);
-
             Log.d("FANMODE","CPU profile - fanmodesaved="+fanModeSaved+","+fanSpeed.name()+","+occupied);
             if(!occupied &&(fanSpeed != OFF ) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_LOW_ALL_TIMES) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES)&& (fanSpeed != StandaloneLogicalFanSpeeds.FAN_HIGH2_ALL_TIMES)){
                 //Reset to auto during unoccupied hours, if it is not all times set

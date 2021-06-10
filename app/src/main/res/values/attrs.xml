@@ -207,6 +207,10 @@
     <attr name="buttonstyle" format="reference" />
     <attr name="toggle_on_off" format="reference" />
     <attr name="SwitchTheme" format="reference" />
+    <attr name="DefaultNumberPickerTheme" format="reference" />
+    <attr name="error_appearance" format="reference" />
+    <attr name="tunerButton" format="reference" />
+    <attr name="spinner_label_orange" format="reference" />
 
 
 

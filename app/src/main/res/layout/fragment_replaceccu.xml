@@ -59,7 +59,7 @@
                 android:id="@+id/textInputSiteID"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:errorTextAppearance="@style/error_appearance">
+                app:errorTextAppearance="?error_appearance">
 
                 <EditText
                     android:id="@+id/editSiteID"
@@ -110,7 +110,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textViewList"
                 android:layout_marginTop="84dp"
-                app:errorTextAppearance="@style/error_appearance">
+                app:errorTextAppearance="?error_appearance">
 
                 <EditText
                     android:id="@+id/editFacilityEmail"
@@ -131,7 +131,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textInputEmail"
                 android:layout_marginTop="-9dp"
-                app:errorTextAppearance="@style/error_appearance">
+                app:errorTextAppearance="?error_appearance">
 
                 <EditText
                     android:id="@+id/editFacilityPass"

@@ -362,7 +362,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/radioGroupConfig"
-                    app:errorTextAppearance="@style/error_appearance">
+                    app:errorTextAppearance="?error_appearance">
 
                     <EditText
                         android:id="@+id/editIPaddr"
@@ -388,7 +388,7 @@
                     android:layout_below="@+id/radioGroupConfig"
                     android:layout_marginStart="56dp"
                     android:layout_toEndOf="@+id/textInputIP"
-                    app:errorTextAppearance="@style/error_appearance">
+                    app:errorTextAppearance="?error_appearance">
 
                     <EditText
                         android:id="@+id/editSubnet"
@@ -412,7 +412,7 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/textInputIP"
                     android:layout_marginTop="20dp"
-                    app:errorTextAppearance="@style/error_appearance">
+                    app:errorTextAppearance="?error_appearance">
 
                     <EditText
                         android:id="@+id/editGateway"

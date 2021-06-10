@@ -86,5 +86,7 @@
     <color name="tuner_bg_grey">#F9F9F9</color>
     <color name="tuner_divider">#F9F9F9</color>
     <color name="tuner_header_bg">#EBECED</color>
+    <color name="col1">#2962FF</color>
+    <color name="col2">#00BFA5</color>
 
 </resources>

@@ -82,7 +82,7 @@
                 android:layout_alignRight="@+id/textTempOffset"
                 android:gravity="center_vertical|center_horizontal"
                 android:minWidth="77dp"
-                android:theme="@style/DefaultNumberPickerTheme" />
+                android:theme="?DefaultNumberPickerTheme" />
 
             <ImageView
                 android:id="@+id/imageHPInput"

@@ -34,9 +34,12 @@
         <item name="RenatusTabTextSelected">@style/RenatusTabTextSelected_daikin</item>
         <item name="WindowTextStyle">@style/WindowTextStyle_daikin</item>
         <item name="buttonstyle">@style/buttonstyle_daikin</item>
-
         <item name="toggle_on_off">@style/toggle_on_off_daikin</item>
         <item name="SwitchTheme">@style/SwitchTheme_daikin</item>
+        <item name="DefaultNumberPickerTheme">@style/DefaultNumberPickerTheme_daikin</item>
+        <item name="error_appearance">@style/error_appearance_daikin</item>
+        <item name="tunerButton">@style/tunerButton_daikin</item>
+        <item name="spinner_label_orange">@style/spinner_label_orange_daikin</item>
 
 
     </style>
@@ -64,7 +67,8 @@
         <item name="buttonstyle">@style/buttonstyle_daikin</item>
         <item name="toggle_on_off">@style/toggle_on_off_daikin</item>
         <item name="SwitchTheme">@style/SwitchTheme_daikin</item>
-
+        <item name="DefaultNumberPickerTheme">@style/DefaultNumberPickerTheme_daikin</item>
+        <item name="error_appearance">@style/error_appearance_daikin</item>
 
     </style>
 
@@ -151,13 +155,7 @@
 
     </style>
 
-
-    <style name="LoginFormContainer">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:padding">16dp</item>
-    </style>
-
+<!--
     <style name="FullscreenTheme" parent="RenatusAppDaikinTheme">
         <item name="android:actionBarStyle">@style/FullscreenActionBarStyle</item>
         <item name="android:windowActionBarOverlay">true</item>
@@ -169,12 +167,12 @@
     <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
         <item name="android:background">@color/black_overlay</item>
     </style>
-
-    <style name="DefaultNumberPickerTheme" parent="RenatusAppDaikinTheme">
+-->
+    <style name="DefaultNumberPickerTheme_daikin" parent="RenatusAppDaikinTheme">
         <item name="colorControlNormal">@color/daikin_75f</item>
     </style>
 
-    <style name="error_appearance" parent="@android:style/TextAppearance">
+    <style name="error_appearance_daikin" parent="@android:style/TextAppearance">
         <item name="android:textColor">@color/hint_color</item>
         <item name="android:textSize">16sp</item>
         <item name="android:paddingLeft">10dp</item>
@@ -381,7 +379,7 @@
         <item name="android:gravity">center_vertical</item>
     </style>
 
-    <style name="spinner_label_orange" parent="@android:style/TextAppearance">
+    <style name="spinner_label_orange_daikin" parent="@android:style/TextAppearance">
         <item name="android:textSize">22sp</item>
         <item name="android:textColor">@color/daikin_75f</item>
         <item name="android:fontFamily">@font/lato_bold</item>
@@ -396,7 +394,7 @@
         <item name="android:gravity">center_vertical</item>
     </style>
 
-    <style name="tunerButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+    <style name="tunerButton_daikin" parent="Widget.MaterialComponents.Button.OutlinedButton">
         <item name="android:textColor">@color/tuner_button_text_selector</item>
         <item name="android:textSize">19.5sp</item>
         <item name="android:textAllCaps">false</item>

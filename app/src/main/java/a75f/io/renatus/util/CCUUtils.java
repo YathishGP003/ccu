@@ -636,6 +636,8 @@ public class CCUUtils {
     }
 
     public static String getValue(String item) {
+
+
         String value = "NA";
         if (!Strings.isNullOrEmpty(item)) {
             value = item;
@@ -650,4 +652,12 @@ public class CCUUtils {
 	public static int getPrimaryThemeColor(Context context){
 		return MaterialColors.getColor(context, R.attr.orange_75f, Color.CYAN);
 	}
+
+	public static int getListSelectorBackground(Context context){
+		return  context.getResources().getIdentifier("@drawable/ic_listselector", "drawable", context.getPackageName());
+	}
+	public static int getDayselectionBackgroud(Context context){
+		return  context.getResources().getIdentifier("@drawable/bg_weekdays_selector", "drawable", context.getPackageName());
+	}
+
 }

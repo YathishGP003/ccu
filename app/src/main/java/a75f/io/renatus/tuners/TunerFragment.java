@@ -81,8 +81,8 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     TunerExpandableLayoutHelper tunerExpandableLayoutHelper;
     int childSelected = 0;
     ArrayList<HashMap> updatedTunerValues;
-    MaterialButton saveTunerValues;
-    MaterialButton cancelTunerUpdate;
+    Button saveTunerValues;
+    Button cancelTunerUpdate;
     EditText editChangeReason;
     EditText editTunerSearch;
     Spinner spinnerSelection;

@@ -56,7 +56,7 @@
                 android:id="@+id/textInputConfigCode"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:errorTextAppearance="@style/error_appearance">
+                app:errorTextAppearance="?error_appearance">
 
                 <EditText
                     android:id="@+id/editConfigCode"
@@ -79,7 +79,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textInputConfigCode"
                 android:layout_marginTop="12dp"
-                app:errorTextAppearance="@style/error_appearance">
+                app:errorTextAppearance="?error_appearance">
 
                 <EditText
                     android:id="@+id/editConfirmCode"

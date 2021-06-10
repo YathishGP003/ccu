@@ -56,7 +56,7 @@
                 android:id="@+id/textInputSitename"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:errorTextAppearance="@style/error_appearance">
+                app:errorTextAppearance="?error_appearance">
 
                 <EditText
                     android:id="@+id/editSitename"
@@ -97,7 +97,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textTimeZone"
                 android:layout_marginTop="-9dp"
-                app:errorTextAppearance="@style/error_appearance">
+                app:errorTextAppearance="?error_appearance">
 
                 <EditText
                     android:id="@+id/editStreetAdd"
@@ -128,7 +128,7 @@
                     android:layout_marginTop="-9dp"
                     android:layout_marginRight="40dp"
                     android:layout_weight="1"
-                    app:errorTextAppearance="@style/error_appearance">
+                    app:errorTextAppearance="?error_appearance">
 
                     <EditText
                         android:id="@+id/editCity"
@@ -150,7 +150,7 @@
                     android:layout_below="@+id/textTimeZone"
                     android:layout_marginLeft="40dp"
                     android:layout_weight="1"
-                    app:errorTextAppearance="@style/error_appearance">
+                    app:errorTextAppearance="?error_appearance">
 
                     <EditText
                         android:id="@+id/editState"
@@ -182,7 +182,7 @@
                     android:layout_below="@+id/textTimeZone"
                     android:layout_marginRight="40dp"
                     android:layout_weight="1"
-                    app:errorTextAppearance="@style/error_appearance">
+                    app:errorTextAppearance="?error_appearance">
 
                     <EditText
                         android:id="@+id/editCountry"
@@ -204,7 +204,7 @@
                     android:layout_below="@+id/textTimeZone"
                     android:layout_marginLeft="40dp"
                     android:layout_weight="1"
-                    app:errorTextAppearance="@style/error_appearance">
+                    app:errorTextAppearance="?error_appearance">
 
                     <EditText
                         android:id="@+id/editZip"
@@ -227,7 +227,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/ltCountry"
                 android:layout_marginTop="-9dp"
-                app:errorTextAppearance="@style/error_appearance">
+                app:errorTextAppearance="?error_appearance">
 
                 <EditText
                     android:id="@+id/editCCU"
@@ -248,7 +248,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textInputCCU"
                 android:layout_marginTop="-9dp"
-                app:errorTextAppearance="@style/error_appearance">
+                app:errorTextAppearance="?error_appearance">
 
                 <EditText
                     android:id="@+id/editFacilityEmail"
@@ -268,7 +268,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textInputEmail"
                 android:layout_marginTop="-9dp"
-                app:errorTextAppearance="@style/error_appearance">
+                app:errorTextAppearance="?error_appearance">
 
                 <EditText
                     android:id="@+id/editInstallerEmail"
@@ -288,7 +288,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textInputInstallerEmail"
                 android:layout_marginTop="-9dp"
-                app:errorTextAppearance="@style/error_appearance">
+                app:errorTextAppearance="?error_appearance">
 
                 <EditText
                     android:id="@+id/editFacilityOrganization"

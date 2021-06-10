@@ -79,7 +79,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical|center_horizontal"
                     android:minWidth="150dp"
-                    android:theme="@style/DefaultNumberPickerTheme" />
+                    android:theme="?DefaultNumberPickerTheme" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -96,7 +96,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical|center_horizontal"
                     android:minWidth="150dp"
-                    android:theme="@style/DefaultNumberPickerTheme" />
+                    android:theme="?DefaultNumberPickerTheme" />
 
             </LinearLayout>
 

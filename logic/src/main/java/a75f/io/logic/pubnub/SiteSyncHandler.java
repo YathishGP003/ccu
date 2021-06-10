@@ -27,16 +27,6 @@ public class SiteSyncHandler
             //SiteSyncHandler should take care of only the Site entity updates.
             if (remoteSite != null && !remoteSite.equals(hayStack.getSite())) {
                 hayStack.updateSiteLocal(remoteSite, hayStack.getSiteIdRef().toString());
-                
-                SharedPreferences.Editor spPrefsEditor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-                spPrefsEditor.putString("zipcode", remoteSite.getGeoPostalCode());
-                spPrefsEditor.putString("country", remoteSite.getGeoCountry());
-    
-                //Reset lat & lng so that WeatherService regenerates it using updated address.
-                spPrefsEditor.putFloat("lat", 0);
-                spPrefsEditor.putFloat("lng", 0);
-    
-                spPrefsEditor.commit();
                 Intent locationUpdateIntent = new Intent(RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED);
                 context.sendBroadcast(locationUpdateIntent);
             }

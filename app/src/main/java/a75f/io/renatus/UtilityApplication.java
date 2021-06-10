@@ -26,6 +26,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.util.RenatusLogicIntentActions;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
+import a75f.io.renatus.util.Receiver.LocationUpdateReceiver;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatDelegate;
 import android.text.format.Formatter;
@@ -253,7 +254,7 @@ public abstract class UtilityApplication extends Application {
         context.registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         InitialiseBACnet();
     
-        context.registerReceiver(new LocationUpdateEventReceiver(),
+        context.registerReceiver(new LocationUpdateReceiver(),
                                  new IntentFilter(ACTION_SITE_LOCATION_UPDATED));
     }
 
@@ -806,15 +807,6 @@ public abstract class UtilityApplication extends Application {
                             Segmentation.noSegmentation, localDevice.get(PropertyIdentifier.vendorIdentifier)));
                 }
             }
-        }
-    }
-    
-    
-    public class LocationUpdateEventReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            //Update weather data using new location details.
-            WeatherDataDownloadService.getWeatherData();
         }
     }
 

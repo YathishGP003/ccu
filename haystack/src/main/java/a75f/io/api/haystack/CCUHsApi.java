@@ -294,12 +294,27 @@ public class CCUHsApi
     {
         tagsDb.updateSite(s, id);
         entitySyncHandler.requestSiteSync();
+        updateLocationDataForWeatherUpdate(s);
     }
     
     //Local site entity may be updated on pubnub notification which does not need to be synced back.
     public void updateSiteLocal(Site s, String id)
     {
         tagsDb.updateSite(s, id);
+        updateLocationDataForWeatherUpdate(s);
+    }
+    
+    private void updateLocationDataForWeatherUpdate(Site updatedSite) {
+    
+        SharedPreferences.Editor spPrefsEditor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        spPrefsEditor.putString("zipcode", updatedSite.getGeoPostalCode());
+        spPrefsEditor.putString("country", updatedSite.getGeoCountry());
+    
+        //Reset lat & lng so that WeatherService regenerates it using updated address.
+        spPrefsEditor.putFloat("lat", 0);
+        spPrefsEditor.putFloat("lng", 0);
+    
+        spPrefsEditor.commit();
     }
 
     public void updateEquip(Equip q, String id)

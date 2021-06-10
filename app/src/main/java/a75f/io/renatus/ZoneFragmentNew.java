@@ -1,8 +1,11 @@
 package a75f.io.renatus;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,6 +15,7 @@ import android.preference.PreferenceManager;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.plc.PlcProfile;
+import a75f.io.renatus.util.Receiver.LocationUpdateReceiver;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -90,6 +94,7 @@ import a75f.io.renatus.util.NonTempControl;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.SeekArc;
 
+import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 
 public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
@@ -233,6 +238,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 selectFloor(position);
             }
         });
+    
+        getContext().registerReceiver(new BroadcastReceiver() {
+            @Override public void onReceive(Context context, Intent intent) {
+                if (weatherUpdateHandler != null)
+                    weatherUpdateHandler.postDelayed(weatherUpdate, 60000);
+            }
+        }, new IntentFilter(ACTION_SITE_LOCATION_UPDATED));
     }
 
     public void refreshScreen(String id)

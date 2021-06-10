@@ -15,7 +15,7 @@ import java.lang.StringBuilder
 typealias AlertDefsMap = MutableMap<String, AlertDefinition>
 
 /** Map of keys (title+equipId) to full AlertDef occurrance state (alert def, occurrance, progress) */
-typealias AlertDefsState = MutableMap<AlertsDefStateKey, AlertDefOccurranceState>
+typealias AlertDefsState = MutableMap<AlertsDefStateKey, AlertDefOccurrenceState>
 
 /** Nice print out for debugging */
 fun AlertDefsState.niceString(): String {
@@ -33,6 +33,21 @@ fun AlertDefsState.niceString(): String {
       .forEach { (key, value) -> sb.append(" ").append((value.progress as AlertDefProgress.Partial).occurrenceCount).append("  ").append(key.title) }
    sb.append(",   fixed: ").append(fixed)
    return sb.toString()
+}
+
+fun AlertDefsState.remove(alert: Alert) {
+   val key = AlertsDefStateKey(alert.mTitle, alert.equipId)
+   remove(key)
+}
+
+   /**
+ * Call when an alert definition is to be removed from the system.
+ * This removes all instances of it from AlertDefsState.
+ */
+fun AlertDefsState.removeAll(alertDefinition: AlertDefinition) {
+
+   val matchingKeys = keys.filter { it.title == alertDefinition.alert.mTitle }
+   matchingKeys.forEach { remove(it) }
 }
 
 
@@ -87,7 +102,7 @@ operator fun AlertDefsState.plusAssign(occurrences: List<AlertDefOccurrence>) {
    val updates: AlertDefsState = mutableMapOf()
    val deletions: MutableList<AlertDefOccurrence> = mutableListOf()
 
-   // for existing raised alert defs...
+   // for existing noted alert defs...
    forEach { (key, value) ->
       val alertDefOccurrence = value.occurrence
       val progress = value.progress
@@ -125,9 +140,9 @@ operator fun AlertDefsState.plusAssign(occurrences: List<AlertDefOccurrence>) {
       if ( alertDefOccurrence.key !in keys) {
          val offset = alertDefOccurrence.alertDef.offset?.toInt() ?: 0
          if (offset <= 1) {
-            updates.put(alertDefOccurrence.key, AlertDefOccurranceState(alertDefOccurrence, AlertDefProgress.Raised()))
+            updates.put(alertDefOccurrence.key, AlertDefOccurrenceState(alertDefOccurrence, AlertDefProgress.Raised()))
          } else {
-            updates.put(alertDefOccurrence.key, AlertDefOccurranceState(alertDefOccurrence, AlertDefProgress.Partial()))
+            updates.put(alertDefOccurrence.key, AlertDefOccurrenceState(alertDefOccurrence, AlertDefProgress.Partial()))
          }
       }
    }

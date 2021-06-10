@@ -56,7 +56,16 @@ public class AlertSyncHandler
                                         syncedAlerts.add(a);
                                         dataStore.updateAlert(a);
                                     },
-                                    error -> CcuLog.w("CCU_ALERTS", "Unexpected error posting alert.", error)
+                                    error -> {
+                                        if (error.getMessage().contains("HTTP 409")) {
+                                            CcuLog.w("CCU_ALERTS", "Duplicate error on server: " + a);
+                                            a.setSyncStatus(true);
+                                            syncedAlerts.add(a);
+                                            dataStore.updateAlert(a);
+                                        } else {
+                                            CcuLog.w("CCU_ALERTS", "Unexpected error posting alert.", error);
+                                        }
+                                    }
                             );
             }else {
                 CcuLog.d("CCU_ALERTS", "Updating alert on alerts-service: " + a);
@@ -74,7 +83,7 @@ public class AlertSyncHandler
         }
 
         if (alerts.size() != syncedAlerts.size()) {
-            CcuLog.w("CCU_ALERTS", "Attempted to sync " + alerts.size() + "alerts, but synced only "
+            CcuLog.w("CCU_ALERTS", "Attempted to sync " + alerts.size() + " alerts, but synced only "
                     + syncedAlerts.size());
         }
     }

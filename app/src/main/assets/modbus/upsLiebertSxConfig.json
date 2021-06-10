@@ -787,10 +787,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "off"
+              "tagName": "systemOff"
             },
             {
               "tagName": "alarm"
@@ -1547,10 +1544,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "restart"
+              "tagName": "systemRestart"
             },
             {
               "tagName": "pending"
@@ -2016,10 +2010,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "system"
+              "tagName": "systemBattery"
             },
             {
               "tagName": "alarm"

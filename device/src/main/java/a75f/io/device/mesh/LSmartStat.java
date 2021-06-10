@@ -17,6 +17,7 @@ import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
@@ -253,8 +254,9 @@ public class LSmartStat {
         return CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and mode and his and " + cmd + " and equipRef== \"" + equipRef + "\"");
     }
     public static SmartStatFanSpeed_t getOperationalMode(String cmd, String equipRef){
-
-        double fanMode = CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and operation and mode and his and "+cmd+" and equipRef== \"" + equipRef + "\"");
+        HashMap opModePoint = CCUHsApi.getInstance().read("point and standalone and operation and mode and his and "+cmd+" and " +
+                                       "equipRef== \"" + equipRef + "\"");
+        double fanMode = CCUHsApi.getInstance().readPointPriorityVal(opModePoint.get("id").toString());
         StandaloneLogicalFanSpeeds fanSpeeds = StandaloneLogicalFanSpeeds.values()[(int)fanMode];
         SmartStatFanSpeed_t fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_AUTO;
         switch (fanSpeeds){
@@ -265,31 +267,27 @@ public class LSmartStat {
                 fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_AUTO;
                 break;
             case FAN_LOW_CURRENT_OCCUPIED:
-                fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_LOW;
-                break;
             case FAN_LOW_OCCUPIED:
-                fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_LOW;
-                break;
             case FAN_LOW_ALL_TIMES:
                 fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_LOW;
                 break;
             case FAN_HIGH_OCCUPIED://High equal to medium
-                fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_HIGH;
-                break;
             case FAN_HIGH_CURRENT_OCCUPIED:
-                fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_HIGH;
-                break;
             case FAN_HIGH_ALL_TIMES:
+                if (opModePoint.containsKey(Tags.FCU)) {
+                    fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_HIGH2;
+                } else {
                 fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_HIGH;
+                }
                 break;
             case FAN_HIGH2_OCCUPIED://High2 is actual high in firmware mapping
-                fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_HIGH2;
-                break;
             case FAN_HIGH2_CURRENT_OCCUPIED:
-                fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_HIGH2;
-                break;
             case FAN_HIGH2_ALL_TIMES:
-                fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_HIGH2;
+                if (opModePoint.containsKey(Tags.FCU)) {
+                    fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_HIGH;
+                } else {
+                    fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_HIGH2;
+                }
                 break;
         }
         return fanSpeed_t;

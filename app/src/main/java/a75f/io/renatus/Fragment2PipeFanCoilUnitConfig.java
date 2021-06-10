@@ -41,9 +41,12 @@ import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.util.RxjavaUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.disposables.Disposable;
 
 public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implements CompoundButton.OnCheckedChangeListener {
     public static final String ID = Fragment2PipeFanCoilUnitConfig.class.getSimpleName();
@@ -55,6 +58,8 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
     private NodeType mNodeType;
     private TwoPipeFanCoilUnitProfile twoPfcuProfile;
     private TwoPipeFanCoilUnitConfiguration mProfileConfig;
+
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     ToggleButton switchThermistor1;
     ToggleButton switchFanMediumY1;
@@ -103,6 +108,12 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
             dialog.getWindow().setLayout(width, height);
         }
         setTitle();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        compositeDisposable.dispose();
     }
 
     private void setTitle() {
@@ -224,19 +235,22 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
         setButton.setOnClickListener(v -> {
 
             setButton.setEnabled(false);
-            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving 2PFCU Configuration");
 
-            new Thread(() -> {
-                setup2PFCUZoneProfile();
-                L.saveCCUState();
-            }).start();
-
-            new Handler().postDelayed(() -> {
-                ProgressDialogUtils.hideProgressDialog();
-                Fragment2PipeFanCoilUnitConfig.this.closeAllBaseDialogFragments();
-                getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                LSerial.getInstance().sendSeedMessage(true,false, mSmartNodeAddress, roomRef,floorRef);
-            },12000);
+            compositeDisposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+                    ()->{
+                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving 2PFCU Configuration");
+                    },
+                    ()->{
+                        setup2PFCUZoneProfile();
+                        L.saveCCUState();
+                        LSerial.getInstance().sendSeedMessage(true, false, mSmartNodeAddress, roomRef, floorRef);
+                    },
+                    ()->{
+                        ProgressDialogUtils.hideProgressDialog();
+                        Fragment2PipeFanCoilUnitConfig.this.closeAllBaseDialogFragments();
+                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                    }
+            ));
 
         });
         view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {

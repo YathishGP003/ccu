@@ -1,6 +1,10 @@
 package a75f.io.alerts.model
 
+import a75f.io.alerts.AlertBuilder
 import a75f.io.alerts.AlertDefinition
+import a75f.io.alerts.AlertFormatter
+import a75f.io.api.haystack.Alert
+import a75f.io.api.haystack.CCUHsApi
 
 /**
  * @author tcase@75f.io
@@ -16,10 +20,19 @@ data class AlertDefOccurrence(
    val equipRef: String? = null,
 ) {
    val key = AlertsDefStateKey(alertDef.alert.mTitle, equipRef)
+
+   fun toAlert(haystack: CCUHsApi): Alert {
+      return if (pointId != null)
+         AlertBuilder.build(alertDef, AlertFormatter.getFormattedMessage(alertDef, pointId), haystack,
+            equipRef,
+            pointId)
+      else
+         AlertBuilder.build(alertDef, AlertFormatter.getFormattedMessage(alertDef), haystack)
+   }
 }
 
 /** Current state (progress) in the system of one alert def occurrance */
-data class AlertDefOccurranceState(
+data class AlertDefOccurrenceState(
    val occurrence: AlertDefOccurrence,
    val progress: AlertDefProgress
 )

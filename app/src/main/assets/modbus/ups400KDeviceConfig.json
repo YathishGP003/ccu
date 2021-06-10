@@ -16,7 +16,7 @@
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a7071",
-          "name": "System Input Voltage L1-L2",
+          "name": "system Input Voltage L1-L2",
           "startBit": 0,
           "endBit": 15,
           "displayInUiDefault": false,
@@ -25,7 +25,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemInput"
             },
             {
               "tagName": "voltage"
@@ -69,7 +69,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemInput"
             },
             {
               "tagName": "voltage"
@@ -113,7 +113,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemInput"
             },
             {
               "tagName": "voltage"
@@ -157,7 +157,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemInput"
             },
             {
               "tagName": "input"
@@ -204,7 +204,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemInput"
             },
             {
               "tagName": "input"
@@ -251,7 +251,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemInput"
             },
             {
               "tagName": "input"
@@ -298,7 +298,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemInput"
             },
             {
               "tagName": "input"
@@ -342,7 +342,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemInput"
             },
             {
               "tagName": "voltage"
@@ -386,7 +386,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemInput"
             },
             {
               "tagName": "voltage"
@@ -430,7 +430,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemInput"
             },
             {
               "tagName": "voltage"
@@ -474,7 +474,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemInput"
             },
             {
               "tagName": "input"
@@ -520,7 +520,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemInput"
             },
             {
               "tagName": "input"
@@ -566,10 +566,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "input"
+              "tagName": "systemInput"
             },
             {
               "tagName": "power"
@@ -612,7 +609,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemInput"
             },
             {
               "tagName": "voltage"
@@ -656,7 +653,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemInput"
             },
             {
               "tagName": "voltage"
@@ -700,7 +697,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemInput"
             },
             {
               "tagName": "voltage"
@@ -1194,10 +1191,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "output"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "voltage"
@@ -1241,10 +1235,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "output"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "voltage"
@@ -1288,10 +1279,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "output"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "voltage"
@@ -1335,10 +1323,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "output"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "current"
@@ -1382,10 +1367,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "output"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "current"
@@ -1429,10 +1411,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "output"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "current"
@@ -1476,10 +1455,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "output"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "frequency"
@@ -1520,10 +1496,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "output"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "voltage"
@@ -1567,10 +1540,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "output"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "voltage"
@@ -1614,10 +1584,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "output"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "voltage"
@@ -1661,10 +1628,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "output"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "power"
@@ -1707,10 +1671,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "output"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "power"
@@ -1753,10 +1714,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "output"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "power"
@@ -1799,10 +1757,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "output"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "power"
@@ -1849,10 +1804,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "output"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "power"
@@ -1899,10 +1851,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "output"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "power"
@@ -2178,16 +2127,13 @@
               "tagName": "ups"
             },
             {
-              "tagName": "output"
-            },
-            {
               "tagName": "power"
             },
             {
               "tagName": "phase"
             },
             {
-              "tagName": "system"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "l1"
@@ -2228,16 +2174,13 @@
               "tagName": "ups"
             },
             {
-              "tagName": "output"
-            },
-            {
               "tagName": "power"
             },
             {
               "tagName": "phase"
             },
             {
-              "tagName": "system"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "l2"
@@ -2278,16 +2221,13 @@
               "tagName": "ups"
             },
             {
-              "tagName": "output"
-            },
-            {
               "tagName": "power"
             },
             {
               "tagName": "phase"
             },
             {
-              "tagName": "system"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "l3"
@@ -2328,9 +2268,6 @@
               "tagName": "ups"
             },
             {
-              "tagName": "output"
-            },
-            {
               "tagName": "power"
             },
             {
@@ -2340,7 +2277,7 @@
               "tagName": "phase"
             },
             {
-              "tagName": "system"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "l1"
@@ -2381,9 +2318,6 @@
               "tagName": "ups"
             },
             {
-              "tagName": "output"
-            },
-            {
               "tagName": "power"
             },
             {
@@ -2393,7 +2327,7 @@
               "tagName": "apparent"
             },
             {
-              "tagName": "system"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "l2"
@@ -2434,9 +2368,6 @@
               "tagName": "ups"
             },
             {
-              "tagName": "output"
-            },
-            {
               "tagName": "power"
             },
             {
@@ -2446,7 +2377,7 @@
               "tagName": "apparent"
             },
             {
-              "tagName": "system"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "l3"
@@ -2487,13 +2418,10 @@
               "tagName": "ups"
             },
             {
-              "tagName": "output"
-            },
-            {
               "tagName": "power"
             },
             {
-              "tagName": "system"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "unit",
@@ -2531,13 +2459,10 @@
               "tagName": "ups"
             },
             {
-              "tagName": "output"
-            },
-            {
               "tagName": "power"
             },
             {
-              "tagName": "system"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "apparent"
@@ -2764,10 +2689,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "status"
+              "tagName": "systemStatus"
             },
             {
               "tagName": "kind",
@@ -2810,10 +2732,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "status"
+              "tagName": "systemStatus"
             },
             {
               "tagName": "kind",
@@ -3101,10 +3020,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "input"
+              "tagName": "systemInput"
             },
             {
               "tagName": "voltage"
@@ -3148,10 +3064,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "input"
+              "tagName": "systemInput"
             },
             {
               "tagName": "frequency"
@@ -3195,10 +3108,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "input"
+              "tagName": "systemInput"
             },
             {
               "tagName": "current"
@@ -3286,10 +3196,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "output"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "voltage"
@@ -3333,10 +3240,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "output"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "frequency"
@@ -3380,7 +3284,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemOp"
             },
             {
               "tagName": "output"
@@ -3427,13 +3331,10 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemEfficiency"
             },
             {
               "tagName": "average"
-            },
-            {
-              "tagName": "efficiency"
             },
             {
               "tagName": "unit",
@@ -3913,10 +3814,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "input"
+              "tagName": "systemInput"
             },
             {
               "tagName": "power"
@@ -3963,10 +3861,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "rectifier"
+              "tagName": "systemRectifier"
             },
             {
               "tagName": "failure"
@@ -4013,10 +3908,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "inverter"
+              "tagName": "systemInverter"
             },
             {
               "tagName": "failure"
@@ -4201,10 +4093,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "fan"
+              "tagName": "systemFan"
             },
             {
               "tagName": "failure"
@@ -4251,7 +4140,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemEquip"
             },
             {
               "tagName": "over"
@@ -4301,10 +4190,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "shutdown"
+              "tagName": "systemShutdown"
             },
             {
               "tagName": "epo"
@@ -4604,7 +4490,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
+              "tagName": "systemInput"
             },
             {
               "tagName": "rotation"
@@ -4654,10 +4540,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "fuse"
+              "tagName": "systemFuse"
             },
             {
               "tagName": "failure"
@@ -4704,10 +4587,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "inverter"
+              "tagName": "systemInverter"
             },
             {
               "tagName": "overload"
@@ -4754,10 +4634,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "mMS"
+              "tagName": "systemMMS"
             },
             {
               "tagName": "overload"
@@ -4904,10 +4781,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "output"
+              "tagName": "systemOutput"
             },
             {
               "tagName": "fault"
@@ -4954,10 +4828,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "internal"
+              "tagName": "systemInternal"
             },
             {
               "tagName": "communications"
@@ -5054,10 +4925,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "input"
+              "tagName": "systemInput"
             },
             {
               "tagName": "current"
@@ -5104,10 +4972,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "system"
+              "tagName": "systemBattery"
             },
             {
               "tagName": "qualified"
@@ -6080,10 +5945,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "input"
+              "tagName": "systemInput"
             },
             {
               "tagName": "current"
@@ -6174,10 +6036,7 @@
               "tagName": "ups"
             },
             {
-              "tagName": "system"
-            },
-            {
-              "tagName": "overload"
+              "tagName": "systemOverload"
             },
             {
               "tagName": "alarm"
@@ -6563,9 +6422,6 @@
             },
             {
               "tagName": "roomAlarm"
-            },
-            {
-              "tagName": "alarm"
             },
             {
               "tagName": "kind",

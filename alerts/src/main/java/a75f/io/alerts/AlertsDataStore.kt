@@ -81,6 +81,16 @@ class AlertsDataStore @JvmOverloads constructor(
       alertBox.remove(alert)
    }
 
+   fun deleteAlertsForDef(alertDef: AlertDefinition) {
+
+      val alertQuery = alertBox.query()
+      val matchingAlerts = alertQuery
+         .equal(Alert_.mTitle, alertDef.alert.mTitle)
+         .build().find()
+      matchingAlerts
+         .forEach { deleteAlert(it) }
+   }
+
    fun cancelAppRestarted() {
       alertsSharedPrefs.edit().putBoolean(PREFS_ALERTS_APP_RESTART, false).apply()
    }
@@ -111,7 +121,7 @@ class AlertsDataStore @JvmOverloads constructor(
    fun getUnSyncedAlerts(): List<Alert> {
       val alertQuery = alertBox.query()
       alertQuery.equal(Alert_.syncStatus, false)
-         .orderDesc(Alert_.startTime)
+         .order(Alert_.startTime)
       return alertQuery.build().find()
    }
 

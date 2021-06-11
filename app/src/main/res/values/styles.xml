@@ -1,43 +1,61 @@
 <resources>
 
-    <!-- Base application theme. -->
-  <!--  <style name="RenatusAppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        &lt;!&ndash; Customize your theme here. &ndash;&gt;
+    <style name="RenatusApp75FTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/secondary</item>
         <item name="colorPrimaryDark">@color/secondary</item>
-        <item name="colorAccent">@color/accent75F</item>
-        <item name="orange_75f">@color/orange_75f</item>
+        <item name="colorAccent">@color/renatus_75F_accent</item>
+        <item name="orange_75f">@color/renatus_75f_primary</item>
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
-
+        <item name="AppTheme.AppBarOverlay">@style/AppTheme.AppBarOverlay</item>
+        <item name="AppTheme.PopupOverlay">@style/AppTheme.PopupOverlay</item>
+        <item name="RenatusTabStyle">@style/RenatusTabStyle_75f</item>
+        <item name="RenatusLandingTabStyle">@style/RenatusLandingTabStyle_75f</item>
+        <item name="RenatusLandingTabTextStyle">@style/RenatusLandingTabTextStyle</item>
+        <item name="RenatusTabTextStyle">@style/RenatusTabTextStyle</item>
+        <item name="RenatusTabTextSelected">@style/RenatusTabTextSelected</item>
+        <item name="WindowTextStyle">@style/WindowTextStyle_75f</item>
+        <item name="buttonstyle">@style/buttonstyle</item>
+        <item name="toggle_on_off">@style/toggle_on_off</item>
+        <item name="SwitchTheme">@style/SwitchTheme_75f</item>
+        <item name="DefaultNumberPickerTheme">@style/DefaultNumberPickerTheme_75f</item>
+        <item name="error_appearance">@style/error_appearance</item>
+        <item name="tunerButton">@style/tunerButton_75f</item>
+        <item name="spinner_label_orange">@style/spinner_label_orange_75f</item>
+        <item name="tuner_group_title">@style/tuner_group_title_75f</item>
+        <item name="tuner_button_cancel">@style/tuner_button_cancel_75f</item>
+        <item name="tuner_text_value">@style/tuner_text_value_75f</item>
+        <item name="label_orange_title">@style/label_orange_title_75f</item>
+        <item name="label_orange">@style/label_orange_75f</item>
+        <item name="action_text_appearance">@style/action_text_appearance_75f</item>
+        <item name="title_orange">@style/title_orange_75f</item>
+        <item name="text_header">@style/text_header_75f</item>
     </style>
--->
+
     <style name="RenatusAppDaikinTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/secondary</item>
         <item name="colorPrimaryDark">@color/secondary</item>
-
         <item name="colorAccent">@color/accentDaikin_75f</item>
         <item name="orange_75f">@color/daikin_75f</item>
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
-        <item name="AppTheme.AppBarOverlay">@style/AppTheme.AppBarOverlay_daikin</item>
-        <item name="AppTheme.PopupOverlay">@style/AppTheme.PopupOverlay_daikin</item>
+        <item name="AppTheme.AppBarOverlay">@style/AppTheme.AppBarOverlay</item>
+        <item name="AppTheme.PopupOverlay">@style/AppTheme.PopupOverlay</item>
         <item name="RenatusTabStyle">@style/RenatusTabStyle_daikin</item>
         <item name="RenatusLandingTabStyle">@style/RenatusLandingTabStyle_daikin</item>
-        <item name="RenatusLandingTabTextStyle">@style/RenatusLandingTabTextStyle_daikin</item>
-        <item name="RenatusTabTextStyle">@style/RenatusTabTextStyle_daikin</item>
-        <item name="RenatusTabTextSelected">@style/RenatusTabTextSelected_daikin</item>
+        <item name="RenatusLandingTabTextStyle">@style/RenatusLandingTabTextStyle</item>
+        <item name="RenatusTabTextStyle">@style/RenatusTabTextStyle</item>
+        <item name="RenatusTabTextSelected">@style/RenatusTabTextSelected</item>
         <item name="WindowTextStyle">@style/WindowTextStyle_daikin</item>
-        <item name="buttonstyle">@style/buttonstyle_daikin</item>
-        <item name="toggle_on_off">@style/toggle_on_off_daikin</item>
+        <item name="buttonstyle">@style/buttonstyle</item>
+        <item name="toggle_on_off">@style/toggle_on_off</item>
         <item name="SwitchTheme">@style/SwitchTheme_daikin</item>
         <item name="DefaultNumberPickerTheme">@style/DefaultNumberPickerTheme_daikin</item>
-        <item name="error_appearance">@style/error_appearance_daikin</item>
+        <item name="error_appearance">@style/error_appearance</item>
         <item name="tunerButton">@style/tunerButton_daikin</item>
         <item name="spinner_label_orange">@style/spinner_label_orange_daikin</item>
         <item name="tuner_group_title">@style/tuner_group_title_daikin</item>
@@ -48,53 +66,42 @@
         <item name="action_text_appearance">@style/action_text_appearance_daikin</item>
         <item name="title_orange">@style/title_orange_daikin</item>
         <item name="text_header">@style/text_header_daikin</item>
-
-
     </style>
 
 
 
-    <style name="AppTheme.AppBarOverlay_daikin" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
-        <item name="android:textColorPrimary">@color/colorPrimary</item>
-        <item name="android:textColorSecondary">@color/colorPrimaryDark</item>
+
+    <style name="RenatusTabStyle_75f" parent="Base.Widget.Design.TabLayout">
+        <item name="tabSelectedTextColor">@color/white</item>
+        <item name="tabTextColor">@color/light_gray</item>
+        <item name="tabIndicatorColor">@color/renatus_75f_primary</item>
+        <item name="tabTextAppearance">@style/RenatusTabTextStyle</item>
     </style>
-
-    <style name="AppTheme.PopupOverlay_daikin" parent="ThemeOverlay.AppCompat.Light" />
-
     <style name="RenatusTabStyle_daikin" parent="Base.Widget.Design.TabLayout">
         <item name="tabSelectedTextColor">@color/white</item>
         <item name="tabTextColor">@color/light_gray</item>
         <item name="tabIndicatorColor">@color/daikin_75f</item>
-        <item name="tabTextAppearance">@style/RenatusTabTextStyle_daikin</item>
+        <item name="tabTextAppearance">@style/RenatusTabTextStyle</item>
+    </style>
+
+    <style name="RenatusLandingTabStyle_75f" parent="Base.Widget.Design.TabLayout">
+        <item name="tabSelectedTextColor">@color/white</item>
+        <item name="tabTextColor">@color/white</item>
+        <item name="tabIndicatorColor">@color/renatus_75f_primary</item>
+        <item name="tabTextAppearance">@style/RenatusLandingTabTextStyle</item>
     </style>
 
     <style name="RenatusLandingTabStyle_daikin" parent="Base.Widget.Design.TabLayout">
         <item name="tabSelectedTextColor">@color/white</item>
         <item name="tabTextColor">@color/white</item>
         <item name="tabIndicatorColor">@color/daikin_75f</item>
-        <item name="tabTextAppearance">@style/RenatusLandingTabTextStyle_daikin</item>
+        <item name="tabTextAppearance">@style/RenatusLandingTabTextStyle</item>
     </style>
 
-    <style name="RenatusLandingTabTextStyle_daikin" parent="TextAppearance.Design.Tab">
-        <item name="android:textSize">19sp</item>
-        <item name="android:textColor">@color/white</item>
-        <item name="android:fontFamily">@font/lato_light</item>
-        <item name="textAllCaps">true</item>
-    </style>
-
-    <style name="RenatusTabTextStyle_daikin" parent="TextAppearance.Design.Tab">
-        <item name="android:textSize">18sp</item>
-        <item name="android:textColor">@color/white</item>
-        <item name="android:fontFamily">@font/lato_regular</item>
-        <item name="textAllCaps">false</item>
-    </style>
-
-    <style name="RenatusTabTextSelected_daikin" parent="TextAppearance.Design.Tab">
-        <item name="android:textStyle">bold</item>
-        <item name="android:textSize">18sp</item>
-        <item name="android:textColor">@color/white</item>
-        <item name="android:fontFamily">@font/lato_bold</item>
-        <item name="textAllCaps">true</item>
+    <style name="WindowTextStyle_75f">
+        <item name="android:textColor">@color/renatus_75f_primary</item>
+        <item name="android:textSize">@dimen/text_medium</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Title</item>
     </style>
 
     <style name="WindowTextStyle_daikin">
@@ -103,73 +110,30 @@
         <item name="android:textAppearance">@style/TextAppearance.AppCompat.Title</item>
     </style>
 
-    <style name="buttonstyle_daikin">
-        <item name="android:textSize">@dimen/text_small</item>
+
+    <style name="SwitchTheme_75f" parent="ThemeOverlay.AppCompat.Light">
+        <item name="colorAccent">@color/renatus_75f_primary</item>
     </style>
-
-
-    <style name="NewDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="android:windowTitleStyle">@style/WindowTextStyle_daikin</item>
-        <item name="colorAccent">@color/black</item>
-        <item name="buttonStyle">@style/buttonstyle_daikin</item>
-
-    </style>
-
-    <style name="toggle_on_off_daikin">
-        <item name="android:paddingLeft">10dp</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:textOff">Off</item>
-        <item name="android:textOn">On</item>
-    </style>
-
     <style name="SwitchTheme_daikin" parent="ThemeOverlay.AppCompat.Light">
         <item name="colorAccent">@color/daikin_75f</item>
 
     </style>
 
-<!--
-    <style name="FullscreenTheme" parent="RenatusAppDaikinTheme">
-        <item name="android:actionBarStyle">@style/FullscreenActionBarStyle</item>
-        <item name="android:windowActionBarOverlay">true</item>
-        <item name="android:windowBackground">@null</item>
-        <item name="metaButtonBarStyle">?android:attr/buttonBarStyle</item>
-        <item name="metaButtonBarButtonStyle">?android:attr/buttonBarButtonStyle</item>
+
+
+    <style name="DefaultNumberPickerTheme_75f" parent="RenatusAppDaikinTheme">
+        <item name="colorControlNormal">@color/renatus_75f_primary</item>
     </style>
 
-    <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
-        <item name="android:background">@color/black_overlay</item>
-    </style>
--->
     <style name="DefaultNumberPickerTheme_daikin" parent="RenatusAppDaikinTheme">
         <item name="colorControlNormal">@color/daikin_75f</item>
     </style>
 
-    <style name="error_appearance_daikin" parent="@android:style/TextAppearance">
-        <item name="android:textColor">@color/hint_color</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:paddingLeft">10dp</item>
-        <item name="android:paddingTop">-10dp</item>
-        <item name="android:fontFamily">@font/lato_regular</item>
-    </style>
 
-    <style name="text_appearance" parent="@android:style/TextAppearance">
-        <item name="android:textColor">@color/text_color</item>
-        <item name="android:textSize">22sp</item>
-        <item name="android:fontFamily">@font/lato_regular</item>
-        <item name="android:gravity">center_vertical</item>
-    </style>
-
-    <style name="text_toggleappearance" parent="@android:style/TextAppearance">
-        <item name="android:textSize">19.5sp</item>
-        <item name="android:fontFamily">@font/lato_regular</item>
-        <item name="android:gravity">center_vertical</item>
-    </style>
-
-    <style name="text_label" parent="@android:style/TextAppearance">
-        <item name="android:textSize">19.5sp</item>
-        <item name="android:textColor">@color/hint_textcolor</item>
-        <item name="android:fontFamily">@font/lato_regular</item>
+    <style name="text_header_75f" parent="@android:style/TextAppearance">
+        <item name="android:textSize">30sp</item>
+        <item name="android:textColor">@color/renatus_75f_primary</item>
+        <item name="android:fontFamily">@font/lato_light</item>
         <item name="android:gravity">center_vertical</item>
     </style>
 
@@ -180,6 +144,156 @@
         <item name="android:gravity">center_vertical</item>
     </style>
 
+    <style name="title_orange_75f" parent="@android:style/TextAppearance">
+        <item name="android:textSize">34sp</item>
+        <item name="android:textColor">@color/renatus_75f_primary</item>
+        <item name="android:fontFamily">@font/lato_bold</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+    <style name="title_orange_daikin" parent="@android:style/TextAppearance">
+        <item name="android:textSize">34sp</item>
+        <item name="android:textColor">@color/daikin_75f</item>
+        <item name="android:fontFamily">@font/lato_bold</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="action_text_appearance_75f" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/renatus_75f_primary</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:fontFamily">@font/lato_bold</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+
+
+    <style name="action_text_appearance_daikin" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/daikin_75f</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:fontFamily">@font/lato_bold</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="label_orange_75f" parent="@android:style/TextAppearance">
+        <item name="android:textSize">25sp</item>
+        <item name="android:textColor">@color/renatus_75f_primary</item>
+        <item name="android:fontFamily">@font/lato_bold</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="label_orange_daikin" parent="@android:style/TextAppearance">
+        <item name="android:textSize">25sp</item>
+        <item name="android:textColor">@color/daikin_75f</item>
+        <item name="android:fontFamily">@font/lato_bold</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+
+    <style name="label_orange_title_75f" parent="@android:style/TextAppearance">
+        <item name="android:textSize">33.5sp</item>
+        <item name="android:textColor">@color/renatus_75f_primary</item>
+        <item name="android:fontFamily">@font/lato_bold</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+    <style name="label_orange_title_daikin" parent="@android:style/TextAppearance">
+        <item name="android:textSize">33.5sp</item>
+        <item name="android:textColor">@color/daikin_75f</item>
+        <item name="android:fontFamily">@font/lato_bold</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="tuner_text_value_75f" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/renatus_75f_primary</item>
+        <item name="android:textSize">19.5sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+    <style name="tuner_text_value_daikin" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/daikin_75f</item>
+        <item name="android:textSize">19.5sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="tuner_button_cancel_75f" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/renatus_75f_primary</item>
+        <item name="android:textSize">19.5sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+    <style name="tuner_button_cancel_daikin" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/daikin_75f</item>
+        <item name="android:textSize">19.5sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="tuner_group_title_75f" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/renatus_75f_primary</item>
+        <item name="android:textSize">25sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/lato_bold</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+    <style name="tuner_group_title_daikin" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/daikin_75f</item>
+        <item name="android:textSize">25sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/lato_bold</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+
+    <style name="spinner_label_orange_75f" parent="@android:style/TextAppearance">
+        <item name="android:textSize">22sp</item>
+        <item name="android:textColor">@color/renatus_75f_primary</item>
+        <item name="android:fontFamily">@font/lato_bold</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+
+    <style name="spinner_label_orange_daikin" parent="@android:style/TextAppearance">
+        <item name="android:textSize">22sp</item>
+        <item name="android:textColor">@color/daikin_75f</item>
+        <item name="android:fontFamily">@font/lato_bold</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+
+
+    <style name="tunerButton_daikin" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textColor">@color/tuner_button_text_selector</item>
+        <item name="android:textSize">19.5sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:gravity">center</item>
+        <item name="android:strokeColor">@color/tuner_button_text_selector</item>
+        <item name="rippleColor">@color/material_button_ripple</item>
+    </style>
+
+    <style name="tunerButton_75f" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textColor">@color/tuner_button_text_selector</item>
+        <item name="android:textSize">19.5sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:gravity">center</item>
+        <item name="android:strokeColor">@color/tuner_button_text_selector</item>
+        <item name="rippleColor">@color/material_button_ripple</item>
+    </style>
+
+
+    <style name="error_appearance" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/hint_color</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingTop">-10dp</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+    </style>
     <style name="text_values" parent="@android:style/TextAppearance">
         <item name="android:textSize">19sp</item>
         <item name="android:textColor">@color/hint_textcolor</item>
@@ -198,21 +312,6 @@
         <item name="android:textSize">30sp</item>
         <item name="android:textColor">@color/hint_textcolor</item>
         <item name="android:fontFamily">@font/lato_light</item>
-        <item name="android:gravity">center_vertical</item>
-    </style>
-
-    <style name="title_orange_daikin" parent="@android:style/TextAppearance">
-        <item name="android:textSize">34sp</item>
-        <item name="android:textColor">@color/daikin_75f</item>
-        <item name="android:fontFamily">@font/lato_bold</item>
-        <item name="android:gravity">center_vertical</item>
-    </style>
-
-    <style name="action_text_appearance_daikin" parent="@android:style/TextAppearance">
-        <item name="android:textColor">@color/daikin_75f</item>
-        <item name="android:textSize">24sp</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:fontFamily">@font/lato_bold</item>
         <item name="android:gravity">center_vertical</item>
     </style>
 
@@ -280,32 +379,8 @@
         <item name="android:fontFamily">@font/lato_bold</item>
         <item name="android:gravity">center_vertical</item>
     </style>
-
-    <style name="label_orange_daikin" parent="@android:style/TextAppearance">
-        <item name="android:textSize">25sp</item>
-        <item name="android:textColor">@color/daikin_75f</item>
-        <item name="android:fontFamily">@font/lato_bold</item>
-        <item name="android:gravity">center_vertical</item>
-    </style>
-
-    <style name="label_orange_title_daikin" parent="@android:style/TextAppearance">
-        <item name="android:textSize">33.5sp</item>
-        <item name="android:textColor">@color/daikin_75f</item>
-        <item name="android:fontFamily">@font/lato_bold</item>
-        <item name="android:gravity">center_vertical</item>
-    </style>
-
-
     <style name="tuner_text_label" parent="@android:style/TextAppearance">
         <item name="android:textColor">@color/hint_textcolor</item>
-        <item name="android:textSize">19.5sp</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:fontFamily">@font/lato_regular</item>
-        <item name="android:gravity">center_vertical</item>
-    </style>
-
-    <style name="tuner_text_value_daikin" parent="@android:style/TextAppearance">
-        <item name="android:textColor">@color/daikin_75f</item>
         <item name="android:textSize">19.5sp</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:fontFamily">@font/lato_regular</item>
@@ -328,34 +403,11 @@
         <item name="android:gravity">center_vertical</item>
     </style>
 
-    <style name="tuner_button_cancel_daikin" parent="@android:style/TextAppearance">
-        <item name="android:textColor">@color/daikin_75f</item>
-        <item name="android:textSize">19.5sp</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:fontFamily">@font/lato_regular</item>
-        <item name="android:gravity">center_vertical</item>
-    </style>
-
-    <style name="tuner_group_title_daikin" parent="@android:style/TextAppearance">
-        <item name="android:textColor">@color/daikin_75f</item>
-        <item name="android:textSize">25sp</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:fontFamily">@font/lato_bold</item>
-        <item name="android:gravity">center_vertical</item>
-    </style>
-
     <style name="tuner_text_label_black" parent="@android:style/TextAppearance">
         <item name="android:textColor">@color/black</item>
         <item name="android:textSize">19.5sp</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:fontFamily">@font/lato_regular</item>
-        <item name="android:gravity">center_vertical</item>
-    </style>
-
-    <style name="spinner_label_orange_daikin" parent="@android:style/TextAppearance">
-        <item name="android:textSize">22sp</item>
-        <item name="android:textColor">@color/daikin_75f</item>
-        <item name="android:fontFamily">@font/lato_bold</item>
         <item name="android:gravity">center_vertical</item>
     </style>
 
@@ -366,15 +418,69 @@
         <item name="android:fontFamily">@font/lato_bold</item>
         <item name="android:gravity">center_vertical</item>
     </style>
-
-    <style name="tunerButton_daikin" parent="Widget.MaterialComponents.Button.OutlinedButton">
-        <item name="android:textColor">@color/tuner_button_text_selector</item>
-        <item name="android:textSize">19.5sp</item>
-        <item name="android:textAllCaps">false</item>
+    <style name="text_appearance" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:textSize">22sp</item>
         <item name="android:fontFamily">@font/lato_regular</item>
-        <item name="android:gravity">center</item>
-        <item name="android:strokeColor">@color/tuner_button_text_selector</item>
-        <item name="rippleColor">@color/material_button_ripple</item>
+        <item name="android:gravity">center_vertical</item>
     </style>
 
+    <style name="text_toggleappearance" parent="@android:style/TextAppearance">
+        <item name="android:textSize">19.5sp</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="text_label" parent="@android:style/TextAppearance">
+        <item name="android:textSize">19.5sp</item>
+        <item name="android:textColor">@color/hint_textcolor</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="NewDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:windowTitleStyle">@style/WindowTextStyle_daikin</item>
+        <item name="colorAccent">@color/black</item>
+        <item name="buttonStyle">@style/buttonstyle</item>
+    </style>
+
+    <style name="buttonstyle">
+        <item name="android:textSize">@dimen/text_small</item>
+    </style>
+
+    <style name="RenatusLandingTabTextStyle" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">19sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:fontFamily">@font/lato_light</item>
+        <item name="textAllCaps">true</item>
+    </style>
+
+    <style name="RenatusTabTextStyle" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="textAllCaps">false</item>
+    </style>
+
+    <style name="RenatusTabTextSelected" parent="TextAppearance.Design.Tab">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:fontFamily">@font/lato_bold</item>
+        <item name="textAllCaps">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:textColorPrimary">@color/colorPrimary</item>
+        <item name="android:textColorSecondary">@color/colorPrimaryDark</item>
+    </style>
+
+    <style name="toggle_on_off">
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textOff">Off</item>
+        <item name="android:textOn">On</item>
+    </style>
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

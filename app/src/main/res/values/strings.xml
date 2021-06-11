@@ -501,7 +501,9 @@
     <string name="title_sn">SN</string>
     <string name="title_smartnode">Smart Node</string>
     <string name="title_ss">SS</string>
+    <string name="title_hs">HS</string>
     <string name="title_smartstat">Smart Stat</string>
+    <string name="title_hyperstat">HyperStat</string>
     <string name="title_wtm">WTM</string>
     <string name="title_wirelesstemp">Wireless Temperature Monitor</string>
 

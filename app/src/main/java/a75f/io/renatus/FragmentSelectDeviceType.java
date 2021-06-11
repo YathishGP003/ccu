@@ -105,6 +105,14 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         showDialogFragment(wrmProfiling, DialogSmartNodeProfiling.ID);
     }
 
+    @OnClick(R.id.rl_hyperstat) void onHyperStatClick() {
+        if (isModbusPaired()) {
+            return;
+        }
+        DialogSmartStatProfiling smartStatProfiling = DialogSmartStatProfiling.newInstance(mNodeAddress, mRoomName, mFloorName);
+        showDialogFragment(smartStatProfiling, DialogSmartStatProfiling.ID);
+    }
+
     @OnClick(R.id.rl_smartstat) void onSmartStatClick() {
         if (isModbusPaired()) {
             return;

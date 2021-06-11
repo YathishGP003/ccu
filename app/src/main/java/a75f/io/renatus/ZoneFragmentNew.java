@@ -547,7 +547,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             boolean nontempModule = false;
                             for (HashMap equipTypes : equipZones) {
                                 profileType = equipTypes.get("profile").toString();
-                                Log.e("RoomData", "ProfileType:" + profileType);
+                                //Log.e("RoomData", "ProfileType:" + profileType);
                                  if ( !profileType.contains(profileModBus) &&
                                      profileType.contains(profileVAV) ||
                                      profileType.contains(profileDAB) ||
@@ -2247,7 +2247,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
             if (HeatPumpUnitConfiguration.enableRelay5) {
                 if (fanHighHumdOption == 2.0) {
-                    textViewLabel3.setText("Target Humidity : ");
+                    textViewLabel3.setText("Dynamic Target Humidity : ");
                     targetHumidity = (double) hpuEquipPoints.get("Target Humidity");
                     Log.e("targetHumidity", "insideZoneFragment" + targetHumidity);
                     humiditySpinner.setSelection((int) targetHumidity - 1, false);
@@ -2756,9 +2756,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         try {
             if((boolean)plcPoints.get("Dynamic Setpoint") == true)
             {
-                    labelTarget.setText("Target "+plcPoints.get("Dynamic Unit Type").toString()+" : ");
+
+                    labelTarget.setText("Dynamic Target "+plcPoints.get("Dynamic Unit Type").toString()+" : ");
                     textViewTargetAir.setText(plcPoints.get("Target Value").toString()+" "+plcPoints.get("Dynamic Unit").toString());
-                    labelOffsetAir.setText("Offset "+plcPoints.get("Dynamic Unit Type").toString()+" : ");
+                    labelOffsetAir.setText("Offset Dynamic Target "+plcPoints.get("Dynamic Unit Type").toString()+" : ");
                     textViewOffsetAir.setText(plcPoints.get("Offset Value").toString()+" "+plcPoints.get("Dynamic Unit").toString());
                     viewPointRow2.setPadding(0,0,0,40);
                     linearLayoutZonePoints.addView(viewTitle);

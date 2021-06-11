@@ -659,11 +659,12 @@ public class VavStagedRtu extends VavSystemProfile
                 .setDisplayName(equipDis+"-"+name)
                 .setSiteRef(siteRef)
                 .setEquipRef(equipref).setHisInterpolate("cov")
-                .addMarker("system").addMarker("cmd").addMarker(relayMap).addMarker("his")
+                .addMarker("system").addMarker("cmd").addMarker(relayMap).addMarker("his").addMarker("runtime")
                 .setEnums("off,on")
                 .setTz(tz)
                 .build();
-        CCUHsApi.getInstance().addPoint(relay1Op);
+        String cmdPointId = CCUHsApi.getInstance().addPoint(relay1Op);
+        CCUHsApi.getInstance().writeHisValById(cmdPointId,0.0);
     }
     public double getCmdSignal(String cmd) {
         try {

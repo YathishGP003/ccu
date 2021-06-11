@@ -198,7 +198,8 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
                 getActivity(), R.array.smartstat_relay_fanHumiD, R.layout.spinner_cpu_configure_item);
         fanTypeAdapter.setDropDownViewResource(R.layout.spinner_cpu_configure_item);
         fanHumiDSpinner.setAdapter(fanTypeAdapter);
-
+        fanHumiDSpinner.setEnabled(false);
+        switchFanHighOb.setEnabled(false);
 
         switchOccSensor = view.findViewById(R.id.toggleCpuOccupancy);
 

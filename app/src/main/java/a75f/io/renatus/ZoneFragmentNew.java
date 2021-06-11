@@ -994,7 +994,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             imageOn = true;
                             selectedView = seekArc.getId();
                             try {
-                                textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
+//                                textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
                                 textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 tableLayout.addView(zoneDetails, index);
@@ -1034,7 +1034,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     imageOn = true;
                     selectedView = seekArc.getId();
                     try {
-                        textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
+                       // textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         tableLayout.addView(zoneDetails, index);
@@ -1602,7 +1602,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             imageOn = true;
                             isExpanded = true;
                             try {
-                                textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
+                           //     textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
                                 textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 tableLayout.addView(zoneDetails, index);
@@ -1641,7 +1641,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     imageOn = true;
                     isExpanded = true;
                     try {
-                        textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
+                       // textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         tableLayout.addView(zoneDetails, index);

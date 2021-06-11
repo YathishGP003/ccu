@@ -21,7 +21,7 @@
         android:layout_alignParentLeft="true"
         android:layout_margin="10sp"
         android:text="@string/txt_tunersTitle"
-        android:textAppearance="@style/label_orange" />
+        android:textAppearance="?label_orange" />
 
     <androidx.appcompat.widget.AppCompatSpinner
         android:id="@+id/spinnerSelection"

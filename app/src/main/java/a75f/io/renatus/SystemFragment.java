@@ -54,6 +54,7 @@ import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
+import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.views.OaoArc;
 
@@ -563,11 +564,13 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	
 	private void setDividerColor(NumberPicker picker) {
 		Field[] numberPickerFields = NumberPicker.class.getDeclaredFields();
+		int resource = CCUUtils.getDrawableResouce(getContext(),"divider_np");
 		for (Field field : numberPickerFields) {
 			if (field.getName().equals("mSelectionDivider")) {
 				field.setAccessible(true);
 				try {
-					field.set(picker, getResources().getDrawable(R.drawable.divider_np));
+
+					field.set(picker, resource);
 				} catch (IllegalArgumentException e) {
 					Log.v("NP", "Illegal Argument Exception");
 					e.printStackTrace();

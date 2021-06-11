@@ -48,6 +48,7 @@
         android:layout_alignLeft="@id/seekArc"
         android:layout_alignRight="@id/seekArc"
         android:text="DAB"
+        style="?label_orange"
         android:gravity="center_horizontal|center_vertical"
         android:textAppearance="@style/label_black"
         android:clickable="false"

@@ -637,7 +637,6 @@ public class CCUUtils {
 
     public static String getValue(String item) {
 
-
         String value = "NA";
         if (!Strings.isNullOrEmpty(item)) {
             value = item;
@@ -658,6 +657,9 @@ public class CCUUtils {
 	}
 	public static int getDayselectionBackgroud(Context context){
 		return  context.getResources().getIdentifier("@drawable/bg_weekdays_selector", "drawable", context.getPackageName());
+	}
+	public static int getDrawableResouce(Context context, String name){
+		return  context.getResources().getIdentifier("@drawable/"+name, "drawable", context.getPackageName());
 	}
 
 }

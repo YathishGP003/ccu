@@ -516,8 +516,8 @@ public class MasterControlView extends LinearLayout {
                 HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min");
                 HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max");
 
-                // For these points, write to both CCU Level (TUNER_EQUIP_VAL_LEVEL) b/c we're setting it on the CCU,
-                // and also at Building level, so the value propagates to other CCUs
+                //Building level tuners points are only written on Level 16. Generally writes made from CCU are
+                // written to level 8 , but BuildingTuners are considered to be at "Site level".
                 if (buildingCoolingUpperLimit.size() != 0) {
                     CCUHsApi.getInstance().writePoint(buildingCoolingUpperLimit.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL, "ccu_" + ccuName, (double) coolingTemperatureUpperLimit, 0);
                     CCUHsApi.getInstance().writeHisValById(buildingCoolingUpperLimit.get("id").toString(), (double) coolingTemperatureUpperLimit);

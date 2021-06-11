@@ -209,11 +209,13 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
                 getActivity(), R.array.smartstat_relay_fanHumiD, R.layout.spinner_cpu_configure_item);
         fanTypeAdapter.setDropDownViewResource(R.layout.spinner_cpu_configure_item);
         fanHumiDSpinner.setAdapter(fanTypeAdapter);
+        fanHumiDSpinner.setEnabled(false);
 
         ArrayAdapter<CharSequence> hpChangeOverType = ArrayAdapter.createFromResource(
                 getActivity(), R.array.smartstat_relay_hp_changeover, R.layout.spinner_cpu_configure_item);
         hpChangeOverType.setDropDownViewResource(R.layout.spinner_cpu_configure_item);
         hpChangeOverTypeSpinner.setAdapter(hpChangeOverType);
+        hpChangeOverTypeSpinner.setEnabled(false);
 
 
         switchOccSensor = view.findViewById(R.id.toggleOccupancy);
@@ -480,7 +482,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
     }
 
     @Override
-    @OnCheckedChanged({R.id.testHpuRelay1,R.id.testHpuRelay2,R.id.testHpuRelay3,R.id.testHpuRelay4,R.id.testHpuRelay5,R.id.testHpuRelay6,R.id.toggleFanLow, R.id.toggleFanHigh})
+    @OnCheckedChanged({R.id.testHpuRelay1,R.id.testHpuRelay2,R.id.testHpuRelay3,R.id.testHpuRelay4,R.id.testHpuRelay5,R.id.testHpuRelay6,R.id.toggleFanLow, R.id.toggleFanHigh, R.id.toggleHeatPump})
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         switch (buttonView.getId())
         {
@@ -506,18 +508,31 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
                 }
                 break;
             case R.id.toggleFanHigh:
-                if(fanHumiDSpinner.getSelectedItemPosition() > 0){
-                    if(!switchFanHigh.isChecked())
-                        switchFanHigh.setChecked(false);
-                    else
-                        switchFanHigh.setChecked(true);
-                    switchFanHigh.setEnabled(true);
-                }else{
-                    if(!switchFanLowG.isChecked()) {
+                if (isChecked){
+                    fanHumiDSpinner.setEnabled(true);
+                    if(fanHumiDSpinner.getSelectedItemPosition() > 0){
+                        if(!switchFanHigh.isChecked())
+                            switchFanHigh.setChecked(false);
+                        else
+                            switchFanHigh.setChecked(true);
+                        switchFanHigh.setEnabled(true);
+                    }else{
+                        if(!switchFanLowG.isChecked()) {
 
-                        switchFanHigh.setEnabled(false);
-                        switchFanHigh.setChecked(false);
+                            switchFanHigh.setEnabled(false);
+                            switchFanHigh.setChecked(false);
+                        }
                     }
+                }
+                else{
+                    fanHumiDSpinner.setEnabled(false);
+                }
+                break;
+            case R.id.toggleHeatPump:
+                if(isChecked) {
+                    hpChangeOverTypeSpinner.setEnabled(true);
+                }else{
+                    hpChangeOverTypeSpinner.setEnabled(false);
                 }
                 break;
         }

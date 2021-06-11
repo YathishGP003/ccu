@@ -40,7 +40,7 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@drawable/image_pairinginstructionsn"
+        android:src="@drawable/image_pairing_screen_snhn"
         android:id="@+id/pairinginstruct"
         android:layout_below="@+id/layoutHeader"
         android:layout_marginTop="64dp"

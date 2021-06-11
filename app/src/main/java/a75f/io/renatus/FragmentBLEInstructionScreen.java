@@ -371,7 +371,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         if (mNodeType == NodeType.SMART_NODE)
         {
             title.setText(getText(R.string.title_pairsn));
-            pairinginstruct.setImageResource(R.drawable.image_pairinginstructionsn);
+            pairinginstruct.setImageResource(R.drawable.image_pairing_screen_snhn);
         }
         else if (mNodeType == NodeType.SMART_STAT)
         {

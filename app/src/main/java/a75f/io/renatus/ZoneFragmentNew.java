@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -85,6 +86,7 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
+import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.GridItem;
 import a75f.io.renatus.util.NonTempControl;
 import a75f.io.renatus.util.Prefs;
@@ -830,7 +832,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         seekArc.setTag(gridItemObj);
         scheduleStatus.setTag(gridItemObj);
         zoneDetails.setTag(gridItemObj);
-        //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
 
@@ -924,6 +925,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         });
 
         seekArc.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("ResourceType")
             @Override
             public void onClick(View v) {
                 GridItem gridItemNew = (GridItem) v.getTag();
@@ -989,12 +991,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             v.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
                             int index = clickedView / columnCount + 1;
                             seekArc.setDetailedView(true);
-                            //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
                             seekArc.scaletoNormalBig(250, 210);
                             imageOn = true;
                             selectedView = seekArc.getId();
                             try {
-//                                textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
+                               textEquipment.setTextAppearance(getActivity(),R.attr.label_orange);
                                 textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 tableLayout.addView(zoneDetails, index);
@@ -1028,13 +1029,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     v.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                     int index = clickedView / columnCount + 1;
                     seekArc.setDetailedView(true);
-                    //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
                     seekArc.scaletoNormalBig(250, 210);
                     hideWeather();
                     imageOn = true;
                     selectedView = seekArc.getId();
                     try {
-                       // textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
+                        textEquipment.setTextColor(CCUUtils.getPrimaryThemeColor(getContext()));
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         tableLayout.addView(zoneDetails, index);
@@ -1534,6 +1534,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         //imageView.setOnClickListener(new View.OnClickListener() {
         Equip nonTempEquip = p;
         nonTempControl.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("ResourceType")
             @Override
             public void onClick(View v) {
                 boolean isExpanded = false;
@@ -1602,7 +1603,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             imageOn = true;
                             isExpanded = true;
                             try {
-                           //     textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
+                                textEquipment.setTextAppearance(CCUUtils.getPrimaryThemeColor(getContext()));
                                 textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 tableLayout.addView(zoneDetails, index);
@@ -1641,7 +1642,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     imageOn = true;
                     isExpanded = true;
                     try {
-                       // textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
+                        textEquipment.setTextAppearance(CCUUtils.getPrimaryThemeColor(getContext()));
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         tableLayout.addView(zoneDetails, index);

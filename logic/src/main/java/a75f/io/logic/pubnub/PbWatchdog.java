@@ -34,6 +34,7 @@ public class PbWatchdog {
      * @param context
      */
     public void startMonitoring(Context context, PbSubscriptionHandler pbSubscription) {
+
         Observable.interval(30, TimeUnit.MINUTES)
                   .subscribeOn(Schedulers.io())
                   .subscribe ( i -> {

@@ -38,6 +38,7 @@ import android.widget.ToggleButton;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.Globals;
+import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.DABFullyAHUProfile;
 import a75f.io.renatus.DABHybridAhuProfile;
 import a75f.io.renatus.DABStagedProfile;
@@ -90,7 +91,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         listView_icons = findViewById(R.id.listView_icons);
         imageView_logo = findViewById(R.id.imageLogo);
         buttonNext = findViewById(R.id.buttonNext);
-
+        configLogo();
         prefs = new Prefs(FreshRegistration.this);
 
         rl_Header = findViewById(R.id.layoutHeader);
@@ -1269,6 +1270,20 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
              super.onBackPressed();
         else
              imageView_Goback.callOnClick();
+    }
+
+
+    private void configLogo(){
+        /**
+         * Change according to daikin
+         */
+        if(BuildConfig.BUILD_TYPE.equals("dev")){
+            imageView_logo.setImageDrawable(getResources().getDrawable(R.drawable.ic_daikin_75f_logo));
+
+        }
+        if(BuildConfig.BUILD_TYPE.equals("qa")){
+            imageView_logo.setImageDrawable(getResources().getDrawable(R.drawable.ic_logo_svg));
+        }
 
     }
 }

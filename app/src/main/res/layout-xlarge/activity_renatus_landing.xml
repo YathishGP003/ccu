@@ -76,15 +76,8 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <!--<ImageView
-            android:id="@+id/logo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:layout_gravity="center"
-            android:visibility="gone"
-            app:srcCompat="@drawable/ic_powered_by_75f" />-->
         <ImageView
+            android:id="@+id/powerbylogo"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:padding="8dp"

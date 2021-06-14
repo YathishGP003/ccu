@@ -9,6 +9,8 @@ import android.os.Bundle;
 import a75f.io.logger.CcuLog;
 import androidx.annotation.Nullable;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.util.HashMap;
@@ -33,7 +35,7 @@ public class SplashActivity extends Activity {
 
         prefs = new Prefs(this);
         Log.i(TAG, "Splash activity");
-        
+        configSplashLogo(findViewById(R.id.splash_logo));
         registrationThread = new Thread() {
             public void run() {
                 try {
@@ -155,6 +157,20 @@ public class SplashActivity extends Activity {
                 return 18;
         }
         return 9;
+    }
+
+
+    private void configSplashLogo(ImageView splash_logo){
+        /**
+         * Change according to daikin
+         */
+        if(BuildConfig.BUILD_TYPE.equals("dev")){
+            splash_logo.setImageDrawable(getResources().getDrawable(R.drawable.x75f_new));
+        }
+        if(BuildConfig.BUILD_TYPE.equals("qa")){
+            splash_logo.setImageDrawable(getResources().getDrawable(R.drawable.ic_daikin_logo));
+        }
+
     }
 }
 

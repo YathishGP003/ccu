@@ -322,9 +322,17 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:drawablePadding="50dp"
-                    android:drawableEnd="@drawable/ic_edit_site"
                     android:text="@string/title_edit" />
-
+                <ImageView
+                    android:id="@+id/imgEditSite"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:padding="2.5dp"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="24dp"
+                    android:rotation="180"
+                    app:srcCompat="@drawable/ic_edit_site"
+                    app:tint="?orange_75f" />
                 <View
                     android:layout_width="0.1dp"
                     android:layout_height="20dp"
@@ -344,8 +352,18 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:drawablePadding="50dp"
-                    android:drawableEnd="@drawable/ic_unregister"
+                    app:tint="?orange_75f"
                     android:text="@string/title_unregister" />
+                <ImageView
+                    android:id="@+id/imgUnregisterSite"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:padding="2.5dp"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="24dp"
+                    android:rotation="180"
+                    app:srcCompat="@drawable/ic_unregister"
+                    />
             </LinearLayout>
 
             <Button

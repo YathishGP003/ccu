@@ -23,6 +23,7 @@ import a75f.io.renatus.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
 import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
 public class CongratsFragment extends Fragment {
@@ -167,12 +168,12 @@ public class CongratsFragment extends Fragment {
         mCurrentTemp.setText(currentTemp);
         mCurrentHumidity.setText(currentHumidity);
         labelHvac.setText(L.ccu().systemProfile.getProfileName()+":");
-
+        String colorHex = "#" + Integer.toHexString(getPrimaryThemeColor(getContext()) & 0x00ffffff);
         String status = L.ccu().systemProfile.getStatusMessage();
         if (L.ccu().systemProfile instanceof DefaultSystem) {
-            mHVACEquip.setText(status.equals("") ? "System is in gateway mode" : Html.fromHtml(status.replace("ON", "<font color='#e24725'>ON</font>")));
+            mHVACEquip.setText(status.equals("") ? "System is in gateway mode" : Html.fromHtml(status.replace("ON", "<font color='"+colorHex+"'>ON</font>")));
         }else {
-            mHVACEquip.setText(status.equals("") ? Html.fromHtml("<font color='#e24725'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='#e24725'>ON</font>").replace("OFF","<font color='#e24725'>OFF</font>")));
+            mHVACEquip.setText(status.equals("") ? Html.fromHtml("<font color='"+colorHex+"'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='"+colorHex+"'>ON</font>").replace("OFF","<font color='"+colorHex+"'>OFF</font>")));
         }
         mComfortSelector.setText("Maximum Comfort");
 

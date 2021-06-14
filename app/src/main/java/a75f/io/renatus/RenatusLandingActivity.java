@@ -78,11 +78,8 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     private static final String TAG = RenatusLandingActivity.class.getSimpleName();
     //TODO - refactor
     public boolean settingView = false;
-    TabItem pageSettingButton;
-    TabItem pageDashBoardButton;
-    ImageView setupButton;
-    ImageView menuToggle;
-    ImageView floorMenu;
+    TabItem pageSettingButton,pageDashBoardButton;
+    ImageView logo_75f,powerbylogo,menuToggle,floorMenu;
     static CloudConnetionStatusThread mCloudConnectionStatus = null;
     private BroadcastReceiver mConnectionChangeReceiver;
 
@@ -127,9 +124,11 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             btnTabs = findViewById(R.id.btnTabs);
             mTabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
             btnTabs.setTabMode(TabLayout.MODE_SCROLLABLE);
-
+            logo_75f = findViewById(R.id.logo_75f);
+            powerbylogo = findViewById(R.id.powerbylogo);
             pageSettingButton = findViewById(R.id.pageSettingButton);
             pageDashBoardButton = findViewById(R.id.pageDashBoardButton);
+            configLogo();
             if (isSetupPassWordRequired()) {
                 showRequestPasswordAlert("Setup Access Authentication",getString(R.string.USE_SETUP_PASSWORD_KEY), 0);
             }
@@ -183,7 +182,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     SettingsFragment.slidingPane.openPane();
                 }
             });
-            findViewById(R.id.logo_75f).setOnLongClickListener(view -> {
+            logo_75f.setOnLongClickListener(view -> {
                 startActivity(new Intent(view.getContext(), RenatusEngineeringActivity.class));
                 return true;
             });
@@ -601,5 +600,19 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     break;
             }
         }
+    }
+
+    private void configLogo(){
+        /**
+         * Change according to daikin
+         */
+        if(BuildConfig.BUILD_TYPE.equals("dev")){
+            logo_75f.setImageDrawable(getResources().getDrawable(R.drawable.ic_75f_logo));
+            powerbylogo.setVisibility(View.GONE);
+        }
+        if(BuildConfig.BUILD_TYPE.equals("qa")){
+            logo_75f.setImageDrawable(getResources().getDrawable(R.drawable.ic_daikin_logo));
+        }
+
     }
 }

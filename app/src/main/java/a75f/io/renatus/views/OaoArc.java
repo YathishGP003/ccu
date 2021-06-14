@@ -19,6 +19,8 @@ import android.view.View;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.BitmapUtil;
 
+import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
+
 /**
  * Created by mahesh on 29-08-2019.
  */
@@ -149,7 +151,7 @@ public class OaoArc extends View {
         mUnitTextPaint.setTypeface(latoLightFont);
         mUnitTextPaint.setStyle(Paint.Style.FILL);
         mUnitTextPaint.setFakeBoldText(true);
-        mUnitTextPaint.setColor(Color.parseColor("#e24725"));
+        mUnitTextPaint.setColor(getPrimaryThemeColor(getContext()));
         mUnitTextPaint.setAntiAlias(true);
         mUnitTextPaint.setTextSize(12);
 

@@ -6,9 +6,10 @@
 
 
     <ImageView
+        android:id="@+id/splash_logo"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:src="@drawable/x75f_new" />
+        />
 
 </LinearLayout>

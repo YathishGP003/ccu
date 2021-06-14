@@ -135,7 +135,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     View parentRootView;
     Schedule mSchedule = null;
     ScrollView scrollViewParent;
-    Equip equipment;
 
     boolean zoneOpen = false;
     boolean zoneNonTempOpen = false;
@@ -157,8 +156,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     int noTempSensor = 0;
     HashMap<String, Integer> mScheduleTypeMap = new HashMap<>();
     Prefs prefs;
-    HashMap<String, EquipmentDevice> modbusZones = new HashMap<>();
-    String MODBUS_ZONE = "MODBUS_CONFIG";
 
     public ZoneFragmentNew()
     {
@@ -1603,7 +1600,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             imageOn = true;
                             isExpanded = true;
                             try {
-                                textEquipment.setTextAppearance(CCUUtils.getPrimaryThemeColor(getContext()));
+                                textEquipment.setTextColor(CCUUtils.getPrimaryThemeColor(getContext()));
                                 textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 tableLayout.addView(zoneDetails, index);
@@ -1642,7 +1639,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     imageOn = true;
                     isExpanded = true;
                     try {
-                        textEquipment.setTextAppearance(CCUUtils.getPrimaryThemeColor(getContext()));
+                        textEquipment.setTextColor(CCUUtils.getPrimaryThemeColor(getContext()));
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         tableLayout.addView(zoneDetails, index);

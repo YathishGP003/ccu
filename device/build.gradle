@@ -52,6 +52,10 @@ android {
             variant.setIgnore(true);
         }
     }
+
+    sourceSets{
+        main.java.srcDirs += "${protobuf.generatedFilesBaseDir}"
+    }
 }
 
 dependencies {
@@ -69,7 +73,7 @@ dependencies {
     implementation project(':BACnet4J')
     implementation project(':modbus4j')
     implementation project(path: ':modbusbox')
-    implementation 'com.google.protobuf:protobuf-javalite:3.8.0'
+    api 'com.google.protobuf:protobuf-javalite:3.8.0'
 }
 
 protobuf {

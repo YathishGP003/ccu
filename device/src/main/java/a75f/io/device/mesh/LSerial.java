@@ -367,6 +367,18 @@ public class LSerial
         mUsbModbusService.modbusWrite(data);
         return true;
     }
+    
+    public synchronized boolean sendSerialBytesToCM(byte[] data)
+    {
+        
+        if (mUsbService == null) {
+            DLog.logUSBServiceNotInitialized();
+            return false;
+        }
+        
+        mUsbService.write(data);
+        return true;
+    }
 
     /***
      *  This method maintains the hash, if it returns false, proceed without needing to add extra

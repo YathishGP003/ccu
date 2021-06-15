@@ -15,11 +15,11 @@
         android:layout_height="wrap_content"
         android:text="Lights Test"/>
 
-    <Button
-        android:id="@+id/smartStatTestBtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="SmartStat Test"/>
+   <Button
+       android:id="@+id/hyperStatTestBtn"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:text="HyperStat Test"/>
 
    </LinearLayout>
 

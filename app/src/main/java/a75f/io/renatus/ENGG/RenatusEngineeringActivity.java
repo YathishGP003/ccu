@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import a75f.io.logger.CcuLog;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUtils;
 
 public class RenatusEngineeringActivity extends AppCompatActivity
 {
@@ -23,8 +24,9 @@ public class RenatusEngineeringActivity extends AppCompatActivity
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		CCUUtils.setThemeDetails(this);
 		setContentView(R.layout.activity_renatus_engineering);
-		
+
 		mEnggPagerAdapter = new EngineeringPagerAdapter(getSupportFragmentManager());
 		mViewPager = (ViewPager) findViewById(R.id.container);
 		

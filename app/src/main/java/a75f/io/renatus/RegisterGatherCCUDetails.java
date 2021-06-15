@@ -40,6 +40,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.registration.FreshRegistration;
+import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.Prefs;
 
 import static a75f.io.logic.L.ccu;
@@ -65,6 +66,7 @@ public class RegisterGatherCCUDetails extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        CCUUtils.setThemeDetails(this);
         setContentView(R.layout.activity_register_gather_ccu_details);
 
         prefs = new Prefs(getApplicationContext());

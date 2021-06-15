@@ -84,11 +84,6 @@
         <activity
                 android:name=".RegisterGatherCCUDetails"></activity>
 
-        <activity
-                android:name=".CCUSettings">
-
-        </activity>
-
         <service android:name="com.raygun.raygun4android.services.CrashReportingPostService"
            android:exported="false"
            android:permission="android.permission.BIND_JOB_SERVICE"/>

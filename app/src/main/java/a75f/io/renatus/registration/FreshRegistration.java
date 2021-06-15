@@ -53,6 +53,7 @@ import a75f.io.renatus.VavHybridRtuProfile;
 import a75f.io.renatus.VavIERtuProfile;
 import a75f.io.renatus.VavStagedRtuProfile;
 import a75f.io.renatus.VavStagedRtuWithVfdProfile;
+import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -86,6 +87,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        CCUUtils.setThemeDetails(this);
         setContentView(R.layout.activity_freshregistration);
         container = findViewById(R.id.container);
         listView_icons = findViewById(R.id.listView_icons);

@@ -105,7 +105,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         prefs = new Prefs(this);
-
+        CCUUtils.setThemeDetails(this);
         mConnectionChangeReceiver = new ConnectionChangeReceiver();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -607,11 +607,12 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
          * Change according to daikin
          */
         if(BuildConfig.BUILD_TYPE.equals("dev")){
-            logo_75f.setImageDrawable(getResources().getDrawable(R.drawable.ic_75f_logo));
-            powerbylogo.setVisibility(View.GONE);
+            logo_75f.setImageDrawable(getResources().getDrawable(R.drawable.ic_daikin_logo));
+
         }
         if(BuildConfig.BUILD_TYPE.equals("qa")){
-            logo_75f.setImageDrawable(getResources().getDrawable(R.drawable.ic_daikin_logo));
+            logo_75f.setImageDrawable(getResources().getDrawable(R.drawable.ic_75f_logo));
+            powerbylogo.setVisibility(View.GONE);
         }
 
     }

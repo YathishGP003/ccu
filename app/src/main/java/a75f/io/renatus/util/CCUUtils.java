@@ -1,5 +1,6 @@
 package a75f.io.renatus.util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -9,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.View;
 
 import com.google.android.material.color.MaterialColors;
 import com.google.common.base.Strings;
@@ -661,5 +663,13 @@ public class CCUUtils {
 	public static int getDrawableResouce(Context context, String name){
 		return  context.getResources().getIdentifier("@drawable/"+name, "drawable", context.getPackageName());
 	}
+	public static void setThemeDetails(Activity activity){
+		if(BuildConfig.BUILD_TYPE.equals("qa")){
+			activity.setTheme(R.style.RenatusApp75FTheme);
+		}
+		if(BuildConfig.BUILD_TYPE.equals("dev")){
+			activity.setTheme(R.style.RenatusAppDaikinTheme);
+		}
 
+	}
 }

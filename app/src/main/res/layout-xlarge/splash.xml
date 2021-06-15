@@ -14,22 +14,23 @@
         android:layout_gravity="center" />
 
     <LinearLayout
+        android:visibility="gone"
         android:id="@+id/daikin_splash"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
         android:orientation="vertical">
         <ImageView
-            android:layout_width="250dp"
+            android:layout_marginTop="50dp"
+            android:layout_width="300dp"
             android:src="@drawable/ic_daikin_logo_colored"
-            android:layout_height="250dp"
-            android:layout_gravity="center" />
+            android:layout_height="300dp"
+            android:layout_gravity="top" />
 
         <ImageView
-            android:layout_marginBottom="@dimen/margin_100"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_marginTop="@dimen/vfd_profile_config_text_width"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
             android:layout_gravity="center"
             android:src="@drawable/ic__5f_logo_colored" />
 

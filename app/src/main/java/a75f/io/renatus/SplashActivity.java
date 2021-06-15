@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import java.util.HashMap;
@@ -29,15 +30,18 @@ public class SplashActivity extends BaseActivity {
     public static final String TAG = SplashActivity.class.getSimpleName();
     Prefs prefs;
     private Thread registrationThread;
+    ImageView splashLogo75f;
+    LinearLayout daikinSplash;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
         setContentView(R.layout.splash);
-
+        splashLogo75f = findViewById(R.id.splash_logo);
+        daikinSplash = findViewById(R.id.daikin_splash);
         prefs = new Prefs(this);
         Log.i(TAG, "Splash activity");
-        configSplashLogo(findViewById(R.id.splash_logo));
+        configSplashLogo();
         registrationThread = new Thread() {
             public void run() {
                 try {
@@ -163,15 +167,15 @@ public class SplashActivity extends BaseActivity {
     }
 
 
-    private void configSplashLogo(ImageView splash_logo){
+    private void configSplashLogo(){
         /**
          * Change according to daikin
          */
-        if(BuildConfig.BUILD_TYPE.equals("dev")){
-            splash_logo.setImageDrawable(getResources().getDrawable(R.drawable.x75f_new));
-        }
         if(BuildConfig.BUILD_TYPE.equals("qa")){
-            splash_logo.setImageDrawable(getResources().getDrawable(R.drawable.ic_daikin_logo));
+            splashLogo75f.setVisibility(View.VISIBLE);
+        }
+        if(BuildConfig.BUILD_TYPE.equals("dev")){
+            daikinSplash.setVisibility(View.VISIBLE);
         }
 
     }

@@ -23,7 +23,7 @@ import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.Prefs;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 
-public class SplashActivity extends BaseActivity {
+public class SplashActivity extends AppCompatActivity {
     
     public static final int CCU_PERMISSION_REQUEST_ID = 1;
     

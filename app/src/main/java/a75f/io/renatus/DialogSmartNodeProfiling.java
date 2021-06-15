@@ -3,6 +3,8 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
+
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -25,6 +28,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Optional;
+
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.PROFILE_TYPE;
 
 /**
  * Created by ryant on 9/27/2017.
@@ -37,6 +42,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     
     Zone         mZone;
     LightProfile mLightProfile;
+    ProfileType mProfileType;
     
     short        mNodeAddress;
     
@@ -52,8 +58,16 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     RelativeLayout rlVAV;
 
     @Nullable
+    @BindView(R.id.rl_vav_head)
+    RelativeLayout rlVAVHead;
+
+    @Nullable
     @BindView(R.id.rl_dab)
     RelativeLayout rlDAB;
+
+    @Nullable
+    @BindView(R.id.rl_dab_head)
+    RelativeLayout rlDABHead;
 
     @Nullable
     @BindView(R.id.rl_light)
@@ -319,6 +333,9 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         isPaired = getArguments().getBoolean(FragmentCommonBundleArgs.ALREADY_PAIRED);
         //mZone = L.findZoneByName(mFloorName, mRoomName);
         //mLightProfile = (LightProfile) mZone.findProfile(ProfileType.LIGHT);
+        mProfileType = ProfileType.values()[getArguments().getInt(FragmentCommonBundleArgs.PROFILE_TYPE)];
+        //mProfileType = ProfileType.valueOf(getArguments().getString(PROFILE_TYPE));
+        Log.e("ProfileType","InsideDialogSmartNodeProf- "+mProfileType);
         
         return view;
     }
@@ -333,6 +350,19 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
             int width = ViewGroup.LayoutParams.MATCH_PARENT;
             int height = ViewGroup.LayoutParams.MATCH_PARENT;
             dialog.getWindow().setLayout(width, height);
+        }
+        if(L.ccu().systemProfile.getProfileType() == ProfileType.DAB || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_ANALOG_RTU
+                || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU
+                ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU){
+            rlVAVHead.setVisibility(View.GONE);
+        }else if (L.ccu().systemProfile.getProfileType() == ProfileType.VAV_REHEAT || L.ccu().systemProfile.getProfileType() == ProfileType.VAV_SERIES_FAN
+                || L.ccu().systemProfile.getProfileType() == ProfileType.VAV_PARALLEL_FAN ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_ANALOG_RTU
+                ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU
+                ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU){
+            rlDABHead.setVisibility(View.GONE);
+        }else if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT){
+            rlVAVHead.setVisibility(View.GONE);
+            rlDABHead.setVisibility(View.GONE);
         }
         setTitle();
     }

@@ -920,4 +920,8 @@
     </string-array>
 
     <string name="buttonDesableDelay">2000</string>
+
+    <!--HyperStat Sense Screen-->
+    <string name="label_hsstempoffset">TEMP OFFSET</string>
+
 </resources>

@@ -65,6 +65,15 @@ android {
             buildConfigField "String", 'CARETAKER_API_KEY', '\"ccu-746e8311-38fe-4381-b557-e88278aa8516\"'
             buildConfigField "String", 'HAYSTACK_API_KEY', '\"ccu-391fc224-e3bc-4ef9-98ea-398797b8183a\"'
         }
+        daikin_prod {
+            minifyEnabled false
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath = "${projectDir}/../CHANGES"
+            buildConfigField "String", 'PUBNUB_SUBSCRIBE_KEY', '\"sub-c-97b4645a-36eb-11ea-81d4-f6d34a0dd71d\"'
+            buildConfigField "String", 'PUBNUB_PUBLISH_KEY', '\"pub-c-bc945448-0b14-4d08-a8d7-5727bdbc2c62\"'
+            buildConfigField "String", 'CARETAKER_API_KEY', '\"ccu-a47d57fd-cd62-4700-8eed-f598b9c24791\"'
+            buildConfigField "String", 'HAYSTACK_API_KEY', '\"ccu-c292d879-d70a-474b-907e-3da24bc61a4d\"'
+        }
     }
 
     android.variantFilter { variant ->

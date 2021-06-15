@@ -6,17 +6,30 @@
 
 
     <ImageView
+        android:visibility="gone"
         android:id="@+id/splash_logo"
         android:layout_width="wrap_content"
+        android:src="@drawable/x75f_new"
         android:layout_height="match_parent"
         android:layout_gravity="center" />
-<!--
-<ImageView
-        android:id="@+id/splash_logo"
-        android:layout_width="wrap_content"
+
+
+    <LinearLayout
+        android:id="@+id/daikin_splash"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:src="@drawable/x75f_new" />
--->
+        android:orientation="vertical">
+        <ImageView
+            android:layout_width="250dp"
+            android:src="@drawable/ic_daikin_logo_colored"
+            android:layout_height="250dp"
+            android:layout_gravity="center" />
+        <ImageView
+            android:layout_width="100dp"
+            android:src="@drawable/ic__5f_logo_colored"
+            android:layout_height="100dp"
+            android:layout_gravity="center" />
+
+    </LinearLayout>
 
 </LinearLayout>

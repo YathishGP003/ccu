@@ -103,6 +103,14 @@ android {
             buildConfigField "String", 'GOOGLE_MAPS_KEY', '\"AIzaSyA-b5lbhs7XOO8Fy1bdNky7CoNJR4B3kyY\"'
             versionNameSuffix "_" + 'staging' + "_" + versionSuffix
         }
+        daikin_prod {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+            buildConfigField "String", 'GOOGLE_MAPS_KEY', '\"AIzaSyDEI5fuYQmggzyoDc6cBLciIx3ygY-lmOE\"'
+            versionNameSuffix "_" + 'prod' + "_" + versionSuffix
+        }
     }
 
     android.variantFilter { variant ->

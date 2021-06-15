@@ -8,6 +8,8 @@ import android.os.Bundle;
 
 import a75f.io.logger.CcuLog;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -20,7 +22,7 @@ import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.Prefs;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 
-public class SplashActivity extends Activity {
+public class SplashActivity extends BaseActivity {
     
     public static final int CCU_PERMISSION_REQUEST_ID = 1;
     
@@ -28,7 +30,7 @@ public class SplashActivity extends Activity {
     Prefs prefs;
     private Thread registrationThread;
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
         setContentView(R.layout.splash);
@@ -101,6 +103,7 @@ public class SplashActivity extends Activity {
     
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == CCU_PERMISSION_REQUEST_ID) {
             for (int result : grantResults) {
                 if (result == PackageManager.PERMISSION_DENIED) {

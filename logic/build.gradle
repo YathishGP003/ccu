@@ -103,6 +103,18 @@ android {
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
         }
+        daikin_prod {
+            minifyEnabled false
+            buildConfigField "String", 'PUBNUB_SUBSCRIBE_KEY', '\"sub-c-97b4645a-36eb-11ea-81d4-f6d34a0dd71d\"'
+            buildConfigField "String", 'PUBNUB_PUBLISH_KEY', '\"pub-c-bc945448-0b14-4d08-a8d7-5727bdbc2c62\"'
+            buildConfigField "String", 'HAYSTACK_API_BASE', '\"https://silo-75f-service.azurewebsites.net/v1/\"'
+            buildConfigField "String", 'CARETAKER_API_BASE', '\"https://caretaker-75f-service.azurewebsites.net/api/v1/\"'
+            buildConfigField "String", 'FILE_STORAGE_API_BASE', '\"https://filestorage-75f-service.azurewebsites.net/\"'
+            buildConfigField "String", 'ALERTS_API_BASE', '\"https://alertsv2-75f-service.azurewebsites.net/\"'
+            buildConfigField "String", 'PUBNUB_GLOBAL_CHANNEL', '\"global\"'
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+        }
     }
 
     android.variantFilter { variant ->

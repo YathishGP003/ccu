@@ -51,6 +51,12 @@ android {
             minifyEnabled false
             buildConfigField "String", 'ALERTS_API_KEY', '\"ccu-445de537-c8a3-4d8a-bac4-528fa193562a\"'
         }
+        daikin_prod{
+            minifyEnabled false
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+            buildConfigField "String", 'ALERTS_API_KEY', '\"ccu-43a7691a-554d-4a71-844f-1a08b7afc12e\"'
+        }
     }
 
     android.variantFilter { variant ->

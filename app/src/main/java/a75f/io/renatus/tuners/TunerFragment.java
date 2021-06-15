@@ -59,6 +59,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUtils;
 
 import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
 
@@ -81,8 +82,8 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     TunerExpandableLayoutHelper tunerExpandableLayoutHelper;
     int childSelected = 0;
     ArrayList<HashMap> updatedTunerValues;
-    Button saveTunerValues;
-    Button cancelTunerUpdate;
+    private Button saveTunerValues;
+    private Button cancelTunerUpdate;
     EditText editChangeReason;
     EditText editTunerSearch;
     Spinner spinnerSelection;
@@ -125,7 +126,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         //getSystemTuners();
 
         reasonLabel = view.findViewById(R.id.textReasonLabel);
-        String colorHex = "#" + Integer.toHexString(getPrimaryThemeColor(getContext()) & 0x00ffffff);
+        String colorHex = CCUUtils.getColorCode(getContext());
         String text = "<font color="+colorHex+">*</font> <font color=#999999>Reason for Change</font>";
         reasonLabel.setText(Html.fromHtml(text));
 

@@ -37,6 +37,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.TunerNumberPicker;
 import butterknife.ButterKnife;
 
@@ -395,7 +396,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             if (tunerItemSelected.containsKey("reset")) {
                 tunerItemSelected.remove("reset");
             }
-            String colorHex = "#" + Integer.toHexString(getPrimaryThemeColor(getContext()) & 0x00ffffff);
+            String colorHex = CCUUtils.getColorCode(getContext());
 
             String text = "Level " + (position + 1) + " " + levelName;
             text = text.replaceAll("System", "<font color='"+colorHex+"'>System</font>");

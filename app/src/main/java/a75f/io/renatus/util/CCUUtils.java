@@ -672,4 +672,13 @@ public class CCUUtils {
 		}
 
 	}
+	public static String getColorCode(Context context) {
+		StringBuffer colorCode = new StringBuffer("#");
+		colorCode.append(Integer.toHexString(getPrimaryThemeColor(context) & 0x00ffffff));
+		return colorCode.toString();
+	}
+
+	public static String getHTMLCode(Context context){
+		return "<small><font color='" + getColorCode(context) + "'>" + context.getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>";
+	}
 }

@@ -11,6 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import org.jsoup.helper.StringUtil;
+
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -20,6 +22,7 @@ import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -168,12 +171,12 @@ public class CongratsFragment extends Fragment {
         mCurrentTemp.setText(currentTemp);
         mCurrentHumidity.setText(currentHumidity);
         labelHvac.setText(L.ccu().systemProfile.getProfileName()+":");
-        String colorHex = "#" + Integer.toHexString(getPrimaryThemeColor(getContext()) & 0x00ffffff);
+        String colorHex = CCUUtils.getColorCode(getContext());
         String status = L.ccu().systemProfile.getStatusMessage();
         if (L.ccu().systemProfile instanceof DefaultSystem) {
-            mHVACEquip.setText(status.equals("") ? "System is in gateway mode" : Html.fromHtml(status.replace("ON", "<font color='"+colorHex+"'>ON</font>")));
+            mHVACEquip.setText(StringUtil.isBlank(status) ? "System is in gateway mode" : Html.fromHtml(status.replace("ON", "<font color='"+colorHex+"'>ON</font>")));
         }else {
-            mHVACEquip.setText(status.equals("") ? Html.fromHtml("<font color='"+colorHex+"'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='"+colorHex+"'>ON</font>").replace("OFF","<font color='"+colorHex+"'>OFF</font>")));
+            mHVACEquip.setText(StringUtil.isBlank(status) ? Html.fromHtml("<font color='"+colorHex+"'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='"+colorHex+"'>ON</font>").replace("OFF","<font color='"+colorHex+"'>OFF</font>")));
         }
         mComfortSelector.setText("Maximum Comfort");
 

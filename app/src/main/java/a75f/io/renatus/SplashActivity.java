@@ -30,8 +30,8 @@ public class SplashActivity extends BaseActivity {
     public static final String TAG = SplashActivity.class.getSimpleName();
     Prefs prefs;
     private Thread registrationThread;
-    ImageView splashLogo75f;
-    LinearLayout daikinSplash;
+    private ImageView splashLogo75f;
+    private LinearLayout daikinSplash;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -168,9 +168,9 @@ public class SplashActivity extends BaseActivity {
 
 
     private void configSplashLogo(){
-        /**
-         * Change according to daikin
-         */
+
+         // Change according to daikin
+
         if(BuildConfig.BUILD_TYPE.equals("qa")){
             splashLogo75f.setVisibility(View.VISIBLE);
         }

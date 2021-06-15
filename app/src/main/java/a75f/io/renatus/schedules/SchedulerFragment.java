@@ -277,10 +277,9 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
         colorMinTemp = getResources().getString(0 + R.color.min_temp);
         colorMinTemp = "#" + colorMinTemp.substring(3);
-        //colorMinTemp = "#" + Integer.toHexString(ContextCompat.getColor(getActivity(), R.color.min_temp));
         colorMaxTemp = getResources().getString(0 + R.color.max_temp);
         colorMaxTemp = "#" + colorMaxTemp.substring(3);
-        //colorMaxTemp = "#" + Integer.toHexString(ContextCompat.getColor(getActivity(), R.color.max_temp));
+
 
         textViewaddEntry.setOnClickListener(view -> showDialog(ID_DIALOG_SCHEDULE));
         textViewaddEntryIcon.setOnClickListener(view -> showDialog(ID_DIALOG_SCHEDULE));

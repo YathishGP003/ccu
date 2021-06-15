@@ -106,7 +106,6 @@ public class MenuFragment extends Fragment {
         textTemporaryOverride.setTextColor(getResources().getColor(R.color.black));
         textAbout.setTextColor(getResources().getColor(R.color.black));
 
-        //lilAccount.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
         lilAccount.setBackgroundResource(listSelectorBackground);
         lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
         liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));

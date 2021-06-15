@@ -78,8 +78,12 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     private static final String TAG = RenatusLandingActivity.class.getSimpleName();
     //TODO - refactor
     public boolean settingView = false;
-    TabItem pageSettingButton,pageDashBoardButton;
-    ImageView logo_75f,powerbylogo,menuToggle,floorMenu;
+    private TabItem pageSettingButton;
+    private TabItem pageDashBoardButton;
+    private ImageView logo_75f;
+    private ImageView powerbylogo;
+    private ImageView menuToggle;
+    private ImageView floorMenu;
     static CloudConnetionStatusThread mCloudConnectionStatus = null;
     private BroadcastReceiver mConnectionChangeReceiver;
 
@@ -603,9 +607,9 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     }
 
     private void configLogo(){
-        /**
-         * Change according to daikin
-         */
+
+         // Change according to daikin
+
         if(BuildConfig.BUILD_TYPE.equals("dev")){
             logo_75f.setImageDrawable(getResources().getDrawable(R.drawable.ic_daikin_logo));
 

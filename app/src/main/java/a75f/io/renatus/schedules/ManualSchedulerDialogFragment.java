@@ -96,14 +96,14 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
     Boolean booleanisSaturday = false;
     Boolean booleanisSunday = false;
 
-    int daySelectionBackgroud;
+   
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
         prefs = new Prefs(getActivity());
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View view = inflater.inflate(R.layout.dialog_manualschedule, null);
-        daySelectionBackgroud = CCUUtils.getDayselectionBackgroud(getContext());
+        int dayselectionBackgroud = CCUUtils.getDayselectionBackgroud(getContext());
         ImageButton deleteButton = view.findViewById(R.id.buttonDelete);
         rangeSeekBarView = view.findViewById(R.id.rangeSeekBar);
         rangeSeekBarView.setZoneSchedule(mSchedule);
@@ -193,7 +193,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
                 booleanisMonday = true;
                 checkBoxMonday.setTextColor(Color.parseColor("#ffffff"));
                 //checkBoxMonday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
-                checkBoxMonday.setBackgroundResource(daySelectionBackgroud);
+                checkBoxMonday.setBackgroundResource(dayselectionBackgroud);
             } else {
                 booleanisMonday = false;
                 checkBoxMonday.setTextColor(Color.parseColor("#000000"));
@@ -206,7 +206,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
             if (isChecked) {
                 booleanisTuesday = true;
                 checkBoxTuesday.setTextColor(Color.parseColor("#ffffff"));
-                checkBoxTuesday.setBackgroundResource(daySelectionBackgroud);
+                checkBoxTuesday.setBackgroundResource(dayselectionBackgroud);
             } else {
                 booleanisTuesday = false;
                 checkBoxTuesday.setTextColor(Color.parseColor("#000000"));
@@ -219,7 +219,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
             if (isChecked) {
                 booleanisWednesday = true;
                 checkBoxWednesday.setTextColor(Color.parseColor("#ffffff"));
-                checkBoxWednesday.setBackgroundResource(daySelectionBackgroud);
+                checkBoxWednesday.setBackgroundResource(dayselectionBackgroud);
             } else {
                 booleanisWednesday = false;
                 checkBoxWednesday.setTextColor(Color.parseColor("#000000"));
@@ -232,7 +232,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
             if (isChecked) {
                 booleanisThursday = true;
                 checkBoxThursday.setTextColor(Color.parseColor("#ffffff"));
-                checkBoxThursday.setBackgroundResource(daySelectionBackgroud);
+                checkBoxThursday.setBackgroundResource(dayselectionBackgroud);
             } else {
                 booleanisThursday = false;
                 checkBoxThursday.setTextColor(Color.parseColor("#000000"));
@@ -245,7 +245,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
             if (isChecked) {
                 booleanisFriday = true;
                 checkBoxFriday.setTextColor(Color.parseColor("#ffffff"));
-                checkBoxFriday.setBackgroundResource(daySelectionBackgroud);
+                checkBoxFriday.setBackgroundResource(dayselectionBackgroud);
             } else {
                 booleanisFriday = false;
                 checkBoxFriday.setTextColor(Color.parseColor("#000000"));
@@ -258,7 +258,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
             if (isChecked) {
                 booleanisSaturday = true;
                 checkBoxSaturday.setTextColor(Color.parseColor("#ffffff"));
-                checkBoxSaturday.setBackgroundResource(daySelectionBackgroud);
+                checkBoxSaturday.setBackgroundResource(dayselectionBackgroud);
             } else {
                 booleanisSaturday = false;
                 checkBoxSaturday.setTextColor(Color.parseColor("#000000"));
@@ -271,7 +271,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
             if (isChecked) {
                 booleanisSunday = true;
                 checkBoxSunday.setTextColor(Color.parseColor("#ffffff"));
-                checkBoxSunday.setBackgroundResource(daySelectionBackgroud);
+                checkBoxSunday.setBackgroundResource(dayselectionBackgroud);
             } else {
                 booleanisSunday = false;
                 checkBoxSunday.setTextColor(Color.parseColor("#000000"));
@@ -443,7 +443,6 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
                 field.setAccessible(true);
                 try {
                     int  divider_np = getResources().getIdentifier("@drawable/divider_np", "drawable", getContext().getPackageName());
-                    //field.set(picker, getResources().getDrawable(R.drawable.divider_np));
                     field.set(picker, divider_np);
                 } catch (IllegalArgumentException e) {
                     Log.v("NP", "Illegal Argument Exception");

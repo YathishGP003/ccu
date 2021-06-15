@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.Looper;
 import com.google.android.material.textfield.TextInputLayout;
 
+import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 
 import androidx.core.content.ContextCompat;
@@ -103,8 +104,13 @@ public class CreateNewSite extends Fragment {
     EditText mSiteOrg;
 
     Button mNext;
-    TextView btnEditSite,btnUnregisterSite;
-    ImageView imgEditSite,imgUnregisterSite;
+
+    private TextView btnEditSite;
+    private TextView btnUnregisterSite;
+
+    private ImageView imgEditSite;
+    private ImageView imgUnregisterSite;
+
     Context mContext;
     LinearLayout btnSetting;
     Prefs prefs;
@@ -184,17 +190,17 @@ public class CreateNewSite extends Fragment {
             enableViews(false);
         }
         populateAndUpdateTimeZone();
-        String colorHex = "#" + Integer.toHexString(getPrimaryThemeColor(getContext()) & 0x00ffffff);
-        mSiteName.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_sitename) + "</font></big>"));
-        mStreetAdd.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_streetadd) + "</font></big>"));
-        mSiteCity.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_city) + "</font></big>"));
-        mSiteState.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_state) + "</font></big>"));
-        mSiteCountry.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_country) + "</font></big>"));
-        mSiteZip.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_zip) + "</font></big>"));
-        mSiteCCU.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_ccuname) + "</font></big>"));
-        mSiteEmailId.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_facilityemail) + "</font></big>"));
-        mSiteOrg.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_facilityorg) + "</font></big>"));
-        mSiteInstallerEmailId.setHint(Html.fromHtml("<small><font color='" + colorHex + "'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_installer_email) + "</font></big>"));
+        String htmlCode =CCUUtils.getHTMLCode(getContext());
+        mSiteName.setHint(Html.fromHtml(htmlCode + getString(R.string.input_sitename) + "</font></big>"));
+        mStreetAdd.setHint(Html.fromHtml(htmlCode + getString(R.string.input_streetadd) + "</font></big>"));
+        mSiteCity.setHint(Html.fromHtml(htmlCode + getString(R.string.input_city) + "</font></big>"));
+        mSiteState.setHint(Html.fromHtml(htmlCode + getString(R.string.input_state) + "</font></big>"));
+        mSiteCountry.setHint(Html.fromHtml(htmlCode + getString(R.string.input_country) + "</font></big>"));
+        mSiteZip.setHint(Html.fromHtml(htmlCode + getString(R.string.input_zip) + "</font></big>"));
+        mSiteCCU.setHint(Html.fromHtml(htmlCode  + getString(R.string.input_ccuname) + "</font></big>"));
+        mSiteEmailId.setHint(Html.fromHtml(htmlCode  + getString(R.string.input_facilityemail) + "</font></big>"));
+        mSiteOrg.setHint(Html.fromHtml(htmlCode + getString(R.string.input_facilityorg) + "</font></big>"));
+        mSiteInstallerEmailId.setHint(Html.fromHtml(htmlCode + getString(R.string.input_installer_email) + "</font></big>"));
 
         if (CCUHsApi.getInstance().isCCURegistered()) {
             btnUnregisterSite.setText("Unregister");

@@ -751,14 +751,13 @@ public class FloorPlanFragment extends Fragment {
     private void setSystemSelection(int position) {
         int background = CCUUtils.getListSelectorBackground(getContext());
 
-        //.setBackground(getActivity().getDrawable(R.drawable.ic_listselector));
         rl_systemdevice.setBackgroundResource(background);
         rl_systemdevice.setEnabled(false);
         textViewSystemDevice.setTextColor(getContext().getResources().getColor(R.color.white));
 
         if (position == 1) {
             sysyemDeviceType = SysyemDeviceType.OAO;
-           // rl_oao.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
+
             rl_oao.setBackgroundResource(background);
             textViewOAO.setSelected(true);
             textViewOAO.setTextColor(Color.WHITE);
@@ -766,7 +765,7 @@ public class FloorPlanFragment extends Fragment {
         }
         if (position == 2) {
             sysyemDeviceType = SysyemDeviceType.ENERGY_METER;
-            //rl_modbus_energy_meter.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
+
             rl_modbus_energy_meter.setBackgroundResource(background);
             textModbusEnergyMeter.setSelected(true);
             textModbusEnergyMeter.setTextColor(Color.WHITE);
@@ -774,7 +773,7 @@ public class FloorPlanFragment extends Fragment {
         }
         if (position == 3) {
             sysyemDeviceType = SysyemDeviceType.BTU_METER;
-           // rl_modbus_btu_meter.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
+           
             rl_modbus_btu_meter.setBackgroundResource(background);
             textModbusBTUMeter.setSelected(true);
             textModbusBTUMeter.setTextColor(Color.WHITE);

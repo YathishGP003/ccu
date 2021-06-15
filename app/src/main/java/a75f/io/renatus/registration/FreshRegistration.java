@@ -1276,9 +1276,9 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
 
     private void configLogo(){
-        /**
-         * Change according to daikin
-         */
+
+         // Change according to daikin
+
         if(BuildConfig.BUILD_TYPE.equals("dev")){
             imageView_logo.setImageDrawable(getResources().getDrawable(R.drawable.ic_daikin_75f_logo));
 

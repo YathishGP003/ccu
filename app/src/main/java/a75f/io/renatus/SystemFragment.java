@@ -32,6 +32,7 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.helper.StringUtil;
 
 import java.lang.reflect.Field;
 import a75f.io.api.haystack.modbus.Parameter;
@@ -487,7 +488,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 				@Override
 				public void run() {
-					String colorHex = "#" + Integer.toHexString(getPrimaryThemeColor(getContext()) & 0x00ffffff);
+					String colorHex = CCUUtils.getColorCode(getContext());
 					String status = CCUHsApi.getInstance().readDefaultStrVal("system and status and message");
 					//If the system status is not updated yet (within a minute of registering the device), generate a
 					//default message.
@@ -496,7 +497,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					}
 
 					if (L.ccu().systemProfile instanceof DefaultSystem) {
-						equipmentStatus.setText(status.equals("") ? "System is in gateway mode" : Html.fromHtml(status.replace("ON", "<font color='"+colorHex+"'>ON</font>")));
+						equipmentStatus.setText(StringUtil.isBlank(status) ? "System is in gateway mode" : Html.fromHtml(status.replace("ON", "<font color='"+colorHex+"'>ON</font>")));
 						occupancyStatus.setText("No Central equipment connected.");
 						tbCompHumidity.setChecked(false);
 						tbDemandResponse.setChecked(false);
@@ -512,7 +513,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					}else{
 						systemModePicker.setValue((int) TunerUtil.readSystemUserIntentVal("conditioning and mode"));
 
-						equipmentStatus.setText(status.equals("") ? Html.fromHtml("<font color='"+colorHex+"'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='"+colorHex+"'>ON</font>").replace("OFF","<font color='"+colorHex+"'>OFF</font>")));
+						equipmentStatus.setText(StringUtil.isBlank(status)? Html.fromHtml("<font color='"+colorHex+"'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='"+colorHex+"'>ON</font>").replace("OFF","<font color='"+colorHex+"'>OFF</font>")));
 						Log.i(TAG, "getSystemStatusString: Before system fragement");
 						occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());
 						tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);

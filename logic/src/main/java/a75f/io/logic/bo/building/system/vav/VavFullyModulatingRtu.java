@@ -5,7 +5,6 @@ package a75f.io.logic.bo.building.system.vav;
  */
 
 import android.content.Intent;
-import android.util.Log;
 
 import java.util.HashMap;
 

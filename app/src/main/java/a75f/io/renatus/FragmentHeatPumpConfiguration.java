@@ -434,7 +434,6 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
             mHPUProfile.updateLogicalMapAndPoints(mSmartNodeAddress, hpuConfig, roomRef);
         }
         L.ccu().zoneProfiles.add(mHPUProfile);
-        Log.d("CPUConfig", "Set Config: Profiles - " + L.ccu().zoneProfiles.size());
     }
 
     private void setDividerColor(NumberPicker picker) {

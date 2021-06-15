@@ -9,6 +9,8 @@ import android.location.Address;
 import android.os.AsyncTask;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.View;
 
@@ -678,7 +680,4 @@ public class CCUUtils {
 		return colorCode.toString();
 	}
 
-	public static String getHTMLCode(Context context){
-		return "<small><font color='" + getColorCode(context) + "'>" + context.getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>";
-	}
 }

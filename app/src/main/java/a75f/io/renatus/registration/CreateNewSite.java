@@ -16,10 +16,10 @@ import com.google.android.material.textfield.TextInputLayout;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import android.text.Editable;
 import android.text.Html;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -36,7 +36,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGridBuilder;
@@ -190,17 +189,17 @@ public class CreateNewSite extends Fragment {
             enableViews(false);
         }
         populateAndUpdateTimeZone();
-        String htmlCode =CCUUtils.getHTMLCode(getContext());
-        mSiteName.setHint(Html.fromHtml(htmlCode + getString(R.string.input_sitename) + "</font></big>"));
-        mStreetAdd.setHint(Html.fromHtml(htmlCode + getString(R.string.input_streetadd) + "</font></big>"));
-        mSiteCity.setHint(Html.fromHtml(htmlCode + getString(R.string.input_city) + "</font></big>"));
-        mSiteState.setHint(Html.fromHtml(htmlCode + getString(R.string.input_state) + "</font></big>"));
-        mSiteCountry.setHint(Html.fromHtml(htmlCode + getString(R.string.input_country) + "</font></big>"));
-        mSiteZip.setHint(Html.fromHtml(htmlCode + getString(R.string.input_zip) + "</font></big>"));
-        mSiteCCU.setHint(Html.fromHtml(htmlCode  + getString(R.string.input_ccuname) + "</font></big>"));
-        mSiteEmailId.setHint(Html.fromHtml(htmlCode  + getString(R.string.input_facilityemail) + "</font></big>"));
-        mSiteOrg.setHint(Html.fromHtml(htmlCode + getString(R.string.input_facilityorg) + "</font></big>"));
-        mSiteInstallerEmailId.setHint(Html.fromHtml(htmlCode + getString(R.string.input_installer_email) + "</font></big>"));
+
+        mSiteName.setHint(getHTMLCodeForHints(R.string.input_sitename));
+        mStreetAdd.setHint(getHTMLCodeForHints(R.string.input_streetadd));
+        mSiteCity.setHint(getHTMLCodeForHints(R.string.input_city));
+        mSiteState.setHint(getHTMLCodeForHints(R.string.input_state));
+        mSiteCountry.setHint(getHTMLCodeForHints(R.string.input_country));
+        mSiteZip.setHint(getHTMLCodeForHints(R.string.input_zip));
+        mSiteCCU.setHint(getHTMLCodeForHints(R.string.input_ccuname));
+        mSiteEmailId.setHint(getHTMLCodeForHints(R.string.input_facilityemail));
+        mSiteOrg.setHint(getHTMLCodeForHints(R.string.input_facilityorg));
+        mSiteInstallerEmailId.setHint(getHTMLCodeForHints(R.string.input_installer_email));
 
         if (CCUHsApi.getInstance().isCCURegistered()) {
             btnUnregisterSite.setText("Unregister");
@@ -859,4 +858,8 @@ public class CreateNewSite extends Fragment {
         ((FreshRegistration) getActivity()).selectItem(4);
     }
 
+    private Spanned getHTMLCodeForHints( int resource){
+        return Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory)
+                + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(resource) + "</font></big>");
+    }
 }

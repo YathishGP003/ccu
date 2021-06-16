@@ -37,8 +37,7 @@
                 android:id="@+id/tempoffset"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_marginLeft="150dp"
+                android:layout_marginLeft="480dp"
                 android:layout_marginTop="20dp"
                 android:orientation="vertical">
 
@@ -151,14 +150,14 @@
                     <TextView
                         android:id="@+id/textanlg1"
                         android:layout_width="wrap_content"
-                        android:layout_height="30dp"
+                        android:layout_height="35dp"
                         android:text="@string/analogin1"
                         android:textAppearance="@style/text_appearance"
                         android:layout_marginTop="70dp"/>
                     <TextView
                         android:id="@+id/textangl2"
                         android:layout_width="wrap_content"
-                        android:layout_height="30dp"
+                        android:layout_height="35dp"
                         android:text="@string/analogin2"
                         android:textAppearance="@style/text_appearance"
                         android:layout_marginTop="42dp"/>

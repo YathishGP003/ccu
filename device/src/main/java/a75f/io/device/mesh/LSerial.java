@@ -11,6 +11,7 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.modbus.ModbusPulse;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwarePacketRequest_t;
@@ -144,6 +145,8 @@ public class LSerial
                 DLog.LogdSerial("Event Type CM_TO_CCU_OVER_USB_SN_REBOOT DEVICE_REBOOT:"+data.length+","+data.toString());
                 Pulse.smartDevicesRebootMessage(fromBytes(data, SnRebootIndicationMessage_t.class));
 
+            } else if (isHyperStatMessage(messageType) ) {
+                HyperStatMsgReceiver.processMessage(data, messageType, CCUHsApi.getInstance());
             }
 
             // Pass event to external handlers
@@ -430,5 +433,11 @@ public class LSerial
             isNodeSeeding = true;
             Pulse.sendSeedMessage(isSs, isTi, addr, roomRef, floorRef);
         }
+    }
+    
+    private static boolean isHyperStatMessage(MessageType messageType) {
+        return messageType == MessageType.HYPERSTAT_CCU_SERIALIZED_MESSAGE ||
+               messageType == MessageType.HYPERSTAT_REGULAR_UPDATE_MESSAGE ||
+               messageType == MessageType.HYPERSTAT_LOCAL_CONTROLS_OVERRIDE_MESSAGE;
     }
 }

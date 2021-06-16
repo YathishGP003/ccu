@@ -1,6 +1,8 @@
 package a75f.io.renatus
 
 import a75f.io.logger.CcuLog
+import a75f.io.logic.bo.building.NodeType
+import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import android.os.Bundle
@@ -24,6 +26,7 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
       get() = requireArguments().getString(FragmentCommonBundleArgs.ARG_NAME)!!
    private val mFloorName: String
       get() = requireArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME)!!
+
 
 
    companion object {
@@ -70,6 +73,7 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
       val twoPipeCell = view.findViewById<View>(R.id.twoPipeCell)
       val fourPipeCell = view.findViewById<View>(R.id.fourPipeCell)
       val vrvCell = view.findViewById<View>(R.id.vrvCell)
+      val senseCell = view.findViewById<View>(R.id.hypersenseCell)
 
       goBack.setOnClickListener { removeDialogFragment(HYPERSTAT_PROFILE_SELECTION_ID) }
       cpuCell.setOnClickListener { showCPUConfigFragment()
@@ -85,12 +89,24 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
                ), FragmentBLEInstructionScreen.ID
             ) */
       }
+      senseCell.setOnClickListener{ showSenseconfigFragment() }
    }
 
    private fun showCPUConfigFragment() {
       CcuLog.i("CCU_", "TC: showCPUConfigFragment");
       showDialogFragment(
          HyperstatCpuFragment(), HyperstatCpuFragment.ID
+      )
+   }
+
+   private fun showSenseconfigFragment(){
+      CcuLog.i("CCU_", "TC: showSenseconfigFragment");
+      showDialogFragment(
+              FragmentHyperStatSense.newInstance( mNodeAddress,
+                      mRoomName,
+                      mFloorName,
+                      ProfileType.HYPERSTAT_SENSE),
+              FragmentHyperStatSense.ID
       )
    }
 }

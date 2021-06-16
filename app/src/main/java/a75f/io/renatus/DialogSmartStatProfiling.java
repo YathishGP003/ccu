@@ -56,20 +56,12 @@ public class DialogSmartStatProfiling extends BaseDialogFragment
     RelativeLayout rl2Pipe;
     @BindView(R.id.rl_4pipe)
     RelativeLayout rl4Pipe;
-    @BindView(R.id.rl_sense)
-    RelativeLayout rlsense;
 
 
     @Nullable
     @BindView(R.id.imageGoback)
     ImageView imageGoback;
 
-
-    @OnClick(R.id.imageGoback)
-    void onsenseClick()
-    {
-
-    }
 
     @OnClick(R.id.imageGoback)
     void onGoBackClick()

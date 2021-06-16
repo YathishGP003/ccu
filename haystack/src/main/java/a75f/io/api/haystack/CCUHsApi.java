@@ -191,10 +191,20 @@ public class CCUHsApi
         Log.d("Authentication URL: ","url="+careTakerUrl);
         return careTakerUrl;
     }
-    
-    public synchronized void saveTagsData()
+
+    public synchronized void saveTagsData() {
+        saveTagsData(false);
+    }
+
+    /**
+     * Save all of our data (entities, point arrays, ids to sync) to disk.
+
+     * @param immediate whether the disk write in Shared Prefs should be immediate, synchronous.  If false,
+     *                  SharedPrefs will write to memory immediate but write to disk when convenient.
+     */
+    public synchronized void saveTagsData(boolean immediate)
     {
-        tagsDb.saveTags();
+        tagsDb.saveTags(immediate);
     }
 
     public String addSite(Site s)

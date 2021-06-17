@@ -63,7 +63,7 @@ public class VavIERtu extends VavSystemProfile
     }
     
     public String getProfileName() {
-        return "Daikin IE Rtu";
+        return "Daikin IE RTU";
     }
     
     @Override

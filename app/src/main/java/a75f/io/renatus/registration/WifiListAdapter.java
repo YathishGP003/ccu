@@ -18,8 +18,8 @@ import android.widget.TextView;
 import java.util.List;
 
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUiUtil;
 
-import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
 
 public class WifiListAdapter extends RecyclerView.Adapter<WifiListAdapter.WifiViewHolder> {
 
@@ -137,9 +137,9 @@ public class WifiListAdapter extends RecyclerView.Adapter<WifiListAdapter.WifiVi
                 if (ssid_connected.equalsIgnoreCase(ssid_scanned)) {
                     holder.textisConnected.setVisibility(View.VISIBLE);
                     holder.textisConnected.setText("CONNECTED");
-                    holder.textWifiNw.setTextColor(getPrimaryThemeColor(mContext));
+                    holder.textWifiNw.setTextColor(CCUUiUtil.getPrimaryThemeColor(mContext));
                     holder.imageSecurity.setVisibility(View.INVISIBLE);
-                    holder.imageWifi.setColorFilter(getPrimaryThemeColor(mContext), PorterDuff.Mode.SRC_IN);
+                    holder.imageWifi.setColorFilter(CCUUiUtil.getPrimaryThemeColor(mContext), PorterDuff.Mode.SRC_IN);
                 }
             }
         }

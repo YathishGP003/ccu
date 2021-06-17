@@ -38,17 +38,25 @@
     </RelativeLayout>
 
     <ImageView
+        android:visibility="visible"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:src="@drawable/image_pairinginstructionsn"
-        android:id="@+id/pairinginstruct"
         android:layout_below="@+id/layoutHeader"
         android:layout_marginTop="64dp"
         android:layout_marginLeft="64dp"
         android:layout_marginRight="64dp"
+        android:id="@+id/pairinginstruct"
         android:layout_marginBottom="64dp"
         />
-
+    <ImageView
+        android:id="@+id/pairinginstruct_daikin"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/paring_step_screen_daikin"
+        android:layout_below="@+id/layoutHeader"
+        />
     <LinearLayout
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"

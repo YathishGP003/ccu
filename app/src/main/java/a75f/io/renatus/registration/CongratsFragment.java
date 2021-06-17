@@ -22,11 +22,12 @@ import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
+
 import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
 public class CongratsFragment extends Fragment {
@@ -171,7 +172,7 @@ public class CongratsFragment extends Fragment {
         mCurrentTemp.setText(currentTemp);
         mCurrentHumidity.setText(currentHumidity);
         labelHvac.setText(L.ccu().systemProfile.getProfileName()+":");
-        String colorHex = CCUUtils.getColorCode(getContext());
+        String colorHex = CCUUiUtil.getColorCode(getContext());
         String status = L.ccu().systemProfile.getStatusMessage();
         if (L.ccu().systemProfile instanceof DefaultSystem) {
             mHVACEquip.setText(StringUtil.isBlank(status) ? "System is in gateway mode" : Html.fromHtml(status.replace("ON", "<font color='"+colorHex+"'>ON</font>")));

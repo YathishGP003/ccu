@@ -652,32 +652,5 @@ public class CCUUtils {
 			return BuildConfig.GOOGLE_MAPS_KEY;
 	}
 
-	public static int getPrimaryThemeColor(Context context){
-		return MaterialColors.getColor(context, R.attr.orange_75f, Color.CYAN);
-	}
-
-	public static int getListSelectorBackground(Context context){
-		return  context.getResources().getIdentifier("@drawable/ic_listselector", "drawable", context.getPackageName());
-	}
-	public static int getDayselectionBackgroud(Context context){
-		return  context.getResources().getIdentifier("@drawable/bg_weekdays_selector", "drawable", context.getPackageName());
-	}
-	public static int getDrawableResouce(Context context, String name){
-		return  context.getResources().getIdentifier("@drawable/"+name, "drawable", context.getPackageName());
-	}
-	public static void setThemeDetails(Activity activity){
-		if(BuildConfig.BUILD_TYPE.equals("qa")){
-			activity.setTheme(R.style.RenatusApp75FTheme);
-		}
-		if(BuildConfig.BUILD_TYPE.equals("dev")){
-			activity.setTheme(R.style.RenatusAppDaikinTheme);
-		}
-
-	}
-	public static String getColorCode(Context context) {
-		StringBuffer colorCode = new StringBuffer("#");
-		colorCode.append(Integer.toHexString(getPrimaryThemeColor(context) & 0x00ffffff));
-		return colorCode.toString();
-	}
 
 }

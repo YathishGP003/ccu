@@ -53,12 +53,12 @@
                     android:textAppearance="@style/label_values" />
 
                 <NumberPicker
+                    android:theme="?DefaultNumberPickerTheme"
                     android:id="@+id/temperatureOffset"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:textColor="#202020"
-                    android:textSize="30sp" />
+                   />
             </LinearLayout>
 
             <RelativeLayout
@@ -395,11 +395,12 @@
                         android:textAppearance="@style/label_values" />
 
                     <NumberPicker
+                        android:theme="?DefaultNumberPickerTheme"
                         android:id="@+id/maxDamperPos"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:textSize="30sp" />
+                         />
                 </LinearLayout>
 
                 <LinearLayout
@@ -418,11 +419,12 @@
                         android:textAppearance="@style/label_values" />
 
                     <NumberPicker
+                        android:theme="?DefaultNumberPickerTheme"
                         android:id="@+id/minDamperPos"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:textSize="30sp" />
+                         />
                 </LinearLayout>
 
                 <LinearLayout
@@ -442,11 +444,12 @@
 
 
                     <NumberPicker
+                        android:theme="?DefaultNumberPickerTheme"
                         android:id="@+id/maxHeatingDamperPos"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:textSize="30sp" />
+                         />
                 </LinearLayout>
 
                 <LinearLayout
@@ -465,11 +468,12 @@
                         android:textAppearance="@style/label_values" />
 
                     <NumberPicker
+                        android:theme="?DefaultNumberPickerTheme"
                         android:id="@+id/minHeatingDamperPos"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:textSize="30sp" />
+                         />
                 </LinearLayout>
             </LinearLayout>
 

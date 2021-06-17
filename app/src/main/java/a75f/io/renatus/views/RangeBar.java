@@ -21,7 +21,7 @@ import android.view.View;
 import a75f.io.renatus.R;
 
 import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
-import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
+
 
 /**
  * Created by mahesh on 15-08-2019.

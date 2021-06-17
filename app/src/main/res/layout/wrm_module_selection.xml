@@ -132,6 +132,7 @@
                     </RelativeLayout>
 
                     <LinearLayout
+                        android:visibility="gone"
                         android:id="@+id/ll_vavmods"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -179,6 +180,7 @@
                                 android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
                                 tools:ignore="ContentDescription"
                                 app:tint="?orange_75f" />
+
 
                             <View
                                 android:layout_width="517dp"

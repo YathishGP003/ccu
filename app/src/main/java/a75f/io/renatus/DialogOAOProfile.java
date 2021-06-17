@@ -31,12 +31,13 @@ import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.oao.OAOProfileConfiguration;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType.TwoToTenV;
-import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
+
 
 /**
  * Created by samjithsadasivan on 6/5/18.
@@ -120,7 +121,7 @@ public class DialogOAOProfile extends BaseDialogFragment
         {
 
             titleView.setGravity(Gravity.CENTER);
-            titleView.setTextColor(getPrimaryThemeColor(getContext()));
+            titleView.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
         }
         int titleDividerId = getContext().getResources()
                                          .getIdentifier("titleDivider", "id", "android");

@@ -86,6 +86,7 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.GridItem;
 import a75f.io.renatus.util.NonTempControl;
@@ -1031,7 +1032,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     imageOn = true;
                     selectedView = seekArc.getId();
                     try {
-                        textEquipment.setTextColor(CCUUtils.getPrimaryThemeColor(getContext()));
+                        textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         tableLayout.addView(zoneDetails, index);
@@ -1600,7 +1601,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             imageOn = true;
                             isExpanded = true;
                             try {
-                                textEquipment.setTextColor(CCUUtils.getPrimaryThemeColor(getContext()));
+                                textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                                 textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 tableLayout.addView(zoneDetails, index);
@@ -1639,7 +1640,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     imageOn = true;
                     isExpanded = true;
                     try {
-                        textEquipment.setTextColor(CCUUtils.getPrimaryThemeColor(getContext()));
+                        textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         tableLayout.addView(zoneDetails, index);

@@ -21,11 +21,12 @@ import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.erm.EmrProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
+
 
 public class FragmentEMRConfiguration extends BaseDialogFragment
 {
@@ -89,7 +90,7 @@ public class FragmentEMRConfiguration extends BaseDialogFragment
         if(titleView != null)
         {
             titleView.setGravity(Gravity.CENTER);
-            titleView.setTextColor(getPrimaryThemeColor(getContext()));
+            titleView.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
         }
         int titleDividerId = getContext().getResources()
                                          .getIdentifier("titleDivider", "id", "android");

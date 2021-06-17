@@ -20,6 +20,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.renatus.registration.FreshRegistration;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 
@@ -168,16 +169,10 @@ public class SplashActivity extends AppCompatActivity {
 
 
     private void configSplashLogo(){
-
-         // Change according to daikin
-
-        if(BuildConfig.BUILD_TYPE.equals("qa")){
-            splashLogo75f.setVisibility(View.VISIBLE);
-        }
-        if(BuildConfig.BUILD_TYPE.equals("dev")){
+        if(BuildConfig.BUILD_TYPE.equals("daikin_prod")|| CCUUiUtil.isDaikinThemeEnabled(this))
             daikinSplash.setVisibility(View.VISIBLE);
-        }
-
+        else
+            splashLogo75f.setVisibility(View.VISIBLE);
     }
 }
 

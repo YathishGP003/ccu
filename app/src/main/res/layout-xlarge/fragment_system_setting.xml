@@ -187,8 +187,8 @@
                             android:textAppearance="@style/label_black" />
 
                         <Spinner
-                            android:id="@+id/targetMinInsideHumidity"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
+                            android:id="@+id/targetMinInsideHumidity"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"

@@ -18,6 +18,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 
+import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.CCUUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -110,7 +112,7 @@ public class ModbusConfigFragment extends Fragment {
             @Override
             public void onClick(View view)
             {
-                triggerRestart(getActivity());
+                CCUUiUtil.triggerRestart(getActivity());
             }
         });
     }
@@ -127,12 +129,5 @@ public class ModbusConfigFragment extends Fragment {
         editor.commit();
     }
     
-    public static void triggerRestart(Context context) {
-        PackageManager packageManager = context.getPackageManager();
-        Intent intent = packageManager.getLaunchIntentForPackage(context.getPackageName());
-        ComponentName componentName = intent.getComponent();
-        Intent mainIntent = Intent.makeRestartActivityTask(componentName);
-        context.startActivity(mainIntent);
-        Runtime.getRuntime().exit(0);
-    }
+
 }

@@ -30,15 +30,15 @@
             app:srcCompat="@drawable/ic_menu" />
         <ImageView
             android:id="@+id/logo_75f"
-            android:layout_width="300dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:padding="@dimen/margin_20"
             android:layout_marginTop="18dp"
             android:layout_marginBottom="18dp"
             android:scaleType="center"
             android:layout_gravity="center_vertical"
-            app:srcCompat="@drawable/ic_daikin_logo" />
+            app:srcCompat="@drawable/d3" />
+
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"
             style="?RenatusLandingTabStyle"

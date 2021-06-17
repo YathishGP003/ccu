@@ -64,7 +64,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.renatus.modbus.FragmentModbusConfiguration;
 import a75f.io.renatus.modbus.FragmentModbusEnergyMeterConfiguration;
-import a75f.io.renatus.util.CCUUtils;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -749,7 +749,7 @@ public class FloorPlanFragment extends Fragment {
     }
 
     private void setSystemSelection(int position) {
-        int background = CCUUtils.getListSelectorBackground(getContext());
+        int background = CCUUiUtil.getListSelectorBackground(getContext());
 
         rl_systemdevice.setBackgroundResource(background);
         rl_systemdevice.setEnabled(false);

@@ -11,6 +11,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
 
 /**
@@ -31,7 +32,7 @@ public class DataArrayAdapter<T> extends ArrayAdapter<T>
 	{
 		super(context, textViewResourceId, objects);
 		this.objects = objects;
-		listSelectorBackground = CCUUtils.getListSelectorBackground(context);
+		listSelectorBackground = CCUUiUtil.getListSelectorBackground(context);
 		// TODO Auto-generated constructor stub
 	}
 	

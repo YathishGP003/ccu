@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
 
     <TextView
@@ -106,12 +107,13 @@
 
                     </LinearLayout>
                     <ImageView
-                        android:layout_width="12dp"
-                        android:layout_height="20dp"
-                        android:layout_marginRight="92dp"
-                        android:layout_alignParentRight="true"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
+                        android:layout_marginEnd="92dp"
                         android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                        tools:ignore="ContentDescription"
                         app:tint="?orange_75f" />
                 </RelativeLayout>
 

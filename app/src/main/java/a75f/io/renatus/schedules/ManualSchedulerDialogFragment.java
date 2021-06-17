@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.TimeUtils;
@@ -103,7 +104,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         prefs = new Prefs(getActivity());
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View view = inflater.inflate(R.layout.dialog_manualschedule, null);
-        int dayselectionBackgroud = CCUUtils.getDayselectionBackgroud(getContext());
+        int dayselectionBackgroud = CCUUiUtil.getDayselectionBackgroud(getContext());
         ImageButton deleteButton = view.findViewById(R.id.buttonDelete);
         rangeSeekBarView = view.findViewById(R.id.rangeSeekBar);
         rangeSeekBarView.setZoneSchedule(mSchedule);
@@ -121,9 +122,6 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
 
         npStartTime = view.findViewById(R.id.np1);
         npEndTime = view.findViewById(R.id.np2);
-        setDividerColor(npStartTime);
-        setDividerColor(npEndTime);
-
         buttonSave = view.findViewById(R.id.buttonSave);
         buttonCancel = view.findViewById(R.id.buttonCancel);
 

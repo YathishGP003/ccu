@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.Looper;
 import com.google.android.material.textfield.TextInputLayout;
 
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 
@@ -64,7 +65,7 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 
-import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
+
 
 public class CreateNewSite extends Fragment {
     private static final String TAG = CreateNewSite.class.getSimpleName();
@@ -212,10 +213,10 @@ public class CreateNewSite extends Fragment {
         } else {
             btnEditSite.setEnabled(false);
             btnUnregisterSite.setText("Register");
-            btnUnregisterSite.setTextColor(getPrimaryThemeColor(getContext()));
-            imgUnregisterSite.setColorFilter(getPrimaryThemeColor(getContext()));
+            btnUnregisterSite.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
+            imgUnregisterSite.setColorFilter(CCUUiUtil.getPrimaryThemeColor(getContext()));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                setCompoundDrawableColor(btnUnregisterSite, getPrimaryThemeColor(getContext()));
+                setCompoundDrawableColor(btnUnregisterSite, CCUUiUtil.getPrimaryThemeColor(getContext()));
             }
         }
 
@@ -572,9 +573,9 @@ public class CreateNewSite extends Fragment {
                             if (ccuId != null && ccuId != "")
                             {
                                 btnUnregisterSite.setText("Register");
-                                btnUnregisterSite.setTextColor(getPrimaryThemeColor(getContext()));
+                                btnUnregisterSite.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                                 btnEditSite.setEnabled(false);
-                                imgUnregisterSite.setColorFilter(getPrimaryThemeColor(getContext()));
+                                imgUnregisterSite.setColorFilter(CCUUiUtil.getPrimaryThemeColor(getContext()));
                                 CCUHsApi.getInstance().setJwt("");
                                 Toast.makeText(getActivity(), "CCU unregistered successfully " +ccuId, Toast.LENGTH_LONG).show();
                             } else {

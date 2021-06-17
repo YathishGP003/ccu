@@ -60,6 +60,7 @@ import a75f.io.renatus.ENGG.AppInstaller;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 import a75f.io.renatus.registration.CustomViewPager;
 import a75f.io.renatus.schedules.SchedulerFragment;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.CloudConnetionStatusThread;
 import a75f.io.renatus.util.Prefs;
@@ -71,7 +72,7 @@ import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_MODULE;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_TABLET;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.SAVE_CCU_LOGS;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.UPDATE_CCU;
-import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
+
 
 public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface {
 
@@ -109,7 +110,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         prefs = new Prefs(this);
-        CCUUtils.setThemeDetails(this);
+        CCUUiUtil.setThemeDetails(this);
         mConnectionChangeReceiver = new ConnectionChangeReceiver();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -378,7 +379,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         String password = getSavedPassword(key);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         SpannableString spannable = new SpannableString(title);
-        spannable.setSpan(new ForegroundColorSpan(getPrimaryThemeColor(RenatusLandingActivity.this)), 0, title.length(), 0);
+        spannable.setSpan(new ForegroundColorSpan(CCUUiUtil.getPrimaryThemeColor(RenatusLandingActivity.this)), 0, title.length(), 0);
         builder.setTitle(spannable);
         builder.setCancelable(false);
 
@@ -608,13 +609,10 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
     private void configLogo(){
 
-         // Change according to daikin
-
-        if(BuildConfig.BUILD_TYPE.equals("dev")){
-            logo_75f.setImageDrawable(getResources().getDrawable(R.drawable.ic_daikin_logo));
-
-        }
-        if(BuildConfig.BUILD_TYPE.equals("qa")){
+        if(BuildConfig.BUILD_TYPE.equals("daikin_prod")||CCUUiUtil.isDaikinThemeEnabled(this)){
+            logo_75f.setImageDrawable(getResources().getDrawable(R.drawable.d3));
+            powerbylogo.setVisibility(View.VISIBLE);
+        }else{
             logo_75f.setImageDrawable(getResources().getDrawable(R.drawable.ic_75f_logo));
             powerbylogo.setVisibility(View.GONE);
         }

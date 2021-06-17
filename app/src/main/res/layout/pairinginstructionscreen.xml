@@ -3,14 +3,26 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-
     <ImageView
+        android:visibility="visible"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@drawable/pairinginstruct"
+        android:src="@drawable/image_pairinginstructionsn"
+        android:layout_below="@+id/layoutHeader"
+        android:layout_marginTop="64dp"
+        android:layout_marginLeft="64dp"
+        android:layout_marginRight="64dp"
         android:id="@+id/pairinginstruct"
+        android:layout_marginBottom="64dp"
         />
-
+    <ImageView
+        android:id="@+id/pairinginstruct_daikin"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/paring_step_screen_daikin"
+        android:layout_below="@+id/layoutHeader"
+        />
     <TextView
         android:layout_width="match_parent"
         android:layout_height="60dp"

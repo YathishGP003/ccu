@@ -59,9 +59,10 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
-import a75f.io.renatus.util.CCUUtils;
+import a75f.io.renatus.util.CCUUiUtil;
 
-import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
+
+
 
 /**
  * Created by samjithsadasivan on 1/17/19.
@@ -126,7 +127,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         //getSystemTuners();
 
         reasonLabel = view.findViewById(R.id.textReasonLabel);
-        String colorHex = CCUUtils.getColorCode(getContext());
+        String colorHex = CCUUiUtil.getColorCode(getContext());
         String text = "<font color="+colorHex+">*</font> <font color=#999999>Reason for Change</font>";
         reasonLabel.setText(Html.fromHtml(text));
 
@@ -447,7 +448,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             });
             buttonCancelTuners.setOnClickListener(dialogV -> {
                 saveTunerValues.setEnabled(true);
-                saveTunerValues.setTextColor(getPrimaryThemeColor(getContext()));
+                saveTunerValues.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                 valueDialog.dismiss();
             });
             linearLayoutBody.invalidate();
@@ -696,7 +697,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     }
                     if (updatedTunerValues.size() > 0) {
                         saveTunerValues.setEnabled(true);
-                        saveTunerValues.setTextColor(getPrimaryThemeColor(getContext()));
+                        saveTunerValues.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                     }
                 }
                 break;

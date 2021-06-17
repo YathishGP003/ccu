@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -55,12 +56,13 @@ import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.views.OaoArc;
 
 import static a75f.io.logic.jobs.ScheduleProcessJob.ACTION_STATUS_CHANGE;
-import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
+
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
@@ -209,24 +211,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			modesAvailable.add(SystemMode.HEATONLY.displayName);
 		}
 
-//TODO uncomment when it comes to prod release KUMAR.. commenting for now for Automation test case , dont forget to revoke xml file too
-		/*systemModePicker.setTextColorResource(R.color.my_gray);
-		systemModePicker.setSelectedTextSize(R.dimen.selected_text_size);
-		systemModePicker.setTextSize(R.dimen.text_size);
-		systemModePicker.setDividerColor(getResources().getColor(R.color.accent));
-
-		systemModePicker.setMinValue(0);
-		systemModePicker.setMaxValue(modesAvailable.size()-1);
-
-		// Set fading edge enabled
-		systemModePicker.setFadingEdgeEnabled(true);
-
-		// Set scroller enabled
-		systemModePicker.setScrollerEnabled(true);
-
-		// Set wrap selector wheel
-		systemModePicker.setWrapSelectorWheel(false);
-		*/
 
 		systemModePicker.setMinValue(0);
 		systemModePicker.setMaxValue(modesAvailable.size()-1);
@@ -236,7 +220,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 		//TODO we will comment out below two lines for prod release
 		systemModePicker.setWrapSelectorWheel(false);
-		setDividerColor(systemModePicker);
+
 		
 		
 		systemModePicker.setOnScrollListener(new NumberPicker.OnScrollListener() {
@@ -278,7 +262,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		
 		targetMaxInsideHumidity = view.findViewById(R.id.targetMaxInsideHumidity);
 		targetMinInsideHumidity = view.findViewById(R.id.targetMinInsideHumidity);
-		
+		CCUUiUtil.setSpinnerDropDownColor(targetMaxInsideHumidity,getContext());
+		CCUUiUtil.setSpinnerDropDownColor(targetMinInsideHumidity,getContext());
 		targetMinInsideHumidity.setOnTouchListener(new View.OnTouchListener() {
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
@@ -488,7 +473,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 				@Override
 				public void run() {
-					String colorHex = CCUUtils.getColorCode(getContext());
+					String colorHex = CCUUiUtil.getColorCode(getContext());
 					String status = CCUHsApi.getInstance().readDefaultStrVal("system and status and message");
 					//If the system status is not updated yet (within a minute of registering the device), generate a
 					//default message.
@@ -562,30 +547,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public void onNothingSelected(AdapterView<?> arg0) {
 		// TODO Auto-generated method stub
 	}
-	
-	private void setDividerColor(NumberPicker picker) {
-		Field[] numberPickerFields = NumberPicker.class.getDeclaredFields();
-		int resource = CCUUtils.getDrawableResouce(getContext(),"divider_np");
-		for (Field field : numberPickerFields) {
-			if (field.getName().equals("mSelectionDivider")) {
-				field.setAccessible(true);
-				try {
 
-					field.set(picker, resource);
-				} catch (IllegalArgumentException e) {
-					Log.v("NP", "Illegal Argument Exception");
-					e.printStackTrace();
-				} catch (Resources.NotFoundException e) {
-					Log.v("NP", "Resources NotFound");
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					Log.v("NP", "Illegal Access Exception");
-					e.printStackTrace();
-				}
-				break;
-			}
-		}
-	}
 	
 	private void setUserIntentBackground(String query, double val) {
 		

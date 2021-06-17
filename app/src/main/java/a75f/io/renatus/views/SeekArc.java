@@ -32,7 +32,6 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.RoomDataInterface;
 import a75f.io.renatus.R;
 
-import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
 
 public class SeekArc extends View implements RoomDataInterface
 {

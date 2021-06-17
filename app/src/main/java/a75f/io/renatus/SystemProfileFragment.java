@@ -22,10 +22,11 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.logic.L;
 import a75f.io.renatus.registration.FreshRegistration;
+import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static a75f.io.renatus.util.CCUUtils.getPrimaryThemeColor;
+
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
@@ -80,7 +81,7 @@ public class SystemProfileFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (!isFreshRegister&& adapterView.getChildAt(0)!= null) {
-                    ((TextView) adapterView.getChildAt(0)).setTextColor(getPrimaryThemeColor(getContext()));
+                    ((TextView) adapterView.getChildAt(0)).setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                     ((TextView) adapterView.getChildAt(0)).setTextSize(18);
                     spSystemProfile.getLayoutParams().width = 340;
                 }

@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -79,7 +80,7 @@ public class MenuFragment extends Fragment {
         if (SettingsFragment.SettingFragmentHandler != null) {
             SettingsFragment.SettingFragmentHandler.sendEmptyMessage(0);
         }
-        listSelectorBackground = CCUUtils.getListSelectorBackground(getContext());
+        listSelectorBackground = CCUUiUtil.getListSelectorBackground(getContext());
         iconAccount.setColorFilter(ContextCompat.getColor(getActivity(),
                 R.color.white));
         iconSecurity.setColorFilter(ContextCompat.getColor(getActivity(),

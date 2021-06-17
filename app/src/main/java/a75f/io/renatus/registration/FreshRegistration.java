@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.PorterDuff;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
@@ -53,6 +54,7 @@ import a75f.io.renatus.VavHybridRtuProfile;
 import a75f.io.renatus.VavIERtuProfile;
 import a75f.io.renatus.VavStagedRtuProfile;
 import a75f.io.renatus.VavStagedRtuWithVfdProfile;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
@@ -87,7 +89,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        CCUUtils.setThemeDetails(this);
+        CCUUiUtil.setThemeDetails(this);
         setContentView(R.layout.activity_freshregistration);
         container = findViewById(R.id.container);
         listView_icons = findViewById(R.id.listView_icons);
@@ -100,6 +102,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         textView_title = findViewById(R.id.textTitleFragment);
         imageView_Goback = findViewById(R.id.imageGoback);
         spinnerSystemProile = findViewById(R.id.spinnerSystemProfile);
+        CCUUiUtil.setSpinnerDropDownColor(spinnerSystemProile,getApplicationContext());
         imageRefresh = (ImageView) findViewById(R.id.imageRefresh);
         toggleWifi = (ToggleButton) findViewById(R.id.toggleWifi);
 
@@ -1276,16 +1279,9 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
 
     private void configLogo(){
-
-         // Change according to daikin
-
-        if(BuildConfig.BUILD_TYPE.equals("dev")){
+        if(BuildConfig.BUILD_TYPE.equals("daikin_prod")|| CCUUiUtil.isDaikinThemeEnabled(this))
             imageView_logo.setImageDrawable(getResources().getDrawable(R.drawable.ic_daikin_75f_logo));
-
-        }
-        if(BuildConfig.BUILD_TYPE.equals("qa")){
+        else
             imageView_logo.setImageDrawable(getResources().getDrawable(R.drawable.ic_logo_svg));
-        }
-
     }
 }

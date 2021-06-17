@@ -917,8 +917,12 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         String strminTemp = FontManager.getColoredSpanned(Double.toString(coolingTemp), colorMinTemp);
         String strmaxTemp = FontManager.getColoredSpanned(Double.toString(heatingTemp), colorMaxTemp);
 
-        Typeface typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lato_regular.ttf");
-
+        Typeface typeface=null;
+        try {
+            typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lato_regular.ttf");
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
         if (startTimeHH > endTimeHH || (startTimeHH == endTimeHH && startTimeMM > endTimeMM)) {
             drawScheduleBlock(position, strminTemp, strmaxTemp, typeface, startTimeHH,
@@ -1008,8 +1012,8 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         AppCompatTextView textViewTemp = new AppCompatTextView(getActivity());
         textViewTemp.setGravity(Gravity.CENTER_HORIZONTAL);
         textViewTemp.setText(Html.fromHtml(strminTemp + " " + strmaxTemp));
-
-        textViewTemp.setTypeface(typeface);
+        if(typeface!=null)
+            textViewTemp.setTypeface(typeface);
         TextViewCompat.setAutoSizeTextTypeWithDefaults(textViewTemp, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
         textViewTemp.setMaxLines(2);
         textViewTemp.setContentDescription(textView.getText().toString()+"_"+tempStartTime+":"+startTimeMM+"-"+tempEndTime+":"+endTimeMM);

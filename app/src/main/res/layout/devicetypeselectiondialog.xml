@@ -232,12 +232,21 @@
             android:layout_marginStart="440dp">
 
             <ImageView
+                android:id="@+id/ccu75_img"
+                android:visibility="gone"
                 android:layout_width="300dp"
-                android:layout_height="114dp"
+                android:layout_height="113dp"
                 android:layout_alignParentBottom="true"
                 android:layout_marginStart="10dp"
                 android:src="@drawable/image_ccu" />
-
+            <ImageView
+                android:id="@+id/daikin_ccu"
+                android:layout_width="300dp"
+                android:layout_height="70dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginStart="10dp"
+                android:visibility="gone"
+                android:src="@drawable/ccu" />
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

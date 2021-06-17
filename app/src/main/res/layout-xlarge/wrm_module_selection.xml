@@ -172,8 +172,9 @@
                             </LinearLayout>
 
                             <ImageView
-                                android:layout_width="12dp"
-                                android:layout_height="20dp"
+
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginEnd="92dp"
@@ -222,8 +223,8 @@
                             </LinearLayout>
 
                             <ImageView
-                                android:layout_width="12dp"
-                                android:layout_height="20dp"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginEnd="92dp"
@@ -272,8 +273,8 @@
                             </LinearLayout>
 
                             <ImageView
-                                android:layout_width="12dp"
-                                android:layout_height="20dp"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginEnd="92dp"
@@ -297,6 +298,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="40dp"
+                    android:visibility="visible"
                     android:minHeight="92dp">
 
 
@@ -395,8 +397,8 @@
                             </LinearLayout>
 
                             <ImageView
-                                android:layout_width="12dp"
-                                android:layout_height="20dp"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginEnd="92dp"
@@ -445,8 +447,8 @@
                             </LinearLayout>
 
                             <ImageView
-                                android:layout_width="12dp"
-                                android:layout_height="20dp"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginEnd="92dp"
@@ -552,8 +554,8 @@
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="12dp"
-                        android:layout_height="20dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="92dp"

@@ -1,7 +1,6 @@
 package a75f.io.renatus
 
 import a75f.io.logger.CcuLog
-import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
@@ -102,11 +101,11 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
    private fun showSenseconfigFragment(){
       CcuLog.i("CCU_", "TC: showSenseconfigFragment");
       showDialogFragment(
-              FragmentHyperStatSense.newInstance( mNodeAddress,
+              HyperStatSenseFragment.newInstance( mNodeAddress,
                       mRoomName,
                       mFloorName,
                       ProfileType.HYPERSTAT_SENSE),
-              FragmentHyperStatSense.ID
+              HyperStatSenseFragment.ID
       )
    }
 }

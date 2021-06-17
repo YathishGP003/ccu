@@ -10,6 +10,7 @@ import a75f.io.logger.CcuLog;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -41,6 +42,8 @@ public class SplashActivity extends AppCompatActivity {
         splashLogo75f = findViewById(R.id.splash_logo);
         daikinSplash = findViewById(R.id.daikin_splash);
         prefs = new Prefs(this);
+        /*PreferenceManager.getDefaultSharedPreferences(this).edit().
+                putBoolean(getString(R.string.prefs_theme_key),true).commit();*/
         Log.i(TAG, "Splash activity");
         configSplashLogo();
         registrationThread = new Thread() {

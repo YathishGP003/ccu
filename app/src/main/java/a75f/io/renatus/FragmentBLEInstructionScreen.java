@@ -382,7 +382,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             }
             else
             {
-                pairinginstruct.setImageResource(R.drawable.image_pairinginstructionsn);
+                pairinginstruct.setImageResource(R.drawable.image_pairing_screen_snhn);
             }
            // pairinginstruct.setImageResource(R.drawable.image_pairing_screen_snhn);
         }

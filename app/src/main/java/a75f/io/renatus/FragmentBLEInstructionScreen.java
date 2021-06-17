@@ -350,7 +350,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         }
     }
     
-
+    
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState)
@@ -384,6 +384,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             {
                 pairinginstruct.setImageResource(R.drawable.image_pairinginstructionsn);
             }
+           // pairinginstruct.setImageResource(R.drawable.image_pairing_screen_snhn);
         }
         else if (mNodeType == NodeType.SMART_STAT)
         {

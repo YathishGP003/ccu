@@ -35,12 +35,12 @@
                     android:layout_marginStart="80dp"
                     android:text="@string/title_input_value" />
 
-                <TextView
+                <!--<TextView
                     style="@style/text_appearance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="80dp"
-                    android:text="@string/title_input_value" />
+                    android:text="@string/title_input_value" />-->
 
                 <TextView
                     style="@style/text_appearance"

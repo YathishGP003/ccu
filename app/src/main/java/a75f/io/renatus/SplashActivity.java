@@ -42,8 +42,8 @@ public class SplashActivity extends AppCompatActivity {
         splashLogo75f = findViewById(R.id.splash_logo);
         daikinSplash = findViewById(R.id.daikin_splash);
         prefs = new Prefs(this);
-        PreferenceManager.getDefaultSharedPreferences(this).edit().
-                putBoolean(getString(R.string.prefs_theme_key),true).commit();
+        /*PreferenceManager.getDefaultSharedPreferences(this).edit().
+                putBoolean(getString(R.string.prefs_theme_key),true).commit();*/
         Log.i(TAG, "Splash activity");
         configSplashLogo();
         registrationThread = new Thread() {

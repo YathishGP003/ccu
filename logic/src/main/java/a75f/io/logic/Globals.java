@@ -53,6 +53,7 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.tuners.TunerUpgrades;
 import a75f.io.logic.watchdog.Watchdog;
 
 /*
@@ -199,6 +200,7 @@ public class Globals {
                         multiple CCUs having duplicate instances of tuners. */
                         CCUHsApi.getInstance().importBuildingTuners();
                     }
+                    TunerUpgrades.handleBuildingTunerForceClear(mApplicationContext, CCUHsApi.getInstance());
                     
                     CCUHsApi.getInstance().syncEntityTree();
                 }

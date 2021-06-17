@@ -1,5 +1,7 @@
 package a75f.io.logic.tuners;
 
+import android.content.Context;
+import android.preference.PreferenceManager;
 import android.widget.ArrayAdapter;
 
 import java.util.ArrayList;
@@ -8,10 +10,14 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+
+import static a75f.io.logic.tuners.TunerConstants.TUNER_BUILDING_VAL_LEVEL;
+import static a75f.io.logic.tuners.TunerConstants.TUNER_EQUIP_VAL_LEVEL;
 
 /**
  * Tuners are normally created when an equip is created.
@@ -19,6 +25,8 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
  *
  */
 public class TunerUpgrades {
+    
+    private static final String PREF_TUNER_EQUIP_LEVEL_RESET = "buildingTunerEquipLevelReset";
     
     /**
      * Takes care creating new tuners on existing equips during an upgrade.
@@ -98,5 +106,56 @@ public class TunerUpgrades {
             }
         }
         
+    }
+    
+    /**
+     * Some of the building level tuners have incorrectly been written to level 8.
+     * We have now changed it write to level 16.
+     * This method does the clean up job to clear those level 8 writes.
+     * This could be removed in future once all the Sites are migrated to 1.568.0 or later versions of CCU.
+     */
+    public static void handleBuildingTunerForceClear(Context context, CCUHsApi hayStack) {
+        boolean isPendingBuildingTunerReset = PreferenceManager.getDefaultSharedPreferences(context)
+                                                   .getBoolean(PREF_TUNER_EQUIP_LEVEL_RESET, false);
+        if (!isPendingBuildingTunerReset) {
+            forceClearBuildingTunerEquipLevel(hayStack);
+    
+            PreferenceManager.getDefaultSharedPreferences(context).edit()
+                             .putBoolean(PREF_TUNER_EQUIP_LEVEL_RESET, true)
+                             .apply();
+        }
+    
+    }
+    
+    private static void forceClearBuildingTunerEquipLevel(CCUHsApi hayStack) {
+        HashMap buildingCoolingUpperLimit = hayStack.read("point and limit and max and cooling and user");
+        forceExpireEquipLevel(buildingCoolingUpperLimit.get("id").toString(), hayStack);
+        HashMap buildingHeatingUpperLimit = hayStack.read("point and limit and max and heating and user");
+        forceExpireEquipLevel(buildingHeatingUpperLimit.get("id").toString(), hayStack);
+        HashMap buildingCoolingLowerLimit = hayStack.read("point and limit and min and cooling and user");
+        forceExpireEquipLevel(buildingCoolingLowerLimit.get("id").toString(), hayStack);
+        HashMap buildingHeatingLowerLimit = hayStack.read("point and limit and min and heating and user");
+        forceExpireEquipLevel(buildingHeatingLowerLimit.get("id").toString(), hayStack);
+        HashMap buildingMin = hayStack.read("building and limit and min");
+        forceExpireEquipLevel(buildingMin.get("id").toString(), hayStack);
+        HashMap buildingMax = hayStack.read("building and limit and max");
+        forceExpireEquipLevel(buildingMax.get("id").toString(), hayStack);
+    }
+    
+    private static void forceExpireEquipLevel(String id, CCUHsApi hayStack) {
+        HashMap equipLevelVal = HSUtil.getPriorityLevel(id, TUNER_EQUIP_VAL_LEVEL);
+        if (equipLevelVal.isEmpty() ||
+            equipLevelVal.get(HayStackConstants.WRITABLE_ARRAY_WHO) == null ||
+            equipLevelVal.get(HayStackConstants.WRITABLE_ARRAY_VAL) == null) {
+            CcuLog.i(L.TAG_CCU_TUNER,"Level 8 does not exist for "+id);
+            return;
+        }
+        hayStack.writePoint(id, TUNER_BUILDING_VAL_LEVEL,
+                            equipLevelVal.get(HayStackConstants.WRITABLE_ARRAY_WHO).toString(),
+                            Double.parseDouble(equipLevelVal.get(HayStackConstants.WRITABLE_ARRAY_VAL).toString()),
+                            (int)Double.parseDouble(equipLevelVal.get(HayStackConstants.WRITABLE_ARRAY_DURATION).toString()));
+    
+        hayStack.clearPointArrayLevel(id, TUNER_EQUIP_VAL_LEVEL, false);
+        CcuLog.i(L.TAG_CCU_TUNER,"Cleared level 8 : "+id);
     }
 }

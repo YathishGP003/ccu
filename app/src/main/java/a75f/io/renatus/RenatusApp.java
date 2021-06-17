@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.renatus.util.Prefs;
 import androidx.multidex.MultiDex;
@@ -118,6 +119,8 @@ public class RenatusApp extends UtilityApplication
 	}
 
 	public static void rebootTablet() {
+		boolean persistImmediate = true;
+		CCUHsApi.getInstance().saveTagsData(persistImmediate);
 
 		setIntentToRestartCCU();
 		try {
@@ -130,6 +133,8 @@ public class RenatusApp extends UtilityApplication
 	}
 
 	public static void closeApp() {
+		boolean persistImmediate = true;
+		CCUHsApi.getInstance().saveTagsData(persistImmediate);
 		setIntentToRestartCCU();
 
 		Log.d("CCU_DEBUG", "************Houston, CCU Is Going Down-CloseApp!!!************");

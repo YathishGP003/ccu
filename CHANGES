@@ -1,28 +1,51 @@
- - Merged PR 1107: Schedule title showing Building schedue for Zone Schedule also
- - Merged PR 998: Use high dynamic priority value for forced-occupied zones
- - Updated with Main Looper
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/6733_CCU_When_a_zone_is_assigned_with_zone_schedule_when_we_open_the_schedule_it_still_shows_as_building_schedule
- - Merged PR 901: Keep Alert after 24 hours if not synced
- - Merged PR 1093: CCU:  Crasher -- SystemFragment creation, operation on SystemProfile when it is null.
- - Merge branches 'bug/mkundaragi/6733_CCU_When_a_zone_is_assigned_with_zone_schedule_when_we_open_the_schedule_it_still_shows_as_building_schedule' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/6733_CCU_When_a_zone_is_assigned_with_zone_schedule_when_we_open_the_schedule_it_still_shows_as_building_schedule
- - Updated with handler
- - Merged PR 1011: CCU_Modbus_Zone_tag_should_be_removed_for_system_level_modbus_device
- - Just checking arguments contains room reference for zone schedule
- - Merged PR 1090: Alert Def conditional evaluation improvements
- - Merged PR 1039: Alignment issue in building/zone schedule when many schedules are found in a single day.
+ - Merged PR 1174: System modbus support
+ - Merged PR 1175: Clear building tuner level 8
+ - Update the comment about building limit update
+ - Remove zone tag from display
+ - Merged PR 863: Bug 6232: User is able to do selection between Fan high, Humidifier and dehumidifier without having relay5/6 renabled.
+ - Merged PR 950: Bug 5955: Offset text & sensor type unit correction
+ - Merged PR 1027: CCU : Unless relay 7 is enabled CCU does not write default humidifier value for any system profile.
+ - remove zone tag for modbus devices
+ - Fix crash in parse HNum
  - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
- - Merged PR 1087: Add littleEndian word order for PELTEK BTU meter
- - Add littleEndian word order for PELTEK BTU meter
- - Merged PR 990: Removed building equip tuner his tag
- - Zone tag needs to be removed
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/sdev/6613_CCU_Modbus_Zone_tag_should_be_removed_for_system_level_modbus_devices
- - Fix query for reading priority point
- - onResume method is overridden in SchedularFragment which was causing alignment issue in building and zone schedule
- - Merge branch 'master' into Bug/samjith/4507_forced_occupied_not_triggered
- - Zone tag needs to be removed for system devices
- - Fetch zone priority from priority array
- - CCU_Modbus_Zone_tag_should_be_removed_for_system_level_modbus_device
- - Zone tags needs to be removed
- - Zone tag needs to be removed
- - Use high dynamic priority value for forced-occupied zones
- - Zone tag has been removed to Energymeters and BTU meters of system level
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/5955/CCU_PI
+ - Merged PR 1130: CCU : For CPU profile when Fan mode changed from high to low, relay 6 is not turning off
+ - When FanSpeed is set to Low, relay 6 should turn off
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merged PR 1046: Update his value for fanOpMode
+ - When FanSpeed is set to Low, relay 6 should turn off
+ - Clear building tuner level 8 during upgrades
+ - Merge branch 'bug/tcase/6410_temp_limits_from_ccu1_to_ccu2' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/samjith/6410_clear_level_8_master_control
+ - SmartStat paired as FCU profile send FanMedium as FAN_HIGH2. Handle by converting it appropriately.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/sdev/6670-CCU-For_CPU_profile_when_Fan_mode_changed_from_high_to_low,_relay_6_is_not_turning_off
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - merge master
+ - Merged PR 1149: Vav reheat tuner field trial
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu
+ - Merged PR 1137: Revert 'Bug-5108 CCU : Relay mapping are shown as cooling stage1 for few seconds'
+ - Revert "Merged PR 525: Bug-5108 CCU : Relay mapping are shown as cooling stage1 for few seconds
+ - Vav reheat tuner trial
+ - Vav reheat tuner trial
+ - Merged PR 1103: 6721  CCU:  Alert definitions not deleted on CCU after back end deletion
+ - fanstage 2 was not set to 0 after setting 1,once it is disabled
+ - Merged PR 988: Bug 6337: CCU : App crashed while pairing 2 PFCU as a zone
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/5955/CCU_PI
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/5101/CCU_Unless_relay_7_is_enabled_CCU_does_not_write_default_humidifier_value_for_any_system_profile
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/6337/CCU_App_crash
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/akuma2/6232/CCU_SmartStats
+ - Update his value for fanOpMode
+ - Write building temp limits on building level
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
+ - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.

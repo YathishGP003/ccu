@@ -20,7 +20,7 @@ public class CCUUiUtil {
 
 
     public static int getPrimaryThemeColor(Context context){
-        return MaterialColors.getColor(context, R.attr.orange_75f, Color.CYAN);
+        return MaterialColors.getColor(context, R.attr.orange_75f, Color.RED);
     }
 
     public static int getListSelectorBackground(Context context){

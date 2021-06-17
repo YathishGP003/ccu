@@ -102,7 +102,7 @@
                 android:layout_below="@+id/textCCU"
                 android:layout_alignParentEnd="true"
                 android:layout_marginTop="42dp"
-                android:spinnerMode="dropdown" />
+                />
 
             <TextView
                 android:id="@+id/textUseOutside"

@@ -145,6 +145,7 @@ public class CreateNewSite extends Fragment {
         mSiteName = rootView.findViewById(R.id.editSitename);
 
         mTimeZoneSelector = rootView.findViewById(R.id.timeZoneSelector);
+        CCUUiUtil.setSpinnerDropDownColor(mTimeZoneSelector,getContext());
         mTextTimeZone = rootView.findViewById(R.id.textTimeZone);
 
         mTextInputStreetAdd = rootView.findViewById(R.id.textInputStreeAdd);

@@ -58,6 +58,7 @@ import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
 import a75f.io.renatus.views.TempLimit.TempLimitView;
@@ -186,6 +187,7 @@ public class InstallerOptions extends Fragment {
 
         imageGoback = rootView.findViewById(R.id.imageGoback);
         mAddressBandSpinner = rootView.findViewById(R.id.spinnerAddress);
+        CCUUiUtil.setSpinnerDropDownColor(mAddressBandSpinner,getContext());
         mToggleTempAll = rootView.findViewById(R.id.toggleTempAll);
         mNext = rootView.findViewById(R.id.buttonNext);
         imageTemp = rootView.findViewById(R.id.imageTemp);

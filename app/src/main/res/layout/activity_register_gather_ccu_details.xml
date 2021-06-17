@@ -52,6 +52,7 @@
         android:textSize="16sp"
         android:text="Select SmartNode Address Band"/>
     <Spinner
+        style="@style/Widget.AppCompat.Spinner.Underlined"
         android:id="@+id/addressBandSpinner"
         android:layout_width="170dp"
         android:layout_height="45dp"

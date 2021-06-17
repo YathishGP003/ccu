@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -102,7 +103,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         textView_title = findViewById(R.id.textTitleFragment);
         imageView_Goback = findViewById(R.id.imageGoback);
         spinnerSystemProile = findViewById(R.id.spinnerSystemProfile);
-        CCUUiUtil.setSpinnerDropDownColor(spinnerSystemProile,getApplicationContext());
+
         imageRefresh = (ImageView) findViewById(R.id.imageRefresh);
         toggleWifi = (ToggleButton) findViewById(R.id.toggleWifi);
 
@@ -382,7 +383,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             }
 
         });
-
+        CCUUiUtil.setSpinnerDropDownColor(spinnerSystemProile,FreshRegistration.this);
         selectItem(position);
     }
 

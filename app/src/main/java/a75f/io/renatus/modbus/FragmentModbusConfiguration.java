@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,6 +49,7 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.EnergyDistributionAdapter;
 import a75f.io.renatus.FloorPlanFragment;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -68,9 +70,9 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     ModbusProfile modbusProfile;
     EquipmentDevice equipmentDevice;
     @BindView(R.id.spEquipmentType)
-    AppCompatSpinner spEquipmentType;
+    Spinner spEquipmentType;
     @BindView(R.id.spAddress)
-    AppCompatSpinner spAddress;
+    Spinner spAddress;
     @BindView(R.id.setBtn)
     Button setBtn;
     @BindView(R.id.paramHeader1)
@@ -225,6 +227,8 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
             });
         }
 
+        CCUUiUtil.setSpinnerDropDownColor(spEquipmentType,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(spAddress,getContext());
     }
 
     private void updateUi(boolean isNewConfig) {

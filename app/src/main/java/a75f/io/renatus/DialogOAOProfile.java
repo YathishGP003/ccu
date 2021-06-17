@@ -1,3 +1,4 @@
+
 package a75f.io.renatus;
 
 import android.app.Dialog;
@@ -247,6 +248,7 @@ public class DialogOAOProfile extends BaseDialogFragment
             smartPurgeOutsideDamperMinOpen.setSelection(100,false);
             enhancedVentilationOutsideDamperMinOpen.setSelection(50,false);
         }
+        setSpinnerDropdown();
     }
     
     private void setUpOAOProfile() {
@@ -301,5 +303,22 @@ public class DialogOAOProfile extends BaseDialogFragment
         
     }
 
+    private void setSpinnerDropdown(){
+
+        CCUUiUtil.setSpinnerDropDownColor(oaDamperAtMin,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(returnDamperAtMin,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(oaDamperMinOpen,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(exFanStage1Threshold,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(currentTransformerType,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(exFanHysteresis,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(oaDamperAtMax,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(returnDamperAtMax,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(returnDamperMinOpen,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(exFanStage2Threshold,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(co2Threshold,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(smartPurgeOutsideDamperMinOpen,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(enhancedVentilationOutsideDamperMinOpen,getContext());
+
+    }
     
 }

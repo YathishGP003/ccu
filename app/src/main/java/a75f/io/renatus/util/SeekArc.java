@@ -267,19 +267,19 @@ public class SeekArc extends View
     {
         mCurrentBitmapMatrix = new Matrix();
 
-        mHeatingRectangle = drawableToBitmap(context.getResources().getDrawable(R.drawable.ic_heating_dt_two));
+        mHeatingRectangle = drawableToBitmap(context.getDrawable(R.drawable.ic_heating_dt_two));
         //mHeatingRectangle = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_heating_dt_two);
-        mCoolingRectangle = drawableToBitmap(context.getResources().getDrawable(R.drawable.ic_cooling_dt_two));
+        mCoolingRectangle = drawableToBitmap(context.getDrawable(R.drawable.ic_cooling_dt_two));
         //mCoolingRectangle = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_cooling_dt_two);
-        mHeatingProgressCircle = drawableToBitmap(context.getResources().getDrawable(R.drawable.ic_heating_slider));
+        mHeatingProgressCircle = drawableToBitmap(context.getDrawable(R.drawable.ic_heating_slider));
         //mHeatingProgressCircle = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_heating_slider);
-        mCoolingProgressCircle = drawableToBitmap(context.getResources().getDrawable(R.drawable.ic_cooling_slider));
+        mCoolingProgressCircle = drawableToBitmap(context.getDrawable(R.drawable.ic_cooling_slider));
         //mCoolingProgressCircle = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_cooling_slider);
-        mCurrentTempRectangle = drawableToBitmap(context.getResources().getDrawable(R.drawable.ic_ct_two));
+        mCurrentTempRectangle = drawableToBitmap(context.getDrawable(R.drawable.ic_ct_two));
         //mCurrentTempRectangle = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_ct_two);
-        mRedLimitNonDetailedView = drawableToBitmap(context.getResources().getDrawable(R.drawable.ic_ct_red_two));
+        mRedLimitNonDetailedView = drawableToBitmap(context.getDrawable(R.drawable.ic_ct_red_two));
         //mRedLimitNonDetailedView = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_ct_red_two);
-        mGreyLimitNonDetailedView = drawableToBitmap(context.getResources().getDrawable(R.drawable.ic_ct_grey));
+        mGreyLimitNonDetailedView = drawableToBitmap(context.getDrawable(R.drawable.ic_ct_grey));
         //mGreyLimitNonDetailedView = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_ct_grey);
 
 

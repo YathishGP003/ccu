@@ -77,6 +77,7 @@ public class SystemProfileFragment extends Fragment {
         ArrayAdapter<CharSequence> systemProfileSelectorAdapter = ArrayAdapter.createFromResource(this.getActivity(), R.array.system_profile_select, R.layout.spinner_dropdown_item);
         systemProfileSelectorAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spSystemProfile.setAdapter(systemProfileSelectorAdapter);
+        CCUUiUtil.setSpinnerDropDownColor(spSystemProfile,getContext());
         spSystemProfile.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {

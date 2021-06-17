@@ -663,6 +663,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         LinearLayout linearLayoutZonePoints  = zoneDetails.findViewById(R.id.lt_profilepoints);
         TextView    scheduleStatus      = zoneDetails.findViewById(R.id.schedule_status_tv);
         Spinner scheduleSpinner     = zoneDetails.findViewById(R.id.schedule_spinner);
+        CCUUiUtil.setSpinnerDropDownColor(scheduleSpinner,getContext());
         ImageButton scheduleImageButton = zoneDetails.findViewById(R.id.schedule_edit_button);
         ImageButton vacationImageButton = zoneDetails.findViewById(R.id.vacation_edit_button);
         TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
@@ -1933,7 +1934,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         Spinner spinnerValue1 = viewPointRow1.findViewById(R.id.spinnerValue1);
         Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
-
+        CCUUiUtil.setSpinnerDropDownColor(spinnerValue1,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(spinnerValue2,getContext());
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
         textAirflowValue.setText(cpuEquipPoints.get("Discharge Airflow").toString());
 
@@ -2153,7 +2155,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         Spinner conditionSpinner = viewPointRow1.findViewById(R.id.spinnerValue1);
         Spinner fanSpinner = viewPointRow1.findViewById(R.id.spinnerValue2);
-
+        CCUUiUtil.setSpinnerDropDownColor(conditionSpinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(fanSpinner,getContext());
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
         textAirflowValue.setText(hpuEquipPoints.get("Discharge Airflow").toString());
 
@@ -2395,7 +2398,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         Spinner spinnerValue1 = viewPointRow1.findViewById(R.id.spinnerValue1);
         Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
-
+        CCUUiUtil.setSpinnerDropDownColor(spinnerValue1,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(spinnerValue2,getContext());
 
 
         int conditionMode = 0;
@@ -2541,6 +2545,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         Spinner spinnerValue1 = viewPointRow1.findViewById(R.id.spinnerValue1);
         Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
+        CCUUiUtil.setSpinnerDropDownColor(spinnerValue1,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(spinnerValue2,getContext());
 
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
 

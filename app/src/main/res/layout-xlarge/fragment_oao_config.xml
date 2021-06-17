@@ -397,8 +397,8 @@
 
                             <Spinner
                                 android:id="@+id/co2Threshold"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                android:layout_width="46.12dp"
+                                android:layout_height="27.42dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -423,15 +423,15 @@
                                 android:layout_marginEnd="5dp"
                                 android:textAppearance="@style/title_normal" />
 
+
                             <ToggleButton
                                 android:id="@+id/roomCO2Sensing"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
+                                android:layout_width="46.12dp"
+                                android:layout_height="27.42dp"
+                                android:layout_alignParentRight="true"
                                 android:layout_centerVertical="true"
-                                android:layout_marginLeft="10dp"
-                                android:background="@null"
-                                android:button="@drawable/toggle_selector"
+                                android:layout_marginTop="35dp"
+                                android:background="@drawable/toggle_selector"
                                 android:checked="false"
                                 android:textOff=""
                                 android:textOn="" />

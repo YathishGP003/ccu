@@ -70,7 +70,7 @@
             android:textSize="33.5dp"
             android:textStyle="bold" />
 
-        <androidx.appcompat.widget.AppCompatSpinner
+        <Spinner
             android:id="@+id/spinnerSystemProfile"
             style="@style/Widget.AppCompat.Spinner.Underlined"
             android:layout_width="370dp"
@@ -78,7 +78,7 @@
             android:layout_alignParentRight="true"
             android:layout_marginRight="56dp"
             android:layout_below="@+id/textInputSitename"
-            android:spinnerMode="dropdown"
+            tools:listitem="@layout/spinner_dropdown_item"
             android:entries="@array/system_profile_select"/>
 
         <ToggleButton

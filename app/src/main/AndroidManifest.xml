@@ -31,10 +31,11 @@
             android:name=".RenatusApp"
             android:allowBackup="true"
             android:icon="@drawable/ic_logo_svg"
-            android:label="@string/app_name"
+            android:label="${applicationLabel}"
             android:roundIcon="@drawable/ic_logo_svg"
             android:supportsRtl="true"
-            android:theme="@style/RenatusApp75FTheme">
+            android:theme="@style/RenatusApp75FTheme"
+            tools:replace="android:label">
 
         <service android:name=".bluetooth.BLEProvisionService"/>
         <service android:name=".OTAUpdateHandlerService"/>

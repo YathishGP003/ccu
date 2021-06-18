@@ -334,8 +334,6 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         //mZone = L.findZoneByName(mFloorName, mRoomName);
         //mLightProfile = (LightProfile) mZone.findProfile(ProfileType.LIGHT);
         mProfileType = ProfileType.values()[getArguments().getInt(FragmentCommonBundleArgs.PROFILE_TYPE)];
-        //mProfileType = ProfileType.valueOf(getArguments().getString(PROFILE_TYPE));
-        Log.e("ProfileType","InsideDialogSmartNodeProf- "+mProfileType);
         
         return view;
     }
@@ -354,7 +352,6 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         if(L.ccu().systemProfile.getProfileType() == ProfileType.DAB || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_ANALOG_RTU
                 || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU
                 ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU){
-            //rlVAVHead.setVisibility(View.GONE);
             rlVAV.setEnabled(false);
             rlVAV.setClickable(false);
             rlVAVHead.setBackgroundColor(getResources().getColor(R.color.progress_gray));
@@ -363,14 +360,11 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
                 || L.ccu().systemProfile.getProfileType() == ProfileType.VAV_PARALLEL_FAN ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_ANALOG_RTU
                 ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU
                 ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU){
-            //rlDABHead.setVisibility(View.GONE);
             rlDAB.setEnabled(false);
             rlDAB.setClickable(false);
             rlDABHead.setBackgroundColor(getResources().getColor(R.color.progress_gray));
             Toast.makeText(getActivity(),"Set System Profile to DAB and try",Toast.LENGTH_LONG).show();
         }else if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT){
-            /*rlVAVHead.setVisibility(View.GONE);
-            rlDABHead.setVisibility(View.GONE);*/
             rlDAB.setEnabled(false);
             rlVAV.setEnabled(false);
             rlDAB.setClickable(false);

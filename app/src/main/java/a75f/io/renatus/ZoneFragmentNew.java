@@ -1730,7 +1730,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                 GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(),2);
                                 modbusParams.setLayoutManager(gridLayoutManager);
 
-                                ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getActivity(),modbusDevices.get(i).getEquipRef(),parameterList);
+                                ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getContext(),modbusDevices.get(i).getEquipRef(),parameterList);
                                 modbusParams.setAdapter(zoneRecyclerModbusParamAdapter);
                                 modbusParams.invalidate();
                                 linearLayoutZonePoints.addView(zoneDetails);

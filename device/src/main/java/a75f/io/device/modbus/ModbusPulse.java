@@ -15,6 +15,7 @@ import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.mesh.DLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.Port;
 
 public class ModbusPulse {
     private static final int MODBUS_DATA_START_INDEX = 3;
@@ -96,7 +97,14 @@ public class ModbusPulse {
                                          " and registerAddress == \""+readRegister.getRegisterAddress()+ "\""+
                                          " and parameterId == \""+readRegister.getParameters().get(0).getParameterId()+ "\""+
                                          " and deviceRef == \"" + deviceRef + "\"");
-        
+
+        switch (Port.valueOf(phyPoint.get("port").toString())) {
+            case RSSI:
+                hayStack.writeHisValueByIdWithoutCOV(phyPoint.get("id").toString(),  1.0);
+                Log.i("Jayatheertha-147", 1 + "<<--->>" + hayStack.readHisValById(phyPoint.get("id").toString())
+                        + "<<--->>" + hayStack.curRead(phyPoint.get("id").toString()).getDateInMillis());
+                break;
+        }
         if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
             Log.d(L.TAG_CCU_MODBUS, "Physical point does not exist for register "
                                             +readRegister.getRegisterAddress() +" and device "+deviceRef);

@@ -139,6 +139,12 @@ public class Pulse
 				isSse = logPointInfo.getMarkers().contains("sse");
 				double val = 0;
 				switch (Port.valueOf(phyPoint.get("port").toString())){
+					case RSSI:
+						hayStack.writeHisValueByIdWithoutCOV(phyPoint.get("id").toString(), (double)rssi);
+						hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), (double)rssi);
+						Log.i("Jayatheertha-147", rssi + "<<--->>" + hayStack.readHisValById(phyPoint.get("id").toString())
+								+ "<<--->>" + hayStack.curRead(phyPoint.get("id").toString()).getDateInMillis());
+						break;
 					case SENSOR_RT:
 						val = smartNodeRegularUpdateMessage_t.update.roomTemperature.get();
 						curTempVal = getRoomTempConversion(val);
@@ -659,6 +665,12 @@ public class Pulse
 				
 				double val;
 				switch (Port.valueOf(phyPoint.get("port").toString())){
+					case RSSI:
+						hayStack.writeHisValueByIdWithoutCOV(phyPoint.get("id").toString(), (double)rssi);
+						hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), (double)rssi);
+						Log.i("Jayatheertha-147", rssi + "<<--->>" + hayStack.readHisValById(phyPoint.get("id").toString())
+								+ "<<--->>" + hayStack.curRead(phyPoint.get("id").toString()).getDateInMillis());
+						break;
 					case SENSOR_RT:
 						val = smartStatRegularUpdateMessage_t.update.roomTemperature.get();
 						curTempVal = getRoomTempConversion(val);

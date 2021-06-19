@@ -13,6 +13,7 @@ import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.sensors.NativeSensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.logic.bo.haystack.device.SmartNode;
@@ -265,9 +266,13 @@ public class PlcEquip {
                                               .build();
         String controlLoopInversionId = hayStack.addPoint(controlLoopInversion);
         hayStack.writeDefaultValById(controlLoopInversionId, config.controlLoopInversion ? 1.0 : 0);
+        String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
+                siteRef, roomRef, floorRef, nodeAddr, "smartnode", tz));
         
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
 
+        device.rssi.setPointRef(heartBeatId);
+        device.rssi.setEnabled(true);
         if (config.analog1InputSensor > 0) {
             if (!config.useAnalogIn2ForSetpoint) {
                 createTargetValuePoint(floorRef, roomRef, config);

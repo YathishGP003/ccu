@@ -32,6 +32,7 @@ import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ReheatType;
+import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
 import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.VavUnit;
@@ -582,6 +583,9 @@ public class VavEquip
         String zoneDynamicPriorityPointID = CCUHsApi.getInstance().addPoint(zoneDynamicPriorityPoint);
         CCUHsApi.getInstance().writeHisValById(zoneDynamicPriorityPointID, 10.0);
 
+
+        String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
+                siteRef, room, floor, nodeAddr, "smartnode", tz));
         //Create Physical points and map
         SmartNode device = new SmartNode(nodeAddr, siteRef, floor, room, equipRef);
         device.th1In.setPointRef(datID);
@@ -592,6 +596,9 @@ public class VavEquip
         //device.analog1Out.setEnabled(true);
         device.analog2Out.setPointRef(rhID);
         device.relay1.setPointRef(rhID);
+        device.rssi.setPointRef(heartBeatId);
+        device.rssi.setEnabled(true);
+
 
         if (profileType != ProfileType.VAV_REHEAT) {
             createFanTuner(siteDis, equipRef, siteRef, floor, room, tz);

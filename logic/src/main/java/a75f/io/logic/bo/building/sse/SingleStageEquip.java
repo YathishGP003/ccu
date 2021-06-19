@@ -19,6 +19,7 @@ import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.hvac.SSEStage;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
@@ -268,7 +269,10 @@ public class SingleStageEquip {
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(occupancy);
-        
+
+        String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
+                siteRef, roomRef, floorRef, nodeAddr, "smartnode", tz));
+
 		SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
@@ -280,6 +284,8 @@ public class SingleStageEquip {
         device.th2In.setEnabled(config.enableThermistor2);
         device.relay1.setEnabled(config.enableRelay1 > 0 ? true : false);
         device.relay2.setEnabled(config.enableRelay1 > 0 ? true : false);
+        device.rssi.setPointRef(heartBeatId);
+        device.rssi.setEnabled(true);
 
         device.addSensor(Port.SENSOR_RH, humidityId);
         device.addSensor(Port.SENSOR_CO2, co2Id);

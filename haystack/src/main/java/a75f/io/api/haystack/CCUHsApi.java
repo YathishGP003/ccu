@@ -825,6 +825,12 @@ public class CCUHsApi
        
     }
 
+    public synchronized void writeHisValueByIdWithoutCOV(String id, Double val)
+    {
+        hsClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), HNum.make(val))});
+
+    }
+
     public synchronized void writeHisValByQuery(String query, Double val)
     {
         if (CACHED_HIS_QUERY)

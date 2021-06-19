@@ -12,6 +12,7 @@ import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.OAOTuners;
 
@@ -305,7 +306,9 @@ public class OAOEquip
                                          .setTz(tz)
                                          .build();
         String co2WAId = hayStack.addPoint(co2WA);
-    
+
+        String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
+                siteRef, roomRef, floorRef, nodeAddr, "oao", tz));
     
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.analog1In.setPointRef(returnAirCO2Id);
@@ -319,6 +322,8 @@ public class OAOEquip
         device.th1In.setEnabled(true);
         device.th2In.setPointRef(supplyAirTemperatureId);
         device.th2In.setEnabled(true);
+        device.rssi.setPointRef(heartBeatId);
+        device.rssi.setEnabled(true);
         
         device.analog1Out.setEnabled(config.isOpConfigured(Port.ANALOG_OUT_ONE));
         device.analog1Out.setPointRef(outsideAirDamperId);

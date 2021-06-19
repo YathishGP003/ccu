@@ -20,6 +20,7 @@ import a75f.io.api.haystack.modbus.LogicalPointTags;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.UserIntentPointTags;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 
 public class ModbusEquip {
     ProfileType profileType;
@@ -83,6 +84,9 @@ public class ModbusEquip {
         if (profileType != ProfileType.MODBUS_EMR && profileType != ProfileType.MODBUS_BTU) {
             zoneMarker = "zone";
         }
+        String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
+                siteRef, roomRef, floorRef, slaveId, "modbus", tz));
+
         Point equipScheduleType = new Point.Builder()
                     .setDisplayName(siteDis+"-"+modbusEquipType+"-"+slaveId+"-scheduleType")
                     .setEquipRef(equipRef)

@@ -147,6 +147,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     @Override
     public void doJob() {
 
+        /*ArrayList<Schedule> getAllVacationSchedules = CCUHsApi.getInstance().getAllVacationSchedules();
+        Log.e("InsideScheduleProcess","getAllVacationSchedules2- "+getAllVacationSchedules);*/
+
         CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob-> "+CCUHsApi.getInstance());
 
         watchdogMonitor = false;
@@ -207,13 +210,15 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 }
 
                 updateEquipScheduleStatus(equip);
-
             }
 
         }
 
         systemVacation = activeSystemVacation != null || isAllZonesInVacation();
         updateSystemOccupancy();
+
+        ArrayList<Schedule> getAllVacationSchedules = CCUHsApi.getInstance().getAllVacationSchedules();
+        Log.e("InsideScheduleProcess","getAllVacationSchedules- "+getAllVacationSchedules);
     }
 
     public static void processZoneEquipSchedule(Equip equip){
@@ -246,7 +251,12 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
         systemVacation = activeSystemVacation != null || isAllZonesInVacation();
         updateSystemOccupancy();
+
+        /*ArrayList<Schedule> getAllVacationSchedules = CCUHsApi.getInstance().getAllVacationSchedules();
+        Log.e("InsideScheduleProcess","getAllVacationSchedules1- "+getAllVacationSchedules);*/
     }
+
+
     private static Schedule getActiveVacation(ArrayList<Schedule> activeVacationSchedules)
     {
 

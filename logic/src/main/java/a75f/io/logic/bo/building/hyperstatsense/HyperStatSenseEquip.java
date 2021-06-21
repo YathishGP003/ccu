@@ -66,12 +66,22 @@ public class HyperStatSenseEquip {
                 .setGroup(String.valueOf(mNodeAddr));
         mEquipRef = CCUHsApi.getInstance().addEquip(b.build());
 
+
+        mHayStack.writeDefaultVal("point and config and analog1relay and enabled and equipRef == \"" + mEquipRef + "\"",
+                config.isAnalog1Enable ? 1.0 : 0);
+        mHayStack.writeDefaultVal("point and config and analog2relay and enabled and equipRef == \"" + mEquipRef + "\"",
+                config.isAnalog2Enable ? 1.0 : 0);
+        mHayStack.writeDefaultVal("point and config and th1relay and enabled and equipRef == \"" + mEquipRef + "\"",
+                config.isTh1Enable ? 1.0 : 0);
+        mHayStack.writeDefaultVal("point and config and th2relay and enabled and equipRef == \"" + mEquipRef + "\"",
+                config.isTh2Enable ? 1.0 : 0);
+
         Point temperatureOffset = new Point.Builder()
                 .setDisplayName(equipDis+"-temperatureOffset")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .addMarker("config").addMarker("writable").addMarker("zone")
-                .addMarker("temperature").addMarker("offset").addMarker("hyperstatsense")
+                .addMarker("temp").addMarker("offset").addMarker("hyperstatsense")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setUnit("\u00B0F")
                 .setTz(tz)
@@ -80,6 +90,7 @@ public class HyperStatSenseEquip {
         mHayStack.writeDefaultValById(tempoffsetId, 0.0);
 
 
+        createAnalogPoint();
             Point.Builder analog1InputSensor = new Point.Builder()
                     .setDisplayName(equipDis + "-analog1InputSensor")
                     .setEquipRef(mEquipRef)
@@ -106,8 +117,7 @@ public class HyperStatSenseEquip {
             mHayStack.writeDefaultValById(analog1InputSensorId, 0.0);
 
 
-            mHayStack.writeDefaultVal("point and config and analog1relay and enabled and equipRef == \"" + mEquipRef + "\"",
-                    config.isAnalog1Enable ? 1.0 : 0);
+
 
 
         if (config.isAnalog2Enable) {
@@ -135,8 +145,7 @@ public class HyperStatSenseEquip {
             String analog2InputSensorId = mHayStack.addPoint(analog2InputSensor);
             mHayStack.writeDefaultValById(analog2InputSensorId, 0.0);
 
-            mHayStack.writeDefaultVal("point and config and analog2relay and enabled and equipRef == \"" + mEquipRef + "\"",
-                    config.isAnalog2Enable ? 1.0 : 0);
+
 
         }
 
@@ -161,8 +170,7 @@ public class HyperStatSenseEquip {
             String th1InputSensorId = mHayStack.addPoint(th1InputSensor);
             mHayStack.writeDefaultValById(th1InputSensorId, 0.0);
 
-            mHayStack.writeDefaultVal("point and config and th1relay and enabled and equipRef == \"" + mEquipRef + "\"",
-                    config.isTh1Enable ? 1.0 : 0);
+
         }
 
         if (config.isTh2Enable) {
@@ -186,8 +194,7 @@ public class HyperStatSenseEquip {
             String th2InputSensorId = mHayStack.addPoint(th2InputSensor);
             mHayStack.writeDefaultValById(th2InputSensorId, 0.0);
 
-            mHayStack.writeDefaultVal("point and config and th2relay and enabled and equipRef == \"" + mEquipRef + "\"",
-                    config.isTh2Enable ? 1.0 : 0);
+
         }
 
     }

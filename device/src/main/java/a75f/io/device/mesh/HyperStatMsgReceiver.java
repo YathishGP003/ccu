@@ -6,10 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.device.HyperStat;
 import a75f.io.device.HyperStat.HyperStatCmToCcuSerializedMessage_t;
+import a75f.io.device.HyperStat.HyperStatLocalControlsOverrideMessage_t;
 import a75f.io.device.HyperStat.HyperStatRegularUpdateMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
@@ -18,6 +20,7 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.sensors.SensorType;
 import a75f.io.logic.bo.haystack.device.HyperStatDevice;
 import a75f.io.logic.bo.util.CCUUtils;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 
 public class HyperStatMsgReceiver {
     
@@ -27,9 +30,13 @@ public class HyperStatMsgReceiver {
     
             if (messageType == MessageType.HYPERSTAT_REGULAR_UPDATE_MESSAGE) {
                 HyperStatRegularUpdateMessage_t regularUpdate =
-                    HyperStat.HyperStatRegularUpdateMessage_t.parseFrom(message.getSerializedMessageData());
+                        HyperStatRegularUpdateMessage_t.parseFrom(message.getSerializedMessageData());
     
                 handleRegularUpdate(regularUpdate, message.getAddress(), hayStack);
+            } else if (messageType == MessageType.HYPERSTAT_LOCAL_CONTROLS_OVERRIDE_MESSAGE) {
+                HyperStatLocalControlsOverrideMessage_t overrideMessage =
+                        HyperStatLocalControlsOverrideMessage_t.parseFrom(message.getSerializedMessageData());
+                handleOverrideMessage(overrideMessage, message.getAddress(), hayStack);
             }
             
         } catch (InvalidProtocolBufferException e) {
@@ -47,6 +54,19 @@ public class HyperStatMsgReceiver {
         if (regularUpdateMessage.getSensorReadingsList().size() > 0) {
             writeSensorInputsToHaystackDatabase(regularUpdateMessage.getSensorReadingsList(), nodeAddress);
         }
+    }
+    
+    private static void handleOverrideMessage(HyperStatLocalControlsOverrideMessage_t message, int nodeAddress,
+                                              CCUHsApi hayStack) {
+        CcuLog.i(L.TAG_CCU_SERIAL, "handleOverrideMessage: "+message.toByteString());
+    
+        HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+nodeAddress+"\"");
+        Equip hsEquip = new Equip.Builder().setHashMap(equipMap).build();
+    
+        writeDesiredTemp(message, hsEquip, hayStack);
+        //TODO
+        //Update fanMode and conditioning mode once profile is ready.
+        //Send Ack - TODO message does not exist per proto definition.
     }
     
     private static void writePortInputsToHaystackDatabase(RawPoint rawPoint,
@@ -160,5 +180,43 @@ public class HyperStatMsgReceiver {
             CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),(double)emVal);
         }
         
+    }
+    
+    private static void writeDesiredTemp(HyperStatLocalControlsOverrideMessage_t message, Equip hsEquip,
+                                         CCUHsApi hayStack) {
+        HashMap coolingDtPoint = hayStack.read("point and temp and desired and cooling and sp and equipRef == \""
+                                               +hsEquip.getId()+ "\"");
+        double coolingDesiredTemp = (double)message.getSetTempCooling();
+        double heatingDesiredTemp = (double)message.getSetTempHeating();
+        double averageDesiredTemp = (coolingDesiredTemp + heatingDesiredTemp)/2;
+        
+        if (!coolingDtPoint.isEmpty()) {
+            CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
+        } else {
+            CcuLog.e(L.TAG_CCU_DEVICE, "coolingDtPoint does not exist: "+hsEquip.getDisplayName());
+        }
+    
+    
+        HashMap heatingDtPoint = hayStack.read("point and temp and desired and heating and sp and equipRef == \""
+                                               +hsEquip.getId()+ "\"");
+        if (!heatingDtPoint.isEmpty()) {
+            CCUHsApi.getInstance().writeHisValById(heatingDtPoint.get("id").toString(), heatingDesiredTemp);
+        } else {
+            CcuLog.e(L.TAG_CCU_DEVICE, "heatingDtPoint does not exist: "+hsEquip.getDisplayName());
+        }
+    
+        HashMap dtPoint = hayStack.read("point and temp and desired and average and sp and equipRef == \""
+                                               +hsEquip.getId()+ "\"");
+        if (!dtPoint.isEmpty()) {
+            CCUHsApi.getInstance().writeHisValById(dtPoint.get("id").toString(), (double)message.getSetTempCooling());
+        } else {
+            CcuLog.e(L.TAG_CCU_DEVICE, "dtPoint does not exist: "+hsEquip.getDisplayName());
+        }
+        
+        ScheduleProcessJob.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(),
+                                                         new Point.Builder().setHashMap(heatingDtPoint).build(),
+                                                         new Point.Builder().setHashMap(dtPoint).build(),
+                                                         coolingDesiredTemp, heatingDesiredTemp, averageDesiredTemp);
+    
     }
 }

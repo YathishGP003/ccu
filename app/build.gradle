@@ -70,7 +70,6 @@ android {
         def versionSuffix = VERSION_CODE_MAJOR + "." + VERSION_CODE_MINOR + "." + VERSION_CODE_PATCH
 
         local {
-            manifestPlaceholders = [ applicationLabel:"@string/app_name_75f"]
             minifyEnabled false
             signingConfig signingConfigs.debug
             buildConfigField "String", 'GOOGLE_MAPS_KEY', '\"AIzaSyA867irnfUuznLLsTVFwLs_c-0DNqiVEEY\"'
@@ -78,7 +77,6 @@ android {
             debuggable true
         }
         dev {
-            manifestPlaceholders = [ applicationLabel:"@string/app_name_75f"]
             minifyEnabled false
             signingConfig signingConfigs.debug
             buildConfigField "String", 'GOOGLE_MAPS_KEY', '\"AIzaSyA867irnfUuznLLsTVFwLs_c-0DNqiVEEY\"'
@@ -86,7 +84,6 @@ android {
             debuggable true
         }
         prod {
-            manifestPlaceholders = [ applicationLabel:"@string/app_name_75f"]
             minifyEnabled false
             signingConfig signingConfigs.release
             ext.betaDistributionGroupAliases = "nightly-1"
@@ -95,21 +92,18 @@ android {
             versionNameSuffix "_" + 'prod' + "_" + versionSuffix
         }
         qa {
-            manifestPlaceholders = [ applicationLabel:"@string/app_name_75f"]
             minifyEnabled false
             signingConfig signingConfigs.debug
             buildConfigField "String", 'GOOGLE_MAPS_KEY', '\"AIzaSyCo7HhoO6m40JWyosWl3RqMjTZd5GI0znU\"'
             versionNameSuffix "_" + 'qa' + "_" + versionSuffix
         }
         staging {
-            manifestPlaceholders = [ applicationLabel:"@string/app_name_75f"]
             minifyEnabled false
             signingConfig signingConfigs.debug
             buildConfigField "String", 'GOOGLE_MAPS_KEY', '\"AIzaSyA-b5lbhs7XOO8Fy1bdNky7CoNJR4B3kyY\"'
             versionNameSuffix "_" + 'staging' + "_" + versionSuffix
         }
         daikin_prod {
-            manifestPlaceholders = [ applicationLabel:"@string/app_name_daikin"]
             minifyEnabled false
             signingConfig signingConfigs.release
             ext.betaDistributionGroupAliases = "nightly-1"

@@ -127,8 +127,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         //getSystemTuners();
 
         reasonLabel = view.findViewById(R.id.textReasonLabel);
-        String colorHex = CCUUiUtil.getColorCode(getContext());
-        String text = "<font color="+colorHex+">*</font> <font color=#999999>Reason for Change</font>";
+        String text = "<font color=#E24301>*</font> <font color=#999999>Reason for Change</font>";
         reasonLabel.setText(Html.fromHtml(text));
 
         cancelTunerUpdate.setOnClickListener(view1 -> {

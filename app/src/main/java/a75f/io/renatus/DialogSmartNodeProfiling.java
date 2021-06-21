@@ -352,20 +352,16 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
                 || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU
                 ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU){
             rlVAV.setEnabled(false);
-            //rlVAV.setClickable(false);
             rlVAVHead.setBackgroundColor(getResources().getColor(R.color.progress_gray));
         }else if (L.ccu().systemProfile.getProfileType() == ProfileType.VAV_REHEAT || L.ccu().systemProfile.getProfileType() == ProfileType.VAV_SERIES_FAN
                 || L.ccu().systemProfile.getProfileType() == ProfileType.VAV_PARALLEL_FAN ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_ANALOG_RTU
                 ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU
                 ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU){
             rlDAB.setEnabled(false);
-            //rlDAB.setClickable(false);
             rlDABHead.setBackgroundColor(getResources().getColor(R.color.progress_gray));
         }else if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT){
             rlDAB.setEnabled(false);
             rlVAV.setEnabled(false);
-            //rlDAB.setClickable(false);
-            //rlVAV.setClickable(false);
             rlDABHead.setBackgroundColor(getResources().getColor(R.color.progress_gray));
             rlVAVHead.setBackgroundColor(getResources().getColor(R.color.progress_gray));
         }

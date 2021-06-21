@@ -4,7 +4,6 @@ import android.app.Dialog;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -353,25 +352,22 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
                 || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU
                 ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU){
             rlVAV.setEnabled(false);
-            rlVAV.setClickable(false);
+            //rlVAV.setClickable(false);
             rlVAVHead.setBackgroundColor(getResources().getColor(R.color.progress_gray));
-            Toast.makeText(getActivity(),"Set System Profile to VAV and try",Toast.LENGTH_LONG).show();
         }else if (L.ccu().systemProfile.getProfileType() == ProfileType.VAV_REHEAT || L.ccu().systemProfile.getProfileType() == ProfileType.VAV_SERIES_FAN
                 || L.ccu().systemProfile.getProfileType() == ProfileType.VAV_PARALLEL_FAN ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_ANALOG_RTU
                 ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU
                 ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU){
             rlDAB.setEnabled(false);
-            rlDAB.setClickable(false);
+            //rlDAB.setClickable(false);
             rlDABHead.setBackgroundColor(getResources().getColor(R.color.progress_gray));
-            Toast.makeText(getActivity(),"Set System Profile to DAB and try",Toast.LENGTH_LONG).show();
         }else if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT){
             rlDAB.setEnabled(false);
             rlVAV.setEnabled(false);
-            rlDAB.setClickable(false);
-            rlVAV.setClickable(false);
+            //rlDAB.setClickable(false);
+            //rlVAV.setClickable(false);
             rlDABHead.setBackgroundColor(getResources().getColor(R.color.progress_gray));
             rlVAVHead.setBackgroundColor(getResources().getColor(R.color.progress_gray));
-            Toast.makeText(getActivity(),"System Profile is currently set to Default System Profile",Toast.LENGTH_LONG).show();
         }
         setTitle();
     }

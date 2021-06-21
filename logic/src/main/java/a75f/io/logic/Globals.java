@@ -451,8 +451,7 @@ public class Globals {
     public String getSmartNodeBand() {
         HashMap device = CCUHsApi.getInstance().read("device and addr");
         if (device != null && device.size() > 0 && device.get("modbus") == null && device.get("addr") != null) {
-            String nodeAdd = device.get("addr").toString();
-            return nodeAdd.substring(0, 2).concat("00");
+            return device.get("addr").toString();
         } else {
             HashMap band = CCUHsApi.getInstance().read("point and snband");
             if (band != null && band.size() > 0 && band.get("val") != null) {

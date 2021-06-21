@@ -436,7 +436,7 @@ public class LSerial
     }
     
     private static boolean isHyperStatMessage(MessageType messageType) {
-        return messageType == MessageType.HYPERSTAT_CCU_SERIALIZED_MESSAGE ||
+        return messageType == MessageType.HYPERSTAT_CM_TO_CCU_SERIALIZED_MESSAGE ||
                messageType == MessageType.HYPERSTAT_REGULAR_UPDATE_MESSAGE ||
                messageType == MessageType.HYPERSTAT_LOCAL_CONTROLS_OVERRIDE_MESSAGE;
     }

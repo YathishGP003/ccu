@@ -163,10 +163,16 @@ message HyperStatCcuDatabaseSeedMessage_t {
   bytes serializedControlsData = 4 ;//[(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_CONTROLS_MESSAGE
 }
 
-message HyperStatCcuSerializedMessage_t {
+message HyperStatCmToCcuSerializedMessage_t {
   uint32 address = 1; // The (16-bit) mesh address of a device
   int32 cmLqi = 2; // LQI of this received data packet @ CM
   int32 cmRssi = 3; // RSSI of this received data packet @ CM
   int32 protocolMessageType = 4; // ProtocolMessageType_t identifier for the serialized message
   bytes serializedMessageData = 5 ;//[(nanopb).max_size = 109, (nanopb).fixed_length = false];
+}
+
+message HyperStatCcuToCmSerializedMessage_t {
+  uint32 address = 1; // The (16-bit) mesh address of a device
+  int32 protocolMessageType = 2; // ProtocolMessageType_t identifier for the serialized message
+  bytes serializedMessageData = 3;//[(nanopb).max_size = 109, (nanopb).fixed_length = false];
 }

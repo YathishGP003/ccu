@@ -1,26 +1,20 @@
 package a75f.io.device.mesh;
 
-import android.util.Log;
-
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.device.HyperStat;
-import a75f.io.device.HyperStat.HyperStatCcuSerializedMessage_t;
+import a75f.io.device.HyperStat.HyperStatCmToCcuSerializedMessage_t;
 import a75f.io.device.HyperStat.HyperStatRegularUpdateMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
-import a75f.io.logic.bo.building.sensors.Sensor;
-import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.logic.bo.building.sensors.SensorType;
 import a75f.io.logic.bo.haystack.device.HyperStatDevice;
 import a75f.io.logic.bo.util.CCUUtils;
@@ -29,7 +23,7 @@ public class HyperStatMsgReceiver {
     
     public static void processMessage(byte[] data, MessageType messageType, CCUHsApi hayStack) {
         try {
-            HyperStatCcuSerializedMessage_t message = HyperStat.HyperStatCcuSerializedMessage_t.parseFrom(data);
+            HyperStatCmToCcuSerializedMessage_t message = HyperStatCmToCcuSerializedMessage_t.parseFrom(data);
     
             if (messageType == MessageType.HYPERSTAT_REGULAR_UPDATE_MESSAGE) {
                 HyperStatRegularUpdateMessage_t regularUpdate =
@@ -101,7 +95,7 @@ public class HyperStatMsgReceiver {
                                      double val) {
         double rawAnalogInput = regularUpdateMessage.getExternalAnalogVoltageInput1();
         hayStack.writeHisValById(rawPoint.getId(), rawAnalogInput);
-        hayStack.writeHisValById(point.getId(), getAnalogConversion(rawPoint, rawAnalogInput));
+        hayStack.writeHisValById(point.getId(), AnalogUtil.getAnalogConversion(rawPoint, rawAnalogInput));
     }
     
     private static void writeHumidityVal(RawPoint rawPoint, Point point,
@@ -167,26 +161,4 @@ public class HyperStatMsgReceiver {
         }
         
     }
-    
-    //TODO - Move to Util
-    public static Double getAnalogConversion(RawPoint rawPoint, Double val) {
-        double analogVal = val/1000;
-        Sensor analogSensor;
-        //If the analogType of physical point is set to one of the sensor types (Sensor.getSensorList) , corresponding sensor's
-        //conversion formula is applied. Otherwise the input value that is already divided by 1000 is just returned.
-        try
-        {
-            int index = (int)Double.parseDouble(rawPoint.getType());
-            analogSensor = SensorManager.getInstance().getExternalSensorList().get(index);
-        }catch (NumberFormatException e) {
-            e.printStackTrace();
-            return analogVal;
-        }
-        Log.d(L.TAG_CCU_DEVICE, "Sensor input : type " + rawPoint.getType() + " val " + analogVal);
-        double analogConversion = analogSensor.minEngineeringValue +
-                                  (analogSensor.maxEngineeringValue- analogSensor.minEngineeringValue) * analogVal / (analogSensor.maxVoltage - analogSensor.minVoltage);
-        return CCUUtils.roundToTwoDecimal(analogConversion);
-        
-    }
-    
 }

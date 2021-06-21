@@ -26,12 +26,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import a75f.io.device.HyperStat;
 import a75f.io.device.HyperStat.HyperStatAnalogOutputControl_t;
 import a75f.io.device.HyperStat.HyperStatCcuDatabaseSeedMessage_t;
 import a75f.io.device.HyperStat.HyperStatControlsMessage_t;
 import a75f.io.device.HyperStat.HyperStatSettingsMessage_t;
 import a75f.io.device.mesh.HyperStatMessageSender;
 import a75f.io.device.mesh.LSerial;
+import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.BASE.BaseDialogFragment;
@@ -279,7 +281,16 @@ public class HyperStatTestFragment extends BaseDialogFragment
 
 	@OnClick(R.id.sendSettings)
 	public void sendSettings() {
-		HyperStatMessageSender.writeSettingsMessage(getSettingMessage(), getChannelAddress(), true);
+		
+		HyperStat.HyperStatCcuToCmSerializedMessage_t message = HyperStat.HyperStatCcuToCmSerializedMessage_t
+			                                                        .newBuilder()
+			                                                        .setAddress(getChannelAddress())
+			                                                        .setProtocolMessageType(
+				                                                        MessageType.HYPERSTAT_SETTINGS_MESSAGE.ordinal())
+			                                                        .setSerializedMessageData(getSettingMessage().toByteString())
+			                                                        .build();
+		
+		HyperStatMessageSender.writeSerializedMessage(message, getChannelAddress(), MessageType.HYPERSTAT_SETTINGS_MESSAGE, false);
 		
 	}
 	
@@ -290,7 +301,16 @@ public class HyperStatTestFragment extends BaseDialogFragment
 	
 	@OnClick(R.id.sendControl)
 	public void sendControl() {
-		HyperStatMessageSender.writeControlMessage(getControlMessage(), getChannelAddress(), true);
+		
+		HyperStat.HyperStatCcuToCmSerializedMessage_t message = HyperStat.HyperStatCcuToCmSerializedMessage_t
+			                                                        .newBuilder()
+			                                                        .setAddress(getChannelAddress())
+			                                                        .setProtocolMessageType(MessageType.HYPERSTAT_CONTROLS_MESSAGE.ordinal())
+			                                                        .setSerializedMessageData(getControlMessage().toByteString())
+			                                                        .build();
+		
+		HyperStatMessageSender.writeSerializedMessage(message, getChannelAddress(), MessageType.HYPERSTAT_CONTROLS_MESSAGE, false);
+		
 	}
 	
 	

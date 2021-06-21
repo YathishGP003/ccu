@@ -2,9 +2,6 @@ package a75f.io.device.mesh;
 
 import java.util.HashMap;
 
-import a75f.io.logger.CcuLog;
-import a75f.io.logic.L;
-
 public class HyperStatMessageCache {
     
     private static HyperStatMessageCache instance;
@@ -44,12 +41,9 @@ public class HyperStatMessageCache {
     public boolean checkAndInsert(int hyperStatAddress, String simpleName, Integer messageHash) {
         if (messages.containsKey(hyperStatAddress)) {
             HashMap<String, Integer> stringIntegerHashMap = messages.get(hyperStatAddress);
-            if (stringIntegerHashMap.containsKey(simpleName)) {
-                Integer previousHash = stringIntegerHashMap.get(simpleName);
-                if (previousHash.equals(messageHash)) {
-                    CcuLog.d(L.TAG_CCU_SERIAL,"Message was already sent");
-                    return true;
-                }
+            if (stringIntegerHashMap.containsKey(simpleName) &&
+                            messageHash.equals(stringIntegerHashMap.get(simpleName))) {
+               return true;
             }
         }
         else {

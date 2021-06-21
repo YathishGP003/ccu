@@ -79,9 +79,8 @@ public class HyperStatSenseEquip {
         String tempoffsetId = mHayStack.addPoint(temperatureOffset);
         mHayStack.writeDefaultValById(tempoffsetId, 0.0);
 
-        if (config.isAnalog1Enable) {
-            sensordata = SensorManager.getInstance().getExternalSensorList().get(config.analog1Sensor);
-            Point analog1InputSensor = new Point.Builder()
+
+            Point.Builder analog1InputSensor = new Point.Builder()
                     .setDisplayName(equipDis + "-analog1InputSensor")
                     .setEquipRef(mEquipRef)
                     .setSiteRef(siteRef)
@@ -90,22 +89,26 @@ public class HyperStatSenseEquip {
                     .setShortDis("Analog1 Input Config")
                     .addMarker("config").addMarker("zone").addMarker("writable")
                     .addMarker("analog1").addMarker("input").addMarker("sensor")
-                    .addMarker("hyperstatsense").addMarker(sensordata.sensorName)
-                    .addMarker(sensordata.engineeringUnit)
-                    .addMarker(String.valueOf(sensordata.incrementEgineeringValue))
-                    .addMarker(String.valueOf(sensordata.minEngineeringValue))
-                    .addMarker(String.valueOf(sensordata.maxEngineeringValue))
-                    .addMarker(String.valueOf(sensordata.minVoltage))
-                    .addMarker(String.valueOf(sensordata.maxVoltage))
+                    .addMarker("hyperstatsense")
                     .setGroup(String.valueOf(mNodeAddr))
-                    .setTz(tz)
-                    .build();
+                    .setTz(tz);
+
+            if(config.isAnalog1Enable){
+                sensordata = SensorManager.getInstance().getExternalSensorList()
+                        .get(config.analog2Sensor);
+                analog1InputSensor.addMarker(sensordata.sensorName)
+                        .setUnit(sensordata.engineeringUnit)
+                        .setMinVal(String.valueOf(sensordata.minEngineeringValue))
+                        .setMaxVal(String.valueOf(sensordata.minEngineeringValue));
+            }
+            analog1InputSensor.build();
             String analog1InputSensorId = mHayStack.addPoint(analog1InputSensor);
             mHayStack.writeDefaultValById(analog1InputSensorId, 0.0);
 
+
             mHayStack.writeDefaultVal("point and config and analog1relay and enabled and equipRef == \"" + mEquipRef + "\"",
                     config.isAnalog1Enable ? 1.0 : 0);
-        }
+
 
         if (config.isAnalog2Enable) {
             sensordata = SensorManager.getInstance().getExternalSensorList()

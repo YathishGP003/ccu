@@ -9,13 +9,14 @@ public class HeartBeat {
     private RawPoint rssi;
 
     private HeartBeat(String equipDis, String equipRef, String siteRef, String room, String floor, int nodeAddr,
-                      String profile, String tz){
+                      String profile, String tz, String module){
         heartBeat = new Point.Builder()
                 .setDisplayName(equipDis+"-heartBeat")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor).setHisInterpolate("cov")
+                .addMarker("heartbeat").addMarker(module)
                 .addMarker("zone").addMarker("standalone")
                 .addMarker(profile).addMarker("sensor")
                 .addMarker("current").addMarker("his")
@@ -32,6 +33,7 @@ public class HeartBeat {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
+                .addMarker("rssi")
                 .addMarker("sensor").addMarker("his")
                 .setPort(Port.RSSI.toString())
                 .setTz(tz)
@@ -39,8 +41,8 @@ public class HeartBeat {
     }
 
     public static Point getHeartBeatPoint(String equipDis, String equipRef, String siteRef, String room, String floor,
-                                          int nodeAddr, String profile, String tz){
-        return new HeartBeat(equipDis, equipRef, siteRef, room, floor, nodeAddr, profile, tz).heartBeat;
+                                          int nodeAddr, String profile, String tz, String module){
+        return new HeartBeat(equipDis, equipRef, siteRef, room, floor, nodeAddr, profile, tz, module).heartBeat;
     }
 
     public static RawPoint getHeartBeatRawPoint(int nodeAddr,String deviceRef, String siteRef, String room, String floor, String tz){

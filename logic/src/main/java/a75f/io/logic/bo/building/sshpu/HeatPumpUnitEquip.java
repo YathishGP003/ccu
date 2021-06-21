@@ -435,7 +435,7 @@ public class HeatPumpUnitEquip{
         CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
 
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
-                siteRef, room, floor, nodeAddr, profile, tz));
+                siteRef, room, floor, nodeAddr, profile, tz, "hpu"));
         //Create Physical points and map
         SmartStat device = new SmartStat(nodeAddr, siteRef, floor, room,equipRef,profile);
         //TODO Need to set it for default if not enabled, currently set it as enabled //kumar

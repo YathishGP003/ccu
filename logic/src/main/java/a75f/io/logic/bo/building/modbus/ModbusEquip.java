@@ -85,7 +85,7 @@ public class ModbusEquip {
             zoneMarker = "zone";
         }
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
-                siteRef, roomRef, floorRef, slaveId, "modbus", tz));
+                siteRef, roomRef, floorRef, slaveId, "modbus", tz, "modbus"));
 
         Point equipScheduleType = new Point.Builder()
                     .setDisplayName(siteDis+"-"+modbusEquipType+"-"+slaveId+"-scheduleType")

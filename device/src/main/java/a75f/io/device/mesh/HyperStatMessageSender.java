@@ -2,125 +2,141 @@ package a75f.io.device.mesh;
 
 import android.util.Log;
 
-import com.google.protobuf.ByteString;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Occupied;
-import a75f.io.api.haystack.Point;
-import a75f.io.api.haystack.RawPoint;
-import a75f.io.api.haystack.Zone;
-import a75f.io.device.HyperStat;
 import a75f.io.device.HyperStat.*;
-import a75f.io.device.serial.CcuToCmOverUsbSmartStatSettingsMessage_t;
+import a75f.io.device.HyperStat.HyperStatCcuDatabaseSeedMessage_t;
 import a75f.io.device.serial.MessageType;
-import a75f.io.device.serial.SmartStatConditioningMode_t;
-import a75f.io.device.serial.SmartStatProfileMap_t;
-import a75f.io.device.serial.SmartStatSettings_t;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.definitions.Port;
-import a75f.io.logic.jobs.ScheduleProcessJob;
-import a75f.io.logic.tuners.StandaloneTunerUtil;
-import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.logic.bo.building.definitions.Port.RELAY_FIVE;
-import static a75f.io.logic.bo.building.definitions.Port.RELAY_FOUR;
-import static a75f.io.logic.bo.building.definitions.Port.RELAY_ONE;
-import static a75f.io.logic.bo.building.definitions.Port.RELAY_SEVEN;
-import static a75f.io.logic.bo.building.definitions.Port.RELAY_SIX;
-import static a75f.io.logic.bo.building.definitions.Port.RELAY_THREE;
-import static a75f.io.logic.bo.building.definitions.Port.RELAY_TWO;
 
 public class HyperStatMessageSender {
     
+    /**
+     * Send seed message based on the node's state in database.
+     * Message will be sent only the current state is different from last sent state.
+     * @param zone
+     * @param address
+     * @param equipRef
+     * @param profile
+     */
+    public static void sendSeedMessage(String zone,int address,String equipRef, String profile) {
+        HyperStatCcuDatabaseSeedMessage_t seedMessage = HyperStatMessageGenerator.getSeedMessage(zone, address,
+                                                                                                         equipRef, profile);
+        writeSeedMessage(seedMessage, address, false);
+    }
     
-    public static HyperStatCcuDatabaseSeedMessage_t getSeedMessage(String zone,int address,String equipRef, String profile) {
-        HyperStatCcuDatabaseSeedMessage_t seed = HyperStatCcuDatabaseSeedMessage_t
-                                               .newBuilder()
-                                              .setAddress(7000)
-                                              .setEncryptionKey(ByteString.copyFrom(L.getEncryptionKey()))
-                                              .setSerializedSettingsData(getSettingsMessage(zone,
-                                                                        address, equipRef).toByteString())
-                                              .setSerializedControlsData(getControlMessage(address,
-                                                                        equipRef).toByteString())
-                                              .build();
+    public static void writeSeedMessage(HyperStatCcuDatabaseSeedMessage_t seedMessage, int address,
+                                        boolean resend) {
+        try {
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            seedMessage.writeTo(os);
+    
+            if (!resend) {
+                Integer messageHash = Arrays.hashCode(os.toByteArray());
+                if (HyperStatMessageCache.getInstance().checkAndInsert(address, HyperStatCcuDatabaseSeedMessage_t.class.getSimpleName(),
+                                                                       messageHash)) {
+                    CcuLog.d(L.TAG_CCU_SERIAL, HyperStatCcuDatabaseSeedMessage_t.class.getSimpleName() +
+                                               " was already " +
+                                               "sent, returning");
+                    return;
+                }
+            }
+            writeMessageBytesToUsb((byte) MessageType.HYPERSTAT_CCU_DATABASE_SEED_MESSAGE.ordinal(), os);
+            CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + seedMessage);
         
-        return seed;
-    }
-    
-    
-    public static HyperStatSettingsMessage_t getSettingsMessage(String zone, int address, String equipRef) {
-    
-        //TODO - Proto file does not define profile bitmap, enabledRelay.
-        HyperStatSettingsMessage_t settings = HyperStatSettingsMessage_t.newBuilder()
-                                .setRoomName(zone)
-                                .setHeatingDeadBand((int)StandaloneTunerUtil.getStandaloneHeatingDeadband(equipRef))
-                                .setCoolingDeadBand((int)StandaloneTunerUtil.getStandaloneCoolingDeadband(equipRef))
-                                .setMinCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user " +
-                                                                                                 "and limit and min"))
-                                .setMaxCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user " +
-                                                                                                  "and limit and max"))
-                                .setMinHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("heating and user " +
-                                                                                                    "and limit and min"))
-                                .setMaxHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user " +
-                                                                                                   "and limit and max"))
-                                .setTemperatureOffset(0)//TODO
-                                .build();
-        return settings;
-    }
-    
-    public static HyperStatControlsMessage_t getControlMessage(int address, String equipRef) {
-    
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        
-        HashMap device = hayStack.read("device and addr == \"" + address + "\"");
-    
-        HyperStatControlsMessage_t.Builder controls = HyperStatControlsMessage_t.newBuilder();
-        controls.setSetTempCooling((int)getDesiredTempCooling(equipRef) * 10);
-        controls.setSetTempHeating((int)getDesiredTempHeating(equipRef) * 10);
-        controls.setFanSpeed(HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_AUTO) ;//TODO
-        controls.setConditioningMode(HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_AUTO);
-        
-        if (!device.isEmpty()) {
-            DeviceUtil.getEnabledRawPointsWithRefForDevice(device, hayStack)
-                      .forEach( rawPoint -> {
-                          double logicalVal = hayStack.readHisValById(rawPoint.getPointRef());
-                          short mappedVal = (LSmartStat.mapDigitalOut(rawPoint.getType(), logicalVal > 0));
-                          hayStack.writeHisValById(rawPoint.getId(), (double) mappedVal);
-                          setHyperStatPort(controls, Port.valueOf(rawPoint.getPort()), mappedVal > 0);
-                      });
-        }
-    
-        return controls.build();
-    }
-    
-    //TODO-
-    private static double getDesiredTempCooling(String equipRef) {
-        return CCUHsApi.getInstance().readDefaultVal("desired and temp and cooling and equipRef == \""+equipRef+"\"");
-    }
-    
-    private static double getDesiredTempHeating(String equipRef) {
-        return CCUHsApi.getInstance().readDefaultVal("desired and temp and cooling and equipRef == \""+equipRef+"\"");
-    }
-    
-    private static void setHyperStatPort(HyperStatControlsMessage_t.Builder controls,
-                                         Port port, boolean val) {
-        if (port == RELAY_ONE) {
-            controls.setRelay1(val);
-        } else if (port == RELAY_TWO) {
-            controls.setRelay2(val);
-        } else if (port == RELAY_THREE) {
-            controls.setRelay3(val);
-        } else if (port == RELAY_FOUR) {
-            controls.setRelay4(val);
-        } else if (port == RELAY_FIVE) {
-            controls.setRelay5(val);
-        } else if (port == RELAY_SIX) {
-            controls.setRelay6(val);
+        }catch (IOException e) {
+            CcuLog.e(L.TAG_CCU_SERIAL, "writeSeedMessage Exception ", e);
         }
     }
     
+    /**
+     * Send setting message based on the node's state in database.
+     * Message will be sent only the current message is different from last sent state
+     * @param zone
+     * @param address
+     * @param equipRef
+     */
+    public static void sendSettingsMessage(String zone, int address, String equipRef) {
+        HyperStatSettingsMessage_t settings = HyperStatMessageGenerator.getSettingsMessage(zone, address,
+                                                                                                     equipRef);
+        writeSettingsMessage(settings, address, false);
+    }
+    
+    public static void writeSettingsMessage(HyperStatSettingsMessage_t settings, int address, boolean resend) {
+        try {
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            settings.writeTo(os);
+    
+            if (!resend) {
+                Integer messageHash = Arrays.hashCode(os.toByteArray());
+                if (HyperStatMessageCache.getInstance().checkAndInsert(address, HyperStatCcuDatabaseSeedMessage_t.class.getSimpleName(),
+                                                                       messageHash)) {
+                    CcuLog.d(L.TAG_CCU_SERIAL, HyperStatCcuDatabaseSeedMessage_t.class.getSimpleName() +
+                                               " was already " +
+                                               "sent, returning");
+                    return;
+                }
+            }
+            
+            writeMessageBytesToUsb((byte)MessageType.HYPERSTAT_SETTINGS_MESSAGE.ordinal(), os);
+            CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + settings);
+        
+        } catch (IOException e) {
+            CcuLog.e(L.TAG_CCU_SERIAL, "writeSettingsMessage Exception ", e);
+        }
+    }
+    
+    /**
+     * Send control message based on the node's state in database.
+     * Message will be sent only the current message is different from last sent state
+     * @param address
+     * @param equipRef
+     */
+    public static void sendControlMessage(int address, String equipRef) {
+        HyperStatControlsMessage_t controls = HyperStatMessageGenerator.getControlMessage(address, equipRef);
+        writeControlMessage(controls, address, false);
+    }
+    
+    public static void writeControlMessage(HyperStatControlsMessage_t controls, int address, boolean resend) {
+        try {
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            controls.writeTo(os);
+            if (!resend) {
+                Integer messageHash = Arrays.hashCode(os.toByteArray());
+                if (HyperStatMessageCache.getInstance().checkAndInsert(address, HyperStatCcuDatabaseSeedMessage_t.class.getSimpleName(),
+                                                                       messageHash)) {
+                    CcuLog.d(L.TAG_CCU_SERIAL, HyperStatCcuDatabaseSeedMessage_t.class.getSimpleName() +
+                                               " was already " +
+                                               "sent, returning");
+                    return;
+                }
+            }
+            
+            writeMessageBytesToUsb((byte)MessageType.HYPERSTAT_CONTROLS_MESSAGE.ordinal(), os);
+            CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + controls);
+        
+        }catch (IOException e) {
+            CcuLog.e(L.TAG_CCU_SERIAL, "writeControlMessage Exception ", e);
+        }
+    }
+    
+    private static void writeMessageBytesToUsb(byte msgType, ByteArrayOutputStream os) {
+        
+        byte[] tempBytes = os.toByteArray();
+        byte[] msgBytes = new byte[tempBytes.length+1];
+        
+        //CM currently supports both legacy byte array and protobuf encoding. Message type is kept as raw byte at the start to help CM determine which type
+        //of decoding to be used.
+        msgBytes[0] = msgType;
+        
+        System.arraycopy(tempBytes, 0, msgBytes, 1, tempBytes.length);
+        
+        LSerial.getInstance().sendSerialBytesToCM(msgBytes);
+        Log.d("CCU_SERIAL", Arrays.toString(msgBytes));
+        
+    }
     
 }

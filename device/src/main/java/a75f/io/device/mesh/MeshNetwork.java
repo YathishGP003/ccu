@@ -120,6 +120,11 @@ public class MeshNetwork extends DeviceNetwork
                                     }
                                 }
                                 break;
+                                
+                                
+                            case HYPER_STAT:
+                                //TODO - profile
+                                
                         }
                     }
                 }

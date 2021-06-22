@@ -52,7 +52,14 @@ public class AlertFormatter
         {
             String token = t.nextToken();
             if (token.startsWith("#")) {
-                message = message.replace(token, parseToken(def, token, null));
+                try {
+                    message = message.replace(token, parseToken(def, token, null));
+                }
+                catch (NullPointerException ex) {
+                    // while parsing message.
+                    // last ditch solution.  Just use token as is.
+                    message = token;
+                }
             }
         }
         CcuLog.d("CCU_ALERTS","  Alert Formatted Message "+message);
@@ -73,7 +80,14 @@ public class AlertFormatter
         return message;
     }
     
-    private static String parseToken(AlertDefinition def, String token, String point) {
+    /*
+     * This method is problematic in that 'point' can sometimes be null, but other times null
+     * will cause a crash.  'point' being nonnull is neither fully required nor allowed.
+     *
+     * The strategy here is to require the client to be careful, and suggest a NPE catch block
+     * if 'point' might be null.
+     */
+    private static String parseToken(AlertDefinition def, String token, String point) throws NullPointerException {
         token.replace("#","");
         int n = getConditionalIndex(token);
         Conditional c = n > 0 ? def.conditionals.get(n-1) : null;
@@ -121,8 +135,7 @@ public class AlertFormatter
                 HashMap f = hs.readMapById(p.getFloorRef());
                 return f.get("dis").toString();
             case "site":
-                HashMap s = hs.readMapById(p.getSiteRef());
-                return s.get("dis").toString();
+                return hs.getSiteName();
             case "system":
                 HashMap system = hs.read("system and equip");
                 return system.get("dis").toString();

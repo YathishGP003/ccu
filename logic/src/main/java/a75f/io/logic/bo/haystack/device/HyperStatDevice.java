@@ -14,6 +14,8 @@ import a75f.io.logic.bo.building.definitions.Port;
 
 /**
  * Models a HyperStat device Haystack entity.
+ *
+ * I
  */
 public class HyperStatDevice {
     
@@ -42,6 +44,19 @@ public class HyperStatDevice {
     
     String tz;
     
+    /**
+     * Constructs a new HaystackDevice instance , and adds the device and all its associated entities to the
+     * Haystack device.
+     *
+     * !This should be called only once for a specific address.!
+     *
+     * @param address
+     * @param site
+     * @param floor
+     * @param room
+     * @param equipRef
+     * @param profile
+     */
     public HyperStatDevice(int address, String site, String floor, String room, String equipRef, String profile) {
         Device d = new Device.Builder()
                        .setDisplayName("SS-"+address)
@@ -65,6 +80,11 @@ public class HyperStatDevice {
         
         createPoints();
     }
+    
+    /**
+     * Reconstruct a HyperStatDevice from haystack database using the address.
+     * @param address
+     */
     public HyperStatDevice(int address) {
         HashMap device = CCUHsApi.getInstance().read("device and addr == \""+address+"\"");
         Device d = new Device.Builder().setHashMap(device).build();
@@ -77,9 +97,8 @@ public class HyperStatDevice {
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         tz = siteMap.get("tz").toString();
     }
+    
     private void createPoints() {
-        
-        
         analog1In = new RawPoint.Builder()
                         .setDisplayName("Analog1In-"+hyperStatNodeAddress)
                         .setDeviceRef(deviceRef)
@@ -140,6 +159,10 @@ public class HyperStatDevice {
         relay4 = createRelayPoint(Port.RELAY_FOUR, Tags.RELAY4);
         relay5 = createRelayPoint(Port.RELAY_FIVE, Tags.RELAY5);
         relay6 = createRelayPoint(Port.RELAY_SIX, Tags.RELAY6);
+    
+        analog1Out = createAnalogOutPoint(Port.ANALOG_OUT_ONE, "analog1Out");
+        analog2Out = createAnalogOutPoint(Port.ANALOG_OUT_TWO, "analog2Out");
+        analog3Out = createAnalogOutPoint(Port.ANALOG_OUT_THREE, "analog3Out");
         
         currentTemp = new RawPoint.Builder()
                           .setDisplayName("currentTemp-"+hyperStatNodeAddress)
@@ -179,6 +202,20 @@ public class HyperStatDevice {
                             .addMarker("cmd").addMarker("his")
                             .setTz(tz)
                             .build();
+    }
+    
+    private RawPoint createAnalogOutPoint(Port analogPort, String name) {
+        return new RawPoint.Builder()
+                   .setDisplayName(hyperStatNodeAddress+"-"+name)
+                   .setDeviceRef(deviceRef)
+                   .setSiteRef(siteRef)
+                   .setRoomRef(roomRef)
+                   .setFloorRef(floorRef)
+                   .setPort(analogPort.toString())
+                   .setType(OutputRelayActuatorType.NormallyOpen.displayName)
+                   .addMarker("cmd").addMarker("his")
+                   .setTz(tz)
+                   .build();
     }
     
     public void createPhysicalSensorPoint(Port p, String pointRef) {
@@ -250,6 +287,9 @@ public class HyperStatDevice {
         CCUHsApi.getInstance().addPoint(relay4);
         CCUHsApi.getInstance().addPoint(relay5);
         CCUHsApi.getInstance().addPoint(relay6);
+        CCUHsApi.getInstance().addPoint(analog1Out);
+        CCUHsApi.getInstance().addPoint(analog2Out);
+        CCUHsApi.getInstance().addPoint(analog3Out);
         CCUHsApi.getInstance().addPoint(currentTemp);
         CCUHsApi.getInstance().addPoint(desiredTemp);
     }

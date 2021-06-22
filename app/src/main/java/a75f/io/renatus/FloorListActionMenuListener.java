@@ -1,24 +1,30 @@
 package a75f.io.renatus;
 
-import android.os.AsyncTask;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.AbsListView.MultiChoiceModeListener;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.Callable;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HSUtilKtKt;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.bacnet.BACnetUtils;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.modbusbox.EquipsManager;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class FloorListActionMenuListener implements MultiChoiceModeListener
 {
@@ -26,8 +32,8 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 	final private FloorPlanFragment floorPlanActivity;
 	private Menu             mMenu         = null;
 	private ArrayList<Floor> selectedFloor = new ArrayList<Floor>();
-	
-	
+	private Disposable deleteFloorDisposable;
+
 	/**
 	 * @param floorPlanFragment
 	 */
@@ -66,7 +72,6 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 		{
 			case R.id.deleteSelection:
 				deleteSelectedFloors();
-				selectedFloor.clear();
 				mode.finish(); // Action picked, so close the CAB
 				return true;
 			case R.id.renameSelection:
@@ -78,25 +83,54 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 				return false;
 		}
 	}
-	
-	
+
 	@Override
 	public void onDestroyActionMode(ActionMode mode)
 	{
-		
 		floorPlanActivity.mFloorListAdapter.setMultiSelectMode(false);
-		selectedFloor.clear();
 		mMenu = null;
 	}
+
+	public void dispose() {
+		if (deleteFloorDisposable != null) {
+			deleteFloorDisposable.dispose();
+		}
+	}
+
+	private void deleteSelectedFloors() {
+		floorPlanActivity.showWait(floorPlanActivity.getString(R.string.deleting_floor));
+
+		Completable task = Completable.fromCallable((Callable<Void>) () -> {
+			deleteSelectedFloorsAsync();
+			return null;
+		});
+
+		deleteFloorDisposable = task
+			.subscribeOn(Schedulers.io())
+			.observeOn(AndroidSchedulers.mainThread())
+			.subscribe(
+					() -> {
+						selectedFloor.clear();
+						floorPlanActivity.refreshScreen();
+						floorPlanActivity.hideWait();
+					},
+					error -> {
+						Toast.makeText(floorPlanActivity.requireContext(),
+								"Error deleting floor",
+								Toast.LENGTH_LONG)
+							 .show();
+						floorPlanActivity.hideWait();
+						CcuLog.w("CCU_UI", "Unable to delete floor", error);
+					});
+	}
 	
-	
-	private void deleteSelectedFloors()
+	private void deleteSelectedFloorsAsync()
 	{
 		for (int nCount = 0; nCount < selectedFloor.size(); nCount++)
 		{
 			Floor floor = selectedFloor.get(nCount);
-			
-			for (Zone sZone: HSUtil.getZones(floor.getId()))
+			String floorId = floor.getId();
+			for (Zone sZone: HSUtil.getZones(floorId))
 			{
 				for (Device d : HSUtil.getDevices(sZone.getId())) {
 					BACnetUtils.removeModule(Short.parseShort(d.getAddr()));
@@ -109,25 +143,19 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
                 }
 				CCUHsApi.getInstance().deleteEntity(sZone.getId());
 			}
-			CCUHsApi.getInstance().deleteEntityTree(floor.getId());
+			boolean usedByOtherCcu = HSUtilKtKt.isFloorUsedByOtherCcuAsync(floorId);
+			if (usedByOtherCcu) {
+				CCUHsApi.getInstance().deleteFloorEntityTreeLeavingRemoteFloorIntact(floorId);
+			} else {
+				CCUHsApi.getInstance().deleteEntityTree(floorId);
+			}
 			CCUHsApi.getInstance().saveTagsData();
-			floorPlanActivity.refreshScreen();
 			EquipsManager.getInstance().deleteEquipsByFloor(floor.getId());
 		}
-		new AsyncTask<String, Void, Void>() {
-			@Override
-			protected Void doInBackground( final String ... params ) {
-				CCUHsApi.getInstance().syncEntityTree();
-				L.saveCCUState();
-				return null;
-			}
-			
-			@Override
-			protected void onPostExecute( final Void result ) {
-				// continue what you are doing...
-				floorPlanActivity.getBuildingFloorsZones("");
-			}
-		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+		CCUHsApi.getInstance().syncEntityTree();
+		L.saveCCUState();
+		// continue what you are doing...
+		floorPlanActivity.getBuildingFloorsZones("");
 	}
 	
 	

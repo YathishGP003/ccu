@@ -899,7 +899,8 @@
 
     <string name="label_modbus_energy_meter">MODBUS ENERGY METER</string>
     <string name="title_modbus_energy_proportional_distribution">Energy Proportional Distribution</string>
-    <string-array name="energy_distribution_values">
+   <string name="deleting_floor">Removing floor</string>
+   <string-array name="energy_distribution_values">
         <item> 0% </item>
         <item> 10% </item>
         <item> 20% </item>

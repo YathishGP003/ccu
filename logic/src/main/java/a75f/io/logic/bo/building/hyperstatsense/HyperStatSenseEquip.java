@@ -60,7 +60,7 @@ public class HyperStatSenseEquip {
                 .setFloorRef(floorRef)
                 .setProfile(mProfileType.name())
                 .setPriority(config.getPriority().name())
-                .addMarker("equip").addMarker("hyperstatsense").addMarker("zone")
+                .addMarker("equip").addMarker("hyperstat").addMarker("sense").addMarker("zone")
                 .setAhuRef(ahuRef)
                 .setTz(tz)
                 .setGroup(String.valueOf(mNodeAddr));
@@ -81,7 +81,7 @@ public class HyperStatSenseEquip {
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .addMarker("config").addMarker("writable").addMarker("zone")
-                .addMarker("temp").addMarker("offset").addMarker("hyperstatsense")
+                .addMarker("temp").addMarker("offset").addMarker("hyperstat").addMarker("sense")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setUnit("\u00B0F")
                 .setTz(tz)
@@ -90,112 +90,68 @@ public class HyperStatSenseEquip {
         mHayStack.writeDefaultValById(tempoffsetId, 0.0);
 
 
-        createAnalogPoint();
-            Point.Builder analog1InputSensor = new Point.Builder()
-                    .setDisplayName(equipDis + "-analog1InputSensor")
-                    .setEquipRef(mEquipRef)
-                    .setSiteRef(siteRef)
-                    .setRoomRef(roomRef)
-                    .setFloorRef(floorRef)
-                    .setShortDis("Analog1 Input Config")
-                    .addMarker("config").addMarker("zone").addMarker("writable")
-                    .addMarker("analog1").addMarker("input").addMarker("sensor")
-                    .addMarker("hyperstatsense")
-                    .setGroup(String.valueOf(mNodeAddr))
-                    .setTz(tz);
-
-            if(config.isAnalog1Enable){
-                sensordata = SensorManager.getInstance().getExternalSensorList()
-                        .get(config.analog2Sensor);
-                analog1InputSensor.addMarker(sensordata.sensorName)
-                        .setUnit(sensordata.engineeringUnit)
-                        .setMinVal(String.valueOf(sensordata.minEngineeringValue))
-                        .setMaxVal(String.valueOf(sensordata.minEngineeringValue));
-            }
-            analog1InputSensor.build();
-            String analog1InputSensorId = mHayStack.addPoint(analog1InputSensor);
-            mHayStack.writeDefaultValById(analog1InputSensorId, 0.0);
+        Point analog1InputSensor = new Point.Builder()
+                .setDisplayName(equipDis + "-analog1InputSensor")
+                .setEquipRef(mEquipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .setShortDis("Analog1 Input Config")
+                .addMarker("config").addMarker("zone").addMarker("writable")
+                .addMarker("analog1").addMarker("input").addMarker("sensor")
+                .addMarker("hyperstat").addMarker("sense")
+                .setGroup(String.valueOf(mNodeAddr))
+                .setTz(tz).build();
+        String analog1InputSensorId = mHayStack.addPoint(analog1InputSensor);
+        mHayStack.writeDefaultValById(analog1InputSensorId, 0.0);
 
 
+        Point analog2InputSensor = new Point.Builder()
+                .setDisplayName(equipDis + "-analog2InputSensor")
+                .setEquipRef(mEquipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .setShortDis("Analog2 Input Config")
+                .addMarker("config").addMarker("zone").addMarker("writable")
+                .addMarker("analog2").addMarker("input").addMarker("sensor")
+                .addMarker("hyperstat").addMarker("sense")
+                .setGroup(String.valueOf(mNodeAddr))
+                .setTz(tz)
+                .build();
+        String analog2InputSensorId = mHayStack.addPoint(analog2InputSensor);
+        mHayStack.writeDefaultValById(analog2InputSensorId, 0.0);
 
+        Point th1InputSensor = new Point.Builder()
+                .setDisplayName(equipDis + "-th1InputSensor")
+                .setEquipRef(mEquipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("config").addMarker("zone").addMarker("writable")
+                .addMarker("th1").addMarker("input").addMarker("sensor")
+                .addMarker("hyperstat").addMarker("sense")
+                .setGroup(String.valueOf(mNodeAddr))
+                .setTz(tz)
+                .build();
+        String th1InputSensorId = mHayStack.addPoint(th1InputSensor);
+        mHayStack.writeDefaultValById(th1InputSensorId, 0.0);
 
+        Point th2InputSensor = new Point.Builder()
+                .setDisplayName(equipDis + "-th2InputSensor")
+                .setEquipRef(mEquipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("config").addMarker("zone").addMarker("writable")
+                .addMarker("th2").addMarker("input").addMarker("sensor")
+                .addMarker("hyperstat").addMarker("sense")
+                .setGroup(String.valueOf(mNodeAddr))
+                .setTz(tz)
+                .build();
+        String th2InputSensorId = mHayStack.addPoint(th2InputSensor);
+        mHayStack.writeDefaultValById(th2InputSensorId, 0.0);
 
-        if (config.isAnalog2Enable) {
-            sensordata = SensorManager.getInstance().getExternalSensorList()
-                    .get(config.analog2Sensor);
-            Point analog2InputSensor = new Point.Builder()
-                    .setDisplayName(equipDis + "-analog2InputSensor")
-                    .setEquipRef(mEquipRef)
-                    .setSiteRef(siteRef)
-                    .setRoomRef(roomRef)
-                    .setFloorRef(floorRef)
-                    .setShortDis("Analog2 Input Config")
-                    .addMarker("config").addMarker("zone").addMarker("writable")
-                    .addMarker("analog2").addMarker("input").addMarker("sensor")
-                    .addMarker("hyperstatsense").addMarker(sensordata.sensorName)
-                    .addMarker(sensordata.engineeringUnit)
-                    .addMarker(String.valueOf(sensordata.incrementEgineeringValue))
-                    .addMarker(String.valueOf(sensordata.minEngineeringValue))
-                    .addMarker(String.valueOf(sensordata.maxEngineeringValue))
-                    .addMarker(String.valueOf(sensordata.minVoltage))
-                    .addMarker(String.valueOf(sensordata.maxVoltage))
-                    .setGroup(String.valueOf(mNodeAddr))
-                    .setTz(tz)
-                    .build();
-            String analog2InputSensorId = mHayStack.addPoint(analog2InputSensor);
-            mHayStack.writeDefaultValById(analog2InputSensorId, 0.0);
-
-
-
-        }
-
-        if (config.isTh1Enable) {
-            thermistordata = Thermistor.getThermistorList().get(config.th1Sensor);
-            Point th1InputSensor = new Point.Builder()
-                    .setDisplayName(equipDis + "-th1InputSensor")
-                    .setEquipRef(mEquipRef)
-                    .setSiteRef(siteRef)
-                    .setRoomRef(roomRef)
-                    .setFloorRef(floorRef)
-                    .addMarker("config").addMarker("zone").addMarker("writable")
-                    .addMarker("th1").addMarker("input").addMarker("sensor")
-                    .addMarker("hyperstatsense").addMarker(thermistordata.sensorName)
-                    .addMarker(thermistordata.engineeringUnit)
-                    .addMarker(String.valueOf(thermistordata.incrementEngineeringValue))
-                    .addMarker(String.valueOf(thermistordata.minEngineeringValue))
-                    .addMarker(String.valueOf(thermistordata.maxEngineeringValue))
-                    .setGroup(String.valueOf(mNodeAddr))
-                    .setTz(tz)
-                    .build();
-            String th1InputSensorId = mHayStack.addPoint(th1InputSensor);
-            mHayStack.writeDefaultValById(th1InputSensorId, 0.0);
-
-
-        }
-
-        if (config.isTh2Enable) {
-            thermistordata = Thermistor.getThermistorList().get(config.th2Sensor);
-            Point th2InputSensor = new Point.Builder()
-                    .setDisplayName(equipDis + "-th2InputSensor")
-                    .setEquipRef(mEquipRef)
-                    .setSiteRef(siteRef)
-                    .setRoomRef(roomRef)
-                    .setFloorRef(floorRef)
-                    .addMarker("config").addMarker("zone").addMarker("writable")
-                    .addMarker("th2").addMarker("input").addMarker("sensor")
-                    .addMarker("hyperstatsense").addMarker(thermistordata.sensorName)
-                    .addMarker(thermistordata.engineeringUnit)
-                    .addMarker(String.valueOf(thermistordata.incrementEngineeringValue))
-                    .addMarker(String.valueOf(thermistordata.minEngineeringValue))
-                    .addMarker(String.valueOf(thermistordata.maxEngineeringValue))
-                    .setGroup(String.valueOf(mNodeAddr))
-                    .setTz(tz)
-                    .build();
-            String th2InputSensorId = mHayStack.addPoint(th2InputSensor);
-            mHayStack.writeDefaultValById(th2InputSensorId, 0.0);
-
-
-        }
 
     }
 

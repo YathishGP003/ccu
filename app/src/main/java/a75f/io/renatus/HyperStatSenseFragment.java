@@ -2,6 +2,7 @@ package a75f.io.renatus;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -21,12 +23,17 @@ import java.util.ArrayList;
 
 import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseEquip;
+import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseProfile;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+import io.objectbox.android.AndroidScheduler;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 
 public class HyperStatSenseFragment extends BaseDialogFragment {
 
@@ -102,13 +109,20 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         mProfileName = getArguments().getString(FragmentCommonBundleArgs.PROFILE_TYPE);
         ButterKnife.bind(this, view);
+
         return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mHyperStatSenseVM = ViewModelProviders.of(this).get(HyperStatSenseVM.class);
+        mHyperStatSenseVM = new ViewModelProvider(this).get(HyperStatSenseVM.class);
+        mHyperStatSenseVM.get().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean bool) {
+                   //TODO
+            }
+        });
         setSpinnerListItem();
 
         /** Setting temperature offset limit */
@@ -170,10 +184,12 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
         mSetbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO
+
             }
         });
     }
+
+
 
     private void setSpinnerListItem() {
         ArrayList<String> analogArr = new ArrayList<>();

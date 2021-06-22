@@ -27,6 +27,8 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnCheckedChanged;
+import butterknife.OnClick;
 
 public class HyperStatSenseFragment extends BaseDialogFragment {
 
@@ -126,53 +128,29 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
         mThermostat2Sp.setEnabled(false);
         mAnalog1Sp.setEnabled(false);
         mAnalog2Sp.setEnabled(false);
+    }
 
-        mTherm1toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+    @OnCheckedChanged({R.id.th1,R.id.th2,R.id.anlg1,R.id.anlg2})
+    public void th1Onchange(CompoundButton buttonView, boolean isChecked){
+        switch (buttonView.getId())
+        {
+            case R.id.th1:
                 if(isChecked) mThermostat1Sp.setEnabled(true);
                 else mThermostat1Sp.setEnabled(false);
-            }
-        });
-
-        mTherm1toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked) mThermostat1Sp.setEnabled(true);
-                else mThermostat1Sp.setEnabled(false);
-            }
-        });
-
-        mTherm2toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                break;
+            case R.id.th2:
                 if(isChecked) mThermostat2Sp.setEnabled(true);
                 else mThermostat2Sp.setEnabled(false);
-            }
-        });
-
-        mAnalog1toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                break;
+            case R.id.anlg1:
                 if(isChecked) mAnalog1Sp.setEnabled(true);
                 else mAnalog1Sp.setEnabled(false);
-            }
-        });
-
-        mAnalog2toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                break;
+            case R.id.anlg2:
                 if(isChecked) mAnalog2Sp.setEnabled(true);
                 else mAnalog2Sp.setEnabled(false);
-            }
-        });
-
-        mSetbtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //TODO
-            }
-        });
+                break;
+        }
     }
 
     private void setSpinnerListItem() {

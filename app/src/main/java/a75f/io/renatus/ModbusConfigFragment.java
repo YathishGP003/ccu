@@ -115,6 +115,7 @@ public class ModbusConfigFragment extends Fragment {
                 CCUUiUtil.triggerRestart(getActivity());
             }
         });
+        setSpinnerBackground();
     }
     
     public int readIntPref(String key, int defaultVal) {
@@ -130,4 +131,11 @@ public class ModbusConfigFragment extends Fragment {
     }
     
 
+    private void setSpinnerBackground(){
+        CCUUiUtil.setSpinnerDropDownColor(spinnerBaudRate,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(spinnerParity,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(spinnerDatabits,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(spinnerBaudRate,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(spinnerStopbits,getContext());
+    }
 }

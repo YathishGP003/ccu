@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_logoscreen"
+    android:id="@+id/main_layout"
     tools:context=".registration.FreshRegistration">
 
 
@@ -110,7 +110,7 @@
         android:layout_height="100dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:srcCompat="@drawable/ic_logo_svg"
+        app:srcCompat="@drawable/ic_daikin_logo_colored"
         android:layout_marginLeft="38dp"
         android:layout_marginBottom="36dp"/>
 

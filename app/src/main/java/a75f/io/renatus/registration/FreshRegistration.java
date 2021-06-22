@@ -1281,8 +1281,11 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
     private void configLogo(){
         if(BuildConfig.BUILD_TYPE.equals("daikin_prod")|| CCUUiUtil.isDaikinThemeEnabled(this))
-            imageView_logo.setImageDrawable(getResources().getDrawable(R.drawable.ic_daikin_75f_logo));
+            imageView_logo.setImageDrawable(getResources().getDrawable(R.drawable.ic_daikin_logo_colored));
         else
+        {
             imageView_logo.setImageDrawable(getResources().getDrawable(R.drawable.ic_logo_svg));
+            findViewById(R.id.main_layout).setBackgroundResource(R.drawable.bg_logoscreen);
+        }
     }
 }

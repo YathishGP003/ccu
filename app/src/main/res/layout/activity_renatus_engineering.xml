@@ -12,16 +12,16 @@
         android:background="?attr/colorPrimary"
         android:orientation="horizontal">
 
-        <ImageButton
+        <ImageView
+            android:layout_gravity="center"
+            android:layout_marginLeft="@dimen/margin_20"
             android:id="@+id/logo"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:scaleType="fitCenter"
+            android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:paddingStart="4dp"
             android:paddingEnd="4dp"
-            android:background="@color/grey_select"
-            android:src="@drawable/x75f_new"/>
+            android:src="@drawable/ic_75f_logo"/>
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"

@@ -4,8 +4,11 @@ import com.google.android.material.tabs.TabLayout;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
 
 import a75f.io.logger.CcuLog;
+import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
@@ -41,6 +44,7 @@ public class RenatusEngineeringActivity extends AppCompatActivity
 				mTabLayout.setupWithViewPager(mViewPager, true);
 			}
 		});
+		configLogo();
 	}
 	
 	@Override
@@ -52,5 +56,17 @@ public class RenatusEngineeringActivity extends AppCompatActivity
 	public void onStop() {
 		super.onStop();
 		CcuLog.setLogNode(null);
+	}
+
+	private void configLogo(){
+		ImageView logo = findViewById(R.id.logo);
+		if(BuildConfig.BUILD_TYPE.equals("daikin_prod")||CCUUiUtil.isDaikinThemeEnabled(this)){
+			logo.setImageDrawable(getResources().getDrawable(R.drawable.d3));
+
+		}else{
+			logo.setImageDrawable(getResources().getDrawable(R.drawable.ic_75f_logo));
+
+		}
+
 	}
 }

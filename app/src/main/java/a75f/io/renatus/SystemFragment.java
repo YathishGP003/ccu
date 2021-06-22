@@ -80,7 +80,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	ToggleButton tbSmartPrePurge;
 	ToggleButton tbSmartPostPurge;
 	ToggleButton tbEnhancedVentilation;
-	LinearLayout purgeLayout;
+	LinearLayout purgeLayout,mainLayout;
 
 	TextView energyMeterModelDetails;
 	RecyclerView energyMeterParams;
@@ -193,6 +193,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		oaoArc = view.findViewById(R.id.oaoArc);
 		purgeLayout = view.findViewById(R.id.purgelayout);
 		systemModePicker = view.findViewById(R.id.systemModePicker);
+		mainLayout = view.findViewById(R.id.main_layout);
 
 		if (L.ccu().systemProfile != null) {
 			coolingAvailable = L.ccu().systemProfile.isCoolingAvailable();
@@ -418,7 +419,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 		});
 		getActivity().registerReceiver(occupancyReceiver, new IntentFilter(ACTION_STATUS_CHANGE));
-
+		configWatermark();
 	}
 
 	private void checkForOao() {
@@ -670,6 +671,12 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getContext(), btuDevice.getEquipRef(), parameterList);
 			btuMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
 		}
+
+	}
+
+	private void configWatermark(){
+		if(!BuildConfig.BUILD_TYPE.equals("daikin_prod")&&! CCUUiUtil.isDaikinThemeEnabled(getContext()))
+			mainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
 
 	}
 }

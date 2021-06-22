@@ -66,6 +66,10 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
         this.expandableListDetail = expandableListDetail;
         this.idMap = idmap;
         this.mActivity = activity;
+
+        Log.e("InsideEquipTempExpandableListAdapter","expandableListTitle- "+expandableListTitle);
+        Log.e("InsideEquipTempExpandableListAdapter","expandableListDetail- "+expandableListDetail);
+        Log.e("InsideEquipTempExpandableListAdapter","idMap- "+idMap);
     }
 
     @Override

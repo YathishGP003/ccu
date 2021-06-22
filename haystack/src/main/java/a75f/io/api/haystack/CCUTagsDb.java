@@ -1,6 +1,8 @@
 package a75f.io.api.haystack;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.google.gson.Gson;
@@ -265,6 +267,14 @@ public class CCUTagsDb extends HServer {
     }
 
     public void saveTags() {
+        saveTags(false);
+    }
+
+    @SuppressLint("ApplySharedPref")
+    public void saveTags(boolean persistImmediate) {
+
+        SharedPreferences.Editor sharedPrefsEditor = appContext.getSharedPreferences(
+                PREFS_TAGS_DB, Context.MODE_PRIVATE).edit();
 
         Gson gson = new GsonBuilder()
                 .registerTypeAdapterFactory(hsTypeAdapter)
@@ -273,21 +283,27 @@ public class CCUTagsDb extends HServer {
                 .create();
 
         tagsString = HZincWriter.gridToString(getGridTagsMap());
-        appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_TAGS_MAP, tagsString).apply();
+        sharedPrefsEditor.putString(PREFS_TAGS_MAP, tagsString);
 
         Type waType = new TypeToken<Map<String, WriteArray>>() {
         }.getType();
         waString = gson.toJson(writeArrays, waType);
-        appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_TAGS_WA, waString).apply();
+        sharedPrefsEditor.putString(PREFS_TAGS_WA, waString);
 
         idMapString = gson.toJson(idMap);
-        appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_ID_MAP, idMapString).apply();
+        sharedPrefsEditor.putString(PREFS_ID_MAP, idMapString);
 
         removeIdMapString = gson.toJson(removeIdMap);
-        appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_REMOVE_ID_MAP, removeIdMapString).apply();
+        sharedPrefsEditor.putString(PREFS_REMOVE_ID_MAP, removeIdMapString);
 
         updateIdMapString = gson.toJson(updateIdMap);
-        appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_UPDATE_ID_MAP, updateIdMapString).apply();
+        sharedPrefsEditor.putString(PREFS_UPDATE_ID_MAP, updateIdMapString);
+
+        if (persistImmediate) {
+            sharedPrefsEditor.commit();
+        } else {
+            sharedPrefsEditor.apply();
+        }
     }
 
     private HGrid getGridTagsMap() {

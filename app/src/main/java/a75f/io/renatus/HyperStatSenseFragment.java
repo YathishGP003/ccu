@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.NumberPicker;
@@ -16,11 +17,16 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 
-import a75f.io.logic.bo.building.Zone;
+import java.util.ArrayList;
+
+import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.lights.LightProfile;
+import a75f.io.logic.bo.building.sensors.Sensor;
+import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class HyperStatSenseFragment extends BaseDialogFragment {
 
@@ -28,22 +34,40 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
     private  HyperStatSenseVM mHyperStatSenseVM;
     static final int TEMP_OFFSET_LIMIT = 100;
 
-    Zone mZone;
-    LightProfile mLightProfile;
     short        mNodeAddress;
     String       mRoomName;
     String       mFloorName;
     Boolean      misPaired;
+    String       mProfileName;
 
+    @BindView(R.id.temperatureOffset)
     NumberPicker mTemperatureOffset;
+
+    @BindView(R.id.th1)
     ToggleButton mTherm1toggle;
+
+    @BindView(R.id.th2)
     ToggleButton mTherm2toggle;
+
+    @BindView(R.id.anlg1)
     ToggleButton mAnalog1toggle;
+
+    @BindView(R.id.anlg2)
     ToggleButton mAnalog2toggle;
-    Spinner mThermostat1;
-    Spinner mThermostat2;
-    Spinner mAnalog1;
-    Spinner mAnalog2;
+
+    @BindView(R.id.th1select)
+    Spinner mThermostat1Sp;
+
+    @BindView(R.id.th2select)
+    Spinner mThermostat2Sp;
+
+    @BindView(R.id.analog1select)
+    Spinner mAnalog1Sp;
+
+    @BindView(R.id.analog2select)
+    Spinner mAnalog2Sp;
+
+    @BindView(R.id.setBtn)
     Button mSetbtn;
 
 
@@ -64,29 +88,28 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
         return f;
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_hssense_config, container, false);
-        mHyperStatSenseVM = ViewModelProviders.of(this).get(HyperStatSenseVM.class);
-
+        mNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
+        mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
+        mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
+        mProfileName = getArguments().getString(FragmentCommonBundleArgs.PROFILE_TYPE);
+        ButterKnife.bind(this, view);
         return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mTemperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
-        mThermostat1 = view.findViewById(R.id.th1select);
-        mThermostat2 = view.findViewById(R.id.th2select);
-        mAnalog1 = view.findViewById(R.id.analog1select);
-        mAnalog2 = view.findViewById(R.id.analog2select);
-        mTherm1toggle = view.findViewById(R.id.th1);
-        mTherm2toggle = view.findViewById(R.id.th2);
-        mAnalog1toggle = view.findViewById(R.id.anlg1);
-        mAnalog2toggle = view.findViewById(R.id.anlg2);
-        mSetbtn = view.findViewById(R.id.setBtn);
-
+        mHyperStatSenseVM = ViewModelProviders.of(this).get(HyperStatSenseVM.class);
+        setSpinnerListItem();
 
         /** Setting temperature offset limit */
         mTemperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
@@ -99,48 +122,48 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
         mTemperatureOffset.setValue(TEMP_OFFSET_LIMIT);
 
         /** Spinner id disabled by default */
-        mThermostat1.setEnabled(false);
-        mThermostat2.setEnabled(false);
-        mAnalog1.setEnabled(false);
-        mAnalog2.setEnabled(false);
+        mThermostat1Sp.setEnabled(false);
+        mThermostat2Sp.setEnabled(false);
+        mAnalog1Sp.setEnabled(false);
+        mAnalog2Sp.setEnabled(false);
 
         mTherm1toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked) mThermostat1.setEnabled(true);
-                else mThermostat1.setEnabled(false);
+                if(isChecked) mThermostat1Sp.setEnabled(true);
+                else mThermostat1Sp.setEnabled(false);
             }
         });
 
         mTherm1toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked) mThermostat1.setEnabled(true);
-                else mThermostat1.setEnabled(false);
+                if(isChecked) mThermostat1Sp.setEnabled(true);
+                else mThermostat1Sp.setEnabled(false);
             }
         });
 
         mTherm2toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked) mThermostat2.setEnabled(true);
-                else mThermostat2.setEnabled(false);
+                if(isChecked) mThermostat2Sp.setEnabled(true);
+                else mThermostat2Sp.setEnabled(false);
             }
         });
 
         mAnalog1toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked) mAnalog1.setEnabled(true);
-                else mAnalog1.setEnabled(false);
+                if(isChecked) mAnalog1Sp.setEnabled(true);
+                else mAnalog1Sp.setEnabled(false);
             }
         });
 
         mAnalog2toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked) mAnalog2.setEnabled(true);
-                else mAnalog2.setEnabled(false);
+                if(isChecked) mAnalog2Sp.setEnabled(true);
+                else mAnalog2Sp.setEnabled(false);
             }
         });
 
@@ -150,6 +173,28 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
                 //TODO
             }
         });
+    }
+
+    private void setSpinnerListItem() {
+        ArrayList<String> analogArr = new ArrayList<>();
+        for (Sensor r : SensorManager.getInstance().getExternalSensorList()) {
+            analogArr.add(r.sensorName+" "+r.engineeringUnit);
+        }
+        ArrayList<String> thArr = new ArrayList<>();
+        for (Thermistor m : Thermistor.getThermistorList()) {
+            thArr.add(m.sensorName+" "+m.engineeringUnit);
+        }
+
+        ArrayAdapter<String> analogAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, analogArr);
+        analogAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mAnalog1Sp.setAdapter(analogAdapter);
+        mAnalog2Sp.setAdapter(analogAdapter);
+
+
+        ArrayAdapter<String> thAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, thArr);
+        thAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mThermostat1Sp.setAdapter(thAdapter);
+        mThermostat2Sp.setAdapter(thAdapter);
     }
 
     @Override

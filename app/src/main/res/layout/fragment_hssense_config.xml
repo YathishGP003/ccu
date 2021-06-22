@@ -59,7 +59,8 @@
                     android:layout_gravity="center"
                     android:textColor="#202020"
                     android:textSize="30sp"
-                    android:theme="@style/DefaultNumberPickerTheme"/>
+                    android:theme="@style/DefaultNumberPickerTheme"
+                    />
             </LinearLayout>
 
             <LinearLayout
@@ -184,7 +185,6 @@
                         android:layout_height="50dp"
                         android:layout_alignParentRight="true"
                         android:fontFamily="@font/lato_regular"
-                        android:entries="@array/thermistor1_array"
                         tools:listitem="@layout/spinner_dropdown_item" />
                     <Spinner
                         android:id="@+id/th2select"
@@ -194,7 +194,6 @@
                         android:layout_alignParentRight="true"
                         android:fontFamily="@font/lato_regular"
                         style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:entries="@array/thermistor1_array"
                         tools:listitem="@layout/spinner_dropdown_item"/>
                     <Spinner
                         android:id="@+id/analog1select"
@@ -204,7 +203,6 @@
                         android:layout_alignParentRight="true"
                         android:fontFamily="@font/lato_regular"
                         style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:entries="@array/analog1_array"
                         tools:listitem="@layout/spinner_dropdown_item"/>
                     <Spinner
                         android:id="@+id/analog2select"
@@ -214,7 +212,6 @@
                         android:layout_alignParentRight="true"
                         android:fontFamily="@font/lato_regular"
                         style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:entries="@array/analog1_array"
                         tools:listitem="@layout/spinner_dropdown_item"
                         />
                 </LinearLayout>

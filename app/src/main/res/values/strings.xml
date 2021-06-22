@@ -923,24 +923,4 @@
     <string name="analogin1">Analog-in1</string>
     <string name="analogin2">Analog-in2</string>
 
-    <string-array name="thermistor1_array">
-        <item>10K type 2 probe</item>
-        <item>Generic 1-100kohms</item>
-    </string-array>
-
-    <string-array name="analog1_array">
-        <item>Generic 0-10</item>
-        <item>0-2 in. Pressure Sensor</item>
-        <item>0-0.25 Differential Pressure Sensor</item>
-        <item>Humidity</item>
-        <item>CO2</item>
-        <item>CO</item>
-        <item>NO2</item>
-        <item>CT 0-10</item>
-        <item>CT 0-20</item>
-        <item>CT 0-30</item>
-        <item>ION Meter 0-1 Million</item>
-
-    </string-array>
-
 </resources>

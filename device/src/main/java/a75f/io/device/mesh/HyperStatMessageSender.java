@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.util.Arrays;
 
+import a75f.io.alerts.BuildConfig;
 import a75f.io.device.HyperStat.HyperStatCcuDatabaseSeedMessage_t;
 import a75f.io.device.HyperStat.HyperStatCcuToCmSerializedMessage_t;
 import a75f.io.device.HyperStat.HyperStatControlsMessage_t;
@@ -27,6 +28,13 @@ public class HyperStatMessageSender {
     public static void sendSeedMessage(String zone,int address,String equipRef, String profile) {
         HyperStatCcuDatabaseSeedMessage_t seedMessage = HyperStatMessageGenerator.getSeedMessage(zone, address,
                                                                                                          equipRef, profile);
+    
+        if (DLog.isLoggingEnabled()) {
+            CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + HYPERSTAT_CCU_DATABASE_SEED_MESSAGE);
+            CcuLog.i(L.TAG_CCU_SERIAL, seedMessage.getSerializedSettingsData().toString());
+            CcuLog.i(L.TAG_CCU_SERIAL, seedMessage.getSerializedControlsData().toString());
+        }
+        
         writeSeedMessage(seedMessage, address, true);
     }
     
@@ -43,7 +51,6 @@ public class HyperStatMessageSender {
             }
         }
         writeMessageBytesToUsb(HYPERSTAT_CCU_DATABASE_SEED_MESSAGE, seedMessage.toByteArray());
-        CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + seedMessage);
     }
     
     /**
@@ -62,6 +69,10 @@ public class HyperStatMessageSender {
                                                           .setProtocolMessageType(MessageType.HYPERSTAT_SETTINGS_MESSAGE.ordinal())
                                                           .setSerializedMessageData(settings.toByteString())
                                                           .build();
+    
+        if (DLog.isLoggingEnabled()) {
+            CcuLog.i(L.TAG_CCU_SERIAL, message.toString());
+        }
     
         writeSerializedMessage(message, address, MessageType.HYPERSTAT_SETTINGS_MESSAGE, true);
     }
@@ -82,11 +93,17 @@ public class HyperStatMessageSender {
                                                           .setSerializedMessageData(controls.toByteString())
                                                           .build();
     
+        if (DLog.isLoggingEnabled()) {
+            CcuLog.i(L.TAG_CCU_SERIAL, message.toString());
+        }
+    
         writeSerializedMessage(message, address, MessageType.HYPERSTAT_CONTROLS_MESSAGE, true);
     }
     
     public static void writeSerializedMessage(HyperStatCcuToCmSerializedMessage_t message, int address,
                                               MessageType msgType, boolean checkDuplicate) {
+    
+        CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + msgType);
         if (checkDuplicate) {
             Integer messageHash = Arrays.hashCode(message.toByteArray());
             if (HyperStatMessageCache.getInstance().checkAndInsert(address, HyperStatCcuToCmSerializedMessage_t.class.getSimpleName(),
@@ -98,7 +115,6 @@ public class HyperStatMessageSender {
         }
     
         writeMessageBytesToUsb(msgType, message.toByteArray());
-        CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + msgType);
     }
     
     private static void writeMessageBytesToUsb(MessageType msgType, byte[] dataBytes) {

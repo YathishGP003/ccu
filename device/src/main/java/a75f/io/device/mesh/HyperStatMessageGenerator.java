@@ -4,7 +4,12 @@ import com.google.protobuf.ByteString;
 
 import java.util.HashMap;
 
+
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.device.HyperStat.HyperStatCcuDatabaseSeedMessage_t;
+import a75f.io.device.HyperStat.HyperStatCcuToCmSerializedMessage_t;
+import a75f.io.device.HyperStat.HyperStatControlsMessage_t;
+import a75f.io.device.HyperStat.HyperStatSettingsMessage_t;
 import a75f.io.device.HyperStat;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -20,48 +25,66 @@ import static a75f.io.logic.bo.building.definitions.Port.RELAY_TWO;
 
 public class HyperStatMessageGenerator {
     
-    public static HyperStat.HyperStatCcuDatabaseSeedMessage_t getSeedMessage(String zone, int address, String equipRef, String profile) {
-        HyperStat.HyperStatCcuDatabaseSeedMessage_t seed = HyperStat.HyperStatCcuDatabaseSeedMessage_t
-                                                               .newBuilder()
-                                                               .setAddress(7000)
-                                                               .setEncryptionKey(ByteString.copyFrom(L.getEncryptionKey()))
-                                                               .setSerializedSettingsData(getSettingsMessage(zone,
-                                                                                                             address, equipRef).toByteString())
-                                                               .setSerializedControlsData(getControlMessage(address,
-                                                                                                            equipRef).toByteString())
-                                                               .build();
+    /**
+     * Generates seed message for a node from haystack data.
+     * @param zone
+     * @param address
+     * @param equipRef
+     * @param profile
+     * @return
+     */
+    public static HyperStatCcuDatabaseSeedMessage_t getSeedMessage(String zone, int address, String equipRef, String profile) {
+        HyperStatCcuDatabaseSeedMessage_t seed = HyperStatCcuDatabaseSeedMessage_t
+                                               .newBuilder()
+                                               .setAddress(7000)
+                                               .setEncryptionKey(ByteString.copyFrom(L.getEncryptionKey()))
+                                               .setSerializedSettingsData(getSettingsMessage(zone, address, equipRef).toByteString())
+                                               .setSerializedControlsData(getControlMessage(address, equipRef).toByteString())
+                                               .build();
         
         return seed;
     }
     
-    
-    public static HyperStat.HyperStatSettingsMessage_t getSettingsMessage(String zone, int address, String equipRef) {
+    /**
+     * Generate settings message for a node from haystack data.
+     * @param zone
+     * @param address
+     * @param equipRef
+     * @return
+     */
+    public static HyperStatSettingsMessage_t getSettingsMessage(String zone, int address, String equipRef) {
         
         //TODO - Proto file does not define profile bitmap, enabledRelay.
-        HyperStat.HyperStatSettingsMessage_t settings = HyperStat.HyperStatSettingsMessage_t.newBuilder()
-                                                                                            .setRoomName(zone)
-                                                                                            .setHeatingDeadBand((int) StandaloneTunerUtil.getStandaloneHeatingDeadband(equipRef))
-                                                                                            .setCoolingDeadBand((int)StandaloneTunerUtil.getStandaloneCoolingDeadband(equipRef))
-                                                                                            .setMinCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user " +
-                                                                                                                                                               "and limit and min"))
-                                                                                            .setMaxCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user " +
-                                                                                                                                                               "and limit and max"))
-                                                                                            .setMinHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("heating and user " +
-                                                                                                                                                               "and limit and min"))
-                                                                                            .setMaxHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user " +
-                                                                                                                                                               "and limit and max"))
-                                                                                            .setTemperatureOffset(0)//TODO
-                                                                                            .build();
+        HyperStatSettingsMessage_t settings = HyperStatSettingsMessage_t.newBuilder()
+                                            .setRoomName(zone)
+                                            .setHeatingDeadBand((int) StandaloneTunerUtil.getStandaloneHeatingDeadband(equipRef))
+                                            .setCoolingDeadBand((int)StandaloneTunerUtil.getStandaloneCoolingDeadband(equipRef))
+                                            .setMinCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user " +
+                                                                                                               "and limit and min"))
+                                            .setMaxCoolingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user " +
+                                                                                                               "and limit and max"))
+                                            .setMinHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("heating and user " +
+                                                                                                               "and limit and min"))
+                                            .setMaxHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user " +
+                                                                                                               "and limit and max"))
+                                            .setTemperatureOffset(0)//TODO
+                                            .build();
         return settings;
     }
     
-    public static HyperStat.HyperStatControlsMessage_t getControlMessage(int address, String equipRef) {
+    /**
+     * Generate control message for a node from haystack data.
+     * @param address
+     * @param equipRef
+     * @return
+     */
+    public static HyperStatControlsMessage_t getControlMessage(int address, String equipRef) {
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
         
         HashMap device = hayStack.read("device and addr == \"" + address + "\"");
         
-        HyperStat.HyperStatControlsMessage_t.Builder controls = HyperStat.HyperStatControlsMessage_t.newBuilder();
+        HyperStatControlsMessage_t.Builder controls = HyperStat.HyperStatControlsMessage_t.newBuilder();
         controls.setSetTempCooling((int)getDesiredTempCooling(equipRef) * 10);
         controls.setSetTempHeating((int)getDesiredTempHeating(equipRef) * 10);
         controls.setFanSpeed(HyperStat.HyperStatFanSpeed_e.HYPERSTAT_FAN_SPEED_AUTO) ;//TODO

@@ -46,7 +46,9 @@ public class HyperStatMsgReceiver {
     
     private static void handleRegularUpdate(HyperStatRegularUpdateMessage_t regularUpdateMessage, int nodeAddress,
                                      CCUHsApi hayStack) {
-        CcuLog.e(L.TAG_CCU_DEVICE, "handleRegularUpdate: "+regularUpdateMessage.toString());
+        if (DLog.isLoggingEnabled()) {
+            CcuLog.i(L.TAG_CCU_DEVICE, "handleRegularUpdate: "+regularUpdateMessage.toString());
+        }
         HashMap device = hayStack.read("device and addr == \"" + nodeAddress + "\"");
         DeviceUtil.getRawPointsWithRefForDevice(device, hayStack)
                     .forEach( point -> writePortInputsToHaystackDatabase( point, regularUpdateMessage, hayStack));
@@ -58,7 +60,9 @@ public class HyperStatMsgReceiver {
     
     private static void handleOverrideMessage(HyperStatLocalControlsOverrideMessage_t message, int nodeAddress,
                                               CCUHsApi hayStack) {
-        CcuLog.i(L.TAG_CCU_SERIAL, "handleOverrideMessage: "+message.toByteString());
+        if (DLog.isLoggingEnabled()) {
+            CcuLog.i(L.TAG_CCU_SERIAL, "handleOverrideMessage: "+message.toByteString());
+        }
     
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+nodeAddress+"\"");
         Equip hsEquip = new Equip.Builder().setHashMap(equipMap).build();

@@ -34,6 +34,7 @@ import a75f.io.device.HyperStat.HyperStatSettingsMessage_t;
 import a75f.io.device.mesh.HyperStatMessageSender;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.device.serial.MessageType;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.BASE.BaseDialogFragment;
@@ -291,7 +292,7 @@ public class HyperStatTestFragment extends BaseDialogFragment
 			                                                        .build();
 		
 		HyperStatMessageSender.writeSerializedMessage(message, getChannelAddress(), MessageType.HYPERSTAT_SETTINGS_MESSAGE, false);
-		
+		CcuLog.i(L.TAG_CCU_SERIAL, message.toString());
 	}
 	
 	@OnClick(R.id.sendFota)
@@ -310,7 +311,7 @@ public class HyperStatTestFragment extends BaseDialogFragment
 			                                                        .build();
 		
 		HyperStatMessageSender.writeSerializedMessage(message, getChannelAddress(), MessageType.HYPERSTAT_CONTROLS_MESSAGE, false);
-		
+		CcuLog.i(L.TAG_CCU_SERIAL, message.toString());
 	}
 	
 	

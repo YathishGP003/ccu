@@ -31,7 +31,7 @@ public class HyperStatMessageCache {
      * If the node does not exist , create a new Map for the node.
      * Else update node message map with the new message.
      *
-     * We need to send a meesage to hyperstat only if this method return false.
+     * We need to send a message to hyperstat only if this method returns false.
      *
      * @param hyperStatAddress
      * @param simpleName

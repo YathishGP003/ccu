@@ -1,14 +1,21 @@
 package a75f.io.renatus;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import android.text.method.DigitsKeyListener;
+import android.text.method.KeyListener;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ExpandableListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,6 +23,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.Equip;
 import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.renatus.ENGG.HaystackExplorer;
 import butterknife.ButterKnife;
 
 /**
@@ -95,5 +103,78 @@ public class TempOverrideFragment extends Fragment {
                 loadDualDuctPointsUI(dualDuctPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
             }
         }*/
+
+        /*expandableListView = view.findViewById(R.id.expandableListView);
+
+        expandableListDetail = new HashMap<>();
+        updateAllData();
+        expandableListAdapter = new EquipTempExpandableListAdapter(TempOverrideFragment.this, expandableListTitle, expandableListDetail, tunerMap, getActivity());
+        expandableListView.setAdapter(expandableListAdapter);
+        expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v,
+                                        int groupPosition, int childPosition, long id) {
+
+                if (passCodeValidationRequired) {
+                    showPassCodeScren();
+                    return true;
+                }
+                Log.d("CCU_HE", "onChildClick "+groupPosition+" "+childPosition);
+                String tunerName = expandableListDetail.get(expandableListTitle.get(groupPosition)).get(
+                        childPosition);
+
+                *//*if (tunerName.contains("currentTemp") || tunerName.contains("Variable")) {
+                    return true ;
+                }*//*
+                Toast.makeText(getActivity(), expandableListTitle.get(groupPosition) + " -> " + tunerName, Toast.LENGTH_SHORT).show();
+
+                final EditText taskEditText = new EditText(getActivity());
+                String tunerVal = String.valueOf(getPointVal(tunerMap.get(tunerName)));
+                KeyListener keyListener = DigitsKeyListener.getInstance("0123456789.");
+                taskEditText.setKeyListener(keyListener);
+
+                AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                        .setTitle(tunerName)
+                        .setMessage(tunerVal)
+                        .setView(taskEditText)
+                        .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (taskEditText.getText().toString().trim().length() > 0) {
+                                    setPointVal(tunerMap.get(tunerName), Double.parseDouble(taskEditText.getText().toString()) );
+                                    tunerMap.put(tunerMap.get(tunerName), taskEditText.getText().toString());
+                                    expandableListView.invalidateViews();
+                                }
+                            }
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .create();
+                dialog.show();
+                return false;
+            }
+        });
+
+        expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
+            @Override
+            public void onGroupExpand(int groupPosition) {
+                // This is breaking HaystackExplorer for me since the second time we grab data here, the order
+                // of the groups changes in the backing data, but not in the UI.  I'm unable to programmatically force the UI to update.
+                // Recommend not updating data after UI drawn, unless we can get the expandable list to redraw.
+                // updateAllData();
+                for (int g = 0; g < expandableListAdapter.getGroupCount(); g++) {
+                    if (g != groupPosition) {
+                        expandableListView.collapseGroup(g);
+                    }
+                }
+                expandableListView.invalidateViews();
+                *//*if (lastExpandedPosition != -1
+                    && groupPosition != lastExpandedPosition) {
+                    expandableListView.collapseGroup(lastExpandedPosition);
+                }*//*
+                lastExpandedPosition = groupPosition;
+
+
+            }
+        });*/
     }
 }

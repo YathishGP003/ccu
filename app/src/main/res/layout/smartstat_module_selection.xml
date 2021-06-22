@@ -323,6 +323,8 @@
                         android:alpha="0.37"
                         android:background="@color/text_color" />
                 </RelativeLayout>
+
+
             </LinearLayout>
 
         </ScrollView>

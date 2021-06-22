@@ -365,4 +365,8 @@
         <item name="rippleColor">@color/material_button_ripple</item>
     </style>
 
+    <style name="hssense" parent="Widget.AppCompat.Spinner.Underlined">
+        <item name="android:background"> @drawable/ic_arrow_down</item>
+    </style>
+
 </resources>

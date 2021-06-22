@@ -210,7 +210,7 @@
         <item>  Dehumidifier </item>
     </string-array>
     <string-array name="smartstat_relay_hp_changeover">
-    	<item>  O - Energize in cooling</item>
+        <item>  O - Energize in cooling</item>
         <item>  B - Energize in heating</item>
     </string-array>
     <string-array name="schedulePORT">
@@ -554,7 +554,7 @@
     <string name="desc_4pipe">A water coil fed by separate heating and cooling pipes\nAllows for independent heating/cooling modes</string>
     <string name="title_vrv">VRV</string>
     <string name="desc_vrv">Connect to the Daikin VRV Indoor Unit using P1 P2 Protocol</string>
-    <string name="title_hypersense">Hypersense</string>
+    <string name="title_hypersense">Sense</string>
     <string name="desc_hypersense">Equipment Connector for Monitoring Data</string>
 
     <!--WTM Module Screen-->
@@ -849,9 +849,9 @@
 
     <string name="txt_mb_restart_prompt">Changes in config requires Application restart</string>
     <string name="txt_restart">Restart Now</string>
-   <string name="local_sandbox">Local Sandbox</string>
+    <string name="local_sandbox">Local Sandbox</string>
     <string name="change_ip_address">Change IP Address</string>
-   <string name="alert_definitions">Alert Definitions:</string>
+    <string name="alert_definitions">Alert Definitions:</string>
     <string name="active_alerts">Active:</string>
     <string name="resolved">Resolved:</string>
     <string name="in_process">In process:</string>
@@ -920,4 +920,7 @@
     </string-array>
 
     <string name="buttonDesableDelay">2000</string>
+    <string name="analogin1">Analog-in1</string>
+    <string name="analogin2">Analog-in2</string>
+
 </resources>

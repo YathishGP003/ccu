@@ -917,7 +917,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         String strminTemp = FontManager.getColoredSpanned(Double.toString(coolingTemp), colorMinTemp);
         String strmaxTemp = FontManager.getColoredSpanned(Double.toString(heatingTemp), colorMaxTemp);
 
-        Typeface typeface=null;
+        Typeface typeface=Typeface.DEFAULT;
         try {
             typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lato_regular.ttf");
         }catch (Exception e){

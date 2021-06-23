@@ -57,7 +57,6 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int viewPosition) {
         int position = viewHolder.getAdapterPosition();
         viewHolder.tvParamLabel.setText(modbusParam.get(position).getName());
-        CCUUiUtil.setSpinnerDropDownColor( viewHolder.spValue,context);
         if (modbusParam.get(position).getParameterDefinitionType() != null) {
             switch (modbusParam.get(position).getParameterDefinitionType()) {
                 case "range":

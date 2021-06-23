@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import com.google.android.material.textfield.TextInputLayout;
 import androidx.fragment.app.Fragment;
+import androidx.multidex.BuildConfig;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;

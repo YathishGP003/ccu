@@ -101,11 +101,11 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
    private fun showSenseconfigFragment(){
       CcuLog.i("CCU_", "TC: showSenseconfigFragment");
       showDialogFragment(
-              HyperStatSenseFragment.newInstance( mNodeAddress,
+              HyperStatSensePairScreen.newInstance( mNodeAddress,
                       mRoomName,
                       mFloorName,
                       ProfileType.HYPERSTAT_SENSE),
-              HyperStatSenseFragment.ID
+              HyperStatSensePairScreen.ID
       )
    }
 }

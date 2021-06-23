@@ -234,7 +234,7 @@
                 android:textAllCaps="true"
                 android:textColor="@color/orange_75f"
                 android:textSize="19.5dp"
-                android:drawableEnd="@drawable/ic_arrow_right"/>
+                />
 
         </RelativeLayout>
     </ScrollView>

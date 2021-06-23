@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
+import a75f.io.renatus.util.ProgressDialogUtils;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -145,6 +146,7 @@ public class FloorPlanFragment extends Fragment {
     private Floor floorToRename;
     ArrayList<Floor> siteFloorList = new ArrayList<>();
     ArrayList<String> siteRoomList = new ArrayList<>();
+    private FloorListActionMenuListener floorListActionMenuListener;
 
     private final BroadcastReceiver mPairingReceiver = new BroadcastReceiver() {
         @Override
@@ -277,7 +279,9 @@ public class FloorPlanFragment extends Fragment {
     public void onStart() {
         super.onStart();
         floorListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-        floorListView.setMultiChoiceModeListener(new FloorListActionMenuListener(this));
+
+        floorListActionMenuListener = new FloorListActionMenuListener(this);
+        floorListView.setMultiChoiceModeListener(floorListActionMenuListener);
         roomListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         roomListView.setMultiChoiceModeListener(new RoomListActionMenuListener(this));
         moduleListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
@@ -299,6 +303,10 @@ public class FloorPlanFragment extends Fragment {
         saveData();
     }
 
+    @Override public void onStop() {
+        super.onStop();
+        floorListActionMenuListener.dispose();
+    }
 
     public void saveData() {
         //Save
@@ -306,7 +314,16 @@ public class FloorPlanFragment extends Fragment {
 
     }
 
+    // callback from FloorListActionMenuListener
+    public void showWait(String message) {
+        ProgressDialogUtils.showProgressDialog(requireContext(), message);
+    }
 
+    public void hideWait() {
+        ProgressDialogUtils.hideProgressDialog();
+    }
+
+    // callback from FloorListActionMenuListener
     public void refreshScreen() {
         floorList = HSUtil.getFloors();
         Collections.sort(floorList, new FloorComparator());

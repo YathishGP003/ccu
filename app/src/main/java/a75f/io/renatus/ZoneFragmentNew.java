@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 
 import a75f.io.logic.bo.building.Output;
@@ -47,12 +48,16 @@ import org.joda.time.Interval;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -85,6 +90,7 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
+import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.renatus.util.GridItem;
 import a75f.io.renatus.util.NonTempControl;
 import a75f.io.renatus.util.Prefs;
@@ -157,7 +163,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     Prefs prefs;
     HashMap<String, EquipmentDevice> modbusZones = new HashMap<>();
     String MODBUS_ZONE = "MODBUS_CONFIG";
-
     public ZoneFragmentNew()
     {
     }
@@ -508,12 +513,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 tablerowLayout[0] = new LinearLayout(tableLayout.getContext());
                 int i = 0;
                  for (int m = 0; m < roomMap.size(); m++) {
+
                     String zoneTitle = "";
                     LayoutInflater inflater = LayoutInflater.from(getContext());
 
                     zoneTitle = roomMap.get(m).get("dis").toString();
                     ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\""+ roomMap.get(m).get("id").toString()+"\" and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
                     if(equips.size() > 0) {// zones has devices paired
+                        boolean isZoneAlive = isZoneAlive(equips);
+
                         HashMap<String, ArrayList<HashMap>> zoneData = new HashMap<String, ArrayList<HashMap>>();
                         for (HashMap zoneModel : equips) {
                             if (zoneData.containsKey(zoneModel.get("roomRef").toString())) {
@@ -566,11 +574,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
                             if (tempModule) {
                                 Log.e("RoomData", "Load Temperature Based View");
-                                viewTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout);
+                                viewTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout, isZoneAlive);
                             }
                             if (!tempModule && nontempModule) {
                                 Log.e("RoomData", "Load Non Temperature Based View");
-                                viewNonTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout);
+                                viewNonTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout, isZoneAlive);
                                 //arcViewParent = inflater.inflate(R.layout.zones_item_smartstat, (ViewGroup) rootView, false);
                             }
                             i++;
@@ -578,7 +586,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     }else{
                         //No devices paired
                         Log.e("RoomData", "Load No device paired Based View");
-                        viewNonTemperatureBasedZone(inflater, rootView, new ArrayList<HashMap>(), zoneTitle, i, tablerowLayout);
+                        viewNonTemperatureBasedZone(inflater, rootView, new ArrayList<HashMap>(), zoneTitle, i, tablerowLayout, false);
                         i++;
                     }
                 }
@@ -587,7 +595,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
     }
 
-    private void viewTemperatureBasedZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap,String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout)
+    private void viewTemperatureBasedZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap,String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout, boolean isZoneAlive)
     {
 
         Log.i("ProfileTypes","Points:"+zoneMap.toString());
@@ -833,6 +841,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
+        TextView textViewModule = arcView.findViewById(R.id.module_status);
+        zoneStatus(textViewModule, isZoneAlive);
 
         seekArc.scaletoNormal(250, 210);
 
@@ -1440,7 +1450,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     }
 
 
-    private void viewNonTemperatureBasedZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap,String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout)
+    private void viewNonTemperatureBasedZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap,String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout, boolean isZoneAlive)
     {
 
         Equip p = null;
@@ -1461,6 +1471,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         nonTempControl.setTag(gridItemObj);
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
+        TextView textViewModule = arcView.findViewById(R.id.module_status);
+        zoneStatus(textViewModule, isZoneAlive);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         arcView.setPadding(48,56,0,0);
         try {
@@ -1758,7 +1770,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         View viewPointRow2 = inflater.inflate(R.layout.zones_item_type1, null);
         
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        moduleSatus(textViewModule, nodeAddress);
+
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
@@ -1772,6 +1788,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         
         textViewTitle.setText(vavPoints.get("Profile").toString()+" ("+nodeAddress+")");
         textViewStatus.setText(vavPoints.get("Status").toString());
+        textViewUpdatedTime.setText(getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Damper : ");
         textViewValue1.setText(vavPoints.get("Damper").toString());
         textViewLabel2.setText("Reheat Coil : ");
@@ -1796,6 +1813,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        moduleSatus(textViewModule, nodeAddress);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
         textViewLabel2.setVisibility(View.GONE);
@@ -1805,6 +1825,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         textViewTitle.setText(ssePoints.get("Profile").toString()+" ("+nodeAddress+")");
         textViewStatus.setText(ssePoints.get("Status").toString());
+        textViewUpdatedTime.setText(getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Discharge Airflow : ");
         textViewValue1.setText(ssePoints.get("Discharge Airflow").toString());
 
@@ -1821,6 +1842,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        moduleSatus(textViewModule, nodeAddress);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         textViewLabel1.setVisibility(View.GONE);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
@@ -1832,6 +1856,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         textViewTitle.setText(tiPoints.get("Profile").toString()+" ("+nodeAddress+")");
         textViewStatus.setText(tiPoints.get("Status").toString());
+        textViewUpdatedTime.setText(getLastUpdatedTime(nodeAddress));
 
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
@@ -1846,6 +1871,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        moduleSatus(textViewModule, nodeAddress);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
         TextView textViewValue1 = viewPointRow1.findViewById(R.id.text_point1value);
@@ -1853,6 +1881,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         textViewTitle.setText(dabPoints.get("Profile").toString()+" ("+nodeAddress+")");
         textViewStatus.setText(dabPoints.get("Status").toString());
+        textViewUpdatedTime.setText(getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Damper : ");
         textViewLabel2.setText("Discharge Airflow : ");
         textViewValue1.setText(dabPoints.get("Damper").toString());
@@ -1875,6 +1904,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        moduleSatus(textViewModule, nodeAddress);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
         
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
@@ -1888,6 +1920,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         
         textViewTitle.setText(dualDuctPoints.get("Profile").toString()+" ("+nodeAddress+")");
         textViewStatus.setText(dualDuctPoints.get("Status").toString());
+        textViewUpdatedTime.setText(getLastUpdatedTime(nodeAddress));
         if (dualDuctPoints.containsKey("CoolingSupplyAirflow") ) {
             textViewLabel1.setText("Cooling Supply Airflow : ");
             textViewValue1.setText(dualDuctPoints.get("CoolingSupplyAirflow").toString());
@@ -1928,6 +1961,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        moduleSatus(textViewModule, nodeAddress);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
@@ -1991,6 +2027,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         textViewTitle.setText(cpuEquipPoints.get("Profile").toString()+" ("+nodeAddress+")");
         textViewStatus.setText(cpuEquipPoints.get("Status").toString());
+        textViewUpdatedTime.setText(getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Conditioning Mode : ");
         textViewLabel2.setText("Fan Mode : ");
 
@@ -2148,6 +2185,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        moduleSatus(textViewModule, nodeAddress);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
@@ -2160,6 +2200,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         textViewTitle.setText(hpuEquipPoints.get("Profile").toString()+" ("+nodeAddress+")");
         textViewStatus.setText(hpuEquipPoints.get("Status").toString());
+        textViewUpdatedTime.setText(getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Conditioning Mode : ");
         textViewLabel2.setText("Fan Mode : ");
 
@@ -2386,6 +2427,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        moduleSatus(textViewModule, nodeAddress);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
@@ -2456,6 +2500,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         textViewTitle.setText(p2FCUPoints.get("Profile").toString()+" ("+nodeAddress+")");
         textViewStatus.setText(p2FCUPoints.get("Status").toString());
+        textViewUpdatedTime.setText(getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Conditioning Mode : ");
         textViewLabel2.setText("Fan Mode : ");
 
@@ -2536,6 +2581,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        moduleSatus(textViewModule, nodeAddress);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
@@ -2606,6 +2654,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         textViewTitle.setText(p4FCUPoints.get("Profile").toString()+" ("+nodeAddress+")");
         textViewStatus.setText(p4FCUPoints.get("Status").toString());
+        textViewUpdatedTime.setText(getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Conditioning Mode : ");
         textViewLabel2.setText("Fan Mode : ");
 
@@ -2685,9 +2734,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        moduleSatus(textViewModule, nodeAddress);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         textViewTitle.setText(EmrPoints.get("Profile").toString()+" ("+nodeAddress+")");
         textViewStatus.setText(EmrPoints.get("Status").toString());
+        textViewUpdatedTime.setText(getLastUpdatedTime(nodeAddress));
+
         viewStatus.setPadding(0,0,0,40);
         try {
             linearLayoutZonePoints.addView(viewTitle);
@@ -2708,6 +2762,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView statusTitle = viewStatus.findViewById(R.id.inner_status_title);
         statusTitle.setVisibility(View.GONE);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        textViewModule.setVisibility(View.GONE);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
+        textViewUpdatedTime.setVisibility(View.GONE);
+        TextView textViewUpdatedText = viewStatus.findViewById(R.id.last_updated);
+        textViewUpdatedText.setVisibility(View.GONE);
+
         textViewStatus.setGravity(Gravity.CENTER|Gravity.CENTER_HORIZONTAL|Gravity.CENTER_VERTICAL);
         textViewStatus.setText(Html.fromHtml("<b>No device currently Paired</b> <br>Please go to the floor planner on settings page to pair a new device</br>"));
         viewStatus.setPadding(0,0,0,40);
@@ -2732,6 +2793,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        moduleSatus(textViewModule, nodeAddress);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         TextView labelInputAir = viewPointRow1.findViewById(R.id.text_point1label);
         TextView labelTarget = viewPointRow1.findViewById(R.id.text_point2label);
@@ -2748,6 +2812,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         textViewTitle.setText(plcPoints.get("Profile").toString()+" ("+nodeAddress+")");
         textViewStatus.setText(plcPoints.get("Status").toString());
+        textViewUpdatedTime.setText(getLastUpdatedTime(nodeAddress));
 
         labelInputAir.setText("Input  "+plcPoints.get("Unit Type").toString()+" : ");
 
@@ -3114,5 +3179,90 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     private String getScheduleTypeId(String equipId){
         return CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \""+equipId+"\"");
     }
-    
+
+    private void zoneStatus(TextView zoneStatus, boolean isAlive){
+        if (isAlive) {
+            zoneStatus.setBackgroundResource(R.drawable.module_alive);
+        } else {
+            zoneStatus.setBackgroundResource(R.drawable.module_dead);
+        }
+
+    }
+
+    private void moduleSatus(TextView moduleStatus, String nodeAddress){
+        if (isModuleAlive(nodeAddress)) {
+            moduleStatus.setBackgroundResource(R.drawable.module_alive);
+        } else {
+            moduleStatus.setBackgroundResource(R.drawable.module_dead);
+        }
+    }
+
+    private boolean isModuleAlive(String nodeAddress){
+        Date updatedTime = CCUUtils.getLastReceivedTime(nodeAddress);
+        if(updatedTime == null){
+            return false;
+        }
+        return TimeUnit.MILLISECONDS.toMinutes(new Date().getTime() - updatedTime.getTime()) < 15;
+    }
+    private String getLastUpdatedTime(String nodeAddress){
+        Date updatedTime = CCUUtils.getLastReceivedTime(nodeAddress);
+        if(updatedTime == null){
+            return "n/a";
+        }
+        StringBuffer message = new StringBuffer();
+        Date currTime = new Date();
+        if(currTime.getDate() == updatedTime.getDate()){
+            return message.append("Today, ")
+                 .append(getTime(updatedTime)).toString();
+
+        } else{
+            return getLastUpdatedTime(message, updatedTime).toString();
+        }
+    }
+
+     private String getDateSuffix(int updatedDate){
+         if( updatedDate == 1 || updatedDate == 21 || updatedDate == 31) {
+             return "st";
+         }
+         else if(updatedDate == 2 || updatedDate == 22) {
+             return "nd";
+         }
+         else if(updatedDate == 3 || updatedDate == 23) {
+             return "rd";
+         }
+         return "th";
+     }
+
+     private String getLastUpdatedTime(StringBuffer message, Date updatedTime){
+         SimpleDateFormat monthYearFormatter = new SimpleDateFormat("MMM, yyyy");
+         String space = " ";
+         return message.append("On")
+                 .append(space)
+                 .append(String.valueOf(updatedTime.getDate()))
+                 .append(getDateSuffix(updatedTime.getDate()))
+                 .append(space)
+                 .append(monthYearFormatter.format(updatedTime))
+                 .append(space)
+                 .append("|")
+                 .append(space)
+                 .append(getTime(updatedTime)).toString()
+                 .replace("pm", "PM")
+                 .replace("am", "AM");
+
+     }
+
+     private String getTime(Date time){
+         SimpleDateFormat timeFormatter = new SimpleDateFormat("hh:mm:ss aa");
+         return timeFormatter.format(time);
+     }
+
+     private boolean isZoneAlive(ArrayList<HashMap> equips){
+        for(HashMap equip : equips){
+            String address = equip.get("group").toString();
+            if(!isModuleAlive(address)){
+                return false;
+            }
+        }
+        return true;
+     }
 }

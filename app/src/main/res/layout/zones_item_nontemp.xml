@@ -123,18 +123,33 @@
         android:layout_width="236dp"
         android:layout_height="215dp"
         android:layout_gravity="center"/>
-    <TextView
-        android:id="@+id/textEquipment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <LinearLayout
         android:layout_below="@+id/rl_nontemp"
         android:layout_alignLeft="@id/rl_nontemp"
         android:layout_alignRight="@id/rl_nontemp"
-        android:text="DAB"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="-20dp"
         android:gravity="center_horizontal|center_vertical"
-        android:textAppearance="@style/label_black"
-        android:clickable="false"
-        android:focusable="false"
-        android:duplicateParentState="true"/>
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/textEquipment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DAB"
+            android:gravity="center_horizontal|center_vertical"
+            android:textAppearance="@style/label_black"
+            android:clickable="false"
+            android:focusable="false"
+            android:duplicateParentState="true"/>
+        <TextView
+            android:id="@+id/module_status"
+            android:layout_marginLeft="5dp"
+            android:layout_gravity="top"
+            android:gravity="top"
+            android:layout_width="15dp"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/module_dead"
+            android:layout_height="15dp"/>
+        </LinearLayout>
 
 </RelativeLayout>

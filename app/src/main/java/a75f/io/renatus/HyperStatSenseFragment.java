@@ -122,6 +122,7 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
         mTemperatureOffset.setMinValue(0);
         mTemperatureOffset.setMaxValue(TEMP_OFFSET_LIMIT * 2);
         mTemperatureOffset.setValue(TEMP_OFFSET_LIMIT);
+        mTemperatureOffset.setWrapSelectorWheel(false);
 
         /** Spinner id disabled by default */
         mThermostat1Sp.setEnabled(false);

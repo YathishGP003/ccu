@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -131,6 +132,22 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @Nullable
     @BindView(R.id.dabImageViewArrow)
     ImageView dabImageViewArrow;
+
+    @Nullable
+    @BindView(R.id.textDABTitle)
+    TextView textDABTitle;
+
+    @Nullable
+    @BindView(R.id.textDABTitleDesc)
+    TextView textDABTitleDesc;
+
+    @Nullable
+    @BindView(R.id.textVAV)
+    TextView textVAV;
+
+    @Nullable
+    @BindView(R.id.textVAVdesc)
+    TextView textVAVdesc;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -352,18 +369,34 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
                 || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU
                 ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU){
             rlVAV.setEnabled(false);
-            rlVAVHead.setBackgroundColor(getResources().getColor(R.color.progress_gray));
+            textVAV.setTextColor(getResources().getColor(R.color.selection_gray));
+            textVAVdesc.setTextColor(getResources().getColor(R.color.selection_gray));
+            imageViewArrow.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            imageViewArrow.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
+            imageViewArrow.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
         }else if (L.ccu().systemProfile.getProfileType() == ProfileType.VAV_REHEAT || L.ccu().systemProfile.getProfileType() == ProfileType.VAV_SERIES_FAN
                 || L.ccu().systemProfile.getProfileType() == ProfileType.VAV_PARALLEL_FAN ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_ANALOG_RTU
                 ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU
                 ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU){
             rlDAB.setEnabled(false);
-            rlDABHead.setBackgroundColor(getResources().getColor(R.color.progress_gray));
+            textDABTitle.setTextColor(getResources().getColor(R.color.selection_gray));
+            textDABTitleDesc.setTextColor(getResources().getColor(R.color.selection_gray));
+            dabImageViewArrow.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            dabImageViewArrow.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
+            dabImageViewArrow.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
         }else if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT){
             rlDAB.setEnabled(false);
             rlVAV.setEnabled(false);
-            rlDABHead.setBackgroundColor(getResources().getColor(R.color.progress_gray));
-            rlVAVHead.setBackgroundColor(getResources().getColor(R.color.progress_gray));
+            textVAV.setTextColor(getResources().getColor(R.color.selection_gray));
+            textVAVdesc.setTextColor(getResources().getColor(R.color.selection_gray));
+            textDABTitle.setTextColor(getResources().getColor(R.color.selection_gray));
+            textDABTitleDesc.setTextColor(getResources().getColor(R.color.selection_gray));
+            imageViewArrow.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            imageViewArrow.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
+            dabImageViewArrow.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            dabImageViewArrow.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
+            imageViewArrow.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
+            dabImageViewArrow.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
         }
         setTitle();
     }

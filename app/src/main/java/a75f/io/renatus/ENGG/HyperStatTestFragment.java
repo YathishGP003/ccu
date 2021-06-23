@@ -269,7 +269,6 @@ public class HyperStatTestFragment extends BaseDialogFragment
 	public void sendSeed() {
 		
 		HyperStatCcuDatabaseSeedMessage_t seed = HyperStatCcuDatabaseSeedMessage_t.newBuilder()
-		                                                                        .setAddress(getChannelAddress())
                                                                                 .setEncryptionKey(
                                                                                     ByteString.copyFrom(
                                                                                     L.getEncryptionKey()))
@@ -277,6 +276,7 @@ public class HyperStatTestFragment extends BaseDialogFragment
                                                                                 .setSerializedControlsData(getControlMessage().toByteString())
                                                                                 .build();
 		
+		CcuLog.i(L.TAG_CCU_SERIAL, "Send Test message " + seed.toString());
 		HyperStatMessageSender.writeSeedMessage(seed, getChannelAddress(), true);
 	}
 
@@ -291,8 +291,8 @@ public class HyperStatTestFragment extends BaseDialogFragment
 			                                                        .setSerializedMessageData(getSettingMessage().toByteString())
 			                                                        .build();
 		
+		CcuLog.i(L.TAG_CCU_SERIAL, "Send Test message " + message.toString());
 		HyperStatMessageSender.writeSerializedMessage(message, getChannelAddress(), MessageType.HYPERSTAT_SETTINGS_MESSAGE, false);
-		CcuLog.i(L.TAG_CCU_SERIAL, message.toString());
 	}
 	
 	@OnClick(R.id.sendFota)
@@ -310,8 +310,8 @@ public class HyperStatTestFragment extends BaseDialogFragment
 			                                                        .setSerializedMessageData(getControlMessage().toByteString())
 			                                                        .build();
 		
+		CcuLog.i(L.TAG_CCU_SERIAL, "Send Test message " + message.toString());
 		HyperStatMessageSender.writeSerializedMessage(message, getChannelAddress(), MessageType.HYPERSTAT_CONTROLS_MESSAGE, false);
-		CcuLog.i(L.TAG_CCU_SERIAL, message.toString());
 	}
 	
 	

@@ -2,6 +2,9 @@ package a75f.io.device.mesh;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -24,30 +27,47 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 
 public class HyperStatMsgReceiver {
     
-    public static void processMessage(byte[] data, MessageType messageType, CCUHsApi hayStack) {
+    public static void processMessage(byte[] data, CCUHsApi hayStack) {
         try {
-            HyperStatCmToCcuSerializedMessage_t message = HyperStatCmToCcuSerializedMessage_t.parseFrom(data);
     
+            /*
+            * Message Type - 1 byte
+            * Address - 4 bytes
+            * CM lqi - 4 bytes
+            * CM rssi - 4 bytes
+            * Message types - 4 bytes
+            *
+            * Actual Serialized data starts at index 17.
+            * */
+            CcuLog.e(L.TAG_CCU_SERIAL, "processMessage processMessage :"+ Arrays.toString(data));
+    
+            byte[] addrArray = Arrays.copyOfRange(data, 1, 5);
+            int address = ByteBuffer.wrap(addrArray)
+                                    .order(ByteOrder.LITTLE_ENDIAN)
+                                    .getInt();
+            byte[] messageArray = Arrays.copyOfRange(data, 17, data.length);
+            MessageType messageType = MessageType.values()[data[13]];
+            
             if (messageType == MessageType.HYPERSTAT_REGULAR_UPDATE_MESSAGE) {
                 HyperStatRegularUpdateMessage_t regularUpdate =
-                        HyperStatRegularUpdateMessage_t.parseFrom(message.getSerializedMessageData());
+                        HyperStatRegularUpdateMessage_t.parseFrom(messageArray);
     
-                handleRegularUpdate(regularUpdate, message.getAddress(), hayStack);
+                handleRegularUpdate(regularUpdate, address, hayStack);
             } else if (messageType == MessageType.HYPERSTAT_LOCAL_CONTROLS_OVERRIDE_MESSAGE) {
                 HyperStatLocalControlsOverrideMessage_t overrideMessage =
-                        HyperStatLocalControlsOverrideMessage_t.parseFrom(message.getSerializedMessageData());
-                handleOverrideMessage(overrideMessage, message.getAddress(), hayStack);
+                        HyperStatLocalControlsOverrideMessage_t.parseFrom(messageArray);
+                handleOverrideMessage(overrideMessage, address, hayStack);
             }
             
         } catch (InvalidProtocolBufferException e) {
-            CcuLog.e(L.TAG_CCU_DEVICE, "Cant parse protobuf data: "+e.getMessage());
+            CcuLog.e(L.TAG_CCU_SERIAL, "Cant parse protobuf data: "+e.getMessage());
         }
     }
     
     private static void handleRegularUpdate(HyperStatRegularUpdateMessage_t regularUpdateMessage, int nodeAddress,
                                      CCUHsApi hayStack) {
         if (DLog.isLoggingEnabled()) {
-            CcuLog.i(L.TAG_CCU_DEVICE, "handleRegularUpdate: "+regularUpdateMessage.toString());
+            CcuLog.i(L.TAG_CCU_SERIAL, "handleRegularUpdate: "+regularUpdateMessage.toString());
         }
         HashMap device = hayStack.read("device and addr == \"" + nodeAddress + "\"");
         DeviceUtil.getRawPointsWithRefForDevice(device, hayStack)

@@ -157,10 +157,9 @@ message HyperStatP1P2StatusMessage_t {
 }
 
 message HyperStatCcuDatabaseSeedMessage_t {
-  uint32 address = 1; // The (16-bit) mesh address of a device
-  bytes encryptionKey = 2 ;//[(nanopb).max_size = 16, (nanopb).fixed_length = true]; // The encryption key to use for data sent over the mesh network to/from this device
-  bytes serializedSettingsData = 3 ;//[(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_SETTINGS_MESSAGE
-  bytes serializedControlsData = 4 ;//[(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_CONTROLS_MESSAGE
+  bytes encryptionKey = 1 ;//[(nanopb).max_size = 16, (nanopb).fixed_length = true]; // The encryption key to use for data sent over the mesh network to/from this device
+  bytes serializedSettingsData = 2 ;//[(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_SETTINGS_MESSAGE
+  bytes serializedControlsData = 3 ;//[(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_CONTROLS_MESSAGE
 }
 
 message HyperStatCmToCcuSerializedMessage_t {

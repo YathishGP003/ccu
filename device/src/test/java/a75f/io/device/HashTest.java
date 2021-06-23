@@ -2,13 +2,17 @@ package a75f.io.device;
 
 import junit.framework.Assert;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.zip.CRC32;
 
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.device.serial.MessageType;
 
 /**
  * Created by Yinten on 9/19/2017.
@@ -42,5 +46,19 @@ public class HashTest
 //
 //        Assert.assertTrue(ccuSeed.equals(seedMessages.get(ccuSeed.smartNodeAddress.get())));
 //        Assert.assertNoteSame(ccuSeed.hashCode());
+    }
+    
+    @Test
+    public void testProto() {
+    
+        byte[] bytes = getByteArrayFromInt(6000);
+        System.out.println(Arrays.toString(bytes));
+    
+        ByteBuffer wrapped = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN); // big-endian by default
+        System.out.println(wrapped.getInt());
+    }
+    
+    byte[] getByteArrayFromInt(int x) {
+        return ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(x).array();
     }
 }

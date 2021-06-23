@@ -212,13 +212,20 @@ public class InstallerOptions extends Fragment {
         if (ccuId != null) {
             ccuUid = CCUHsApi.getInstance().getCcuRef().toString();
         }
-        if(CCUHsApi.getInstance().isCCURegistered() && ccuUid != null){
-            textBacnetEnable.setVisibility(View.VISIBLE);
-            toggleBACnet.setVisibility(View.VISIBLE);
-        }else {
+        if(BuildConfig.BUILD_TYPE.equals("daikin_prod")|| CCUUiUtil.isDaikinThemeEnabled(getContext()))
+        {
             textBacnetEnable.setVisibility(View.GONE);
             toggleBACnet.setVisibility(View.GONE);
+        }else{
+            if(CCUHsApi.getInstance().isCCURegistered() && ccuUid != null){
+                textBacnetEnable.setVisibility(View.VISIBLE);
+                toggleBACnet.setVisibility(View.VISIBLE);
+            }else {
+                textBacnetEnable.setVisibility(View.GONE);
+                toggleBACnet.setVisibility(View.GONE);
+            }
         }
+
         ArrayList<String> addressBand = new ArrayList<>();
         for (int addr = 1000; addr <= 9900; addr += 100) {
             addressBand.add(String.valueOf(addr));

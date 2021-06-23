@@ -172,7 +172,8 @@ class AlertsDataStore @JvmOverloads constructor(
 
    fun addAlertIfUnique(alert: Alert) {
       for (a in getActiveAlerts()) {
-         if (a.mTitle == alert.mTitle && a.ref != null && a.ref == alert.ref && a.mMessage != null && a.mMessage == alert.mMessage) {
+         // We do not allow adding alerts if there is already an active alert of the same type (title) and same equip (same test/requirement as on server)
+         if (a.mTitle == alert.mTitle && a.equipId == alert.equipId) {
             return
          }
       }

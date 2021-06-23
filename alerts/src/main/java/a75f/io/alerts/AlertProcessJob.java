@@ -49,7 +49,6 @@ public class AlertProcessJob
                     return;
                 }
                 alertManager.rebuildServiceNewToken(token);
-                alertManager.fetchPredefinedAlertsIfEmpty();
             }
 
             alertManager.processAlerts();

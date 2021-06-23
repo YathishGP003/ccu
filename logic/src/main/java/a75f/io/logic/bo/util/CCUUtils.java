@@ -31,7 +31,7 @@ public class CCUUtils
             Device deviceInfo = new Device.Builder().setHashMap(device).build();
             ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + deviceInfo.getId() + "\"");
             for(HashMap phyPoint : phyPoints) {
-                if(Port.valueOf(phyPoint.get("port").toString()) == Port.RSSI){
+                if((Port.valueOf(phyPoint.get("port").toString()) == Port.RSSI) && phyPoint.containsKey("id")){
                     return hayStack.curRead(phyPoint.get("id").toString()).getDate();
                 }
             }

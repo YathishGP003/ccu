@@ -461,7 +461,7 @@ public class FourPipeFanCoilUnitEquip  {
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
 
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
-                siteRef, room, floor, nodeAddr, profile, tz, "4fcu"));
+                siteRef, room, floor, nodeAddr, profile, tz));
         //TODO, what if already equip exists in a zone and its schedule is zone or named? Kumar
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
         CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);

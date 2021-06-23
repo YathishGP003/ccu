@@ -271,7 +271,7 @@ public class SingleStageEquip {
         CCUHsApi.getInstance().addPoint(occupancy);
 
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
-                siteRef, roomRef, floorRef, nodeAddr, "smartnode", tz, "sse"));
+                siteRef, roomRef, floorRef, nodeAddr, "sse", tz));
 
 		SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.currentTemp.setPointRef(ctID);

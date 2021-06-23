@@ -308,7 +308,7 @@ public class OAOEquip
         String co2WAId = hayStack.addPoint(co2WA);
 
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
-                siteRef, roomRef, floorRef, nodeAddr, "smartnode", tz, "oao"));
+                siteRef, roomRef, floorRef, nodeAddr, "oao", tz));
     
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.analog1In.setPointRef(returnAirCO2Id);

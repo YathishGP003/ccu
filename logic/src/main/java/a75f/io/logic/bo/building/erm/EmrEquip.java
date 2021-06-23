@@ -113,7 +113,7 @@ public class EmrEquip
         CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
 
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
-                siteRef, roomRef, floorRef, nodeAddr, "smartnode", tz, "emr"));
+                siteRef, roomRef, floorRef, nodeAddr, "emr", tz));
 
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.addPointsToDb();

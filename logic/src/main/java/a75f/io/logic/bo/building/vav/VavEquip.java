@@ -585,7 +585,7 @@ public class VavEquip
 
 
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
-                siteRef, room, floor, nodeAddr, "smartnode", tz, "vav"));
+                siteRef, room, floor, nodeAddr, "vav", tz));
         //Create Physical points and map
         SmartNode device = new SmartNode(nodeAddr, siteRef, floor, room, equipRef);
         device.th1In.setPointRef(datID);

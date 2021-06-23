@@ -57,7 +57,7 @@ public class AlertSyncHandler
                                         dataStore.updateAlert(a);
                                     },
                                     error -> {
-                                        if (error.getMessage().contains("HTTP 409")) {
+                                        if (error.getMessage().contains("409")) {
                                             CcuLog.w("CCU_ALERTS", "Duplicate error on server: " + a);
                                             a.setSyncStatus(true);
                                             syncedAlerts.add(a);

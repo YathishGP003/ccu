@@ -132,7 +132,6 @@ public class Conditional
                                 sb.append("val (RHS): ").append(val);
                                 if (isNumeric(value)) sb.append("  (numeric)");
                                 sb.append("\nkey (LHS): ").append(key);
-        CcuLog.d("CCU_ALERTS"," Evaluate Conditional : "+key+ " "+condition+" "+val + (isNumeric(value) ? "" : "("+value+")" ));
 
         if (grpOperation == null || grpOperation.equals("")) {
                                     sb.append("  -- find point from haystack for " + key);
@@ -225,7 +224,6 @@ public class Conditional
             resVal = spDefaultPrefs.getInt("PASSWORD_ATTEMPT",0);
                                         sb.append("\n   resVal (LHS): ").append(resVal).append(" -- password attempts recorded in prefs");
 
-            CcuLog.d("CCU_ALERTS ", " Evaluate Conditional: "+toString());
             val = isNumeric(value) ? value : String.valueOf(CCUHsApi.getInstance().read(value));
 
                                         if (! isNumeric(value)) {

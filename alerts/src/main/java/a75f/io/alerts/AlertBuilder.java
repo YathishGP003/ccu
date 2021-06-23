@@ -16,7 +16,7 @@ public class AlertBuilder
         return build(def, message, haystack, null, null);
     }
     
-    public static Alert build(AlertDefinition def, String message, CCUHsApi haystack, String equipRef, String id) {
+    public static Alert build(AlertDefinition def, String message, CCUHsApi haystack, String equipRef, String pointId) {
         Alert alert = new Alert();
         alert.setGuid("");
         alert.setStartTime(GregorianCalendar.getInstance().getTimeInMillis());
@@ -25,7 +25,7 @@ public class AlertBuilder
         alert.setmNotificationMsg(message);
         alert.setmSeverity(def.alert.mSeverity);
         alert.setmAlertType(def.alert.mAlertType);
-        alert.setRef(id);
+        alert.setRef(pointId);
         alert.setDeviceRef(CCUHsApi.getInstance().getCcuRef().toString());
         alert.setmEnabled(true);
         alert.setSyncStatus(false);

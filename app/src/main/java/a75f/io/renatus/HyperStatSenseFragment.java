@@ -117,9 +117,10 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mHyperStatSenseVM = new ViewModelProvider(this).get(HyperStatSenseVM.class);
-        mHyperStatSenseVM.get().observe(this, new Observer<Boolean>() {
+        mHyperStatSenseVM.init();
+        mHyperStatSenseVM.get().observe(this, new Observer<HyperStatSenseModel>() {
             @Override
-            public void onChanged(Boolean bool) {
+            public void onChanged(HyperStatSenseModel model) {
                    //TODO
             }
         });

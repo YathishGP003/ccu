@@ -11,13 +11,23 @@ import io.reactivex.rxjava3.subjects.BehaviorSubject;
 
 public class HyperStatSenseVM extends ViewModel {
     //TODO
-    MutableLiveData<Boolean> mVm;
+    MutableLiveData<HyperStatSenseModel> mVm;
+    HyperStatSenseModel model;
 
     public void init(){
-        mVm = new MutableLiveData<Boolean>();
+        mVm = new MutableLiveData<HyperStatSenseModel>();
+        model = new HyperStatSenseModel();
     }
 
-    public LiveData<Boolean> get(){
+    public LiveData<HyperStatSenseModel> get(){
         return mVm;
     }
+
+    public void saveConfig(){
+
+    }
+
+
+
+
 }

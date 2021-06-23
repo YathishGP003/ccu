@@ -278,8 +278,6 @@ public class UsbModbusService extends Service {
                     } else {
                         Log.d(TAG, "Failed to Open Serial MODBUS device instance for " + deviceVID);
                     }
-                    //We have found the supported MODBUS USB device and is ready to use, no need to iterate further.
-                    break;
                 } else {
                     connection = null;
                     device = null;

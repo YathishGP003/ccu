@@ -434,9 +434,7 @@ public class UsbService extends Service
 						UsbService.this.getApplicationContext().sendBroadcast(intent);
 						keep = false;
 					}
-					Log.d(TAG, "Opened Serial device instance for "+deviceVID);
-					//We have found the supported USB device and is ready to use, no need to iterate further.
-					break;
+					Log.d(TAG, "Opened Serial MODBUS device instance for "+deviceVID);
 				}
 				else
 				{

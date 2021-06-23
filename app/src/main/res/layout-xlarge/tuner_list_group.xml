@@ -6,6 +6,7 @@
     android:layoutDirection="ltr">
 
     <TextView
+        android:textColor="@color/orange_75f"
         android:id="@+id/listTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

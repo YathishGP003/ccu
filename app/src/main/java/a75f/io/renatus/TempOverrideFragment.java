@@ -71,62 +71,17 @@ public class TempOverrideFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        /*for(int k=0;k<openZoneMap.size();k++) {
-            Equip updatedEquip = new Equip.Builder().setHashMap(openZoneMap.get(k)).build();
-            if (updatedEquip.getProfile().startsWith("DAB")) {
-                HashMap dabPoints = ScheduleProcessJob.getDABEquipPoints(updatedEquip.getId());
-                Log.i("PointsValue", "DAB Points:" + dabPoints.toString());
-                loadDABPointsUI(dabPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
-            }
-            if (updatedEquip.getProfile().startsWith("VAV")) {
-                HashMap vavPoints = ScheduleProcessJob.getVAVEquipPoints(updatedEquip.getId());
-                Log.i("PointsValue", "VAV Points:" + vavPoints.toString());
-                loadVAVPointsUI(vavPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
-            }
-            if (updatedEquip.getProfile().startsWith("SSE")) {
-                HashMap ssePoints = ScheduleProcessJob.getSSEEquipPoints(updatedEquip.getId());
-                Log.i("PointsValue", "SSE Points:" + ssePoints.toString());
-                loadSSEPointsUI(ssePoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
-            }
-            if (updatedEquip.getProfile().startsWith("TEMP_INFLUENCE")) {
-                HashMap tiPoints = ScheduleProcessJob.getTIEquipPoints(updatedEquip.getId());
-                Log.i("PointsValue", "TI Points:" + tiPoints.toString());
-                loadTIPointsUI(tiPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
-            }
-            if (updatedEquip.getProfile().startsWith("SMARTSTAT_TWO_PIPE_FCU")) {
-                HashMap p2FCUPoints = ScheduleProcessJob.get2PFCUEquipPoints(updatedEquip.getId());
-                Log.i("PointsValue", "2PFCU Points:" + p2FCUPoints.toString());
-                loadSS2PFCUPointsUI(p2FCUPoints, inflater, linearLayoutZonePoints, equipId, true, updatedEquip.getGroup());
-
-            }
-            if (updatedEquip.getProfile().startsWith("SMARTSTAT_FOUR_PIPE_FCU")) {
-                HashMap p4FCUPoints = ScheduleProcessJob.get4PFCUEquipPoints(updatedEquip.getId());
-                Log.i("PointsValue", "4PFCU Points:" + p4FCUPoints.toString());
-                loadSS4PFCUPointsUI(p4FCUPoints, inflater, linearLayoutZonePoints, equipId, true, updatedEquip.getGroup());
-            }
-            if (updatedEquip.getProfile().startsWith("SMARTSTAT_CONVENTIONAL_PACK_UNIT")) {
-                HashMap cpuEquipPoints = ScheduleProcessJob.getCPUEquipPoints(updatedEquip.getId());
-                Log.i("PointsValue", "CPU Points:" + cpuEquipPoints.toString());
-                loadSSCPUPointsUI(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), true, updatedEquip.getGroup(),false);
-                //isCPUloaded = true;
-            }
-            if (updatedEquip.getProfile().startsWith("SMARTSTAT_HEAT_PUMP_UNIT")) {
-                HashMap hpuEquipPoints = ScheduleProcessJob.getHPUEquipPoints(updatedEquip.getId());
-                Log.i("PointsValue", "HPU Points:" + hpuEquipPoints.toString());
-                loadSSHPUPointsUI(hpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), true, updatedEquip.getGroup(),false);
-                //isHPUloaded = true;
-            }
-            if (updatedEquip.getProfile().startsWith("DUAL_DUCT")) {
-                HashMap dualDuctPoints = DualDuctUtil.getEquipPointsForView(updatedEquip.getId());
-                Log.i("PointsValue", "DUAL_DUCT Points:" + dualDuctPoints.toString());
-                loadDualDuctPointsUI(dualDuctPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
-            }
-        }*/
 
         expandableListView = view.findViewById(R.id.expandableListView);
 
         expandableListDetail = new HashMap<>();
         updateAllData();
+        /*List<String> result = new ArrayList<>();
+        for (String s : expandableListTitle) {
+            if (s.contains("SN-1000")) {
+                result.add(s);
+            }
+        }*/
         expandableListAdapter = new EquipTempExpandableListAdapter(TempOverrideFragment.this, expandableListTitle, expandableListDetail, tunerMap, getActivity());
         expandableListView.setAdapter(expandableListAdapter);
         expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
@@ -205,7 +160,7 @@ public class TempOverrideFragment extends Fragment {
         Log.e("InsideTempOverrideFrag","equips- "+equips);
         for (Map m : equips) {
             ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and equipRef == \""+m.get("id")+"\"");
-            Log.e("InsideTempOverrideFrag","tuners- "+tuners);
+            //Log.e("InsideTempOverrideFrag","tuners1- "+tuners);
             ArrayList tunerList = new ArrayList();
 
             for (Map t : tuners) {
@@ -214,7 +169,7 @@ public class TempOverrideFragment extends Fragment {
             }
 
             ArrayList<HashMap> userIntents = CCUHsApi.getInstance().readAll("userIntent and equipRef == \""+m.get("id")+"\"");
-            Log.e("InsideTempOverrideFrag","userIntents- "+userIntents);
+            //Log.e("InsideTempOverrideFrag","userIntents- "+userIntents);
 
             for (Map t : userIntents) {
                 tunerList.add(t.get("dis").toString());
@@ -222,7 +177,7 @@ public class TempOverrideFragment extends Fragment {
             }
 
             ArrayList<HashMap> configs = CCUHsApi.getInstance().readAll("config and equipRef == \""+m.get("id")+"\"");
-            Log.e("InsideTempOverrideFrag","configs- "+configs);
+            //Log.e("InsideTempOverrideFrag","configs- "+configs);
 
             for (Map t : configs) {
                 tunerList.add(t.get("dis").toString());
@@ -233,8 +188,10 @@ public class TempOverrideFragment extends Fragment {
         }
 
         ArrayList<HashMap> devices = CCUHsApi.getInstance().readAll("device");
+        Log.e("InsideTempOverrideFrag","devices- "+devices);
         for (Map m : devices) {
             ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and deviceRef == \""+m.get("id")+"\"");
+            //Log.e("InsideTempOverrideFrag","tuners2- "+tuners);
             ArrayList tunerList = new ArrayList();
 
             for (Map t : tuners) {
@@ -242,9 +199,11 @@ public class TempOverrideFragment extends Fragment {
                 tunerMap.put(t.get("dis").toString(), t.get("id").toString());
             }
             expandableListDetail.put(m.get("dis").toString(), tunerList);
+            //Log.e("InsideTempOverrideFrag","expandableListDetail- "+expandableListDetail);
             equipMap.put(m.get("dis").toString(), m.get("id").toString());
         }
         expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
+        //Log.e("InsideTempOverrideFrag","expandableListTitle- "+expandableListTitle);
     }
 
     public static double getPointVal(String id) {

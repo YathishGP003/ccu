@@ -310,7 +310,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 || equip.getMarkers().contains("ti")) && !equip.getMarkers().contains("system")) {
 
             VAVScheduler.processEquip(equip, equipSchedule, vacation, systemOccupancy);
-        } else if (equip.getMarkers().contains("pid")) {
+        } else if (equip.getMarkers().contains("pid")
+                   || equip.getMarkers().contains("emr")
+                   || equip.getMarkers().contains("modbus")) {
             Occupied occ = equipSchedule.getCurrentValues();
             if (occ != null) {
                 putOccupiedModeCache(equip.getRoomRef(), occ);

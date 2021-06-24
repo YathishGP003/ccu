@@ -896,6 +896,21 @@ public class CCUHsApi
         deleteWritableArray(id);
         deleteEntity(id);
     }
+
+    public void deleteFloorEntityTreeLeavingRemoteFloorIntact(String id) {
+        HashMap entity = CCUHsApi.getInstance().read("id == " + id);
+        if (entity.get("floor") == null) {
+            // not a floor :-(
+            CcuLog.w("CCU_HS", "Attempt to delete Floor locally with non-floor entity id");
+            return;
+        }
+        ArrayList<HashMap> rooms = readAll("room and floorRef == \"" + id + "\"");
+        for (HashMap room : rooms)
+        {
+            deleteEntityTree(room.get("id").toString());
+        }
+        deleteEntityLocally(entity.get("id").toString());
+    }
     
     public void deleteEntityTree(String id)
     {

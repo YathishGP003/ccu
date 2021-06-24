@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import com.google.android.material.textfield.TextInputLayout;
 import androidx.fragment.app.Fragment;
-import androidx.multidex.BuildConfig;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
@@ -56,6 +55,7 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
@@ -213,6 +213,7 @@ public class InstallerOptions extends Fragment {
         if (ccuId != null) {
             ccuUid = CCUHsApi.getInstance().getCcuRef().toString();
         }
+
         if(BuildConfig.BUILD_TYPE.equals("daikin_prod")|| CCUUiUtil.isDaikinThemeEnabled(getContext()))
         {
             textBacnetEnable.setVisibility(View.GONE);

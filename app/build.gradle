@@ -108,7 +108,7 @@ android {
             signingConfig signingConfigs.release
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
-            buildConfigField "String", 'GOOGLE_MAPS_KEY', '\"AIzaSyDEI5fuYQmggzyoDc6cBLciIx3ygY-lmOE\"'
+            buildConfigField "String", 'GOOGLE_MAPS_KEY', '\"AIzaSyA867irnfUuznLLsTVFwLs_c-0DNqiVEEY\"'
             versionNameSuffix "_" + 'daikin_prod' + "_" + versionSuffix
         }
     }

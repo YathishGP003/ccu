@@ -55,7 +55,7 @@ android {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
-            buildConfigField "String", 'ALERTS_API_KEY', '\"ccu-43a7691a-554d-4a71-844f-1a08b7afc12e\"'
+            buildConfigField "String", 'ALERTS_API_KEY', '\"ccu-f7b41a0d-af29-4d5e-a891-f2aa9e73dbfb\"'
         }
     }
 

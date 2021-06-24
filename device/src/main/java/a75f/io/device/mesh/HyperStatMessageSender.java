@@ -168,14 +168,14 @@ public class HyperStatMessageSender {
         msgBytes[0] = (byte)HYPERSTAT_CCU_TO_CM_SERIALIZED_MESSAGE.ordinal();
         
         //Network requires un-encoded node address occupying the first 4 bytes
-        System.arraycopy(getByteArrayFromInt(address), 0, msgBytes, 0, FIXED_INT_BYTES_SIZE);
+        System.arraycopy(getByteArrayFromInt(address), 0, msgBytes, 1, FIXED_INT_BYTES_SIZE);
     
         //Network requires un-encoded message type occupying the next 4 bytes
         System.arraycopy(getByteArrayFromInt(msgType.ordinal()),
-                         0, msgBytes, FIXED_INT_BYTES_SIZE, FIXED_INT_BYTES_SIZE);
+                         0, msgBytes, FIXED_INT_BYTES_SIZE + 1, FIXED_INT_BYTES_SIZE);
     
         //Now fill the serialized protobuf messages
-        System.arraycopy(dataBytes, 0, msgBytes,  2 * FIXED_INT_BYTES_SIZE, dataBytes.length);
+        System.arraycopy(dataBytes, 0, msgBytes,  2 * FIXED_INT_BYTES_SIZE + 1, dataBytes.length);
     
         LSerial.getInstance().sendSerialBytesToCM(msgBytes);
         Log.d(L.TAG_CCU_SERIAL, Arrays.toString(msgBytes));

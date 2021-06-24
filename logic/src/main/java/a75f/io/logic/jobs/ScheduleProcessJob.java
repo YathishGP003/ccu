@@ -8,7 +8,11 @@ import org.joda.time.DateTime;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -217,8 +221,33 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         systemVacation = activeSystemVacation != null || isAllZonesInVacation();
         updateSystemOccupancy();
 
+        try {
+            deleteExpiredVacation();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*This method will delete expired vacation from the internal portal as well, done by Aniket*/
+    private static void deleteExpiredVacation() throws ParseException {
         ArrayList<Schedule> getAllVacationSchedules = CCUHsApi.getInstance().getAllVacationSchedules();
-        Log.e("InsideScheduleProcess","getAllVacationSchedules- "+getAllVacationSchedules);
+        String currentDate = getDate();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        Date TodayDate = format.parse(currentDate);
+        for (int i=0; i<getAllVacationSchedules.size(); i++){
+            String vacationEndDate = getAllVacationSchedules.get(i).getEndDateString();
+            Date VacationDate = format.parse(vacationEndDate);
+            if (VacationDate.before(TodayDate)){
+                CCUHsApi.getInstance().deleteEntity("@" + getAllVacationSchedules.get(i).getId());
+                CCUHsApi.getInstance().syncEntityTree();
+            }
+        }
+    }
+
+    private static String getDate() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-M-dd");
+        Date date = new Date();
+        return dateFormat.format(date);
     }
 
     public static void processZoneEquipSchedule(Equip equip){

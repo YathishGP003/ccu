@@ -15,7 +15,7 @@
         android:max="100"
         android:backgroundTint="@color/white"
         android:layout_gravity="bottom"
-        android:indeterminateTint="@color/accent"
+        android:indeterminateTint="?orange_75f"
         android:layout_marginTop="-7dp"/>
 
     <EditText
@@ -52,6 +52,7 @@
         android:textSize="16sp"
         android:text="Select SmartNode Address Band"/>
     <Spinner
+        style="@style/Widget.AppCompat.Spinner.Underlined"
         android:id="@+id/addressBandSpinner"
         android:layout_width="170dp"
         android:layout_height="45dp"
@@ -61,7 +62,7 @@
         android:id="@+id/create_new"
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:background="@color/accent"
+        android:background="?orange_75f"
         android:textColor="@color/white"
         android:text="Create New" />
 

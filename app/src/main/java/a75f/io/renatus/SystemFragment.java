@@ -5,10 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -31,6 +33,7 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.helper.StringUtil;
 
 import java.lang.reflect.Field;
 import a75f.io.api.haystack.modbus.Parameter;
@@ -53,10 +56,13 @@ import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
+import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.views.OaoArc;
 
 import static a75f.io.logic.jobs.ScheduleProcessJob.ACTION_STATUS_CHANGE;
+
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
@@ -74,7 +80,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	ToggleButton tbSmartPrePurge;
 	ToggleButton tbSmartPostPurge;
 	ToggleButton tbEnhancedVentilation;
-	LinearLayout purgeLayout;
+	LinearLayout purgeLayout,mainLayout;
 
 	TextView energyMeterModelDetails;
 	RecyclerView energyMeterParams;
@@ -187,6 +193,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		oaoArc = view.findViewById(R.id.oaoArc);
 		purgeLayout = view.findViewById(R.id.purgelayout);
 		systemModePicker = view.findViewById(R.id.systemModePicker);
+		mainLayout = view.findViewById(R.id.main_layout);
 
 		if (L.ccu().systemProfile != null) {
 			coolingAvailable = L.ccu().systemProfile.isCoolingAvailable();
@@ -205,24 +212,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			modesAvailable.add(SystemMode.HEATONLY.displayName);
 		}
 
-//TODO uncomment when it comes to prod release KUMAR.. commenting for now for Automation test case , dont forget to revoke xml file too
-		/*systemModePicker.setTextColorResource(R.color.my_gray);
-		systemModePicker.setSelectedTextSize(R.dimen.selected_text_size);
-		systemModePicker.setTextSize(R.dimen.text_size);
-		systemModePicker.setDividerColor(getResources().getColor(R.color.accent));
-
-		systemModePicker.setMinValue(0);
-		systemModePicker.setMaxValue(modesAvailable.size()-1);
-
-		// Set fading edge enabled
-		systemModePicker.setFadingEdgeEnabled(true);
-
-		// Set scroller enabled
-		systemModePicker.setScrollerEnabled(true);
-
-		// Set wrap selector wheel
-		systemModePicker.setWrapSelectorWheel(false);
-		*/
 
 		systemModePicker.setMinValue(0);
 		systemModePicker.setMaxValue(modesAvailable.size()-1);
@@ -232,7 +221,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 		//TODO we will comment out below two lines for prod release
 		systemModePicker.setWrapSelectorWheel(false);
-		setDividerColor(systemModePicker);
+
 		
 		
 		systemModePicker.setOnScrollListener(new NumberPicker.OnScrollListener() {
@@ -274,7 +263,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		
 		targetMaxInsideHumidity = view.findViewById(R.id.targetMaxInsideHumidity);
 		targetMinInsideHumidity = view.findViewById(R.id.targetMinInsideHumidity);
-		
+		CCUUiUtil.setSpinnerDropDownColor(targetMaxInsideHumidity,getContext());
+		CCUUiUtil.setSpinnerDropDownColor(targetMinInsideHumidity,getContext());
 		targetMinInsideHumidity.setOnTouchListener(new View.OnTouchListener() {
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
@@ -429,7 +419,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 		});
 		getActivity().registerReceiver(occupancyReceiver, new IntentFilter(ACTION_STATUS_CHANGE));
-
+		configWatermark();
 	}
 
 	private void checkForOao() {
@@ -484,15 +474,16 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 				@Override
 				public void run() {
+					String colorHex = CCUUiUtil.getColorCode(getContext());
 					String status = CCUHsApi.getInstance().readDefaultStrVal("system and status and message");
 					//If the system status is not updated yet (within a minute of registering the device), generate a
 					//default message.
 					if (StringUtils.isEmpty(status)) {
 						status = L.ccu().systemProfile.getStatusMessage();
 					}
-					
+
 					if (L.ccu().systemProfile instanceof DefaultSystem) {
-						equipmentStatus.setText(status.equals("") ? "System is in gateway mode" : Html.fromHtml(status.replace("ON", "<font color='#e24725'>ON</font>")));
+						equipmentStatus.setText(StringUtil.isBlank(status) ? "System is in gateway mode" : Html.fromHtml(status.replace("ON", "<font color='"+colorHex+"'>ON</font>")));
 						occupancyStatus.setText("No Central equipment connected.");
 						tbCompHumidity.setChecked(false);
 						tbDemandResponse.setChecked(false);
@@ -508,7 +499,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					}else{
 						systemModePicker.setValue((int) TunerUtil.readSystemUserIntentVal("conditioning and mode"));
 
-						equipmentStatus.setText(status.equals("") ? Html.fromHtml("<font color='#e24725'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='#e24725'>ON</font>").replace("OFF","<font color='#e24725'>OFF</font>")));
+						equipmentStatus.setText(StringUtil.isBlank(status)? Html.fromHtml("<font color='"+colorHex+"'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='"+colorHex+"'>ON</font>").replace("OFF","<font color='"+colorHex+"'>OFF</font>")));
+						Log.i(TAG, "getSystemStatusString: Before system fragement");
 						occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());
 						tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
 						tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
@@ -556,28 +548,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public void onNothingSelected(AdapterView<?> arg0) {
 		// TODO Auto-generated method stub
 	}
-	
-	private void setDividerColor(NumberPicker picker) {
-		Field[] numberPickerFields = NumberPicker.class.getDeclaredFields();
-		for (Field field : numberPickerFields) {
-			if (field.getName().equals("mSelectionDivider")) {
-				field.setAccessible(true);
-				try {
-					field.set(picker, getResources().getDrawable(R.drawable.divider_np));
-				} catch (IllegalArgumentException e) {
-					Log.v("NP", "Illegal Argument Exception");
-					e.printStackTrace();
-				} catch (Resources.NotFoundException e) {
-					Log.v("NP", "Resources NotFound");
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					Log.v("NP", "Illegal Access Exception");
-					e.printStackTrace();
-				}
-				break;
-			}
-		}
-	}
+
 	
 	private void setUserIntentBackground(String query, double val) {
 		
@@ -656,7 +627,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			energyMeterModelDetails.setText(emDevice+ "("+emDevice.getEquipType() + emDevice.getSlaveId() + ")");
 			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 			energyMeterParams.setLayoutManager(gridLayoutManager);
-			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getActivity(), emDevice.getEquipRef(), parameterList);
+			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getContext(), emDevice.getEquipRef(), parameterList);
 			energyMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
 		}
 
@@ -697,9 +668,15 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			btuMeterModelDetails.setText(btuDevice+ "("+btuDevice.getEquipType() + btuDevice.getSlaveId() + ")");
 			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 			btuMeterParams.setLayoutManager(gridLayoutManager);
-			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getActivity(), btuDevice.getEquipRef(), parameterList);
+			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getContext(), btuDevice.getEquipRef(), parameterList);
 			btuMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
 		}
+
+	}
+
+	private void configWatermark(){
+		if(!BuildConfig.BUILD_TYPE.equals("daikin_prod")&&! CCUUiUtil.isDaikinThemeEnabled(getContext()))
+			mainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
 
 	}
 }

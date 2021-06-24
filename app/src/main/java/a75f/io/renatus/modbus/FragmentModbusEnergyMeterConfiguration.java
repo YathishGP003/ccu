@@ -43,6 +43,7 @@ import a75f.io.renatus.FloorPlanFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.modbus.FragmentModbusConfiguration;
 import a75f.io.renatus.modbus.RecyclerModbusParamAdapter;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -166,6 +167,8 @@ public class FragmentModbusEnergyMeterConfiguration extends BaseDialogFragment {
             });
         }
 
+        CCUUiUtil.setSpinnerDropDownColor(spEquipmentType,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(spAddress,getContext());
     }
     private void updateUi(boolean isNewConfig){
         //If multiple slave address occurs

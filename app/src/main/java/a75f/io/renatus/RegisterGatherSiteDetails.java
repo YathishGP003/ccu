@@ -21,6 +21,8 @@ import a75f.io.api.haystack.Site;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.CCUUtils;
 
 public class RegisterGatherSiteDetails extends Activity {
 
@@ -42,7 +44,7 @@ public class RegisterGatherSiteDetails extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        CCUUiUtil.setThemeDetails(this);
         setContentView(R.layout.activity_register_gather_site_details);
 
         mSiteName = (EditText) findViewById(R.id.site_name_et);

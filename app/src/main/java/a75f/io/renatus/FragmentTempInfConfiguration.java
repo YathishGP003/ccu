@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,6 +29,7 @@ import a75f.io.logic.bo.building.ccu.CazProfileConfig;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -127,7 +129,7 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
             mCcuAsZoneProfile = new CazProfile();
 
         }
-        setDividerColor(temperatureOffset);
+
         temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];//{"-4","-3","-2","-1","0","1","2","3","4"};
         for (int nNum = 0; nNum < TEMP_OFFSET_LIMIT * 2 + 1; nNum++)
@@ -143,7 +145,7 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
                 R.array.zone_priority, R.layout.spinner_dropdown_item);
         zonePriorityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         zonePriority.setAdapter(zonePriorityAdapter);
-
+        CCUUiUtil.setSpinnerDropDownColor(zonePriority,getContext());
 
         if(mProfileConfig != null) {
             zonePriority.setSelection(mProfileConfig.getPriority().ordinal());

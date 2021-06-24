@@ -27,6 +27,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatDelegate;
 import android.text.format.Formatter;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.raygun.raygun4android.RaygunClient;

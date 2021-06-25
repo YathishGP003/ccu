@@ -99,9 +99,9 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         if ((L.ccu().systemProfile instanceof VavIERtu))
         {
             systemProfile = (VavIERtu) L.ccu().systemProfile;
-            analog1Cb.setChecked(systemProfile.getConfigEnabled("analog1") > 0);
-            analog2Cb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
-            analog3Cb.setChecked(systemProfile.getConfigEnabled("analog3") > 0);
+            analog1Cb.setChecked(systemProfile.getConfigEnabled("cooling") > 0);
+            analog2Cb.setChecked(systemProfile.getConfigEnabled("fan") > 0);
+            analog3Cb.setChecked(systemProfile.getConfigEnabled("heating") > 0);
             humidificationCb.setChecked(systemProfile.getConfigEnabled("humidification") > 0);
             setupAnalogLimitSelectors();
             setupEquipAddrEditor();
@@ -312,13 +312,13 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         switch (buttonView.getId())
         {
             case R.id.analog1RTU:
-                setSelectionBackground("analog1", isChecked);
+                setSelectionBackground("cooling", isChecked);
                 break;
             case R.id.analog2RTU:
-                setSelectionBackground("analog2", isChecked);
+                setSelectionBackground("fan", isChecked);
                 break;
             case R.id.analog3RTU:
-                setSelectionBackground("analog3", isChecked);
+                setSelectionBackground("heating", isChecked);
                 break;
             case R.id.humidificationCb:
                 setSelectionBackground("humidification", isChecked);

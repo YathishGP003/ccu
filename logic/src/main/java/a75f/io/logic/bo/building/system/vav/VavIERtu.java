@@ -379,38 +379,38 @@ public class VavIERtu extends VavSystemProfile
         String siteRef = siteMap.get("id").toString();
         String tz = siteMap.get("tz").toString();
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        Point analog1OutputEnabled = new Point.Builder()
-                                             .setDisplayName(equipDis+"-"+"analog1OutputEnabled")
+        Point coolingEnabled = new Point.Builder()
+                                             .setDisplayName(equipDis+"-"+"coolingEnabled")
                                              .setSiteRef(siteRef)
                                              .setEquipRef(equipref)
-                                             .addMarker("system").addMarker("config").addMarker("analog1")
+                                             .addMarker("system").addMarker("config").addMarker("cooling")
                                              .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
                                              .setEnums("false,true").setTz(tz)
                                              .build();
-        String analog1OutputEnabledId = hayStack.addPoint(analog1OutputEnabled);
-        hayStack.writeDefaultValById(analog1OutputEnabledId, 0.0 );
+        String coolingEnabledId = hayStack.addPoint(coolingEnabled);
+        hayStack.writeDefaultValById(coolingEnabledId, 0.0 );
         
-        Point analog2OutputEnabled = new Point.Builder()
-                                             .setDisplayName(equipDis+"-"+"analog2OutputEnabled")
+        Point fanEnabled = new Point.Builder()
+                                             .setDisplayName(equipDis+"-"+"fanEnabled")
                                              .setSiteRef(siteRef)
                                              .setEquipRef(equipref)
-                                             .addMarker("system").addMarker("config").addMarker("analog2")
+                                             .addMarker("system").addMarker("config").addMarker("fan")
                                              .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
                                              .setEnums("false,true").setTz(tz)
                                              .build();
-        String analog2OutputEnabledId = hayStack.addPoint(analog2OutputEnabled);
-        hayStack.writeDefaultValById(analog2OutputEnabledId, 0.0 );
+        String fanEnabledId = hayStack.addPoint(fanEnabled);
+        hayStack.writeDefaultValById(fanEnabledId, 0.0 );
         
-        Point analog3OutputEnabled = new Point.Builder()
-                                             .setDisplayName(equipDis+"-"+"analog3OutputEnabled")
+        Point heatingEnabled = new Point.Builder()
+                                             .setDisplayName(equipDis+"-"+"heatingEnabled")
                                              .setSiteRef(siteRef)
                                              .setEquipRef(equipref)
-                                             .addMarker("system").addMarker("config").addMarker("analog3")
+                                             .addMarker("system").addMarker("config").addMarker("heating")
                                              .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
                                              .setEnums("false,true").setTz(tz)
                                              .build();
-        String analog3OutputEnabledId = hayStack.addPoint(analog3OutputEnabled);
-        hayStack.writeDefaultValById(analog3OutputEnabledId, 0.0 );
+        String heatingEnabledId = hayStack.addPoint(heatingEnabled);
+        hayStack.writeDefaultValById(heatingEnabledId, 0.0 );
     
         Point humidificationEnabled = new Point.Builder()
                                              .setDisplayName(equipDis+"-"+"humidificationEnabled")
@@ -422,7 +422,17 @@ public class VavIERtu extends VavSystemProfile
                                              .build();
         String humidificationEnabledId = hayStack.addPoint(humidificationEnabled);
         hayStack.writeDefaultValById(humidificationEnabledId, 0.0 );
-        
+    
+        Point multiZoneEnabled = new Point.Builder()
+                                          .setDisplayName(equipDis+"-"+"multiZoneEnabled")
+                                          .setSiteRef(siteRef)
+                                          .setEquipRef(equipref)
+                                          .addMarker("system").addMarker("config").addMarker("multiZone")
+                                          .addMarker("enabled").addMarker("writable").addMarker("sp")
+                                          .setEnums("false,true").setTz(tz)
+                                          .build();
+        String multiZoneEnabledId = hayStack.addPoint(multiZoneEnabled);
+        hayStack.writeDefaultValById(multiZoneEnabledId, 0.0 );
         
         Point minCoolingDat = new Point.Builder()
                                                .setDisplayName(equipDis+"-"+"minCoolingDat")
@@ -507,6 +517,18 @@ public class VavIERtu extends VavSystemProfile
                                       .build();
         String equipmentIPId = hayStack.addPoint(equipmentIP);
         hayStack.writeDefaultValById(equipmentIPId, "10.100.11.71" );
+    
+        Point macAddress = new Point.Builder()
+                                     .setDisplayName(equipDis+"-"+"macAddress")
+                                     .setSiteRef(siteRef)
+                                     .setEquipRef(equipref)
+                                     .addMarker("system").addMarker("config").addMarker("ie").addMarker("mac")
+                                     .addMarker("address").addMarker("writable").addMarker("sp")
+                                     .setKind(Kind.STRING)
+                                     .setTz(tz)
+                                     .build();
+        String macAddressId = hayStack.addPoint(macAddress);
+        hayStack.writeDefaultValById(macAddressId, "" );
     }
     
     public double getCmdSignal(String cmd) {
@@ -554,7 +576,7 @@ public class VavIERtu extends VavSystemProfile
             String siteRef = siteMap.get("id").toString();
             String tz = siteMap.get("tz").toString();
             switch (tags){
-                case "analog1":
+                case "cooling":
                     HashMap cmdCool = CCUHsApi.getInstance().read("point and system and cmd and cooling and modulating");
                     if(cmdCool != null && cmdCool.size() > 0) {
                         if(val == 0.0) {
@@ -571,7 +593,7 @@ public class VavIERtu extends VavSystemProfile
                         CCUHsApi.getInstance().addPoint(coolingSignal);
                     }
                     break;
-                case "analog2":
+                case "fan":
                     HashMap cmdFan = CCUHsApi.getInstance().read("point and system and cmd and fan and modulating");
                     if(cmdFan != null && cmdFan.size() > 0) {
                         if(val == 0.0) {
@@ -588,7 +610,7 @@ public class VavIERtu extends VavSystemProfile
                         CCUHsApi.getInstance().addPoint(fanSignal);
                     }
                     break;
-                case "analog3":
+                case "heating":
                     HashMap cmdHeat = CCUHsApi.getInstance().read("point and system and cmd and heating and modulating");
                     if(cmdHeat != null && cmdHeat.size() > 0) {
                         if(val == 0.0) {

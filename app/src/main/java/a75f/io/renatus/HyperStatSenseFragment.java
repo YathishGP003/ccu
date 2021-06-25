@@ -178,7 +178,35 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
         }
     }
 
+    @OnClick(R.id.setBtn)
+    private void setOnClick(View v){
+        new AsyncTask<String, Void, Void>() {
+            @Override
+            protected void onPreExecute() {
+                mSetbtn.setEnabled(false);
+                ProgressDialogUtils.showProgressDialog(getActivity(),"Saving HyperStat Sense Configuration");
+                super.onPreExecute();
+            }
+
+            @Override
+            protected Void doInBackground( final String ... params ) {
+                setupSenseProfile();
+                L.saveCCUState();
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute( final Void result ) {
+                ProgressDialogUtils.hideProgressDialog();
+                HyperStatSenseFragment.this.closeAllBaseDialogFragments();
+                getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                LSerial.getInstance().sendSeedMessage(false,false, mNodeAddress, mRoomName,mFloorName);
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+    }
+
     private void setupSenseProfile() {
+
         HyperStatSenseConfiguration hssense = new HyperStatSenseConfiguration();
         hssense.temperatureOffset = mTemperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
         hssense.isTh1Enable = mTherm1toggle.isChecked();

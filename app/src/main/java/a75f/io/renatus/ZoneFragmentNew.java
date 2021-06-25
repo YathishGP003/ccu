@@ -94,6 +94,7 @@ import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 
 public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 {
+    private static final String LOG_TAG = " ZoneFragmentNew ";
     ExpandableListView            expandableListView;
     HashMap<String, List<String>> expandableListDetail;
 
@@ -269,7 +270,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Log.d("Scheduler", "refreshDesiredTemp22 =" + pointcoolDT + "," + pointheatDT + "," + nodeAddress);
+                                Log.d(LOG_TAG+"Scheduler", "refreshDesiredTemp22 =" + pointcoolDT + "," + pointheatDT + "," + nodeAddress);
                                 tempSeekArc.setCoolingDesiredTemp((float)pointcoolDT, false);
                                 tempSeekArc.setHeatingDesiredTemp((float)pointheatDT, false);
                                 tempSeekArc.invalidate();
@@ -326,7 +327,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 {
                     GridItem gridItem = (GridItem) seekArcArrayList.get(i).getTag();
                     ArrayList<Short> zoneNodes = gridItem.getZoneNodes();
-                    Log.i("CurrentTemp", "SensorCurrentTemp:" + currentTemp + " Node:" + nodeAddress+" zoneNodes:"+zoneNodes);
+                    Log.i(LOG_TAG+"CurrentTemp", "SensorCurrentTemp:" + currentTemp + " Node:" + nodeAddress+" zoneNodes:"+zoneNodes);
                     if(zoneNodes.contains(nodeAddress))
                     {
                             SeekArc tempSeekArc = seekArcArrayList.get(i);
@@ -526,7 +527,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                 zoneData.put(zoneModel.get("roomRef").toString(), newData);
                             }
                         }
-                        Log.i("ZonesMap", "Size:" + zoneData.size() + " Data:" + zoneData);
+                        Log.i(LOG_TAG+"ZonesMap", "Size:" + zoneData.size() + " Data:" + zoneData);
                         for (ArrayList<HashMap> equipZones : zoneData.values()) {
 
                             String profileType = "";
@@ -547,7 +548,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             boolean nontempModule = false;
                             for (HashMap equipTypes : equipZones) {
                                 profileType = equipTypes.get("profile").toString();
-                                Log.e("RoomData", "ProfileType:" + profileType);
+                                Log.e(LOG_TAG+"RoomData", "ProfileType:" + profileType);
                                  if ( !profileType.contains(profileModBus) &&
                                      profileType.contains(profileVAV) ||
                                      profileType.contains(profileDAB) ||
@@ -556,7 +557,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                      profileType.contains(profileTempInfluence) ||
                                      profileType.contains(profileDualDuct)) {
                                     tempModule = true;
-                                    Log.e("RoomData", "Load SmartNode ProfileType:" + profileType);
+                                    Log.e(LOG_TAG+"RoomData", "Load SmartNode ProfileType:" + profileType);
                                 }
                                 if (profileType.contains(profileEM) || profileType.contains(profilePLC)
                                         || profileType.contains(profileTempMonitor)
@@ -564,16 +565,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                         || profileType.contains(profileModBus)
                                         || profileType.contains(profileHyperStat)) {
                                     nontempModule = true;
-                                    Log.e("RoomData", "Load SmartStat ProfileType:" + profileType);
+                                    Log.e(LOG_TAG+"RoomData", "Load SmartStat ProfileType:" + profileType);
                                 }
                             }
 
                             if (tempModule) {
-                                Log.e("RoomData", "Load Temperature Based View");
+                                Log.e(LOG_TAG+"RoomData", "Load Temperature Based View");
                                 viewTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout);
                             }
                             if (!tempModule && nontempModule) {
-                                Log.e("RoomData", "Load Non Temperature Based View");
+                                Log.e(LOG_TAG+"RoomData", "Load Non Temperature Based View");
                                 viewNonTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout);
                                 //arcViewParent = inflater.inflate(R.layout.zones_item_smartstat, (ViewGroup) rootView, false);
                             }
@@ -581,7 +582,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         }
                     }else{
                         //No devices paired
-                        Log.e("RoomData", "Load No device paired Based View");
+                        Log.e(LOG_TAG+"RoomData", "Load No device paired Based View");
                         viewNonTemperatureBasedZone(inflater, rootView, new ArrayList<HashMap>(), zoneTitle, i, tablerowLayout);
                         i++;
                     }

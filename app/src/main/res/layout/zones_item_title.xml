@@ -16,15 +16,15 @@
             android:textAppearance="@style/action_text_appearance"
             android:textAllCaps="false"/>
 
-    <TextView
-        android:id="@+id/module_status"
-        android:layout_marginLeft="5dp"
-        android:layout_gravity="top"
-        android:gravity="top"
-        android:layout_width="15dp"
-        android:layout_alignParentRight="true"
-        android:background="@drawable/module_dead"
-        android:layout_height="15dp"/>
+        <TextView
+            android:id="@+id/module_status"
+            android:layout_marginLeft="5dp"
+            android:layout_gravity="top"
+            android:gravity="top"
+            android:layout_width="15dp"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/module_dead"
+            android:layout_height="15dp"/>
 
 
 </LinearLayout>

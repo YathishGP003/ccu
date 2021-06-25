@@ -142,6 +142,9 @@ public class Pulse
 					case RSSI:
 						hayStack.writeHisValueByIdWithoutCOV(phyPoint.get("id").toString(), (double)rssi);
 						hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), (double)rssi);
+						if(currentTempInterface != null) {
+							currentTempInterface.refreshScreen(null);
+						}
 						Log.i("Jayatheertha-147", rssi + "<<--->>" + hayStack.readHisValById(phyPoint.get("id").toString())
 								+ "<<--->>" + hayStack.curRead(phyPoint.get("id").toString()).getDateInMillis());
 						break;

@@ -19,6 +19,7 @@ import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.TemperatureProfileUtil;
 import a75f.io.logic.tuners.DualDuctTuners;
@@ -242,8 +243,9 @@ class DualDuctEquip {
         String dtId = CCUHsApi.getInstance().addPoint(desiredTemp);
         
         String supplyAirTempId = createSupplyAirTempPoint(siteRef, equipDis, roomRef, floorRef, tz, config);
-        
-        
+
+        String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
+                siteRef, roomRef, floorRef, nodeAddr, "dualDuct", tz));
     
         CCUHsApi.getInstance().writeHisValById(datId, 0.0);
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
@@ -255,6 +257,8 @@ class DualDuctEquip {
         device.th1In.setEnabled(true);
         device.th2In.setPointRef(supplyAirTempId);
         device.th2In.setEnabled(true);
+        device.rssi.setPointRef(heartBeatId);
+        device.rssi.setEnabled(true);
         
         for (Output op : config.getOutputs()) {
             switch (op.getPort()) {

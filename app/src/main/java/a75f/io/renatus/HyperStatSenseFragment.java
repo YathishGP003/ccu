@@ -41,6 +41,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.objectbox.android.AndroidScheduler;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import butterknife.OnCheckedChanged;
+import butterknife.OnClick;
 
 public class HyperStatSenseFragment extends BaseDialogFragment {
 
@@ -144,83 +146,36 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
         mTemperatureOffset.setMinValue(0);
         mTemperatureOffset.setMaxValue(TEMP_OFFSET_LIMIT * 2);
         mTemperatureOffset.setValue(TEMP_OFFSET_LIMIT);
+        mTemperatureOffset.setWrapSelectorWheel(false);
 
         /** Spinner id disabled by default */
         mThermostat1Sp.setEnabled(false);
         mThermostat2Sp.setEnabled(false);
         mAnalog1Sp.setEnabled(false);
         mAnalog2Sp.setEnabled(false);
+    }
 
-        mTherm1toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+    @OnCheckedChanged({R.id.th1,R.id.th2,R.id.anlg1,R.id.anlg2})
+    public void th1Onchange(CompoundButton buttonView, boolean isChecked){
+        switch (buttonView.getId())
+        {
+            case R.id.th1:
                 if(isChecked) mThermostat1Sp.setEnabled(true);
                 else mThermostat1Sp.setEnabled(false);
-            }
-        });
-
-        mTherm1toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked) mThermostat1Sp.setEnabled(true);
-                else mThermostat1Sp.setEnabled(false);
-            }
-        });
-
-        mTherm2toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                break;
+            case R.id.th2:
                 if(isChecked) mThermostat2Sp.setEnabled(true);
                 else mThermostat2Sp.setEnabled(false);
-            }
-        });
-
-        mAnalog1toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                break;
+            case R.id.anlg1:
                 if(isChecked) mAnalog1Sp.setEnabled(true);
                 else mAnalog1Sp.setEnabled(false);
-            }
-        });
-
-        mAnalog2toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                break;
+            case R.id.anlg2:
                 if(isChecked) mAnalog2Sp.setEnabled(true);
                 else mAnalog2Sp.setEnabled(false);
-            }
-        });
-
-        mSetbtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new AsyncTask<String, Void, Void>() {
-                    @Override
-                    protected void onPreExecute() {
-                        mSetbtn.setEnabled(false);
-                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving HyperStat Sense Configuration");
-                        super.onPreExecute();
-                    }
-
-                    @Override
-                    protected Void doInBackground( final String ... params ) {
-                        setupSenseProfile();
-                        L.saveCCUState();
-                        return null;
-                    }
-
-
-
-                    @Override
-                    protected void onPostExecute( final Void result ) {
-                        ProgressDialogUtils.hideProgressDialog();
-                        HyperStatSenseFragment.this.closeAllBaseDialogFragments();
-                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                        LSerial.getInstance().sendSeedMessage(false,false, mNodeAddress, mRoomName,mFloorName);
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
-            }
-        });
+                break;
+        }
     }
 
     private void setupSenseProfile() {

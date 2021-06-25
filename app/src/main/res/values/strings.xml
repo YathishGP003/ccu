@@ -923,5 +923,6 @@
     <string name="buttonDesableDelay">2000</string>
     <string name="analogin1">Analog-in1</string>
     <string name="analogin2">Analog-in2</string>
+    <string name="title_pairhss">HYPERSTAT | PAIRING STEPS </string>
 
 </resources>

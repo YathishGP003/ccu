@@ -24,6 +24,7 @@ import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.erm.EmrProfile;
+import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
@@ -380,6 +381,11 @@ public class Globals {
                             FourPipeFanCoilUnitProfile fourPfcu = new FourPipeFanCoilUnitProfile();
                             fourPfcu.addLogicalMap(Short.valueOf(eq.getGroup()), z.getId());
                             L.ccu().zoneProfiles.add(fourPfcu);
+                            break;
+                        case HYPERSTAT_SENSE:
+                            HyperStatSenseProfile hssense = new HyperStatSenseProfile();
+                            hssense.addHyperStatSenseEquip(Short.valueOf(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(hssense);
                             break;
                         case MODBUS_PAC:
                         case MODBUS_RRS:

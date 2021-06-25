@@ -541,13 +541,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             String profileTempInfluence = "TEMP_INFLUENCE";
                             String profileDualDuct = "DUAL_DUCT";
                             String profileModBus = "MODBUS";
+                            String profileHyperStat = "HYPERSTAT";
 
-                            //Log.e("RoomData","ProfileType:"+profileType);
                             boolean tempModule = false;
                             boolean nontempModule = false;
                             for (HashMap equipTypes : equipZones) {
                                 profileType = equipTypes.get("profile").toString();
-                                //Log.e("RoomData", "ProfileType:" + profileType);
+                                Log.e("RoomData", "ProfileType:" + profileType);
                                  if ( !profileType.contains(profileModBus) &&
                                      profileType.contains(profileVAV) ||
                                      profileType.contains(profileDAB) ||
@@ -558,7 +558,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                     tempModule = true;
                                     Log.e("RoomData", "Load SmartNode ProfileType:" + profileType);
                                 }
-                                if (profileType.contains(profileEM) || profileType.contains(profilePLC) || profileType.contains(profileTempMonitor) || profileType.contains(profileTempInfluence) || profileType.contains(profileModBus)) {
+                                if (profileType.contains(profileEM) || profileType.contains(profilePLC)
+                                        || profileType.contains(profileTempMonitor)
+                                        || profileType.contains(profileTempInfluence)
+                                        || profileType.contains(profileModBus)
+                                        || profileType.contains(profileHyperStat)) {
                                     nontempModule = true;
                                     Log.e("RoomData", "Load SmartStat ProfileType:" + profileType);
                                 }

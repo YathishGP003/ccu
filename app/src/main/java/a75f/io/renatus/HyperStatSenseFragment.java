@@ -1,6 +1,8 @@
 package a75f.io.renatus;
 
 import android.app.Dialog;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,14 +23,19 @@ import androidx.lifecycle.ViewModelProviders;
 
 import java.util.ArrayList;
 
+import a75f.io.device.mesh.LSerial;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseConfiguration;
 import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseEquip;
 import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseProfile;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -39,6 +46,7 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
 
     public static final String ID = HyperStatSenseFragment.class.getSimpleName();
     private  HyperStatSenseVM mHyperStatSenseVM;
+    private HyperStatSenseProfile mHSSenseProfile;
     static final int TEMP_OFFSET_LIMIT = 100;
 
     short        mNodeAddress;
@@ -125,6 +133,7 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
             }
         });
         setSpinnerListItem();
+        mHSSenseProfile = new HyperStatSenseProfile();
 
         /** Setting temperature offset limit */
         mTemperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
@@ -185,9 +194,54 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
         mSetbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                new AsyncTask<String, Void, Void>() {
+                    @Override
+                    protected void onPreExecute() {
+                        mSetbtn.setEnabled(false);
+                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving HyperStat Sense Configuration");
+                        super.onPreExecute();
+                    }
 
+                    @Override
+                    protected Void doInBackground( final String ... params ) {
+                        setupSenseProfile();
+                        L.saveCCUState();
+                        return null;
+                    }
+
+
+
+                    @Override
+                    protected void onPostExecute( final Void result ) {
+                        ProgressDialogUtils.hideProgressDialog();
+                        HyperStatSenseFragment.this.closeAllBaseDialogFragments();
+                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                        LSerial.getInstance().sendSeedMessage(false,false, mNodeAddress, mRoomName,mFloorName);
+                    }
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
             }
         });
+    }
+
+    private void setupSenseProfile() {
+        HyperStatSenseConfiguration hssense = new HyperStatSenseConfiguration();
+        hssense.temperatureOffset = mTemperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
+        hssense.isTh1Enable = mTherm1toggle.isChecked();
+        hssense.isTh2Enable = mTherm2toggle.isChecked();
+        hssense.isAnalog1Enable = mAnalog1toggle.isChecked();
+        hssense.isAnalog2Enable = mAnalog2toggle.isChecked();
+        hssense.th1Sensor = mThermostat1Sp.getSelectedItemPosition();
+        hssense.th2Sensor = mThermostat2Sp.getSelectedItemPosition();
+        hssense.analog1Sensor = mAnalog1Sp.getSelectedItemPosition();
+        hssense.analog2Sensor = mAnalog2Sp.getSelectedItemPosition();
+
+       // if (mProfileConfig == null) {
+        mHSSenseProfile.addHyperStatSenseEquip(ProfileType.HYPERSTAT_SENSE,mNodeAddress, hssense, mFloorName, mRoomName);
+       // } else {
+         //   mHSSenseProfile.updatePlcEquip(p,floorRef, zoneRef, processVariableTag, dynamicTargetTag);
+       // }
+        L.ccu().zoneProfiles.add(mHSSenseProfile);
+        CcuLog.d(L.TAG_CCU_UI, "Set Hyperstat sense Config: Profiles - "+L.ccu().zoneProfiles.size());
     }
 
 

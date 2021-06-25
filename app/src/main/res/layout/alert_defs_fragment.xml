@@ -116,7 +116,7 @@
          <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/refreshButton"
             android:paddingTop="0dp"
-            android:textColor="@color/orange_75f"
+            android:textColor="?orange_75f"
             android:paddingBottom="0dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

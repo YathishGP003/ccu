@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
@@ -38,6 +40,7 @@ import android.widget.ToggleButton;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.Globals;
+import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.DABFullyAHUProfile;
 import a75f.io.renatus.DABHybridAhuProfile;
 import a75f.io.renatus.DABStagedProfile;
@@ -52,6 +55,8 @@ import a75f.io.renatus.VavHybridRtuProfile;
 import a75f.io.renatus.VavIERtuProfile;
 import a75f.io.renatus.VavStagedRtuProfile;
 import a75f.io.renatus.VavStagedRtuWithVfdProfile;
+import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -85,18 +90,20 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        CCUUiUtil.setThemeDetails(this);
         setContentView(R.layout.activity_freshregistration);
         container = findViewById(R.id.container);
         listView_icons = findViewById(R.id.listView_icons);
         imageView_logo = findViewById(R.id.imageLogo);
         buttonNext = findViewById(R.id.buttonNext);
-
+        configLogo();
         prefs = new Prefs(FreshRegistration.this);
 
         rl_Header = findViewById(R.id.layoutHeader);
         textView_title = findViewById(R.id.textTitleFragment);
         imageView_Goback = findViewById(R.id.imageGoback);
         spinnerSystemProile = findViewById(R.id.spinnerSystemProfile);
+
         imageRefresh = (ImageView) findViewById(R.id.imageRefresh);
         toggleWifi = (ToggleButton) findViewById(R.id.toggleWifi);
 
@@ -376,7 +383,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             }
 
         });
-
+        CCUUiUtil.setSpinnerDropDownColor(spinnerSystemProile,FreshRegistration.this);
         selectItem(position);
     }
 
@@ -1269,6 +1276,16 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
              super.onBackPressed();
         else
              imageView_Goback.callOnClick();
+    }
 
+
+    private void configLogo(){
+        if(BuildConfig.BUILD_TYPE.equals("daikin_prod")|| CCUUiUtil.isDaikinThemeEnabled(this))
+            imageView_logo.setImageDrawable(getResources().getDrawable(R.drawable.ic_daikin_logo_colored));
+        else
+        {
+            imageView_logo.setImageDrawable(getResources().getDrawable(R.drawable.ic_logo_svg));
+            findViewById(R.id.main_layout).setBackgroundResource(R.drawable.bg_logoscreen);
+        }
     }
 }

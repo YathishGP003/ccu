@@ -20,6 +20,7 @@
         />
 
     <Spinner
+        style="@style/Widget.AppCompat.Spinner.Underlined"
         android:id="@+id/channelSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -27,6 +28,7 @@
         />
 
     <Spinner
+        style="@style/Widget.AppCompat.Spinner.Underlined"
         android:id="@+id/profileSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -58,12 +60,14 @@
         android:layout_weight="1"/>
 
     <Spinner
+        style="@style/Widget.AppCompat.Spinner.Underlined"
         android:id="@+id/fanspeedSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"/>
 
     <Spinner
+        style="@style/Widget.AppCompat.Spinner.Underlined"
         android:id="@+id/condModeSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

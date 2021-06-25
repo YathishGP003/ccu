@@ -83,7 +83,7 @@
         <item>  DAB Fully Modulating AHU</item>
         <item>  DAB Staged RTU with VFD Fan</item>
         <item>  DAB Advanced Hybrid AHU</item>
-        <item>  Daikin IE Rtu</item>
+        <item>  Daikin IE RTU</item>
     </string-array>
 
     <string-array name="hvac_stage_selector">
@@ -915,4 +915,5 @@
     </string-array>
 
     <string name="buttonDesableDelay">2000</string>
+    <string name="prefs_theme_key">isEnabled</string>
 </resources>

@@ -1,14 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical" >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
 
 
     <ImageView
+        android:visibility="gone"
+        android:id="@+id/splash_logo"
+        android:layout_width="wrap_content"
+        android:src="@drawable/x75f_new"
+        android:layout_height="match_parent"
+        android:layout_gravity="center" />
+
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/daikin_splash"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:src="@drawable/x75f_new" />
+        android:orientation="vertical">
+        <ImageView
+            android:layout_marginTop="50dp"
+            android:layout_width="300dp"
+            android:src="@drawable/ic_daikin_logo_colored"
+            android:layout_height="300dp"
+            android:layout_gravity="top" />
+
+        <ImageView
+            android:layout_marginTop="@dimen/vfd_profile_config_text_width"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic__5f_logo_colored" />
+
+    </LinearLayout>
 
 </LinearLayout>

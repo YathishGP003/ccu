@@ -8,32 +8,44 @@ import android.os.Bundle;
 
 import a75f.io.logger.CcuLog;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.renatus.registration.FreshRegistration;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 
-public class SplashActivity extends Activity {
+public class SplashActivity extends AppCompatActivity {
     
     public static final int CCU_PERMISSION_REQUEST_ID = 1;
     
     public static final String TAG = SplashActivity.class.getSimpleName();
     Prefs prefs;
     private Thread registrationThread;
+    private ImageView splashLogo75f;
+    private LinearLayout daikinSplash;
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
         setContentView(R.layout.splash);
-
+        splashLogo75f = findViewById(R.id.splash_logo);
+        daikinSplash = findViewById(R.id.daikin_splash);
         prefs = new Prefs(this);
+        /*PreferenceManager.getDefaultSharedPreferences(this).edit().
+                putBoolean(getString(R.string.prefs_theme_key),true).commit();*/
         Log.i(TAG, "Splash activity");
-        
+        configSplashLogo();
         registrationThread = new Thread() {
             public void run() {
                 try {
@@ -99,6 +111,7 @@ public class SplashActivity extends Activity {
     
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == CCU_PERMISSION_REQUEST_ID) {
             for (int result : grantResults) {
                 if (result == PackageManager.PERMISSION_DENIED) {
@@ -155,6 +168,14 @@ public class SplashActivity extends Activity {
                 return 18;
         }
         return 9;
+    }
+
+
+    private void configSplashLogo(){
+        if(BuildConfig.BUILD_TYPE.equals("daikin_prod")|| CCUUiUtil.isDaikinThemeEnabled(this))
+            daikinSplash.setVisibility(View.VISIBLE);
+        else
+            splashLogo75f.setVisibility(View.VISIBLE);
     }
 }
 

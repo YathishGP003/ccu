@@ -16,8 +16,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:clickable="true"
-            android:padding="8dp"
             android:layout_gravity="center_vertical"
+            android:padding="8dp"
             app:srcCompat="@drawable/ic_floormenu" />
 
         <ImageView
@@ -28,35 +28,25 @@
             android:padding="8dp"
             android:visibility="gone"
             app:srcCompat="@drawable/ic_menu" />
-
-        <!--<ImageView
-            android:id="@+id/logo_daikin"
-            android:layout_width="wrap_content"
-            android:layout_height="?actionBarSize"
-            android:layout_marginStart="16dp"
-            android:padding="8dp"
-            android:layout_gravity="center_vertical"
-            android:visibility="gone"
-            app:srcCompat="@drawable/ic_daikin_logo" />-->
-
         <ImageView
             android:id="@+id/logo_75f"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:padding="8dp"
+            android:layout_marginTop="18dp"
+            android:layout_marginBottom="18dp"
             android:scaleType="center"
             android:layout_gravity="center_vertical"
-            app:srcCompat="@drawable/ic_75f_logo" />
+            app:srcCompat="@drawable/d3" />
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"
-            style="@style/RenatusLandingTabStyle"
+            style="?RenatusLandingTabStyle"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             app:tabGravity="fill"
             android:layout_marginStart="12dp"
-            app:tabIndicator="@color/accent"
+            app:tabIndicator="?orange_75f"
             app:tabIndicatorHeight="6dp"
             app:tabMode="fixed" />
 
@@ -65,23 +55,22 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <!--<ImageView
-            android:id="@+id/logo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <ImageView
+            android:id="@+id/powerbylogo"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:padding="8dp"
-            android:layout_gravity="center"
-            android:visibility="gone"
-            app:srcCompat="@drawable/ic_powered_by_75f" />-->
+            android:layout_gravity="center_vertical"
+            app:srcCompat="@drawable/ic_powered_by_75f" />
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/btnTabs"
-            style="@style/RenatusTabStyle"
+            style="?RenatusTabStyle"
             android:layout_width="140dp"
             android:layout_height="?actionBarSize"
             app:tabBackground = "@null"
             app:tabRippleColor="@null"
-            app:tabIndicator="@color/accent"
+            app:tabIndicator="?orange_75f"
             app:tabIndicatorHeight="6dp"
             app:tabMaxWidth="70dp"
             app:tabGravity="fill"

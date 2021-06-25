@@ -13,7 +13,7 @@
             android:gravity="left"
             android:padding="10dp"
             android:text="VAV Reheat - No Fan"
-            android:textAppearance="@style/action_text_appearance"
+            android:textAppearance="?action_text_appearance"
             android:textAllCaps="false"/>
 
         <TextView

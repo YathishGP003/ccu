@@ -33,6 +33,7 @@ import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.registration.FreshRegistration;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
@@ -188,6 +189,7 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
                 }
             }
         });
+        setSpinnerBackground();
     }
 
     private void goTonext() {
@@ -242,6 +244,14 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
         relay5Test.setOnCheckedChangeListener(this);
         relay6Test.setOnCheckedChangeListener(this);
         relay7Test.setOnCheckedChangeListener(this);
+
+        CCUUiUtil.setSpinnerDropDownColor(relay1Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay2Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay3Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay4Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay5Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay6Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay7Spinner,getContext());
 
     }
 
@@ -471,5 +481,15 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
                 Globals.getInstance().setTestMode(false);
             }
         }
+    }
+
+    private void setSpinnerBackground(){
+        CCUUiUtil.setSpinnerDropDownColor(relay1Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay2Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay3Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay4Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay5Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay6Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay7Spinner,getContext());
     }
 }

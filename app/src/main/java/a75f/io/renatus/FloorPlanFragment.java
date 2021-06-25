@@ -65,6 +65,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.renatus.modbus.FragmentModbusConfiguration;
 import a75f.io.renatus.modbus.FragmentModbusEnergyMeterConfiguration;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -765,28 +766,32 @@ public class FloorPlanFragment extends Fragment {
     }
 
     private void setSystemSelection(int position) {
+        int background = CCUUiUtil.getListSelectorBackground(getContext());
 
-        rl_systemdevice.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
+        rl_systemdevice.setBackgroundResource(background);
         rl_systemdevice.setEnabled(false);
         textViewSystemDevice.setTextColor(getContext().getResources().getColor(R.color.white));
 
         if (position == 1) {
             sysyemDeviceType = SysyemDeviceType.OAO;
-            rl_oao.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
+
+            rl_oao.setBackgroundResource(background);
             textViewOAO.setSelected(true);
             textViewOAO.setTextColor(Color.WHITE);
             rl_oao.setEnabled(false);
         }
         if (position == 2) {
             sysyemDeviceType = SysyemDeviceType.ENERGY_METER;
-            rl_modbus_energy_meter.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
+
+            rl_modbus_energy_meter.setBackgroundResource(background);
             textModbusEnergyMeter.setSelected(true);
             textModbusEnergyMeter.setTextColor(Color.WHITE);
             rl_modbus_energy_meter.setEnabled(false);
         }
         if (position == 3) {
             sysyemDeviceType = SysyemDeviceType.BTU_METER;
-            rl_modbus_btu_meter.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
+           
+            rl_modbus_btu_meter.setBackgroundResource(background);
             textModbusBTUMeter.setSelected(true);
             textModbusBTUMeter.setTextColor(Color.WHITE);
             rl_modbus_btu_meter.setEnabled(false);

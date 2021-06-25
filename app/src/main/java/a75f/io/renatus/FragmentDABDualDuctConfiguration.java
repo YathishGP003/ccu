@@ -2,6 +2,7 @@ package a75f.io.renatus;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
@@ -34,6 +35,7 @@ import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfileConfiguration;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -242,8 +244,8 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
     }
     
     private void setUpNumberPickers() {
-        
-        setNumberPickerDividerColor(temperatureOffset);
+
+
         temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];//{"-4","-3","-2","-1","0","1","2","3","4"};
         for (int nNum = 0; nNum < TEMP_OFFSET_LIMIT * 2 + 1; nNum++)
@@ -253,40 +255,36 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         temperatureOffset.setMaxValue(TEMP_OFFSET_LIMIT * 2);
         temperatureOffset.setValue(TEMP_OFFSET_LIMIT);
         temperatureOffset.setWrapSelectorWheel(false);
-        
-        setNumberPickerDividerColor(maxCoolingDamperPos);
+
+
         maxCoolingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         maxCoolingDamperPos.setMinValue(DEFAULT_DAMPER_MIN);
         maxCoolingDamperPos.setMaxValue(DEFAULT_DAMPER_MAX);
         maxCoolingDamperPos.setValue(DEFAULT_DAMPER_MAX);
         maxCoolingDamperPos.setWrapSelectorWheel(false);
-        
-        setNumberPickerDividerColor(minCoolingDamperPos);
+
+
         minCoolingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         minCoolingDamperPos.setMinValue(DEFAULT_DAMPER_MIN);
         minCoolingDamperPos.setMaxValue(DEFAULT_DAMPER_MAX);
         minCoolingDamperPos.setValue(DEFAULT_DAMPER_VAL);
         minCoolingDamperPos.setWrapSelectorWheel(false);
-        
-        setNumberPickerDividerColor(maxHeatingDamperPos);
+
+
         maxHeatingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         maxHeatingDamperPos.setMinValue(DEFAULT_DAMPER_MIN);
         maxHeatingDamperPos.setMaxValue(DEFAULT_DAMPER_MAX);
         maxHeatingDamperPos.setValue(DEFAULT_DAMPER_MAX);
         maxHeatingDamperPos.setWrapSelectorWheel(false);
-        
-        setNumberPickerDividerColor(minHeatingDamperPos);
+
+
         minHeatingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         minHeatingDamperPos.setMinValue(DEFAULT_DAMPER_MIN);
         minHeatingDamperPos.setMaxValue(DEFAULT_DAMPER_MAX);
         minHeatingDamperPos.setValue(DEFAULT_DAMPER_VAL);
         minHeatingDamperPos.setWrapSelectorWheel(false);
-    
-        setDividerColor(temperatureOffset);
-        setDividerColor(maxCoolingDamperPos);
-        setDividerColor(minCoolingDamperPos);
-        setDividerColor(maxHeatingDamperPos);
-        setDividerColor(minHeatingDamperPos);
+
+
     }
     
     private ArrayAdapter<Double> getAnalogOutAdapter() {
@@ -315,6 +313,16 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         ao2MaxDamperHeatingSpinner.setAdapter(analogOutAdapter);
         ao2MinDamperCoolingSpinner.setAdapter(analogOutAdapter);
         ao2MaxDamperCoolingSpinner.setAdapter(analogOutAdapter);
+
+        CCUUiUtil.setSpinnerDropDownColor(ao1MinDamperHeatingSpinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(ao1MaxDamperHeatingSpinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(ao1MinDamperCoolingSpinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(ao1MaxDamperCoolingSpinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(ao2MinDamperHeatingSpinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(ao2MaxDamperHeatingSpinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(ao2MinDamperCoolingSpinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(ao2MaxDamperCoolingSpinner,getContext());
+
     }
     
     private void updateAO1ConfigVisibility(int visibility) {
@@ -448,33 +456,8 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         ao1MinDamperCoolingSpinner.setSelection(analogOutAdapter.getPosition(DEFAULT_COMPOSITE_ANALOG_COOLING_MIN), false);
     }
     
-    private void setDividerColor(NumberPicker picker) {
-        Field[] numberPickerFields = NumberPicker.class.getDeclaredFields();
-        for (Field field : numberPickerFields) {
-            if (field.getName().equals("mSelectionDivider")) {
-                field.setAccessible(true);
-                try {
-                    field.set(picker, getResources().getDrawable(R.drawable.divider_np));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                break;
-            }
-        }
-    }
-    
-    private void setNumberPickerDividerColor(NumberPicker pk) {
-        Class<?> numberPickerClass;
-        try {
-            numberPickerClass = Class.forName("android.widget.NumberPicker");
-            Field selectionDivider = numberPickerClass.getDeclaredField("mSelectionDivider");
-            selectionDivider.setAccessible(true);
-            selectionDivider.set(pk, getResources().getDrawable(R.drawable.line_959595));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    
+
+
     private void configureSetButton() {
         setButton.setOnClickListener(new View.OnClickListener(){
             @Override

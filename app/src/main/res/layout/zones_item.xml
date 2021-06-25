@@ -40,6 +40,21 @@
         android:duplicateParentState="true"
         android:focusable="false"
         />
+    <TextView
+        android:id="@+id/textEquipment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/seekArc"
+        android:layout_alignLeft="@id/seekArc"
+        android:layout_alignRight="@id/seekArc"
+        android:text="DAB"
+        android:gravity="center_horizontal|center_vertical"
+        android:textAppearance="@style/label_black"
+        android:clickable="false"
+        android:focusable="false"
+        android:layout_marginTop="-20dp"
+        android:duplicateParentState="true"/>
+
     <LinearLayout
         android:layout_below="@+id/seekArc"
         android:layout_alignLeft="@id/seekArc"

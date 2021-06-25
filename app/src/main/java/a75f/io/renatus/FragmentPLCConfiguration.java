@@ -2,6 +2,7 @@ package a75f.io.renatus;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -39,9 +40,12 @@ import a75f.io.logic.bo.building.plc.PlcProfileConfiguration;
 import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+
 
 /**
  * Created by samjithsadasivan on 2/22/19.
@@ -178,7 +182,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         if(titleView != null)
         {
             titleView.setGravity(Gravity.CENTER);
-            titleView.setTextColor(getResources().getColor(R.color.progress_color_orange));
+            titleView.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
         }
         int titleDividerId = getContext().getResources()
                                          .getIdentifier("titleDivider", "id", "android");
@@ -513,6 +517,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
             }
         });
+        configSpinnerDropIconColor();
     }
 
     private void configureNativeSensorInputSpinner() {
@@ -664,5 +669,21 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         }
         L.ccu().zoneProfiles.add(mPlcProfile);
         CcuLog.d(L.TAG_CCU_UI, "Set Plc Config: Profiles - "+L.ccu().zoneProfiles.size());
+    }
+
+    private void configSpinnerDropIconColor(){
+        CCUUiUtil.setSpinnerDropDownColor(analog1InSensorSp,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(targetValSp,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(th1InSensorSp,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(nativeSensorSp,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(errorRangeSp,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog2InSensorSp,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(sensorOffsetSp,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analogout1AtMinSp,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analogout1AtMaxSp,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay1OnThreshold,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay1OffThreshold,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay2OnThreshold,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay2OffThreshold,getContext());
     }
 }

@@ -21,9 +21,9 @@
             android:layout_marginLeft="10dp"
             android:layout_gravity="center_vertical"
             app:srcCompat="@drawable/ic_floormenu"
-            android:tint="@color/orange_75f"
             android:visibility="gone"
-            android:adjustViewBounds="true"/>
+            android:adjustViewBounds="true"
+            app:tint="?orange_75f" />
 
         <RelativeLayout
             android:id="@+id/weather_data"
@@ -31,7 +31,7 @@
             android:layout_height="374dp"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:background="@color/accent"
+            android:background="?orange_75f"
             android:orientation="horizontal"
             android:layout_marginRight="10dp"
             >

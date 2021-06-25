@@ -455,12 +455,12 @@
                     android:layout_marginEnd="30dp"
                     android:layout_marginBottom="10dp"
                     android:background="@null"
-                    android:drawableEnd="@drawable/icon_arrowright"
+                    android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_right_24"
                     android:drawablePadding="5dp"
                     android:fontFamily="@font/lato_bold"
                     android:gravity="center_vertical"
                     android:text="@string/button_next"
-                    android:textColor="@color/orange_75f"
+                    android:textColor="?orange_75f"
                     android:textSize="24dp" />
             </RelativeLayout>
         </LinearLayout>

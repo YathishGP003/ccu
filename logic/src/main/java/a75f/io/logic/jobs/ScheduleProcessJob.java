@@ -3,7 +3,6 @@ package a75f.io.logic.jobs;
 import android.content.Intent;
 import android.os.StrictMode;
 import android.util.Log;
-
 import org.joda.time.DateTime;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
@@ -150,9 +149,6 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
     @Override
     public void doJob() {
-
-        /*ArrayList<Schedule> getAllVacationSchedules = CCUHsApi.getInstance().getAllVacationSchedules();
-        Log.e("InsideScheduleProcess","getAllVacationSchedules2- "+getAllVacationSchedules);*/
 
         CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob-> "+CCUHsApi.getInstance());
 

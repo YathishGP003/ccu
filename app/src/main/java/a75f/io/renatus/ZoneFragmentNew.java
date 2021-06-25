@@ -93,7 +93,6 @@ import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
-import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.renatus.util.GridItem;
 import a75f.io.renatus.util.NonTempControl;
 import a75f.io.renatus.util.Prefs;
@@ -3203,14 +3202,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     }
 
     private boolean isModuleAlive(String nodeAddress){
-        Date updatedTime = CCUUtils.getLastReceivedTime(nodeAddress);
+        Date updatedTime = a75f.io.logic.bo.util.CCUUtils.getLastReceivedTime(nodeAddress);
         if(updatedTime == null){
             return false;
         }
         return TimeUnit.MILLISECONDS.toMinutes(new Date().getTime() - updatedTime.getTime()) < 15;
     }
     private String getLastUpdatedTime(String nodeAddress){
-        Date updatedTime = CCUUtils.getLastReceivedTime(nodeAddress);
+        Date updatedTime = a75f.io.logic.bo.util.CCUUtils.getLastReceivedTime(nodeAddress);
         if(updatedTime == null){
             return "n/a";
         }

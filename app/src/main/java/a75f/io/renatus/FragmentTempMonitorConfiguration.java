@@ -110,7 +110,7 @@ public class FragmentTempMonitorConfiguration extends BaseDialogFragment
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        setDividerColor(temperatureOffset);
+
 
     }
 

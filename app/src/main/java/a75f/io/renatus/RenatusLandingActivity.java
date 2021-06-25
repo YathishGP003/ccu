@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
@@ -34,7 +35,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.io.IOException;
+
 import java.util.HashMap;
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
@@ -50,7 +51,6 @@ import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.filesystem.FileSystemTools;
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.logtasks.UploadLogs;
@@ -60,6 +60,7 @@ import a75f.io.renatus.ENGG.AppInstaller;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 import a75f.io.renatus.registration.CustomViewPager;
 import a75f.io.renatus.schedules.SchedulerFragment;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.CloudConnetionStatusThread;
 import a75f.io.renatus.util.Prefs;
@@ -72,16 +73,18 @@ import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.RESTART_TABLET;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.SAVE_CCU_LOGS;
 import static a75f.io.logic.pubnub.RemoteCommandUpdateHandler.UPDATE_CCU;
 
+
 public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface {
 
     private static final String TAG = RenatusLandingActivity.class.getSimpleName();
     //TODO - refactor
     public boolean settingView = false;
-    TabItem pageSettingButton;
-    TabItem pageDashBoardButton;
-    ImageView setupButton;
-    ImageView menuToggle;
-    ImageView floorMenu;
+    private TabItem pageSettingButton;
+    private TabItem pageDashBoardButton;
+    private ImageView logo_75f;
+    private ImageView powerbylogo;
+    private ImageView menuToggle;
+    private ImageView floorMenu;
     static CloudConnetionStatusThread mCloudConnectionStatus = null;
     private BroadcastReceiver mConnectionChangeReceiver;
 
@@ -107,7 +110,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         prefs = new Prefs(this);
-
+        CCUUiUtil.setThemeDetails(this);
         mConnectionChangeReceiver = new ConnectionChangeReceiver();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -126,9 +129,11 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             btnTabs = findViewById(R.id.btnTabs);
             mTabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
             btnTabs.setTabMode(TabLayout.MODE_SCROLLABLE);
-
+            logo_75f = findViewById(R.id.logo_75f);
+            powerbylogo = findViewById(R.id.powerbylogo);
             pageSettingButton = findViewById(R.id.pageSettingButton);
             pageDashBoardButton = findViewById(R.id.pageDashBoardButton);
+            configLogo();
             if (isSetupPassWordRequired()) {
                 showRequestPasswordAlert("Setup Access Authentication",getString(R.string.USE_SETUP_PASSWORD_KEY), 0);
             }
@@ -182,7 +187,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     SettingsFragment.slidingPane.openPane();
                 }
             });
-            findViewById(R.id.logo_75f).setOnLongClickListener(view -> {
+            logo_75f.setOnLongClickListener(view -> {
                 startActivity(new Intent(view.getContext(), RenatusEngineeringActivity.class));
                 return true;
             });
@@ -280,20 +285,22 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         });
 
         mTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @SuppressLint("ResourceType")
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 LinearLayout tabLayout = (LinearLayout)((ViewGroup) mTabLayout.getChildAt(0)).getChildAt(tab.getPosition());
                 TextView tabTextView = (TextView) tabLayout.getChildAt(1);
 
-                tabTextView.setTextAppearance(tabLayout.getContext(), R.style.RenatusTabTextSelected);
+                tabTextView.setTextAppearance(tabLayout.getContext(), R.attr.RenatusTabTextSelected);
             }
 
+            @SuppressLint("ResourceType")
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
                 LinearLayout tabLayout = (LinearLayout)((ViewGroup) mTabLayout.getChildAt(0)).getChildAt(tab.getPosition());
                 TextView tabTextView = (TextView) tabLayout.getChildAt(1);
 
-                tabTextView.setTextAppearance(tabLayout.getContext(), R.style.RenatusLandingTabTextStyle);
+                tabTextView.setTextAppearance(tabLayout.getContext(), R.attr.RenatusLandingTabTextStyle);
             }
 
             @Override
@@ -372,7 +379,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         String password = getSavedPassword(key);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         SpannableString spannable = new SpannableString(title);
-        spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.accent)), 0, title.length(), 0);
+        spannable.setSpan(new ForegroundColorSpan(CCUUiUtil.getPrimaryThemeColor(RenatusLandingActivity.this)), 0, title.length(), 0);
         builder.setTitle(spannable);
         builder.setCancelable(false);
 
@@ -598,5 +605,17 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     break;
             }
         }
+    }
+
+    private void configLogo(){
+
+        if(BuildConfig.BUILD_TYPE.equals("daikin_prod")||CCUUiUtil.isDaikinThemeEnabled(this)){
+            logo_75f.setImageDrawable(getResources().getDrawable(R.drawable.d3));
+            powerbylogo.setVisibility(View.VISIBLE);
+        }else{
+            logo_75f.setImageDrawable(getResources().getDrawable(R.drawable.ic_75f_logo));
+            powerbylogo.setVisibility(View.GONE);
+        }
+
     }
 }

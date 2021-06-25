@@ -250,7 +250,7 @@ public class LightingDetailAdapter extends BaseAdapter
             onOff.setTag(position);
             onOff.setSwitchMinWidth(40);
             /*StateListDrawable switchStates = new StateListDrawable();
-            switchStates.addState(new int[]{android.R.attr.state_checked}, new ColorDrawable(c.getResources().getColor(R.color.progress_color_orange)));
+            switchStates.addState(new int[]{android.R.attr.state_checked}, new ColorDrawable(c.getResources().getColor(R.color.accent75F)));
             switchStates.addState(new int[]{-android.R.attr.state_enabled}, new ColorDrawable(c.getResources().getColor(R.color.grey_select)));
             switchStates.addState(new int[]{}, new ColorDrawable(c.getResources().getColor(R.color.grey_select))); // this one has to come last
             onOff.setThumbDrawable(switchStates);*/

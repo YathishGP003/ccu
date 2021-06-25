@@ -1,24 +1,51 @@
- - Merged PR 1255: Revert 'USB device crash'
- - Revert "Merged PR 1150: USB device crash
- - Merged PR 1136: Consider emr and modbus equips in determining system occpuancy
- - Merged PR 1150: USB device crash
- - Merged PR 1254: Peltek device json update
- - Merged PR 1237: Bug 7101: Duplicate Alerts in Production
- - Merged PR 1195: RF enhancements for pairing address
- - Merged PR 1154: 6680 Alerts issues
- - Add system and logical tag to btu param query Correct actualPower tag
- - Merged PR 975: Delete floor remotely only if not used by other CCU
- - Fixed the issue about pairing address - if the pairing address is greater than 9500, it's getting defaulted to 1000
- - Peltek file temp tag updated
- - Remove zone tag from BTU meter measurements
- - Merged PR 1171: 6828 [CCU]: Update smart node string with HelioNode.
- - Merged PR 1045: 5092: CCU - Pubnub edge case with CCU Restart
- - RF enhancements for pairing address
- - Vertical seperation line has been added
- - Pairing device image was updated
- - Update the string with Helio Node
- - Updated the string for Helio Node Profile
- - Updated the name of the profile
- - Merge branch 'master' into Bug/samjith/4778_usb_async_open_crash
- - Fix random USB crash
- - Consider emr and modbus equips in determining system occpuancy
+ - Merged PR 1191: CCU Daikin Theme configuration
+ - Bacnet Option Updated
+ - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
+ - Updated Modbus Spinner configuration
+ - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
+ - Updated Modbus Spinner configuration
+ - Disabled Bacnet option for Daikin build
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
+ - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
+ - Enhancement as per QE demo
+ - Removed App name configurations
+ - Removed App name configurations
+ - Configure the Application name by Build variant
+ - Updated dropdown icon colors
+ - Updated dropdown icon colors
+ - Updated dropdown icon colors
+ - all the changes are updated
+ - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
+ - Updated all the spinner configurations
+ - Removed Unused Base activity
+ - Updated as per comments
+ - Added Daikin Loader and updated as per comments
+ - Configuring the flash screen logo
+ - Configuring the flash screen logo
+ - Configuring the flash screen logo
+ - Configured colors and UP components
+ - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
+ - Until Zone selected text color
+ - Added Theme configurations
+ - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
+ - almost updated with Color centralization
+ - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
+ - Updated with Main Looper
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
+ - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
+ - modified
+ - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
+ - Updated with latest master
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
+ - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
+ - updated Icons tint colors
+ - updated Icons tint colors
+ - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
+ - updated colors
+ - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
+ - Updating UI Designs
+ - Update with UI changes Color updated

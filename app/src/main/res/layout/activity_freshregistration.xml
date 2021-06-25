@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_logoscreen"
+    android:id="@+id/main_layout"
     tools:context=".registration.FreshRegistration">
 
 
@@ -54,7 +54,8 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="64dp"
             android:rotation="180"
-            app:srcCompat="@drawable/icon_arrowright" />
+            app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
+            app:tint="?orange_75f" />
 
         <TextView
             android:id="@+id/textTitleFragment"
@@ -65,11 +66,11 @@
             android:fontFamily="@font/lato_bold"
             android:text="@string/title_systemprofile"
             android:textAllCaps="true"
-            android:textColor="@color/orange_75f"
+            android:textColor="?orange_75f"
             android:textSize="33.5dp"
             android:textStyle="bold" />
 
-        <androidx.appcompat.widget.AppCompatSpinner
+        <Spinner
             android:id="@+id/spinnerSystemProfile"
             style="@style/Widget.AppCompat.Spinner.Underlined"
             android:layout_width="370dp"
@@ -77,7 +78,7 @@
             android:layout_alignParentRight="true"
             android:layout_marginRight="56dp"
             android:layout_below="@+id/textInputSitename"
-            android:spinnerMode="dropdown"
+            tools:listitem="@layout/spinner_dropdown_item"
             android:entries="@array/system_profile_select"/>
 
         <ToggleButton
@@ -105,11 +106,11 @@
 
     <ImageView
         android:id="@+id/imageLogo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="200dp"
+        android:layout_height="100dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:srcCompat="@drawable/ic_logo_svg"
+        app:srcCompat="@drawable/ic_daikin_logo_colored"
         android:layout_marginLeft="38dp"
         android:layout_marginBottom="36dp"/>
 
@@ -121,11 +122,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:background="@null"
-        android:drawableRight="@drawable/icon_arrowright"
+        android:drawableRight="@drawable/ic_baseline_keyboard_arrow_right_24"
         android:drawablePadding="5dp"
         android:fontFamily="@font/lato_bold"
         android:text="@string/button_next"
-        android:textColor="@color/orange_75f"
+        android:textColor="?orange_75f"
         android:textSize="24dp"
         android:layout_marginRight="38dp"
         android:layout_marginBottom="36dp"/>

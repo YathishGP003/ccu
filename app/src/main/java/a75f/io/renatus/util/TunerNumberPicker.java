@@ -746,7 +746,7 @@ public class TunerNumberPicker extends LinearLayout {
         } else {
             mDividerColor = attributes.getColor(R.styleable.NumberPicker_nps_dividerColor,
                     mDividerColor);
-            setDividerColor(mDividerColor);
+
         }
 
         final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();

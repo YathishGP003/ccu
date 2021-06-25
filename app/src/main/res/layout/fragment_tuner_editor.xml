@@ -21,7 +21,7 @@
         android:layout_alignParentLeft="true"
         android:layout_margin="10sp"
         android:text="@string/txt_tunersTitle"
-        android:textAppearance="@style/label_orange" />
+        android:textAppearance="?label_orange" />
 
     <androidx.appcompat.widget.AppCompatSpinner
         android:id="@+id/spinnerSelection"
@@ -119,7 +119,6 @@
                 android:layout_alignParentLeft="true"
                 android:layout_marginLeft="10sp"
                 android:layout_marginTop="10sp"
-                android:text="@string/text_tunerChangeReason"
                 android:textAppearance="@style/tuner_text_group"
                 android:textSize="19sp" />
 
@@ -142,30 +141,28 @@
                 android:layout_alignParentRight="true"
                 android:orientation="horizontal">
 
-                <com.google.android.material.button.MaterialButton
+                <Button
                     android:id="@+id/buttonCancel"
-                    android:theme="@style/Theme.MaterialComponents.Light"
-                    style="@style/tunerButton"
+                    style="?tunerButton"
                     android:layout_width="100sp"
                     android:layout_height="50sp"
                     android:layout_marginRight="5sp"
                     android:padding="5sp"
                     android:text="@string/cancel"
-                    android:textAppearance="@style/tunerButton"
-                    app:strokeColor="@color/orange_75f" />
+                    android:textAppearance="?tunerButton"
+                    app:strokeColor="?orange_75f" />
 
-                <com.google.android.material.button.MaterialButton
+                <Button
                     android:id="@+id/buttonSave"
-                    android:theme="@style/Theme.MaterialComponents.Light"
-                    style="@style/tunerButton"
+                    style="?tunerButton"
                     android:layout_width="100sp"
                     android:layout_height="50sp"
                     android:layout_marginLeft="5sp"
                     android:enabled="false"
                     android:padding="5sp"
                     android:text="@string/tuner_save"
-                    android:textAppearance="@style/tunerButton"
-                    app:strokeColor="@color/orange_75f" />
+                    android:textAppearance="?tunerButton"
+                    app:strokeColor="?orange_75f" />
 
 
             </LinearLayout>

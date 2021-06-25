@@ -33,6 +33,7 @@ import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.registration.FreshRegistration;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
@@ -195,6 +196,7 @@ public class DABStagedProfile extends Fragment implements AdapterView.OnItemSele
                 }
             }
         });
+        setSpinnerDropDownIcon();
     }
 
     private void goTonext() {
@@ -477,5 +479,15 @@ public class DABStagedProfile extends Fragment implements AdapterView.OnItemSele
             }
         }
     }
-    
+
+    private void setSpinnerDropDownIcon(){
+        CCUUiUtil.setSpinnerDropDownColor(relay1Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay2Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay3Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay4Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay5Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay6Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay7Spinner,getContext());
+
+    }
 }

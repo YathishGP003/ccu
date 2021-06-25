@@ -37,6 +37,7 @@ import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.registration.FreshRegistration;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
@@ -213,6 +214,7 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 }
             }
         });
+        setSpinnerDropDownIcon();
     }
 
     private void goTonext() {
@@ -655,5 +657,30 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 // continue what you are doing...
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void setSpinnerDropDownIcon(){
+
+        CCUUiUtil.setSpinnerDropDownColor(relay1Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay2Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay3Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay4Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay5Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay6Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay7Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog2TestSpinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog2Economizer,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog2Recirculate,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog2CoolStage1,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog2CoolStage2,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog2CoolStage3,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog2CoolStage4,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog2CoolStage5,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog2HeatStage1,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog2HeatStage2,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog2HeatStage3,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog2HeatStage4,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog2HeatStage5,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog2DefaultSpinner,getContext());
     }
 }

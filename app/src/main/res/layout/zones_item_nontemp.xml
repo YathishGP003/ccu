@@ -13,117 +13,13 @@
     android:id="@+id/container"
     android:background="@color/white">
 
-    <!--<RelativeLayout
-        android:id="@+id/rl_nontemp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:layout_gravity="center"
-            />
-
-        <RelativeLayout
-            android:id="@+id/piValues"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/textInput"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="142dp"
-                android:layout_marginTop="42dp"
-                android:text="420"
-                android:textSize="30sp" />
-            <TextView
-                android:id="@+id/textInputCFM"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="CFM"
-                android:textSize="20sp"
-                android:textColor="@color/orange_75f"
-                android:layout_marginTop="-12dp"
-                android:layout_alignLeft="@+id/textInput"
-                android:layout_below="@+id/textInput"/>
-            <TextView
-                android:id="@+id/textOutput"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="420"
-                android:textSize="30sp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginTop="164dp"/>
-            <TextView
-                android:id="@+id/textOutputCFM"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="CFM"
-                android:textSize="20sp"
-                android:textColor="@color/orange_75f"
-                android:layout_marginTop="-12dp"
-                android:layout_alignLeft="@+id/textOutput"
-                android:layout_below="@+id/textOutput"/>
-        </RelativeLayout>
-
-
-        <RelativeLayout
-            android:id="@+id/emValues"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:paddingBottom="20dp"
-            android:layout_marginLeft="-20dp"
-            android:layout_alignBottom="@+id/imageView"
-            android:layout_toRightOf="@+id/imageView">
-
-            <TextView
-                android:id="@+id/textEmTotal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="42dp"
-                android:text="2456.4"
-                android:textSize="36sp" />
-            <TextView
-                android:id="@+id/textTotalUnit"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="KWh"
-                android:textSize="24sp"
-                android:textColor="@color/orange_75f"
-                android:layout_marginTop="5dp"
-                android:layout_toEndOf="@+id/textEmTotal"
-                android:layout_alignTop="@+id/textEmTotal" />
-
-            <TextView
-                android:id="@+id/textEmCurrent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/textEmTotal"
-                android:text="25"
-                android:textSize="36sp" />
-            <TextView
-                android:id="@+id/textCurrentUnit"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="KWh"
-                android:textSize="24sp"
-                android:textColor="@color/orange_75f"
-                android:layout_marginTop="5dp"
-                android:layout_toEndOf="@+id/textEmCurrent"
-                android:layout_alignTop="@+id/textEmCurrent" />
-
-        </RelativeLayout>
-    </RelativeLayout>-->
     <a75f.io.renatus.util.NonTempControl
         android:id="@+id/rl_nontemp"
         android:layout_width="236dp"
         android:layout_height="215dp"
         android:layout_gravity="center"/>
     <LinearLayout
+        android:id="@+id/status_view"
         android:layout_below="@+id/rl_nontemp"
         android:layout_alignLeft="@id/rl_nontemp"
         android:layout_alignRight="@id/rl_nontemp"
@@ -141,16 +37,7 @@
             android:clickable="false"
             android:focusable="false"
             android:duplicateParentState="true"/>
-        <!--  <TextView
-              android:id="@+id/module_status"
-              android:layout_marginLeft="5dp"
-              android:layout_marginTop="5dp"
-              android:layout_gravity="top"
-              android:gravity="center"
-              android:layout_width="15dp"
-              android:layout_alignParentRight="true"
-              android:background="@drawable/module_dead"
-              android:layout_height="15dp"/>-->
+
         <TextView
             android:id="@+id/module_status"
             android:layout_marginLeft="5dp"

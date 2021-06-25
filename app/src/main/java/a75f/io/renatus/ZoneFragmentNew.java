@@ -841,6 +841,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
         TextView textViewModule = arcView.findViewById(R.id.module_status);
+        View status_view = arcView.findViewById(R.id.status_view);
         zoneStatus(textViewModule, isZoneAlive);
 
         seekArc.scaletoNormal(250, 210);
@@ -997,6 +998,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             openZoneMap = zoneMap;
                             clickedView = gridItemNew.getGridID();
                             v.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
+                            status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
                             int index = clickedView / columnCount + 1;
                             seekArc.setDetailedView(true);
                             seekArc.scaletoNormalBig(250, 210);
@@ -1015,6 +1017,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         }
                     } else if (clickposition == clickedView) {
                         v.setBackgroundColor(getResources().getColor(R.color.white));
+                        status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                         textEquipment.setTextAppearance(getActivity(),R.style.label_black);
                         textEquipment.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                         tableLayout.removeView(zoneDetails);
@@ -1035,6 +1038,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     clickedView = gridItemNew.getGridID();
                     seekArc.setClickable(true);
                     v.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                    status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
                     int index = clickedView / columnCount + 1;
                     seekArc.setDetailedView(true);
                     seekArc.scaletoNormalBig(250, 210);
@@ -1470,6 +1474,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
         TextView textViewModule = arcView.findViewById(R.id.module_status);
+        View status_view = arcView.findViewById(R.id.status_view);
         zoneStatus(textViewModule, isZoneAlive);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         arcView.setPadding(48,56,0,0);
@@ -1605,6 +1610,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             openZoneMap = zoneMap;
                             clickedView = gridItemNew.getGridID();
                             v.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
+                            status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
+
                             int index = clickedView / columnCount + 1;
                             //ScaleImageToBig(250,210,imageView);
                             ScaleControlToExpand(250,210,nonTempControl);
@@ -1624,6 +1631,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         }
                     } else if (clickposition == clickedView) {
                         v.setBackgroundColor(getResources().getColor(R.color.white));
+                        status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                         textEquipment.setTextAppearance(getActivity(),R.style.label_black);
                         textEquipment.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                         tableLayout.removeView(zoneDetails);
@@ -1643,6 +1651,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     openZoneMap = zoneMap;
                     clickedView = gridItemNew.getGridID();
                     v.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                    status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
                     int index = clickedView / columnCount + 1;
                     //ScaleImageToBig(250,210,imageView);
                     ScaleControlToExpand(250,210,nonTempControl);

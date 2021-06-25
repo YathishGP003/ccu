@@ -42,10 +42,11 @@
         />
 
     <LinearLayout
+        android:id="@+id/status_view"
         android:layout_below="@+id/seekArc"
         android:layout_alignLeft="@id/seekArc"
         android:layout_alignRight="@id/seekArc"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_marginTop="-20dp"
         android:gravity="center_horizontal|center_vertical"
         android:layout_height="wrap_content">

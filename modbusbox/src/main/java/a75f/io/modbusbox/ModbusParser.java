@@ -10,6 +10,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -34,6 +36,7 @@ public class ModbusParser {
                 String equipJson = readFileFromAssets(c, "modbus/" + filename);
                 assetEquipments.add(parseModbusDataFromString(equipJson));
             }
+            assetEquipments.addAll(readExternalJSONFromDir(c,"/sdcard/ccu/modbus"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -89,6 +92,7 @@ public class ModbusParser {
                 String equipJson = readFileFromAssets(c, "modbus-em-zone/" + filename);
                 assetEquipments.add(parseModbusDataFromString(equipJson));
             }
+            assetEquipments.addAll(readExternalJSONFromDir(c,"/sdcard/ccu/modbus/modbus-em-zone"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -106,6 +110,7 @@ public class ModbusParser {
                 String equipJson = readFileFromAssets(c, "modbus-em-system/" + filename);
                 energyMeterDevices.add(parseModbusDataFromString(equipJson));
             }
+            energyMeterDevices.addAll(readExternalJSONFromDir(c,"/sdcard/ccu/modbus/modbus-em-system"));
         } catch (IOException e) {
             Log.e("MODBUS PARSER", "File path does not exist");
             e.printStackTrace();
@@ -129,10 +134,51 @@ public class ModbusParser {
                 String equipJson = readFileFromAssets(context, "modbus-btu/" + filename);
                 btuMeterDevices.add(parseModbusDataFromString(equipJson));
             }
+            btuMeterDevices.addAll(readExternalJSONFromDir(context,"/sdcard/ccu/modbus/modbus-btu"));
         } catch (IOException e) {
             Log.e("MODBUS PARSER", "File path does not exist");
             e.printStackTrace();
         }
         return btuMeterDevices;
     }
+
+    private ArrayList<EquipmentDevice> readExternalJSONFromDir(Context c, String filePath){
+        ArrayList<EquipmentDevice> filterDevices = new ArrayList<EquipmentDevice>();
+        File modbusJsonFolder = new File(filePath);
+        if(modbusJsonFolder!=null && modbusJsonFolder.exists() && modbusJsonFolder.isDirectory()
+                && modbusJsonFolder.listFiles()!=null && modbusJsonFolder.listFiles().length>0) {
+            File listOfFile[] = modbusJsonFolder.listFiles();
+            for (int i = 0; i < listOfFile.length; i++) {
+                try {
+                    if(listOfFile[i].isFile())
+                        filterDevices.add(parseModbusDataFromString(readFileFromFolder(c, listOfFile[i])));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }else{
+            modbusJsonFolder.mkdir();
+        }
+        return filterDevices;
+    }
+
+
+
+    public String readFileFromFolder(Context ctx, File file) {
+        String jsonObjects = "";
+        try {
+            InputStream is = new FileInputStream(file);
+            int size = is.available();
+            if (size > 0) {
+                byte[] buffer = new byte[size];
+                is.read(buffer);
+                is.close();
+                jsonObjects = new String(buffer, "UTF-8");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return jsonObjects;
+    }
+
 }

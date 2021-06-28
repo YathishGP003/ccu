@@ -607,39 +607,5 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
             setBtn.setVisibility(View.INVISIBLE);
         }
     }
-    /*public List<EquipmentDevice> loadJSONFromAsset() {
-        List<EquipmentDevice> equipmentDevicesList = new ArrayList<EquipmentDevice>();
-        try {
-            String[] fileList;
-            fileList = getActivity().getAssets().list("modbus");
-            for(String filename: fileList) {
-                InputStream is = getActivity().getAssets().open("modbus/"+filename);
-                int size = is.available();
-                if(size > 0) {
-                    byte[] buffer = new byte[size];
-                    is.read(buffer);
-                    is.close();
-                    EquipmentDevice equipmentDevice = gson.fromJson(new String(buffer, "UTF-8"), EquipmentDevice.class);
-                    List<ModbusEquipsInfo> equipsQueryBuilder = modbusEquipsBox.query()
-                            .equal(ModbusEquipsInfo_.modbusEquipId, equipmentDevice.getModbusEquipIdId()).build().find();
-                    if(equipsQueryBuilder.size() > 0) {
-                        for(ModbusEquipsInfo info : equipsQueryBuilder) {
-                            Log.d("Modbus", "loadjson=" + equipmentDevice.getModbusEquipIdId()+","+info.getModbusEquipId());
-                            if ((info.getModbusEquipId() == null) || !info.getModbusEquipId().equals(equipmentDevice.getModbusEquipIdId())) {
-                                modbusEquipsBox.put(new ModbusEquipsInfo(equipmentDevice));
-                            }
-                        }
-                    }else {
-                        Log.d("Modbus", "loadjson22 new="+equipmentDevice.getName());
-                        modbusEquipsBox.put(new ModbusEquipsInfo(equipmentDevice.getModbusEquipIdId(), equipmentDevice));
-                    }
-                    equipmentDevicesList.add(equipmentDevice);  `
-                }
-            }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return equipmentDevicesList;
-        }
-        return equipmentDevicesList;
-    }*/
+
 }

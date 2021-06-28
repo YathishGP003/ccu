@@ -75,5 +75,10 @@ dependencies {
     implementation project(':BACnet4J')
     implementation project(':modbus4j')
     implementation project(path: ':modbusbox')
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.7.2'
+    implementation 'com.squareup.retrofit2:converter-simplexml:2.3.0'
+    implementation "com.github.akarnokd:rxjava3-retrofit-adapter:3.0.0"
+
 }
 

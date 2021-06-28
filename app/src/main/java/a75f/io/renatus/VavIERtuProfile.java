@@ -24,7 +24,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.device.mesh.DaikinIE;
+import a75f.io.device.daikin.DaikinIE;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemMode;

@@ -1,4 +1,4 @@
-package a75f.io.device.mesh;
+package a75f.io.device.daikin;
 
 import android.os.AsyncTask;
 import android.util.Log;

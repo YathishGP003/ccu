@@ -162,29 +162,21 @@ public class VavIERtu extends VavSystemProfile
             systemCoolingLoopOp = 0;
         }
         
-        int signal;
+        int coolingDat, heatingDat;
         setSystemLoopOp("cooling", systemCoolingLoopOp);
-        if (getConfigVal("analog1 and output and enabled") > 0)
-        {
+        if (getConfigVal("cooling and output and enabled") > 0) {
             double coolingDatMin = getConfigVal("analog1 and cooling and dat and min");
             double coolingDatMax = getConfigVal("analog1 and cooling and dat and max");
             CcuLog.d(L.TAG_CCU_SYSTEM, "coolingDatMin: "+coolingDatMin+" coolingDatMax: "+coolingDatMax+" SAT: "+getSystemSAT());
             
-            if (coolingDatMax > coolingDatMin)
-            {
-                signal = (int) (coolingDatMax - (coolingDatMax - coolingDatMin) * (systemCoolingLoopOp/100));
-            }
-            else
-            {
-                signal = (int) (coolingDatMin - (coolingDatMin - coolingDatMax) * (systemCoolingLoopOp/100));
+            if (coolingDatMax > coolingDatMin) {
+                coolingDat = (int) (coolingDatMax - (coolingDatMax - coolingDatMin) * (systemCoolingLoopOp/100));
+            } else {
+                coolingDat = (int) (coolingDatMin - (coolingDatMin - coolingDatMax) * (systemCoolingLoopOp/100));
             }
             
         } else {
-            signal = 0;
-        }
-    
-        if (signal != getCmdSignal("cooling")) {
-            setCmdSignal("cooling", signal);
+            coolingDat = 0;
         }
         
         if (VavSystemController.getInstance().getSystemState() == HEATING)
@@ -195,30 +187,21 @@ public class VavIERtu extends VavSystemProfile
         }
         
         setSystemLoopOp("heating", systemHeatingLoopOp);
-        if (getConfigVal("analog3 and output and enabled") > 0)
-        {
+        if (getConfigVal("heating and output and enabled") > 0) {
             double heatingDatMin = getConfigVal("analog3 and heating and min");
             double heatingDatMax = getConfigVal("analog3 and heating and max");
             CcuLog.d(L.TAG_CCU_SYSTEM, "heatingDatMin: "+heatingDatMin+" heatingDatMax: "+heatingDatMax+" HeatingSignal : "+VavSystemController.getInstance().getHeatingSignal());
-            if (heatingDatMax > heatingDatMin)
-            {
-                signal = (int) (heatingDatMin + (heatingDatMax - heatingDatMin) * (systemHeatingLoopOp / 100));
-            }
-            else
-            {
-                signal = (int) (heatingDatMin - (heatingDatMax - heatingDatMin) * (systemHeatingLoopOp / 100));
+            if (heatingDatMax > heatingDatMin) {
+                heatingDat = (int) (heatingDatMin + (heatingDatMax - heatingDatMin) * (systemHeatingLoopOp / 100));
+            } else {
+                heatingDat = (int) (heatingDatMin - (heatingDatMax - heatingDatMin) * (systemHeatingLoopOp / 100));
             }
         } else {
-            signal = 0;
+            heatingDat = 0;
         }
-    
-        if (signal != getCmdSignal("heating")) {
-            setCmdSignal("heating", signal);
-        }
-    
-        double datSp = VavSystemController.getInstance().getSystemState() == COOLING ? getCmdSignal("cooling") : getCmdSignal("heating");
+        
+        double datSp = VavSystemController.getInstance().getSystemState() == COOLING ? coolingDat : heatingDat;
         setCmdSignal("dat", datSp);
-        ControlMote.setAnalogOut("analog1", datSp);
         
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
         double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+getSystemEquipRef()+"\"");
@@ -251,45 +234,7 @@ public class VavIERtu extends VavSystemProfile
         }
         systemFanLoopOp = Math.min(systemFanLoopOp, 100);
         setSystemLoopOp("fan", systemFanLoopOp);
-        double spSignal = 0;
-        if (getConfigVal("analog2 and output and enabled") > 0)
-        {
-            double staticPressureMin = getConfigVal("analog2 and staticPressure and min");
-            double staticPressureMax = getConfigVal("analog2 and staticPressure and max");
-            
-            CcuLog.d(L.TAG_CCU_SYSTEM, "staticPressureMin: "+staticPressureMin+" staticPressureMax: "+staticPressureMax+" systemFanLoopOp: "+systemFanLoopOp);
-            
-            if (staticPressureMax > staticPressureMin)
-            {
-                spSignal = CCUUtils.roundToTwoDecimal(staticPressureMin + (staticPressureMax - staticPressureMin) * (systemFanLoopOp / 100.0));
-            }
-            else
-            {
-                spSignal = CCUUtils.roundToTwoDecimal(staticPressureMin - (staticPressureMin - staticPressureMax) * (systemFanLoopOp/100.0));
-            }
-            setCmdSignal("fan", spSignal);
-        } else {
-            spSignal = 0;
-        }
-    
-        if (spSignal != getCmdSignal("fan")) {
-            setCmdSignal("fan", spSignal);
-        }
-        
-        ControlMote.setAnalogOut("analog2", spSignal);
-        
-        ControlMote.setAnalogOut("analog3", VavSystemController.getInstance().getAverageSystemHumidity());
-    
-        systemCo2LoopOp = VavSystemController.getInstance().getSystemState() == OFF
-                                  ? 0 : (SystemConstants.CO2_CONFIG_MAX - getSystemCO2()) * 100 / 200 ;
-        setSystemLoopOp("co2", systemCo2LoopOp);
-        
-        if (L.ccu().oaoProfile != null) {
-            ControlMote.setAnalogOut("analog4", CCUHsApi.getInstance().readHisValByQuery("point and his and outside and air and damper and cmd"));
-        } else {
-            ControlMote.setAnalogOut("analog4",0);
-        }
-        
+       
         setSystemPoint("operating and mode", VavSystemController.getInstance().systemState.ordinal());
         String systemStatus = getStatusMessage();
         String scheduleStatus = ScheduleProcessJob.getSystemStatusString();

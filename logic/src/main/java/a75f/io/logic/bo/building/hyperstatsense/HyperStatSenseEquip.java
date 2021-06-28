@@ -49,7 +49,7 @@ public class HyperStatSenseEquip {
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
-        String equipDis = siteDis + "-HSSENSE-" + mNodeAddr;
+        String equipDis = siteDis + "-SENSE-" + mNodeAddr;
         HashMap systemEquip = mHayStack.read("equip and system");
         String ahuRef = null;
         if (systemEquip != null && systemEquip.size() > 0) {
@@ -65,7 +65,7 @@ public class HyperStatSenseEquip {
                 .setDisplayName(equipDis)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-
+                .setProfile(mProfileType.name())
                 .addMarker("equip").addMarker("hyperstat").addMarker("sense").addMarker("zone")
                 .setAhuRef(ahuRef)
                 .setTz(tz)
@@ -89,14 +89,65 @@ public class HyperStatSenseEquip {
         CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
 
 
-        mHayStack.writeDefaultVal("point and config and analog1relay and enabled and equipRef == \"" + mEquipRef + "\"",
-                config.isAnalog1Enable ? 1.0 : 0);
-        mHayStack.writeDefaultVal("point and config and analog2relay and enabled and equipRef == \"" + mEquipRef + "\"",
-                config.isAnalog2Enable ? 1.0 : 0);
-        mHayStack.writeDefaultVal("point and config and th1relay and enabled and equipRef == \"" + mEquipRef + "\"",
-                config.isTh1Enable ? 1.0 : 0);
-        mHayStack.writeDefaultVal("point and config and th2relay and enabled and equipRef == \"" + mEquipRef + "\"",
-                config.isTh2Enable ? 1.0 : 0);
+        Point isAn1 = new Point.Builder()
+                .setDisplayName(equipDis + "-isAnalog1")
+                .setEquipRef(mEquipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("config").addMarker("hyperstat").addMarker("zone").addMarker("writable")
+                .addMarker("enabled").addMarker("analog1").addMarker("sense")
+                .setGroup(String.valueOf(mNodeAddr))
+                .setEnums("false,true")
+                .setTz(tz)
+                .build();
+        String isAn1ID = mHayStack.addPoint(isAn1);
+        mHayStack.writeDefaultValById(isAn1ID, config.isAnalog1Enable ? 1.0 : 0);
+
+        Point isAn2 = new Point.Builder()
+                .setDisplayName(equipDis + "-isAnalog2")
+                .setEquipRef(mEquipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("config").addMarker("hyperstat").addMarker("zone").addMarker("writable")
+                .addMarker("enabled").addMarker("analog2").addMarker("sense")
+                .setGroup(String.valueOf(mNodeAddr))
+                .setEnums("false,true")
+                .setTz(tz)
+                .build();
+        String isAn2ID = mHayStack.addPoint(isAn2);
+        mHayStack.writeDefaultValById(isAn2ID, config.isAnalog2Enable ? 1.0 : 0);
+
+        Point isTh1 = new Point.Builder()
+                .setDisplayName(equipDis + "-isThermister1")
+                .setEquipRef(mEquipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("config").addMarker("hyperstat").addMarker("zone").addMarker("writable")
+                .addMarker("enabled").addMarker("thermister1").addMarker("sense")
+                .setGroup(String.valueOf(mNodeAddr))
+                .setEnums("false,true")
+                .setTz(tz)
+                .build();
+        String isTh1ID = mHayStack.addPoint(isTh1);
+        mHayStack.writeDefaultValById(isTh1ID, config.isTh1Enable ? 1.0 : 0);
+
+        Point isTh2 = new Point.Builder()
+                .setDisplayName(equipDis + "-isThermister2")
+                .setEquipRef(mEquipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("config").addMarker("hyperstat").addMarker("zone").addMarker("writable")
+                .addMarker("enabled").addMarker("thermister2").addMarker("sense")
+                .setGroup(String.valueOf(mNodeAddr))
+                .setEnums("false,true")
+                .setTz(tz)
+                .build();
+        String isTh2ID = mHayStack.addPoint(isTh2);
+        mHayStack.writeDefaultValById(isTh2ID, config.isTh2Enable ? 1.0 : 0);
 
         Point temperatureOffset = new Point.Builder()
                 .setDisplayName(equipDis+"-temperatureOffset")
@@ -109,7 +160,7 @@ public class HyperStatSenseEquip {
                 .setTz(tz)
                 .build();
         String tempoffsetId = mHayStack.addPoint(temperatureOffset);
-        mHayStack.writeDefaultValById(tempoffsetId, 0.0);
+        mHayStack.writeDefaultValById(tempoffsetId, config.temperatureOffset);
 
 
         Point analog1InputSensor = new Point.Builder()
@@ -125,7 +176,7 @@ public class HyperStatSenseEquip {
                 .setGroup(String.valueOf(mNodeAddr))
                 .setTz(tz).build();
         String analog1InputSensorId = mHayStack.addPoint(analog1InputSensor);
-        mHayStack.writeDefaultValById(analog1InputSensorId, 0.0);
+        mHayStack.writeDefaultValById(analog1InputSensorId, (double) config.analog1Sensor);
 
 
         Point analog2InputSensor = new Point.Builder()
@@ -142,7 +193,7 @@ public class HyperStatSenseEquip {
                 .setTz(tz)
                 .build();
         String analog2InputSensorId = mHayStack.addPoint(analog2InputSensor);
-        mHayStack.writeDefaultValById(analog2InputSensorId, 0.0);
+        mHayStack.writeDefaultValById(analog2InputSensorId, (double) config.analog2Sensor);
 
         Point th1InputSensor = new Point.Builder()
                 .setDisplayName(equipDis + "-th1InputSensor")
@@ -157,7 +208,7 @@ public class HyperStatSenseEquip {
                 .setTz(tz)
                 .build();
         String th1InputSensorId = mHayStack.addPoint(th1InputSensor);
-        mHayStack.writeDefaultValById(th1InputSensorId, 0.0);
+        mHayStack.writeDefaultValById(th1InputSensorId, (double) config.th1Sensor);
 
         Point th2InputSensor = new Point.Builder()
                 .setDisplayName(equipDis + "-th2InputSensor")
@@ -172,10 +223,20 @@ public class HyperStatSenseEquip {
                 .setTz(tz)
                 .build();
         String th2InputSensorId = mHayStack.addPoint(th2InputSensor);
-        mHayStack.writeDefaultValById(th2InputSensorId, 0.0);
+        mHayStack.writeDefaultValById(th2InputSensorId, (double) config.th2Sensor);
 
 
         HyperStatDevice device = new HyperStatDevice(mNodeAddr, siteRef , floorRef,roomRef, mEquipRef,"hyperstatsense");
+
+        Log.d("Spoo-values","in create entities"+String.valueOf(config.temperatureOffset) +"  and  \n"+
+                String.valueOf(config.analog1Sensor)+"  and  \n"+
+                String.valueOf(config.analog2Sensor)+"  and  \n"+
+                String.valueOf(config.th1Sensor)+"  and  \n"+
+                String.valueOf(config.th2Sensor)+"  and  \n"+
+                String.valueOf(config.isAnalog1Enable)+"  and  \n"+
+                String.valueOf(config.isAnalog2Enable)+"  and  \n"+
+                String.valueOf(config.isTh1Enable)+"  and  \n"+
+                String.valueOf(config.isTh2Enable)+"  and  \n");
 
         if (config.isAnalog1Enable) {
             String sensorId = createSensorPoint(floorRef, roomRef,"analog1", config);
@@ -207,6 +268,10 @@ public class HyperStatSenseEquip {
 
     }
 
+    public void update(ProfileType type,int node, HyperStatSenseConfiguration config, String floorRef, String roomRef){
+
+    }
+
     public HyperStatSenseConfiguration getHyperStatSenseConfig(){
         HyperStatSenseConfiguration HSSConfig = new HyperStatSenseConfiguration();
         HSSConfig.temperatureOffset = mHayStack.readHisValByQuery("point and air and temp and sensor and current and group == \""+mNodeAddr+"\"");
@@ -224,12 +289,20 @@ public class HyperStatSenseEquip {
 
     private String createSensorPoint(String floorRef, String roomRef, String sensorName,
                                      HyperStatSenseConfiguration config) {
-
+        Log.d("Spoo-values","in crate sensor"+String.valueOf(config.temperatureOffset) +"  and  \n"+
+                String.valueOf(config.analog1Sensor)+"  and  \n"+
+                String.valueOf(config.analog2Sensor)+"  and  \n"+
+                String.valueOf(config.th1Sensor)+"  and  \n"+
+                String.valueOf(config.th2Sensor)+"  and  \n"+
+                String.valueOf(config.isAnalog1Enable)+"  and  \n"+
+                String.valueOf(config.isAnalog2Enable)+"  and  \n"+
+                String.valueOf(config.isTh1Enable)+"  and  \n"+
+                String.valueOf(config.isTh2Enable)+"  and  \n");
         HashMap siteMap = mHayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
-        String equipDis = siteDis + "-PID-" + mNodeAddr;
+        String equipDis = siteDis + "-HSSENSE-" + mNodeAddr;
         Bundle bundle = new Bundle();
         if (config.analog1Sensor > 0){
             bundle = getAnalogBundle(config.analog1Sensor);
@@ -248,7 +321,7 @@ public class HyperStatSenseEquip {
         String[] markers = bundle.getStringArray("markers");
 
         Point.Builder sensorTag = new Point.Builder()
-                .setDisplayName(equipDis + "-processVariable- " + sensorName)
+                .setDisplayName(equipDis + "-sensorvaribles- " + sensorName)
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -267,11 +340,13 @@ public class HyperStatSenseEquip {
             }
         }
 
-        String processVariableTagId = mHayStack.addPoint(sensorTag.build());
-        mHayStack.writeHisValById(processVariableTagId, 0.0);
+        String sensorVariableTagId = mHayStack.addPoint(sensorTag.build());
+        mHayStack.writeHisValById(sensorVariableTagId, 0.0);
 
-        return processVariableTagId;
+        return sensorVariableTagId;
     }
+
+
 
     private Bundle getAnalogBundle(int analog){
         Bundle bundle = new Bundle();

@@ -29,6 +29,7 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.Occupancy;
+import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.sensors.NativeSensor;
@@ -268,7 +269,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
     private static void writePointsForEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
         if((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab") || equip.getMarkers().contains("dualDuct")
-                || equip.getMarkers().contains("ti")) && !equip.getMarkers().contains("system")) {
+                || equip.getMarkers().contains("ti")) && !equip.getMarkers().contains("system")
+        ||(equip.getMarkers().contains("sense"))  ) {
 
             VAVScheduler.processEquip(equip, equipSchedule, vacation, systemOccupancy);
         } else if (equip.getMarkers().contains("pid")
@@ -1715,5 +1717,82 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             CCUHsApi.getInstance().pointWrite(HRef.copy(averageDT.get("id").toString()), 4, "manual", HNum.make(0), HNum.make(1, "ms"));
         }
         systemOccupancy = UNOCCUPIED;
+    }
+
+
+    public static HashMap getHyperStatSenseEquipPoints(String equipID) {
+        HashMap sensePoints = new HashMap();
+        CCUHsApi haystack = CCUHsApi.getInstance();
+        sensePoints.put("Profile","SENSE");
+        String equipStatusPoint = haystack.readDefaultStrVal("point and status and message and group == \""+equipID+"\"");
+        double tempOffset = haystack.readDefaultVal("point and zone and temp and group == \""+equipID+"\"");
+        double analog1Sensor = haystack.readDefaultVal("point and config and analog1 and input and sensor and group == \"" + equipID + "\"").intValue();
+        double analog2Sensor = haystack.readDefaultVal("point and config and analog2 and input and sensor and group == \"" + equipID + "\"").intValue();
+        double th1Sensor = haystack.readDefaultVal("point and config and th1 and input and sensor and group == \"" + equipID + "\"").intValue();
+        double th2Sensor = haystack.readDefaultVal("point and config and th2 and input and sensor and group == \"" + equipID + "\"").intValue();
+        boolean isAnalog1Enable = haystack.readDefaultVal("point and config and analog1 and enabled and group == \"" + equipID + "\"") > 0;
+        boolean isAnalog2Enable = haystack.readDefaultVal("point and config and analog2 and enabled and group == \"" + equipID + "\"") > 0;
+        boolean isTh1Enable = haystack.readDefaultVal("point and config and thermister1 and enabled and group == \"" + equipID + "\"") > 0;
+        boolean isTh2Enable = haystack.readDefaultVal("point and config and thermister2 and enabled and group == \"" + equipID + "\"") > 0;
+
+        Log.d("Spoo-values",String.valueOf(tempOffset) +"  and  \n"+
+                String.valueOf(analog1Sensor)+"  and  \n"+
+                String.valueOf(analog2Sensor)+"  and  \n"+
+                String.valueOf(th1Sensor)+"  and  \n"+
+                String.valueOf(th2Sensor)+"  and  \n"+
+                String.valueOf(isAnalog1Enable)+"  and  \n"+
+                String.valueOf(isAnalog2Enable)+"  and  \n"+
+                String.valueOf(isTh1Enable)+"  and  \n"+
+                String.valueOf(isTh2Enable)+"  and  \n");
+
+        if (equipStatusPoint.length() > 0) {
+            sensePoints.put("Status",equipStatusPoint);
+        }else{
+            sensePoints.put("Status","OFF");
+        }
+
+
+        if (tempOffset  != 0) {
+            sensePoints.put("TemperatureOffset",tempOffset+" \u2109");
+        }else{
+            sensePoints.put("TemperatureOffset",0+" \u2109");
+        }
+
+        if(isAnalog1Enable)sensePoints.put("iAn1Enable","true");
+        else sensePoints.put("iAn1Enable","false");
+
+        if(isAnalog2Enable)sensePoints.put("iAn2Enable","true");
+        else sensePoints.put("iAn1Enable","false");
+
+        if(isTh1Enable)sensePoints.put("isTh1Enable","true");
+        else sensePoints.put("isTh1Enable","false");
+
+        if(isTh2Enable)sensePoints.put("isTh2Enable","true");
+        else sensePoints.put("isTh2Enable","false");
+
+
+        if (analog1Sensor >= 0 ) {
+            NativeSensor selectedSensor = SensorManager.getInstance().getNativeSensorList().get((int) analog1Sensor );
+            sensePoints.put("Analog1", selectedSensor.sensorName);
+            sensePoints.put("Unit1", selectedSensor.engineeringUnit);
+        }
+
+        if (analog2Sensor >= 0) {
+            NativeSensor selectedSensor = SensorManager.getInstance().getNativeSensorList().get((int) analog2Sensor );
+            sensePoints.put("Analog2", selectedSensor.sensorName);
+            sensePoints.put("Unit2", selectedSensor.engineeringUnit);
+        }
+
+        if (th1Sensor >= 0) {
+            Thermistor selectedSensor = Thermistor.getThermistorList().get((int) th1Sensor );
+            sensePoints.put("Thermistor1", selectedSensor.sensorName);
+            sensePoints.put("Unit3", selectedSensor.engineeringUnit);
+        }
+        if (th2Sensor >= 0) {
+            Thermistor selectedSensor = Thermistor.getThermistorList().get((int) th2Sensor);
+            sensePoints.put("Thermistor2", selectedSensor.sensorName);
+            sensePoints.put("Unit4", selectedSensor.engineeringUnit);
+        }
+        return sensePoints;
     }
 }

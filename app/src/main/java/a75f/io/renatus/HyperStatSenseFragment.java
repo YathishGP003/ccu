@@ -126,14 +126,16 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mHyperStatSenseVM = new ViewModelProvider(this).get(HyperStatSenseVM.class);
+     /*   mHyperStatSenseVM = new ViewModelProvider(this).get(HyperStatSenseVM.class);
         mHyperStatSenseVM.init();
         mHyperStatSenseVM.get().observe(this, new Observer<HyperStatSenseModel>() {
             @Override
             public void onChanged(HyperStatSenseModel model) {
                    //TODO
+                Log.d("Spoo", "in onchange");
+                updateView();
             }
-        });
+        });*/
         setSpinnerListItem();
         mHSSenseProfile = new HyperStatSenseProfile();
 
@@ -148,11 +150,26 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
         mTemperatureOffset.setValue(TEMP_OFFSET_LIMIT);
         mTemperatureOffset.setWrapSelectorWheel(false);
 
+      /*  mTemperatureOffset.setOnValueChangedListener(new NumberPicker.OnValueChangeListener(){
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+
+
+                mHyperStatSenseVM.setTempoffset(String.valueOf(newVal));
+            }
+        });*/
+
+
         /** Spinner id disabled by default */
         mThermostat1Sp.setEnabled(false);
         mThermostat2Sp.setEnabled(false);
         mAnalog1Sp.setEnabled(false);
         mAnalog2Sp.setEnabled(false);
+    }
+
+
+
+    private void updateView() {
+        mTemperatureOffset.setValue(Integer.parseInt(mHyperStatSenseVM.getTempOffset()));
     }
 
     @OnCheckedChanged({R.id.th1,R.id.th2,R.id.anlg1,R.id.anlg2})
@@ -179,7 +196,7 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
     }
 
     @OnClick(R.id.setBtn)
-    private void setOnClick(View v){
+    void setOnClick(View v){
         new AsyncTask<String, Void, Void>() {
             @Override
             protected void onPreExecute() {
@@ -218,11 +235,11 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
         hssense.analog1Sensor = mAnalog1Sp.getSelectedItemPosition();
         hssense.analog2Sensor = mAnalog2Sp.getSelectedItemPosition();
 
-       // if (mProfileConfig == null) {
-        mHSSenseProfile.addHyperStatSenseEquip(ProfileType.HYPERSTAT_SENSE,mNodeAddress, hssense, mFloorName, mRoomName);
-       // } else {
-         //   mHSSenseProfile.updatePlcEquip(p,floorRef, zoneRef, processVariableTag, dynamicTargetTag);
-       // }
+ //       if (mHSSenseProfile == null) {
+            mHSSenseProfile.addHyperStatSenseEquip(ProfileType.HYPERSTAT_SENSE,mNodeAddress, hssense, mFloorName, mRoomName);
+    //   } else {
+           // mHSSenseProfile.updateHyperStatSenseEquip(ProfileType.HYPERSTAT_SENSE,mNodeAddress, hssense, mFloorName, mRoomName);
+      //  }
         L.ccu().zoneProfiles.add(mHSSenseProfile);
         CcuLog.d(L.TAG_CCU_UI, "Set Hyperstat sense Config: Profiles - "+L.ccu().zoneProfiles.size());
     }
@@ -262,6 +279,7 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
             dialog.getWindow().setLayout(width, height);
         }
     }
+
 
 
 }

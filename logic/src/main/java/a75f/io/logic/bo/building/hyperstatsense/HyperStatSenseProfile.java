@@ -20,6 +20,10 @@ public class HyperStatSenseProfile extends ZoneProfile {
         mHyperStatSenseEquip.init();
     }
 
+    public void updateHyperStatSenseEquip(ProfileType type,int node, HyperStatSenseConfiguration config, String floorRef, String roomRef) {
+      //  plcEquip.update(config,floorRef,zoneRef,processTag, dynamicTargetTag);
+        //plcEquip.init();
+    }
 
     @Override
     public void updateZonePoints() {
@@ -28,7 +32,7 @@ public class HyperStatSenseProfile extends ZoneProfile {
 
     @Override
     public ProfileType getProfileType() {
-        return mHyperStatSenseEquip.mProfileType;
+        return ProfileType.HYPERSTAT_SENSE;
     }
 
     @Override

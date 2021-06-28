@@ -513,7 +513,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     LayoutInflater inflater = LayoutInflater.from(getContext());
 
                     zoneTitle = roomMap.get(m).get("dis").toString();
+                     Log.d(LOG_TAG, "zoneTitle = " + zoneTitle);
                     ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\""+ roomMap.get(m).get("id").toString()+"\" and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
+                     Log.d(LOG_TAG, "roomMap.get(m).get(\"id\").toString() = " + roomMap.get(m).get("id").toString());
+                     Log.d(LOG_TAG, "floorList.get(mFloorListAdapter.getSelectedPostion()).getId()  = " + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() );
                     if(equips.size() > 0) {// zones has devices paired
                         HashMap<String, ArrayList<HashMap>> zoneData = new HashMap<String, ArrayList<HashMap>>();
                         for (HashMap zoneModel : equips) {
@@ -527,7 +530,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                 zoneData.put(zoneModel.get("roomRef").toString(), newData);
                             }
                         }
-                        Log.i(LOG_TAG+"ZonesMap", "Size:" + zoneData.size() + " Data:" + zoneData);
+                        Log.d(LOG_TAG+"ZonesMap", "Size:" + zoneData.size() + " Data:" + zoneData);
                         for (ArrayList<HashMap> equipZones : zoneData.values()) {
 
                             String profileType = "";
@@ -542,7 +545,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             String profileTempInfluence = "TEMP_INFLUENCE";
                             String profileDualDuct = "DUAL_DUCT";
                             String profileModBus = "MODBUS";
-                            String profileHyperStat = "HYPERSTAT";
+                            String profileHyperStatSense = "HYPERSTAT_SENSE";
 
                             boolean tempModule = false;
                             boolean nontempModule = false;
@@ -563,7 +566,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                         || profileType.contains(profileTempMonitor)
                                         || profileType.contains(profileTempInfluence)
                                         || profileType.contains(profileModBus)
-                                        || profileType.contains(profileHyperStat)) {
+                                        || profileType.contains(profileHyperStatSense)) {
                                     nontempModule = true;
                                     Log.e(LOG_TAG+"RoomData", "Load SmartStat ProfileType:" + profileType);
                                 }
@@ -597,6 +600,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         Log.i("ProfileTypes","Points:"+zoneMap.toString());
         Equip p = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
+        Log.i("ProfileTypes","p:"+ p.toString());
         double currentAverageTemp = 0;
         int noTempSensor = 0;
         ArrayList<Short> equipNodes = new ArrayList<>();
@@ -1392,6 +1396,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
     }
 
+
+
     private void updateNonTemperatureBasedZones(NonTempControl nonTempControlOpen, View zonePointsOpen, Equip equipOpen, LayoutInflater inflater)
     {
         Equip p = equipOpen;
@@ -1525,6 +1531,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 nonTempControl.setEquipType(2);
                 nonTempControl.setImage(R.drawable.ic_zone_em);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_em_max);
+            }
+            if ((zoneEquips.get("profile").toString()).contains("SENSE")) {
+                nonTempControl.setEquipType(1);
+
             }
         }else{
             //No devices paired zone
@@ -1741,6 +1751,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                 linearLayoutZonePoints.addView(zoneDetails);
                                 linearLayoutZonePoints.setPadding(0,0,0,20);
                             }
+                        }
+                        if (nonTempEquip.getProfile().contains("SENSE")) {
+                            LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
+                            LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                           ll_status.setVisibility(View.GONE);
+                           ll_schedule.setVisibility(View.GONE);
+
+                            HashMap sensePoints = ScheduleProcessJob.getHyperStatSenseEquipPoints(nonTempEquip.getGroup());
+                            loadSENSEPointsUI(sensePoints, inflater, linearLayoutZonePoints, nonTempEquip.getGroup());
+
                         }
                     }else{
                         //Non paired devices
@@ -3118,6 +3138,43 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
     private String getScheduleTypeId(String equipId){
         return CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \""+equipId+"\"");
+    }
+
+    private void loadSENSEPointsUI(HashMap sensePoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
+
+        View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
+        View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
+        View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
+        View viewPointRow2 = inflater.inflate(R.layout.zones_item_type1, null);
+
+        TextView textViewAnalog1 = viewPointRow1.findViewById(R.id.text_point1value);
+        TextView textViewAnalog2 = viewPointRow1.findViewById(R.id.text_point2value);
+        TextView textViewth1 = viewPointRow2.findViewById(R.id.text_point1value);
+        TextView textViewth2 = viewPointRow2.findViewById(R.id.text_point2value);
+
+        TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
+        TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+
+        textViewTitle.setText(sensePoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewStatus.setText(sensePoints.get("Status").toString());
+
+        if(sensePoints.get("iAn1Enable") == "true"){
+            textViewAnalog1.setText(sensePoints.get("Analog1").toString()+ " : " +(sensePoints.get("Unit1").toString()));
+        }
+        if(sensePoints.get("iAn2Enable") == "true"){
+            textViewAnalog2.setText(sensePoints.get("Analog2").toString()+ " : " +(sensePoints.get("Unit2").toString()));
+        }
+        if(sensePoints.get("isTh1Enable") == "true"){
+            textViewth1.setText(sensePoints.get("Thermistor1").toString()+ " : " +(sensePoints.get("Unit3").toString()));
+        }
+        if(sensePoints.get("isTh2Enable") == "true"){
+            textViewth2.setText(sensePoints.get("Thermistor2").toString()+ " : " +(sensePoints.get("Unit4").toString()));
+        }
+        linearLayoutZonePoints.addView(viewTitle);
+        linearLayoutZonePoints.addView(viewStatus);
+        linearLayoutZonePoints.addView(viewPointRow1);
+        linearLayoutZonePoints.addView(viewPointRow2);
+
     }
     
 }

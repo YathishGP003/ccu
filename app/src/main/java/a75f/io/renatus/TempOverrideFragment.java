@@ -75,6 +75,8 @@ public class TempOverrideFragment extends Fragment {
         expandableListView = view.findViewById(R.id.expandableListView);
 
         expandableListDetail = new HashMap<>();
+
+        Log.e("InsideTempOverrideFrag","space- "+CCUHsApi.getInstance().readAll("space"));
         updateAllData();
         /*List<String> result = new ArrayList<>();
         for (String s : expandableListTitle) {

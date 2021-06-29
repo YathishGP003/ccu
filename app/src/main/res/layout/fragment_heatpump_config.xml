@@ -16,7 +16,7 @@
         android:fontFamily="@font/lato_bold"
         android:text="@string/heat_pump_unit"
         android:textAllCaps="true"
-        android:textColor="@color/orange_75f"
+        android:textColor="?orange_75f"
         android:textSize="33.5dp"
         android:textStyle="bold" />
 
@@ -82,7 +82,7 @@
                 android:layout_marginRight="25dp"
                 android:gravity="center_vertical|center_horizontal"
                 android:minWidth="77dp"
-                android:theme="@style/DefaultNumberPickerTheme" />
+                android:theme="?DefaultNumberPickerTheme" />
 
             <ImageView
                 android:id="@+id/imageHPInput"
@@ -408,7 +408,7 @@
                 android:fontFamily="@font/lato_regular"
                 android:text="@string/button_set"
                 android:textAllCaps="true"
-                android:textColor="@color/orange_75f"
+                android:textColor="?orange_75f"
                 android:textSize="19.5dp" />
         </RelativeLayout>
     </ScrollView>

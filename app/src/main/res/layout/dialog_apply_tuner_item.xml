@@ -41,7 +41,7 @@
             android:layout_marginLeft="5sp"
             android:gravity="center_vertical|left"
             android:text="abnormalTunername"
-            android:textAppearance="@style/tuner_button_cancel" />
+            android:textAppearance="?tuner_button_cancel" />
 
         <TextView
             android:id="@+id/textView_level"
@@ -62,7 +62,7 @@
             android:layout_marginRight="10sp"
             android:gravity="center_vertical|left"
             android:text="40"
-            android:textAppearance="@style/tuner_text_value" />
+            android:textAppearance="?tuner_text_value" />
 
         <ImageView
             android:id="@+id/imageViewArrow"
@@ -91,6 +91,6 @@
             android:layout_marginRight="10dp"
             android:gravity="center_vertical|left"
             android:text="100"
-            android:textAppearance="@style/tuner_text_value" />
+            android:textAppearance="?tuner_text_value" />
     </LinearLayout>
 </RelativeLayout>

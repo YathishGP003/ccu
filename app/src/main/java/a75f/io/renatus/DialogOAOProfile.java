@@ -1,7 +1,9 @@
+
 package a75f.io.renatus;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import androidx.annotation.Nullable;
@@ -16,6 +18,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.google.android.material.color.MaterialColors;
+
 import java.util.ArrayList;
 
 import a75f.io.logger.CcuLog;
@@ -28,11 +32,13 @@ import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.oao.OAOProfileConfiguration;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType.TwoToTenV;
+
 
 /**
  * Created by samjithsadasivan on 6/5/18.
@@ -114,8 +120,9 @@ public class DialogOAOProfile extends BaseDialogFragment
         TextView titleView = this.getDialog().findViewById(android.R.id.title);
         if(titleView != null)
         {
+
             titleView.setGravity(Gravity.CENTER);
-            titleView.setTextColor(getResources().getColor(R.color.progress_color_orange));
+            titleView.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
         }
         int titleDividerId = getContext().getResources()
                                          .getIdentifier("titleDivider", "id", "android");
@@ -241,6 +248,7 @@ public class DialogOAOProfile extends BaseDialogFragment
             smartPurgeOutsideDamperMinOpen.setSelection(100,false);
             enhancedVentilationOutsideDamperMinOpen.setSelection(50,false);
         }
+        setSpinnerDropdown();
     }
     
     private void setUpOAOProfile() {
@@ -295,5 +303,22 @@ public class DialogOAOProfile extends BaseDialogFragment
         
     }
 
+    private void setSpinnerDropdown(){
+
+        CCUUiUtil.setSpinnerDropDownColor(oaDamperAtMin,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(returnDamperAtMin,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(oaDamperMinOpen,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(exFanStage1Threshold,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(currentTransformerType,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(exFanHysteresis,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(oaDamperAtMax,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(returnDamperAtMax,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(returnDamperMinOpen,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(exFanStage2Threshold,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(co2Threshold,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(smartPurgeOutsideDamperMinOpen,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(enhancedVentilationOutsideDamperMinOpen,getContext());
+
+    }
     
 }

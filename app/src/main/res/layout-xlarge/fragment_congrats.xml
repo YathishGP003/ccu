@@ -30,7 +30,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal|center_vertical"
-                android:textAppearance="@style/text_header"
+                android:textAppearance="?text_header"
                 android:text="@string/title_success"/>
 
             <TextView

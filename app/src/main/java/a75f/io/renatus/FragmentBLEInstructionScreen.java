@@ -24,6 +24,7 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
 import a75f.io.renatus.ZONEPROFILE.LightingZoneProfileFragment;
+import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -54,6 +55,9 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
 
     @BindView(R.id.imageGoback)
     ImageView imageGoback;
+
+    @BindView(R.id.pairinginstruct_daikin)
+    ImageView pairinginstructDaikin;
 
     public static FragmentBLEInstructionScreen getInstance(short nodeAddress, String roomName,
                                                            String floorName,
@@ -371,7 +375,16 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         if (mNodeType == NodeType.SMART_NODE)
         {
             title.setText(getText(R.string.title_pairsn));
-            pairinginstruct.setImageResource(R.drawable.image_pairing_screen_snhn);
+            if(BuildConfig.BUILD_TYPE.equals("daikin_prod")|| CCUUiUtil.isDaikinThemeEnabled(getContext()))
+            {
+                pairinginstruct.setVisibility(View.GONE);
+                pairinginstructDaikin.setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                pairinginstruct.setImageResource(R.drawable.image_pairing_screen_snhn);
+            }
+           // pairinginstruct.setImageResource(R.drawable.image_pairing_screen_snhn);
         }
         else if (mNodeType == NodeType.SMART_STAT)
         {

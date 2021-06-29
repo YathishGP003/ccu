@@ -27,9 +27,12 @@ import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.modbus.FragmentModbusConfiguration;
+import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+
 
 /**
  * Created by ryant on 9/27/2017.
@@ -76,6 +79,13 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
     @BindView(R.id.imageGoback)
     ImageView imageGoback;
 
+    @BindView(R.id.ccu75_img)
+    ImageView ccu75Image;
+
+    @BindView(R.id.daikin_ccu)
+    ImageView daikinCcu;
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         // TODO Auto-generated method stub
@@ -90,6 +100,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
         defaultTextView.setText(HSUtil.getDis(mRoomName));
+        configCCULogo();
     }
 
 
@@ -225,7 +236,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         if(titleView != null)
         {
             titleView.setGravity(Gravity.CENTER);
-            titleView.setTextColor(getResources().getColor(R.color.progress_color_orange));
+            titleView.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
         }
         int titleDividerId = getContext().getResources()
                 .getIdentifier("titleDivider", "id", "android");
@@ -265,5 +276,14 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
             }
         }
         return false;
+    }
+
+    private void configCCULogo(){
+
+        if(BuildConfig.BUILD_TYPE.equals("daikin_prod")||CCUUiUtil.isDaikinThemeEnabled(getContext()))
+            daikinCcu.setVisibility(View.VISIBLE);
+        else
+            ccu75Image.setVisibility(View.VISIBLE);
+
     }
 }

@@ -11,6 +11,9 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.CCUUtils;
+
 /**
  * Created by samjithsadasivan isOn 8/9/17.
  */
@@ -23,12 +26,13 @@ public class DataArrayAdapter<T> extends ArrayAdapter<T>
 	private int     nColor             = Color.argb(0x55, 0x00, 0x99, 0xcc);
 	private int     nMultiColor        = Color.argb(0x33, 0x00, 0x99, 0xcc);
 	private ArrayList<T> objects;
-
+	int listSelectorBackground;
 
 	public DataArrayAdapter(Context context, int textViewResourceId, ArrayList<T> objects)
 	{
 		super(context, textViewResourceId, objects);
 		this.objects = objects;
+		listSelectorBackground = CCUUiUtil.getListSelectorBackground(context);
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -53,14 +57,16 @@ public class DataArrayAdapter<T> extends ArrayAdapter<T>
 		{
 			if(position == -1)
 			{
-				convertView.setBackground(getContext().getResources().getDrawable(R.drawable.ic_listselector));
+				//convertView.setBackground(getContext().getResources().getDrawable(R.drawable.ic_listselector));
+				convertView.setBackgroundResource(listSelectorBackground);
 				textView_Data.setTextColor(Color.WHITE);
 				textView_Data.setSelected(true);
 			}
 			if (position == nSelectedPostion)
 			{
 				//v.setBackgroundColor(getContext().getResources().getColor(R.color.orange_multi));
-				convertView.setBackground(getContext().getResources().getDrawable(R.drawable.ic_listselector));
+				//convertView.setBackground(getContext().getResources().getDrawable(R.drawable.ic_listselector));
+				convertView.setBackgroundResource(listSelectorBackground);
 				textView_Data.setTextColor(Color.WHITE);
 				textView_Data.setSelected(true);
 			}

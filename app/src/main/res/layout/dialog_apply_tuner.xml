@@ -97,7 +97,7 @@
             android:gravity="center_vertical|center_horizontal"
             android:padding="5sp"
             android:text="@string/cancel"
-            android:textColor="@color/orange_75f"
+            android:textColor="?orange_75f"
             android:textSize="19.5sp" />
 
         <View
@@ -117,7 +117,7 @@
             android:gravity="center_vertical|center_horizontal"
             android:padding="5sp"
             android:text="@string/button_apply"
-            android:textColor="@color/orange_75f"
+            android:textColor="?orange_75f"
             android:textSize="19.5sp" />
     </LinearLayout>
 </LinearLayout>

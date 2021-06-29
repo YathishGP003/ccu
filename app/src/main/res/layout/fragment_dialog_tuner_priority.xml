@@ -21,7 +21,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:text="@string/tuner_label_priority"
-                android:textAppearance="@style/tuner_group_title" />
+                android:textAppearance="?tuner_group_title" />
 
             <TextView
                 android:id="@+id/textTunerGroupName"
@@ -29,7 +29,7 @@
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/textTunerGroupTitle"
                 android:text="VAV"
-                android:textAppearance="@style/tuner_group_title" />
+                android:textAppearance="?tuner_group_title" />
 
             <TextView
                 android:id="@+id/textTunerName"
@@ -184,7 +184,7 @@
                 android:gravity="center_vertical|center_horizontal"
                 android:padding="5sp"
                 android:text="@string/cancel"
-                android:textColor="@color/orange_75f"
+                android:textColor="?orange_75f"
                 android:textSize="19.5sp" />
 
             <View

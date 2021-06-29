@@ -31,7 +31,7 @@
                     android:fontFamily="@font/lato_bold"
                     android:text="@string/title_vavnofan"
                     android:textAllCaps="true"
-                    android:textColor="@color/orange_75f"
+                    android:textColor="?orange_75f"
                     android:textSize="33.5sp"
                     android:textStyle="bold" />
 
@@ -267,12 +267,12 @@
                         android:textAppearance="@style/label_values" />
 
                     <NumberPicker
+                        android:theme="?DefaultNumberPickerTheme"
                         android:id="@+id/temperatureOffset"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:textColor="#202020"
-                        android:textSize="30sp" />
+                        />
                 </LinearLayout>
 
                 <LinearLayout
@@ -292,6 +292,7 @@
                         android:textAppearance="@style/label_values" />
 
                     <NumberPicker
+                        android:theme="?DefaultNumberPickerTheme"
                         android:id="@+id/maxDamperPos"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -315,11 +316,12 @@
                         android:textAppearance="@style/label_values" />
 
                     <NumberPicker
+                        android:theme="?DefaultNumberPickerTheme"
                         android:id="@+id/minDamperPos"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:textSize="30sp" />
+                         />
                 </LinearLayout>
 
                 <LinearLayout
@@ -339,11 +341,12 @@
 
 
                     <NumberPicker
+                        android:theme="?DefaultNumberPickerTheme"
                         android:id="@+id/maxHeatingDamperPos"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:textSize="30sp" />
+                         />
                 </LinearLayout>
 
                 <LinearLayout
@@ -362,11 +365,12 @@
                         android:textAppearance="@style/label_values" />
 
                     <NumberPicker
+                        android:theme="?DefaultNumberPickerTheme"
                         android:id="@+id/minHeatingDamperPos"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:textSize="30sp" />
+                         />
                 </LinearLayout>
             </LinearLayout>
 
@@ -382,7 +386,7 @@
                 android:fontFamily="@font/lato_regular"
                 android:text="@string/button_set"
                 android:textAllCaps="true"
-                android:textColor="@color/orange_75f"
+                android:textColor="?orange_75f"
                 android:textSize="19.5sp" />
         </LinearLayout>
 

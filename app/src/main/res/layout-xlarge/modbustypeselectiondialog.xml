@@ -8,7 +8,7 @@
 
     <TextView
         android:id="@+id/default_text_view"
-        style="@style/WindowTextStyle"
+        style="?WindowTextStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingStart="8dp"
@@ -32,7 +32,7 @@
             android:layout_marginStart="64dp"
             android:padding="2.5dp"
             android:rotation="180"
-            app:srcCompat="@drawable/icon_arrowright" />
+            app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24" />
 
         <TextView
             android:id="@+id/textTitleFragment"
@@ -44,7 +44,7 @@
             android:fontFamily="@font/lato_bold"
             android:text="@string/label_modbusselectdevicetype"
             android:textAllCaps="true"
-            android:textColor="@color/orange_75f"
+            android:textColor="?orange_75f"
             android:textSize="33.5sp"
             android:textStyle="bold" />
 
@@ -89,12 +89,12 @@
 
             <ImageView
                 android:id="@+id/nextMBEq"
-                android:layout_width="12dp"
-                android:layout_height="20dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="96dp"
-                android:src="@drawable/icon_arrowright" />
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24" />
 
             <View
                 android:layout_width="match_parent"
@@ -138,12 +138,12 @@
 
             <ImageView
                 android:id="@+id/nextSS"
-                android:layout_width="12dp"
-                android:layout_height="20dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="96dp"
-                android:src="@drawable/icon_arrowright" />
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24" />
 
             <View
                 android:layout_width="match_parent"

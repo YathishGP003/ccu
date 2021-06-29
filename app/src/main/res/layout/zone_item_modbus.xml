@@ -42,12 +42,12 @@
 
         <Spinner
             android:id="@+id/spValue"
+            style="@style/Widget.AppCompat.Spinner.Underlined"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="14dp"
             android:gravity="center"
             android:layout_gravity="start|center"
-            android:spinnerMode="dropdown"
             android:visibility="gone" />
     </LinearLayout>
 

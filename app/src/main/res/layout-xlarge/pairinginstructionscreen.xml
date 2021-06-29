@@ -20,7 +20,7 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="64dp"
             android:rotation="180"
-            app:srcCompat="@drawable/icon_arrowright" />
+             app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24" />
 
         <TextView
             android:id="@+id/title"
@@ -31,24 +31,33 @@
             android:fontFamily="@font/lato_bold"
             android:text="@string/title_pairsn"
             android:textAllCaps="true"
-            android:textColor="@color/orange_75f"
+            android:textColor="?orange_75f"
             android:textSize="33.5dp"
             android:textStyle="bold" />
 
     </RelativeLayout>
 
     <ImageView
+        android:visibility="visible"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+
         android:src="@drawable/image_pairing_screen_snhn"
-        android:id="@+id/pairinginstruct"
         android:layout_below="@+id/layoutHeader"
         android:layout_marginTop="64dp"
         android:layout_marginLeft="64dp"
         android:layout_marginRight="64dp"
+        android:id="@+id/pairinginstruct"
         android:layout_marginBottom="64dp"
         />
-
+    <ImageView
+        android:id="@+id/pairinginstruct_daikin"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/paring_step_screen_daikin"
+        android:layout_below="@+id/layoutHeader"
+        />
     <LinearLayout
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
@@ -61,7 +70,7 @@
         android:paddingTop="8dp">
 
         <Button
-            style="@style/buttonstyle"
+            style="?buttonstyle"
             android:id="@+id/first_button"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
@@ -74,11 +83,11 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:background="@null"
-            android:drawableRight="@drawable/icon_arrowright"
+             android:drawableRight="@drawable/ic_baseline_keyboard_arrow_right_24"
             android:drawablePadding="5dp"
             android:fontFamily="@font/lato_bold"
             android:text="@string/button_pair"
-            android:textColor="@color/orange_75f"
+            android:textColor="?orange_75f"
             android:layout_marginRight="24dp"
             android:layout_marginBottom="24dp"
             android:textSize="24dp" />

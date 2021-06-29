@@ -26,6 +26,11 @@ public class ModbusParser {
         return allEquips;
     }
 
+    public static final int MODBUS=1;
+    public static final int BTU=2;
+    public static final int EM_SYSTEM=3;
+    public static final int EM_ZONE=4;
+
     public ArrayList<EquipmentDevice> parseEquips(Context c) {
         ArrayList<EquipmentDevice> assetEquipments = new ArrayList<>();
 
@@ -36,7 +41,7 @@ public class ModbusParser {
                 String equipJson = readFileFromAssets(c, "modbus/" + filename);
                 assetEquipments.add(parseModbusDataFromString(equipJson));
             }
-            assetEquipments.addAll(readExternalJSONFromDir(c,"/sdcard/ccu/modbus"));
+            assetEquipments.addAll(readExternalJSONFromDir(c,"/sdcard/ccu/modbus",this.MODBUS));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -92,7 +97,7 @@ public class ModbusParser {
                 String equipJson = readFileFromAssets(c, "modbus-em-zone/" + filename);
                 assetEquipments.add(parseModbusDataFromString(equipJson));
             }
-            assetEquipments.addAll(readExternalJSONFromDir(c,"/sdcard/ccu/modbus/modbus-em-zone"));
+            assetEquipments.addAll(readExternalJSONFromDir(c,"/sdcard/ccu/modbus",this.EM_ZONE));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -110,7 +115,7 @@ public class ModbusParser {
                 String equipJson = readFileFromAssets(c, "modbus-em-system/" + filename);
                 energyMeterDevices.add(parseModbusDataFromString(equipJson));
             }
-            energyMeterDevices.addAll(readExternalJSONFromDir(c,"/sdcard/ccu/modbus/modbus-em-system"));
+            energyMeterDevices.addAll(readExternalJSONFromDir(c,"/sdcard/ccu/modbus",this.EM_SYSTEM));
         } catch (IOException e) {
             Log.e("MODBUS PARSER", "File path does not exist");
             e.printStackTrace();
@@ -134,7 +139,7 @@ public class ModbusParser {
                 String equipJson = readFileFromAssets(context, "modbus-btu/" + filename);
                 btuMeterDevices.add(parseModbusDataFromString(equipJson));
             }
-            btuMeterDevices.addAll(readExternalJSONFromDir(context,"/sdcard/ccu/modbus/modbus-btu"));
+            btuMeterDevices.addAll(readExternalJSONFromDir(context,"/sdcard/ccu/modbus",this.BTU));
         } catch (IOException e) {
             Log.e("MODBUS PARSER", "File path does not exist");
             e.printStackTrace();
@@ -142,7 +147,7 @@ public class ModbusParser {
         return btuMeterDevices;
     }
 
-    private ArrayList<EquipmentDevice> readExternalJSONFromDir(Context c, String filePath){
+    private ArrayList<EquipmentDevice> readExternalJSONFromDir(Context c, String filePath,int type){
         ArrayList<EquipmentDevice> filterDevices = new ArrayList<EquipmentDevice>();
         File modbusJsonFolder = new File(filePath);
         if(modbusJsonFolder!=null && modbusJsonFolder.exists() && modbusJsonFolder.isDirectory()
@@ -151,7 +156,17 @@ public class ModbusParser {
             for (int i = 0; i < listOfFile.length; i++) {
                 try {
                     if(listOfFile[i].isFile())
-                        filterDevices.add(parseModbusDataFromString(readFileFromFolder(c, listOfFile[i])));
+                    {
+                        EquipmentDevice device =parseModbusDataFromString(readFileFromFolder(c, listOfFile[i]));
+                        if(type == MODBUS && device.getEquipType()!="BTU" && device.getEquipType()!="EMR" && device.getEquipType()!="EMR_ZONE")
+                            filterDevices.add(device);
+                        else if(type == BTU && device.getEquipType()!="BTU")
+                            filterDevices.add(device);
+                        else if(type == EM_SYSTEM && device.getEquipType()!="EMR")
+                            filterDevices.add(device);
+                        else if(type == EM_ZONE && device.getEquipType()!="EMR_ZONE")
+                            filterDevices.add(device);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

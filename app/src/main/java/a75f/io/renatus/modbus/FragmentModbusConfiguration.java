@@ -20,7 +20,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatSpinner;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -184,7 +183,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 case MODBUS_UPS150:
                 case MODBUS_EMR:
                 case MODBUS_BTU:
-
+                case MODBUS_DEFAULT:
                 case MODBUS_UPS40K:
                 case MODBUS_UPSL:
                 case MODBUS_UPSV:
@@ -331,7 +330,13 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     private void setUpsModbusProfile() {
         String equipType = equipmentDevice.getEquipType();
         Log.i("equipType", "setUpsModbusProfile: "+equipType);
-        ModbusEquipTypes curEquipTypeSelected = ModbusEquipTypes.valueOf(equipType);
+        ModbusEquipTypes curEquipTypeSelected;
+        try {
+             curEquipTypeSelected = ModbusEquipTypes.valueOf(equipType);
+        }catch (Exception e){
+            curEquipTypeSelected = ModbusEquipTypes.MODBUS_DEFAULT;
+        }
+
         String equipRef = null;
         curSelectedSlaveId = (short) (spAddress.getSelectedItemPosition() + 1);
         if (spAddress.getVisibility() == View.GONE) {
@@ -507,7 +512,15 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 } else
                     equipRef = updateModbusProfile(curSelectedSlaveId);
                 break;
-
+            case MODBUS_DEFAULT:
+                CcuLog.d(L.TAG_CCU_UI, "Set modbus Config: MB Profiles - " + L.ccu().zoneProfiles.size() + "," + L.getProfile(curSelectedSlaveId) + "," + curSelectedSlaveId);
+                if (L.getProfile(curSelectedSlaveId) == null) {
+                    modbusProfile.addMbEquip(curSelectedSlaveId, floorRef, zoneRef, equipmentDevice, recyclerModbusParamAdapter.modbusParam, ProfileType.MODBUS_DEFAULT);
+                    L.ccu().zoneProfiles.add(modbusProfile);
+                    equipRef = modbusProfile.getEquip().getId();
+                } else
+                    equipRef = updateModbusProfile(curSelectedSlaveId);
+                break;
         }
         saveToBox(zoneRef, equipRef, equipmentDevice, curSelectedSlaveId, isNewDevice, floorRef);
     }

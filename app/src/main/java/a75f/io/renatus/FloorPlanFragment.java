@@ -47,7 +47,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -1463,6 +1462,7 @@ public class FloorPlanFragment extends Fragment {
                 case MODBUS_UPSV:
                 case MODBUS_UPSVL:
                 case MODBUS_VAV_BACnet:
+                case MODBUS_DEFAULT:
                     showDialogFragment(FragmentModbusConfiguration
                             .newInstance(Short.parseShort(nodeAddr), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusConfiguration.ID);
                     break;

@@ -101,8 +101,6 @@ public class ModbusPulse {
         switch (Port.valueOf(phyPoint.get("port").toString())) {
             case RSSI:
                 hayStack.writeHisValueByIdWithoutCOV(phyPoint.get("id").toString(),  1.0);
-                Log.i("Jayatheertha-104", 1 + "<<--->>" + hayStack.readHisValById(phyPoint.get("id").toString())
-                        + "<<--->>" + hayStack.curRead(phyPoint.get("id").toString()).getDateInMillis());
                 break;
         }
         if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {

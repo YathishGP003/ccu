@@ -122,28 +122,6 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="30dp"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="30dp"
-                        android:text="Last Updated : "
-                        android:textAppearance="@style/label_black" />
-
-                    <TextView
-                        android:id="@+id/last_updated_status"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="20dp"
-                        android:text=""
-                        android:textSize="20sp" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:layout_marginTop="30dp">
 
                     <TextView
@@ -327,6 +305,7 @@
                         android:textOn="" />
                 </LinearLayout>
 
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -341,6 +320,25 @@
                         app:layout_constraintLeft_toLeftOf="parent"
                         android:text="@string/lable_epidemic_settings_text"
                         style="@style/label_black"/>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginTop="24dp"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:id="@+id/last_updated"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Last Updated : "
+                            android:textAppearance="@style/title_normal"/>
+
+                        <TextView
+                            android:id="@+id/last_updated_status_oao"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/label_grey"/>
+                    </LinearLayout>
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -441,7 +439,24 @@
                     app:layout_constraintLeft_toLeftOf="parent"
                     android:text="Energy Meter"
                     style="@style/label_black"/>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginTop="24dp"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Last Updated : "
+                        android:textAppearance="@style/title_normal"/>
 
+                    <TextView
+                        android:id="@+id/last_updated_statusEM"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/label_grey"/>
+                </LinearLayout>
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/energyMeterParams"
                     android:layout_marginLeft="@dimen/fab_margin"
@@ -461,7 +476,24 @@
                     app:layout_constraintLeft_toLeftOf="parent"
                     android:text="BTU Meter"
                     style="@style/label_black"/>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginTop="24dp"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Last Updated : "
+                        android:textAppearance="@style/title_normal"/>
 
+                    <TextView
+                        android:id="@+id/last_updated_statusBTU"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/label_grey"/>
+                </LinearLayout>
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/btuMeterParams"
                     android:layout_marginLeft="@dimen/fab_margin"

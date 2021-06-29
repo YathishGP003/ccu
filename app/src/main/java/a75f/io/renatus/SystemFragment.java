@@ -4,13 +4,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
-import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -35,7 +32,6 @@ import android.widget.ToggleButton;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.helper.StringUtil;
 
-import java.lang.reflect.Field;
 import a75f.io.api.haystack.modbus.Parameter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,7 +53,7 @@ import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.util.CCUUiUtil;
-import a75f.io.renatus.util.CCUUtils;
+import a75f.io.renatus.util.HeartBeatUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.views.OaoArc;
 
@@ -88,6 +84,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	RecyclerView btuMeterParams;
 	TextView btuMeterModelDetails;
 
+	TextView updatedTimeOao;
 
 	
 	int spinnerInit = 0;
@@ -191,6 +188,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		ccuName.setText(ccu.get("dis").toString());
 		profileTitle = view.findViewById(R.id.profileTitle);
 		oaoArc = view.findViewById(R.id.oaoArc);
+
 		purgeLayout = view.findViewById(R.id.purgelayout);
 		systemModePicker = view.findViewById(R.id.systemModePicker);
 		mainLayout = view.findViewById(R.id.main_layout);
@@ -286,19 +284,21 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		tbSmartPrePurge = view.findViewById(R.id.tbSmartPrePurge);
 		tbSmartPostPurge = view.findViewById(R.id.tbSmartPostPurge);
 		tbEnhancedVentilation = view.findViewById(R.id.tbEnhancedVentilation);
+		updatedTimeOao = view.findViewById(R.id.last_updated_status_oao);
+
 		tbCompHumidity.setEnabled(false);
 		tbDemandResponse.setEnabled(false);
 
 		energyMeterParams = view.findViewById(R.id.energyMeterParams);
 		energyMeterModelDetails = view.findViewById(R.id.energyMeterModelDetails);
-		configEnergyMeterDetails();
+		configEnergyMeterDetails(view);
 
 		/**
 		 * init Modbus BTU meter  views
 		 */
 		btuMeterParams = view.findViewById(R.id.btuMeterParams);
 		btuMeterModelDetails = view.findViewById(R.id.btuMeterModelDetails);
-		configBTUMeterDetails();
+		configBTUMeterDetails(view);
 
 
 		if (L.ccu().systemProfile instanceof DefaultSystem) {
@@ -434,7 +434,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			if (equips != null && equips.size() > 0) {
 				ArrayList<OAOEquip> equipList = new ArrayList<>();
 				for (HashMap m : equips) {
-					equipList.add(new OAOEquip(ProfileType.OAO, Short.valueOf(m.get("group").toString())));
+					String nodeAddress = m.get("group").toString();
+					equipList.add(new OAOEquip(ProfileType.OAO, Short.valueOf(nodeAddress)));
+					updatedTimeOao.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
+					oaoArc.updateStatus(HeartBeatUtil.isModuleAlive(nodeAddress));
 				}
 
 				double returnAirCO2 = equipList.get(0).getHisVal("return and air and co2 and sensor");
@@ -592,8 +595,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 		}
 	};
-	private void configEnergyMeterDetails(){
-		List<EquipmentDevice> modbusDevices = EquipsManager.getInstance().getAllMbEquips("SYSTEM");
+	private void configEnergyMeterDetails(View view){
+		List<EquipmentDevice> modbusDevices = getSystemLevelModBusDevices();;
 		if(modbusDevices!=null&&modbusDevices.size()>0){
 			EquipmentDevice  emDevice=null;
 			for (int i = 0; i <modbusDevices.size() ; i++) {
@@ -624,17 +627,24 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					}
 				}
 			}
-			energyMeterModelDetails.setText(emDevice+ "("+emDevice.getEquipType() + emDevice.getSlaveId() + ")");
+			String nodeAddress = String.valueOf(emDevice.getSlaveId());
+			energyMeterModelDetails.setText(emDevice+ "("+emDevice.getEquipType() + nodeAddress + ")");
 			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 			energyMeterParams.setLayoutManager(gridLayoutManager);
 			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getContext(), emDevice.getEquipRef(), parameterList);
 			energyMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
+			TextView emrUpdatedTime = view.findViewById(R.id.last_updated_statusEM);
+			emrUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
 		}
 
 	}
 
-	private void configBTUMeterDetails(){
-		List<EquipmentDevice> modbusDevices = EquipsManager.getInstance().getAllMbEquips("SYSTEM");
+	private List<EquipmentDevice> getSystemLevelModBusDevices(){
+		return 	EquipsManager.getInstance().getAllMbEquips("SYSTEM");
+	}
+
+	private void configBTUMeterDetails(View view){
+		List<EquipmentDevice> modbusDevices = getSystemLevelModBusDevices();
 		if(modbusDevices!=null&&modbusDevices.size()>0){
 			EquipmentDevice  btuDevice=null;
 			for (int i = 0; i <modbusDevices.size() ; i++) {
@@ -665,11 +675,14 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					}
 				}
 			}
-			btuMeterModelDetails.setText(btuDevice+ "("+btuDevice.getEquipType() + btuDevice.getSlaveId() + ")");
+			String nodeAddress = String.valueOf(btuDevice.getSlaveId());
+			btuMeterModelDetails.setText(btuDevice+ "("+btuDevice.getEquipType() + nodeAddress + ")");
 			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 			btuMeterParams.setLayoutManager(gridLayoutManager);
 			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getContext(), btuDevice.getEquipRef(), parameterList);
 			btuMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
+			TextView btuUpdatedTime = view.findViewById(R.id.last_updated_statusBTU);
+			btuUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
 		}
 
 	}

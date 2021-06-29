@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.heartbeat;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 
 public class HeartBeat {
     private Point heartBeat;
@@ -25,6 +26,24 @@ public class HeartBeat {
                 .setTz(tz)
                 .build();
     }
+    private HeartBeat(String equipDis, String equipRef, String siteRef, String room, String floor, int nodeAddr,
+                      String profile, String modbusType, String tz){
+        heartBeat = new Point.Builder()
+                .setDisplayName(equipDis+"-heartBeat")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(room)
+                .setFloorRef(floor).setHisInterpolate("cov")
+                .addMarker("heartbeat")
+                .addMarker("zone").addMarker("standalone")
+                .addMarker(profile).addMarker("sensor")
+                .addMarker("current").addMarker("his")
+                .addMarker("cur").addMarker("logical")
+                .addMarker(modbusType)
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+    }
 
     private HeartBeat(int nodeAddr,String deviceRef, String siteRef, String room, String floor, String tz) {
         rssi = new RawPoint.Builder()
@@ -43,6 +62,18 @@ public class HeartBeat {
     public static Point getHeartBeatPoint(String equipDis, String equipRef, String siteRef, String room, String floor,
                                           int nodeAddr, String profile, String tz){
         return new HeartBeat(equipDis, equipRef, siteRef, room, floor, nodeAddr, profile, tz).heartBeat;
+    }
+
+    public static Point getHeartBeatPoint(String equipDis, String equipRef, String siteRef, String room, String floor,
+                                          int nodeAddr, String profile, ProfileType profileType, String tz){
+        String modbusType = "mb";
+        if (profileType == ProfileType.MODBUS_EMR) {
+            modbusType = "emr";
+        }
+        else if(profileType == ProfileType.MODBUS_BTU){
+            modbusType = "btu";
+        }
+        return new HeartBeat(equipDis, equipRef, siteRef, room, floor, nodeAddr, profile, modbusType, tz).heartBeat;
     }
 
     public static RawPoint getHeartBeatRawPoint(int nodeAddr,String deviceRef, String siteRef, String room, String floor, String tz){

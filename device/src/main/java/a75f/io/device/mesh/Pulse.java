@@ -145,8 +145,6 @@ public class Pulse
 						if(currentTempInterface != null) {
 							currentTempInterface.refreshScreen(null);
 						}
-						Log.i("Jayatheertha-147", rssi + "<<--->>" + hayStack.readHisValById(phyPoint.get("id").toString())
-								+ "<<--->>" + hayStack.curRead(phyPoint.get("id").toString()).getDateInMillis());
 						break;
 					case SENSOR_RT:
 						val = smartNodeRegularUpdateMessage_t.update.roomTemperature.get();
@@ -485,6 +483,13 @@ public class Pulse
 				
 				double val;
 				switch (Port.valueOf(phyPoint.get("port").toString())) {
+					case RSSI:
+						hayStack.writeHisValueByIdWithoutCOV(phyPoint.get("id").toString(), 1.0);
+						hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), 1.0);
+						if(currentTempInterface != null) {
+							currentTempInterface.refreshScreen(null);
+						}
+						break;
 					case SENSOR_RT:
 						val = cmRegularUpdateMessage_t.roomTemperature.get();
 						double tempOffset = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and config and ti and temperature and offset and equipRef == \"" + deviceInfo.getEquipRef() + "\"");
@@ -674,8 +679,6 @@ public class Pulse
 						if(currentTempInterface != null) {
 							currentTempInterface.refreshScreen(null);
 						}
-						Log.i("Jayatheertha-674", nodeAddr + "<<--->>" + hayStack.readHisValById(phyPoint.get("id").toString())
-								+ "<<--->>" + hayStack.curRead(phyPoint.get("id").toString()).getDateInMillis());
 						break;
 					case SENSOR_RT:
 						val = smartStatRegularUpdateMessage_t.update.roomTemperature.get();

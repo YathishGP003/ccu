@@ -1441,6 +1441,10 @@ public class FloorPlanFragment extends Fragment {
                     showDialogFragment(FragmentModbusEnergyMeterConfiguration
                             .newInstance(Short.parseShort(nodeAddr), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusEnergyMeterConfiguration.ID);
                     break;
+                case HYPERSTAT_SENSE:
+                    showDialogFragment(HyperStatSenseFragment.newInstance(Short.parseShort(nodeAddr)
+                            , zone.getId(), floor.getId(), profile.getProfileType()),HyperStatSenseFragment.ID);
+                    break;
                 case MODBUS_UPS30:
                 case MODBUS_UPS80:
                 case MODBUS_UPS400:

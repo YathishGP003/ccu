@@ -36,7 +36,7 @@ public class HyperStatSenseProfile extends ZoneProfile {
     }
 
     @Override
-    public <T extends BaseProfileConfiguration> T getProfileConfiguration(short address) {
-        return null;
+    public HyperStatSenseConfiguration getProfileConfiguration(short address) {
+        return mHyperStatSenseEquip.getHyperStatSenseConfig();
     }
 }

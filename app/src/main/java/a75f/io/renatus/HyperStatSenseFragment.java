@@ -31,6 +31,8 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseConfiguration;
 import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseEquip;
 import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseProfile;
+import a75f.io.logic.bo.building.plc.PlcProfile;
+import a75f.io.logic.bo.building.plc.PlcProfileConfiguration;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.renatus.BASE.BaseDialogFragment;
@@ -49,6 +51,7 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
     public static final String ID = HyperStatSenseFragment.class.getSimpleName();
     private  HyperStatSenseVM mHyperStatSenseVM;
     private HyperStatSenseProfile mHSSenseProfile;
+    HyperStatSenseConfiguration mHSSenseConfig;
     static final int TEMP_OFFSET_LIMIT = 100;
 
     short        mNodeAddress;
@@ -126,6 +129,17 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        mHSSenseProfile = (HyperStatSenseProfile) L.getProfile(mNodeAddress);
+
+        if (mHSSenseProfile != null) {
+            CcuLog.d(L.TAG_CCU_UI,  "Get HyperStat SenseConfig: ");
+            mHSSenseConfig = (HyperStatSenseConfiguration) mHSSenseProfile.getProfileConfiguration(mNodeAddress);
+        } else
+        {
+            CcuLog.d(L.TAG_CCU_UI, "Create Hyperstatsense Profile: ");
+            mHSSenseProfile = new HyperStatSenseProfile();
+        }
      /*   mHyperStatSenseVM = new ViewModelProvider(this).get(HyperStatSenseVM.class);
         mHyperStatSenseVM.init();
         mHyperStatSenseVM.get().observe(this, new Observer<HyperStatSenseModel>() {
@@ -235,11 +249,12 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
         hssense.analog1Sensor = mAnalog1Sp.getSelectedItemPosition();
         hssense.analog2Sensor = mAnalog2Sp.getSelectedItemPosition();
 
- //       if (mHSSenseProfile == null) {
+       if (mHSSenseConfig == null) {
             mHSSenseProfile.addHyperStatSenseEquip(ProfileType.HYPERSTAT_SENSE,mNodeAddress, hssense, mFloorName, mRoomName);
-    //   } else {
+       } else {
+         //  return;
            // mHSSenseProfile.updateHyperStatSenseEquip(ProfileType.HYPERSTAT_SENSE,mNodeAddress, hssense, mFloorName, mRoomName);
-      //  }
+       }
         L.ccu().zoneProfiles.add(mHSSenseProfile);
         CcuLog.d(L.TAG_CCU_UI, "Set Hyperstat sense Config: Profiles - "+L.ccu().zoneProfiles.size());
     }

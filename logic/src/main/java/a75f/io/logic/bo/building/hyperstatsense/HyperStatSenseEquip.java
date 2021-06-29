@@ -117,7 +117,7 @@ public class HyperStatSenseEquip {
                 .setTz(tz)
                 .build();
         String isAn2ID = mHayStack.addPoint(isAn2);
-        mHayStack.writeDefaultValById(isAn2ID, config.isAnalog2Enable ? 1.0 : 0);
+        mHayStack.writeDefaultValById(isAn2ID, config.isAnalog2Enable ? 1.0 : 0.0);
 
         Point isTh1 = new Point.Builder()
                 .setDisplayName(equipDis + "-isThermister1")
@@ -132,7 +132,7 @@ public class HyperStatSenseEquip {
                 .setTz(tz)
                 .build();
         String isTh1ID = mHayStack.addPoint(isTh1);
-        mHayStack.writeDefaultValById(isTh1ID, config.isTh1Enable ? 1.0 : 0);
+        mHayStack.writeDefaultValById(isTh1ID, config.isTh1Enable ? 1.0 : 0.0);
 
         Point isTh2 = new Point.Builder()
                 .setDisplayName(equipDis + "-isThermister2")
@@ -147,7 +147,7 @@ public class HyperStatSenseEquip {
                 .setTz(tz)
                 .build();
         String isTh2ID = mHayStack.addPoint(isTh2);
-        mHayStack.writeDefaultValById(isTh2ID, config.isTh2Enable ? 1.0 : 0);
+        mHayStack.writeDefaultValById(isTh2ID, config.isTh2Enable ? 1.0 : 0.0);
 
         Point temperatureOffset = new Point.Builder()
                 .setDisplayName(equipDis+"-temperatureOffset")
@@ -160,7 +160,7 @@ public class HyperStatSenseEquip {
                 .setTz(tz)
                 .build();
         String tempoffsetId = mHayStack.addPoint(temperatureOffset);
-        mHayStack.writeDefaultValById(tempoffsetId, config.temperatureOffset);
+        mHayStack.writeDefaultValById(tempoffsetId, config.temperatureOffset > 0 ? config.temperatureOffset: 0.0);
 
 
         Point analog1InputSensor = new Point.Builder()
@@ -176,7 +176,7 @@ public class HyperStatSenseEquip {
                 .setGroup(String.valueOf(mNodeAddr))
                 .setTz(tz).build();
         String analog1InputSensorId = mHayStack.addPoint(analog1InputSensor);
-        mHayStack.writeDefaultValById(analog1InputSensorId, (double) config.analog1Sensor);
+        mHayStack.writeDefaultValById(analog1InputSensorId, (double) config.analog1Sensor >=0 ? config.analog1Sensor: 0.0 );
 
 
         Point analog2InputSensor = new Point.Builder()
@@ -193,7 +193,7 @@ public class HyperStatSenseEquip {
                 .setTz(tz)
                 .build();
         String analog2InputSensorId = mHayStack.addPoint(analog2InputSensor);
-        mHayStack.writeDefaultValById(analog2InputSensorId, (double) config.analog2Sensor);
+        mHayStack.writeDefaultValById(analog2InputSensorId, (double) config.analog2Sensor>=0 ? config.analog2Sensor: 0.0);
 
         Point th1InputSensor = new Point.Builder()
                 .setDisplayName(equipDis + "-th1InputSensor")
@@ -208,7 +208,7 @@ public class HyperStatSenseEquip {
                 .setTz(tz)
                 .build();
         String th1InputSensorId = mHayStack.addPoint(th1InputSensor);
-        mHayStack.writeDefaultValById(th1InputSensorId, (double) config.th1Sensor);
+        mHayStack.writeDefaultValById(th1InputSensorId, (double) config.th1Sensor >=0 ? config.th1Sensor: 0.0);
 
         Point th2InputSensor = new Point.Builder()
                 .setDisplayName(equipDis + "-th2InputSensor")
@@ -223,20 +223,11 @@ public class HyperStatSenseEquip {
                 .setTz(tz)
                 .build();
         String th2InputSensorId = mHayStack.addPoint(th2InputSensor);
-        mHayStack.writeDefaultValById(th2InputSensorId, (double) config.th2Sensor);
+        mHayStack.writeDefaultValById(th2InputSensorId, (double) config.th2Sensor >=0 ? config.th2Sensor: 0.0);
 
 
         HyperStatDevice device = new HyperStatDevice(mNodeAddr, siteRef , floorRef,roomRef, mEquipRef,"hyperstatsense");
 
-        Log.d("Spoo-values","in create entities"+String.valueOf(config.temperatureOffset) +"  and  \n"+
-                String.valueOf(config.analog1Sensor)+"  and  \n"+
-                String.valueOf(config.analog2Sensor)+"  and  \n"+
-                String.valueOf(config.th1Sensor)+"  and  \n"+
-                String.valueOf(config.th2Sensor)+"  and  \n"+
-                String.valueOf(config.isAnalog1Enable)+"  and  \n"+
-                String.valueOf(config.isAnalog2Enable)+"  and  \n"+
-                String.valueOf(config.isTh1Enable)+"  and  \n"+
-                String.valueOf(config.isTh2Enable)+"  and  \n");
 
         if (config.isAnalog1Enable) {
             String sensorId = createSensorPoint(floorRef, roomRef,"analog1", config);
@@ -274,43 +265,40 @@ public class HyperStatSenseEquip {
 
     public HyperStatSenseConfiguration getHyperStatSenseConfig(){
         HyperStatSenseConfiguration HSSConfig = new HyperStatSenseConfiguration();
-        HSSConfig.temperatureOffset = mHayStack.readHisValByQuery("point and air and temp and sensor and current and group == \""+mNodeAddr+"\"");
-        HSSConfig.analog1Sensor = mHayStack.readHisValByQuery("point and config and analog1 and input and sensor and equipRef == \"" + mEquipRef + "\"").intValue();
-        HSSConfig.analog2Sensor = mHayStack.readHisValByQuery("point and config and analog2 and input and sensor and equipRef == \"" + mEquipRef + "\"").intValue();
-        HSSConfig.th1Sensor = mHayStack.readHisValByQuery("point and config and th1 and input and sensor and equipRef == \"" + mEquipRef + "\"").intValue();
-        HSSConfig.th2Sensor = mHayStack.readHisValByQuery("point and config and th2 and input and sensor and equipRef == \"" + mEquipRef + "\"").intValue();
-        HSSConfig.isAnalog1Enable = mHayStack.readHisValByQuery("point and config and analog1relay and enabled and equipRef == \"" + mEquipRef + "\"") > 0;
-        HSSConfig.isAnalog2Enable = mHayStack.readHisValByQuery("point and config and analog2relay and enabled and equipRef == \"" + mEquipRef + "\"") > 0;
-        HSSConfig.isTh1Enable = mHayStack.readHisValByQuery("point and config and th1relay and enabled and equipRef == \"" + mEquipRef + "\"") > 0;
-        HSSConfig.isTh2Enable = mHayStack.readHisValByQuery("point and config and th2relay and enabled and equipRef == \"" + mEquipRef + "\"") > 0;
+        HSSConfig.temperatureOffset = mHayStack.readDefaultVal("point and temp and offset and equipRef == \""+mEquipRef+"\"");
+        HSSConfig.analog1Sensor = mHayStack.readDefaultVal("point and config and analog1 and input and sensor and equipRef == \"" + mEquipRef + "\"").intValue();
+        HSSConfig.analog2Sensor = mHayStack.readDefaultVal("point and config and analog2 and input and sensor and equipRef == \"" + mEquipRef + "\"").intValue();
+        HSSConfig.th1Sensor = mHayStack.readDefaultVal("point and config and th1 and input and sensor and equipRef == \"" + mEquipRef + "\"").intValue();
+        HSSConfig.th2Sensor = mHayStack.readDefaultVal("point and config and th2 and input and sensor and equipRef == \"" + mEquipRef + "\"").intValue();
+        HSSConfig.isAnalog1Enable = mHayStack.readDefaultVal("point and config and analog1relay and enabled and equipRef == \"" + mEquipRef + "\"") > 0;
+        HSSConfig.isAnalog2Enable = mHayStack.readDefaultVal("point and config and analog2relay and enabled and equipRef == \"" + mEquipRef + "\"") > 0;
+        HSSConfig.isTh1Enable = mHayStack.readDefaultVal("point and config and th1relay and enabled and equipRef == \"" + mEquipRef + "\"") > 0;
+        HSSConfig.isTh2Enable = mHayStack.readDefaultVal("point and config and th2relay and enabled and equipRef == \"" + mEquipRef + "\"") > 0;
 
         return HSSConfig;
     }
 
     private String createSensorPoint(String floorRef, String roomRef, String sensorName,
                                      HyperStatSenseConfiguration config) {
-        Log.d("Spoo-values","in crate sensor"+String.valueOf(config.temperatureOffset) +"  and  \n"+
-                String.valueOf(config.analog1Sensor)+"  and  \n"+
-                String.valueOf(config.analog2Sensor)+"  and  \n"+
-                String.valueOf(config.th1Sensor)+"  and  \n"+
-                String.valueOf(config.th2Sensor)+"  and  \n"+
-                String.valueOf(config.isAnalog1Enable)+"  and  \n"+
-                String.valueOf(config.isAnalog2Enable)+"  and  \n"+
-                String.valueOf(config.isTh1Enable)+"  and  \n"+
-                String.valueOf(config.isTh2Enable)+"  and  \n");
+
         HashMap siteMap = mHayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis + "-HSSENSE-" + mNodeAddr;
+        String tag = null;
         Bundle bundle = new Bundle();
-        if (config.analog1Sensor > 0){
+        if (config.isAnalog1Enable){
+            tag = "analog1";
             bundle = getAnalogBundle(config.analog1Sensor);
-        } else if (config.analog2Sensor > 0){
+        } else if (config.isAnalog2Enable){
+            tag = "analog2";
             bundle = getAnalogBundle(config.analog2Sensor);
-        } else if (config.th1Sensor > 0) {
+        } else if (config.isTh1Enable) {
+            tag = "thermister1";
             bundle = getThermistorBundle(config.th1Sensor);
-        }else if(config.th2Sensor > 0){
+        }else if(config.isTh2Enable){
+            tag = "thermister2";
             bundle = getThermistorBundle(config.analog2Sensor);
         }
 
@@ -328,7 +316,7 @@ public class HyperStatSenseEquip {
                 .setFloorRef(floorRef)
                 .setShortDis(shortDis)
                 .setHisInterpolate("cov")
-                .addMarker("logical").addMarker("zone").addMarker("his")
+                .addMarker("logical").addMarker("zone").addMarker("his").addMarker(tag)
                 .setGroup(String.valueOf(mNodeAddr))
                 .setMinVal(minVal)
                 .setMaxVal(maxVal)
@@ -341,6 +329,7 @@ public class HyperStatSenseEquip {
         }
 
         String sensorVariableTagId = mHayStack.addPoint(sensorTag.build());
+        mHayStack.writeDefaultValById(sensorVariableTagId, 0.0);
         mHayStack.writeHisValById(sensorVariableTagId, 0.0);
 
         return sensorVariableTagId;

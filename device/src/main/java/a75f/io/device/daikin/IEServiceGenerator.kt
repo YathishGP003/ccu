@@ -31,11 +31,8 @@ class IEServiceGenerator {
         }
 
         val okHttpClient = OkHttpClient.Builder().apply {
-            connectTimeout(30, TimeUnit.SECONDS)
-            writeTimeout(30, TimeUnit.SECONDS)
-            readTimeout(30, TimeUnit.SECONDS)
             addInterceptor(okhttpLogging)
-            //addNetworkInterceptor(okhttpLogging)
+            addNetworkInterceptor(okhttpLogging)
             addInterceptor(
                 Interceptor { chain ->
                     val builder = chain.request().newBuilder()

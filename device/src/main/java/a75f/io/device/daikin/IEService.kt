@@ -24,7 +24,7 @@ interface IEService {
     ): Single<IEResponse>
 
 }
-
+//TODO- Exact response structure from Daikin IE is unknown now. This will be changed after field trials.
 data class IEResponse(
     val responseVal: String
 )

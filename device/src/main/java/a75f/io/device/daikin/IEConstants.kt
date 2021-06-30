@@ -4,7 +4,7 @@ const val IE_POINT_TYPE_MI = "MI"
 const val IE_POINT_TYPE_MV = "MV"
 const val IE_POINT_TYPE_AV = "AV"
 
-const val IE_POINT_NAME_OCCUPANCY = "OccMode"
+const val IE_POINT_NAME_OCCUPANCY = "NetOccManCmd"
 const val IE_POINT_NAME_CONDITIONING_MODE = "NetApplicMode"
 const val IE_POINT_NAME_DAT_SETPOINT = "DATClgSetpoint"
 const val IE_POINT_NAME_DSP_SETPOINT = "DSPSpt"

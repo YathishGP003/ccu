@@ -31,6 +31,8 @@ class IEDeviceHandler {
     private var serviceBaseUrl : String? = null
     private var ieService : IEService? = null
 
+    private var occFetchCounter = 0
+
     companion object {
         @JvmStatic
         val instance: IEDeviceHandler by lazy {
@@ -46,7 +48,7 @@ class IEDeviceHandler {
             CcuLog.e(L.TAG_CCU_DEVICE, "Invalid IE equip URL $ieEquipUrl")
             return
         }
-        //Needs to recreate the retrofit service when IE url has been updated.
+        //Recreate the retrofit service when IE url has been updated.
         if (ieService == null || serviceBaseUrl != ieEquipUrl) {
             ieService = IEServiceGenerator.instance.createService("http://$ieEquipUrl:8080")
         }
@@ -63,6 +65,15 @@ class IEDeviceHandler {
             updateDatClgSetpoint(it, systemProfile)
             updateFanControl(it, hayStack, systemProfile)
             updateHumidityControl(it, systemProfile)
+            fetchAlarms(it, hayStack)
+            fetchSystemClock(it, hayStack)
+
+            //OccStatus to be fetched every 5 minutes
+            if (occFetchCounter++ % 5 == 0) {
+                fetchOccStatus(it, hayStack)
+                occFetchCounter = 0
+            }
+
         }
     }
 
@@ -188,15 +199,73 @@ class IEDeviceHandler {
         }
     }
 
+    private fun fetchAlarms(ieService: IEService, hayStack: CCUHsApi) {
+
+        ieService.readPoint(IE_POINT_TYPE_AV, IE_POINT_NAME_ALARM_WARN)
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                { response ->
+                    hayStack.writeHisValByQuery("system and point and ie and alarm and warning",
+                                            response.responseVal.toDouble())
+                },
+                { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching alarm warnings", error) }
+            )
+
+        ieService.readPoint(IE_POINT_TYPE_AV, IE_POINT_NAME_ALARM_PROB)
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                { response ->
+                    hayStack.writeHisValByQuery("system and point and ie and alarm and problem",
+                        response.responseVal.toDouble())
+                },
+                { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching alarm problems", error) }
+            )
+
+        ieService.readPoint(IE_POINT_TYPE_AV, IE_POINT_NAME_ALARM_FAULT)
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                { response ->
+                    hayStack.writeHisValByQuery("system and point and ie and alarm and fault",
+                        response.responseVal.toDouble())
+                },
+                { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching alarm fault", error) }
+            )
+
+    }
+
+    private fun fetchSystemClock(ieService: IEService, hayStack: CCUHsApi) {
+        ieService.readPoint(IE_POINT_TYPE_AV, IE_POINT_NAME_SYSTEM_CLOCK)
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                { response ->
+                    hayStack.writeHisValByQuery("system and point and ie and clock",
+                        response.responseVal.toDouble())
+                },
+                { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching system clock", error) }
+            )
+    }
+
+    private fun fetchOccStatus(ieService: IEService, hayStack: CCUHsApi) {
+        ieService.readPoint(IE_POINT_TYPE_MV, IE_POINT_NAME_OCCUPANCY_STATUS)
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                { response ->
+                    hayStack.writeHisValByQuery("system and point and ie and occStatus",
+                        response.responseVal.toDouble())
+                },
+                { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching occStatus", error) }
+            )
+    }
+
     private fun writeToIEDevice(service: IEService, pointType : String, pointName : String, msg : String)  {
         service.writePoint(
             pointType,
             pointName,
             msg
         ).subscribeOn(Schedulers.io())
-            .subscribe(
-                { CcuLog.e(L.TAG_CCU_DEVICE, "IE Write Completed")},
-                { error -> CcuLog.e("IE_TEMP", "Write failed for message $msg : $error.message" ) }
-            )
+         .subscribe(
+             { CcuLog.e(L.TAG_CCU_DEVICE, "IE Write Completed")},
+             { error -> CcuLog.e(L.TAG_CCU_DEVICE, "IE Write failed for $msg : $error.message" ) }
+         )
     }
 }

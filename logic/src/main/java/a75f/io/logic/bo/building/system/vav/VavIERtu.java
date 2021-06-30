@@ -132,6 +132,7 @@ public class VavIERtu extends VavSystemProfile
         addTunerPoints(equipRef);
         addVavSystemTuners(equipRef);
         updateAhuRef(equipRef);
+        addIEPoints(siteDis+"-SystemEquip", siteRef, equipRef, siteMap.get("tz").toString(), hayStack);
         new ControlMote(equipRef);
         initTRSystem();
         L.saveCCUState();
@@ -281,41 +282,57 @@ public class VavIERtu extends VavSystemProfile
                 .setUnit("\u00B0F").setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(DATClgSetpoint);
-        /*Point coolingSignal = new Point.Builder()
-                                      .setDisplayName(equipDis+"-"+"coolingDat")
-                                      .setSiteRef(siteRef)
-                                      .setEquipRef(equipref)
-                                      .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("discharge").addMarker("air").addMarker("temp").addMarker("his").addMarker("runtime")
-                                      .setUnit("\u00B0F").setTz(tz)
-                                      .build();
-        CCUHsApi.getInstance().addPoint(coolingSignal);
-        
-        Point heatingSignal = new Point.Builder()
-                                      .setDisplayName(equipDis+"-"+"heatingDat")
-                                      .setSiteRef(siteRef)
-                                      .setEquipRef(equipref)
-                                      .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("discharge").addMarker("air").addMarker("temp").addMarker("his").addMarker("runtime")
-                                      .setUnit("\u00B0F").setTz(tz)
-                                      .build();
-        CCUHsApi.getInstance().addPoint(heatingSignal);
+    }
     
-        Point DATClgSetpoint = new Point.Builder()
-                                      .setDisplayName(equipDis+"-"+"DATClgSetpoint")
-                                      .setSiteRef(siteRef)
-                                      .setEquipRef(equipref)
-                                      .addMarker("system").addMarker("cmd").addMarker("dat").addMarker("setpoint").addMarker("temp").addMarker("his")
-                                      .setUnit("\u00B0F").setTz(tz)
-                                      .build();
-        CCUHsApi.getInstance().addPoint(DATClgSetpoint);
-        
-        Point fanSignal = new Point.Builder()
-                                  .setDisplayName(equipDis+"-"+"ductStaticPressure")
+    private void addIEPoints(String equipDis, String siteRef, String equipRef, String tz, CCUHsApi hayStack) {
+        Point alarmWarnings = new Point.Builder()
+                                   .setDisplayName(equipDis+"-"+"alarmWarnings")
+                                   .setSiteRef(siteRef)
+                                   .setEquipRef(equipRef)
+                                   .addMarker("system").addMarker("alarm").addMarker("warning").addMarker("ie")
+                                   .addMarker("sp").addMarker("his")
+                                   .setTz(tz)
+                                   .build();
+        CCUHsApi.getInstance().addPoint(alarmWarnings);
+        Point alarmProblems = new Point.Builder()
+                                  .setDisplayName(equipDis+"-"+"alarmProblems")
                                   .setSiteRef(siteRef)
-                                  .setEquipRef(equipref)
-                                  .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his").addMarker("runtime")
-                                  .setUnit("inch wc").setTz(tz)
+                                  .setEquipRef(equipRef)
+                                  .addMarker("system").addMarker("alarm").addMarker("problem").addMarker("ie")
+                                  .addMarker("sp").addMarker("his")
+                                  .setTz(tz)
                                   .build();
-        CCUHsApi.getInstance().addPoint(fanSignal);*/
+        CCUHsApi.getInstance().addPoint(alarmProblems);
+    
+        Point alarmFaults = new Point.Builder()
+                                  .setDisplayName(equipDis+"-"+"alarmFaults")
+                                  .setSiteRef(siteRef)
+                                  .setEquipRef(equipRef)
+                                  .addMarker("system").addMarker("alarm").addMarker("fault").addMarker("ie")
+                                  .addMarker("sp").addMarker("his")
+                                  .setTz(tz)
+                                  .build();
+        CCUHsApi.getInstance().addPoint(alarmFaults);
+    
+        Point systemClock = new Point.Builder()
+                                .setDisplayName(equipDis+"-"+"systemClock")
+                                .setSiteRef(siteRef)
+                                .setEquipRef(equipRef)
+                                .addMarker("system").addMarker("clock").addMarker("ie")
+                                .addMarker("sp").addMarker("his")
+                                .setTz(tz)
+                                .build();
+        CCUHsApi.getInstance().addPoint(systemClock);
+    
+        Point occStatus = new Point.Builder()
+                                .setDisplayName(equipDis+"-"+"cccStatus")
+                                .setSiteRef(siteRef)
+                                .setEquipRef(equipRef)
+                                .addMarker("system").addMarker("occStatus").addMarker("ie")
+                                .addMarker("sp").addMarker("his")
+                                .setTz(tz)
+                                .build();
+        CCUHsApi.getInstance().addPoint(occStatus);
     }
     
     private void addConfigPoints(String equipref) {

@@ -1,5 +1,6 @@
 package a75f.io.renatus.util;
 
+import android.view.View;
 import android.widget.TextView;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.renatus.R;
 
 public class HeartBeatUtil {
-    public static void zoneStatus(TextView zoneStatus, boolean isAlive){
+    public static void zoneStatus(View zoneStatus, boolean isAlive){
         if (isAlive) {
             zoneStatus.setBackgroundResource(R.drawable.module_alive);
         } else {
@@ -33,7 +34,7 @@ public class HeartBeatUtil {
         if(updatedTime == null){
             return false;
         }
-        return TimeUnit.MILLISECONDS.toMinutes(new Date().getTime() - updatedTime.getTime()) < 15;
+        return TimeUnit.MILLISECONDS.toMinutes(new Date().getTime() - updatedTime.getTime()) <= 15;
     }
     public static String getLastUpdatedTime(String nodeAddress){
         Date updatedTime = a75f.io.logic.bo.util.CCUUtils.getLastReceivedTime(nodeAddress);

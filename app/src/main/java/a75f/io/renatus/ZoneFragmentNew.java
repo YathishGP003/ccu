@@ -8,12 +8,10 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.preference.PreferenceManager;
 
-import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
-import a75f.io.logic.bo.building.plc.PlcProfile;
+
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -49,16 +47,13 @@ import org.joda.time.Interval;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -80,19 +75,16 @@ import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitConfiguration;
-import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.modbusbox.EquipsManager;
-import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.CCUUiUtil;
-import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.GridItem;
 import a75f.io.renatus.util.HeartBeatUtil;
 import a75f.io.renatus.util.NonTempControl;
@@ -244,18 +236,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     public void refreshScreen(String id)
     {
         if(getActivity() != null) {
-            if(zoneOpen) {
-                //Log.i("PubNub","Zone Point Updating:"+id+" Points:"+pointsOpen.toString());
-                //if(pointsOpen.containsKey(id)) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            if(zoneOpen) {
                                 updateTemperatureBasedZones(seekArcOpen, zonePointsOpen, equipOpen, getLayoutInflater());
                                 tableLayout.invalidate();
+                            }
+                            refreshZoneHeartBeat();
                         }
                     });
-                //}
-                }
         }
     }
 
@@ -844,6 +834,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textViewModule = arcView.findViewById(R.id.module_status);
         View status_view = arcView.findViewById(R.id.status_view);
         HeartBeatUtil.zoneStatus(textViewModule, isZoneAlive);
+        zoneStatus.put(zoneTitle, textViewModule);
 
         seekArc.scaletoNormal(250, 210);
 
@@ -1477,6 +1468,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textViewModule = arcView.findViewById(R.id.module_status);
         View status_view = arcView.findViewById(R.id.status_view);
         HeartBeatUtil.zoneStatus(textViewModule, isZoneAlive);
+        zoneStatus.put(zoneTitle, textViewModule);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         arcView.setPadding(48,56,0,0);
         try {
@@ -3197,5 +3189,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
     private String getScheduleTypeId(String equipId){
         return CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \""+equipId+"\"");
+    }
+    HashMap<String, View> zoneStatus = new HashMap<>();
+    public void refreshZoneHeartBeat(){
+        ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("room and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
+        for (Map zone : zones) {
+            String zoneName = zone.get("dis").toString();
+            ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\""+zone.get("id").toString()+"\" and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
+            if(equips.size() > 0) {
+                boolean isZoneAlive = HeartBeatUtil.isZoneAlive(equips);
+                View statusView  = zoneStatus.get(zoneName);
+                HeartBeatUtil.zoneStatus(statusView, isZoneAlive);
+            }
+        }
+
     }
 }

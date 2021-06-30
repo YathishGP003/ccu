@@ -1,12 +1,14 @@
 package a75f.io.device.mesh;
 
 import a75f.io.alerts.AlertManager;
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.DeviceNetwork;
 import a75f.io.device.daikin.DaikinIE;
+import a75f.io.device.daikin.IEDeviceHandler;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
@@ -163,7 +165,17 @@ public class MeshNetwork extends DeviceNetwork
     }
     
     public void sendSystemControl() {
-        CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendSystemControl");
+        CcuLog.i(L.TAG_CCU_DEVICE, "MeshNetwork SendSystemControl");
+        
+        if (ccu().systemProfile == null) {
+            CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendSystemControl : Abort , No system profile");
+            return;
+        }
+        Pulse.checkForDeviceDead();
+
+        if (ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU) {
+            IEDeviceHandler.getInstance().sendControl(CCUHsApi.getInstance());
+        }
     
         if (!LSerial.getInstance().isConnected()) {
             CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
@@ -174,17 +186,6 @@ public class MeshNetwork extends DeviceNetwork
             AlertManager.getInstance().fixCMDead();
         }
         
-        if (ccu().systemProfile == null) {
-            CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendSystemControl : Abort , No system profile");
-            return;
-        }
-        Pulse.checkForDeviceDead();
-
-        if (ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU)
-        {
-            DaikinIE.sendControl();
-        }
-       
         CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
         msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
         msg.analog0.set((short) ControlMote.getAnalogOut("analog1"));

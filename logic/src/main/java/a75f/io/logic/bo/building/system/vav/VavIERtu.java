@@ -73,12 +73,12 @@ public class VavIERtu extends VavSystemProfile
     
     @Override
     public boolean isCoolingAvailable() {
-        return (getConfigVal("analog1 and output and enabled") > 0);
+        return (getConfigVal("cooling and output and enabled") > 0);
     }
     
     @Override
     public boolean isHeatingAvailable() {
-        return (getConfigVal("analog3 and output and enabled") > 0);
+        return (getConfigVal("heating and output and enabled") > 0);
     }
     
     @Override

@@ -2,161 +2,201 @@ package a75f.io.device.daikin
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Tags
-import a75f.io.device.daikin.DaikinIE.HumidityCtrl
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.system.vav.VavIERtu
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 class IEDeviceHandler {
 
     internal enum class OccMode {
         Occ, Unocc, TntOvrd, Auto, UnInit
     }
-    private var currentOccMode = OccMode.UnInit
 
-    fun sendControl() {
-        val hayStack : CCUHsApi = CCUHsApi.getInstance()
+    internal enum class NetApplicMode {
+        Null, Off, HeatOnly, CoolOnly, FanOnly, Auto, Invalid, UnInit
+    }
+
+    internal enum class HumidityCtrl {
+        None, RelHum, DewPt, Always, UnInit
+    }
+
+    private var currentCondMode = NetApplicMode.UnInit
+
+    private var staticPressureSp : Double = -1.0;
+    private var fanLoopSp : Double = -1.0;
+
+    private var humCtrl : HumidityCtrl = HumidityCtrl.UnInit
+
+    private var serviceBaseUrl : String? = null
+    private var ieService : IEService? = null
+
+    companion object {
+        @JvmStatic
+        val instance: IEDeviceHandler by lazy {
+            IEDeviceHandler()
+        }
+    }
+
+    fun sendControl(hayStack: CCUHsApi) {
+
+        CcuLog.e(L.TAG_CCU_DEVICE, "IEDeviceHandler : sendControl")
         val ieEquipUrl : String? = getIEUrl(hayStack)
         if (ieEquipUrl.isNullOrEmpty()) {
             CcuLog.e(L.TAG_CCU_DEVICE, "Invalid IE equip URL $ieEquipUrl")
             return
         }
-        //Needs to recreate the retrofit service since IP address might have been updated.
-        //Check if address url can be updated
-        val ieService : IEService = IEServiceGenerator.instance.createService("$ieEquipUrl:8080")
-
-        val systemProfile = L.ccu().systemProfile as VavIERtu
-
-        if (systemProfile.getConfigEnabled(Tags.FAN) > 0) {
-            updateFanControl(
-                ieService,
-                hayStack,
-                systemProfile
-            )
+        //Needs to recreate the retrofit service when IE url has been updated.
+        if (ieService == null || serviceBaseUrl != ieEquipUrl) {
+            ieService = IEServiceGenerator.instance.createService("http://$ieEquipUrl:8080")
         }
 
-        updateOccMode(
-            ieService,
-            systemProfile
-        )
+        ieService?.let {
+            val systemProfile = L.ccu().systemProfile as VavIERtu
+            updateOccMode(it, systemProfile
+            )
+            if (systemProfile.getConfigEnabled(Tags.FAN) > 0) {
+                updateFanControl(it, hayStack, systemProfile)
+            }
 
-        updateConditioningMode(
-            ieService,
-            hayStack
-        )
-        updateDatClgSetpoint(
-            ieService,
-            systemProfile
-        )
-
-        updateFanControl(
-            ieService,
-            hayStack,
-            systemProfile
-        )
-
-        updateHumidityControl(
-            ieService,
-            systemProfile
-        )
+            updateConditioningMode(it, hayStack)
+            updateDatClgSetpoint(it, systemProfile)
+            updateFanControl(it, hayStack, systemProfile)
+            updateHumidityControl(it, systemProfile)
+        }
     }
 
     private fun updateOccMode(service : IEService, systemProfile: VavIERtu) {
 
         if (isSystemOccupied(systemProfile)) {
-            if (currentOccMode != OccMode.Occ) {
-                service.writePoint(
-                    IE_POINT_TYPE_MV,
-                    IE_POINT_NAME_OCCUPANCY,
-                    IE_MSG_BODY.format(OccMode.Occ.ordinal)
-                )
-                currentOccMode = OccMode.Occ
-            }
+            writeToIEDevice(
+                service,
+                IE_POINT_TYPE_MV,
+                IE_POINT_NAME_OCCUPANCY,
+                IE_MSG_BODY.format(OccMode.Occ.ordinal.toFloat())
+            )
         } else {
-            if (currentOccMode != OccMode.Unocc) {
-                service.writePoint(
-                    IE_POINT_TYPE_MV,
-                    IE_POINT_NAME_OCCUPANCY,
-                    IE_MSG_BODY.format(OccMode.Unocc.ordinal)
-                )
-                currentOccMode = OccMode.Unocc
-            }
+            writeToIEDevice(
+                service,
+                IE_POINT_TYPE_MV,
+                IE_POINT_NAME_OCCUPANCY,
+                IE_MSG_BODY.format(OccMode.Unocc.ordinal.toFloat())
+            )
         }
     }
 
     private fun updateConditioningMode(service : IEService, hayStack: CCUHsApi) {
         if (isConditioningRequired(hayStack)) {
-            service.writePoint(
-                IE_POINT_TYPE_MI,
-                IE_POINT_NAME_CONDITIONING_MODE,
-                IE_MSG_BODY.format(DaikinIE.NetApplicMode.Auto.ordinal)
-            )
+            if (currentCondMode != NetApplicMode.Auto) {
+                writeToIEDevice(
+                    service,
+                    IE_POINT_TYPE_MI,
+                    IE_POINT_NAME_CONDITIONING_MODE,
+                    IE_MSG_BODY.format(NetApplicMode.Auto.ordinal.toFloat())
+                )
+                currentCondMode = NetApplicMode.Auto
+            }
         } else {
-            service.writePoint(
-                IE_POINT_TYPE_MI,
-                IE_POINT_NAME_CONDITIONING_MODE,
-                IE_MSG_BODY.format(DaikinIE.NetApplicMode.FanOnly.ordinal)
-            )
+            if (currentCondMode != NetApplicMode.FanOnly) {
+                writeToIEDevice(
+                    service,
+                    IE_POINT_TYPE_MI,
+                    IE_POINT_NAME_CONDITIONING_MODE,
+                    IE_MSG_BODY.format(NetApplicMode.FanOnly.ordinal.toFloat())
+                )
+                currentCondMode = NetApplicMode.FanOnly
+            }
         }
 
     }
 
     private fun updateDatClgSetpoint(service : IEService, systemProfile: VavIERtu) {
-        service.writePoint(
+        writeToIEDevice(
+            service,
             IE_POINT_TYPE_MI,
             IE_POINT_NAME_DAT_SETPOINT,
             IE_MSG_BODY.format(fahrenheitToCelsius(systemProfile.getCmd("dat and setpoint")))
         )
     }
 
+    /**
+     * Update fanLoop only when multizone configuration or dspSp or fanLoopOp changes.
+     */
     private fun updateFanControl(service : IEService, hayStack: CCUHsApi, systemProfile: VavIERtu) {
         if (isMultiZoneEnabled(hayStack)) {
-            service.writePoint(
-                IE_POINT_TYPE_AV,
-                IE_POINT_NAME_DSP_SETPOINT,
-                IE_MSG_BODY.format(inchToPascal(getDuctStaticPressureTarget(systemProfile)))
-            )
+            val updatedStaticPressureSp = inchToPascal(getDuctStaticPressureTarget(systemProfile))
+            if (updatedStaticPressureSp != staticPressureSp) {
+                writeToIEDevice(
+                    service,
+                    IE_POINT_TYPE_AV,
+                    IE_POINT_NAME_DSP_SETPOINT,
+                    IE_MSG_BODY.format(updatedStaticPressureSp)
+                )
+                staticPressureSp = updatedStaticPressureSp
+                fanLoopSp = -1.0
+            }
         } else {
-            service.writePoint(
-                IE_POINT_TYPE_AV,
-                IE_POINT_NAME_FAN_SPEED_CONTROL,
-                IE_MSG_BODY.format(systemProfile.systemFanLoopOp)
-            )
+            if (fanLoopSp != systemProfile.systemFanLoopOp) {
+                writeToIEDevice(
+                    service,
+                    IE_POINT_TYPE_AV,
+                    IE_POINT_NAME_FAN_SPEED_CONTROL,
+                    IE_MSG_BODY.format(systemProfile.systemFanLoopOp)
+                )
+                fanLoopSp = systemProfile.systemFanLoopOp
+                staticPressureSp = -1.0
+            }
         }
     }
 
     private fun updateHumidityControl(service : IEService, systemProfile: VavIERtu) {
         if (systemProfile.getConfigEnabled(Tags.HUMIDIFICATION) > 0) {
-            if (DaikinIE.humCtrl != HumidityCtrl.RelHum) {
-                service.writePoint(
+            if (humCtrl != HumidityCtrl.RelHum) {
+                writeToIEDevice(
+                    service,
                     IE_POINT_TYPE_MI,
                     IE_POINT_NAME_HUMIDITY_CONTROL,
-                    IE_MSG_BODY.format(HumidityCtrl.RelHum.ordinal)
+                    IE_MSG_BODY.format(HumidityCtrl.RelHum.ordinal.toFloat())
                 )
-                DaikinIE.humCtrl = HumidityCtrl.RelHum
+                humCtrl = HumidityCtrl.RelHum
             }
 
-            service.writePoint(
+            writeToIEDevice(
+                service,
                 IE_POINT_TYPE_AV,
                 IE_POINT_NAME_RELATIVE_HUMIDITY,
                 IE_MSG_BODY.format(systemProfile.systemController.averageSystemHumidity)
             )
 
-            service.writePoint(
+            writeToIEDevice(
+                service,
                 IE_POINT_TYPE_AV,
                 IE_POINT_NAME_HUMIDITY_SETPOINT,
                 IE_MSG_BODY.format(getMeanHumidityTarget())
             )
 
         } else {
-            if (DaikinIE.humCtrl != HumidityCtrl.None) {
-                service.writePoint(
+            if (humCtrl != HumidityCtrl.None) {
+                writeToIEDevice(
+                    service,
                     IE_POINT_TYPE_MI,
                     IE_POINT_NAME_HUMIDITY_CONTROL,
-                    IE_MSG_BODY.format(HumidityCtrl.None.ordinal)
+                    IE_MSG_BODY.format(HumidityCtrl.None.ordinal.toFloat())
                 )
-                DaikinIE.humCtrl = HumidityCtrl.None
+                humCtrl = HumidityCtrl.None
             }
         }
+    }
+
+    private fun writeToIEDevice(service: IEService, pointType : String, pointName : String, msg : String)  {
+        service.writePoint(
+            pointType,
+            pointName,
+            msg
+        ).subscribeOn(Schedulers.io())
+            .subscribe(
+                { CcuLog.e(L.TAG_CCU_DEVICE, "IE Write Completed")},
+                { error -> CcuLog.e("IE_TEMP", "Write failed for message $msg : $error.message" ) }
+            )
     }
 }

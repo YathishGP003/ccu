@@ -1,12 +1,12 @@
 package a75f.io.renatus.util;
 
 import android.widget.TextView;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
+import a75f.io.logic.bo.util.CCUUtils;
 
 import a75f.io.renatus.R;
 
@@ -29,7 +29,7 @@ public class HeartBeatUtil {
     }
 
     public static boolean isModuleAlive(String nodeAddress){
-        Date updatedTime = a75f.io.logic.bo.util.CCUUtils.getLastReceivedTime(nodeAddress);
+        Date updatedTime = CCUUtils.getLastReceivedTime(nodeAddress);
         if(updatedTime == null){
             return false;
         }
@@ -38,17 +38,32 @@ public class HeartBeatUtil {
     public static String getLastUpdatedTime(String nodeAddress){
         Date updatedTime = a75f.io.logic.bo.util.CCUUtils.getLastReceivedTime(nodeAddress);
         if(updatedTime == null){
-            return "n/a";
+            return "--";
         }
         StringBuffer message = new StringBuffer();
         Date currTime = new Date();
         if(currTime.getDate() == updatedTime.getDate()){
-            return message.append("Today, ")
-                    .append(getTime(updatedTime)).toString();
+            return getTimeDifference(currTime, updatedTime, message);
 
         } else{
-            return getLastUpdatedTime(message, updatedTime).toString();
+            return getLastUpdatedTime(message, updatedTime);
         }
+    }
+
+    private static String getTimeDifference(Date currTime, Date updatedTime, StringBuffer message){
+        long mins = TimeUnit.MILLISECONDS.toMinutes(currTime.getTime() - updatedTime.getTime());
+        if(mins < 1){
+            return message.append("Just now")
+                    .toString();
+        }
+        else if(mins <60){
+            return message.append(mins)
+                    .append(" mins ago")
+                    .toString();
+        }
+        return message.append("Today, ")
+                .append(getTime(updatedTime))
+                .toString();
     }
 
     public static String getDateSuffix(int updatedDate){

@@ -218,7 +218,7 @@ public class OaoArc extends View {
         heartBeatSignal.setAntiAlias(true);
         heartBeatSignal.setTextSize(12);
 
-        canvas.drawCircle(140, 240, 7, heartBeatSignal);
+        canvas.drawCircle(140, 240, 6, heartBeatSignal);
         //canvas.drawCircle(140, 240, 7, new Paint(Color.argb(110,98, 104, 104)));
 
     }
@@ -367,9 +367,9 @@ public class OaoArc extends View {
 
     public void updateStatus(boolean status){
         if(status){
-            heartBeatSignal.setColor(Color.parseColor("#40AC45"));
+            heartBeatSignal.setColor(Color.parseColor("#02C18D"));
         }else{
-            heartBeatSignal.setColor(Color.parseColor("#626868"));
+            heartBeatSignal.setColor(Color.parseColor("#999999"));
         }
 
     }

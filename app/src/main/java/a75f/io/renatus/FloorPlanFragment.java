@@ -1260,6 +1260,7 @@ public class FloorPlanFragment extends Fragment {
         boolean isEMRPaired = false;
         boolean isCCUPaired = false;
         boolean isPaired = false;
+        boolean isSensePaired = false;
 
         if (zoneEquips.size() > 0) {
             isPaired = true;
@@ -1273,10 +1274,13 @@ public class FloorPlanFragment extends Fragment {
                 if (zoneEquips.get(i).getProfile().contains("TEMP_INFLUENCE")) {
                     isCCUPaired = true;
                 }
+                if (zoneEquips.get(i).getProfile().contains("SENSE")) {
+                    isSensePaired = true;
+                }
             }
         }
 
-        if (!isPLCPaired && !isEMRPaired && !isCCUPaired) {
+        if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isSensePaired) {
             short meshAddress = L.generateSmartNodeAddress();
             if (mFloorListAdapter.getSelectedPostion() == -1) {
                 if (L.ccu().oaoProfile != null) {
@@ -1309,6 +1313,9 @@ public class FloorPlanFragment extends Fragment {
             }
             if (isCCUPaired) {
                 Toast.makeText(getActivity(), "CCU as Zone is already paired in this zone", Toast.LENGTH_LONG).show();
+            }
+            if (isSensePaired) {
+                Toast.makeText(getActivity(), "HyperStatSense is already paired in this zone", Toast.LENGTH_LONG).show();
             }
         }
     }

@@ -2,6 +2,11 @@ package a75f.io.logic.bo.building.hyperstatsense;
 
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 
+/*
+ * created by spoorthidev on 30-May-2021
+ * This class if a configuration class for Hyperstat sense
+ */
+
 public class HyperStatSenseConfiguration extends BaseProfileConfiguration {
 
     public double temperatureOffset;

@@ -1133,8 +1133,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         LinearLayout linearLayoutschedulePoints = zoneDetails.findViewById(R.id.lt_schedule);
         LinearLayout linearLayoutstatusPoints = zoneDetails.findViewById(R.id.lt_status);
         linearLayoutstatusPoints.setVisibility(View.GONE);
-       linearLayoutschedulePoints.setVisibility(View.GONE);
-     //String zoneId = Schedule.getZoneIdByEquipId(equipId[0]);
+        linearLayoutschedulePoints.setVisibility(View.GONE);
+        //String zoneId = Schedule.getZoneIdByEquipId(equipId[0]);
 
 
         GridItem gridItemObj = new GridItem();
@@ -1148,7 +1148,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         arcView.setId(i);
         SeekArc seekArc = arcView.findViewById(R.id.seekArc);
         seekArc.setTag(gridItemObj);
-
+        seekArc.setCurrentTemp((float) currentAverageTemp);
         zoneDetails.setTag(gridItemObj);
 
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
@@ -1311,17 +1311,18 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     }
                     isExpanded = true;
                 }
+                linearLayoutZonePoints.removeAllViews();
+                for (int k = 0; k < openZoneMap.size(); k++) {
+                    Equip updatedEquip = new Equip.Builder().setHashMap(openZoneMap.get(k)).build();
+                    if (updatedEquip.getProfile().contains("SENSE")) {
+                        HashMap sensePoints = ScheduleProcessJob.getHyperStatSenseEquipPoints(updatedEquip.getGroup());
+                        // SeekArc.setCurrentTemp(Float.parseFloat(sensePoints.get("TemperatureOffset").toString()));
+                        seekArc.setCurrentTemp(Float.parseFloat(sensePoints.get("TemperatureOffset").toString()));
 
-
-                    linearLayoutZonePoints.removeAllViews();
-                    for (int k = 0; k < openZoneMap.size(); k++) {
-                        Equip updatedEquip = new Equip.Builder().setHashMap(openZoneMap.get(k)).build();
-                        if (updatedEquip.getProfile().contains("SENSE")) {
-                            HashMap sensePoints = ScheduleProcessJob.getHyperStatSenseEquipPoints(updatedEquip.getGroup());
-                            loadSENSEPointsUI(sensePoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
-                        }
-
+                        loadSENSEPointsUI(sensePoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
                     }
+
+                }
 
             }
         });
@@ -3271,42 +3272,41 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private void loadSENSEPointsUI(HashMap sensePoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
 
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
-        View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
-        View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
-        View viewPointRow2 = inflater.inflate(R.layout.zones_item_type1, null);
-
-        viewStatus.setVisibility(View.GONE);
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
-
-
-
-
-
-
         textViewTitle.setText(sensePoints.get("Profile").toString() + " (" + nodeAddress + ")");
+        linearLayoutZonePoints.addView(viewTitle);
 
         if (sensePoints.get("iAn1Enable") == "true") {
-            TextView textViewAnalog1 = viewPointRow1.findViewById(R.id.text_point1value);
-            textViewAnalog1.setText(sensePoints.get("Analog1").toString() + " : " + (sensePoints.get("An1Val").toString()) +" " +(sensePoints.get("Unit1").toString()));
+            TextView textViewAnalog1 = new TextView(getContext());
+            textViewAnalog1.setTextSize(24);
+            textViewAnalog1.setPadding(10, 0, 0, 10);
+            textViewAnalog1.setText(sensePoints.get("Analog1").toString() + " : " + (sensePoints.get("An1Val").toString()) + " " + (sensePoints.get("Unit1").toString()));
+            linearLayoutZonePoints.addView(textViewAnalog1);
         }
         if (sensePoints.get("iAn2Enable") == "true") {
-            TextView textViewAnalog2 = viewPointRow1.findViewById(R.id.text_point2value);
-            textViewAnalog2.setText(sensePoints.get("Analog2").toString() + " : " +(sensePoints.get("An2Val").toString()) +" " + (sensePoints.get("Unit2").toString()));
+            TextView textViewAnalog2 = new TextView(getContext());
+            textViewAnalog2.setTextSize(24);
+            textViewAnalog2.setPadding(10, 0, 0, 10);
+            textViewAnalog2.setText(sensePoints.get("Analog2").toString() + " : " + (sensePoints.get("An2Val").toString()) + " " + (sensePoints.get("Unit2").toString()));
+            linearLayoutZonePoints.addView(textViewAnalog2);
+
         }
         if (sensePoints.get("isTh1Enable") == "true") {
-
-            TextView textViewth1 = viewPointRow2.findViewById(R.id.text_point1value);
-
-            textViewth1.setText(sensePoints.get("Thermistor1").toString() + " : "+ (sensePoints.get("Th1Val").toString()) +" " + (sensePoints.get("Unit3").toString()));
+            TextView textViewth1 = new TextView(getContext());
+            ;
+            textViewth1.setTextSize(24);
+            textViewth1.setPadding(10, 0, 0, 10);
+            textViewth1.setText(sensePoints.get("Thermistor1").toString() + " : " + (sensePoints.get("Th1Val").toString()) + " " + (sensePoints.get("Unit3").toString()));
+            linearLayoutZonePoints.addView(textViewth1);
         }
         if (sensePoints.get("isTh2Enable") == "true") {
-            TextView textViewth2 = viewPointRow2.findViewById(R.id.text_point2value);
-            textViewth2.setText(sensePoints.get("Thermistor2").toString() + " : " + (sensePoints.get("Th2Val").toString()) +" " +(sensePoints.get("Unit4").toString()));
+            TextView textViewth2 = new TextView(getContext());
+            textViewth2.setTextSize(24);
+            textViewth2.setTextSize(24);
+            textViewth2.setPadding(10, 0, 0, 10);
+            textViewth2.setText(sensePoints.get("Thermistor2").toString() + " : " + (sensePoints.get("Th2Val").toString()) + " " + (sensePoints.get("Unit4").toString()));
+            linearLayoutZonePoints.addView(textViewth2);
         }
-        linearLayoutZonePoints.addView(viewTitle);
-        linearLayoutZonePoints.addView(viewStatus);
-        linearLayoutZonePoints.addView(viewPointRow1);
-        linearLayoutZonePoints.addView(viewPointRow2);
 
     }
 

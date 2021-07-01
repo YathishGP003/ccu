@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
+import a75f.io.renatus.util.NetworkUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
@@ -32,6 +33,8 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.renovo.bacnet4j.npdu.Network;
 
 import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HDict;
@@ -640,6 +643,13 @@ public class FloorPlanFragment extends Fragment {
 
     @OnClick(R.id.addFloorBtn)
     public void handleFloorBtn() {
+        
+        if (!CCUHsApi.getInstance().isPrimaryCcu() && !NetworkUtil.isNetworkConnected(getActivity())) {
+            Toast.makeText(getActivity(), "Floor cannot be added when CCU is offline. Please connect to network.",
+                           Toast.LENGTH_LONG)
+                 .show();
+            return;
+        }
         enableFloorEdit();
         addFloorEdit.setText("");
         addFloorEdit.requestFocus();
@@ -1103,6 +1113,12 @@ public class FloorPlanFragment extends Fragment {
     }
 
     public void renameFloor(Floor floor) {
+        if (!CCUHsApi.getInstance().isPrimaryCcu() && !NetworkUtil.isNetworkConnected(getActivity())) {
+            Toast.makeText(getActivity(), "Floor cannot be renamed when CCU is offline. Please connect to network.",
+                           Toast.LENGTH_LONG)
+                 .show();
+            return;
+        }
         floorToRename = floor;
         enableFloorEdit();
         addFloorEdit.setText(floor.getDisplayName());

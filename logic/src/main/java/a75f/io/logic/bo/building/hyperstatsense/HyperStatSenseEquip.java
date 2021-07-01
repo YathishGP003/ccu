@@ -284,12 +284,11 @@ public class HyperStatSenseEquip {
         device.currentTemp.setEnabled(true);
         device.addPointsToDb();
         mHayStack.syncEntityTree();
-
     }
 
     public void update(ProfileType type, int node, HyperStatSenseConfiguration config, String floorRef, String roomRef) {
 
-        HashMap tempOffset = mHayStack.read("point and temp and offsetand equipRef == \"" + mEquipRef + "\"");
+        HashMap tempOffset = mHayStack.read("point and temp and offset and equipRef == \"" + mEquipRef + "\"");
         HashMap isTh1 = mHayStack.read("point and config and thermister1  and enabled and equipRef == \"" + mEquipRef + "\"");
         HashMap isTh2 = mHayStack.read("point and config and thermister2  and enabled and equipRef == \"" + mEquipRef + "\"");
         HashMap isAn1 = mHayStack.read("point and config and analog1  and enabled and equipRef == \"" + mEquipRef + "\"");
@@ -399,7 +398,7 @@ public class HyperStatSenseEquip {
                 mHayStack.writeDefaultValById(An2.get("id").toString(), (double) config.analog2Sensor);
             }
         }
-        device.addPointsToDb();
+
     }
 
 

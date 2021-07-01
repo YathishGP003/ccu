@@ -1109,226 +1109,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         //return view;
     }
 
-    private void viewSenseZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap, String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout) {
-
-        Log.i("ProfileTypes", "Points:" + zoneMap.toString());
-        Equip p = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
-        Log.i("ProfileTypes", "p:" + p.toString());
-        double currentAverageTemp = 0;
-        int noTempSensor = 0;
-
-        if (zoneMap.size() > 1 && currentAverageTemp != 0) {
-            currentAverageTemp = currentAverageTemp / (zoneMap.size() - noTempSensor);
-            DecimalFormat decimalFormat = new DecimalFormat("#.#");
-            currentAverageTemp = Double.parseDouble(decimalFormat.format(Math.round(currentAverageTemp * 10.0) / 10.0));
-        }
-        Log.i("EachzoneData", " currentAvg:" + currentAverageTemp);
-        final String[] equipId = {p.getId()};
-        int i = gridPosition;
-        View arcView = null;
-        arcView = inflater.inflate(R.layout.zones_item, (ViewGroup) rootView, false);
-        View zoneDetails = inflater.inflate(R.layout.zones_item_details, null);
-
-        LinearLayout linearLayoutZonePoints = zoneDetails.findViewById(R.id.lt_profilepoints);
-        LinearLayout linearLayoutschedulePoints = zoneDetails.findViewById(R.id.lt_schedule);
-        LinearLayout linearLayoutstatusPoints = zoneDetails.findViewById(R.id.lt_status);
-        linearLayoutstatusPoints.setVisibility(View.GONE);
-        linearLayoutschedulePoints.setVisibility(View.GONE);
-        //String zoneId = Schedule.getZoneIdByEquipId(equipId[0]);
-
-
-        GridItem gridItemObj = new GridItem();
-        gridItemObj.setGridID(i);
-
-        gridItemObj.setNodeAddress(Short.valueOf(p.getGroup()));
-
-        gridItemObj.setZoneEquips(zoneMap);
-        arcView.setClickable(true);
-        arcView.setTag(gridItemObj);
-        arcView.setId(i);
-        SeekArc seekArc = arcView.findViewById(R.id.seekArc);
-        seekArc.setTag(gridItemObj);
-        seekArc.setCurrentTemp((float) currentAverageTemp);
-        zoneDetails.setTag(gridItemObj);
-
-        TextView textEquipment = arcView.findViewById(R.id.textEquipment);
-        textEquipment.setText(zoneTitle);
-
-        seekArc.scaletoNormal(250, 210);
-
-
-        //  seekArc.setData(false, pointbuildingMin, pointbuildingMax, (float) heatUpperlimit, (float) heatLowerlimit, (float) coolLowerlimit, (float) coolUpperlimit, (float)pointheatDT, (float)pointcoolDT, (float) currentAverageTemp, (float) heatDeadband, (float) coolDeadband);
-        seekArc.setDetailedView(false);
-        LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-
-        arcView.setPadding(48, 64, 0, 0);
-        try {
-            tablerowLayout[rowcount].addView(arcView, rowLayoutParams);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (((i + 1) % columnCount == 0) && (i != 0)) {
-            try {
-                if (tablerowLayout[rowcount].getParent() != null) {
-                    ((ViewGroup) tablerowLayout[rowcount].getParent()).removeView(tablerowLayout[rowcount]);
-                }
-                tableLayout.addView(tablerowLayout[rowcount++]);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            if (rowcount < numRows)
-                tablerowLayout[rowcount] = new LinearLayout(tableLayout.getContext());
-        }
-        if (rowcount < numRows) {
-            try {
-                if (tablerowLayout[rowcount].getParent() != null) {
-                    ((ViewGroup) tablerowLayout[rowcount].getParent()).removeView(tablerowLayout[rowcount]);
-                }
-                tableLayout.addView(tablerowLayout[rowcount]);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-
-        seekArc.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                GridItem gridItemNew = (GridItem) v.getTag();
-                boolean isExpanded = false;
-                int clickedItemRow = 0;
-                int clickposition = gridItemNew.getGridID();
-                if (clickedView != -1) {
-                    if (clickposition != clickedView) {
-                        int newRowCount = 0;
-                        int tableRowCount = tableLayout.getChildCount();
-                        if (tableLayout.getChildCount() > 1) {
-                            boolean viewFound = false;
-                            for (int row = 0; row < tableRowCount; row++) {
-                                View rowView = tableLayout.getChildAt(row);
-                                LinearLayout tableRow = (LinearLayout) rowView;
-                                int cellCount = tableRow.getChildCount();
-                                for (int j = 0; j < cellCount; j++) {
-                                    RelativeLayout gridItem = (RelativeLayout) tableRow.getChildAt(j);
-                                    GridItem viewTag = (GridItem) gridItem.getTag();
-                                    if (viewTag.getGridID() == clickedView) {
-                                       /* if(viewTag.getGridItem().equals("Temp")) {
-                                            SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
-                                            TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
-                                            textViewzone.setTextAppearance(getActivity(), R.style.label_black);
-                                            textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
-                                            tableLayout.removeViewAt(row + 1);
-                                            seekArcExpanded.setDetailedView(false);
-                                            seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
-                                            seekArcExpanded.scaletoNormal(250, 210);
-                                            gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
-                                        }else {*/
-                                        TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
-                                        textViewzone.setTextAppearance(getActivity(), R.style.label_black);
-                                        textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
-                                        tableLayout.removeViewAt(row + 1);
-                                        NonTempControl nonTempControl = gridItem.findViewById(R.id.rl_nontemp);
-                                        ScaleControlToNormal(250, 210, nonTempControl);
-                                        nonTempControl.setExpand(false);
-                                        //ScaleImageToNormal(250,210,imageViewExpanded);
-                                        nonTempControl.setBackgroundColor(getResources().getColor(R.color.white));
-                                        gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
-                                        //}
-
-                                        isExpanded = false;
-                                        imageOn = false;
-                                        viewFound = true;
-                                        break;
-                                    }
-                                }
-                                if (viewFound) {
-                                    clickedItemRow = row;
-                                    break;
-                                }
-                            }
-
-                            zoneOpen = true;
-                            zoneNonTempOpen = false;
-                            seekArcOpen = seekArc;
-                            zonePointsOpen = zoneDetails;
-                            equipOpen = p;
-                            openZoneMap = zoneMap;
-                            clickedView = gridItemNew.getGridID();
-                            v.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
-                            int index = clickedView / columnCount + 1;
-                            seekArc.setDetailedView(true);
-                            //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
-                            seekArc.scaletoNormalBig(250, 210);
-                            imageOn = true;
-                            selectedView = seekArc.getId();
-                            try {
-                                textEquipment.setTextAppearance(getActivity(), R.style.label_orange);
-                                textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
-                                zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
-                                tableLayout.addView(zoneDetails, index);
-
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            isExpanded = true;
-                        }
-                    } else if (clickposition == clickedView) {
-                        v.setBackgroundColor(getResources().getColor(R.color.white));
-                        textEquipment.setTextAppearance(getActivity(), R.style.label_black);
-                        textEquipment.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
-                        tableLayout.removeView(zoneDetails);
-                        imageOn = false;
-                        seekArc.setDetailedView(false);
-                        seekArc.scaletoNormal(250, 210);
-                        showWeather();
-                        clickedView = -1;
-                        isExpanded = false;
-                    }
-                } else {
-                    zoneOpen = true;
-                    zoneNonTempOpen = false;
-                    seekArcOpen = seekArc;
-                    zonePointsOpen = zoneDetails;
-                    equipOpen = p;
-                    openZoneMap = zoneMap;
-                    clickedView = gridItemNew.getGridID();
-                    seekArc.setClickable(true);
-                    v.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
-                    int index = clickedView / columnCount + 1;
-                    seekArc.setDetailedView(true);
-                    //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
-                    seekArc.scaletoNormalBig(250, 210);
-
-                    imageOn = true;
-                    selectedView = seekArc.getId();
-                    try {
-                        textEquipment.setTextAppearance(getActivity(), R.style.label_orange);
-                        textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
-                        zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
-                        tableLayout.addView(zoneDetails, index);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    isExpanded = true;
-                }
-                linearLayoutZonePoints.removeAllViews();
-                for (int k = 0; k < openZoneMap.size(); k++) {
-                    Equip updatedEquip = new Equip.Builder().setHashMap(openZoneMap.get(k)).build();
-                    if (updatedEquip.getProfile().contains("SENSE")) {
-                        HashMap sensePoints = ScheduleProcessJob.getHyperStatSenseEquipPoints(updatedEquip.getGroup());
-                        // SeekArc.setCurrentTemp(Float.parseFloat(sensePoints.get("TemperatureOffset").toString()));
-                       // seekArc.setCurrentTemp(Float.parseFloat(sensePoints.get("TemperatureOffset").toString()));
-
-                        loadSENSEPointsUI(sensePoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
-                    }
-
-                }
-
-            }
-        });
-
-
-    }
 
     private void clearTempOverride(String equipId) {
         new Handler().postDelayed(new Runnable() {
@@ -3276,21 +3056,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         textViewTitle.setText(sensePoints.get("Profile").toString() + " (" + nodeAddress + ")");
         linearLayoutZonePoints.addView(viewTitle);
 
-        if (sensePoints.get("iAn1Enable") == "true") {
-            TextView textViewAnalog1 = new TextView(getContext());
-            textViewAnalog1.setTextSize(24);
-            textViewAnalog1.setPadding(10, 0, 0, 10);
-            textViewAnalog1.setText(sensePoints.get("Analog1").toString() + " : " + (sensePoints.get("An1Val").toString()) + " " + (sensePoints.get("Unit1").toString()));
-            linearLayoutZonePoints.addView(textViewAnalog1);
-        }
-        if (sensePoints.get("iAn2Enable") == "true") {
-            TextView textViewAnalog2 = new TextView(getContext());
-            textViewAnalog2.setTextSize(24);
-            textViewAnalog2.setPadding(10, 0, 0, 10);
-            textViewAnalog2.setText(sensePoints.get("Analog2").toString() + " : " + (sensePoints.get("An2Val").toString()) + " " + (sensePoints.get("Unit2").toString()));
-            linearLayoutZonePoints.addView(textViewAnalog2);
 
-        }
         if (sensePoints.get("isTh1Enable") == "true") {
             TextView textViewth1 = new TextView(getContext());
             textViewth1.setTextSize(24);
@@ -3306,6 +3072,228 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             linearLayoutZonePoints.addView(textViewth2);
         }
 
+        if (sensePoints.get("iAn1Enable") == "true") {
+            TextView textViewAnalog1 = new TextView(getContext());
+            textViewAnalog1.setTextSize(24);
+            textViewAnalog1.setPadding(10, 0, 0, 10);
+            textViewAnalog1.setText(sensePoints.get("Analog1").toString() + " : " + (sensePoints.get("An1Val").toString()) + " " + (sensePoints.get("Unit1").toString()));
+            linearLayoutZonePoints.addView(textViewAnalog1);
+        }
+        if (sensePoints.get("iAn2Enable") == "true") {
+            TextView textViewAnalog2 = new TextView(getContext());
+            textViewAnalog2.setTextSize(24);
+            textViewAnalog2.setPadding(10, 0, 0, 10);
+            textViewAnalog2.setText(sensePoints.get("Analog2").toString() + " : " + (sensePoints.get("An2Val").toString()) + " " + (sensePoints.get("Unit2").toString()));
+            linearLayoutZonePoints.addView(textViewAnalog2);
+
+        }
+
     }
+    private void viewSenseZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap, String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout) {
+
+        Log.i("ProfileTypes", "Points:" + zoneMap.toString());
+        Equip p = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
+        Log.i("ProfileTypes", "p:" + p.toString());
+        double currentAverageTemp = 0;
+        int noTempSensor = 0;
+
+        if (zoneMap.size() > 1 && currentAverageTemp != 0) {
+            currentAverageTemp = currentAverageTemp / (zoneMap.size() - noTempSensor);
+            DecimalFormat decimalFormat = new DecimalFormat("#.#");
+            currentAverageTemp = Double.parseDouble(decimalFormat.format(Math.round(currentAverageTemp * 10.0) / 10.0));
+        }
+        Log.i("EachzoneData", " currentAvg:" + currentAverageTemp);
+        final String[] equipId = {p.getId()};
+        int i = gridPosition;
+        View arcView = null;
+        arcView = inflater.inflate(R.layout.zones_item, (ViewGroup) rootView, false);
+        View zoneDetails = inflater.inflate(R.layout.zones_item_details, null);
+
+        LinearLayout linearLayoutZonePoints = zoneDetails.findViewById(R.id.lt_profilepoints);
+        LinearLayout linearLayoutschedulePoints = zoneDetails.findViewById(R.id.lt_schedule);
+        LinearLayout linearLayoutstatusPoints = zoneDetails.findViewById(R.id.lt_status);
+        linearLayoutstatusPoints.setVisibility(View.GONE);
+        linearLayoutschedulePoints.setVisibility(View.GONE);
+        //String zoneId = Schedule.getZoneIdByEquipId(equipId[0]);
+
+
+        GridItem gridItemObj = new GridItem();
+        gridItemObj.setGridID(i);
+
+        gridItemObj.setNodeAddress(Short.valueOf(p.getGroup()));
+
+        gridItemObj.setZoneEquips(zoneMap);
+        arcView.setClickable(true);
+        arcView.setTag(gridItemObj);
+        arcView.setId(i);
+        SeekArc seekArc = arcView.findViewById(R.id.seekArc);
+        seekArc.setTag(gridItemObj);
+        seekArc.setCurrentTemp((float) currentAverageTemp);
+        zoneDetails.setTag(gridItemObj);
+
+        TextView textEquipment = arcView.findViewById(R.id.textEquipment);
+        textEquipment.setText(zoneTitle);
+
+        seekArc.scaletoNormal(250, 210);
+
+
+        //  seekArc.setData(false, pointbuildingMin, pointbuildingMax, (float) heatUpperlimit, (float) heatLowerlimit, (float) coolLowerlimit, (float) coolUpperlimit, (float)pointheatDT, (float)pointcoolDT, (float) currentAverageTemp, (float) heatDeadband, (float) coolDeadband);
+        seekArc.setDetailedView(false);
+        LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+        arcView.setPadding(48, 64, 0, 0);
+        try {
+            tablerowLayout[rowcount].addView(arcView, rowLayoutParams);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (((i + 1) % columnCount == 0) && (i != 0)) {
+            try {
+                if (tablerowLayout[rowcount].getParent() != null) {
+                    ((ViewGroup) tablerowLayout[rowcount].getParent()).removeView(tablerowLayout[rowcount]);
+                }
+                tableLayout.addView(tablerowLayout[rowcount++]);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (rowcount < numRows)
+                tablerowLayout[rowcount] = new LinearLayout(tableLayout.getContext());
+        }
+        if (rowcount < numRows) {
+            try {
+                if (tablerowLayout[rowcount].getParent() != null) {
+                    ((ViewGroup) tablerowLayout[rowcount].getParent()).removeView(tablerowLayout[rowcount]);
+                }
+                tableLayout.addView(tablerowLayout[rowcount]);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        seekArc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                GridItem gridItemNew = (GridItem) v.getTag();
+                boolean isExpanded = false;
+                int clickedItemRow = 0;
+                int clickposition = gridItemNew.getGridID();
+                if (clickedView != -1) {
+                    if (clickposition != clickedView) {
+                        int newRowCount = 0;
+                        int tableRowCount = tableLayout.getChildCount();
+                        if (tableLayout.getChildCount() > 1) {
+                            boolean viewFound = false;
+                            for (int row = 0; row < tableRowCount; row++) {
+                                View rowView = tableLayout.getChildAt(row);
+                                LinearLayout tableRow = (LinearLayout) rowView;
+                                int cellCount = tableRow.getChildCount();
+                                for (int j = 0; j < cellCount; j++) {
+                                    RelativeLayout gridItem = (RelativeLayout) tableRow.getChildAt(j);
+                                    GridItem viewTag = (GridItem) gridItem.getTag();
+                                    if (viewTag.getGridID() == clickedView) {
+
+                                        TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
+                                        textViewzone.setTextAppearance(getActivity(), R.style.label_black);
+                                        textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                        tableLayout.removeViewAt(row + 1);
+                                        NonTempControl nonTempControl = gridItem.findViewById(R.id.rl_nontemp);
+                                        ScaleControlToNormal(250, 210, nonTempControl);
+                                        nonTempControl.setExpand(false);
+                                        //ScaleImageToNormal(250,210,imageViewExpanded);
+                                        nonTempControl.setBackgroundColor(getResources().getColor(R.color.white));
+                                        gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                        isExpanded = false;
+                                        imageOn = false;
+                                        viewFound = true;
+                                        break;
+                                    }
+                                }
+                                if (viewFound) {
+                                    clickedItemRow = row;
+                                    break;
+                                }
+                            }
+
+                            zoneOpen = true;
+                            zoneNonTempOpen = false;
+                            seekArcOpen = seekArc;
+                            zonePointsOpen = zoneDetails;
+                            equipOpen = p;
+                            openZoneMap = zoneMap;
+                            clickedView = gridItemNew.getGridID();
+                            v.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
+                            int index = clickedView / columnCount + 1;
+                            seekArc.setDetailedView(true);
+                            seekArc.scaletoNormalBig(250, 210);
+                            imageOn = true;
+                            selectedView = seekArc.getId();
+                            try {
+                                textEquipment.setTextAppearance(getActivity(), R.style.label_orange);
+                                textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                                zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                                tableLayout.addView(zoneDetails, index);
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            isExpanded = true;
+                        }
+                    } else if (clickposition == clickedView) {
+                        v.setBackgroundColor(getResources().getColor(R.color.white));
+                        textEquipment.setTextAppearance(getActivity(), R.style.label_black);
+                        textEquipment.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                        tableLayout.removeView(zoneDetails);
+                        imageOn = false;
+                        seekArc.setDetailedView(false);
+                        seekArc.scaletoNormal(250, 210);
+                        showWeather();
+                        clickedView = -1;
+                        isExpanded = false;
+                    }
+                } else {
+                    zoneOpen = true;
+                    zoneNonTempOpen = false;
+                    seekArcOpen = seekArc;
+                    zonePointsOpen = zoneDetails;
+                    equipOpen = p;
+                    openZoneMap = zoneMap;
+                    clickedView = gridItemNew.getGridID();
+                    seekArc.setClickable(true);
+                    v.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                    int index = clickedView / columnCount + 1;
+                    seekArc.setDetailedView(true);
+                    //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
+                    seekArc.scaletoNormalBig(250, 210);
+
+                    imageOn = true;
+                    selectedView = seekArc.getId();
+                    try {
+                        textEquipment.setTextAppearance(getActivity(), R.style.label_orange);
+                        textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                        zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                        tableLayout.addView(zoneDetails, index);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    isExpanded = true;
+                }
+                linearLayoutZonePoints.removeAllViews();
+                for (int k = 0; k < openZoneMap.size(); k++) {
+                    Equip updatedEquip = new Equip.Builder().setHashMap(openZoneMap.get(k)).build();
+                    if (updatedEquip.getProfile().contains("SENSE")) {
+                        HashMap sensePoints = ScheduleProcessJob.getHyperStatSenseEquipPoints(updatedEquip.getGroup());
+                         seekArc.setCurrentTemp(Float.parseFloat(sensePoints.get("curtempwithoffset").toString()));
+                        loadSENSEPointsUI(sensePoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
+                    }
+
+                }
+
+            }
+        });
+
+
+    }
+
 
 }

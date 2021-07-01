@@ -1754,7 +1754,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             size++;
             sensePoints.put("iAn2Enable","true");
         }
-        else sensePoints.put("iAn1Enable","false");
+        else sensePoints.put("iAn2Enable","false");
 
         if(isTh1Enable){
             size++;

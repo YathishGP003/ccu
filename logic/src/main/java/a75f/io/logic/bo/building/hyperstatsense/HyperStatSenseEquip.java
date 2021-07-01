@@ -34,14 +34,14 @@ public class HyperStatSenseEquip {
     }
 
     public void init() {
-        HashMap equip = CCUHsApi.getInstance().read("equip and group == \"" + mNodeAddr + "\"");
+        HashMap equip = CCUHsApi.getInstance().read("equip and sense and group == \"" + mNodeAddr + "\"");
 
         if (equip.isEmpty()) {
-            Log.e(LOG_TAG, "Init Failed : Equip does not exist ");
+            Log.d(LOG_TAG, "Init Failed : Equip does not exist ");
             return;
         }
+        Log.d(LOG_TAG, "Init equip : " +equip.get("id").toString());
         mEquipRef = equip.get("id").toString();
-
     }
 
     public void createEntities(HyperStatSenseConfiguration config, String floorRef, String roomRef) {
@@ -67,7 +67,7 @@ public class HyperStatSenseEquip {
                 "analog1Sensor = " + String.valueOf(config.analog1Sensor) + " \n" +
                 "analog2Sensor = " + String.valueOf(config.analog2Sensor));
 
-        Equip.Builder b = new Equip.Builder()
+        Equip b = new Equip.Builder()
                 .setSiteRef(siteRef)
                 .setDisplayName(equipDis)
                 .setRoomRef(roomRef)
@@ -76,8 +76,8 @@ public class HyperStatSenseEquip {
                 .addMarker("equip").addMarker("hyperstat").addMarker("sense").addMarker("zone")
                 .setAhuRef(ahuRef)
                 .setTz(tz)
-                .setGroup(String.valueOf(mNodeAddr));
-        mEquipRef = CCUHsApi.getInstance().addEquip(b.build());
+                .setGroup(String.valueOf(mNodeAddr)).build();
+        mEquipRef = mHayStack.addEquip(b);
 
         Point equipScheduleType = new Point.Builder()
                 .setDisplayName(equipDis + "-scheduleType")
@@ -92,8 +92,8 @@ public class HyperStatSenseEquip {
                 .setTz(tz)
                 .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
-        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
-        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
+        mHayStack.writeDefaultValById(equipScheduleTypeId, 0.0);
+        mHayStack.writeHisValById(equipScheduleTypeId, 0.0);
 
 
         Point isAnalog1enaled = new Point.Builder()
@@ -168,6 +168,21 @@ public class HyperStatSenseEquip {
                 .build();
         String tempoffsetId = mHayStack.addPoint(temperatureOffset);
         mHayStack.writeDefaultValById(tempoffsetId, config.temperatureOffset > 0 ? config.temperatureOffset : 0.0);
+
+        Point currentTemp = new Point.Builder()
+                .setDisplayName(siteDis+"-SENSE-"+mNodeAddr+"-currentTemp")
+                .setEquipRef(mEquipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .setHisInterpolate("cov")
+                .addMarker("zone").addMarker("hyperstat").addMarker("sense")
+                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical")
+                .setGroup(String.valueOf(mNodeAddr))
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
 
 
         Point analog1InputSensor = new Point.Builder()
@@ -259,12 +274,14 @@ public class HyperStatSenseEquip {
             device.th1In.setType(String.valueOf(config.th1Sensor));
         }
 
-        if (config.isAnalog1Enable) {
+        if (config.isTh2Enable) {
             String sensorId = createSensorPoint(floorRef, roomRef, "th2", config);
             device.th2In.setPointRef(sensorId);
             device.th2In.setEnabled(true);
             device.th2In.setType(String.valueOf(config.th2Sensor));
         }
+        device.currentTemp.setPointRef(ctID);
+        device.currentTemp.setEnabled(true);
         device.addPointsToDb();
         mHayStack.syncEntityTree();
 
@@ -287,62 +304,102 @@ public class HyperStatSenseEquip {
         HashMap An2Val = mHayStack.read("point and logical and analog2 and equipRef == \"" + mEquipRef + "\"");
 
         HyperStatSenseConfiguration currentConfig = getHyperStatSenseConfig();
+        HyperStatDevice device = new HyperStatDevice(node);
 
         if (tempOffset != null && tempOffset.get("id") != null && config.temperatureOffset != currentConfig.temperatureOffset) {
+            Log.d(LOG_TAG, "tempOffset update : " + config.temperatureOffset);
             mHayStack.writeDefaultValById(tempOffset.get("id").toString(), config.temperatureOffset);
         }
         if (config.isTh1Enable != currentConfig.isTh1Enable) {
+            Log.d(LOG_TAG, "thermister1 toggle update : " + config.isTh1Enable );
             mHayStack.writeDefaultValById(isTh1.get("id").toString(), config.isTh1Enable ? 1.0 : 0.0);
             if (config.isTh1Enable == false && Th1Val != null && Th1Val.get("id") != null) {
+                Log.d(LOG_TAG, "thermister1 toggle update  delete entry: ");
                 CCUHsApi.getInstance().deleteEntityTree(Th1Val.get("id").toString());
             } else if (config.isTh1Enable && Th1Val != null && Th1Val.get("id") != null) {
+                Log.d(LOG_TAG, "thermister1 toggle update  delete and create new entry: ");
                 CCUHsApi.getInstance().deleteEntityTree(Th1Val.get("id").toString());
                 String id = createSensorPoint(floorRef, roomRef, "th1", config);
+                device.th1In.setPointRef(id);
+                device.th1In.setEnabled(true);
+                device.th1In.setType(String.valueOf(config.th1Sensor));
                 DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.TH1_IN.name(), id);
+            }
+        }else{
+            Log.d(LOG_TAG, "thermister1 toggle no change : " + config.isTh1Enable );
+            if (config.th1Sensor != currentConfig.th1Sensor && Th1 != null && Th1.get("id") != null) {
+                Log.d(LOG_TAG, "thermister1 spinner update : " + config.th1Sensor );
+                mHayStack.writeDefaultValById(Th1.get("id").toString(), (double) config.th1Sensor);
             }
         }
         if (config.isTh2Enable != currentConfig.isTh2Enable) {
+            Log.d(LOG_TAG, "thermister2 toggle update : " + config.isTh2Enable );
             mHayStack.writeDefaultValById(isTh2.get("id").toString(), config.isTh2Enable ? 1.0 : 0.0);
             if (config.isTh2Enable == false && Th2Val != null && Th2Val.get("id") != null) {
+                Log.d(LOG_TAG, "thermister2 toggle update  delete entry: ");
                 CCUHsApi.getInstance().deleteEntityTree(Th2Val.get("id").toString());
             } else if (config.isTh2Enable && Th2Val != null && Th2Val.get("id") != null) {
+                Log.d(LOG_TAG, "th2 toggle update  delete and create new entry: ");
                 CCUHsApi.getInstance().deleteEntityTree(Th2Val.get("id").toString());
                 String id = createSensorPoint(floorRef, roomRef, "th2", config);
+                device.th2In.setPointRef(id);
+                device.th2In.setEnabled(true);
+                device.th2In.setType(String.valueOf(config.th2Sensor));
                 DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.TH2_IN.name(), id);
+            }
+        }else{
+            Log.d(LOG_TAG, "thermister2 toggle no change : " + config.isTh2Enable );
+            if (config.th2Sensor != currentConfig.th2Sensor && Th2 != null && Th2.get("id") != null) {
+                Log.d(LOG_TAG, "thermister2 spinner update : " + config.th2Sensor );
+                mHayStack.writeDefaultValById(Th2.get("id").toString(), (double) config.th2Sensor);
             }
         }
         if (config.isAnalog1Enable != currentConfig.isAnalog1Enable) {
+            Log.d(LOG_TAG, "analog1 toggle update : " + config.isAnalog1Enable );
             mHayStack.writeDefaultValById(isAn1.get("id").toString(), config.isAnalog1Enable ? 1.0 : 0.0);
             if (config.isAnalog1Enable == false && An1Val != null && An1Val.get("id") != null) {
+                Log.d(LOG_TAG, "an1 toggle update  delete entry: ");
                 CCUHsApi.getInstance().deleteEntityTree(An1Val.get("id").toString());
             } else if (config.isAnalog1Enable && An1Val != null && An1Val.get("id") != null) {
+                Log.d(LOG_TAG, "an1 toggle update  delete and create new entry: ");
                 CCUHsApi.getInstance().deleteEntityTree(An1Val.get("id").toString());
                 String id = createSensorPoint(floorRef, roomRef, "analog1", config);
+                device.analog1In.setPointRef(id);
+                device.analog1In.setEnabled(true);
+                device.analog1In.setType(String.valueOf(config.analog1Sensor));
                 DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.ANALOG_IN_ONE.name(), id);
             }
-        }
-        if (config.isAnalog2Enable != currentConfig.isAnalog2Enable) {
-            mHayStack.writeDefaultValById(isAn2.get("id").toString(), config.isAnalog2Enable ? 1.0 : 0.0);
-            if (config.isAnalog2Enable == false && An2Val != null && An2Val.get("id") != null) {
-                CCUHsApi.getInstance().deleteEntityTree(An2Val.get("id").toString());
-            } else if (config.isAnalog2Enable && An2Val != null && An2Val.get("id") != null) {
-                CCUHsApi.getInstance().deleteEntityTree(An2Val.get("id").toString());
-                String id = createSensorPoint(floorRef, roomRef, "analog2", config);
-                DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.ANALOG_IN_TWO.name(), id);
+        }else {
+            Log.d(LOG_TAG, "an1 toggle no change : " + config.isAnalog1Enable );
+            if (config.analog1Sensor != currentConfig.analog1Sensor && An1 != null && An1.get("id") != null) {
+                Log.d(LOG_TAG, "an1 spinner update : " + config.analog1Sensor );
+                mHayStack.writeDefaultValById(An1.get("id").toString(), (double) config.analog1Sensor);
             }
         }
-        if (config.th1Sensor != currentConfig.th1Sensor && Th1 != null && Th1.get("id") != null) {
-            mHayStack.writeDefaultValById(Th1.get("id").toString(), (double) config.th1Sensor);
+
+        if (config.isAnalog2Enable != currentConfig.isAnalog2Enable) {
+            Log.d(LOG_TAG, "analog2 toggle update : " + config.isAnalog2Enable );
+            mHayStack.writeDefaultValById(isAn2.get("id").toString(), config.isAnalog2Enable ? 1.0 : 0.0);
+            if (config.isAnalog2Enable == false && An2Val != null && An2Val.get("id") != null) {
+                Log.d(LOG_TAG, "an2 toggle update  delete entry: ");
+                CCUHsApi.getInstance().deleteEntityTree(An2Val.get("id").toString());
+            } else if (config.isAnalog2Enable && An2Val != null && An2Val.get("id") != null) {
+                Log.d(LOG_TAG, "an2 toggle update  delete and create new entry: ");
+                CCUHsApi.getInstance().deleteEntityTree(An2Val.get("id").toString());
+                String id = createSensorPoint(floorRef, roomRef, "analog2", config);
+                device.analog2In.setPointRef(id);
+                device.analog2In.setEnabled(true);
+                device.analog2In.setType(String.valueOf(config.analog2Sensor));
+                DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.ANALOG_IN_TWO.name(), id);
+            }
+        } else {
+            Log.d(LOG_TAG, "an2 toggle no change : " + config.isAnalog2Enable );
+            if (config.analog2Sensor != currentConfig.analog2Sensor && An2 != null && An2.get("id") != null) {
+                Log.d(LOG_TAG, "an2 spinner update : " + config.analog2Sensor );
+                mHayStack.writeDefaultValById(An2.get("id").toString(), (double) config.analog2Sensor);
+            }
         }
-        if (config.th2Sensor != currentConfig.th2Sensor && Th2 != null && Th2.get("id") != null) {
-            mHayStack.writeDefaultValById(Th2.get("id").toString(), (double) config.th2Sensor);
-        }
-        if (config.analog1Sensor != currentConfig.analog1Sensor && An1 != null && An1.get("id") != null) {
-            mHayStack.writeDefaultValById(An1.get("id").toString(), (double) config.analog1Sensor);
-        }
-        if (config.analog2Sensor != currentConfig.analog2Sensor && An2 != null && An2.get("id") != null) {
-            mHayStack.writeDefaultValById(An2.get("id").toString(), (double) config.analog2Sensor);
-        }
+        device.addPointsToDb();
     }
 
 
@@ -367,7 +424,7 @@ public class HyperStatSenseEquip {
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
-        String equipDis = siteDis + "-HSSENSE-" + mNodeAddr;
+        String equipDis = siteDis + "-SENSE-" + mNodeAddr;
         String tag = null;
         Bundle bundle = new Bundle();
         if (config.isAnalog1Enable) {
@@ -381,7 +438,7 @@ public class HyperStatSenseEquip {
             bundle = getThermistorBundle(config.th1Sensor);
         } else if (config.isTh2Enable) {
             tag = "thermister2";
-            bundle = getThermistorBundle(config.th1Sensor);
+            bundle = getThermistorBundle(config.th2Sensor);
         }
 
         String shortDis = bundle.getString("shortDis");

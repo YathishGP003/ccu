@@ -1317,7 +1317,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     if (updatedEquip.getProfile().contains("SENSE")) {
                         HashMap sensePoints = ScheduleProcessJob.getHyperStatSenseEquipPoints(updatedEquip.getGroup());
                         // SeekArc.setCurrentTemp(Float.parseFloat(sensePoints.get("TemperatureOffset").toString()));
-                        seekArc.setCurrentTemp(Float.parseFloat(sensePoints.get("TemperatureOffset").toString()));
+                       // seekArc.setCurrentTemp(Float.parseFloat(sensePoints.get("TemperatureOffset").toString()));
 
                         loadSENSEPointsUI(sensePoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
                     }
@@ -3293,7 +3293,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
         if (sensePoints.get("isTh1Enable") == "true") {
             TextView textViewth1 = new TextView(getContext());
-            ;
             textViewth1.setTextSize(24);
             textViewth1.setPadding(10, 0, 0, 10);
             textViewth1.setText(sensePoints.get("Thermistor1").toString() + " : " + (sensePoints.get("Th1Val").toString()) + " " + (sensePoints.get("Unit3").toString()));
@@ -3301,7 +3300,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
         if (sensePoints.get("isTh2Enable") == "true") {
             TextView textViewth2 = new TextView(getContext());
-            textViewth2.setTextSize(24);
             textViewth2.setTextSize(24);
             textViewth2.setPadding(10, 0, 0, 10);
             textViewth2.setText(sensePoints.get("Thermistor2").toString() + " : " + (sensePoints.get("Th2Val").toString()) + " " + (sensePoints.get("Unit4").toString()));

@@ -104,6 +104,7 @@ public class LSerial
         {
             byte[] data = event.getBytes();
             MessageType messageType = MessageType.values()[(event.getBytes()[0] & 0xff)];
+            
             if (messageType == MessageType.CM_REGULAR_UPDATE)
             {
                 Pulse.regularCMUpdate(fromBytes(data, CmToCcuOverUsbCmRegularUpdateMessage_t.class));
@@ -146,9 +147,9 @@ public class LSerial
                 Pulse.smartDevicesRebootMessage(fromBytes(data, SnRebootIndicationMessage_t.class));
 
             } else if (isHyperStatMessage(messageType) ) {
-                HyperStatMsgReceiver.processMessage(data, messageType, CCUHsApi.getInstance());
+                HyperStatMsgReceiver.processMessage(data, CCUHsApi.getInstance());
             }
-
+            
             // Pass event to external handlers
             Intent eventIntent = new Intent(Globals.IntentActions.LSERIAL_MESSAGE);
             eventIntent.putExtra("eventType", messageType);

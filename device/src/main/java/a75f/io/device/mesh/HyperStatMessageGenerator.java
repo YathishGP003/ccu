@@ -36,7 +36,6 @@ public class HyperStatMessageGenerator {
     public static HyperStatCcuDatabaseSeedMessage_t getSeedMessage(String zone, int address, String equipRef, String profile) {
         HyperStatCcuDatabaseSeedMessage_t seed = HyperStatCcuDatabaseSeedMessage_t
                                                .newBuilder()
-                                               .setAddress(7000)
                                                .setEncryptionKey(ByteString.copyFrom(L.getEncryptionKey()))
                                                .setSerializedSettingsData(getSettingsMessage(zone, address, equipRef).toByteString())
                                                .setSerializedControlsData(getControlMessage(address, equipRef).toByteString())

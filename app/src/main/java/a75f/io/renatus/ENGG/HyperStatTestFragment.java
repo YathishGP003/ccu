@@ -269,7 +269,6 @@ public class HyperStatTestFragment extends BaseDialogFragment
 	public void sendSeed() {
 		
 		HyperStatCcuDatabaseSeedMessage_t seed = HyperStatCcuDatabaseSeedMessage_t.newBuilder()
-		                                                                        .setAddress(getChannelAddress())
                                                                                 .setEncryptionKey(
                                                                                     ByteString.copyFrom(
                                                                                     L.getEncryptionKey()))
@@ -277,22 +276,16 @@ public class HyperStatTestFragment extends BaseDialogFragment
                                                                                 .setSerializedControlsData(getControlMessage().toByteString())
                                                                                 .build();
 		
+		CcuLog.i(L.TAG_CCU_SERIAL, "Send Test message " + seed.toString());
 		HyperStatMessageSender.writeSeedMessage(seed, getChannelAddress(), true);
 	}
 
 	@OnClick(R.id.sendSettings)
 	public void sendSettings() {
 		
-		HyperStat.HyperStatCcuToCmSerializedMessage_t message = HyperStat.HyperStatCcuToCmSerializedMessage_t
-			                                                        .newBuilder()
-			                                                        .setAddress(getChannelAddress())
-			                                                        .setProtocolMessageType(
-				                                                        MessageType.HYPERSTAT_SETTINGS_MESSAGE.ordinal())
-			                                                        .setSerializedMessageData(getSettingMessage().toByteString())
-			                                                        .build();
-		
-		HyperStatMessageSender.writeSerializedMessage(message, getChannelAddress(), MessageType.HYPERSTAT_SETTINGS_MESSAGE, false);
-		CcuLog.i(L.TAG_CCU_SERIAL, message.toString());
+		CcuLog.i(L.TAG_CCU_SERIAL, "Send Test message " + getSettingMessage().toString());
+		HyperStatMessageSender.writeSettingMessage(getSettingMessage(), getChannelAddress(), MessageType.HYPERSTAT_SETTINGS_MESSAGE,
+		                                           false);
 	}
 	
 	@OnClick(R.id.sendFota)
@@ -303,15 +296,9 @@ public class HyperStatTestFragment extends BaseDialogFragment
 	@OnClick(R.id.sendControl)
 	public void sendControl() {
 		
-		HyperStat.HyperStatCcuToCmSerializedMessage_t message = HyperStat.HyperStatCcuToCmSerializedMessage_t
-			                                                        .newBuilder()
-			                                                        .setAddress(getChannelAddress())
-			                                                        .setProtocolMessageType(MessageType.HYPERSTAT_CONTROLS_MESSAGE.ordinal())
-			                                                        .setSerializedMessageData(getControlMessage().toByteString())
-			                                                        .build();
-		
-		HyperStatMessageSender.writeSerializedMessage(message, getChannelAddress(), MessageType.HYPERSTAT_CONTROLS_MESSAGE, false);
-		CcuLog.i(L.TAG_CCU_SERIAL, message.toString());
+		CcuLog.i(L.TAG_CCU_SERIAL, "Send Test message " + getControlMessage().toString());
+		HyperStatMessageSender.writeControlMessage(getControlMessage(), getChannelAddress(), MessageType.HYPERSTAT_CONTROLS_MESSAGE,
+		                                           false);
 	}
 	
 	

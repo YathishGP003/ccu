@@ -330,12 +330,16 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     private void setUpsModbusProfile() {
         String equipType = equipmentDevice.getEquipType();
         Log.i("equipType", "setUpsModbusProfile: "+equipType);
-        ModbusEquipTypes curEquipTypeSelected;
-        try {
-             curEquipTypeSelected = ModbusEquipTypes.valueOf(equipType);
-        }catch (Exception e){
-            curEquipTypeSelected = ModbusEquipTypes.MODBUS_DEFAULT;
-        }
+        ModbusEquipTypes curEquipTypeSelected=ModbusEquipTypes.getEnum(equipType);
+
+        /*
+                try {
+                    curEquipTypeSelected = ModbusEquipTypes.getEnum(equipType);
+                }catch (Exception e){
+                    curEquipTypeSelected = ModbusEquipTypes.MODBUS_DEFAULT;
+                }
+
+        */
 
         String equipRef = null;
         curSelectedSlaveId = (short) (spAddress.getSelectedItemPosition() + 1);

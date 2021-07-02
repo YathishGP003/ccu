@@ -97,7 +97,7 @@ public class HyperStatSenseEquip {
 
 
         Point isAnalog1enaled = new Point.Builder()
-                .setDisplayName(equipDis + "-isAnalog1")//update the display name
+                .setDisplayName(equipDis + "-isAnalog1enaled")//update the display name
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -112,7 +112,7 @@ public class HyperStatSenseEquip {
         mHayStack.writeDefaultValById(isAn1ID, config.isAnalog1Enable ? 1.0 : 0);
 
         Point isAn2 = new Point.Builder()
-                .setDisplayName(equipDis + "-isAnalog2")
+                .setDisplayName(equipDis + "-isAnalog2enabled")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -127,7 +127,7 @@ public class HyperStatSenseEquip {
         mHayStack.writeDefaultValById(isAn2ID, config.isAnalog2Enable ? 1.0 : 0.0);
 
         Point isTh1 = new Point.Builder()
-                .setDisplayName(equipDis + "-isThermister1")
+                .setDisplayName(equipDis + "-isThermister1enabled")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -142,7 +142,7 @@ public class HyperStatSenseEquip {
         mHayStack.writeDefaultValById(isTh1ID, config.isTh1Enable ? 1.0 : 0.0);
 
         Point isTh2 = new Point.Builder()
-                .setDisplayName(equipDis + "-isThermister2")
+                .setDisplayName(equipDis + "-isThermister2enabled")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -183,7 +183,7 @@ public class HyperStatSenseEquip {
                 .setTz(tz)
                 .build();
         String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
-
+        mHayStack.writeDefaultValById(ctID, 0.0);
 
         Point analog1InputSensor = new Point.Builder()
                 .setDisplayName(equipDis + "-analog1InputSensor")
@@ -302,6 +302,18 @@ public class HyperStatSenseEquip {
         HashMap An1Val = mHayStack.read("point and logical and analog1 and equipRef == \"" + mEquipRef + "\"");
         HashMap An2Val = mHayStack.read("point and logical and analog2 and equipRef == \"" + mEquipRef + "\"");
 
+
+        Log.d(LOG_TAG, "In update " + "TemperatureOffset = " + String.valueOf(config.temperatureOffset) + " /n" +
+                "isTh1Enable = " + String.valueOf(config.isTh1Enable) + " \n" +
+                "isTh2Enable = " + String.valueOf(config.isTh2Enable) + " \n" +
+                "isAnalog1Enable = " + String.valueOf(config.isAnalog1Enable) + " \n" +
+                "isAnalog2Enable = " + String.valueOf(config.isAnalog2Enable) + " \n" +
+                "th1Sensor = " + String.valueOf(config.th1Sensor) + " \n" +
+                "th2Sensor = " + String.valueOf(config.th2Sensor) + " \n" +
+                "analog1Sensor = " + String.valueOf(config.analog1Sensor) + " \n" +
+                "analog2Sensor = " + String.valueOf(config.analog2Sensor));
+
+
         HyperStatSenseConfiguration currentConfig = getHyperStatSenseConfig();
         HyperStatDevice device = new HyperStatDevice(node);
 
@@ -322,7 +334,9 @@ public class HyperStatSenseEquip {
                 device.th1In.setPointRef(id);
                 device.th1In.setEnabled(true);
                 device.th1In.setType(String.valueOf(config.th1Sensor));
+                device.addSensor(Port.TH1_IN, id);
                 DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.TH1_IN.name(), id);
+                DeviceUtil.setPointEnabled(mNodeAddr,Port.TH1_IN.name(),true);
             }
         }else{
             Log.d(LOG_TAG, "thermister1 toggle no change : " + config.isTh1Enable );
@@ -344,6 +358,7 @@ public class HyperStatSenseEquip {
                 device.th2In.setPointRef(id);
                 device.th2In.setEnabled(true);
                 device.th2In.setType(String.valueOf(config.th2Sensor));
+                device.addSensor(Port.TH2_IN, id);
                 DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.TH2_IN.name(), id);
             }
         }else{
@@ -366,6 +381,7 @@ public class HyperStatSenseEquip {
                 device.analog1In.setPointRef(id);
                 device.analog1In.setEnabled(true);
                 device.analog1In.setType(String.valueOf(config.analog1Sensor));
+                device.addSensor(Port.ANALOG_IN_ONE, id);
                 DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.ANALOG_IN_ONE.name(), id);
             }
         }else {
@@ -389,6 +405,7 @@ public class HyperStatSenseEquip {
                 device.analog2In.setPointRef(id);
                 device.analog2In.setEnabled(true);
                 device.analog2In.setType(String.valueOf(config.analog2Sensor));
+                device.addSensor(Port.ANALOG_IN_TWO, id);
                 DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.ANALOG_IN_TWO.name(), id);
             }
         } else {
@@ -423,7 +440,7 @@ public class HyperStatSenseEquip {
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
-        String equipDis = siteDis + "-SENSE-" + mNodeAddr;
+        String equipDis = siteDis + "-SENSE-" + mNodeAddr +"-";
         String tag = null;
         Bundle bundle = new Bundle();
         if (config.isAnalog1Enable) {
@@ -447,7 +464,7 @@ public class HyperStatSenseEquip {
         String[] markers = bundle.getStringArray("markers");
 
         Point.Builder sensorTag = new Point.Builder()
-                .setDisplayName(equipDis + sensorName)
+                .setDisplayName(equipDis + shortDis)
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)

@@ -1008,7 +1008,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
         Log.i("CCU_UI", "position: "+position+" tempStartTime: " + tempStartTime + " tempEndTime: " + tempEndTime + " startTimeMM: " + startTimeMM + " endTimeMM " + endTimeMM);
 
-
+        if(getContext()==null) return;
         AppCompatTextView textViewTemp = new AppCompatTextView(getContext());
         textViewTemp.setGravity(Gravity.CENTER_HORIZONTAL);
         textViewTemp.setText(Html.fromHtml(strminTemp + " " + strmaxTemp));

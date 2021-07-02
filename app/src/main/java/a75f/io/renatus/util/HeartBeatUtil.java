@@ -2,6 +2,9 @@ package a75f.io.renatus.util;
 
 import android.view.View;
 import android.widget.TextView;
+
+import org.apache.commons.lang3.StringUtils;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,7 +24,7 @@ public class HeartBeatUtil {
 
     }
 
-    public static void moduleSatus(TextView moduleStatus, String nodeAddress){
+    public static void moduleStatus(TextView moduleStatus, String nodeAddress){
         if (isModuleAlive(nodeAddress)) {
             moduleStatus.setBackgroundResource(R.drawable.module_alive);
         } else {
@@ -30,25 +33,38 @@ public class HeartBeatUtil {
     }
 
     public static boolean isModuleAlive(String nodeAddress){
-        Date updatedTime = CCUUtils.getLastReceivedTime(nodeAddress);
+        Date updatedTime = null;
+        if(StringUtils.length(nodeAddress)<4){
+            updatedTime = CCUUtils.getLastReceivedTimeForModBus(nodeAddress);
+        }
+        else{
+            updatedTime = CCUUtils.getLastReceivedTimeForRssi(nodeAddress);
+        }
         if(updatedTime == null){
             return false;
         }
         return TimeUnit.MILLISECONDS.toMinutes(new Date().getTime() - updatedTime.getTime()) <= 15;
     }
+
     public static String getLastUpdatedTime(String nodeAddress){
-        Date updatedTime = a75f.io.logic.bo.util.CCUUtils.getLastReceivedTime(nodeAddress);
+        Date updatedTime = null;
+        if(StringUtils.length(nodeAddress)<4){
+            updatedTime = CCUUtils.getLastReceivedTimeForModBus(nodeAddress);
+        }
+        else{
+            updatedTime = CCUUtils.getLastReceivedTimeForRssi(nodeAddress);
+        }
         if(updatedTime == null){
             return "--";
         }
         StringBuffer message = new StringBuffer();
         Date currTime = new Date();
-        if(currTime.getDate() == updatedTime.getDate()){
+       /* if(currTime.getDate() == updatedTime.getDate()){
             return getTimeDifference(currTime, updatedTime, message);
 
-        } else{
+        } else{*/
             return getLastUpdatedTime(message, updatedTime);
-        }
+        //}
     }
 
     private static String getTimeDifference(Date currTime, Date updatedTime, StringBuffer message){

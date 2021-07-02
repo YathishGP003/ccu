@@ -1742,7 +1742,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                 String nodeAddress =  String.valueOf(modbusDevices.get(i).getSlaveId());
                                 tvEquipmentType.setText(modbusDevices.get(i).getEquipType()+ "("+nodeAddress+")");
                                 TextView textViewModule = zoneDetails.findViewById(R.id.module_status);
-                                HeartBeatUtil.moduleSatus(textViewModule, nodeAddress);
+                                HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
                                 TextView textViewUpdatedTime = zoneDetails.findViewById(R.id.last_updated_status);
                                 textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
                                 GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(),2);
@@ -1777,7 +1777,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewModule = viewTitle.findViewById(R.id.module_status);
-        HeartBeatUtil.moduleSatus(textViewModule, nodeAddress);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
 
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
         TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
@@ -1820,7 +1820,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
         TextView textViewModule = viewTitle.findViewById(R.id.module_status);
-        HeartBeatUtil.moduleSatus(textViewModule, nodeAddress);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
         TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
@@ -1849,7 +1849,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
         TextView textViewModule = viewTitle.findViewById(R.id.module_status);
-        HeartBeatUtil.moduleSatus(textViewModule, nodeAddress);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
         TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         textViewLabel1.setVisibility(View.GONE);
@@ -1878,7 +1878,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
         TextView textViewModule = viewTitle.findViewById(R.id.module_status);
-        HeartBeatUtil.moduleSatus(textViewModule, nodeAddress);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
         TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
@@ -1911,7 +1911,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
         TextView textViewModule = viewTitle.findViewById(R.id.module_status);
-        HeartBeatUtil.moduleSatus(textViewModule, nodeAddress);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
         TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
@@ -1968,7 +1968,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
         TextView textViewModule = viewTitle.findViewById(R.id.module_status);
-        HeartBeatUtil.moduleSatus(textViewModule, nodeAddress);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
         TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
@@ -2193,7 +2193,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
         TextView textViewModule = viewTitle.findViewById(R.id.module_status);
-        HeartBeatUtil.moduleSatus(textViewModule, nodeAddress);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
         TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
@@ -2436,7 +2436,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
         TextView textViewModule = viewTitle.findViewById(R.id.module_status);
-        HeartBeatUtil.moduleSatus(textViewModule, nodeAddress);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
         TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
@@ -2591,7 +2591,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
         TextView textViewModule = viewTitle.findViewById(R.id.module_status);
-        HeartBeatUtil.moduleSatus(textViewModule, nodeAddress);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
         TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
@@ -2805,7 +2805,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
         TextView textViewModule = viewTitle.findViewById(R.id.module_status);
-        HeartBeatUtil.moduleSatus(textViewModule, nodeAddress);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
         TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         TextView labelInputAir = viewPointRow1.findViewById(R.id.text_point1label);
@@ -3191,7 +3191,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         return CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \""+equipId+"\"");
     }
     HashMap<String, View> zoneStatus = new HashMap<>();
-    public void refreshZoneHeartBeat(){
+    private void refreshZoneHeartBeat(){
+        if(floorList == null || mFloorListAdapter == null){
+            return;
+        }
         ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("room and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
         for (Map zone : zones) {
             String zoneName = zone.get("dis").toString();

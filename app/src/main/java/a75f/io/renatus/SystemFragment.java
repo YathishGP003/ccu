@@ -80,15 +80,15 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	TextView energyMeterModelDetails;
 	RecyclerView energyMeterParams;
-	TextView module_status_emr;
-	TextView last_updated_emr;
+	private TextView moduleStatusEmr;
+	private TextView lastUpdatedEmr;
 
 	RecyclerView btuMeterParams;
 	TextView btuMeterModelDetails;
-	TextView module_status_btu;
-	TextView last_updated_btu;
+	private TextView moduleStatusBtu;
+	private TextView lastUpdatedBtu;
 
-	TextView updatedTimeOao;
+	private TextView updatedTimeOao;
 
 	
 	int spinnerInit = 0;
@@ -192,7 +192,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		ccuName.setText(ccu.get("dis").toString());
 		profileTitle = view.findViewById(R.id.profileTitle);
 		oaoArc = view.findViewById(R.id.oaoArc);
-
 		purgeLayout = view.findViewById(R.id.purgelayout);
 		systemModePicker = view.findViewById(R.id.systemModePicker);
 		mainLayout = view.findViewById(R.id.main_layout);
@@ -295,8 +294,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 		energyMeterParams = view.findViewById(R.id.energyMeterParams);
 		energyMeterModelDetails = view.findViewById(R.id.energyMeterModelDetails);
-		module_status_emr = view.findViewById(R.id.module_status_emr);
-		last_updated_emr = view.findViewById(R.id.last_updated_emr);
+		moduleStatusEmr = view.findViewById(R.id.module_status_emr);
+		lastUpdatedEmr = view.findViewById(R.id.last_updated_emr);
 		configEnergyMeterDetails(view);
 
 		/**
@@ -304,8 +303,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		 */
 		btuMeterParams = view.findViewById(R.id.btuMeterParams);
 		btuMeterModelDetails = view.findViewById(R.id.btuMeterModelDetails);
-		module_status_btu = view.findViewById(R.id.module_status_btu);
-		last_updated_btu = view.findViewById(R.id.last_updated_btu);
+		moduleStatusBtu = view.findViewById(R.id.module_status_btu);
+		lastUpdatedBtu = view.findViewById(R.id.last_updated_btu);
 		configBTUMeterDetails(view);
 
 
@@ -617,8 +616,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				return;
 			energyMeterParams.setVisibility(View.VISIBLE);
 			energyMeterModelDetails.setVisibility(View.VISIBLE);
-			module_status_emr.setVisibility(View.VISIBLE);
-			last_updated_emr.setVisibility(View.VISIBLE);
+			moduleStatusEmr.setVisibility(View.VISIBLE);
+			lastUpdatedEmr.setVisibility(View.VISIBLE);
 
 			/**
 			 * Assuming there is always only One Energy meter
@@ -646,7 +645,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			TextView emrUpdatedTime = view.findViewById(R.id.last_updated_statusEM);
 			emrUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
 			TextView textViewModule = view.findViewById(R.id.module_status_emr);
-			HeartBeatUtil.moduleSatus(textViewModule, nodeAddress);
+			HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
 		}
 
 	}
@@ -669,8 +668,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				return;
 			btuMeterParams.setVisibility(View.VISIBLE);
 			btuMeterModelDetails.setVisibility(View.VISIBLE);
-			module_status_btu.setVisibility(View.VISIBLE);
-			last_updated_btu.setVisibility(View.VISIBLE);
+			moduleStatusBtu.setVisibility(View.VISIBLE);
+			lastUpdatedBtu.setVisibility(View.VISIBLE);
 
 			/**
 			 * Assuming there is always only One BTU meter
@@ -698,7 +697,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			TextView btuUpdatedTime = view.findViewById(R.id.last_updated_statusBTU);
 			btuUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
 			TextView textViewModule = view.findViewById(R.id.module_status_btu);
-			HeartBeatUtil.moduleSatus(textViewModule, nodeAddress);
+			HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
 		}
 
 	}

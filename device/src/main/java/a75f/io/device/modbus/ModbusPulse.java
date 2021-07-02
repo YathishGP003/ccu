@@ -8,10 +8,13 @@ import com.x75f.modbus4j.serial.rtu.RtuMessageResponse;
 import com.x75f.modbus4j.sero.util.queue.ByteQueue;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
+import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.mesh.DLog;
 import a75f.io.logic.L;
@@ -84,11 +87,23 @@ public class ModbusPulse {
         HashMap device = hayStack.read("device and addr == \""+slaveid+"\"");
         if (device != null && device.size() > 0) {
             updateModbusRespone(device.get("id").toString(), response, registerType);
+            updateHeartBeatPoint(slaveid, hayStack);
+        }
+    }
+
+    private static void updateHeartBeatPoint(int slaveId, CCUHsApi hayStack){
+        HashMap equip = hayStack.read("equip and modbus and group == \"" + slaveId + "\"");
+        HashMap heartBeatPoint = hayStack.read("point and heartbeat and equipRef == \""+equip.get("id")+ "\"");
+        if(heartBeatPoint.size() == 0){
+            return;
+        }
+        HisItem heartBeatHisItem = hayStack.curRead(heartBeatPoint.get("id").toString());
+        if((heartBeatHisItem == null) || ((new Date().getTime() - heartBeatHisItem.getDate().getTime()) > 60000)){
+                hayStack.writeHisValueByIdWithoutCOV(heartBeatPoint.get("id").toString(),  1.0);
         }
     }
 
     private static void updateModbusRespone(String deviceRef, RtuMessageResponse response,byte registerType){
-
         CCUHsApi hayStack = CCUHsApi.getInstance();
         Register readRegister = LModbus.getModbusCommLock().getRegister();
 
@@ -98,11 +113,6 @@ public class ModbusPulse {
                                          " and parameterId == \""+readRegister.getParameters().get(0).getParameterId()+ "\""+
                                          " and deviceRef == \"" + deviceRef + "\"");
 
-        switch (Port.valueOf(phyPoint.get("port").toString())) {
-            case RSSI:
-                hayStack.writeHisValueByIdWithoutCOV(phyPoint.get("id").toString(),  1.0);
-                break;
-        }
         if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
             Log.d(L.TAG_CCU_MODBUS, "Physical point does not exist for register "
                                             +readRegister.getRegisterAddress() +" and device "+deviceRef);

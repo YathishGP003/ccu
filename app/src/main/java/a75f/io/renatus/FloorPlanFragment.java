@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
+import a75f.io.api.haystack.Device;
+import a75f.io.api.haystack.Point;
 import a75f.io.renatus.util.NetworkUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import androidx.annotation.Nullable;
@@ -50,7 +52,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -639,11 +640,11 @@ public class FloorPlanFragment extends Fragment {
         pairModuleBtn.setVisibility(View.INVISIBLE);
         addModuleEdit.setVisibility(View.INVISIBLE);
     }
-    
+
     private void disableZoneModule() {
         addZonelt.setVisibility(View.INVISIBLE);
         addModulelt.setVisibility(View.INVISIBLE);
-        
+
         addRoomBtn.setVisibility(View.INVISIBLE);
         addRoomEdit.setVisibility(View.INVISIBLE);
         pairModuleBtn.setVisibility(View.INVISIBLE);
@@ -653,7 +654,7 @@ public class FloorPlanFragment extends Fragment {
 
     @OnClick(R.id.addFloorBtn)
     public void handleFloorBtn() {
-        
+
         if (!CCUHsApi.getInstance().isPrimaryCcu() && !NetworkUtil.isNetworkConnected(getActivity())) {
             Toast.makeText(getActivity(), "Floor cannot be added when CCU is offline. Please connect to network.",
                            Toast.LENGTH_LONG)
@@ -947,9 +948,23 @@ public class FloorPlanFragment extends Fragment {
                             for (Zone zone : HSUtil.getZones(floorToRename.getId())) {
                                 zone.setFloorRef(CCUHsApi.getInstance().getLUID(floor.getId()));
                                 CCUHsApi.getInstance().updateZone(zone, zone.getId());
-                                for (Equip q : HSUtil.getEquips(zone.getId())) {
-                                    q.setFloorRef(floor.getId());
-                                    CCUHsApi.getInstance().updateEquip(q, q.getId());
+                                for (Equip equipDetails : HSUtil.getEquips(zone.getId())) {
+                                    equipDetails.setFloorRef(floor.getId());
+                                    CCUHsApi.getInstance().updateEquip(equipDetails, equipDetails.getId());
+                                    ArrayList<HashMap> ponitsList = CCUHsApi.getInstance().readAll("point and equipRef == \"" + equipDetails.getId()+"\"");
+                                    HashMap device = CCUHsApi.getInstance().read("device and equipRef == \"" + equipDetails.getId()+"\"");
+                                    if(device !=null ) {
+                                        Device deviceDetails = new Device.Builder().setHashMap(device).build();
+                                        deviceDetails.setFloorRef(floor.getId());
+                                        CCUHsApi.getInstance().updateDevice(deviceDetails,deviceDetails.getId());
+                                    }
+
+                                    for(HashMap pointDetailsMap : ponitsList) {
+                                        Point pointDetails = new Point.Builder().setHashMap(pointDetailsMap).build();
+                                        pointDetails.setFloorRef(floor.getId());
+                                        CCUHsApi.getInstance().updatePoint(pointDetails, pointDetails.getId());
+                                    }
+
                                 }
                             }
 
@@ -1236,7 +1251,7 @@ public class FloorPlanFragment extends Fragment {
     @OnClick(R.id.pairModuleBtn)
     public void startPairing() {
         addModulelt.setVisibility(View.GONE);
-        desableForMiliSeconds();
+        disableForMiliSeconds();
         if (mFloorListAdapter.getSelectedPostion() == -1) {
             short meshAddress = L.generateSmartNodeAddress();
 
@@ -1521,10 +1536,9 @@ public class FloorPlanFragment extends Fragment {
         }
     }
 
-    /**
-     * Disabling the Pair button for 2 seconds then enabling to avoid double click on pair module
-     */
-    public void desableForMiliSeconds(){
+
+    //Disabling the Pair button for 2 seconds thenenabling to avoid double click on pair module
+    public void disableForMiliSeconds(){
         new Thread(new Runnable() {
             @Override
             public void run() {

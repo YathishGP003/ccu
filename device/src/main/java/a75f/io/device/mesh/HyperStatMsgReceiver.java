@@ -13,7 +13,6 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.device.HyperStat;
-import a75f.io.device.HyperStat.HyperStatCmToCcuSerializedMessage_t;
 import a75f.io.device.HyperStat.HyperStatLocalControlsOverrideMessage_t;
 import a75f.io.device.HyperStat.HyperStatRegularUpdateMessage_t;
 import a75f.io.device.serial.MessageType;
@@ -24,6 +23,8 @@ import a75f.io.logic.bo.building.sensors.SensorType;
 import a75f.io.logic.bo.haystack.device.HyperStatDevice;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+
+import static a75f.io.device.mesh.Pulse.getHumidityConversion;
 
 public class HyperStatMsgReceiver {
     
@@ -38,8 +39,8 @@ public class HyperStatMsgReceiver {
             * Message types - 4 bytes
             *
             * Actual Serialized data starts at index 17.
-            * */
-            CcuLog.e(L.TAG_CCU_SERIAL, "processMessage processMessage :"+ Arrays.toString(data));
+            */
+            CcuLog.e(L.TAG_CCU_DEVICE, "processMessage processMessage :"+ Arrays.toString(data));
     
             byte[] addrArray = Arrays.copyOfRange(data, 1, 5);
             int address = ByteBuffer.wrap(addrArray)
@@ -60,17 +61,17 @@ public class HyperStatMsgReceiver {
             }
             
         } catch (InvalidProtocolBufferException e) {
-            CcuLog.e(L.TAG_CCU_SERIAL, "Cant parse protobuf data: "+e.getMessage());
+            CcuLog.e(L.TAG_CCU_DEVICE, "Cant parse protobuf data: "+e.getMessage());
         }
     }
     
     private static void handleRegularUpdate(HyperStatRegularUpdateMessage_t regularUpdateMessage, int nodeAddress,
                                      CCUHsApi hayStack) {
         if (DLog.isLoggingEnabled()) {
-            CcuLog.i(L.TAG_CCU_SERIAL, "handleRegularUpdate: "+regularUpdateMessage.toString());
+            CcuLog.i(L.TAG_CCU_DEVICE, "handleRegularUpdate: "+regularUpdateMessage.toString());
         }
         HashMap device = hayStack.read("device and addr == \"" + nodeAddress + "\"");
-        DeviceUtil.getRawPointsWithRefForDevice(device, hayStack)
+        DeviceHSUtil.getEnabledSensorPointsWithRefForDevice(device, hayStack)
                     .forEach( point -> writePortInputsToHaystackDatabase( point, regularUpdateMessage, hayStack));
         
         if (regularUpdateMessage.getSensorReadingsList().size() > 0) {
@@ -81,7 +82,7 @@ public class HyperStatMsgReceiver {
     private static void handleOverrideMessage(HyperStatLocalControlsOverrideMessage_t message, int nodeAddress,
                                               CCUHsApi hayStack) {
         if (DLog.isLoggingEnabled()) {
-            CcuLog.i(L.TAG_CCU_SERIAL, "handleOverrideMessage: "+message.toByteString());
+            CcuLog.i(L.TAG_CCU_DEVICE, "handleOverrideMessage: "+message.toByteString());
         }
     
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+nodeAddress+"\"");
@@ -90,30 +91,36 @@ public class HyperStatMsgReceiver {
         writeDesiredTemp(message, hsEquip, hayStack);
         //TODO
         //Update fanMode and conditioning mode once profile is ready.
-        //Send Ack - TODO message does not exist per proto definition.
+        //Send Ack
     }
     
     private static void writePortInputsToHaystackDatabase(RawPoint rawPoint,
                                                      HyperStatRegularUpdateMessage_t regularUpdateMessage,
                                                      CCUHsApi hayStack) {
         
-        Point point = DeviceUtil.getLogicalPointForRawPoint(rawPoint, hayStack);
-        CcuLog.i(L.TAG_CCU_SERIAL, "writePortInputsToHaystackDatabase: logical point for "+rawPoint.getDisplayName()+
-                                   " "+point);
+        Point point = DeviceHSUtil.getLogicalPointForRawPoint(rawPoint, hayStack);
+    
+        if (DLog.isLoggingEnabled()) {
+            CcuLog.i(L.TAG_CCU_DEVICE,
+                     "writePortInputsToHaystackDatabase: logical point for " + rawPoint.getDisplayName() + " " + point);
+        }
         if (point == null) {
             return;
         }
         if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_RT) {
             writeRoomTemp(rawPoint, point, regularUpdateMessage, hayStack);
-        } else if (Port.valueOf(rawPoint.getPort()) == Port.TH1_IN ||
-                                        Port.valueOf(rawPoint.getPort()) == Port.TH2_IN) {
-            writeThermistorVal(rawPoint, point, regularUpdateMessage, hayStack);
+        } else if (Port.valueOf(rawPoint.getPort()) == Port.TH1_IN) {
+            writeThermistorVal(rawPoint, point, hayStack,
+                               regularUpdateMessage.getExternalThermistorInput1());
+        } else if (Port.valueOf(rawPoint.getPort()) == Port.TH2_IN) {
+            writeThermistorVal(rawPoint, point, hayStack,
+                               regularUpdateMessage.getExternalThermistorInput2());
         } else if (Port.valueOf(rawPoint.getPort()) == Port.ANALOG_IN_ONE) {
-            writeAnalogInputVal(rawPoint, point, regularUpdateMessage,
-                                hayStack, regularUpdateMessage.getExternalAnalogVoltageInput1());
+            writeAnalogInputVal(rawPoint, point, hayStack,
+                                regularUpdateMessage.getExternalAnalogVoltageInput1());
         } else if (Port.valueOf(rawPoint.getPort()) == Port.ANALOG_IN_TWO) {
-            writeAnalogInputVal(rawPoint, point, regularUpdateMessage,
-                                hayStack, regularUpdateMessage.getExternalAnalogVoltageInput2());
+            writeAnalogInputVal(rawPoint, point, hayStack,
+                                regularUpdateMessage.getExternalAnalogVoltageInput2());
         } else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_RH) {
             writeHumidityVal(rawPoint, point, regularUpdateMessage, hayStack);
         }
@@ -128,26 +135,21 @@ public class HyperStatMsgReceiver {
                                  Pulse.getRoomTempConversion((double) regularUpdateMessage.getRoomTemperature()));
     }
     
-    private static void writeThermistorVal(RawPoint rawPoint, Point point,
-                                    HyperStatRegularUpdateMessage_t regularUpdateMessage, CCUHsApi hayStack) {
-        double thInputVal = ThermistorUtil.getThermistorValueToTemp(
-                                regularUpdateMessage.getExternalThermistorInput1() * 10);
-        hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getExternalThermistorInput1());
+    private static void writeThermistorVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, double val) {
+        double thInputVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
+        hayStack.writeHisValById(rawPoint.getId(), val);
         hayStack.writeHisValById(point.getId(), CCUUtils.roundToOneDecimal(thInputVal));
     }
     
-    private static void writeAnalogInputVal(RawPoint rawPoint, Point point,
-                                     HyperStatRegularUpdateMessage_t regularUpdateMessage, CCUHsApi hayStack,
-                                     double val) {
-        double rawAnalogInput = regularUpdateMessage.getExternalAnalogVoltageInput1();
-        hayStack.writeHisValById(rawPoint.getId(), rawAnalogInput);
-        hayStack.writeHisValById(point.getId(), AnalogUtil.getAnalogConversion(rawPoint, rawAnalogInput));
+    private static void writeAnalogInputVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, double val) {
+        hayStack.writeHisValById(rawPoint.getId(), val);
+        hayStack.writeHisValById(point.getId(), AnalogUtil.getAnalogConversion(rawPoint, val));
     }
     
     private static void writeHumidityVal(RawPoint rawPoint, Point point,
                                   HyperStatRegularUpdateMessage_t regularUpdateMessage, CCUHsApi hayStack) {
         hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getHumidity());
-        hayStack.writeHisValById(point.getId(), (double) regularUpdateMessage.getHumidity());
+        hayStack.writeHisValById(point.getId(), getHumidityConversion((double) regularUpdateMessage.getHumidity()));
     }
     
     private static void writeSensorInputsToHaystackDatabase(List<HyperStat.SensorReadingPb_t> sensorReadings, int addr) {

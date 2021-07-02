@@ -439,7 +439,7 @@ public class LSerial
         }
     }
     
-    public void sendHyperStatSeedMessage(Short addr, String profile, String roomRef, String floorRef) {
+    public void sendHyperStatSeedMessage(Short addr, String roomRef, String floorRef, String profile) {
         if (isConnected()) {
             CcuLog.d(L.TAG_CCU_DEVICE,
                      "=================NOW SEEDING NEW PROFILE=====================" + addr + "," + roomRef);

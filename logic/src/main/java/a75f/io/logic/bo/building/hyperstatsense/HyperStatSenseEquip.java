@@ -133,7 +133,7 @@ public class HyperStatSenseEquip {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("config").addMarker("hyperstat").addMarker("zone").addMarker("writable")
-                .addMarker("enabled").addMarker("thermister1").addMarker("sense")
+                .addMarker("enabled").addMarker("th1").addMarker("sense")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setEnums("false,true")
                 .setTz(tz)
@@ -148,7 +148,7 @@ public class HyperStatSenseEquip {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("config").addMarker("hyperstat").addMarker("zone").addMarker("writable")
-                .addMarker("enabled").addMarker("thermister2").addMarker("sense")
+                .addMarker("enabled").addMarker("th2").addMarker("sense")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setEnums("false,true")
                 .setTz(tz)
@@ -446,12 +446,14 @@ public class HyperStatSenseEquip {
         HSSConfig.th2Sensor = mHayStack.readDefaultVal("point and config and th2 and input and sensor and equipRef == \"" + mEquipRef + "\"").intValue();
         HSSConfig.isAnalog1Enable = mHayStack.readDefaultVal("point and config and analog1 and enabled  and equipRef == \"" + mEquipRef + "\"") > 0;
         HSSConfig.isAnalog2Enable = mHayStack.readDefaultVal("point and config and analog2 and enabled and equipRef == \"" + mEquipRef + "\"") > 0;
-        HSSConfig.isTh1Enable = mHayStack.readDefaultVal("point and config and thermister1  and enabled and equipRef == \"" + mEquipRef + "\"") > 0;
-        HSSConfig.isTh2Enable = mHayStack.readDefaultVal("point and config and thermister2 and enabled and equipRef == \"" + mEquipRef + "\"") > 0;
+        HSSConfig.isTh1Enable =
+            mHayStack.readDefaultVal("point and config and th1  and enabled and equipRef == \"" + mEquipRef + "\"") > 0;
+        HSSConfig.isTh2Enable =
+            mHayStack.readDefaultVal("point and config and th2 and enabled and equipRef == \"" + mEquipRef + "\"") > 0;
         return HSSConfig;
     }
 
-    private String createSensorPoint(String floorRef, String roomRef, String sensorName,
+    private String createSensorPoint(String floorRef, String roomRef, String tag,
                                      HyperStatSenseConfiguration config) {
 
         HashMap siteMap = mHayStack.read(Tags.SITE);
@@ -459,19 +461,14 @@ public class HyperStatSenseEquip {
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis + "-SENSE-" + mNodeAddr +"-";
-        String tag = null;
         Bundle bundle = new Bundle();
-        if (config.isAnalog1Enable) {
-            tag = "analog1";
+        if (tag.equals("analog1")) {
             bundle = getAnalogBundle(config.analog1Sensor);
-        } else if (config.isAnalog2Enable) {
-            tag = "analog2";
+        } else if (tag.equals("analog2")) {
             bundle = getAnalogBundle(config.analog2Sensor);
-        } else if (config.isTh1Enable) {
-            tag = "thermister1";
+        } else if (tag.equals("th1")) {
             bundle = getThermistorBundle(config.th1Sensor);
-        } else if (config.isTh2Enable) {
-            tag = "thermister2";
+        } else if (tag.equals("th2")) {
             bundle = getThermistorBundle(config.th2Sensor);
         }
 

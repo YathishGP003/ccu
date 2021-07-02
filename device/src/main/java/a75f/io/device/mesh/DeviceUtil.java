@@ -1,53 +1,41 @@
 package a75f.io.device.mesh;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Arrays;
 
-import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Point;
-import a75f.io.api.haystack.RawPoint;
-import a75f.io.api.haystack.Tags;
-import a75f.io.logger.CcuLog;
-import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.Port;
 
 public class DeviceUtil {
     
-    public static Point getLogicalPointForRawPoint(RawPoint rawPoint, CCUHsApi hayStack) {
-        HashMap logPoint = hayStack.readMapById(rawPoint.getPointRef());
-        if (logPoint.isEmpty()) {
-            CcuLog.d(L.TAG_CCU_DEVICE, "Logical mapping does not exist for " + rawPoint.getDisplayName());
-            return null;
+    public static boolean isAnalog(String port) {
+        return Arrays.stream(Port.values()).anyMatch(port::equals);
+    }
+    
+    public static short mapAnalogOut(String type, short val) {
+        val = (short)Math.min(val, 100);
+        val = (short)Math.max(val, 0);
+        switch (type) {
+            case "0-10v":
+                return val;
+            case "10-0v":
+                return (short) (100 - val);
+            case "2-10v":
+                return (short) (20 + scaleAnalog(val, 80));
+            case "10-2v":
+                return (short) (100 - scaleAnalog(val, 80));
         }
-        return new Point.Builder()
-                   .setHashMap(logPoint)
-                   .build();
+        return (short) 0;
     }
     
-    public static List<RawPoint> getRawPointsWithRefForDevice(HashMap device, CCUHsApi hayStack) {
-    
-        CcuLog.d(L.TAG_CCU_DEVICE," getRawPointsWithRefForDevice ");
-        ArrayList<HashMap> rawPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" +
-                                                        device.get("id") + "\"");
-    
-        CcuLog.d(L.TAG_CCU_DEVICE," getRawPointsWithRefForDevice rawPoints "+rawPoints.size());
-        return rawPoints.stream()
-                        .filter( p -> p.get("pointRef") != null)
-                        .map( p -> new RawPoint.Builder().setHashMap(p).build())
-                        .collect(Collectors.toList());
-        
+    public static short mapDigitalOut(String type, boolean val) {
+        if (type.equals("Relay N/O")) {
+            return (short) (val ? 1 : 0);
+        } else if (type.equals("Relay N/C")) {
+            return (short) (val ? 0 : 1);
+        }
+        return 0;
     }
     
-    public static List<RawPoint> getEnabledRawPointsWithRefForDevice(HashMap device, CCUHsApi hayStack) {
-        ArrayList<HashMap> rawPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" +
-                                                        device.get("id") + "\"");
-        
-        return rawPoints.stream()
-                        .filter( p -> p.get("pointRef") != null)
-                        .filter(p -> p.get("portEnabled").toString().equals("true"))
-                        .map( p -> new RawPoint.Builder().setHashMap(p).build())
-                        .collect(Collectors.toList());
-        
+    public static int scaleAnalog(short analog, int scale) {
+        return (int) ((float) scale * ((float) analog / 100.0f));
     }
 }

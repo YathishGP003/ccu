@@ -362,7 +362,7 @@ public class CCUHsApi
      */
     public ArrayList<HashMap> readAll(String query)
     {
-        CcuLog.d("CCU_HS", "Read Query: " + query);
+        //CcuLog.d("CCU_HS", "Read Query: " + query);
         ArrayList<HashMap> rowList = new ArrayList<>();
         try
         {
@@ -396,7 +396,7 @@ public class CCUHsApi
      */
     public HashMap read(String query)
     {
-        CcuLog.d("CCU_HS", "Read Query: " + query);
+        //CcuLog.d("CCU_HS", "Read Query: " + query);
         HashMap<Object, Object> map = new HashMap<>();
         try
         {
@@ -918,15 +918,12 @@ public class CCUHsApi
         HashMap entity = CCUHsApi.getInstance().read("id == " + id);
         if (entity.get("site") != null)
         {
-            ArrayList<HashMap> floors = readAll("floor");
-            for (HashMap floor : floors)
-            {
-                deleteEntityTree(floor.get("id").toString());
-            }
+            //Deleting site from a CCU should not remove shared entities like site , floor or building tuner.
             ArrayList<HashMap> equips = readAll("equip and siteRef == \"" + id + "\"");
             for (HashMap equip : equips)
             {
-                deleteEntityTree(equip.get("id").toString());
+                if (!equip.containsKey("tuner"))
+                    deleteEntityTree(equip.get("id").toString());
             }
             ArrayList<HashMap> devices = readAll("device and siteRef == \"" + id + "\"");
             for (HashMap device : devices)
@@ -936,9 +933,9 @@ public class CCUHsApi
             ArrayList<HashMap> schedules = readAll("schedule and siteRef == \"" + id + "\"");
             for (HashMap schedule : schedules)
             {
-                deleteEntity(schedule.get("id").toString());
+                if (!schedule.containsKey("building"))
+                    deleteEntity(schedule.get("id").toString());
             }
-            deleteEntity(id);
         }
         else if (entity.get("floor") != null)
         {

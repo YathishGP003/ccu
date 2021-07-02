@@ -1732,12 +1732,16 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         double th2Sensor = haystack.readDefaultVal("point and config and th2 and input and sensor and group == \"" + equipID + "\"").intValue();
         boolean isAnalog1Enable = haystack.readDefaultVal("point and config and analog1 and enabled and group == \"" + equipID + "\"") > 0;
         boolean isAnalog2Enable = haystack.readDefaultVal("point and config and analog2 and enabled and group == \"" + equipID + "\"") > 0;
-        boolean isTh1Enable = haystack.readDefaultVal("point and config and thermister1 and enabled and group == \"" + equipID + "\"") > 0;
-        boolean isTh2Enable = haystack.readDefaultVal("point and config and thermister2 and enabled and group == \"" + equipID + "\"") > 0;
+        boolean isTh1Enable =
+            haystack.readDefaultVal("point and config and th1 and enabled and group == \"" + equipID + "\"") > 0;
+        boolean isTh2Enable =
+            haystack.readDefaultVal("point and config and th2 and enabled and group == \"" + equipID + "\"") > 0;
         double an1Val = haystack.readHisValByQuery("point and logical and analog1 and group == \"" + equipID + "\"").intValue();
         double an2Val = haystack.readHisValByQuery("point and logical and analog2 and group == \"" + equipID + "\"").intValue();
-        double th1Val = haystack.readHisValByQuery("point and logical and thermister1 and group == \"" + equipID + "\"").intValue();
-        double th2Val = haystack.readHisValByQuery("point and logical and thermister2 and group == \"" + equipID + "\"").intValue();
+        double th1Val =
+            haystack.readHisValByQuery("point and logical and th1 and group == \"" + equipID + "\"").intValue();
+        double th2Val =
+            haystack.readHisValByQuery("point and logical and th2 and group == \"" + equipID + "\"").intValue();
         int size = 0;
         if (tempOffset  != 0) {
             sensePoints.put("TemperatureOffset",tempOffset);

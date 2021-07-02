@@ -7,7 +7,6 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.HyperStat.HyperStatCcuDatabaseSeedMessage_t;
-import a75f.io.device.HyperStat.HyperStatCcuToCmSerializedMessage_t;
 import a75f.io.device.HyperStat.HyperStatControlsMessage_t;
 import a75f.io.device.HyperStat.HyperStatSettingsMessage_t;
 import a75f.io.device.HyperStat;
@@ -90,10 +89,13 @@ public class HyperStatMessageGenerator {
         controls.setConditioningMode(HyperStat.HyperStatConditioningMode_e.HYPERSTAT_CONDITIONING_MODE_AUTO);
         
         if (!device.isEmpty()) {
-            DeviceUtil.getEnabledRawPointsWithRefForDevice(device, hayStack)
-                      .forEach( rawPoint -> {
+            DeviceHSUtil.getEnabledCmdPointsWithRefForDevice(device, hayStack)
+                        .forEach( rawPoint -> {
                           double logicalVal = hayStack.readHisValById(rawPoint.getPointRef());
-                          short mappedVal = (LSmartStat.mapDigitalOut(rawPoint.getType(), logicalVal > 0));
+    
+                          int mappedVal = (DeviceUtil.isAnalog(rawPoint.getPort())
+                                               ? DeviceUtil.mapAnalogOut(rawPoint.getType(), (short) logicalVal)
+                                               : DeviceUtil.mapDigitalOut(rawPoint.getType(), logicalVal > 0));
                           hayStack.writeHisValById(rawPoint.getId(), (double) mappedVal);
                           setHyperStatPort(controls, Port.valueOf(rawPoint.getPort()), mappedVal > 0);
                       });

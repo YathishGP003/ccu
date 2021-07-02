@@ -1536,9 +1536,8 @@ public class FloorPlanFragment extends Fragment {
         }
     }
 
-    /**
-     * Disabling the Pair button for 2 seconds then enabling to avoid double click on pair module
-     */
+
+    //Disabling the Pair button for 2 seconds thenenabling to avoid double click on pair module
     public void disableForMiliSeconds(){
         new Thread(new Runnable() {
             @Override

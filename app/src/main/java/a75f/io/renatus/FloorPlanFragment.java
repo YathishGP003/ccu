@@ -14,7 +14,6 @@ import android.os.Looper;
 
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Point;
-import a75f.io.api.haystack.RawPoint;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
@@ -1226,7 +1225,7 @@ public class FloorPlanFragment extends Fragment {
     @OnClick(R.id.pairModuleBtn)
     public void startPairing() {
         addModulelt.setVisibility(View.GONE);
-        disableForMaliSeconds();
+        disableForMiliSeconds();
         if (mFloorListAdapter.getSelectedPostion() == -1) {
             short meshAddress = L.generateSmartNodeAddress();
 
@@ -1514,7 +1513,7 @@ public class FloorPlanFragment extends Fragment {
     /**
      * Disabling the Pair button for 2 seconds then enabling to avoid double click on pair module
      */
-    public void disableForMaliSeconds(){
+    public void disableForMiliSeconds(){
         new Thread(new Runnable() {
             @Override
             public void run() {

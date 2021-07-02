@@ -351,7 +351,7 @@ public class FloorPlanFragment extends Fragment {
             if (mModuleListAdapter != null) {
                 mModuleListAdapter.clear();
             }
-            //disableRoomModule();
+            disableZoneModule();
         }
 
         setSystemUnselection();
@@ -634,6 +634,16 @@ public class FloorPlanFragment extends Fragment {
         addZonelt.setVisibility(View.INVISIBLE);
         addModulelt.setVisibility(View.INVISIBLE);
 
+        addRoomBtn.setVisibility(View.INVISIBLE);
+        addRoomEdit.setVisibility(View.INVISIBLE);
+        pairModuleBtn.setVisibility(View.INVISIBLE);
+        addModuleEdit.setVisibility(View.INVISIBLE);
+    }
+    
+    private void disableZoneModule() {
+        addZonelt.setVisibility(View.INVISIBLE);
+        addModulelt.setVisibility(View.INVISIBLE);
+        
         addRoomBtn.setVisibility(View.INVISIBLE);
         addRoomEdit.setVisibility(View.INVISIBLE);
         pairModuleBtn.setVisibility(View.INVISIBLE);

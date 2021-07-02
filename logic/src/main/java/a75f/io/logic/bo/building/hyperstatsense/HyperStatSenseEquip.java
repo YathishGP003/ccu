@@ -184,6 +184,22 @@ public class HyperStatSenseEquip {
                 .build();
         String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
         mHayStack.writeDefaultValById(ctID, 0.0);
+    
+        Point humidity = new Point.Builder()
+                                .setDisplayName(siteDis+"-SENSE-"+mNodeAddr+"-humidity")
+                                .setEquipRef(mEquipRef)
+                                .setSiteRef(siteRef)
+                                .setRoomRef(roomRef)
+                                .setFloorRef(floorRef)
+                                .setHisInterpolate("cov")
+                                .addMarker("zone").addMarker("hyperstat").addMarker("sense")
+                                .addMarker("humidity").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("cur").addMarker("logical")
+                                .setGroup(String.valueOf(mNodeAddr))
+                                .setUnit("\u00B0F")
+                                .setTz(tz)
+                                .build();
+        String humidityId = CCUHsApi.getInstance().addPoint(humidity);
+        mHayStack.writeDefaultValById(humidityId, 0.0);
 
         Point analog1InputSensor = new Point.Builder()
                 .setDisplayName(equipDis + "-analog1InputSensor")
@@ -250,7 +266,7 @@ public class HyperStatSenseEquip {
         mHayStack.writeDefaultValById(th2InputSensorId, (double) config.th2Sensor >= 0 ? config.th2Sensor : 0.0);
 
 
-        HyperStatDevice device = new HyperStatDevice(mNodeAddr, siteRef, floorRef, roomRef, mEquipRef, "hyperstatsense");
+        HyperStatDevice device = new HyperStatDevice(mNodeAddr, siteRef, floorRef, roomRef, mEquipRef, "sense");
 
 
         if (config.isAnalog1Enable) {
@@ -282,6 +298,8 @@ public class HyperStatSenseEquip {
         }
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
+    
+        device.addSensor(Port.SENSOR_RH, humidityId);
         device.addPointsToDb();
         mHayStack.syncEntityTree();
     }

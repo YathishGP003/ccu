@@ -63,6 +63,9 @@ public class MeshNetwork extends DeviceNetwork
                             deviceType = NodeType.SMART_STAT;
                         else if(d.getMarkers().contains("ti"))
                             deviceType = NodeType.CONTROL_MOTE;
+                        else if (d.getMarkers().contains("hyperstat")) {
+                            deviceType = NodeType.HYPER_STAT;
+                        }
                         switch (deviceType) {
                             case SMART_NODE:
                                 String snprofile = "dab";
@@ -124,14 +127,20 @@ public class MeshNetwork extends DeviceNetwork
                                 
                                 
                             case HYPER_STAT:
-                                String hyperStatProfile = "cpu"; //TODO
+                                String hyperStatProfile = "sense"; //TODO
                                 if (bSeedMessage) {
+                                    CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING HyperStat " +
+                                                              "SEEDS ====================="+zone.getId());
                                     HyperStatMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
                                                                            d.getEquipRef(), hyperStatProfile);
                                 } else {
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat " +
+                                                               "Settings =====================");
                                     HyperStatMessageSender.sendSettingsMessage(zone.getDisplayName(),
                                                                                Integer.parseInt(d.getAddr()), d.getEquipRef());
     
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat " +
+                                                               "Controls =====================");
                                     HyperStatMessageSender.sendControlMessage(Integer.parseInt(d.getAddr()), d.getEquipRef());
                                 }
                                 

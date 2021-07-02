@@ -98,6 +98,8 @@ public class HyperStatMsgReceiver {
                                                      CCUHsApi hayStack) {
         
         Point point = DeviceUtil.getLogicalPointForRawPoint(rawPoint, hayStack);
+        CcuLog.i(L.TAG_CCU_SERIAL, "writePortInputsToHaystackDatabase: logical point for "+rawPoint.getDisplayName()+
+                                   " "+point);
         if (point == null) {
             return;
         }

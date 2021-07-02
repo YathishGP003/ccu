@@ -1207,7 +1207,7 @@ public class FloorPlanFragment extends Fragment {
         addModulelt.setVisibility(View.GONE);
         desableForMiliSeconds();
         if (mFloorListAdapter.getSelectedPostion() == -1) {
-            short meshAddress = L.generateSmartNodeAddress();
+            short meshAddress = 6404;//L.generateSmartNodeAddress();
 
             if (priviousSelectedDevice == 1) {
 
@@ -1281,7 +1281,7 @@ public class FloorPlanFragment extends Fragment {
         }
 
         if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isSensePaired) {
-            short meshAddress = L.generateSmartNodeAddress();
+            short meshAddress = 6404;//L.generateSmartNodeAddress();
             if (mFloorListAdapter.getSelectedPostion() == -1) {
                 if (L.ccu().oaoProfile != null) {
                     Toast.makeText(getActivity(), "OAO Module already paired", Toast.LENGTH_LONG).show();

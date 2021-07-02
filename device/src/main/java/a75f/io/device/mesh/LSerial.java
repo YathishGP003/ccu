@@ -12,6 +12,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Device;
+import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Zone;
 import a75f.io.device.modbus.ModbusPulse;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwarePacketRequest_t;
@@ -433,6 +436,16 @@ public class LSerial
         if(isConnected()) {
             isNodeSeeding = true;
             Pulse.sendSeedMessage(isSs, isTi, addr, roomRef, floorRef);
+        }
+    }
+    
+    public void sendHyperStatSeedMessage(Short addr, String profile, String roomRef, String floorRef) {
+        if (isConnected()) {
+            CcuLog.d(L.TAG_CCU_DEVICE,
+                     "=================NOW SEEDING NEW PROFILE=====================" + addr + "," + roomRef);
+            Device d = HSUtil.getDevice(addr);
+            Zone zone = HSUtil.getZone(roomRef, floorRef);
+            HyperStatMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()), d.getEquipRef(), profile);
         }
     }
     

@@ -239,7 +239,7 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
                 ProgressDialogUtils.hideProgressDialog();
                 HyperStatSenseFragment.this.closeAllBaseDialogFragments();
                 getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                LSerial.getInstance().sendSeedMessage(false, false, mNodeAddress, mRoomName, mFloorName);
+                LSerial.getInstance().sendHyperStatSeedMessage(mNodeAddress, mRoomName, mFloorName, "sense");
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }

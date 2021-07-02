@@ -59,8 +59,8 @@ public class HyperStatDevice {
      */
     public HyperStatDevice(int address, String site, String floor, String room, String equipRef, String profile) {
         Device d = new Device.Builder()
-                       .setDisplayName("SS-"+address)
-                       .addMarker("network").addMarker("his").addMarker("node").addMarker(profile)
+                       .setDisplayName("HS-"+address)
+                       .addMarker("network").addMarker("node").addMarker(profile)
                        .addMarker("hyperstat")
                        .setEquipRef(equipRef)
                        .setAddr(address)

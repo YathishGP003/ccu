@@ -362,7 +362,7 @@ public class CCUHsApi
      */
     public ArrayList<HashMap> readAll(String query)
     {
-        //CcuLog.d("CCU_HS", "Read Query: " + query);
+        CcuLog.d("CCU_HS", "Read Query: " + query);
         ArrayList<HashMap> rowList = new ArrayList<>();
         try
         {
@@ -396,7 +396,7 @@ public class CCUHsApi
      */
     public HashMap read(String query)
     {
-        //CcuLog.d("CCU_HS", "Read Query: " + query);
+        CcuLog.d("CCU_HS", "Read Query: " + query);
         HashMap<Object, Object> map = new HashMap<>();
         try
         {

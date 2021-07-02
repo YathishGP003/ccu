@@ -163,7 +163,7 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
                 mThermostat1Sp.setSelection(mHSSenseConfig.th1Sensor);
             }
             if (mHSSenseConfig.isTh2Enable) {
-                mThermostat1Sp.setSelection(mHSSenseConfig.th2Sensor);
+                mThermostat2Sp.setSelection(mHSSenseConfig.th2Sensor);
             }
             if (mHSSenseConfig.isAnalog1Enable) {
                 mAnalog1Sp.setSelection(mHSSenseConfig.analog1Sensor);

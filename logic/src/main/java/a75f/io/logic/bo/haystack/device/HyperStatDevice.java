@@ -293,5 +293,21 @@ public class HyperStatDevice {
         CCUHsApi.getInstance().addPoint(currentTemp);
         CCUHsApi.getInstance().addPoint(desiredTemp);
     }
+
+    public void addSensor(Port p, String pointRef) {
+        RawPoint sensor = new RawPoint.Builder()
+                .setDisplayName(p.toString()+"-"+hyperStatNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .setPointRef(pointRef)
+                .setEnabled(true)
+                .addMarker("sensor").addMarker("his")
+                .setPort(p.toString())
+                .setTz(tz)
+                .build();
+        CCUHsApi.getInstance().addPoint(sensor);
+    }
     
 }

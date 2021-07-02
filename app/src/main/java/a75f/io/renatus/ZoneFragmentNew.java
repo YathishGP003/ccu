@@ -252,11 +252,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
     public void refreshDesiredTemp(String nodeAddress, String pointcoolDT1, String pointheatDT1) {
-        if (getActivity() != null) {
+        if (getActivity() != null ) {
             int i;
             for (i = 0; i < seekArcArrayList.size(); i++) {
                 GridItem gridItem = (GridItem) seekArcArrayList.get(i).getTag();
                 if (gridItem.getNodeAddress() == Short.valueOf(nodeAddress)) {
+                    if( CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and" +
+                            " desired and heating and group == \"" + nodeAddress + "\"") == null){
+                        return;
+                    }
                     SeekArc tempSeekArc = seekArcArrayList.get(i);
                     double pointheatDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and group == \"" + nodeAddress + "\"");
                     double pointcoolDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and cooling and group == \"" + nodeAddress + "\"");
@@ -3060,14 +3064,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         if (sensePoints.get("isTh1Enable") == "true") {
             TextView textViewth1 = new TextView(getContext());
             textViewth1.setTextSize(24);
-            textViewth1.setPadding(10, 0, 0, 10);
+            textViewth1.setPadding(40, 0, 0, 10);
             textViewth1.setText(sensePoints.get("Thermistor1").toString() + " : " + (sensePoints.get("Th1Val").toString()) + " " + (sensePoints.get("Unit3").toString()));
             linearLayoutZonePoints.addView(textViewth1);
         }
         if (sensePoints.get("isTh2Enable") == "true") {
             TextView textViewth2 = new TextView(getContext());
             textViewth2.setTextSize(24);
-            textViewth2.setPadding(10, 0, 0, 10);
+            textViewth2.setPadding(40, 0, 0, 10);
             textViewth2.setText(sensePoints.get("Thermistor2").toString() + " : " + (sensePoints.get("Th2Val").toString()) + " " + (sensePoints.get("Unit4").toString()));
             linearLayoutZonePoints.addView(textViewth2);
         }
@@ -3075,14 +3079,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         if (sensePoints.get("iAn1Enable") == "true") {
             TextView textViewAnalog1 = new TextView(getContext());
             textViewAnalog1.setTextSize(24);
-            textViewAnalog1.setPadding(10, 0, 0, 10);
+            textViewAnalog1.setPadding(40, 0, 0, 10);
             textViewAnalog1.setText(sensePoints.get("Analog1").toString() + " : " + (sensePoints.get("An1Val").toString()) + " " + (sensePoints.get("Unit1").toString()));
             linearLayoutZonePoints.addView(textViewAnalog1);
         }
         if (sensePoints.get("iAn2Enable") == "true") {
             TextView textViewAnalog2 = new TextView(getContext());
             textViewAnalog2.setTextSize(24);
-            textViewAnalog2.setPadding(10, 0, 0, 10);
+            textViewAnalog2.setPadding(40, 0, 0, 10);
             textViewAnalog2.setText(sensePoints.get("Analog2").toString() + " : " + (sensePoints.get("An2Val").toString()) + " " + (sensePoints.get("Unit2").toString()));
             linearLayoutZonePoints.addView(textViewAnalog2);
 
@@ -3105,8 +3109,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         Log.i("EachzoneData", " currentAvg:" + currentAverageTemp);
         final String[] equipId = {p.getId()};
         int i = gridPosition;
-        View arcView = null;
-        arcView = inflater.inflate(R.layout.zones_item, (ViewGroup) rootView, false);
+        View arcView = inflater.inflate(R.layout.zones_item, (ViewGroup) rootView, false);
         View zoneDetails = inflater.inflate(R.layout.zones_item_details, null);
 
         LinearLayout linearLayoutZonePoints = zoneDetails.findViewById(R.id.lt_profilepoints);
@@ -3114,14 +3117,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         LinearLayout linearLayoutstatusPoints = zoneDetails.findViewById(R.id.lt_status);
         linearLayoutstatusPoints.setVisibility(View.GONE);
         linearLayoutschedulePoints.setVisibility(View.GONE);
-        //String zoneId = Schedule.getZoneIdByEquipId(equipId[0]);
-
 
         GridItem gridItemObj = new GridItem();
         gridItemObj.setGridID(i);
-
+        gridItemObj.setGridItem("Sense");
         gridItemObj.setNodeAddress(Short.valueOf(p.getGroup()));
-
         gridItemObj.setZoneEquips(zoneMap);
         arcView.setClickable(true);
         arcView.setTag(gridItemObj);
@@ -3135,9 +3135,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         textEquipment.setText(zoneTitle);
 
         seekArc.scaletoNormal(250, 210);
-
-
-        //  seekArc.setData(false, pointbuildingMin, pointbuildingMax, (float) heatUpperlimit, (float) heatLowerlimit, (float) coolLowerlimit, (float) coolUpperlimit, (float)pointheatDT, (float)pointcoolDT, (float) currentAverageTemp, (float) heatDeadband, (float) coolDeadband);
         seekArc.setDetailedView(false);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 
@@ -3170,7 +3167,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             }
         }
 
-
+        seekArcArrayList.add(seekArc);
         seekArc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -3191,18 +3188,30 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 for (int j = 0; j < cellCount; j++) {
                                     RelativeLayout gridItem = (RelativeLayout) tableRow.getChildAt(j);
                                     GridItem viewTag = (GridItem) gridItem.getTag();
-                                    if (viewTag.getGridID() == clickedView) {
+                                    if (viewTag.getGridID() == clickedView ) {
+                                        if (viewTag.getGridItem().equals("Sense")) {
+                                            SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
+                                            TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
+                                            textViewzone.setTextAppearance(getActivity(), R.style.label_black);
+                                            textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                            tableLayout.removeViewAt(row + 1);
+                                            seekArcExpanded.setDetailedView(false);
+                                            seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
+                                            seekArcExpanded.scaletoNormal(250, 210);
+                                            gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                        } else {
+                                            TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
+                                            textViewzone.setTextAppearance(getActivity(), R.style.label_black);
+                                            textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                            tableLayout.removeViewAt(row + 1);
+                                            NonTempControl nonTempControl = gridItem.findViewById(R.id.rl_nontemp);
+                                            ScaleControlToNormal(250, 210, nonTempControl);
+                                            nonTempControl.setExpand(false);
+                                            //ScaleImageToNormal(250,210,imageViewExpanded);
+                                            nonTempControl.setBackgroundColor(getResources().getColor(R.color.white));
+                                            gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                        }
 
-                                        TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
-                                        textViewzone.setTextAppearance(getActivity(), R.style.label_black);
-                                        textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
-                                        tableLayout.removeViewAt(row + 1);
-                                        NonTempControl nonTempControl = gridItem.findViewById(R.id.rl_nontemp);
-                                        ScaleControlToNormal(250, 210, nonTempControl);
-                                        nonTempControl.setExpand(false);
-                                        //ScaleImageToNormal(250,210,imageViewExpanded);
-                                        nonTempControl.setBackgroundColor(getResources().getColor(R.color.white));
-                                        gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                                         isExpanded = false;
                                         imageOn = false;
                                         viewFound = true;
@@ -3225,6 +3234,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             v.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
                             int index = clickedView / columnCount + 1;
                             seekArc.setDetailedView(true);
+                            //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
                             seekArc.scaletoNormalBig(250, 210);
                             imageOn = true;
                             selectedView = seekArc.getId();
@@ -3252,8 +3262,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         isExpanded = false;
                     }
                 } else {
-                    zoneOpen = true;
-                    zoneNonTempOpen = false;
+                    zoneOpen = false;
+                    zoneNonTempOpen = true;
                     seekArcOpen = seekArc;
                     zonePointsOpen = zoneDetails;
                     equipOpen = p;
@@ -3265,7 +3275,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     seekArc.setDetailedView(true);
                     //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
                     seekArc.scaletoNormalBig(250, 210);
-
+                    hideWeather();
                     imageOn = true;
                     selectedView = seekArc.getId();
                     try {
@@ -3278,6 +3288,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     }
                     isExpanded = true;
                 }
+
+                zoneOpen = false;
+                v.setContentDescription(zoneTitle);
                 linearLayoutZonePoints.removeAllViews();
                 for (int k = 0; k < openZoneMap.size(); k++) {
                     Equip updatedEquip = new Equip.Builder().setHashMap(openZoneMap.get(k)).build();

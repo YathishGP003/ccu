@@ -928,11 +928,11 @@ public class FloorPlanFragment extends Fragment {
                             for (Zone zone : HSUtil.getZones(floorToRename.getId())) {
                                 zone.setFloorRef(CCUHsApi.getInstance().getLUID(floor.getId()));
                                 CCUHsApi.getInstance().updateZone(zone, zone.getId());
-                                for (Equip quipDetails : HSUtil.getEquips(zone.getId())) {
-                                    quipDetails.setFloorRef(floor.getId());
-                                    CCUHsApi.getInstance().updateEquip(quipDetails, quipDetails.getId());
-                                    ArrayList<HashMap> ponitsList = CCUHsApi.getInstance().readAll("point and equipRef == \"" + quipDetails.getId()+"\"");
-                                    HashMap device = CCUHsApi.getInstance().read("device and equipRef == \"" + quipDetails.getId()+"\"");
+                                for (Equip equipDetails : HSUtil.getEquips(zone.getId())) {
+                                    equipDetails.setFloorRef(floor.getId());
+                                    CCUHsApi.getInstance().updateEquip(equipDetails, equipDetails.getId());
+                                    ArrayList<HashMap> ponitsList = CCUHsApi.getInstance().readAll("point and equipRef == \"" + equipDetails.getId()+"\"");
+                                    HashMap device = CCUHsApi.getInstance().read("device and equipRef == \"" + equipDetails.getId()+"\"");
                                     if(device !=null ) {
                                         Device deviceDetails = new Device.Builder().setHashMap(device).build();
                                         deviceDetails.setFloorRef(floor.getId());

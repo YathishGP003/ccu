@@ -12,6 +12,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
+import a75f.io.api.haystack.Device;
+import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.RawPoint;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
@@ -47,7 +50,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -930,6 +932,20 @@ public class FloorPlanFragment extends Fragment {
                                 for (Equip q : HSUtil.getEquips(zone.getId())) {
                                     q.setFloorRef(floor.getId());
                                     CCUHsApi.getInstance().updateEquip(q, q.getId());
+                                    ArrayList<HashMap> ponits = CCUHsApi.getInstance().readAll("point and equipRef == \"" + q.getId()+"\"");
+                                    HashMap device = CCUHsApi.getInstance().read("device and equipRef == \"" + q.getId()+"\"");
+                                    if(device !=null ) {
+                                        Device d1 = new Device.Builder().setHashMap(device).build();
+                                        d1.setFloorRef(floor.getId());
+                                        CCUHsApi.getInstance().updateDevice(d1,d1.getId());
+                                    }
+
+                                    for(HashMap p : ponits) {
+                                        Point rp = new Point.Builder().setHashMap(p).build();
+                                        rp.setFloorRef(floor.getId());
+                                        CCUHsApi.getInstance().updatePoint(rp, rp.getId());
+                                    }
+
                                 }
                             }
 
@@ -1210,7 +1226,7 @@ public class FloorPlanFragment extends Fragment {
     @OnClick(R.id.pairModuleBtn)
     public void startPairing() {
         addModulelt.setVisibility(View.GONE);
-        desableForMiliSeconds();
+        disableForMaliSeconds();
         if (mFloorListAdapter.getSelectedPostion() == -1) {
             short meshAddress = L.generateSmartNodeAddress();
 
@@ -1498,7 +1514,7 @@ public class FloorPlanFragment extends Fragment {
     /**
      * Disabling the Pair button for 2 seconds then enabling to avoid double click on pair module
      */
-    public void desableForMiliSeconds(){
+    public void disableForMaliSeconds(){
         new Thread(new Runnable() {
             @Override
             public void run() {

@@ -928,21 +928,21 @@ public class FloorPlanFragment extends Fragment {
                             for (Zone zone : HSUtil.getZones(floorToRename.getId())) {
                                 zone.setFloorRef(CCUHsApi.getInstance().getLUID(floor.getId()));
                                 CCUHsApi.getInstance().updateZone(zone, zone.getId());
-                                for (Equip q : HSUtil.getEquips(zone.getId())) {
-                                    q.setFloorRef(floor.getId());
-                                    CCUHsApi.getInstance().updateEquip(q, q.getId());
-                                    ArrayList<HashMap> ponits = CCUHsApi.getInstance().readAll("point and equipRef == \"" + q.getId()+"\"");
-                                    HashMap device = CCUHsApi.getInstance().read("device and equipRef == \"" + q.getId()+"\"");
+                                for (Equip quipDetails : HSUtil.getEquips(zone.getId())) {
+                                    quipDetails.setFloorRef(floor.getId());
+                                    CCUHsApi.getInstance().updateEquip(quipDetails, quipDetails.getId());
+                                    ArrayList<HashMap> ponitsList = CCUHsApi.getInstance().readAll("point and equipRef == \"" + quipDetails.getId()+"\"");
+                                    HashMap device = CCUHsApi.getInstance().read("device and equipRef == \"" + quipDetails.getId()+"\"");
                                     if(device !=null ) {
-                                        Device d1 = new Device.Builder().setHashMap(device).build();
-                                        d1.setFloorRef(floor.getId());
-                                        CCUHsApi.getInstance().updateDevice(d1,d1.getId());
+                                        Device deviceDetails = new Device.Builder().setHashMap(device).build();
+                                        deviceDetails.setFloorRef(floor.getId());
+                                        CCUHsApi.getInstance().updateDevice(deviceDetails,deviceDetails.getId());
                                     }
 
-                                    for(HashMap p : ponits) {
-                                        Point rp = new Point.Builder().setHashMap(p).build();
-                                        rp.setFloorRef(floor.getId());
-                                        CCUHsApi.getInstance().updatePoint(rp, rp.getId());
+                                    for(HashMap pointDetailsMap : ponitsList) {
+                                        Point pointDetails = new Point.Builder().setHashMap(pointDetailsMap).build();
+                                        pointDetails.setFloorRef(floor.getId());
+                                        CCUHsApi.getInstance().updatePoint(pointDetails, pointDetails.getId());
                                     }
 
                                 }

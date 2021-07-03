@@ -94,8 +94,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	int spinnerInit = 0;
 	boolean minHumiditySpinnerReady = false;
 	boolean maxHumiditySpinnerReady = false;
-	
-	
+
+	View rootView;
 	TextView ccuName;
 	TextView profileTitle;
 	//TODO uncomment for acctuall prod releasee, commenting it out for Automation test
@@ -133,6 +133,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					if (!(L.ccu().systemProfile instanceof DefaultSystem)) {
 						checkForOao();
 						fetchPoints();
+						if(rootView != null){
+							configEnergyMeterDetails(rootView);
+							configBTUMeterDetails(rootView);
+						}
 					}
 
 				}
@@ -179,10 +183,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState)
 	{
-		View rootView = inflater.inflate(R.layout.fragment_system_setting, container, false);
+		rootView = inflater.inflate(R.layout.fragment_system_setting, container, false);
 		return rootView;
 	}
-	
+
 	@Override
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{

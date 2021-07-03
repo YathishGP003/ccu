@@ -3192,7 +3192,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     }
     HashMap<String, View> zoneStatus = new HashMap<>();
     private void refreshZoneHeartBeat(){
-        if(floorList == null || mFloorListAdapter == null){
+        if((floorList.size() == 0) || mFloorListAdapter == null){
             return;
         }
         ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("room and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");

@@ -747,7 +747,8 @@ public class CCUTagsDb extends HServer {
                 .add("id", HRef.copy(i))
                 .add("dis", f.getDisplayName())
                 .add("floor", HMarker.VAL)
-                .add("siteRef", f.getSiteRef());
+                .add("siteRef", f.getSiteRef())
+                .add("orientation",0.0);
 
         for (String m : f.getMarkers()) {
             b.add(m);

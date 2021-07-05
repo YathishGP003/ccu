@@ -89,7 +89,7 @@ public class RegisterGatherCCUDetails extends Activity {
         mManagerEmailET.setEnabled(ccuFmEmail.isEmpty());
         mInstallerEmailET.setEnabled(ccuInstallerEmail.isEmpty());
 
-        for (int addr = 1000; addr <= 10000; addr+=100)
+        for (int addr = 1000; addr <= 10900; addr+=100)
         {
             addressBand.add(String.valueOf(addr));
         }

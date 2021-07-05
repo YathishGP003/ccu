@@ -454,7 +454,8 @@ public class Pulse
 		mDataReceived = true;
 		mTimeSinceCMDead = 0;
 		CCUHsApi hayStack = CCUHsApi.getInstance();
-		String addr = String.valueOf(L.ccu().getSmartNodeAddressBand()).substring(0,2).concat("99");
+		String addr = String.valueOf(L.ccu().getSmartNodeAddressBand());
+		addr = addr.substring(0, addr.length()-2).concat("99");
 		HashMap device = hayStack.read("device and addr == \""+Short.parseShort(addr)+"\"");
 		double curTempVal = 0.0;
 		if (device != null && device.size() > 0) {

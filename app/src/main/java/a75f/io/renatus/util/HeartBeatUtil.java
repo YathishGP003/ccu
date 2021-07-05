@@ -59,12 +59,14 @@ public class HeartBeatUtil {
         }
         StringBuffer message = new StringBuffer();
         Date currTime = new Date();
-       /* if(currTime.getDate() == updatedTime.getDate()){
+       if(currTime.getDate() == updatedTime.getDate()){
             return getTimeDifference(currTime, updatedTime, message);
 
-        } else{*/
+        } else{
             return getLastUpdatedTime(message, updatedTime);
-        //}
+
+
+        }
     }
 
     private static String getTimeDifference(Date currTime, Date updatedTime, StringBuffer message){

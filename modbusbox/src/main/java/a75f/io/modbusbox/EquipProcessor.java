@@ -52,7 +52,7 @@ public class EquipProcessor
         equipmentDevices = parser.parseAllEquips(c);
         energyMeterDevices = parser.parseEneryMeterEquips(c);
         energyMeterSystemDevices = parser.parseEneryMeterSystemEquips(c);
-        readExternalJsonData();
+
 
 
         for(EquipmentDevice equipmentDevice:equipmentDevices){
@@ -69,6 +69,7 @@ public class EquipProcessor
         for(EquipmentDevice equipmentDevice:modbusBTUMeterDevices){
             addEquips(equipmentDevice);
         }
+        readExternalJsonData();
     }
 
 

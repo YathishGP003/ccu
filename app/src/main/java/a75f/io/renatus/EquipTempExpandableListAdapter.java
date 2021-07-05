@@ -85,6 +85,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
     {
         final String expandedListText = (String) getChild(listPosition, expandedListPosition);
         //Log.i("Scheduler", "IDE Too Slow: " + expandedListText);
+        Log.e("Scheduler", "InsideEquipTempExpandAdapter " + expandedListText);
 
         if (!expandedListText.startsWith("schedule") && (!expandedListText.startsWith("smartstat")))
         {

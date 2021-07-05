@@ -25,9 +25,6 @@ import a75f.io.api.haystack.modbus.Register;
 
 public class ModbusParser {
 
-    enum MBCategory{
-        MODBUS,BTU,EM_SYSTEM,EM_ZONE
-    }
 
     // Hold Existing Devices to avoid duplication
     private List<EquipmentDevice> deviceList = new ArrayList<>();
@@ -167,7 +164,7 @@ public class ModbusParser {
     }
 
 
-    public ArrayList<EquipmentDevice> readExternalJSONFromDir(String filePath,MBCategory type){
+    public List<EquipmentDevice> readExternalJSONFromDir(String filePath,ModbusCategory type){
         ArrayList<EquipmentDevice> filterDevices = new ArrayList<>();
         File modbusJsonFolder = new File(filePath);
         if(modbusJsonFolder.listFiles()==null||modbusJsonFolder.listFiles().length==0)
@@ -181,16 +178,26 @@ public class ModbusParser {
                     {
                         EquipmentDevice device = parseModbusDevice(readFileFromFolder(listOfFile[i]));
                         if(device == null ) continue;
-                        Log.i("CCU_MODBUS", "Valid JSON file found : "+device.getName() + " EquipType :"+device.getEquipType());
-                        if(type == MBCategory.MODBUS && device.getEquipType()!="BTU" &&
-                                device.getEquipType()!="EMR" && device.getEquipType()!="EMR_ZONE")
+                        if(type == ModbusCategory.MODBUS && !device.getEquipType().equals(ModbusCategory.BTU.displayName) &&
+                                !device.getEquipType().equals(ModbusCategory.EMR.displayName) && !device.getEquipType().equals(ModbusCategory.EMR_ZONE.displayName)) {
+                            Log.i("CCU_MODBUS", "Valid JSON file found : "+device.getName() + " EquipType :"+device.getEquipType());
                             filterDevices.add(device);
-                        else if(type == MBCategory.BTU && device.getEquipType()!="BTU")
+                        }
+                        else if(type == ModbusCategory.BTU && device.getEquipType().equals(ModbusCategory.BTU.displayName))
+                        {
+                            Log.i("CCU_MODBUS", "Valid JSON file found : for System level BTU Meter  "+device.getName() + " EquipType :"+device.getEquipType());
                             filterDevices.add(device);
-                        else if(type == MBCategory.EM_SYSTEM && device.getEquipType()!="EMR")
+                        }
+                        else if(type == ModbusCategory.EMR_SYSTEM && device.getEquipType().equals(ModbusCategory.EMR.displayName))
+                        {
+                            Log.i("CCU_MODBUS", "Valid JSON file found : for System level Energy Meter "+device.getName() + " EquipType :"+device.getEquipType());
                             filterDevices.add(device);
-                        else if(type == MBCategory.EM_ZONE && device.getEquipType()!="EMR_ZONE")
+                        }
+                        else if(type == ModbusCategory.EMR_ZONE && device.getEquipType().equals(ModbusCategory.EMR_ZONE.displayName))
+                        {
+                            Log.i("CCU_MODBUS", "Valid JSON file found for Zone level Energy Meter "+device.getName() + " EquipType :"+device.getEquipType());
                             filterDevices.add(device);
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -228,7 +235,7 @@ public class ModbusParser {
             // Check for duplicate Equip ID
             for (int i = 0; i < deviceList.size() ; i++) {
                 if(deviceList.get(i).getModbusEquipIdId().equals(jsonObject.getString("modbusEquipId (_id)"))) {
-                    Log.i("CCU_MODBUS", "Duplicate modbusEquipId: "+jsonObject.getString("modbusEquipId (_id)"));
+                    Log.i("CCU_MODBUS", "Duplicate modbusEquipId: "+jsonObject.getString("modbusEquipId (_id)") +" Device name "+deviceList.get(i).getName());
                     return false;
                 }
             }

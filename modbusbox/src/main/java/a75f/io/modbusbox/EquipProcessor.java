@@ -1,7 +1,6 @@
 package a75f.io.modbusbox;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -52,8 +51,8 @@ public class EquipProcessor
         equipmentDevices = parser.parseAllEquips(c);
         energyMeterDevices = parser.parseEneryMeterEquips(c);
         energyMeterSystemDevices = parser.parseEneryMeterSystemEquips(c);
-
-
+        modbusBTUMeterDevices = parser.readBTUMeterDeviceDetails(c);
+        readExternalJsonData();
 
         for(EquipmentDevice equipmentDevice:equipmentDevices){
             addEquips(equipmentDevice);
@@ -65,20 +64,19 @@ public class EquipProcessor
             addEquips(equipmentDevice);
         }
 
-        modbusBTUMeterDevices = parser.readBTUMeterDeviceDetails(c);
         for(EquipmentDevice equipmentDevice:modbusBTUMeterDevices){
             addEquips(equipmentDevice);
         }
-        readExternalJsonData();
+
     }
 
 
     private void readExternalJsonData(){
         // Read external Json data
-        equipmentDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus", ModbusParser.MBCategory.MODBUS));
-        energyMeterDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus", ModbusParser.MBCategory.EM_ZONE));
-        energyMeterSystemDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus", ModbusParser.MBCategory.EM_SYSTEM));
-        modbusBTUMeterDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus", ModbusParser.MBCategory.BTU));
+        equipmentDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus", ModbusCategory.MODBUS));
+        energyMeterDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus", ModbusCategory.EMR_ZONE));
+        energyMeterSystemDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus",ModbusCategory.EMR_SYSTEM));
+        modbusBTUMeterDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus", ModbusCategory.BTU));
 
     }
 

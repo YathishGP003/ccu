@@ -52,6 +52,9 @@ public class EquipProcessor
         equipmentDevices = parser.parseAllEquips(c);
         energyMeterDevices = parser.parseEneryMeterEquips(c);
         energyMeterSystemDevices = parser.parseEneryMeterSystemEquips(c);
+        readExternalJsonData();
+
+
         for(EquipmentDevice equipmentDevice:equipmentDevices){
             addEquips(equipmentDevice);
         }
@@ -66,6 +69,16 @@ public class EquipProcessor
         for(EquipmentDevice equipmentDevice:modbusBTUMeterDevices){
             addEquips(equipmentDevice);
         }
+    }
+
+
+    private void readExternalJsonData(){
+        // Read external Json data
+        equipmentDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus", ModbusParser.MBCategory.MODBUS));
+        energyMeterDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus", ModbusParser.MBCategory.EM_ZONE));
+        energyMeterSystemDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus", ModbusParser.MBCategory.EM_SYSTEM));
+        modbusBTUMeterDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus", ModbusParser.MBCategory.BTU));
+
     }
 
     public void addEquips(EquipmentDevice equipmentDevice) {

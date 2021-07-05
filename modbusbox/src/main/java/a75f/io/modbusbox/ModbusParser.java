@@ -250,6 +250,7 @@ public class ModbusParser {
                     if(!isContainsDuplicateParametersInSameJSON(params)) {
                         for (int j = 0; j < params.length(); j++) {
 
+                            // Read Logical Points
                             JSONObject parameter = params.getJSONObject(j);
                             JSONArray logicalPointTags = parameter.getJSONArray("logicalPointTags");
 

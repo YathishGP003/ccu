@@ -64,8 +64,6 @@ public class HeartBeatUtil {
 
         } else{
             return getLastUpdatedTime(message, updatedTime);
-
-
         }
     }
 

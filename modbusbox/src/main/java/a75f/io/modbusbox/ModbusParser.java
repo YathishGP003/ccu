@@ -4,9 +4,9 @@ import android.content.Context;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
@@ -30,7 +30,7 @@ public class ModbusParser {
     }
 
     // Hold Existing Devices to avoid duplication
-    ArrayList<EquipmentDevice> deviceList = new ArrayList<>();
+    private List<EquipmentDevice> deviceList = new ArrayList<>();
     public ArrayList<EquipmentDevice> parseAllEquips(Context c) {
         ArrayList<EquipmentDevice> allEquips = parseEquips(c);
         return allEquips;
@@ -69,15 +69,10 @@ public class ModbusParser {
         }
         return equipmentDevice;
     }
-    public EquipmentDevice parseModbusDeVice(String json) {
+    private EquipmentDevice parseModbusDevice(String json) throws JsonParseException {
         EquipmentDevice equipmentDevice = null;
         if(isValidJSON(json)) {
-            try {
-                Gson gson = new Gson();
-                equipmentDevice = gson.fromJson(json, EquipmentDevice.class);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            equipmentDevice = new Gson().fromJson(json, EquipmentDevice.class);
         }else{
             Log.i("CCU_MODBUS", "INVALID JSON TAG FOR EXTERNAL JSON");
         }
@@ -85,7 +80,7 @@ public class ModbusParser {
     }
 
 
-    public String readFileFromAssets(Context ctx, String pathToJson) {
+    private String readFileFromAssets(Context ctx, String pathToJson) {
         InputStream rawInput;
         ByteArrayOutputStream rawOutput = null;
         String jsonObjects = "";
@@ -184,11 +179,11 @@ public class ModbusParser {
                 try {
                     if(listOfFile[i].isFile())
                     {
-                        EquipmentDevice device = parseModbusDeVice(readFileFromFolder(listOfFile[i]));
-                        if(device == null )
-                            continue;
+                        EquipmentDevice device = parseModbusDevice(readFileFromFolder(listOfFile[i]));
+                        if(device == null ) continue;
                         Log.i("CCU_MODBUS", "Valid JSON file found : "+device.getName());
-                        if(type == MBCategory.MODBUS && device.getEquipType()!="BTU" && device.getEquipType()!="EMR" && device.getEquipType()!="EMR_ZONE")
+                        if(type == MBCategory.MODBUS && device.getEquipType()!="BTU" &&
+                                device.getEquipType()!="EMR" && device.getEquipType()!="EMR_ZONE")
                             filterDevices.add(device);
                         else if(type == MBCategory.BTU && device.getEquipType()!="BTU")
                             filterDevices.add(device);
@@ -209,7 +204,7 @@ public class ModbusParser {
 
 
 
-    public String readFileFromFolder(File file) {
+    private String readFileFromFolder(File file) {
         String jsonObjects = "";
         try {
             InputStream is = new FileInputStream(file);

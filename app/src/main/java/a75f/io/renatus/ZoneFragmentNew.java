@@ -931,7 +931,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                     RelativeLayout gridItem = (RelativeLayout) tableRow.getChildAt(j);
                                     GridItem viewTag = (GridItem) gridItem.getTag();
                                     if (viewTag.getGridID() == clickedView) {
-                                        if (viewTag.getGridItem().equals("Temp")) {
+                                        if (viewTag.getGridItem().equals("Temp") || viewTag.getGridItem().equals("Sense")) {
                                             SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
                                             TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
                                             textViewzone.setTextAppearance(getActivity(), R.style.label_black);
@@ -3189,7 +3189,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                     RelativeLayout gridItem = (RelativeLayout) tableRow.getChildAt(j);
                                     GridItem viewTag = (GridItem) gridItem.getTag();
                                     if (viewTag.getGridID() == clickedView ) {
-                                        if (viewTag.getGridItem().equals("Sense")) {
+                                        if (viewTag.getGridItem().equals("Sense") || viewTag.getGridItem().equals("Temp")) {
                                             SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
                                             TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
                                             textViewzone.setTextAppearance(getActivity(), R.style.label_black);

@@ -1,51 +1,12 @@
- - Merged PR 1191: CCU Daikin Theme configuration
- - Bacnet Option Updated
- - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
- - Updated Modbus Spinner configuration
- - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
- - Updated Modbus Spinner configuration
- - Disabled Bacnet option for Daikin build
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
- - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
- - Enhancement as per QE demo
- - Removed App name configurations
- - Removed App name configurations
- - Configure the Application name by Build variant
- - Updated dropdown icon colors
- - Updated dropdown icon colors
- - Updated dropdown icon colors
- - all the changes are updated
- - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
- - Updated all the spinner configurations
- - Removed Unused Base activity
- - Updated as per comments
- - Added Daikin Loader and updated as per comments
- - Configuring the flash screen logo
- - Configuring the flash screen logo
- - Configuring the flash screen logo
- - Configured colors and UP components
- - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
- - Until Zone selected text color
- - Added Theme configurations
- - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
- - almost updated with Color centralization
- - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
- - Updated with Main Looper
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
- - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
- - modified
- - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
- - Updated with latest master
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
- - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
- - updated Icons tint colors
- - updated Icons tint colors
- - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
- - updated colors
- - Merge branches 'CCU_DAIKIN_THEME_CONFIGURAITON' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into CCU_DAIKIN_THEME_CONFIGURAITON
- - Updating UI Designs
- - Update with UI changes Color updated
+ - Merged PR 1363: Fix Site deletion and floor handling issues.
+ - Merged PR 1362: Added details to update the Haystack points
+ - Added Null check for SchedulerFragment
+ - Merge branch 'Bug/samjith/site_removal_adding_new_ccu' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/6918_floorname_edit_is_not_working_properly
+ - Disable room and module when there are no floors
+ - Added Null check for SchedulerFragment
+ - Refactored
+ - Refactored
+ - Added details to update the Haystack points for device and points
+ - Added details to update the Haystack points for device and points
+ - Fix floor floor rename and site deletion issues
+ - Updated ci.config with Daikin build

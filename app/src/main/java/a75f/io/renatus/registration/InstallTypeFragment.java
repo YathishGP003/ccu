@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -128,8 +129,7 @@ public class InstallTypeFragment extends Fragment {
         {
             String siteId = site.get("id").toString();
             CCUHsApi.getInstance().deleteEntityTree(siteId);
-
-
+            
             if (L.ccu().systemProfile instanceof DefaultSystem) {
             } else {
 
@@ -148,6 +148,14 @@ public class InstallTypeFragment extends Fragment {
                     }
                 }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
             }
+    
+            HashMap buildingSchedule = CCUHsApi.getInstance().read("schedule and building and siteRef == \"" + siteId +
+                                                                   "\"");
+    
+            if (!buildingSchedule.isEmpty()) {
+                CCUHsApi.getInstance().removeEntity(buildingSchedule.get("id").toString());
+            }
+            CCUHsApi.getInstance().removeEntity(siteId);
 
             prefs.setBoolean("CCU_SETUP",false);
             prefs.setBoolean("PROFILE_SETUP",false);

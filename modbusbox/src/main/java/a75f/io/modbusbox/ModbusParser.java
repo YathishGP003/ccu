@@ -181,7 +181,7 @@ public class ModbusParser {
                     {
                         EquipmentDevice device = parseModbusDevice(readFileFromFolder(listOfFile[i]));
                         if(device == null ) continue;
-                        Log.i("CCU_MODBUS", "Valid JSON file found : "+device.getName());
+                        Log.i("CCU_MODBUS", "Valid JSON file found : "+device.getName() + " EquipType :"+device.getEquipType());
                         if(type == MBCategory.MODBUS && device.getEquipType()!="BTU" &&
                                 device.getEquipType()!="EMR" && device.getEquipType()!="EMR_ZONE")
                             filterDevices.add(device);
@@ -302,7 +302,7 @@ public class ModbusParser {
                 for (int j = 0; j < jsonArray.length(); j++) {
                         JSONObject paramJDetails = jsonArray.getJSONObject(j);
                         if (i != j && paramIDetails.getString("parameterId").equals(paramJDetails.getString("parameterId"))) {
-                            Log.i("CCU_MODBUS", "Duplicate parameter ID found: "+paramJDetails.getString("parameterId"));
+                            Log.i("CCU_MODBUS", "Duplicate parameter ID found: "+paramJDetails.getString("parameterId")+" Param Name : "+paramIDetails.getString("name"));
                             return true;
                         }
                 }
@@ -322,7 +322,7 @@ public class ModbusParser {
                 List<Parameter> parameters= registers.get(j).getParameters();
                 for (int k = 0; k <parameters.size() ; k++) {
                         if(parameters.get(k).parameterId.equals(paramID)){
-                            Log.i("CCU_MODBUS", "Duplicate parameter ID found: "+paramID+" in "+device.getName());
+                            Log.i("CCU_MODBUS", "Duplicate parameter ID found: "+paramID+" in "+device.getName() +" Param Name "+parameters.get(k).getName());
                             return true;
                         }
                 }

@@ -137,12 +137,12 @@ public class HyperStatMsgReceiver {
     
     private static void writeThermistorVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, double val) {
         double thInputVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
-        hayStack.writeHisValById(rawPoint.getId(), CCUUtils.roundToOneDecimal(thInputVal));
+        hayStack.writeHisValById(rawPoint.getId(), val);
         hayStack.writeHisValById(point.getId(), CCUUtils.roundToOneDecimal(thInputVal));
     }
     
     private static void writeAnalogInputVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, double val) {
-        hayStack.writeHisValById(rawPoint.getId(), AnalogUtil.getAnalogConversion(rawPoint, val));
+        hayStack.writeHisValById(rawPoint.getId(), val);
         hayStack.writeHisValById(point.getId(), AnalogUtil.getAnalogConversion(rawPoint, val));
     }
     
@@ -172,7 +172,7 @@ public class HyperStatMsgReceiver {
             CcuLog.d(L.TAG_CCU_DEVICE,"HyperStatSensor update: "+t+" : "+val);
             switch (t) {
                 case HUMIDITY:
-                    CCUHsApi.getInstance().writeHisValById(sp.getId(), CCUUtils.roundToOneDecimal(val/10.0) );
+                    CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
                     CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), CCUUtils.roundToOneDecimal(val/10.0));
                     break;
                 case CO2:

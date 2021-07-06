@@ -171,7 +171,7 @@ public class HyperStatSenseEquip {
                 .setTz(tz)
                 .build();
         String tempoffsetId = mHayStack.addPoint(temperatureOffset);
-        mHayStack.writeDefaultValById(tempoffsetId, config.temperatureOffset > 0 ? config.temperatureOffset : 0.0);
+        mHayStack.writeDefaultValById(tempoffsetId, config.temperatureOffset);
 
         Point currentTemp = new Point.Builder()
                 .setDisplayName(siteDis + "-SENSE-" + mNodeAddr + "-currentTemp")

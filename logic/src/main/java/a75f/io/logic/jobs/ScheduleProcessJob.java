@@ -1736,12 +1736,12 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             haystack.readDefaultVal("point and config and th1 and enabled and group == \"" + equipID + "\"") > 0;
         boolean isTh2Enable =
             haystack.readDefaultVal("point and config and th2 and enabled and group == \"" + equipID + "\"") > 0;
-        double an1Val = haystack.readHisValByQuery("point and logical and analog1 and group == \"" + equipID + "\"").intValue();
-        double an2Val = haystack.readHisValByQuery("point and logical and analog2 and group == \"" + equipID + "\"").intValue();
+        double an1Val = haystack.readHisValByQuery("point and logical and analog1 and group == \"" + equipID + "\"");
+        double an2Val = haystack.readHisValByQuery("point and logical and analog2 and group == \"" + equipID + "\"");
         double th1Val =
-            haystack.readHisValByQuery("point and logical and th1 and group == \"" + equipID + "\"").intValue();
+            haystack.readHisValByQuery("point and logical and th1 and group == \"" + equipID + "\"");
         double th2Val =
-            haystack.readHisValByQuery("point and logical and th2 and group == \"" + equipID + "\"").intValue();
+            haystack.readHisValByQuery("point and logical and th2 and group == \"" + equipID + "\"");
         int size = 0;
         if (tempOffset  != 0) {
             sensePoints.put("TemperatureOffset",tempOffset);

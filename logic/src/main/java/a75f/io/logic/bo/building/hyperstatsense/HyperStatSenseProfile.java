@@ -1,5 +1,8 @@
 package a75f.io.logic.bo.building.hyperstatsense;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 
@@ -40,5 +43,13 @@ public class HyperStatSenseProfile extends ZoneProfile {
     @Override
     public HyperStatSenseConfiguration getProfileConfiguration(short address) {
         return mHyperStatSenseEquip.getHyperStatSenseConfig();
+    }
+
+    @Override
+    public Set<Short> getNodeAddresses()
+    {
+        return new HashSet<Short>(){{
+            add((short)mHyperStatSenseEquip.mNodeAddr);
+        }};
     }
 }

@@ -199,7 +199,7 @@ public class HyperStatSenseEquip {
                 .setFloorRef(floorRef)
                 .setHisInterpolate("cov")
                 .addMarker("zone").addMarker("hyperstat").addMarker("sense")
-                .addMarker("humidity").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("cur").addMarker("logical")
+                .addMarker("humidity").addMarker("sensor").addMarker("his").addMarker("cur").addMarker("logical")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setUnit("%")
                 .setTz(tz)

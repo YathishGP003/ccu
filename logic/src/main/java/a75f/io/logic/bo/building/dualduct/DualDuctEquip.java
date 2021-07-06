@@ -245,7 +245,7 @@ class DualDuctEquip {
         String supplyAirTempId = createSupplyAirTempPoint(siteRef, equipDis, roomRef, floorRef, tz, config);
 
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
-                siteRef, roomRef, floorRef, nodeAddr, "dualDuct", tz));
+                siteRef, roomRef, floorRef, nodeAddr, "dualDuct", tz, false));
     
         CCUHsApi.getInstance().writeHisValById(datId, 0.0);
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);

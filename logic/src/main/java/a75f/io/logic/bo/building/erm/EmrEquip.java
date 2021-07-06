@@ -113,12 +113,12 @@ public class EmrEquip
         CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
 
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
-                siteRef, roomRef, floorRef, nodeAddr, "emr", tz));
+                siteRef, roomRef, floorRef, nodeAddr, "emr", tz, false));
 
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
-        device.addPointsToDb();
         device.rssi.setPointRef(heartBeatId);
         device.rssi.setEnabled(true);
+        device.addPointsToDb();
         device.addSensor(Port.SENSOR_ENERGY_METER, emrReadingId);
         hayStack.syncEntityTree();
     }

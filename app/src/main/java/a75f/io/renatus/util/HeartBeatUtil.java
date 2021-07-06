@@ -78,9 +78,7 @@ public class HeartBeatUtil {
                     .append(" mins ago")
                     .toString();
         }
-        return message.append("Today, ")
-                .append(getTime(updatedTime))
-                .toString();
+        return getLastUpdatedTime(message, updatedTime);
     }
 
     public static String getDateSuffix(int updatedDate){

@@ -272,7 +272,7 @@ public class CazEquip
         CCUHsApi.getInstance().writeHisValById(occupancyId, 0.0);
 
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
-                siteRef, roomRef, floorRef, nodeAddr, "ti", tz));
+                siteRef, roomRef, floorRef, nodeAddr, "ti", tz, false));
 
         //4 TODO map system device?
         ControlMote device = new ControlMote(nodeAddr,siteRef, floorRef, roomRef, equipRef);

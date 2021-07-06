@@ -27,6 +27,24 @@ public class HeartBeat {
                 .build();
     }
     private HeartBeat(String equipDis, String equipRef, String siteRef, String room, String floor, int nodeAddr,
+                      String profile, String tz, boolean isStandAlone){
+        heartBeat = new Point.Builder()
+                .setDisplayName(equipDis+"-heartBeat")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(room)
+                .setFloorRef(floor)
+                .addMarker("heartbeat")
+                .addMarker("zone")
+                .addMarker(profile).addMarker("sensor")
+                .addMarker("current").addMarker("his")
+                .addMarker("cur").addMarker("logical")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+    }
+
+    private HeartBeat(String equipDis, String equipRef, String siteRef, String room, String floor, int nodeAddr,
                       String profile, String modbusType, String tz){
         heartBeat = new Point.Builder()
                 .setDisplayName(equipDis+"-heartBeat")
@@ -35,7 +53,7 @@ public class HeartBeat {
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("heartbeat")
-                .addMarker("zone").addMarker("standalone")
+                .addMarker("zone")
                 .addMarker(profile).addMarker("sensor")
                 .addMarker("current").addMarker("his")
                 .addMarker("cur").addMarker("logical")
@@ -52,7 +70,7 @@ public class HeartBeat {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("rssi").addMarker("heartbeat")
+                .addMarker("rssi")
                 .addMarker("sensor").addMarker("his")
                 .setPort(Port.RSSI.toString())
                 .setTz(tz)
@@ -62,6 +80,11 @@ public class HeartBeat {
     public static Point getHeartBeatPoint(String equipDis, String equipRef, String siteRef, String room, String floor,
                                           int nodeAddr, String profile, String tz){
         return new HeartBeat(equipDis, equipRef, siteRef, room, floor, nodeAddr, profile, tz).heartBeat;
+    }
+
+    public static Point getHeartBeatPoint(String equipDis, String equipRef, String siteRef, String room, String floor,
+                                          int nodeAddr, String profile, String tz, boolean isStandAlone){
+        return new HeartBeat(equipDis, equipRef, siteRef, room, floor, nodeAddr, profile, tz, isStandAlone).heartBeat;
     }
 
     public static Point getHeartBeatPoint(String equipDis, String equipRef, String siteRef, String room, String floor,

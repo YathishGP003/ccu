@@ -2745,8 +2745,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
-        //TextView textViewModule = viewTitle.findViewById(R.id.module_status);
-      ///  moduleSatus(textViewModule, nodeAddress);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
         TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         textViewTitle.setText(EmrPoints.get("Profile").toString()+" ("+nodeAddress+")");
@@ -2754,6 +2754,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
 
         viewStatus.setPadding(0,0,0,40);
+        viewTitle.setPadding(40,20,0,0);
         try {
             linearLayoutZonePoints.addView(viewTitle);
             linearLayoutZonePoints.addView(viewStatus);

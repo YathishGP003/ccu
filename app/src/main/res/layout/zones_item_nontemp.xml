@@ -15,8 +15,8 @@
 
     <a75f.io.renatus.util.NonTempControl
         android:id="@+id/rl_nontemp"
-        android:layout_width="236dp"
-        android:layout_height="215dp"
+        android:layout_width="260dp"
+        android:layout_height="230dp"
         android:layout_gravity="center"/>
     <LinearLayout
         android:id="@+id/status_view"

@@ -75,11 +75,6 @@ public class EquipProcessor
     private void readExternalJsonData(){
         // Read external Json data
 
-        /*equipmentDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus", ModbusCategory.MODBUS));
-        energyMeterDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus", ModbusCategory.EMR_ZONE));
-        energyMeterSystemDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus",ModbusCategory.EMR_SYSTEM));
-        modbusBTUMeterDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus", ModbusCategory.BTU));*/
-
         parser.readExternalJSONFromDir("/sdcard/ccu/modbus",equipmentDevices,modbusBTUMeterDevices,energyMeterSystemDevices,energyMeterDevices);
         Log.i("CCU_MODBUS", "readExternalJsonData: updated");
 

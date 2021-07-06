@@ -165,7 +165,7 @@ public class HyperStatSenseEquip {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("config").addMarker("writable").addMarker("zone")
-                .addMarker("temp").addMarker("offset").addMarker("hyperstat").addMarker("sense")
+                .addMarker("temperature").addMarker("offset").addMarker("hyperstat").addMarker("sense")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setUnit("\u00B0F")
                 .setTz(tz)
@@ -311,7 +311,7 @@ public class HyperStatSenseEquip {
 
     public void update(ProfileType type, int node, HyperStatSenseConfiguration config, String floorRef, String roomRef) {
 
-        HashMap tempOffset = mHayStack.read("point and temp and offset and equipRef == \"" + mEquipRef + "\"");
+        HashMap tempOffset = mHayStack.read("point and temperature and offset and equipRef == \"" + mEquipRef + "\"");
         HashMap isTh1 = mHayStack.read("point and config and th1  and enabled and equipRef == \"" + mEquipRef + "\"");
         HashMap isTh2 = mHayStack.read("point and config and th2  and enabled and equipRef == \"" + mEquipRef + "\"");
         HashMap isAn1 = mHayStack.read("point and config and analog1  and enabled and equipRef == \"" + mEquipRef + "\"");

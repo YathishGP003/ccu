@@ -65,7 +65,7 @@ public class HyperStatMessageGenerator {
                                                                                                                "and limit and min"))
                                             .setMaxHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user " +
                                                                                                                "and limit and max"))
-                                            .setTemperatureOffset(0)//TODO
+                                            .setTemperatureOffset((int)DeviceHSUtil.getTempOffset(address))
                                             .build();
         return settings;
     }

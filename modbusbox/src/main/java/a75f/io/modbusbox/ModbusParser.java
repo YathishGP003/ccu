@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -164,6 +165,50 @@ public class ModbusParser {
     }
 
 
+    public void readExternalJSONFromDir(String filePath,List<EquipmentDevice> modbus, List<EquipmentDevice> btuList,
+                                                         List<EquipmentDevice> emSysList,List<EquipmentDevice> emzoneList){
+        ArrayList<EquipmentDevice> filterDevices = new ArrayList<>();
+        File modbusJsonFolder = new File(filePath);
+        if(modbusJsonFolder.listFiles()==null||modbusJsonFolder.listFiles().length==0)
+            Log.i("CCU_MODBUS", "No External JSON files found ");
+        if(modbusJsonFolder!=null && modbusJsonFolder.exists() && modbusJsonFolder.isDirectory()
+                && modbusJsonFolder.listFiles()!=null && modbusJsonFolder.listFiles().length>0) {
+            File listOfFile[] = modbusJsonFolder.listFiles();
+            for (int i = 0; i < listOfFile.length; i++) {
+                try {
+                    if(listOfFile[i].isFile())
+                    {
+                        EquipmentDevice device = parseModbusDevice(readFileFromFolder(listOfFile[i]));
+                        if(device == null ) continue;
+
+                        Log.i("CCU_MODBUS", "Valid JSON file found : "+device.getName() + " EquipType :"+device.getEquipType());
+
+                        if(device.getEquipType().equals(ModbusCategory.BTU.displayName)){
+                            btuList.add(device);
+                        }
+                        else if(device.getEquipType().equals(ModbusCategory.EMR.displayName)){
+                            emSysList.add(device);
+                        }
+                        else if(device.getEquipType().equals(ModbusCategory.EMR_ZONE.displayName)){
+                            emzoneList.add(device);
+                        }
+                        else{
+                            modbus.add(device);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }else{
+            modbusJsonFolder.mkdirs();
+        }
+
+    }
+
+
+/*
+
     public List<EquipmentDevice> readExternalJSONFromDir(String filePath,ModbusCategory type){
         ArrayList<EquipmentDevice> filterDevices = new ArrayList<>();
         File modbusJsonFolder = new File(filePath);
@@ -209,6 +254,7 @@ public class ModbusParser {
         return filterDevices;
     }
 
+*/
 
 
     private String readFileFromFolder(File file) {
@@ -229,6 +275,7 @@ public class ModbusParser {
     }
 
     private boolean isValidJSON(String rawJson){
+        boolean isValid= true;
         try {
             JSONObject jsonObject = new JSONObject(rawJson);
 
@@ -236,107 +283,121 @@ public class ModbusParser {
             for (int i = 0; i < deviceList.size() ; i++) {
                 if(deviceList.get(i).getModbusEquipIdId().equals(jsonObject.getString("modbusEquipId (_id)"))) {
                     Log.i("CCU_MODBUS", "Duplicate modbusEquipId: "+jsonObject.getString("modbusEquipId (_id)") +" Device name "+deviceList.get(i).getName());
-                    return false;
+                   // return false;
+                    isValid = false;
+                    break;
                 }
             }
 
             // Read Registers
             JSONArray registers = jsonObject.getJSONArray("registers");
+
+            if(isContainsDuplicateParametersInSameJSON(registers)){
+                Log.i("CCU_MODBUS", registers.toString()+" \n JSON Contains duplicate parameters");
+                isValid = false;
+            }
+
             for (int i = 0; i <registers.length() ; i++) {
 
-                    JSONObject registerData = registers.getJSONObject(i);
-                    // Read register parameters
-                    JSONArray params = registerData.getJSONArray("parameters");
-                    if(!isContainsDuplicateParametersInSameJSON(params)) {
-                        for (int j = 0; j < params.length(); j++) {
+                JSONObject registerData = registers.getJSONObject(i);
+                // Read register parameters
+                JSONArray params = registerData.getJSONArray("parameters");
+                for (int j = 0; j < params.length(); j++) {
 
-                            // Read Logical Points
-                            JSONObject parameter = params.getJSONObject(j);
-                            JSONArray logicalPointTags = parameter.getJSONArray("logicalPointTags");
+                    // Read Logical Points
+                    JSONObject parameter = params.getJSONObject(j);
+                    JSONArray logicalPointTags = parameter.getJSONArray("logicalPointTags");
 
-                            for (int k = 0; k < logicalPointTags.length(); k++) {
+                    for (int k = 0; k < logicalPointTags.length(); k++) {
 
-                                JSONObject tag = logicalPointTags.getJSONObject(k);
+                        JSONObject tag = logicalPointTags.getJSONObject(k);
 
-                                //Validate the logical Point Tag
-                                if (!isValidTAG(tag.getString("tagName"))) {
-                                    return false;
-                                }
-                            }
+                        //Validate the logical Point Tag
+                        if (!isValidTAG(tag.getString("tagName"))) {
+                            isValid =  false;
                         }
-                    }else{
-                        Log.i("CCU_MODBUS", params.toString()+"\n JSON Contains duplicate parameters");
-                        return false;
                     }
+                }
 
             }
+
         }catch (Exception e){
+            Log.i("CCU_MODBUS", "Exception "+e.getMessage());
             e.printStackTrace();
-            return false;
+            //return false;
+            isValid = false;
         }
-        return  true;
+        return  isValid;
     }
 
 
     private boolean isValidTAG(String tag){
+        boolean isValid = true;
         // Check for Special Char
         Pattern validPattern = Pattern.compile("[^A-Za-z0-9]");
         Matcher matcher = validPattern.matcher(tag);
         if(matcher.find())
         {
-            Log.i("CCU_MODBUS", "Invalid: tag : "+tag+" Contains Special Character");
-            return false;
+            Log.i("CCU_MODBUS", "Invalid: tag : '"+tag+ "'  Contains Special Character");
+            isValid = false;
         }
 
         // Check for Caps
         if(Character.isUpperCase(tag.charAt(0))){
-            Log.i("CCU_MODBUS", "Invalid: tag : "+tag+" Should not start with upper case");
-            return false;
+            Log.i("CCU_MODBUS", "Invalid: tag : '"+tag+"'   Should not start with upper case");
+            isValid = false;
         }
 
         if(Character.isDigit(tag.charAt(0))){
-            Log.i("CCU_MODBUS", "Invalid: tag : "+tag+" Should not start with Number");
-            return false;
+            Log.i("CCU_MODBUS", "Invalid: tag : '"+tag+"'   Should not start with Number");
+            isValid = false;
         }
 
-        return  true;
+        return  isValid;
     }
 
 
     private boolean isContainsDuplicateParametersInSameJSON(JSONArray jsonArray){
+        boolean isValid = false;
         try {
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject paramIDetails = jsonArray.getJSONObject(i);
-                for (int j = 0; j < jsonArray.length(); j++) {
-                        JSONObject paramJDetails = jsonArray.getJSONObject(j);
-                        if (i != j && paramIDetails.getString("parameterId").equals(paramJDetails.getString("parameterId"))) {
-                            Log.i("CCU_MODBUS", "Duplicate parameter ID found: "+paramJDetails.getString("parameterId")+" Param Name : "+paramIDetails.getString("name"));
-                            return true;
+            for (int i = 0; i < jsonArray.length()-1; i++) {
+                JSONArray paramIDetails = jsonArray.getJSONObject(i).getJSONArray("parameters");
+
+                for (int j = i+1; j < jsonArray.length(); j++) {
+                    JSONArray paramJDetails = jsonArray.getJSONObject(j).getJSONArray("parameters");
+                        if (paramIDetails.getJSONObject(0).getString("parameterId").equals(paramJDetails.getJSONObject(0).getString("parameterId"))) {
+                            Log.i("CCU_MODBUS", "Duplicate parameter ID found: "+paramJDetails.getJSONObject(0).getString("parameterId")+" Param Name : "+paramIDetails.getJSONObject(0).getString("name"));
+                            isValid = true;
                         }
                 }
-                if (isContainsDuplicateParamerInOtherJSON(paramIDetails.getString("parameterId"))) return true;
+                if (isContainsDuplicateParamerInOtherJSON(paramIDetails.getJSONObject(0).getString("parameterId"))) isValid = true;
             }
         }catch (Exception e){
             e.printStackTrace();
+            Log.i("CCU_MODBUS", "Exception in isContainsDuplicateParametersInSameJSON"+e.getMessage());
+            isValid = true;
         }
-        return false;
+        return isValid;
     }
 
     private boolean isContainsDuplicateParamerInOtherJSON(String paramID){
+        boolean isContainDuplicate = false;
         for (int i = 0; i < deviceList.size(); i++) {
             EquipmentDevice device = deviceList.get(i);
             List<Register> registers= device.getRegisters();
+
             for (int j = 0; j <registers.size() ; j++) {
+
                 List<Parameter> parameters= registers.get(j).getParameters();
-                for (int k = 0; k <parameters.size() ; k++) {
-                        if(parameters.get(k).parameterId.equals(paramID)){
-                            Log.i("CCU_MODBUS", "Duplicate parameter ID found: "+paramID+" in "+device.getName() +" Param Name "+parameters.get(k).getName());
-                            return true;
-                        }
+                if(parameters.get(0).parameterId.equals(paramID)){
+                    Log.i("CCU_MODBUS", "Duplicate parameter ID found: "+paramID+" in "+device.getName() +" Param Name "+parameters.get(0).getName());
+                    isContainDuplicate =  true;
+                    break;
                 }
+
             }
         }
-        return false;
+        return isContainDuplicate;
     }
 
 }

@@ -1,6 +1,7 @@
 package a75f.io.modbusbox;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -73,10 +74,14 @@ public class EquipProcessor
 
     private void readExternalJsonData(){
         // Read external Json data
-        equipmentDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus", ModbusCategory.MODBUS));
+
+        /*equipmentDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus", ModbusCategory.MODBUS));
         energyMeterDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus", ModbusCategory.EMR_ZONE));
         energyMeterSystemDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus",ModbusCategory.EMR_SYSTEM));
-        modbusBTUMeterDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus", ModbusCategory.BTU));
+        modbusBTUMeterDevices.addAll(parser.readExternalJSONFromDir("/sdcard/ccu/modbus", ModbusCategory.BTU));*/
+
+        parser.readExternalJSONFromDir("/sdcard/ccu/modbus",equipmentDevices,modbusBTUMeterDevices,energyMeterSystemDevices,energyMeterDevices);
+        Log.i("CCU_MODBUS", "readExternalJsonData: updated");
 
     }
 

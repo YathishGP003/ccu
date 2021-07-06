@@ -1775,14 +1775,14 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         sensePoints.put("size",size);
         if (analog1Sensor >= 0 ) {
             Sensor selectedSensor = SensorManager.getInstance().getExternalSensorList().get((int) analog1Sensor );
-            sensePoints.put("Analog1", selectedSensor.sensorName);
+            sensePoints.put("Analog1",getAnalogShortDis((int) analog1Sensor) );
             sensePoints.put("Unit1", selectedSensor.engineeringUnit);
             sensePoints.put("An1Val",an1Val);
         }
 
         if (analog2Sensor >= 0) {
             Sensor selectedSensor = SensorManager.getInstance().getExternalSensorList().get((int) analog2Sensor );
-            sensePoints.put("Analog2", selectedSensor.sensorName);
+            sensePoints.put("Analog2", getAnalogShortDis((int) analog2Sensor));
             sensePoints.put("Unit2", selectedSensor.engineeringUnit);
             sensePoints.put("An2Val",an2Val);
         }
@@ -1801,5 +1801,45 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
 
         return sensePoints;
+    }
+
+    private static String getAnalogShortDis(int analog) {
+        String shortDis = "Generic 0-10 Voltage";
+        switch (analog) {
+            case 0:
+                shortDis = "Generic 0-10 Voltage";
+                break;
+            case 1:
+                shortDis = "Pressure [0-2 in.]";
+                break;
+            case 2:
+                shortDis = "Pressure[0-0.25 in. Differential]";
+                break;
+            case 3:
+                shortDis = "Airflow";
+                break;
+            case 4:
+                shortDis = "Humidity";
+                break;
+            case 5:
+                shortDis = "CO2 Level";
+                break;
+            case 6:
+                shortDis = "CO Level";
+                break;
+            case 7:
+                shortDis = "NO2 Level";
+                break;
+            case 8:
+                shortDis = "Current Drawn[CT 0-10]";
+                break;
+            case 9:
+                shortDis = "Current Drawn[CT 0-20]";
+                break;
+            case 10:
+                shortDis = "Current Drawn[CT 0-50]";
+                break;
+        }
+        return shortDis;
     }
 }

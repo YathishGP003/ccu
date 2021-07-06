@@ -399,7 +399,6 @@ public class HyperStatSenseEquip {
 
 
         HyperStatSenseConfiguration currentConfig = getHyperStatSenseConfig();
-        HyperStatDevice device = new HyperStatDevice(mNodeAddr, siteRef, floorRef, roomRef, mEquipRef, "sense");
 
         if (tempOffset != null && tempOffset.get("id") != null && config.temperatureOffset != currentConfig.temperatureOffset) {
             Log.d(LOG_TAG, "tempOffset update : " + config.temperatureOffset);
@@ -417,15 +416,11 @@ public class HyperStatSenseEquip {
             if (config.isTh1Enable) {
                 Log.d(LOG_TAG, "thermister1 toggle update create new entry: ");
                 String id = createSensorPoint(floorRef, roomRef, "th1", config);
-                device.th1In.setPointRef(id);
-                device.th1In.setEnabled(true);
-                device.th1In.setType(String.valueOf(config.th1Sensor));
-                device.addSensor(Port.TH1_IN, id);
                 DeviceUtil.setPointEnabled(mNodeAddr, Port.TH1_IN.name(), true);
                 DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.TH1_IN.name(), id);
             }
         }
-        if (config.isTh1Enable && config.th1Sensor != currentConfig.th1Sensor){
+        else if (config.isTh1Enable && config.th1Sensor != currentConfig.th1Sensor){
             Log.d(LOG_TAG, "thermister1 spinner update : " + config.th1Sensor);
             mHayStack.writeDefaultValById(Th1.get("id").toString(), (double) config.th1Sensor);
             if (Th1Val != null && Th1Val.get("id") != null) {
@@ -434,10 +429,6 @@ public class HyperStatSenseEquip {
                 Log.d(LOG_TAG, "TH1 is null");
             }
             String id = createSensorPoint(floorRef, roomRef, "th1", config);
-            device.th1In.setPointRef(id);
-            device.th1In.setEnabled(true);
-            device.th1In.setType(String.valueOf(config.th1Sensor));
-            device.addSensor(Port.TH1_IN, id);
             DeviceUtil.setPointEnabled(mNodeAddr, Port.TH1_IN.name(), true);
             DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.TH1_IN.name(), id);
         }
@@ -454,15 +445,11 @@ public class HyperStatSenseEquip {
             if (config.isTh2Enable) {
                 Log.d(LOG_TAG, "thermister2 toggle update create new entry: ");
                 String id = createSensorPoint(floorRef, roomRef, "th2", config);
-                device.th2In.setPointRef(id);
-                device.th2In.setEnabled(true);
-                device.th2In.setType(String.valueOf(config.th2Sensor));
-                device.addSensor(Port.TH2_IN, id);
                 DeviceUtil.setPointEnabled(mNodeAddr, Port.TH2_IN.name(), true);
                 DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.TH2_IN.name(), id);
             }
         }
-        if (config.isTh2Enable && config.th2Sensor != currentConfig.th2Sensor){
+        else if (config.isTh2Enable && config.th2Sensor != currentConfig.th2Sensor){
             Log.d(LOG_TAG, "thermister2 spinner update : " + config.th1Sensor);
             mHayStack.writeDefaultValById(Th2.get("id").toString(), (double) config.th2Sensor);
             if (Th2Val != null && Th2Val.get("id") != null) {
@@ -471,10 +458,6 @@ public class HyperStatSenseEquip {
                 Log.d(LOG_TAG, "TH2 is null");
             }
             String id = createSensorPoint(floorRef, roomRef, "th2", config);
-            device.th2In.setPointRef(id);
-            device.th2In.setEnabled(true);
-            device.th2In.setType(String.valueOf(config.th2Sensor));
-            device.addSensor(Port.TH2_IN, id);
             DeviceUtil.setPointEnabled(mNodeAddr, Port.TH2_IN.name(), true);
             DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.TH2_IN.name(), id);
         }
@@ -491,15 +474,11 @@ public class HyperStatSenseEquip {
             if (config.isAnalog1Enable) {
                 Log.d(LOG_TAG, "an1 toggle update create new entry: ");
                 String id = createSensorPoint(floorRef, roomRef, "analog1", config);
-                device.analog1In.setPointRef(id);
-                device.analog1In.setEnabled(true);
-                device.analog1In.setType(String.valueOf(config.analog1Sensor));
-                device.addSensor(Port.ANALOG_IN_ONE, id);
                 DeviceUtil.setPointEnabled(mNodeAddr, Port.ANALOG_IN_ONE.name(), true);
                 DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.ANALOG_IN_ONE.name(), id);
             }
         }
-        if (config.isAnalog1Enable && config.analog1Sensor != currentConfig.analog1Sensor){
+        else if (config.isAnalog1Enable && config.analog1Sensor != currentConfig.analog1Sensor){
             Log.d(LOG_TAG, "an1 spinner update : " + config.analog1Sensor);
             mHayStack.writeDefaultValById(An1.get("id").toString(), (double) config.analog1Sensor);
             if ( An1Val!= null && An1Val.get("id") != null) {
@@ -509,17 +488,10 @@ public class HyperStatSenseEquip {
                 Log.d(LOG_TAG, "An1 is null");
             }
             String id = createSensorPoint(floorRef, roomRef, "analog1", config);
-            device.analog1In.setPointRef(id);
-            device.analog1In.setEnabled(true);
-            device.analog1In.setType(String.valueOf(config.analog1Sensor));
-            device.addSensor(Port.ANALOG_IN_ONE, id);
             DeviceUtil.setPointEnabled(mNodeAddr, Port.ANALOG_IN_ONE.name(), true);
             DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.ANALOG_IN_ONE.name(), id);
 
         }
-
-
-
 
         if (config.isAnalog2Enable != currentConfig.isAnalog2Enable){
             Log.d(LOG_TAG, "an2 toggle update : " + config.isAnalog2Enable);
@@ -529,20 +501,14 @@ public class HyperStatSenseEquip {
             }else{
                 Log.d(LOG_TAG, "An2 is null");
             }
-
             if (config.isAnalog2Enable) {
                 Log.d(LOG_TAG, "an2 toggle update create new entry: ");
                 String id = createSensorPoint(floorRef, roomRef, "analog2", config);
-                device.analog2In.setPointRef(id);
-                device.analog2In.setEnabled(true);
-                device.analog2In.setType(String.valueOf(config.analog2Sensor));
-                device.addSensor(Port.ANALOG_IN_TWO, id);
                 DeviceUtil.setPointEnabled(mNodeAddr, Port.ANALOG_IN_TWO.name(), true);
                 DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.ANALOG_IN_TWO.name(), id);
-
             }
         }
-        if (config.isAnalog2Enable && config.analog2Sensor != currentConfig.analog2Sensor){
+        else if (config.isAnalog2Enable && config.analog2Sensor != currentConfig.analog2Sensor){
             Log.d(LOG_TAG, "an2 spinner update : " + config.analog2Sensor);
             mHayStack.writeDefaultValById(An2.get("id").toString(), (double) config.analog2Sensor);
             if ( An2Val!= null && An2Val.get("id") != null) {
@@ -552,13 +518,8 @@ public class HyperStatSenseEquip {
                 Log.d(LOG_TAG, "An2 is null");
             }
             String id = createSensorPoint(floorRef, roomRef, "analog2", config);
-            device.analog2In.setPointRef(id);
-            device.analog2In.setEnabled(true);
-            device.analog2In.setType(String.valueOf(config.analog2Sensor));
-            device.addSensor(Port.ANALOG_IN_TWO, id);
             DeviceUtil.setPointEnabled(mNodeAddr, Port.ANALOG_IN_TWO.name(), true);
             DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.ANALOG_IN_TWO.name(), id);
-
         }
 
         mHayStack.syncEntityTree();

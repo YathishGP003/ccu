@@ -33,6 +33,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
 import a75f.io.logic.jobs.ScheduleProcessJob;
@@ -71,8 +72,19 @@ public class TempOverrideFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_temp_override, container, false);
         ButterKnife.bind(this, rootView);
-
         return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Globals.getInstance().setTemproryOverrideMode(true);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Globals.getInstance().setTemproryOverrideMode(false);
     }
 
     @Override

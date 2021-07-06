@@ -92,6 +92,7 @@ public class Globals {
     private boolean testHarness = true;
 
     private boolean _siteAlreadyCreated;
+    private boolean isTempOverride = false;
 
     private Long curPubNubMsgTimeToken;
     private Globals() {
@@ -122,12 +123,21 @@ public class Globals {
         return getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                 .getBoolean("biskit_mode", false);
     }
+
+    public boolean isTemproryOverrideMode(){
+        return isTempOverride;
+    }
+
+    public void setTemproryOverrideMode(boolean isTemproryOverrideMode){
+        isTempOverride = isTemproryOverrideMode;
+    }
     
     public boolean isTestMode()
     {
         return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                       .getBoolean("test_mode", false);
     }
+
     public void setTestMode(boolean isTestMode) {
         Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                 .edit().putBoolean("test_mode", isTestMode).apply();

@@ -1804,6 +1804,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     }
 
     private static String getAnalogShortDis(int analog) {
+        Log.d("ScheduleProcessJob","Analog selected -"+analog);
         String shortDis = "Generic 0-10 Voltage";
         switch (analog) {
             case 0:
@@ -1838,6 +1839,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 break;
             case 10:
                 shortDis = "Current Drawn[CT 0-50]";
+                break;
+            case 11:
+                shortDis ="ION Density";
                 break;
         }
         return shortDis;

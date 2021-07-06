@@ -272,67 +272,7 @@ public class HyperStatSenseEquip {
         String th2InputSensorId = mHayStack.addPoint(th2InputSensor);
         mHayStack.writeDefaultValById(th2InputSensorId, (double) config.th2Sensor >= 0 ? config.th2Sensor : 0.0);
 
-
-
-       //  Onboard sensors - Sound, PM2.5 and Light
-        Point sound = new Point.Builder()
-                .setDisplayName(siteDis + "-SENSE-" + mNodeAddr + "-sound")
-                .setEquipRef(mEquipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef)
-                .setHisInterpolate("cov")
-                .addMarker("zone").addMarker("hyperstat").addMarker("sense")
-                .addMarker("sound").addMarker("sensor").addMarker("his").addMarker("cur").addMarker("logical")
-                .setGroup(String.valueOf(mNodeAddr))
-                .setUnit("db")
-                .setTz(tz)
-                .build();
-        String soundid = CCUHsApi.getInstance().addPoint(sound);
-        mHayStack.writeDefaultValById(soundid, 0.0);
-        mHayStack.writeHisValById(soundid, 0.0);
-
-
-        Point  PM2P5 = new Point.Builder()
-                .setDisplayName(siteDis + "-SENSE-" + mNodeAddr + "-PM2")
-                .setEquipRef(mEquipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef)
-                .setHisInterpolate("cov")
-                .addMarker("zone").addMarker("hyperstat").addMarker("sense")
-                .addMarker("sensor").addMarker("his").addMarker("cur").addMarker("logical")
-                .setGroup(String.valueOf(mNodeAddr))
-                .setUnit("ug/m3")
-                .setTz(tz)
-                .build();
-        String pmid = CCUHsApi.getInstance().addPoint(PM2P5);
-        mHayStack.writeDefaultValById(pmid, 0.0);
-        mHayStack.writeHisValById(pmid, 0.0);
-
-        Point  light = new Point.Builder()
-                .setDisplayName(siteDis + "-SENSE-" + mNodeAddr + "-Light")
-                .setEquipRef(mEquipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef)
-                .setHisInterpolate("cov")
-                .addMarker("zone").addMarker("hyperstat").addMarker("sense")
-                .addMarker("sensor").addMarker("his").addMarker("cur").addMarker("logical")
-                .addMarker("light")
-                .setGroup(String.valueOf(mNodeAddr))
-                .setUnit("lux")
-                .setTz(tz)
-                .build();
-        String lightid = CCUHsApi.getInstance().addPoint(light);
-        mHayStack.writeDefaultValById(lightid, 0.0);
-        mHayStack.writeHisValById(lightid, 0.0);
-
-
-
-
         HyperStatDevice device = new HyperStatDevice(mNodeAddr, siteRef, floorRef, roomRef, mEquipRef, "sense");
-
 
         if (config.isAnalog1Enable) {
             String sensorId = createSensorPoint(floorRef, roomRef, "analog1", config);
@@ -705,6 +645,15 @@ public class HyperStatSenseEquip {
                 minVal = "0";
                 incrementVal = "0.1";
                 markers = new String[]{"current", "transformer"};
+                break;
+            case 11:
+                shortDis = "ION Density";
+                shortDisTarget = "Dynamic Target ION Density";
+                unit = "ions/cc";
+                maxVal = "10";
+                minVal = "0";
+                incrementVal = "1000";
+                markers = new String[]{"ion", "density"};
                 break;
         }
 

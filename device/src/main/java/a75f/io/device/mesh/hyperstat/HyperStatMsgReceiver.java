@@ -1,4 +1,4 @@
-package a75f.io.device.mesh;
+package a75f.io.device.mesh.hyperstat;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -15,6 +15,11 @@ import a75f.io.api.haystack.RawPoint;
 import a75f.io.device.HyperStat;
 import a75f.io.device.HyperStat.HyperStatLocalControlsOverrideMessage_t;
 import a75f.io.device.HyperStat.HyperStatRegularUpdateMessage_t;
+import a75f.io.device.mesh.AnalogUtil;
+import a75f.io.device.mesh.DLog;
+import a75f.io.device.mesh.DeviceHSUtil;
+import a75f.io.device.mesh.Pulse;
+import a75f.io.device.mesh.ThermistorUtil;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -27,6 +32,11 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 import static a75f.io.device.mesh.Pulse.getHumidityConversion;
 
 public class HyperStatMsgReceiver {
+    
+    private static final int HYPERSTAT_MESSAGE_ADDR_START_INDEX = 1;
+    private static final int HYPERSTAT_MESSAGE_ADDR_END_INDEX = 5;
+    private static final int HYPERSTAT_MESSAGE_TYPE_INDEX = 13;
+    private static final int HYPERSTAT_SERIALIZED_MESSAGE_START_INDEX = 17;
     
     public static void processMessage(byte[] data, CCUHsApi hayStack) {
         try {
@@ -42,12 +52,15 @@ public class HyperStatMsgReceiver {
             */
             CcuLog.e(L.TAG_CCU_DEVICE, "processMessage processMessage :"+ Arrays.toString(data));
     
-            byte[] addrArray = Arrays.copyOfRange(data, 1, 5);
+            byte[] addrArray = Arrays.copyOfRange(data, HYPERSTAT_MESSAGE_ADDR_START_INDEX,
+                                                  HYPERSTAT_MESSAGE_ADDR_END_INDEX);
             int address = ByteBuffer.wrap(addrArray)
                                     .order(ByteOrder.LITTLE_ENDIAN)
                                     .getInt();
-            byte[] messageArray = Arrays.copyOfRange(data, 17, data.length);
-            MessageType messageType = MessageType.values()[data[13]];
+    
+            MessageType messageType = MessageType.values()[data[HYPERSTAT_MESSAGE_TYPE_INDEX]];
+    
+            byte[] messageArray = Arrays.copyOfRange(data, HYPERSTAT_SERIALIZED_MESSAGE_START_INDEX, data.length);
             
             if (messageType == MessageType.HYPERSTAT_REGULAR_UPDATE_MESSAGE) {
                 HyperStatRegularUpdateMessage_t regularUpdate =
@@ -157,20 +170,22 @@ public class HyperStatMsgReceiver {
         HyperStatDevice node = new HyperStatDevice(addr);
         int emVal = 0;
        
-        for (HyperStat.SensorReadingPb_t r : sensorReadings) {
-            SensorType t = SensorType.values()[r.getSensorType()];
-            Port p = t.getSensorPort();
-            if (p == null) {
+        for (HyperStat.SensorReadingPb_t sensorReading : sensorReadings) {
+            SensorType sensorType = SensorType.values()[sensorReading.getSensorType()];
+            Port port = sensorType.getSensorPort();
+            if (port == null) {
                 continue;
             }
-            double val = r.getSensorData();
-            RawPoint sp = node.getRawPoint(p);
+            //Some of the sensors are optional.So these points are created only when we receive
+            //the first update for a specific sensor type.
+            double val = sensorReading.getSensorData();
+            RawPoint sp = node.getRawPoint(port);
             if (sp == null) {
-                sp = node.createSensorPoints(p);
-                CcuLog.d(L.TAG_CCU_DEVICE, " Sensor Added , type "+t+" port "+p);
+                sp = node.createSensorPoints(port);
+                CcuLog.d(L.TAG_CCU_DEVICE, " Sensor Added , type "+sensorType+" port "+port);
             }
-            CcuLog.d(L.TAG_CCU_DEVICE,"HyperStatSensor update: "+t+" : "+val);
-            switch (t) {
+            CcuLog.d(L.TAG_CCU_DEVICE,"HyperStatSensor update: "+sensorType+" : "+val);
+            switch (sensorType) {
                 case HUMIDITY:
                     CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
                     CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), CCUUtils.roundToOneDecimal(val/10.0));
@@ -191,10 +206,10 @@ public class HyperStatMsgReceiver {
                     //TODO
                     break;
                 case ENERGY_METER_HIGH:
-                    emVal = emVal > 0 ?  (emVal | (r.getSensorData() << 12)) : r.getSensorData();
+                    emVal = emVal > 0 ?  (emVal | (sensorReading.getSensorData() << 12)) : sensorReading.getSensorData();
                     break;
                 case ENERGY_METER_LOW:
-                    emVal = emVal > 0 ? ((emVal << 12) | r.getSensorData()) : r.getSensorData();
+                    emVal = emVal > 0 ? ((emVal << 12) | sensorReading.getSensorData()) : sensorReading.getSensorData();
                     break;
             }
         }

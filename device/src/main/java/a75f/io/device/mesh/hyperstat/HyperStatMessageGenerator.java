@@ -1,4 +1,4 @@
-package a75f.io.device.mesh;
+package a75f.io.device.mesh.hyperstat;
 
 import com.google.protobuf.ByteString;
 
@@ -10,6 +10,8 @@ import a75f.io.device.HyperStat.HyperStatCcuDatabaseSeedMessage_t;
 import a75f.io.device.HyperStat.HyperStatControlsMessage_t;
 import a75f.io.device.HyperStat.HyperStatSettingsMessage_t;
 import a75f.io.device.HyperStat;
+import a75f.io.device.mesh.DeviceHSUtil;
+import a75f.io.device.mesh.DeviceUtil;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
@@ -65,7 +67,7 @@ public class HyperStatMessageGenerator {
                                                                                                                "and limit and min"))
                                             .setMaxHeatingUserTemp((int) TunerUtil.readBuildingTunerValByQuery("cooling and user " +
                                                                                                                "and limit and max"))
-                                            .setTemperatureOffset(0)//TODO
+                                            .setTemperatureOffset((int) DeviceHSUtil.getTempOffset(address))
                                             .build();
         return settings;
     }
@@ -104,7 +106,6 @@ public class HyperStatMessageGenerator {
         return controls.build();
     }
     
-    //TODO-
     private static double getDesiredTempCooling(String equipRef) {
         return CCUHsApi.getInstance().readDefaultVal("desired and temp and cooling and equipRef == \""+equipRef+"\"");
     }

@@ -1,4 +1,4 @@
-package a75f.io.device.mesh;
+package a75f.io.device.mesh.hyperstat;
 
 import java.util.HashMap;
 

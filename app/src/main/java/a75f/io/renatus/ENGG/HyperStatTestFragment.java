@@ -21,18 +21,15 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import a75f.io.device.HyperStat;
 import a75f.io.device.HyperStat.HyperStatAnalogOutputControl_t;
 import a75f.io.device.HyperStat.HyperStatCcuDatabaseSeedMessage_t;
 import a75f.io.device.HyperStat.HyperStatControlsMessage_t;
 import a75f.io.device.HyperStat.HyperStatSettingsMessage_t;
-import a75f.io.device.mesh.HyperStatMessageSender;
-import a75f.io.device.mesh.LSerial;
+import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;

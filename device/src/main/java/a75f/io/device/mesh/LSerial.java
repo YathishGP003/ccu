@@ -15,6 +15,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
+import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
+import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
 import a75f.io.device.modbus.ModbusPulse;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwarePacketRequest_t;

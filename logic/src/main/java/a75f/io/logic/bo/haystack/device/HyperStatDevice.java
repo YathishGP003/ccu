@@ -235,20 +235,25 @@ public class HyperStatDevice {
     }
     
     public RawPoint createSensorPoints(Port p) {
-        Equip q = new Equip.Builder().setHashMap(CCUHsApi.getInstance()
+        Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance()
                                                          .read("equip and group == \""+hyperStatNodeAddress+"\"")).build();
         
-        Point equipSensor = new Point.Builder()
-                                .setDisplayName(q.getDisplayName()+"-"+p.getPortSensor())
-                                .setEquipRef(q.getId())
+        Point.Builder equipSensor = new Point.Builder()
+                                .setDisplayName(equip.getDisplayName()+"-"+p.getPortSensor())
+                                .setEquipRef(equip.getId())
                                 .setSiteRef(siteRef)
                                 .setRoomRef(roomRef)
                                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                                .addMarker("zone").addMarker("sensor").addMarker(p.getPortSensor()).addMarker("his").addMarker("cur").addMarker("logical")
+                                .addMarker("zone").addMarker("sensor").addMarker(p.getPortSensor()).addMarker("his")
+                                .addMarker("cur").addMarker("logical").addMarker(Tags.HYPERSTAT)
                                 .setGroup(String.valueOf(hyperStatNodeAddress))
-                                .setTz(tz)
-                                .build();
-        String pointRef = CCUHsApi.getInstance().addPoint(equipSensor);
+                                .setTz(tz);
+        
+        if (equip.getMarkers().contains(Tags.SENSE)) {
+            equipSensor.addMarker(Tags.SENSE);
+        }
+        
+        String pointRef = CCUHsApi.getInstance().addPoint(equipSensor.build());
         RawPoint deviceSensor = new RawPoint.Builder()
                                     .setDisplayName(p.toString()+"-"+hyperStatNodeAddress)
                                     .setDeviceRef(deviceRef)

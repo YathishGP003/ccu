@@ -6,7 +6,7 @@ import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.DeviceNetwork;
-import a75f.io.device.HyperStat;
+import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;

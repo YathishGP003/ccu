@@ -1,16 +1,19 @@
-package a75f.io.device.mesh;
+package a75f.io.device.mesh.hyperstat;
 
 import android.util.Log;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
-import a75f.io.alerts.BuildConfig;
 import a75f.io.device.HyperStat.HyperStatCcuDatabaseSeedMessage_t;
 import a75f.io.device.HyperStat.HyperStatCcuToCmSerializedMessage_t;
 import a75f.io.device.HyperStat.HyperStatControlsMessage_t;
 import a75f.io.device.HyperStat.HyperStatSettingsMessage_t;
+import a75f.io.device.mesh.DLog;
+import a75f.io.device.mesh.LSerial;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -33,7 +36,7 @@ public class HyperStatMessageSender {
     public static void sendSeedMessage(String zone,int address,String equipRef, String profile,
                                        boolean checkDuplicate) {
         HyperStatCcuDatabaseSeedMessage_t seedMessage = HyperStatMessageGenerator.getSeedMessage(zone, address,
-                                                                                                         equipRef, profile);
+                                                                                                 equipRef, profile);
     
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + HYPERSTAT_CCU_DATABASE_SEED_MESSAGE);

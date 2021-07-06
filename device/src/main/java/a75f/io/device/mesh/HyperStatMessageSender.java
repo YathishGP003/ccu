@@ -30,7 +30,8 @@ public class HyperStatMessageSender {
      * @param equipRef
      * @param profile
      */
-    public static void sendSeedMessage(String zone,int address,String equipRef, String profile) {
+    public static void sendSeedMessage(String zone,int address,String equipRef, String profile,
+                                       boolean checkDuplicate) {
         HyperStatCcuDatabaseSeedMessage_t seedMessage = HyperStatMessageGenerator.getSeedMessage(zone, address,
                                                                                                          equipRef, profile);
     
@@ -40,7 +41,7 @@ public class HyperStatMessageSender {
             CcuLog.i(L.TAG_CCU_SERIAL, seedMessage.getSerializedControlsData().toString());
         }
         
-        writeSeedMessage(seedMessage, address, true);
+        writeSeedMessage(seedMessage, address, checkDuplicate);
     }
     
     public static void writeSeedMessage(HyperStatCcuDatabaseSeedMessage_t seedMessage, int address,

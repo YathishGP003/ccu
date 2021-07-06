@@ -132,7 +132,7 @@ public class MeshNetwork extends DeviceNetwork
                                     CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING HyperStat " +
                                                               "SEEDS ====================="+zone.getId());
                                     HyperStatMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
-                                                                           d.getEquipRef(), hyperStatProfile);
+                                                                           d.getEquipRef(), hyperStatProfile, false);
                                 } else {
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat " +
                                                                "Settings =====================");

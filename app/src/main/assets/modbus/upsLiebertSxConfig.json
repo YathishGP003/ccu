@@ -12,7 +12,7 @@
       "registerAddress": 87,
       "registerNumber": "40088",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8001",
@@ -60,7 +60,7 @@
       "registerAddress": 87,
       "registerNumber": "40088",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8002",
@@ -110,7 +110,7 @@
       "registerAddress": 87,
       "registerNumber": "40088",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8003",
@@ -160,7 +160,7 @@
       "registerAddress": 87,
       "registerNumber": "40088",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8004",
@@ -210,7 +210,7 @@
       "registerAddress": 87,
       "registerNumber": "40088",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8005",
@@ -260,7 +260,7 @@
       "registerAddress": 87,
       "registerNumber": "40088",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8006",
@@ -310,7 +310,7 @@
       "registerAddress": 87,
       "registerNumber": "40088",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8007",
@@ -360,7 +360,7 @@
       "registerAddress": 87,
       "registerNumber": "40088",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8008",
@@ -410,7 +410,7 @@
       "registerAddress": 88,
       "registerNumber": "40089",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8009",
@@ -461,7 +461,7 @@
       "registerAddress": 88,
       "registerNumber": "40089",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8010",
@@ -511,7 +511,7 @@
       "registerAddress": 88,
       "registerNumber": "40089",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8011",
@@ -561,7 +561,7 @@
       "registerAddress": 88,
       "registerNumber": "40089",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8012",
@@ -614,7 +614,7 @@
       "registerAddress": 88,
       "registerNumber": "40089",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8013",
@@ -664,7 +664,7 @@
       "registerAddress": 88,
       "registerNumber": "40089",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8014",
@@ -714,7 +714,7 @@
       "registerAddress": 88,
       "registerNumber": "40089",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8015",
@@ -764,7 +764,7 @@
       "registerAddress": 88,
       "registerNumber": "40089",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8016",
@@ -811,7 +811,7 @@
       "registerAddress": 89,
       "registerNumber": "40090",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8017",
@@ -862,7 +862,7 @@
       "registerAddress": 89,
       "registerNumber": "40090",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8018",
@@ -912,7 +912,7 @@
       "registerAddress": 89,
       "registerNumber": "40090",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8019",
@@ -962,7 +962,7 @@
       "registerAddress": 89,
       "registerNumber": "40090",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8020",
@@ -1015,7 +1015,7 @@
       "registerAddress": 89,
       "registerNumber": "40090",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8021",
@@ -1065,7 +1065,7 @@
       "registerAddress": 89,
       "registerNumber": "40090",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8022",
@@ -1115,7 +1115,7 @@
       "registerAddress": 89,
       "registerNumber": "40090",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8023",
@@ -1165,7 +1165,7 @@
       "registerAddress": 89,
       "registerNumber": "40090",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8024",
@@ -1215,7 +1215,7 @@
       "registerAddress": 90,
       "registerNumber": "40091",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8025",
@@ -1265,7 +1265,7 @@
       "registerAddress": 90,
       "registerNumber": "40091",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8026",
@@ -1315,7 +1315,7 @@
       "registerAddress": 90,
       "registerNumber": "40091",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8027",
@@ -1365,7 +1365,7 @@
       "registerAddress": 90,
       "registerNumber": "40091",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8028",
@@ -1415,7 +1415,7 @@
       "registerAddress": 90,
       "registerNumber": "40091",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8029",
@@ -1468,7 +1468,7 @@
       "registerAddress": 90,
       "registerNumber": "40091",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8030",
@@ -1521,7 +1521,7 @@
       "registerAddress": 90,
       "registerNumber": "40091",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8031",
@@ -1571,7 +1571,7 @@
       "registerAddress": 90,
       "registerNumber": "40091",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8032",
@@ -1621,7 +1621,7 @@
       "registerAddress": 94,
       "registerNumber": "40095",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8036",
@@ -1674,7 +1674,7 @@
       "registerAddress": 95,
       "registerNumber": "40096",
       "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
+      "parameterDefinitionType": "binary",
       "parameters": [
         {
           "parameterId": "5f1f30ad18bcbf4f1d9a8037",
@@ -1721,369 +1721,9 @@
       ]
     },
     {
-      "registerAddress": 1030,
-      "registerNumber": "41031",
-      "registerType": "holdingRegister",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7008",
-          "name": "Common Alarm",
-          "startBit": 0,
-          "endBit": 15,
-          "bitParam": 0,
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "common"
-            },
-            {
-              "tagName": "status"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 1030,
-      "registerNumber": "41031",
-      "registerType": "holdingRegister",
-      "parameterDefinitionType": "boolean",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7009",
-          "name": "UPS Battery status",
-          "startBit": 0,
-          "endBit": 15,
-          "bitParamRange": "8-10",
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": "0"
-            },
-            {
-              "name": "Below The Lower Limit",
-              "bitValues": "1"
-            },
-            {
-              "name": "Above The Upper Limit",
-              "bitValues": "2"
-            },
-            {
-              "name": "No Battery",
-              "bitValues": "3"
-            },
-            {
-              "name": "Pre-Alarm",
-              "bitValues": "4"
-            },
-            {
-              "name": "Reverse Battery",
-              "bitValues": "5"
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "status"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 1035,
-      "registerNumber": "41036",
-      "registerType": "holdingRegister",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7010",
-          "name": "Turning To Bypass Due To Load Impact",
-          "startBit": 0,
-          "endBit": 15,
-          "bitParam": 0,
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "bypass"
-            },
-            {
-              "tagName": "load"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 1033,
-      "registerNumber": "41034",
-      "registerType": "holdingRegister",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7011",
-          "name": "Battery 1 Charger",
-          "startBit": 0,
-          "endBit": 15,
-          "bitParam": 1,
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Failure",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "charger"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 1033,
-      "registerNumber": "41034",
-      "registerType": "holdingRegister",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7012",
-          "name": "Battery 2 Charger",
-          "startBit": 0,
-          "endBit": 15,
-          "bitParam": 2,
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Failure",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "battery"
-            },
-            {
-              "tagName": "charger"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 1035,
-      "registerNumber": "41036",
-      "registerType": "holdingRegister",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7013",
-          "name": "Combined System Battery Pre-Alarm Failure",
-          "startBit": 0,
-          "endBit": 15,
-          "bitParam": 8,
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "systemBattery"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "registerAddress": 1034,
-      "registerNumber": "41035",
-      "registerType": "holdingRegister",
-      "parameterDefinitionType": "binary",
-      "parameters": [
-        {
-          "parameterId": "5f1f30ad18bcbf4f1d9a7014",
-          "name": "Master Fuse Broken Status",
-          "startBit": 0,
-          "endBit": 15,
-          "bitParam": 1,
-          "conditions": [
-            {
-              "name": "Normal",
-              "bitValues": 0
-            },
-            {
-              "name": "Alarm",
-              "bitValues": 1
-            }
-          ],
-          "logicalPointTags": [
-            {
-              "tagName": "ups"
-            },
-            {
-              "tagName": "fuse"
-            },
-            {
-              "tagName": "master"
-            },
-            {
-              "tagName": "alarm"
-            },
-            {
-              "tagName": "kind",
-              "value": "Number"
-            },
-            {
-              "tagName": "his"
-            },
-            {
-              "tagName": "hisInterpolate",
-              "value": "cov"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "registerAddress": 91,
       "registerNumber": "40092",
-      "registerType": "holding",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -2147,7 +1787,7 @@
     {
       "registerAddress": 92,
       "registerNumber": "40093",
-      "registerType": "holding",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -2211,7 +1851,7 @@
     {
       "registerAddress": 93,
       "registerNumber": "40094",
-      "registerType": "holding",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -2275,7 +1915,7 @@
     {
       "registerAddress": 101,
       "registerNumber": "40102",
-      "registerType": "holding",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -2327,7 +1967,7 @@
     {
       "registerAddress": 102,
       "registerNumber": "40103",
-      "registerType": "holding",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -2382,7 +2022,7 @@
     {
       "registerAddress": 20,
       "registerNumber": "40021",
-      "registerType": "holding",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -3311,7 +2951,7 @@
     {
       "registerAddress": 50,
       "registerNumber": "40051",
-      "registerType": "holding",
+      "registerType": "holdingRegister",
       "parameterDefinitionType": "decimal",
       "parameters": [
         {
@@ -4581,4 +4221,3 @@
     }
   ]
 }
-

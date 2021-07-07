@@ -444,7 +444,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
     
     private boolean needsLinkKey()
     {
-        return !mDevice.getName().equalsIgnoreCase(SerialConsts.SMART_STAT_NAME);
+        return mDevice.getName().equalsIgnoreCase(SerialConsts.SMART_NODE_NAME);
     }
     
     

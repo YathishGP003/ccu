@@ -199,6 +199,8 @@ public class HyperStatMsgReceiver {
                 case CO2_EQUIVALENT:
                 case ILLUMINANCE:
                 case UVI:
+                case PM2P5:
+                case PM10:
                     CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
                     CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),val);
                     break;

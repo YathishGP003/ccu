@@ -237,23 +237,66 @@ public class HyperStatDevice {
     public RawPoint createSensorPoints(Port p) {
         Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance()
                                                          .read("equip and group == \""+hyperStatNodeAddress+"\"")).build();
-        
-        Point.Builder equipSensor = new Point.Builder()
-                                .setDisplayName(equip.getDisplayName()+"-"+p.getPortSensor())
-                                .setEquipRef(equip.getId())
-                                .setSiteRef(siteRef)
-                                .setRoomRef(roomRef)
-                                .setFloorRef(floorRef).setHisInterpolate("cov")
-                                .addMarker("zone").addMarker("sensor").addMarker(p.getPortSensor()).addMarker("his")
-                                .addMarker("cur").addMarker("logical").addMarker(Tags.HYPERSTAT)
-                                .setGroup(String.valueOf(hyperStatNodeAddress))
-                                .setTz(tz);
-        
+        String sensorUnit = "";
+        boolean isOccupancySensor = false;
+        switch (p){
+            case SENSOR_NO:
+            case SENSOR_CO2_EQUIVALENT:
+            case SENSOR_CO:
+                sensorUnit = "ppm";
+                break;
+            case SENSOR_ILLUMINANCE:
+                sensorUnit = "lux";
+                break;
+            case SENSOR_PRESSURE:
+                sensorUnit = "inch wc";
+                break;
+            case SENSOR_SOUND:
+                sensorUnit = "dB";
+                break;
+            case SENSOR_VOC:
+                sensorUnit = "ppb";
+                break;
+            case SENSOR_OCCUPANCY:
+                isOccupancySensor = true;
+                break;
+            default:
+                break;
+        }
+        Point.Builder equipSensor = null;
+
+        if(isOccupancySensor){
+            equipSensor = new Point.Builder()
+                    .setDisplayName(equip.getDisplayName() + "-" + p.getPortSensor())
+                    .setEquipRef(equip.getId())
+                    .setSiteRef(siteRef)
+                    .setRoomRef(roomRef)
+                    .setFloorRef(floorRef).setHisInterpolate("cov")
+                    .addMarker("zone").addMarker("sensor").addMarker(p.getPortSensor()).addMarker("his")
+                    .addMarker("cur").addMarker("logical").addMarker(Tags.HYPERSTAT)
+                    .setGroup(String.valueOf(hyperStatNodeAddress))
+                    .setEnums("off,on")
+                    .setTz(tz);
+
+        }else {
+            equipSensor = new Point.Builder()
+                    .setDisplayName(equip.getDisplayName() + "-" + p.getPortSensor())
+                    .setEquipRef(equip.getId())
+                    .setSiteRef(siteRef)
+                    .setRoomRef(roomRef)
+                    .setFloorRef(floorRef).setHisInterpolate("cov")
+                    .addMarker("zone").addMarker("sensor").addMarker(p.getPortSensor()).addMarker("his")
+                    .addMarker("cur").addMarker("logical").addMarker(Tags.HYPERSTAT)
+                    .setGroup(String.valueOf(hyperStatNodeAddress))
+                    .setUnit(sensorUnit)
+                    .setTz(tz);
+        }
         if (equip.getMarkers().contains(Tags.SENSE)) {
             equipSensor.addMarker(Tags.SENSE);
         }
-        
         String pointRef = CCUHsApi.getInstance().addPoint(equipSensor.build());
+
+
         RawPoint deviceSensor = new RawPoint.Builder()
                                     .setDisplayName(p.toString()+"-"+hyperStatNodeAddress)
                                     .setDeviceRef(deviceRef)

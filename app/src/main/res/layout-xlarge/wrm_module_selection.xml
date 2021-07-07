@@ -173,12 +173,9 @@
                             </LinearLayout>
 
                             <ImageView
-
+                                android:id="@+id/iv_vavNoFan"
                                 android:layout_width="32dp"
                                 android:layout_height="32dp"
-                                android:id="@+id/iv_vavNoFan"
-                                android:layout_width="12dp"
-                                android:layout_height="20dp"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginEnd="92dp"
@@ -227,11 +224,9 @@
                             </LinearLayout>
 
                             <ImageView
+                                android:id="@+id/iv_vavSeriesFan"
                                 android:layout_width="32dp"
                                 android:layout_height="32dp"
-                                android:id="@+id/iv_vavSeriesFan"
-                                android:layout_width="12dp"
-                                android:layout_height="20dp"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginEnd="92dp"
@@ -280,11 +275,9 @@
                             </LinearLayout>
 
                             <ImageView
+                                android:id="@+id/iv_vavParallelFan"
                                 android:layout_width="32dp"
                                 android:layout_height="32dp"
-                                android:id="@+id/iv_vavParallelFan"
-                                android:layout_width="12dp"
-                                android:layout_height="20dp"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginEnd="92dp"
@@ -408,11 +401,9 @@
                             </LinearLayout>
 
                             <ImageView
+                                android:id="@+id/ivDabSingleDuct"
                                 android:layout_width="32dp"
                                 android:layout_height="32dp"
-                                android:id="@+id/ivDabSingleDuct"
-                                android:layout_width="12dp"
-                                android:layout_height="20dp"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginEnd="92dp"
@@ -461,11 +452,9 @@
                             </LinearLayout>
 
                             <ImageView
+                                android:id="@+id/ivDabDualDuct"
                                 android:layout_width="32dp"
                                 android:layout_height="32dp"
-                                android:id="@+id/ivDabDualDuct"
-                                android:layout_width="12dp"
-                                android:layout_height="20dp"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginEnd="92dp"

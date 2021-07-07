@@ -34,7 +34,13 @@ public class Register {
     @SerializedName("wordOrder")
     @Expose
     public String wordOrder;
-    
+
+    @SerializedName("multiplier")
+    @Expose
+    public String multiplier;
+
+
+
     @SerializedName("parameters")
     @Expose
     @Convert(converter = EncounterParameterConverter.class, dbType = String.class)
@@ -86,7 +92,15 @@ public class Register {
     public void setParameters(List<Parameter> parameters) {
         this.parameters = parameters;
     }
-    
+
+    public String getMultiplier() {
+        return multiplier;
+    }
+
+    public void setMultiplier(String multiplier) {
+        this.multiplier = multiplier;
+    }
+
     public static class EncounterParameterConverter implements PropertyConverter<List<Parameter>, String> {
 
         @Override
@@ -112,7 +126,7 @@ public class Register {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(registerNumber+":"+registerAddress+":"+registerType+":"+parameterDefinitionType+":"+wordOrder+" ");
+        sb.append(registerNumber+":"+registerAddress+":"+registerType+":"+parameterDefinitionType+":"+wordOrder+":"+multiplier+" ");
         
         for(Parameter p : parameters) {
             sb.append(p.toString());

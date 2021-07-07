@@ -131,20 +131,21 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
         mHSSenseProfile = (HyperStatSenseProfile) L.getProfile(mNodeAddress);
         setSpinnerListItem();
 
+        /** Setting temperature offset limit */
+        mTemperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];//{"-4","-3","-2","-1","0","1","2","3","4"};
+        for (int nNum = 0; nNum < TEMP_OFFSET_LIMIT * 2 + 1; nNum++)
+            nums[nNum] = String.valueOf((float) (nNum - TEMP_OFFSET_LIMIT) / 10);
+        mTemperatureOffset.setDisplayedValues(nums);
+        mTemperatureOffset.setMinValue(0);
+        mTemperatureOffset.setMaxValue(TEMP_OFFSET_LIMIT * 2);
+        mTemperatureOffset.setValue(TEMP_OFFSET_LIMIT);
+        mTemperatureOffset.setWrapSelectorWheel(false);
         if (mHSSenseProfile != null) {
-
             CcuLog.d(L.TAG_CCU_UI, "Get HyperStat SenseConfig: ");
             mHSSenseConfig = (HyperStatSenseConfiguration) mHSSenseProfile.getProfileConfiguration(mNodeAddress);
-            Log.d(LOG_TAG, "In onviewceeate " + "TemperatureOffset = " + String.valueOf(mHSSenseConfig.temperatureOffset) + " /n" +
-                    "isTh1Enable = " + String.valueOf(mHSSenseConfig.isTh1Enable) + " \n" +
-                    "isTh2Enable = " + String.valueOf(mHSSenseConfig.isTh2Enable) + " \n" +
-                    "isAnalog1Enable = " + String.valueOf(mHSSenseConfig.isAnalog1Enable) + " \n" +
-                    "isAnalog2Enable = " + String.valueOf(mHSSenseConfig.isAnalog2Enable) + " \n" +
-                    "th1Sensor = " + String.valueOf(mHSSenseConfig.th1Sensor) + " \n" +
-                    "th2Sensor = " + String.valueOf(mHSSenseConfig.th2Sensor) + " \n" +
-                    "analog1Sensor = " + String.valueOf(mHSSenseConfig.analog1Sensor) + " \n" +
-                    "analog2Sensor = " + String.valueOf(mHSSenseConfig.analog2Sensor));
             mTemperatureOffset.setValue((int) (mHSSenseConfig.temperatureOffset + TEMP_OFFSET_LIMIT));
+
             mThermostat1Sp.setEnabled(mHSSenseConfig.isTh1Enable);
             mThermostat2Sp.setEnabled(mHSSenseConfig.isTh2Enable);
             mAnalog1Sp.setEnabled(mHSSenseConfig.isAnalog1Enable);
@@ -171,16 +172,6 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
         } else {
             CcuLog.d(L.TAG_CCU_UI, "Create Hyperstatsense Profile: ");
             mHSSenseProfile = new HyperStatSenseProfile();
-            /** Setting temperature offset limit */
-            mTemperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-            String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];//{"-4","-3","-2","-1","0","1","2","3","4"};
-            for (int nNum = 0; nNum < TEMP_OFFSET_LIMIT * 2 + 1; nNum++)
-                nums[nNum] = String.valueOf((float) (nNum - TEMP_OFFSET_LIMIT) / 10);
-            mTemperatureOffset.setDisplayedValues(nums);
-            mTemperatureOffset.setMinValue(0);
-            mTemperatureOffset.setMaxValue(TEMP_OFFSET_LIMIT * 2);
-            mTemperatureOffset.setValue(TEMP_OFFSET_LIMIT);
-            mTemperatureOffset.setWrapSelectorWheel(false);
             /** Spinner id disabled by default */
             mThermostat1Sp.setEnabled(false);
             mThermostat2Sp.setEnabled(false);

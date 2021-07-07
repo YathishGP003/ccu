@@ -5,6 +5,7 @@ import android.content.Context;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 
 /**
@@ -36,12 +37,12 @@ public class DcwbBtuMeterDao {
                                                                                       Context.MODE_PRIVATE)
                           .getInt("inlet_waterTemp", 0);
         }
-        HashMap<Object, Object> inletTempPoint = hayStack.read("point and zone and btu and inlet and temp");
+        HashMap<Object, Object> inletTempPoint = hayStack.read("point and btu and system and inlet and temp and " +
+                                                               "logical");
         
         if (inletTempPoint.isEmpty()) {
             return DEFAULT_INLET_TEMP;
         }
-        
         return hayStack.readHisValById(inletTempPoint.get("id").toString());
     }
     
@@ -58,12 +59,12 @@ public class DcwbBtuMeterDao {
                           .getInt("outlet_waterTemp", 0);
         }
     
-        HashMap<Object, Object> outletTempPoint = hayStack.read("point and zone and btu and outlet and temp");
+        HashMap<Object, Object> outletTempPoint = hayStack.read("point and btu and system and outlet and temp and " +
+                                                                "logical");
     
         if (outletTempPoint.isEmpty()) {
             return DEFAULT_OUTLET_TEMP;
         }
-    
         return hayStack.readHisValById(outletTempPoint.get("id").toString());
     }
     
@@ -80,7 +81,8 @@ public class DcwbBtuMeterDao {
                           .getInt("cw_FlowRate", 0);
         }
     
-        HashMap<Object, Object> outletTempPoint = hayStack.read("point and zone and btu and actual and flow");
+        HashMap<Object, Object> outletTempPoint = hayStack.read("point and btu and system and actual and flow and " +
+                                                                "logical");
     
         if (outletTempPoint.isEmpty()) {
             return 0;

@@ -28,7 +28,7 @@
               "tagName": "inlet"
 			},
             {
-              "tagName": "temperature"
+              "tagName": "temp"
             },
             {
               "tagName": "t1"
@@ -76,7 +76,7 @@
               "tagName": "outlet"
             },
             {
-              "tagName": "temperature"
+              "tagName": "temp"
             },
             {
               "tagName": "t2"
@@ -175,12 +175,6 @@
             },
 			{
               "tagName": "energy"
-            },
-			{
-              "tagName": "flow"
-            },
-			{
-              "tagName": "rate"
             },
             {
               "tagName": "kind",

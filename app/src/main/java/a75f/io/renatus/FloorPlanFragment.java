@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
+import a75f.io.renatus.util.ProgressDialogUtils;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -145,6 +146,7 @@ public class FloorPlanFragment extends Fragment {
     private Floor floorToRename;
     ArrayList<Floor> siteFloorList = new ArrayList<>();
     ArrayList<String> siteRoomList = new ArrayList<>();
+    private FloorListActionMenuListener floorListActionMenuListener;
 
     private final BroadcastReceiver mPairingReceiver = new BroadcastReceiver() {
         @Override
@@ -277,7 +279,9 @@ public class FloorPlanFragment extends Fragment {
     public void onStart() {
         super.onStart();
         floorListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-        floorListView.setMultiChoiceModeListener(new FloorListActionMenuListener(this));
+
+        floorListActionMenuListener = new FloorListActionMenuListener(this);
+        floorListView.setMultiChoiceModeListener(floorListActionMenuListener);
         roomListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         roomListView.setMultiChoiceModeListener(new RoomListActionMenuListener(this));
         moduleListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
@@ -299,6 +303,10 @@ public class FloorPlanFragment extends Fragment {
         saveData();
     }
 
+    @Override public void onStop() {
+        super.onStop();
+        floorListActionMenuListener.dispose();
+    }
 
     public void saveData() {
         //Save
@@ -306,7 +314,16 @@ public class FloorPlanFragment extends Fragment {
 
     }
 
+    // callback from FloorListActionMenuListener
+    public void showWait(String message) {
+        ProgressDialogUtils.showProgressDialog(requireContext(), message);
+    }
 
+    public void hideWait() {
+        ProgressDialogUtils.hideProgressDialog();
+    }
+
+    // callback from FloorListActionMenuListener
     public void refreshScreen() {
         floorList = HSUtil.getFloors();
         Collections.sort(floorList, new FloorComparator());
@@ -1243,6 +1260,7 @@ public class FloorPlanFragment extends Fragment {
         boolean isEMRPaired = false;
         boolean isCCUPaired = false;
         boolean isPaired = false;
+        boolean isSensePaired = false;
 
         if (zoneEquips.size() > 0) {
             isPaired = true;
@@ -1256,10 +1274,13 @@ public class FloorPlanFragment extends Fragment {
                 if (zoneEquips.get(i).getProfile().contains("TEMP_INFLUENCE")) {
                     isCCUPaired = true;
                 }
+                if (zoneEquips.get(i).getProfile().contains("SENSE")) {
+                    isSensePaired = true;
+                }
             }
         }
 
-        if (!isPLCPaired && !isEMRPaired && !isCCUPaired) {
+        if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isSensePaired) {
             short meshAddress = L.generateSmartNodeAddress();
             if (mFloorListAdapter.getSelectedPostion() == -1) {
                 if (L.ccu().oaoProfile != null) {
@@ -1292,6 +1313,9 @@ public class FloorPlanFragment extends Fragment {
             }
             if (isCCUPaired) {
                 Toast.makeText(getActivity(), "CCU as Zone is already paired in this zone", Toast.LENGTH_LONG).show();
+            }
+            if (isSensePaired) {
+                Toast.makeText(getActivity(), "HyperStatSense is already paired in this zone", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -1423,6 +1447,10 @@ public class FloorPlanFragment extends Fragment {
                 case MODBUS_EMR_ZONE:
                     showDialogFragment(FragmentModbusEnergyMeterConfiguration
                             .newInstance(Short.parseShort(nodeAddr), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusEnergyMeterConfiguration.ID);
+                    break;
+                case HYPERSTAT_SENSE:
+                    showDialogFragment(HyperStatSenseFragment.newInstance(Short.parseShort(nodeAddr)
+                            , zone.getId(), floor.getId(), profile.getProfileType()),HyperStatSenseFragment.ID);
                     break;
                 case MODBUS_UPS30:
                 case MODBUS_UPS80:

@@ -27,10 +27,14 @@ class AlertsRepository(
 ) {
 
    // cache of alert definitions
-   private var alertDefsMap: AlertDefsMap =
+   private var _alertDefsMap: AlertDefsMap =
       dataStore.getAlertDefinitions()
          .associateBy { it.alert.mTitle }
          .toMutableMap()
+
+   // provide synchronized access to our in-memory store of alert defs.  Use this to read alert defs.
+   private val alertDefsMap: AlertDefsMap
+      get() = synchronized(_alertDefsMap) { _alertDefsMap }
 
    // current state of alert definition instances (i.e. positive tests)
    private val alertDefsState : AlertDefsState = mutableMapOf()
@@ -118,6 +122,7 @@ class AlertsRepository(
       alert.setFixed(true)
       alert.setSyncStatus(false)
       dataStore.updateAlert(alert)
+      alertDefsState.remove(alert)
 
       // special handling in preferences for "CCU RESTART" alert.  Is that restart alert, or that it was restarted?
       if (alert.mTitle.equals("CCU RESTART", ignoreCase = true)) {
@@ -278,15 +283,19 @@ class AlertsRepository(
    }
 
    private fun handleRetrievedDefsAlerts(retrievedAlertDefs: List<AlertDefinition>) {
-      alertDefsMap.clear()
-      alertDefsMap.putAll(retrievedAlertDefs.associateBy { it.alert.mTitle })
 
-      //log
-      CcuLog.d("CCU_ALERTS", "Fetched ${alertDefsMap.size} Predefined alerts")
-      alertDefsMap.values.forEach {
-         CcuLog.d("CCU_ALERTS", "Predefined alertDef Fetched: $it")
+      synchronized(_alertDefsMap) {
+         _alertDefsMap.clear()
+         _alertDefsMap.putAll(retrievedAlertDefs.associateBy { it.alert.mTitle })
+
+         //log
+         CcuLog.d("CCU_ALERTS", "Fetched ${_alertDefsMap.size} Predefined alerts")
+         _alertDefsMap.values.forEach {
+            CcuLog.d("CCU_ALERTS", "Predefined alertDef Fetched: $it")
+         }
+
+         saveDefs()
       }
-      saveDefs()
    }
 
    private fun saveDefs() {

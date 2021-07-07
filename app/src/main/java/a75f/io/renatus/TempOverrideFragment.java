@@ -76,12 +76,6 @@ public class TempOverrideFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        Globals.getInstance().setTemproryOverrideMode(true);
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
         Globals.getInstance().setTemproryOverrideMode(false);
@@ -95,11 +89,6 @@ public class TempOverrideFragment extends Fragment {
         expandableListDetail = new TreeMap<>();
         expandableListDetail_CMDevice = new HashMap<>();
         String siteName = CCUHsApi.getInstance().read("site").get("dis").toString();
-        Log.e("InsideTempOverrideFrag","name- "+siteName);
-        Log.e("InsideTempOverrideFrag","site- "+CCUHsApi.getInstance().read("site"));
-        ArrayList<HashMap> devices = CCUHsApi.getInstance().readAll("device and cm");
-        Log.e("InsideTempOverrideFrag","CM_device- "+devices);
-        Log.e("InsideTempOverrideFrag","ZoneDevices- "+CCUHsApi.getInstance().read("device and zones"));
         /*for (Map m:devices){
             ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and physical and deviceRef == \""+m.get("id")+"\"");
             Log.e("InsideTempOverrideFrag","CM_points- "+points);
@@ -243,79 +232,6 @@ public class TempOverrideFragment extends Fragment {
         //updateAllData();
         expandableListAdapter = new TempOverrideExpandableListAdapter(TempOverrideFragment.this, expandableListTitle, expandableListDetail_CMDevice, tunerMap, getActivity());
     }*/
-
-    private void updateAllData() {
-        ArrayList<String> deviceList = new ArrayList<>();
-        tunerMap.clear();
-        expandableListDetail.clear();
-        equipMap.clear();
-        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
-        Log.e("InsideTempOverrideFrag","equips- "+equips);
-        //Log.e("InsideTempOverrideFrag","space- "+CCUHsApi.getInstance().read("site").get("dis").toString());
-        for (Map m : equips) {
-
-            if (Objects.nonNull(m.get("group"))) {
-                ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and equipRef == \""+m.get("id")+"\"");
-                ArrayList tunerList = new ArrayList();
-
-                for (Map t : tuners) {
-                    tunerList.add(t.get("dis").toString());
-                    tunerMap.put(t.get("dis").toString(), t.get("id").toString());
-                }
-
-                ArrayList<HashMap> userIntents = CCUHsApi.getInstance().readAll("userIntent and equipRef == \""+m.get("id")+"\"");
-                //Log.e("InsideTempOverrideFrag","userIntents- "+userIntents);
-
-                for (Map t : userIntents) {
-                    tunerList.add(t.get("dis").toString());
-                    tunerMap.put(t.get("dis").toString(), t.get("id").toString());
-                }
-
-                ArrayList<HashMap> configs = CCUHsApi.getInstance().readAll("config and equipRef == \""+m.get("id")+"\"");
-                //Log.e("InsideTempOverrideFrag","configs- "+configs);
-
-                for (Map t : configs) {
-                    tunerList.add(t.get("dis").toString());
-                    tunerMap.put(t.get("dis").toString(), t.get("id").toString());
-                }
-                expandableListDetail.put(m.get("dis").toString(), tunerList);
-                equipMap.put(m.get("dis").toString(), m.get("id").toString());
-
-                String groupVal = m.get("group").toString();
-                Log.e("InsideTempOverrideFrag", "groupVal- " + groupVal);
-                short group = Short.parseShort(groupVal);
-                Log.e("InsideTempOverrideFrag", "group- " + group);
-                Log.e("InsideTempOverrideFrag", "device- " + HSUtil.getDevice(group));
-                deviceList.add(HSUtil.getDevice(group).toString());
-            }
-            expandableListDetail.put(m.get("dis").toString(), deviceList);
-        }
-        ArrayList<HashMap> devices = CCUHsApi.getInstance().readAll("device");
-        /*ArrayList<HashMap> devices = new ArrayList<>();
-        devices.add(CCUHsApi.getInstance().read("zone"));*/
-        Log.e("InsideTempOverrideFrag","devices- "+devices);
-        Log.e("InsideTempOverrideFrag","zone- "+CCUHsApi.getInstance().read("zone"));
-        for (Map m : devices) {
-            if (Objects.nonNull(m.get("group"))) {
-                short group = Short.parseShort(m.get("group").toString());
-                Log.e("InsideTempOverrideFrag", "device1- " + HSUtil.getDevice(group));
-            }
-            ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and deviceRef == \""+m.get("id")+"\"");
-            //Log.e("InsideTempOverrideFrag","tuners2- "+tuners);
-            //Log.e("InsideTempOverrideFrag","disCheck- "+CCUHsApi.getInstance().read("occupied sp == \""+m.get("id")+"\""));
-            ArrayList tunerList = new ArrayList();
-
-            for (Map t : tuners) {
-                tunerList.add(t.get("dis").toString());
-                tunerMap.put(t.get("dis").toString(), t.get("id").toString());
-            }
-            expandableListDetail.put(m.get("dis").toString(), tunerList);
-            //Log.e("InsideTempOverrideFrag","expandableListDetail- "+expandableListDetail);
-            equipMap.put(m.get("dis").toString(), m.get("id").toString());
-        }
-        expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
-        //Log.e("InsideTempOverrideFrag","expandableListTitle- "+expandableListTitle);
-    }
 
     public static double getPointVal(String id) {
         CCUHsApi hayStack = CCUHsApi.getInstance();

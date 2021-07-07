@@ -167,7 +167,6 @@ public class ModbusParser {
 
     public void readExternalJSONFromDir(String filePath,List<EquipmentDevice> modbus, List<EquipmentDevice> btuList,
                                                          List<EquipmentDevice> emSysList,List<EquipmentDevice> emzoneList){
-        ArrayList<EquipmentDevice> filterDevices = new ArrayList<>();
         File modbusJsonFolder = new File(filePath);
         if(modbusJsonFolder.listFiles()==null||modbusJsonFolder.listFiles().length==0)
             Log.i("CCU_MODBUS", "No External JSON files found ");

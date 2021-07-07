@@ -76,7 +76,7 @@ public class EquipProcessor
         // Read external Json data
 
         parser.readExternalJSONFromDir("/sdcard/ccu/modbus",equipmentDevices,modbusBTUMeterDevices,energyMeterSystemDevices,energyMeterDevices);
-        Log.i("CCU_MODBUS", "readExternalJsonData: updated");
+        Log.i("CCU_MODBUS", "Modbus external JSON file scan completed");
 
     }
 

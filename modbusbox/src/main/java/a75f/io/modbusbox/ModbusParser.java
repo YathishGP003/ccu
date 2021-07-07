@@ -72,7 +72,7 @@ public class ModbusParser {
         if(isValidJSON(json,fileName)) {
             equipmentDevice = new Gson().fromJson(json, EquipmentDevice.class);
         }else{
-            Log.i("CCU_MODBUS", "INVALID JSON TAG FOR "+fileName);
+            Log.i("CCU_MODBUS", "Invalid JSON File - "+fileName);
         }
         return equipmentDevice;
     }
@@ -180,7 +180,7 @@ public class ModbusParser {
                         EquipmentDevice device = parseModbusDevice(readFileFromFolder(listOfFile[i]), listOfFile[i].getName());
                         if(device == null ) continue;
 
-                        Log.i("CCU_MODBUS", "Valid JSON file found : "+device.getName() + " EquipType :"+device.getEquipType());
+                        Log.i("CCU_MODBUS", "Valid JSON file found : "+listOfFile[i].getName() + " EquipType :"+device.getEquipType());
 
                         if(device.getEquipType().equals(ModbusCategory.BTU.displayName)){
                             btuList.add(device);
@@ -204,56 +204,6 @@ public class ModbusParser {
         }
 
     }
-
-
-/*
-
-    public List<EquipmentDevice> readExternalJSONFromDir(String filePath,ModbusCategory type){
-        ArrayList<EquipmentDevice> filterDevices = new ArrayList<>();
-        File modbusJsonFolder = new File(filePath);
-        if(modbusJsonFolder.listFiles()==null||modbusJsonFolder.listFiles().length==0)
-            Log.i("CCU_MODBUS", "No External JSON files found for "+type);
-        if(modbusJsonFolder!=null && modbusJsonFolder.exists() && modbusJsonFolder.isDirectory()
-                && modbusJsonFolder.listFiles()!=null && modbusJsonFolder.listFiles().length>0) {
-            File listOfFile[] = modbusJsonFolder.listFiles();
-            for (int i = 0; i < listOfFile.length; i++) {
-                try {
-                    if(listOfFile[i].isFile())
-                    {
-                        EquipmentDevice device = parseModbusDevice(readFileFromFolder(listOfFile[i]));
-                        if(device == null ) continue;
-                        if(type == ModbusCategory.MODBUS && !device.getEquipType().equals(ModbusCategory.BTU.displayName) &&
-                                !device.getEquipType().equals(ModbusCategory.EMR.displayName) && !device.getEquipType().equals(ModbusCategory.EMR_ZONE.displayName)) {
-                            Log.i("CCU_MODBUS", "Valid JSON file found : "+device.getName() + " EquipType :"+device.getEquipType());
-                            filterDevices.add(device);
-                        }
-                        else if(type == ModbusCategory.BTU && device.getEquipType().equals(ModbusCategory.BTU.displayName))
-                        {
-                            Log.i("CCU_MODBUS", "Valid JSON file found : for System level BTU Meter  "+device.getName() + " EquipType :"+device.getEquipType());
-                            filterDevices.add(device);
-                        }
-                        else if(type == ModbusCategory.EMR_SYSTEM && device.getEquipType().equals(ModbusCategory.EMR.displayName))
-                        {
-                            Log.i("CCU_MODBUS", "Valid JSON file found : for System level Energy Meter "+device.getName() + " EquipType :"+device.getEquipType());
-                            filterDevices.add(device);
-                        }
-                        else if(type == ModbusCategory.EMR_ZONE && device.getEquipType().equals(ModbusCategory.EMR_ZONE.displayName))
-                        {
-                            Log.i("CCU_MODBUS", "Valid JSON file found for Zone level Energy Meter "+device.getName() + " EquipType :"+device.getEquipType());
-                            filterDevices.add(device);
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }else{
-            modbusJsonFolder.mkdirs();
-        }
-        return filterDevices;
-    }
-
-*/
 
 
     private String readFileFromFolder(File file) {
@@ -281,8 +231,7 @@ public class ModbusParser {
             // Check for duplicate Equip ID
             for (int i = 0; i < deviceList.size() ; i++) {
                 if(deviceList.get(i).getModbusEquipIdId().equals(jsonObject.getString("modbusEquipId (_id)"))) {
-                    Log.i("CCU_MODBUS", "Duplicate modbusEquipId found in: "+fileName+" "+jsonObject.getString("modbusEquipId (_id)") +" Device name "+deviceList.get(i).getName());
-                   // return false;
+                    Log.i("CCU_MODBUS", "Duplicate modbusEquipId - "+jsonObject.getString("modbusEquipId (_id)") +" found in - "+fileName+"" );
                     isValid = false;
                     break;
                 }
@@ -292,7 +241,6 @@ public class ModbusParser {
             JSONArray registers = jsonObject.getJSONArray("registers");
 
             if(isContainsDuplicateParametersInSameJSON(registers,fileName)){
-                Log.i("CCU_MODBUS", registers.toString()+" \n JSON Contains duplicate parameters");
                 isValid = false;
             }
 
@@ -359,13 +307,14 @@ public class ModbusParser {
     private boolean isContainsDuplicateParametersInSameJSON(JSONArray jsonArray,String fileName){
         boolean isValid = false;
         try {
-            for (int i = 0; i < jsonArray.length()-1; i++) {
+            for (int i = 0; i < jsonArray.length(); i++) {
                 JSONArray paramIDetails = jsonArray.getJSONObject(i).getJSONArray("parameters");
 
-                for (int j = i+1; j < jsonArray.length(); j++) {
+                for (int j = 0; j < jsonArray.length(); j++) {
                     JSONArray paramJDetails = jsonArray.getJSONObject(j).getJSONArray("parameters");
-                        if (paramIDetails.getJSONObject(0).getString("parameterId").equals(paramJDetails.getJSONObject(0).getString("parameterId"))) {
-                            Log.i("CCU_MODBUS", "Duplicate parameter ID found in "+fileName+" "+paramJDetails.getJSONObject(0).getString("parameterId")+" Param Name : "+paramIDetails.getJSONObject(0).getString("name"));
+                        if (i!=j&&paramIDetails.getJSONObject(0).getString("parameterId").equals(paramJDetails.getJSONObject(0).getString("parameterId"))) {
+                            Log.i("CCU_MODBUS", "Same JSON has duplicate parameter ID "+paramJDetails.getJSONObject(0).getString("parameterId")+
+                                    ",Param Name : "+paramJDetails.getJSONObject(0).getString("name")+ " found in "+fileName);
                             isValid = true;
                         }
                 }
@@ -389,7 +338,7 @@ public class ModbusParser {
 
                 List<Parameter> parameters= registers.get(j).getParameters();
                 if(parameters.get(0).parameterId.equals(paramID)){
-                    Log.i("CCU_MODBUS", "Duplicate parameter ID found in "+fileName+" "+paramID+" in "+device.getName() +" Param Name "+parameters.get(0).getName());
+                    Log.i("CCU_MODBUS", "Duplicate parameter ID "+paramID+ ",Param Name : "+parameters.get(0).getName()+ " found in "+fileName);
                     isContainDuplicate =  true;
                     break;
                 }

@@ -227,13 +227,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
     /*This method will delete expired vacation from the internal portal as well, done by Aniket*/
     private static void deleteExpiredVacation() throws ParseException {
         ArrayList<Schedule> getAllVacationSchedules = CCUHsApi.getInstance().getAllVacationSchedules();
-        String currentDate = getDate();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        Date TodayDate = format.parse(currentDate);
         for (int i=0; i<getAllVacationSchedules.size(); i++){
-            String vacationEndDate = getAllVacationSchedules.get(i).getEndDateString();
-            Date VacationDate = format.parse(vacationEndDate);
-            if (VacationDate.before(TodayDate)){
+            if (getAllVacationSchedules.get(i).getEndDate().getMillis() < System.currentTimeMillis()){
                 CCUHsApi.getInstance().deleteEntity("@" + getAllVacationSchedules.get(i).getId());
                 CCUHsApi.getInstance().syncEntityTree();
             }

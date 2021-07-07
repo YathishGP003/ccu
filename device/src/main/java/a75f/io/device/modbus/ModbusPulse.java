@@ -144,31 +144,19 @@ public class ModbusPulse {
         } else if (register.registerType.equals("inputRegister")) {
             respVal = parseIntVal(response);
         } else if (register.registerType.equals("holdingRegister")) {
-            Log.i("CCU_SYSTEM", "getRegisterValFromResponse: "+register.multiplier);
             if (register.getParameterDefinitionType().equals("float")) {
                     if (register.getWordOrder() != null && register.getWordOrder().equals("littleEndian")) {
                         respVal = parseLittleEndianFloatVal(response);
                     } else {
                         respVal = parseFloatVal(response);
                     }
-                if(Objects.nonNull(register.multiplier)){
-                    double multiplierValue= Double.parseDouble(register.multiplier);
-                    Log.i("CCU_SYSTEM", "getRegisterValFromResponse: before "+respVal);
-                    respVal=respVal*multiplierValue;
-                    Log.i("CCU_SYSTEM", "getRegisterValFromResponse: after "+respVal);
-                }
             } else if (register.getParameterDefinitionType().equals("integer")
                   || register.getParameterDefinitionType().equals("decimal")
                   || register.getParameterDefinitionType().equals("range")) {
 
                 respVal = parseIntVal(response);
 
-                if(Objects.nonNull(register.multiplier)){
-                    double multiplierValue= Double.parseDouble(register.multiplier);
-                    Log.i("CCU_SYSTEM", "getRegisterValFromResponse: before "+respVal);
-                    respVal=respVal*multiplierValue;
-                    Log.i("CCU_SYSTEM", "getRegisterValFromResponse: after "+respVal);
-                }
+
             } else if (register.getParameterDefinitionType().equals("binary")) {
                 
                 if (register.getParameters().size() > 0) {
@@ -189,13 +177,12 @@ public class ModbusPulse {
                     } else {
                         respVal = parseInt64Val(response);
                     }
-                    if(Objects.nonNull(register.multiplier)){
-                        double multiplierValue= Double.parseDouble(register.multiplier);
-                        Log.i("CCU_SYSTEM", "getRegisterValFromResponse: after "+respVal);
-                        respVal=respVal*multiplierValue;
-                        Log.i("CCU_SYSTEM", "getRegisterValFromResponse: after "+respVal);
-                    }
                 }
+            }
+
+            if(Objects.nonNull(register.multiplier)&&!register.getParameterDefinitionType().equals("boolean")&&!register.getParameterDefinitionType().equals("binary")){
+                double multiplierValue= Double.parseDouble(register.multiplier);
+                respVal=respVal*multiplierValue;
             }
         }
         

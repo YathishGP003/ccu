@@ -24,6 +24,7 @@ import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.erm.EmrProfile;
+import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
@@ -381,6 +382,11 @@ public class Globals {
                             fourPfcu.addLogicalMap(Short.valueOf(eq.getGroup()), z.getId());
                             L.ccu().zoneProfiles.add(fourPfcu);
                             break;
+                        case HYPERSTAT_SENSE:
+                            HyperStatSenseProfile hssense = new HyperStatSenseProfile();
+                            hssense.addHyperStatSenseEquip(Short.valueOf(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(hssense);
+                            break;
                         case MODBUS_PAC:
                         case MODBUS_RRS:
                         case MODBUS_VRF:
@@ -452,7 +458,7 @@ public class Globals {
         HashMap device = CCUHsApi.getInstance().read("device and addr");
         if (device != null && device.size() > 0 && device.get("modbus") == null && device.get("addr") != null) {
             String nodeAdd = device.get("addr").toString();
-            return nodeAdd.substring(0, 2).concat("00");
+            return nodeAdd.substring(0, nodeAdd.length()-2).concat("00");
         } else {
             HashMap band = CCUHsApi.getInstance().read("point and snband");
             if (band != null && band.size() > 0 && band.get("val") != null) {

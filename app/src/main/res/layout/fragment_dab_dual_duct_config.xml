@@ -29,7 +29,7 @@
                     android:fontFamily="@font/lato_bold"
                     android:text="@string/dab_dual_duct_title"
                     android:textAllCaps="true"
-                    android:textColor="@color/orange_75f"
+                    android:textColor="?orange_75f"
                     android:textSize="33.5sp"
                     android:textStyle="bold" />
 
@@ -52,6 +52,7 @@
                     android:textAppearance="@style/label_values" />
 
                 <NumberPicker
+                    android:theme="?DefaultNumberPickerTheme"
                     android:id="@+id/temperatureOffset"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -183,6 +184,7 @@
                         android:textAppearance="@style/label_values" />
 
                     <NumberPicker
+                        android:theme="?DefaultNumberPickerTheme"
                         android:id="@+id/maxCoolingDamperPos"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -206,6 +208,7 @@
                         android:textAppearance="@style/label_values" />
 
                     <NumberPicker
+                        android:theme="?DefaultNumberPickerTheme"
                         android:id="@+id/minCoolingDamperPos"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -230,6 +233,7 @@
 
 
                     <NumberPicker
+                        android:theme="?DefaultNumberPickerTheme"
                         android:id="@+id/maxHeatingDamperPos"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -253,6 +257,7 @@
                         android:textAppearance="@style/label_values" />
 
                     <NumberPicker
+                        android:theme="?DefaultNumberPickerTheme"
                         android:id="@+id/minHeatingDamperPos"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -390,6 +395,8 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+
                     android:id="@+id/ao1MinDamperHeatingSpinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -413,6 +420,7 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
                     android:id="@+id/ao1MaxDamperHeatingSpinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -434,6 +442,7 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
                     android:id="@+id/ao1MinDamperCoolingSpinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -459,6 +468,7 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
                     android:id="@+id/ao1MaxDamperCoolingSpinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -482,6 +492,7 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
                     android:id="@+id/ao2MinDamperHeatingSpinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -507,6 +518,7 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
                     android:id="@+id/ao2MaxDamperHeatingSpinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -529,6 +541,7 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
                     android:id="@+id/ao2MinDamperCoolingSpinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -554,6 +567,7 @@
                     android:textAppearance="@style/label_values"/>
 
                 <Spinner
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
                     android:id="@+id/ao2MaxDamperCoolingSpinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -577,7 +591,7 @@
                 android:fontFamily="@font/lato_regular"
                 android:text="@string/button_set"
                 android:textAllCaps="true"
-                android:textColor="@color/orange_75f"
+                android:textColor="?orange_75f"
                 android:textSize="19.5sp" />
         </LinearLayout>
 

@@ -255,7 +255,7 @@ public class DabEquip
                                            .setSiteRef(siteRef)
                                            .setRoomRef(roomRef)
                                            .setFloorRef(floorRef)
-                                            .setHisInterpolate("cov")
+                                           .setHisInterpolate("cov")
                                            .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("dab").addMarker("cooling")
                                            .addMarker("sp").addMarker("writable").addMarker("his").addMarker("userIntent")
                                            .setGroup(String.valueOf(nodeAddr))

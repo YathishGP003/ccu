@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:baselineAligned="false"
@@ -53,7 +54,8 @@
 						android:layout_height="21dp"
 						android:src="@drawable/ic_add"
 						android:layout_marginRight="20dp"
-						android:layout_gravity="center_vertical"/>
+						android:layout_gravity="center_vertical"
+						app:tint="?orange_75f" />
 				</LinearLayout>
 				<EditText
 					android:layout_width="match_parent"
@@ -72,7 +74,7 @@
 				android:gravity="center_vertical"
 				android:background="@color/progress_gray"
 				android:textSize="30dp"
-				android:textColor="@color/accent"/>
+				android:textColor="?orange_75f"/>
 
 			<RelativeLayout
 				android:id="@+id/rl_systemdevice"
@@ -104,11 +106,10 @@
 
 			<ListView
 				android:id="@+id/floorList"
-				android:animateLayoutChanges="true"
 				android:layout_width="match_parent"
-				android:overScrollMode="never"
-				android:layout_height="wrap_content">
-			</ListView>
+				android:layout_height="wrap_content"
+				android:animateLayoutChanges="true"
+				android:overScrollMode="never"></ListView>
 		</LinearLayout>
 		<View
 			android:layout_width="0.1dp"
@@ -149,7 +150,8 @@
 						android:layout_height="21dp"
 						android:src="@drawable/ic_add"
 						android:layout_gravity="center_vertical"
-						android:layout_marginRight="20dp"/>
+						android:layout_marginRight="20dp"
+						app:tint="?orange_75f" />
 				</LinearLayout>
 
 				<EditText
@@ -173,7 +175,7 @@
 				android:background="@color/progress_gray"
 				android:text="Rooms"
 				android:visibility="gone"
-				android:textColor="@color/accent"
+				android:textColor="?orange_75f"
 				android:textSize="30dp" />
 
 			<RelativeLayout
@@ -301,7 +303,8 @@
 						android:layout_height="21dp"
 						android:src="@drawable/ic_add"
 						android:layout_marginRight="20dp"
-						android:layout_gravity="center_vertical"/>
+						android:layout_gravity="center_vertical"
+						app:tint="?orange_75f" />
 				</LinearLayout>
 
 				<EditText
@@ -324,7 +327,7 @@
 				android:textSize="30dp"
 				android:visibility="gone"
 				android:background="@color/progress_gray"
-				android:textColor="@color/accent"/>
+				android:textColor="?orange_75f"/>
 
 			<ListView
 				android:id="@+id/moduleList"

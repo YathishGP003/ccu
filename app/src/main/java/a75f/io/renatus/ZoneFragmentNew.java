@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,6 +13,7 @@ import android.preference.PreferenceManager;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.plc.PlcProfile;
+
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -19,6 +21,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
@@ -85,6 +88,8 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
+import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.GridItem;
 import a75f.io.renatus.util.NonTempControl;
 import a75f.io.renatus.util.Prefs;
@@ -92,9 +97,9 @@ import a75f.io.renatus.util.SeekArc;
 
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 
-public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
-{
-    ExpandableListView            expandableListView;
+public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
+    private static final String LOG_TAG = " ZoneFragmentNew ";
+    ExpandableListView expandableListView;
     HashMap<String, List<String>> expandableListDetail;
 
 
@@ -133,7 +138,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     View parentRootView;
     Schedule mSchedule = null;
     ScrollView scrollViewParent;
-    Equip equipment;
 
     boolean zoneOpen = false;
     boolean zoneNonTempOpen = false;
@@ -155,22 +159,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     int noTempSensor = 0;
     HashMap<String, Integer> mScheduleTypeMap = new HashMap<>();
     Prefs prefs;
-    HashMap<String, EquipmentDevice> modbusZones = new HashMap<>();
-    String MODBUS_ZONE = "MODBUS_CONFIG";
 
-    public ZoneFragmentNew()
-    {
+    public ZoneFragmentNew() {
     }
-    
-    public static ZoneFragmentNew newInstance()
-    {
+
+    public static ZoneFragmentNew newInstance() {
         return new ZoneFragmentNew();
     }
-    
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState)
-    {
+                             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_zones, container, false);
         parentRootView = rootView.findViewById(R.id.zone_fragment_temp);
         return rootView;
@@ -235,43 +234,45 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         });
     }
 
-    public void refreshScreen(String id)
-    {
-        if(getActivity() != null) {
-            if(zoneOpen) {
+    public void refreshScreen(String id) {
+        if (getActivity() != null) {
+            if (zoneOpen) {
                 //Log.i("PubNub","Zone Point Updating:"+id+" Points:"+pointsOpen.toString());
                 //if(pointsOpen.containsKey(id)) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                                updateTemperatureBasedZones(seekArcOpen, zonePointsOpen, equipOpen, getLayoutInflater());
-                                tableLayout.invalidate();
-                        }
-                    });
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateTemperatureBasedZones(seekArcOpen, zonePointsOpen, equipOpen, getLayoutInflater());
+                        tableLayout.invalidate();
+                    }
+                });
                 //}
-                }
+            }
         }
     }
 
-    public void refreshDesiredTemp(String nodeAddress,String pointcoolDT1, String pointheatDT1)
-    {
-        if(getActivity() != null) {
+    public void refreshDesiredTemp(String nodeAddress, String pointcoolDT1, String pointheatDT1) {
+        if (getActivity() != null ) {
             int i;
             for (i = 0; i < seekArcArrayList.size(); i++) {
                 GridItem gridItem = (GridItem) seekArcArrayList.get(i).getTag();
                 if (gridItem.getNodeAddress() == Short.valueOf(nodeAddress)) {
+                    if( CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and" +
+                            " desired and heating and group == \"" + nodeAddress + "\"") == null){
+                        return;
+                    }
                     SeekArc tempSeekArc = seekArcArrayList.get(i);
                     double pointheatDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and group == \"" + nodeAddress + "\"");
                     double pointcoolDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and cooling and group == \"" + nodeAddress + "\"");
                     //float coolDt = Float.parseFloat(pointcoolDT);
                     //float heatDt = Float.parseFloat(pointheatDT);
-                    if((tempSeekArc.getCoolingDesiredTemp() != pointcoolDT) || (tempSeekArc.getHeatingDesiredTemp() != pointheatDT)) {
+                    if ((tempSeekArc.getCoolingDesiredTemp() != pointcoolDT) || (tempSeekArc.getHeatingDesiredTemp() != pointheatDT)) {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Log.d("Scheduler", "refreshDesiredTemp22 =" + pointcoolDT + "," + pointheatDT + "," + nodeAddress);
-                                tempSeekArc.setCoolingDesiredTemp((float)pointcoolDT, false);
-                                tempSeekArc.setHeatingDesiredTemp((float)pointheatDT, false);
+                                Log.d(LOG_TAG + "Scheduler", "refreshDesiredTemp22 =" + pointcoolDT + "," + pointheatDT + "," + nodeAddress);
+                                tempSeekArc.setCoolingDesiredTemp((float) pointcoolDT, false);
+                                tempSeekArc.setHeatingDesiredTemp((float) pointheatDT, false);
                                 tempSeekArc.invalidate();
                             }
                         });
@@ -281,8 +282,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
     }
 
-    public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId){
-        if(getActivity() != null) {
+    public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId) {
+        if (getActivity() != null) {
             int i;
             String status = ScheduleProcessJob.getZoneStatusString(zoneId, equipId);
             String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);
@@ -314,55 +315,53 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
     }
 
-    public void updateTemperature(double currentTemp, short nodeAddress){
-        if(getActivity() != null) {
+    public void updateTemperature(double currentTemp, short nodeAddress) {
+        if (getActivity() != null) {
             int i;
-            if(currentTemp > 0) {
-                double buildingLimitMax =  TunerUtil.readBuildingTunerValByQuery("building and limit and max");
-                double buildingLimitMin =  TunerUtil.readBuildingTunerValByQuery("building and limit and min");
+            if (currentTemp > 0) {
+                double buildingLimitMax = TunerUtil.readBuildingTunerValByQuery("building and limit and max");
+                double buildingLimitMin = TunerUtil.readBuildingTunerValByQuery("building and limit and min");
 
                 double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
-                for (i = 0; i < seekArcArrayList.size(); i++)
-                {
+                for (i = 0; i < seekArcArrayList.size(); i++) {
                     GridItem gridItem = (GridItem) seekArcArrayList.get(i).getTag();
                     ArrayList<Short> zoneNodes = gridItem.getZoneNodes();
-                    Log.i("CurrentTemp", "SensorCurrentTemp:" + currentTemp + " Node:" + nodeAddress+" zoneNodes:"+zoneNodes);
-                    if(zoneNodes.contains(nodeAddress))
-                    {
-                            SeekArc tempSeekArc = seekArcArrayList.get(i);
-                            new AsyncTask<String, Void, Double>() {
-                                @Override
-                                protected Double doInBackground( final String ... params ) {
-                                    currentTempSensor = 0;
-                                    noTempSensor = 0;
-                                    ArrayList<HashMap> zoneEquips = gridItem.getZoneEquips();
-                                    for (int j = 0; j < zoneEquips.size(); j++) {
-                                        Equip tempEquip = new Equip.Builder().setHashMap(zoneEquips.get(j)).build();
-                                        double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + tempEquip.getId() + "\"");
-                                        if ((avgTemp <= (buildingLimitMax + tempDeadLeeway)) && (avgTemp >= (buildingLimitMin - tempDeadLeeway))) {
-                                            currentTempSensor = (currentTempSensor + avgTemp);
-                                        } else {
-                                            noTempSensor++;
-                                        }
+                    Log.i(LOG_TAG + "CurrentTemp", "SensorCurrentTemp:" + currentTemp + " Node:" + nodeAddress + " zoneNodes:" + zoneNodes);
+                    if (zoneNodes.contains(nodeAddress)) {
+                        SeekArc tempSeekArc = seekArcArrayList.get(i);
+                        new AsyncTask<String, Void, Double>() {
+                            @Override
+                            protected Double doInBackground(final String... params) {
+                                currentTempSensor = 0;
+                                noTempSensor = 0;
+                                ArrayList<HashMap> zoneEquips = gridItem.getZoneEquips();
+                                for (int j = 0; j < zoneEquips.size(); j++) {
+                                    Equip tempEquip = new Equip.Builder().setHashMap(zoneEquips.get(j)).build();
+                                    double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + tempEquip.getId() + "\"");
+                                    if ((avgTemp <= (buildingLimitMax + tempDeadLeeway)) && (avgTemp >= (buildingLimitMin - tempDeadLeeway))) {
+                                        currentTempSensor = (currentTempSensor + avgTemp);
+                                    } else {
+                                        noTempSensor++;
                                     }
-                                    if (currentTempSensor > 0 && zoneEquips.size() >1) {
-                                            currentTempSensor = currentTempSensor / (zoneEquips.size() - noTempSensor);
-                                            DecimalFormat decimalFormat = new DecimalFormat("#.#");
-                                            currentTempSensor = Double.parseDouble(decimalFormat.format(Math.round(currentTempSensor*10.0)/10.0));
-                                    }
-                                    if(currentTempSensor > 0) {
-                                        return currentTempSensor;
-                                    }
-                                    return null;
                                 }
+                                if (currentTempSensor > 0 && zoneEquips.size() > 1) {
+                                    currentTempSensor = currentTempSensor / (zoneEquips.size() - noTempSensor);
+                                    DecimalFormat decimalFormat = new DecimalFormat("#.#");
+                                    currentTempSensor = Double.parseDouble(decimalFormat.format(Math.round(currentTempSensor * 10.0) / 10.0));
+                                }
+                                if (currentTempSensor > 0) {
+                                    return currentTempSensor;
+                                }
+                                return null;
+                            }
 
-                                @Override
-                                protected void onPostExecute( final Double result ) {
-                                    if(result != null) {
-                                        tempSeekArc.setCurrentTemp((float) (result.doubleValue()));
-                                    }
+                            @Override
+                            protected void onPostExecute(final Double result) {
+                                if (result != null) {
+                                    tempSeekArc.setCurrentTemp((float) (result.doubleValue()));
                                 }
-                            }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, "");
+                            }
+                        }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, "");
 
                            /* getActivity().runOnUiThread(new Runnable() {
                                 @Override
@@ -387,9 +386,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
     }
 
-    public void updateSensorValue(short nodeAddress){
-        if(getActivity() != null) {
-            if(zoneNonTempOpen) {
+    public void updateSensorValue(short nodeAddress) {
+        if (getActivity() != null) {
+            if (zoneNonTempOpen) {
                 if (equipOpen.getProfile().contains("PLC") || equipOpen.getProfile().contains("EMR") || equipOpen.getProfile().contains("monitor")) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -402,9 +401,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             }
         }
     }
+
     @Override
-    public void onStart()
-    {
+    public void onStart() {
         super.onStart();
         lvFloorList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
     }
@@ -419,7 +418,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             double weatherHumidity = WeatherDataDownloadService.getHumidity();
             weatherHumidity = weatherHumidity * 100;
             weatherPercipitation = Double.valueOf(df.format(weatherPercipitation));
-            note.setText("Humidity : "+weatherHumidity+"%"+"\n"+"Precipitation : "+weatherPercipitation);
+            note.setText("Humidity : " + weatherHumidity + "%" + "\n" + "Precipitation : " + weatherPercipitation);
             SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext());
             String address = spDefaultPrefs.getString("address", "");
             String city = spDefaultPrefs.getString("city", "");
@@ -446,8 +445,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
     }
 
-    private void selectFloor(int position)
-    {
+    private void selectFloor(int position) {
         mFloorListAdapter.setSelectedItem(position);
         roomList = HSUtil.getZones(floorList.get(position).getId());
         closeFloor();
@@ -460,8 +458,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     }
 
 
-    public void openFloor()
-    {
+    public void openFloor() {
         try {
             mDrawerLayout.openDrawer(drawer_screen);
         } catch (Exception e) {
@@ -472,8 +469,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
     }
 
-    public void closeFloor()
-    {
+    public void closeFloor() {
         try {
             mDrawerLayout.closeDrawer(drawer_screen);
         } catch (Exception e) {
@@ -484,9 +480,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
     }
 
-    private void loadGrid(View rootView){
+    private void loadGrid(View rootView) {
         rowcount = 0;
-        if(floorList.size()>0) {
+        if (floorList.size() > 0) {
             ArrayList<HashMap> roomMap = CCUHsApi.getInstance().readAll("room and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
             imag = new ImageView(getActivity());
             tableLayout.removeAllViews();
@@ -507,13 +503,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 }
                 tablerowLayout[0] = new LinearLayout(tableLayout.getContext());
                 int i = 0;
-                 for (int m = 0; m < roomMap.size(); m++) {
+                for (int m = 0; m < roomMap.size(); m++) {
                     String zoneTitle = "";
                     LayoutInflater inflater = LayoutInflater.from(getContext());
 
                     zoneTitle = roomMap.get(m).get("dis").toString();
-                    ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\""+ roomMap.get(m).get("id").toString()+"\" and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
-                    if(equips.size() > 0) {// zones has devices paired
+                    Log.d(LOG_TAG, "zoneTitle = " + zoneTitle);
+                    ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\"" + roomMap.get(m).get("id").toString() + "\" and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
+                    Log.d(LOG_TAG, "roomMap.get(m).get(\"id\").toString() = " + roomMap.get(m).get("id").toString());
+                    Log.d(LOG_TAG, "floorList.get(mFloorListAdapter.getSelectedPostion()).getId()  = " + floorList.get(mFloorListAdapter.getSelectedPostion()).getId());
+                    if (equips.size() > 0) {// zones has devices paired
                         HashMap<String, ArrayList<HashMap>> zoneData = new HashMap<String, ArrayList<HashMap>>();
                         for (HashMap zoneModel : equips) {
                             if (zoneData.containsKey(zoneModel.get("roomRef").toString())) {
@@ -526,7 +525,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                 zoneData.put(zoneModel.get("roomRef").toString(), newData);
                             }
                         }
-                        Log.i("ZonesMap", "Size:" + zoneData.size() + " Data:" + zoneData);
+                        Log.d(LOG_TAG + "ZonesMap", "Size:" + zoneData.size() + " Data:" + zoneData);
                         for (ArrayList<HashMap> equipZones : zoneData.values()) {
 
                             String profileType = "";
@@ -541,43 +540,49 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             String profileTempInfluence = "TEMP_INFLUENCE";
                             String profileDualDuct = "DUAL_DUCT";
                             String profileModBus = "MODBUS";
+                            String profileHyperStatSense = "HYPERSTAT_SENSE";
 
-                            //Log.e("RoomData","ProfileType:"+profileType);
                             boolean tempModule = false;
                             boolean nontempModule = false;
                             for (HashMap equipTypes : equipZones) {
                                 profileType = equipTypes.get("profile").toString();
-                                //Log.e("RoomData", "ProfileType:" + profileType);
-                                 if ( !profileType.contains(profileModBus) &&
-                                     profileType.contains(profileVAV) ||
-                                     profileType.contains(profileDAB) ||
-                                     profileType.contains(profileSSE) ||
-                                     profileType.contains(profileSmartStat) ||
-                                     profileType.contains(profileTempInfluence) ||
-                                     profileType.contains(profileDualDuct)) {
+                                Log.e(LOG_TAG + "RoomData", "ProfileType:" + profileType);
+                                if (!profileType.contains(profileModBus) &&
+                                        profileType.contains(profileVAV) ||
+                                        profileType.contains(profileDAB) ||
+                                        profileType.contains(profileSSE) ||
+                                        profileType.contains(profileSmartStat) ||
+                                        profileType.contains(profileTempInfluence) ||
+                                        profileType.contains(profileDualDuct)) {
                                     tempModule = true;
-                                    Log.e("RoomData", "Load SmartNode ProfileType:" + profileType);
+                                    Log.e(LOG_TAG + "RoomData", "Load SmartNode ProfileType:" + profileType);
                                 }
-                                if (profileType.contains(profileEM) || profileType.contains(profilePLC) || profileType.contains(profileTempMonitor) || profileType.contains(profileTempInfluence) || profileType.contains(profileModBus)) {
+                                if (profileType.contains(profileEM) || profileType.contains(profilePLC)
+                                        || profileType.contains(profileTempMonitor)
+                                        || profileType.contains(profileTempInfluence)
+                                        || profileType.contains(profileModBus)) {
                                     nontempModule = true;
-                                    Log.e("RoomData", "Load SmartStat ProfileType:" + profileType);
+                                    Log.e(LOG_TAG + "RoomData", "Load SmartStat ProfileType:" + profileType);
                                 }
+                            }
+                            if (profileType.contains(profileHyperStatSense)) {
+                                viewSenseZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout);
                             }
 
                             if (tempModule) {
-                                Log.e("RoomData", "Load Temperature Based View");
+                                Log.e(LOG_TAG + "RoomData", "Load Temperature Based View");
                                 viewTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout);
                             }
-                            if (!tempModule && nontempModule) {
-                                Log.e("RoomData", "Load Non Temperature Based View");
+                            if (!tempModule && nontempModule && !profileType.contains(profileHyperStatSense)) {
+                                Log.e(LOG_TAG + "RoomData", "Load Non Temperature Based View");
                                 viewNonTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout);
                                 //arcViewParent = inflater.inflate(R.layout.zones_item_smartstat, (ViewGroup) rootView, false);
                             }
                             i++;
                         }
-                    }else{
+                    } else {
                         //No devices paired
-                        Log.e("RoomData", "Load No device paired Based View");
+                        Log.e(LOG_TAG + "RoomData", "Load No device paired Based View");
                         viewNonTemperatureBasedZone(inflater, rootView, new ArrayList<HashMap>(), zoneTitle, i, tablerowLayout);
                         i++;
                     }
@@ -587,11 +592,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
     }
 
-    private void viewTemperatureBasedZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap,String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout)
-    {
+    private void viewTemperatureBasedZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap, String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout) {
 
-        Log.i("ProfileTypes","Points:"+zoneMap.toString());
+        Log.i("ProfileTypes", "Points:" + zoneMap.toString());
         Equip p = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
+        Log.i("ProfileTypes", "p:" + p.toString());
         double currentAverageTemp = 0;
         int noTempSensor = 0;
         ArrayList<Short> equipNodes = new ArrayList<>();
@@ -601,13 +606,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         double coolLowerlimit = 0;
         double heatUpperlimit = 0;
         double heatLowerlimit = 0;
-        double buildingLimitMax =  TunerUtil.readBuildingTunerValByQuery("building and limit and max");
-        double buildingLimitMin =  TunerUtil.readBuildingTunerValByQuery("building and limit and min");
+        double buildingLimitMax = TunerUtil.readBuildingTunerValByQuery("building and limit and max");
+        double buildingLimitMin = TunerUtil.readBuildingTunerValByQuery("building and limit and min");
 
         double tempDeadLeeway = TunerUtil.readBuildingTunerValByQuery("temp and dead and leeway");
 
-        for(int i=0;i<zoneMap.size();i++)
-        {
+        for (int i = 0; i < zoneMap.size(); i++) {
             Equip avgTempEquip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
             double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + avgTempEquip.getId() + "\"");
 
@@ -623,23 +627,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             double coolLL = CCUHsApi.getInstance().readPointPriorityValByQuery("point and limit and min and cooling and user and equipRef == \"" + avgTempEquip.getId() + "\"");
             double heatLL = CCUHsApi.getInstance().readPointPriorityValByQuery("point and limit and min and heating and user and equipRef == \"" + avgTempEquip.getId() + "\"");*/
 
-            if(heatDB < heatDeadband || heatDeadband == 0)
-            {
+            if (heatDB < heatDeadband || heatDeadband == 0) {
                 heatDeadband = heatDB;
             }
-            if(coolDB < coolDeadband || coolDeadband == 0)
-            {
+            if (coolDB < coolDeadband || coolDeadband == 0) {
                 coolDeadband = coolDB;
             }
             if ((avgTemp <= (buildingLimitMax + tempDeadLeeway)) && (avgTemp >= (buildingLimitMin - tempDeadLeeway))) {
                 currentAverageTemp = (currentAverageTemp + avgTemp);
-            }else{
+            } else {
                 noTempSensor++;
             }
             equipNodes.add(Short.valueOf(avgTempEquip.getGroup()));
-            Log.i("EachzoneData","temp:"+avgTemp+" currentAvg:"+currentAverageTemp);
+            Log.i("EachzoneData", "temp:" + avgTemp + " currentAvg:" + currentAverageTemp);
 
-            if(heatDB == heatDeadband && coolDB == coolDeadband) // Setting User Limits based on deadband
+            if (heatDB == heatDeadband && coolDB == coolDeadband) // Setting User Limits based on deadband
             {
                 coolUpperlimit = coolUL;
                 coolLowerlimit = coolLL;
@@ -648,21 +650,23 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             }
 
         }
-        if(zoneMap.size() > 1 && currentAverageTemp != 0){
-            currentAverageTemp = currentAverageTemp/(zoneMap.size()-noTempSensor);
+        if (zoneMap.size() > 1 && currentAverageTemp != 0) {
+            currentAverageTemp = currentAverageTemp / (zoneMap.size() - noTempSensor);
             DecimalFormat decimalFormat = new DecimalFormat("#.#");
-            currentAverageTemp = Double.parseDouble(decimalFormat.format(Math.round(currentAverageTemp * 10.0)/10.0));
+            currentAverageTemp = Double.parseDouble(decimalFormat.format(Math.round(currentAverageTemp * 10.0) / 10.0));
         }
-        Log.i("EachzoneData"," currentAvg:"+currentAverageTemp);
+        Log.i("EachzoneData", " currentAvg:" + currentAverageTemp);
         final String[] equipId = {p.getId()};
         int i = gridPosition;
         View arcView = null;
         arcView = inflater.inflate(R.layout.zones_item, (ViewGroup) rootView, false);
         View zoneDetails = inflater.inflate(R.layout.zones_item_details, null);
         //RecyclerView recyclerViewPoints = zoneDetails.findViewById(R.id.recyclerViewProfilePoints);
+
         LinearLayout linearLayoutZonePoints  = zoneDetails.findViewById(R.id.lt_profilepoints);
         TextView    scheduleStatus      = zoneDetails.findViewById(R.id.schedule_status_tv);
         Spinner scheduleSpinner     = zoneDetails.findViewById(R.id.schedule_spinner);
+        CCUUiUtil.setSpinnerDropDownColor(scheduleSpinner,getContext());
         ImageButton scheduleImageButton = zoneDetails.findViewById(R.id.schedule_edit_button);
         ImageButton vacationImageButton = zoneDetails.findViewById(R.id.vacation_edit_button);
         TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
@@ -681,19 +685,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         vacationStatusTV.setText(vacationStatus);
         scheduleStatus.setText(status);
         String scheduleTypeId = getScheduleTypeId(equipId[0]);
-        final Integer mScheduleType = (int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
-        Log.d("ScheduleType","mScheduleType=="+mScheduleType+","+(int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId)+","+p.getDisplayName());
+        final Integer mScheduleType = (int) CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
+        Log.d("ScheduleType", "mScheduleType==" + mScheduleType + "," + (int) CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId) + "," + p.getDisplayName());
         mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
         scheduleSpinner.setTag(mScheduleType);
-        mScheduleTypeMap.put(equipId[0],mScheduleType);
+        mScheduleTypeMap.put(equipId[0], mScheduleType);
         scheduleImageButton.setTag(mSchedule.getId());
         vacationImageButton.setTag(mSchedule.getId());
 
-        if (mSchedule.isZoneSchedule() && !mSchedule.isBuildingSchedule())
-        {
+        if (mSchedule.isZoneSchedule() && !mSchedule.isBuildingSchedule()) {
             scheduleImageButton.setVisibility(View.VISIBLE);
-        }else
-        {
+        } else {
             scheduleImageButton.setVisibility(View.GONE);
         }
 
@@ -706,10 +708,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }*/
         scheduleImageButton.setOnClickListener(v ->
         {
-            SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId);
+            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId);
             FragmentManager childFragmentManager = getFragmentManager();
             childFragmentManager.beginTransaction();
-            schedulerFragment.show(childFragmentManager,"dialog");
+            schedulerFragment.show(childFragmentManager, "dialog");
 
             schedulerFragment.setOnExitListener(() -> {
                 Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
@@ -720,10 +722,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         vacationImageButton.setOnClickListener(v ->
         {
-            SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance((String) v.getTag(), true, zoneId);
+            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), true, zoneId);
             FragmentManager childFragmentManager = getFragmentManager();
             childFragmentManager.beginTransaction();
-            schedulerFragment.show(childFragmentManager,"dialog");
+            schedulerFragment.show(childFragmentManager, "dialog");
 
             schedulerFragment.setOnExitListener(() -> {
                 Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
@@ -734,19 +736,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             });
         });
 
-        scheduleSpinner.setSelection(mScheduleType,false);
+        scheduleSpinner.setSelection(mScheduleType, false);
 
-        scheduleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
-        {
+        scheduleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-            {
-                if (position == 0 && (mScheduleType != -1))
-                {
-                    if (mSchedule.isZoneSchedule())
-                    {
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position == 0 && (mScheduleType != -1)) {
+                    if (mSchedule.isZoneSchedule()) {
                         mSchedule.setDisabled(true);
-                        CCUHsApi.getInstance().updateZoneSchedule(mSchedule,zoneId);
+                        CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
                     }
                     scheduleImageButton.setVisibility(View.GONE);
 
@@ -757,31 +755,26 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     scheduleImageButton.setTag(mSchedule.getId());
                     vacationImageButton.setTag(mSchedule.getId());
                     CCUHsApi.getInstance().scheduleSync();
-                } else if (position == 1 && (mScheduleType != -1)/*&& (mScheduleType != position)*/)
-                {
+                } else if (position == 1 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
                     clearTempOverride(equipId[0]);
                     boolean isContainment = true;
-                    if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled"))
-                    {
+                    if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled")) {
                         mSchedule.setDisabled(false);
                         CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
                         scheduleImageButton.setTag(mSchedule.getId());
                         vacationImageButton.setTag(mSchedule.getId());
-                    } else
-                    {
+                    } else {
 
-                        Zone     zone         = Schedule.getZoneforEquipId(equipId[0]);
+                        Zone zone = Schedule.getZoneforEquipId(equipId[0]);
                         Schedule scheduleById = null;
-                        if (zone.hasSchedule())
-                        {
+                        if (zone.hasSchedule()) {
                             scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
-                            Log.d(L.TAG_CCU_UI," scheduleType changed to ZoneSchedule : "+scheduleTypeId);
+                            Log.d(L.TAG_CCU_UI, " scheduleType changed to ZoneSchedule : " + scheduleTypeId);
                             scheduleById.setDisabled(false);
                             isContainment = checkContainment(scheduleTypeId, scheduleById, scheduleSpinner, zoneMap);
                             CCUHsApi.getInstance().updateZoneSchedule(scheduleById, zone.getId());
-                        } else if (!zone.hasSchedule())
-                        {
-                            Log.d(L.TAG_CCU_UI," Zone does not have Schedule : Shouldn't happen");
+                        } else if (!zone.hasSchedule()) {
+                            Log.d(L.TAG_CCU_UI, " Zone does not have Schedule : Shouldn't happen");
                             DefaultSchedules.setDefaultCoolingHeatingTemp();
                             zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
                             CCUHsApi.getInstance().updateZone(zone, zone.getId());
@@ -794,15 +787,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         CCUHsApi.getInstance().scheduleSync();
                     }
                     if (mScheduleTypeMap.get(equipId[0]) != ScheduleType.ZONE.ordinal()) {
-                        if(isContainment){
+                        if (isContainment) {
                             setScheduleType(scheduleTypeId, ScheduleType.ZONE, zoneMap);
                         }
                         mScheduleTypeMap.put(equipId[0], ScheduleType.ZONE.ordinal());
                     }
-                } else if(position == 2 && (mScheduleType != -1)){
+                } else if (position == 2 && (mScheduleType != -1)) {
                     scheduleImageButton.setVisibility(View.GONE);
-                } else
-                {
+                } else {
                     //list named schedules
                 }
                 mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
@@ -811,8 +803,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent)
-            {
+            public void onNothingSelected(AdapterView<?> parent) {
 
             }
         });
@@ -830,7 +821,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         seekArc.setTag(gridItemObj);
         scheduleStatus.setTag(gridItemObj);
         zoneDetails.setTag(gridItemObj);
-        //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
 
@@ -844,18 +834,18 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         //float pointcurrTmep = (float)getPointVal(currTmep.get("id").toString());
 
-        double pointheatDT =  CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and equipRef == \"" + p.getId() + "\"");
+        double pointheatDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and equipRef == \"" + p.getId() + "\"");
         double pointcoolDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and cooling and equipRef == \"" + p.getId() + "\"");
         float pointbuildingMin = (float) TunerUtil.readBuildingTunerValByQuery("building and limit and min");//getPointVal(buildingMin.get("id").toString());
         float pointbuildingMax = (float) TunerUtil.readBuildingTunerValByQuery("building and limit and max");//getPointVal(buildingMax.get("id").toString());
 
         String floorName = floorList.get(mFloorListAdapter.getSelectedPostion()).getDisplayName();
-        Log.i("EachzoneData","CurrentTemp:"+currentAverageTemp+" FloorName:"+floorName+" ZoneName:"+zoneTitle+","+heatDeadband+","+coolDeadband);
-        seekArc.setData(false, pointbuildingMin, pointbuildingMax, (float) heatUpperlimit, (float) heatLowerlimit, (float) coolLowerlimit, (float) coolUpperlimit, (float)pointheatDT, (float)pointcoolDT, (float) currentAverageTemp, (float) heatDeadband, (float) coolDeadband);
+        Log.i("EachzoneData", "CurrentTemp:" + currentAverageTemp + " FloorName:" + floorName + " ZoneName:" + zoneTitle + "," + heatDeadband + "," + coolDeadband);
+        seekArc.setData(false, pointbuildingMin, pointbuildingMax, (float) heatUpperlimit, (float) heatLowerlimit, (float) coolLowerlimit, (float) coolUpperlimit, (float) pointheatDT, (float) pointcoolDT, (float) currentAverageTemp, (float) heatDeadband, (float) coolDeadband);
         seekArc.setDetailedView(false);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 
-        arcView.setPadding(48,64,0,0);
+        arcView.setPadding(48, 64, 0, 0);
         try {
             tablerowLayout[rowcount].addView(arcView, rowLayoutParams);
         } catch (Exception e) {
@@ -863,8 +853,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
         if (((i + 1) % columnCount == 0) && (i != 0)) {
             try {
-                if(tablerowLayout[rowcount].getParent() != null) {
-                    ((ViewGroup)tablerowLayout[rowcount].getParent()).removeView(tablerowLayout[rowcount]);
+                if (tablerowLayout[rowcount].getParent() != null) {
+                    ((ViewGroup) tablerowLayout[rowcount].getParent()).removeView(tablerowLayout[rowcount]);
                 }
                 tableLayout.addView(tablerowLayout[rowcount++]);
             } catch (Exception e) {
@@ -875,8 +865,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
         if (rowcount < numRows) {
             try {
-                if(tablerowLayout[rowcount].getParent() != null) {
-                    ((ViewGroup)tablerowLayout[rowcount].getParent()).removeView(tablerowLayout[rowcount]);
+                if (tablerowLayout[rowcount].getParent() != null) {
+                    ((ViewGroup) tablerowLayout[rowcount].getParent()).removeView(tablerowLayout[rowcount]);
                 }
                 tableLayout.addView(tablerowLayout[rowcount]);
             } catch (Exception e) {
@@ -889,32 +879,30 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         zoneStatusArrayList.add(zoneDetails);
         seekArc.setOnTemperatureChangeListener(new SeekArc.OnTemperatureChangeListener() {
             @Override
-            public void onTemperatureChange(SeekArc seekArc, float coolingDesiredTemp, float heatingDesiredTemp,boolean syncToHaystack) {
-                if(syncToHaystack){
+            public void onTemperatureChange(SeekArc seekArc, float coolingDesiredTemp, float heatingDesiredTemp, boolean syncToHaystack) {
+                if (syncToHaystack) {
 
-                    double pointheatDT =  CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and equipRef == \"" + p.getId() + "\"");
+                    double pointheatDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and equipRef == \"" + p.getId() + "\"");
                     double pointcoolDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and cooling and equipRef == \"" + p.getId() + "\"");
-                    Log.i("Scheduler","cooldt:"+coolDT.get("id").toString()+" value:"+Double.parseDouble(Float.valueOf(coolingDesiredTemp).toString())+","+pointcoolDT);
-                    Log.i("Scheduler","heatdt:"+heatDT.get("id").toString()+" value:"+Double.parseDouble(Float.valueOf(heatingDesiredTemp).toString())+","+pointheatDT);
+                    Log.i("Scheduler", "cooldt:" + coolDT.get("id").toString() + " value:" + Double.parseDouble(Float.valueOf(coolingDesiredTemp).toString()) + "," + pointcoolDT);
+                    Log.i("Scheduler", "heatdt:" + heatDT.get("id").toString() + " value:" + Double.parseDouble(Float.valueOf(heatingDesiredTemp).toString()) + "," + pointheatDT);
                     //setPointVal(coolDT.get("id").toString(),Double.parseDouble(Float.valueOf(coolingDesiredTemp).toString()));
                     //setPointVal(heatDT.get("id").toString(),Double.parseDouble(Float.valueOf(heatingDesiredTemp).toString()));
-                    if(zoneMap.size() > 0)
-                    {
-                        for(int i=0;i<zoneMap.size();i++)
-                        {
+                    if (zoneMap.size() > 0) {
+                        for (int i = 0; i < zoneMap.size(); i++) {
                             Equip zoneEquip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
                             double curCoolDt = 0;
                             double curHeatDt = 0;
-                            if(pointcoolDT != coolingDesiredTemp)
+                            if (pointcoolDT != coolingDesiredTemp)
                                 curCoolDt = coolingDesiredTemp;
-                            if(pointheatDT != heatingDesiredTemp)
+                            if (pointheatDT != heatingDesiredTemp)
                                 curHeatDt = heatingDesiredTemp;
                             double curAvgDt = (coolingDesiredTemp + heatingDesiredTemp) / 2.0;
                             HashMap coolDT = CCUHsApi.getInstance().read("point and temp and desired and cooling and sp and equipRef == \"" + zoneEquip.getId() + "\"");
                             HashMap heatDT = CCUHsApi.getInstance().read("point and temp and desired and heating and sp and equipRef == \"" + zoneEquip.getId() + "\"");
                             HashMap avgDT = CCUHsApi.getInstance().read("point and temp and desired and average and sp and equipRef == \"" + zoneEquip.getId() + "\"");
                             //setPointVal(coolDT.get("id").toString(),Double.parseDouble(Float.valueOf(coolingDesiredTemp).toString()),heatDT.get("id").toString(),Double.parseDouble(Float.valueOf(heatingDesiredTemp).toString()),avgDT.get("id").toString());
-                            setPointVal(coolDT.get("id").toString(),curCoolDt,heatDT.get("id").toString(),curHeatDt,avgDT.get("id").toString(), curAvgDt);
+                            setPointVal(coolDT.get("id").toString(), curCoolDt, heatDT.get("id").toString(), curHeatDt, avgDT.get("id").toString(), curAvgDt);
                             //setPointVal(heatDT.get("id").toString(),Double.parseDouble(Float.valueOf(heatingDesiredTemp).toString()));
                         }
                     }
@@ -924,11 +912,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         });
 
         seekArc.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("ResourceType")
             @Override
             public void onClick(View v) {
                 GridItem gridItemNew = (GridItem) v.getTag();
                 boolean isExpanded = false;
-                int clickedItemRow =0;
+                int clickedItemRow = 0;
                 int clickposition = gridItemNew.getGridID();
                 if (clickedView != -1) {
                     if (clickposition != clickedView) {
@@ -944,7 +933,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                     RelativeLayout gridItem = (RelativeLayout) tableRow.getChildAt(j);
                                     GridItem viewTag = (GridItem) gridItem.getTag();
                                     if (viewTag.getGridID() == clickedView) {
-                                        if(viewTag.getGridItem().equals("Temp")) {
+                                        if (viewTag.getGridItem().equals("Temp") || viewTag.getGridItem().equals("Sense")) {
                                             SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
                                             TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
                                             textViewzone.setTextAppearance(getActivity(), R.style.label_black);
@@ -954,13 +943,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                             seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
                                             seekArcExpanded.scaletoNormal(250, 210);
                                             gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
-                                        }else {
+                                        } else {
                                             TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
-                                            textViewzone.setTextAppearance(getActivity(),R.style.label_black);
+                                            textViewzone.setTextAppearance(getActivity(), R.style.label_black);
                                             textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                                             tableLayout.removeViewAt(row + 1);
                                             NonTempControl nonTempControl = gridItem.findViewById(R.id.rl_nontemp);
-                                            ScaleControlToNormal(250,210,nonTempControl);
+                                            ScaleControlToNormal(250, 210, nonTempControl);
                                             nonTempControl.setExpand(false);
                                             //ScaleImageToNormal(250,210,imageViewExpanded);
                                             nonTempControl.setBackgroundColor(getResources().getColor(R.color.white));
@@ -989,12 +978,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             v.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
                             int index = clickedView / columnCount + 1;
                             seekArc.setDetailedView(true);
-                            //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
                             seekArc.scaletoNormalBig(250, 210);
                             imageOn = true;
                             selectedView = seekArc.getId();
                             try {
-                                textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
+                                textEquipment.setTextAppearance(getActivity(),R.attr.label_orange);
                                 textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 tableLayout.addView(zoneDetails, index);
@@ -1006,7 +994,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         }
                     } else if (clickposition == clickedView) {
                         v.setBackgroundColor(getResources().getColor(R.color.white));
-                        textEquipment.setTextAppearance(getActivity(),R.style.label_black);
+                        textEquipment.setTextAppearance(getActivity(), R.style.label_black);
                         textEquipment.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                         tableLayout.removeView(zoneDetails);
                         imageOn = false;
@@ -1028,13 +1016,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     v.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                     int index = clickedView / columnCount + 1;
                     seekArc.setDetailedView(true);
-                    //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
                     seekArc.scaletoNormalBig(250, 210);
                     hideWeather();
                     imageOn = true;
                     selectedView = seekArc.getId();
                     try {
-                        textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
+                        textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         tableLayout.addView(zoneDetails, index);
@@ -1044,14 +1031,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     isExpanded = true;
                 }
 
-                if(isExpanded) {
+                if (isExpanded) {
                     v.setContentDescription(zoneTitle);
                     linearLayoutZonePoints.removeAllViews();
-                    if (scheduleSpinner.getSelectedItemPosition() == 1)
-                    {
+                    if (scheduleSpinner.getSelectedItemPosition() == 1) {
                         scheduleImageButton.setVisibility(View.VISIBLE);
-                    } else
-                    {
+                    } else {
                         scheduleImageButton.setVisibility(View.GONE);
                     }
 
@@ -1066,8 +1051,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     }*/
 
                     {
-                        for(int k=0;k<zoneMap.size();k++)
-                        {
+                        for (int k = 0; k < zoneMap.size(); k++) {
                             Equip p = new Equip.Builder().setHashMap(zoneMap.get(k)).build();
                             String updatedEquipId = p.getId();
                             equipOpen = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
@@ -1107,13 +1091,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             if (p.getProfile().startsWith("SMARTSTAT_CONVENTIONAL_PACK_UNIT")) {
                                 HashMap cpuEquipPoints = ScheduleProcessJob.getCPUEquipPoints(p.getId());
                                 Log.i("PointsValue", "CPU Points:" + cpuEquipPoints.toString());
-                                loadSSCPUPointsUI(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId, false, p.getGroup(),false);
+                                loadSSCPUPointsUI(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId, false, p.getGroup(), false);
                                 isCPUloaded = true;
                             }
                             if (p.getProfile().startsWith("SMARTSTAT_HEAT_PUMP_UNIT")) {
                                 HashMap hpuEquipPoints = ScheduleProcessJob.getHPUEquipPoints(p.getId());
                                 Log.i("PointsValue", "HPU Points:" + hpuEquipPoints.toString());
-                                loadSSHPUPointsUI(hpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId, false, p.getGroup(),false);
+                                loadSSHPUPointsUI(hpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId, false, p.getGroup(), false);
                                 isHPUloaded = true;
                             }
                             if (p.getProfile().startsWith("DUAL_DUCT")) {
@@ -1129,6 +1113,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         //return view;
     }
 
+
     private void clearTempOverride(String equipId) {
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -1137,24 +1122,22 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     ScheduleProcessJob.clearTempOverrides(equipId);
                 }
             }
-        },400);
+        }, 400);
     }
 
 
-    private void updateTemperatureBasedZones(SeekArc seekArcOpen, View zonePointsOpen, Equip equipOpen, LayoutInflater inflater)
-    {
+    private void updateTemperatureBasedZones(SeekArc seekArcOpen, View zonePointsOpen, Equip equipOpen, LayoutInflater inflater) {
         Equip p = equipOpen;
         View zoneDetails = zonePointsOpen;
         SeekArc seekArc = seekArcOpen;
         String equipId = p.getId();
 
-        LinearLayout linearLayoutZonePoints  = zoneDetails.findViewById(R.id.lt_profilepoints);
-        TextView    scheduleStatus      = zoneDetails.findViewById(R.id.schedule_status_tv);
-        Spinner scheduleSpinner     = zoneDetails.findViewById(R.id.schedule_spinner);
+        LinearLayout linearLayoutZonePoints = zoneDetails.findViewById(R.id.lt_profilepoints);
+        TextView scheduleStatus = zoneDetails.findViewById(R.id.schedule_status_tv);
+        Spinner scheduleSpinner = zoneDetails.findViewById(R.id.schedule_spinner);
         ImageButton scheduleImageButton = zoneDetails.findViewById(R.id.schedule_edit_button);
         ImageButton vacationImageButton = zoneDetails.findViewById(R.id.vacation_edit_button);
         TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
-
 
 
         ArrayAdapter<CharSequence> scheduleAdapter = ArrayAdapter.createFromResource(
@@ -1165,13 +1148,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         String zoneId = Schedule.getZoneIdByEquipId(equipId);
         String status = ScheduleProcessJob.getZoneStatusString(zoneId, equipId);
         String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);
-        Log.i("ZonePoints","zoneId:"+zoneId+" status:"+status+" vacationstatus:"+vacationStatus);
+        Log.i("ZonePoints", "zoneId:" + zoneId + " status:" + status + " vacationstatus:" + vacationStatus);
 
         vacationStatusTV.setText(vacationStatus);
         scheduleStatus.setText(status);
         String scheduleTypeId = getScheduleTypeId(equipId);
-        final int mScheduleType = (int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
-        Log.d("ScheduleType","update mScheduleType=="+mScheduleType+","+(int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId)+","+p.getDisplayName());
+        final int mScheduleType = (int) CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
+        Log.d("ScheduleType", "update mScheduleType==" + mScheduleType + "," + (int) CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId) + "," + p.getDisplayName());
         mScheduleTypeMap.put(equipId, mScheduleType);
         mSchedule = Schedule.getScheduleByEquipId(equipId);
 
@@ -1179,20 +1162,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         vacationImageButton.setTag(mSchedule.getId());
         vacationImageButton.setOnClickListener(v ->
         {
-            SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance((String) v.getTag(), true, zoneId);
-            FragmentManager childFragmentManager = getFragmentManager();
-            childFragmentManager.beginTransaction();
-            schedulerFragment.show(childFragmentManager,"dialog");
-
-            schedulerFragment.setOnExitListener(() -> {
-                Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
-                mSchedule = Schedule.getScheduleByEquipId(equipId);
-                ScheduleProcessJob.updateSchedules(equipOpen);
-            });
-        });
-        scheduleImageButton.setOnClickListener(v ->
-        {
-            SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId);
+            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), true, zoneId);
             FragmentManager childFragmentManager = getFragmentManager();
             childFragmentManager.beginTransaction();
             schedulerFragment.show(childFragmentManager, "dialog");
@@ -1203,12 +1173,23 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 ScheduleProcessJob.updateSchedules(equipOpen);
             });
         });
-        scheduleSpinner.setSelection(mScheduleType,false);
-        if (mSchedule.isZoneSchedule())
+        scheduleImageButton.setOnClickListener(v ->
         {
+            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId);
+            FragmentManager childFragmentManager = getFragmentManager();
+            childFragmentManager.beginTransaction();
+            schedulerFragment.show(childFragmentManager, "dialog");
+
+            schedulerFragment.setOnExitListener(() -> {
+                Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
+                mSchedule = Schedule.getScheduleByEquipId(equipId);
+                ScheduleProcessJob.updateSchedules(equipOpen);
+            });
+        });
+        scheduleSpinner.setSelection(mScheduleType, false);
+        if (mSchedule.isZoneSchedule()) {
             scheduleImageButton.setVisibility(View.VISIBLE);
-        } else
-        {
+        } else {
             scheduleImageButton.setVisibility(View.GONE);
         }
 
@@ -1221,53 +1202,44 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }*/
 
 
-        scheduleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
-        {
+        scheduleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-            {
-                if (position == 0 && (mScheduleType != -1))
-                {
-                    if (mSchedule.isZoneSchedule())
-                    {
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position == 0 && (mScheduleType != -1)) {
+                    if (mSchedule.isZoneSchedule()) {
                         mSchedule.setDisabled(true);
-                        CCUHsApi.getInstance().updateZoneSchedule(mSchedule,zoneId);
+                        CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
                     }
                     scheduleImageButton.setVisibility(View.GONE);
 
                     if (mScheduleTypeMap.get(equipId) != ScheduleType.BUILDING.ordinal()) {
-                        setScheduleType(scheduleTypeId, ScheduleType.BUILDING,openZoneMap);
+                        setScheduleType(scheduleTypeId, ScheduleType.BUILDING, openZoneMap);
                         mScheduleTypeMap.put(equipId, ScheduleType.BUILDING.ordinal());
                     }
 
                     CCUHsApi.getInstance().scheduleSync();
                     scheduleImageButton.setTag(mSchedule.getId());
                     vacationImageButton.setTag(mSchedule.getId());
-                } else if (position == 1 && (mScheduleType != -1)/*&& (mScheduleType != position)*/)
-                {
+                } else if (position == 1 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
                     clearTempOverride(equipId);
                     boolean isContainment = true;
-                    if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled"))
-                    {
+                    if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled")) {
                         mSchedule.setDisabled(false);
                         CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
                         scheduleImageButton.setTag(mSchedule.getId());
                         vacationImageButton.setTag(mSchedule.getId());
-                    } else
-                    {
+                    } else {
 
-                        Zone     zone         = Schedule.getZoneforEquipId(equipId);
+                        Zone zone = Schedule.getZoneforEquipId(equipId);
                         Schedule scheduleById = null;
-                        if (zone.hasSchedule())
-                        {
+                        if (zone.hasSchedule()) {
                             scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
-                            Log.d(L.TAG_CCU_UI," scheduleType changed to ZoneSchedule : "+scheduleTypeId);
+                            Log.d(L.TAG_CCU_UI, " scheduleType changed to ZoneSchedule : " + scheduleTypeId);
                             scheduleById.setDisabled(false);
                             isContainment = checkContainment(scheduleTypeId, scheduleById, scheduleSpinner, openZoneMap);
                             CCUHsApi.getInstance().updateZoneSchedule(scheduleById, zone.getId());
-                        } else if (!zone.hasSchedule())
-                        {
-                            Log.d(L.TAG_CCU_UI," Zone does not have Schedule : Shouldn't happen");
+                        } else if (!zone.hasSchedule()) {
+                            Log.d(L.TAG_CCU_UI, " Zone does not have Schedule : Shouldn't happen");
                             DefaultSchedules.setDefaultCoolingHeatingTemp();
                             zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
                             CCUHsApi.getInstance().updateZone(zone, zone.getId());
@@ -1280,15 +1252,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         CCUHsApi.getInstance().scheduleSync();
                     }
                     if (mScheduleTypeMap.get(equipId) != ScheduleType.ZONE.ordinal()) {
-                        if(isContainment) {
+                        if (isContainment) {
                             setScheduleType(scheduleTypeId, ScheduleType.ZONE, openZoneMap);
                         }
                         mScheduleTypeMap.put(equipId, ScheduleType.ZONE.ordinal());
                     }
-                } else if(position == 2 && (mScheduleType != -1)){
+                } else if (position == 2 && (mScheduleType != -1)) {
                     scheduleImageButton.setVisibility(View.GONE);
-                } else
-                {
+                } else {
                     //list named schedules
                 }
                 mSchedule = Schedule.getScheduleByEquipId(equipId);
@@ -1297,8 +1268,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent)
-            {
+            public void onNothingSelected(AdapterView<?> parent) {
 
             }
         });
@@ -1326,15 +1296,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         //float pointbuildingMin = (float)getPointVal(buildingMin.get("id").toString());
         //float pointbuildingMax = (float)getPointVal(buildingMax.get("id").toString());
 
-        if(!seekArc.isDetailedView())
-        {
-            seekArc.setData(false, (float)pointbuildingMin, (float)pointbuildingMax, (float)pointheatUL, (float)pointheatLL, (float)pointcoolLL, (float)pointcoolUL, (float)pointheatDT, (float) pointcoolDT, (float)pointcurrTmep, (float)pointheatDB, (float)pointcoolDB);
-        }else {
-            seekArc.setData(true, (float)pointbuildingMin, (float)pointbuildingMax, (float)pointheatUL, (float)pointheatLL, (float)pointcoolLL, (float)pointcoolUL, (float)pointheatDT, (float) pointcoolDT, (float)pointcurrTmep, (float)pointheatDB, (float)pointcoolDB);
+        if (!seekArc.isDetailedView()) {
+            seekArc.setData(false, (float) pointbuildingMin, (float) pointbuildingMax, (float) pointheatUL, (float) pointheatLL, (float) pointcoolLL, (float) pointcoolUL, (float) pointheatDT, (float) pointcoolDT, (float) pointcurrTmep, (float) pointheatDB, (float) pointcoolDB);
+        } else {
+            seekArc.setData(true, (float) pointbuildingMin, (float) pointbuildingMax, (float) pointheatUL, (float) pointheatLL, (float) pointcoolLL, (float) pointcoolUL, (float) pointheatDT, (float) pointcoolDT, (float) pointcurrTmep, (float) pointheatDB, (float) pointcoolDB);
         }
 
         linearLayoutZonePoints.removeAllViews();
-        for(int k=0;k<openZoneMap.size();k++) {
+        for (int k = 0; k < openZoneMap.size(); k++) {
             Equip updatedEquip = new Equip.Builder().setHashMap(openZoneMap.get(k)).build();
             if (updatedEquip.getProfile().startsWith("DAB")) {
                 HashMap dabPoints = ScheduleProcessJob.getDABEquipPoints(updatedEquip.getId());
@@ -1370,13 +1339,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             if (updatedEquip.getProfile().startsWith("SMARTSTAT_CONVENTIONAL_PACK_UNIT")) {
                 HashMap cpuEquipPoints = ScheduleProcessJob.getCPUEquipPoints(updatedEquip.getId());
                 Log.i("PointsValue", "CPU Points:" + cpuEquipPoints.toString());
-                loadSSCPUPointsUI(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), true, updatedEquip.getGroup(),false);
+                loadSSCPUPointsUI(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), true, updatedEquip.getGroup(), false);
                 //isCPUloaded = true;
             }
             if (updatedEquip.getProfile().startsWith("SMARTSTAT_HEAT_PUMP_UNIT")) {
                 HashMap hpuEquipPoints = ScheduleProcessJob.getHPUEquipPoints(updatedEquip.getId());
                 Log.i("PointsValue", "HPU Points:" + hpuEquipPoints.toString());
-                loadSSHPUPointsUI(hpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), true, updatedEquip.getGroup(),false);
+                loadSSHPUPointsUI(hpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), true, updatedEquip.getGroup(), false);
                 //isHPUloaded = true;
             }
             if (updatedEquip.getProfile().startsWith("DUAL_DUCT")) {
@@ -1387,68 +1356,67 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
     }
 
-    private void updateNonTemperatureBasedZones(NonTempControl nonTempControlOpen, View zonePointsOpen, Equip equipOpen, LayoutInflater inflater)
-    {
+
+    private void updateNonTemperatureBasedZones(NonTempControl nonTempControlOpen, View zonePointsOpen, Equip equipOpen, LayoutInflater inflater) {
         Equip p = equipOpen;
         View zoneDetails = zonePointsOpen;
-        LinearLayout linearLayoutZonePoints  = zoneDetails.findViewById(R.id.lt_profilepoints);
+        LinearLayout linearLayoutZonePoints = zoneDetails.findViewById(R.id.lt_profilepoints);
         NonTempControl nonTempControl = nonTempControlOpen;
 
-            linearLayoutZonePoints.removeAllViews();
-            if(p != null) {
-                if (p.getProfile().startsWith("EMR")) {
-                    LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
-                    LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
-                    ll_status.setVisibility(View.GONE);
-                    ll_schedule.setVisibility(View.GONE);
-                    HashMap emPoints = ScheduleProcessJob.getEMEquipPoints(p.getId());
-                    Log.i("PointsValue", "EM Points:" + emPoints.toString());
-                    if (emPoints.size() > 0) {
-                        loadEMPointsUI(emPoints, inflater, linearLayoutZonePoints, p.getGroup());
-                        double totalEm = (double) emPoints.get("Energy Reading");
-                        double currentEm = (double) emPoints.get("Current Rate");
-                        int currentValue = new BigDecimal(currentEm).intValue();
-                        nonTempControl.setEmCurrentText(String.valueOf(currentValue));
-                        nonTempControl.setEmTotalText(String.format("%.0f", totalEm));
-                        nonTempControl.setEmCurrentText(String.valueOf(currentValue));
-                        nonTempControl.setEmTotalUnitText("KWh");
-                        nonTempControl.setEmCurrentUnitText("KW");
-                    }
+        linearLayoutZonePoints.removeAllViews();
+        if (p != null) {
+            if (p.getProfile().startsWith("EMR")) {
+                LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
+                LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                ll_status.setVisibility(View.GONE);
+                ll_schedule.setVisibility(View.GONE);
+                HashMap emPoints = ScheduleProcessJob.getEMEquipPoints(p.getId());
+                Log.i("PointsValue", "EM Points:" + emPoints.toString());
+                if (emPoints.size() > 0) {
+                    loadEMPointsUI(emPoints, inflater, linearLayoutZonePoints, p.getGroup());
+                    double totalEm = (double) emPoints.get("Energy Reading");
+                    double currentEm = (double) emPoints.get("Current Rate");
+                    int currentValue = new BigDecimal(currentEm).intValue();
+                    nonTempControl.setEmCurrentText(String.valueOf(currentValue));
+                    nonTempControl.setEmTotalText(String.format("%.0f", totalEm));
+                    nonTempControl.setEmCurrentText(String.valueOf(currentValue));
+                    nonTempControl.setEmTotalUnitText("KWh");
+                    nonTempControl.setEmCurrentUnitText("KW");
                 }
-                if (p.getProfile().startsWith("PLC")) {
-                    LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
-                    LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
-                    ll_status.setVisibility(View.GONE);
-                    ll_schedule.setVisibility(View.GONE);
-                    HashMap plcPoints = ScheduleProcessJob.getPiEquipPoints(p.getId());
-                    if (plcPoints.size() > 0) {
-                        Log.i("PointsValue", "PiLoop Points:" + plcPoints.toString());
-                        loadPLCPointsUI(plcPoints, inflater, linearLayoutZonePoints, p.getGroup());
-                        double targetValue = (double) plcPoints.get("Target Value");
-                        double inputValue = (double) plcPoints.get("Input Value");
-                        nonTempControl.setPiInputText(String.format("%.2f", inputValue));
-                        nonTempControl.setPiOutputText(String.valueOf(targetValue));
-                        nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
-                        if ((boolean) plcPoints.get("Dynamic Setpoint")){
-                            nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());
-                        } else {
-                            nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
-                        }
+            }
+            if (p.getProfile().startsWith("PLC")) {
+                LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
+                LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                ll_status.setVisibility(View.GONE);
+                ll_schedule.setVisibility(View.GONE);
+                HashMap plcPoints = ScheduleProcessJob.getPiEquipPoints(p.getId());
+                if (plcPoints.size() > 0) {
+                    Log.i("PointsValue", "PiLoop Points:" + plcPoints.toString());
+                    loadPLCPointsUI(plcPoints, inflater, linearLayoutZonePoints, p.getGroup());
+                    double targetValue = (double) plcPoints.get("Target Value");
+                    double inputValue = (double) plcPoints.get("Input Value");
+                    nonTempControl.setPiInputText(String.format("%.2f", inputValue));
+                    nonTempControl.setPiOutputText(String.valueOf(targetValue));
+                    nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
+                    if ((boolean) plcPoints.get("Dynamic Setpoint")) {
+                        nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());
+                    } else {
+                        nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
                     }
                 }
             }
+        }
     }
 
 
-    private void viewNonTemperatureBasedZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap,String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout)
-    {
+    private void viewNonTemperatureBasedZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap, String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout) {
 
         Equip p = null;
         int i = gridPosition;
         View arcView = null;
         arcView = inflater.inflate(R.layout.zones_item_nontemp, (ViewGroup) rootView, false);
         View zoneDetails = inflater.inflate(R.layout.zones_item_details, null);
-        LinearLayout linearLayoutZonePoints  = zoneDetails.findViewById(R.id.lt_profilepoints);
+        LinearLayout linearLayoutZonePoints = zoneDetails.findViewById(R.id.lt_profilepoints);
         GridItem gridItemObj = new GridItem();
         gridItemObj.setGridID(i);
         gridItemObj.setGridItem("NonTemp");
@@ -1462,7 +1430,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        arcView.setPadding(48,56,0,0);
+        arcView.setPadding(48, 56, 0, 0);
         try {
             tablerowLayout[rowcount].addView(arcView, rowLayoutParams);
         } catch (Exception e) {
@@ -1479,17 +1447,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
         if (rowcount < numRows) {
             try {
-                if(tablerowLayout[rowcount].getParent() != null) {
-                    ((ViewGroup)tablerowLayout[rowcount].getParent()).removeView(tablerowLayout[rowcount]);
+                if (tablerowLayout[rowcount].getParent() != null) {
+                    ((ViewGroup) tablerowLayout[rowcount].getParent()).removeView(tablerowLayout[rowcount]);
                 }
                 tableLayout.addView(tablerowLayout[rowcount]);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        if(zoneMap.size() > 0) {
+        if (zoneMap.size() > 0) {
             Log.i("ProfileTypes", "Points:" + zoneMap.toString());
-            p =new Equip.Builder().setHashMap(zoneMap.get(0)).build();
+            p = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
 
             String equipId = p.getId();
             HashMap zoneEquips = zoneMap.get(0);
@@ -1521,19 +1489,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 nonTempControl.setImage(R.drawable.ic_zone_em);
                 nonTempControl.setImageViewExpanded(R.drawable.ic_zone_em_max);
             }
-        }else{
+
+        } else {
             //No devices paired zone
             nonTempControl.setEquipType(2);
             nonTempControl.setImage(R.drawable.ic_no_device_paired_icon);
             nonTempControl.setImageViewExpanded(R.drawable.ic_no_device_paired_expanded_icon);
         }
         //ScaleImageToNormal(250,210,imageView);
-        ScaleControlToNormal(250,210,nonTempControl);
+        ScaleControlToNormal(250, 210, nonTempControl);
         nonTempControl.setExpand(false);
 
         //imageView.setOnClickListener(new View.OnClickListener() {
         Equip nonTempEquip = p;
         nonTempControl.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("ResourceType")
             @Override
             public void onClick(View v) {
                 boolean isExpanded = false;
@@ -1553,30 +1523,30 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                     RelativeLayout gridItem = (RelativeLayout) tableRow.getChildAt(j);
                                     GridItem viewTag = (GridItem) gridItem.getTag();
                                     if (viewTag.getGridID() == clickedView) {
-                                        if(viewTag.getGridItem().equals("NonTemp")) {
+                                        if (viewTag.getGridItem().equals("NonTemp")) {
                                             TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
-                                            textViewzone.setTextAppearance(getActivity(),R.style.label_black);
+                                            textViewzone.setTextAppearance(getActivity(), R.style.label_black);
                                             textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                                             tableLayout.removeViewAt(row + 1);
                                             //ImageView imageViewExpanded = gridItem.findViewById(R.id.imageView);
                                             NonTempControl nonTempControl = gridItem.findViewById(R.id.rl_nontemp);
                                             //ScaleImageToNormal(250,210,imageViewExpanded);
-                                            ScaleControlToNormal(250,210,nonTempControl);
+                                            ScaleControlToNormal(250, 210, nonTempControl);
                                             nonTempControl.setExpand(false);
                                             nonTempControl.setBackgroundColor(getResources().getColor(R.color.white));
                                             gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                                             gridItem.invalidate();
-                                        }else{
+                                        } else {
                                             SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
                                             TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
-                                            textViewzone.setTextAppearance(getActivity(),R.style.label_black);
+                                            textViewzone.setTextAppearance(getActivity(), R.style.label_black);
                                             textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                                             tableLayout.removeViewAt(row + 1);
                                             seekArcExpanded.setDetailedView(false);
                                             seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
                                             seekArcExpanded.scaletoNormal(250, 210);
                                             gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
-                                            }
+                                        }
                                         isExpanded = false;
                                         imageOn = false;
                                         viewFound = true;
@@ -1596,13 +1566,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             v.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
                             int index = clickedView / columnCount + 1;
                             //ScaleImageToBig(250,210,imageView);
-                            ScaleControlToExpand(250,210,nonTempControl);
+                            ScaleControlToExpand(250, 210, nonTempControl);
                             nonTempControl.setExpand(true);
                             nonTempControlOpen = nonTempControl;
                             imageOn = true;
                             isExpanded = true;
                             try {
-                                textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
+                                textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                                 textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                                 tableLayout.addView(zoneDetails, index);
@@ -1613,12 +1583,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         }
                     } else if (clickposition == clickedView) {
                         v.setBackgroundColor(getResources().getColor(R.color.white));
-                        textEquipment.setTextAppearance(getActivity(),R.style.label_black);
+                        textEquipment.setTextAppearance(getActivity(), R.style.label_black);
                         textEquipment.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                         tableLayout.removeView(zoneDetails);
                         imageOn = false;
                         //ScaleImageToNormal(250,210,imageView);
-                        ScaleControlToNormal(250,210,nonTempControl);
+                        ScaleControlToNormal(250, 210, nonTempControl);
                         nonTempControl.setExpand(false);
                         showWeather();
                         clickedView = -1;
@@ -1634,14 +1604,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     v.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                     int index = clickedView / columnCount + 1;
                     //ScaleImageToBig(250,210,imageView);
-                    ScaleControlToExpand(250,210,nonTempControl);
+                    ScaleControlToExpand(250, 210, nonTempControl);
                     nonTempControl.setExpand(true);
                     nonTempControlOpen = nonTempControl;
                     hideWeather();
                     imageOn = true;
                     isExpanded = true;
                     try {
-                        textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
+                        textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                         textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                         tableLayout.addView(zoneDetails, index);
@@ -1650,9 +1620,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     }
                 }
 
-                if(isExpanded) {
+                if (isExpanded) {
                     linearLayoutZonePoints.removeAllViews();
-                    if(nonTempEquip != null) {
+                    if (nonTempEquip != null) {
                         if (nonTempEquip.getProfile().startsWith("EMR")) {
 
                             nonTempControl.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, nonTempControl.getHeight()));
@@ -1691,7 +1661,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             nonTempControl.setPiInputText(String.format("%.2f", inputValue));
                             nonTempControl.setPiOutputText(String.valueOf(targetValue));
                             nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
-                            if ((boolean) plcPoints.get("Dynamic Setpoint")){
+                            if ((boolean) plcPoints.get("Dynamic Setpoint")) {
                                 nonTempControl.setPiOutputUnitText(plcPoints.get("Dynamic Unit").toString());
                             } else {
                                 nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
@@ -1706,7 +1676,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
                             List<EquipmentDevice> modbusDevices = EquipsManager.getInstance().getAllMbEquips(nonTempEquip.getRoomRef());
 
-                            Log.i("MODBUS_UI","ZoneData:"+modbusDevices);
+                            Log.i("MODBUS_UI", "ZoneData:" + modbusDevices);
 
                             for (int i = 0; i < modbusDevices.size(); i++) {
                                 List<Parameter> parameterList = new ArrayList<>();
@@ -1714,7 +1684,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                     for (Register registerTemp : modbusDevices.get(i).getRegisters()) {
                                         if (registerTemp.getParameters() != null) {
                                             for (Parameter p : registerTemp.getParameters()) {
-                                                if (p.isDisplayInUI()){
+                                                if (p.isDisplayInUI()) {
                                                     p.setParameterDefinitionType(registerTemp.getParameterDefinitionType());
                                                     parameterList.add(p);
                                                 }
@@ -1726,37 +1696,35 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
                                 RecyclerView modbusParams = zoneDetails.findViewById(R.id.recyclerParams);
                                 TextView tvEquipmentType = zoneDetails.findViewById(R.id.tvEquipmentType);
-                                tvEquipmentType.setText(modbusDevices.get(i).getEquipType()+ "("+modbusDevices.get(i).getSlaveId()+")");
-                                GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(),2);
+                                tvEquipmentType.setText(modbusDevices.get(i).getEquipType() + "(" + modbusDevices.get(i).getSlaveId() + ")");
+                                GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
                                 modbusParams.setLayoutManager(gridLayoutManager);
-
-                                ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getActivity(),modbusDevices.get(i).getEquipRef(),parameterList);
+                                ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getContext(),modbusDevices.get(i).getEquipRef(),parameterList);
                                 modbusParams.setAdapter(zoneRecyclerModbusParamAdapter);
                                 modbusParams.invalidate();
                                 linearLayoutZonePoints.addView(zoneDetails);
-                                linearLayoutZonePoints.setPadding(0,0,0,20);
+                                linearLayoutZonePoints.setPadding(0, 0, 0, 20);
                             }
                         }
-                    }else{
+                    } else {
                         //Non paired devices
                         LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
                         LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
                         ll_status.setVisibility(View.GONE);
                         ll_schedule.setVisibility(View.GONE);
-                        loadNoDevicesPairedUI(inflater,linearLayoutZonePoints);
+                        loadNoDevicesPairedUI(inflater, linearLayoutZonePoints);
                     }
                 }
             }
         });
     }
 
-    public void loadVAVPointsUI(HashMap vavPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints,String nodeAddress)
-    {
+    public void loadVAVPointsUI(HashMap vavPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
         View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
         View viewPointRow2 = inflater.inflate(R.layout.zones_item_type1, null);
-        
+
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
 
@@ -1764,13 +1732,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
         TextView textViewLabel3 = viewPointRow2.findViewById(R.id.text_point1label);
         TextView textViewLabel4 = viewPointRow2.findViewById(R.id.text_point2label);
-        
+
         TextView textViewValue1 = viewPointRow1.findViewById(R.id.text_point1value);
         TextView textViewValue2 = viewPointRow1.findViewById(R.id.text_point2value);
         TextView textViewValue3 = viewPointRow2.findViewById(R.id.text_point1value);
         TextView textViewValue4 = viewPointRow2.findViewById(R.id.text_point2value);
-        
-        textViewTitle.setText(vavPoints.get("Profile").toString()+" ("+nodeAddress+")");
+
+        textViewTitle.setText(vavPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(vavPoints.get("Status").toString());
         textViewLabel1.setText("Damper : ");
         textViewValue1.setText(vavPoints.get("Damper").toString());
@@ -1780,16 +1748,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         textViewValue3.setText(vavPoints.get("Discharge Airflow").toString());
         textViewLabel4.setText("Supply Airflow : ");
         textViewValue4.setText(vavPoints.get("Entering Airflow").toString());
-        
+
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
         linearLayoutZonePoints.addView(viewPointRow1);
-        viewPointRow2.setPadding(0,0,0,40);
+        viewPointRow2.setPadding(0, 0, 0, 40);
         linearLayoutZonePoints.addView(viewPointRow2);
-        
+
     }
-    public void loadSSEPointsUI(HashMap ssePoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress)
-    {
+
+    public void loadSSEPointsUI(HashMap ssePoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
         View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
@@ -1803,18 +1771,18 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textViewValue2 = viewPointRow1.findViewById(R.id.text_point2value);
         textViewValue2.setVisibility(View.GONE);
 
-        textViewTitle.setText(ssePoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewTitle.setText(ssePoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(ssePoints.get("Status").toString());
         textViewLabel1.setText("Discharge Airflow : ");
         textViewValue1.setText(ssePoints.get("Discharge Airflow").toString());
 
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
-        viewPointRow1.setPadding(0,0,0,40);
+        viewPointRow1.setPadding(0, 0, 0, 40);
         linearLayoutZonePoints.addView(viewPointRow1);
     }
-    public void loadTIPointsUI(HashMap tiPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress)
-    {
+
+    public void loadTIPointsUI(HashMap tiPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
         View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
@@ -1830,16 +1798,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textViewValue2 = viewPointRow1.findViewById(R.id.text_point2value);
         textViewValue2.setVisibility(View.GONE);
 
-        textViewTitle.setText(tiPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewTitle.setText(tiPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(tiPoints.get("Status").toString());
 
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
-        viewPointRow1.setPadding(0,0,0,40);
+        viewPointRow1.setPadding(0, 0, 0, 40);
         linearLayoutZonePoints.addView(viewPointRow1);
     }
-    public void loadDABPointsUI(HashMap dabPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress)
-    {
+
+    public void loadDABPointsUI(HashMap dabPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
         View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
@@ -1851,7 +1819,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textViewValue1 = viewPointRow1.findViewById(R.id.text_point1value);
         TextView textViewValue2 = viewPointRow1.findViewById(R.id.text_point2value);
 
-        textViewTitle.setText(dabPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewTitle.setText(dabPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(dabPoints.get("Status").toString());
         textViewLabel1.setText("Damper : ");
         textViewLabel2.setText("Discharge Airflow : ");
@@ -1860,45 +1828,44 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
-        viewPointRow1.setPadding(0,0,0,40);
+        viewPointRow1.setPadding(0, 0, 0, 40);
         linearLayoutZonePoints.addView(viewPointRow1);
     }
-    
+
     public void loadDualDuctPointsUI(HashMap dualDuctPoints, LayoutInflater inflater,
                                      LinearLayout linearLayoutZonePoints,
-                              String nodeAddress)
-    {
+                                     String nodeAddress) {
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
         View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
         View viewPointRow2 = inflater.inflate(R.layout.zones_item_type1, null);
-        
+
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
-        
+
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
         TextView textViewLabel3 = viewPointRow2.findViewById(R.id.text_point1label);
         TextView textViewLabel4 = viewPointRow2.findViewById(R.id.text_point2label);
-        
+
         TextView textViewValue1 = viewPointRow1.findViewById(R.id.text_point1value);
         TextView textViewValue2 = viewPointRow1.findViewById(R.id.text_point2value);
         TextView textViewValue3 = viewPointRow2.findViewById(R.id.text_point1value);
         TextView textViewValue4 = viewPointRow2.findViewById(R.id.text_point2value);
-        
-        textViewTitle.setText(dualDuctPoints.get("Profile").toString()+" ("+nodeAddress+")");
+
+        textViewTitle.setText(dualDuctPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(dualDuctPoints.get("Status").toString());
-        if (dualDuctPoints.containsKey("CoolingSupplyAirflow") ) {
+        if (dualDuctPoints.containsKey("CoolingSupplyAirflow")) {
             textViewLabel1.setText("Cooling Supply Airflow : ");
             textViewValue1.setText(dualDuctPoints.get("CoolingSupplyAirflow").toString());
-        } else if (dualDuctPoints.containsKey("HeatingSupplyAirflow") ) {
+        } else if (dualDuctPoints.containsKey("HeatingSupplyAirflow")) {
             textViewLabel1.setText("Heating Supply Airflow : ");
             textViewValue1.setText(dualDuctPoints.get("HeatingSupplyAirflow").toString());
         }
-    
+
         textViewLabel2.setText("Discharge Airflow : ");
         textViewValue2.setText(dualDuctPoints.get("DischargeAirflow").toString());
-    
+
         if (dualDuctPoints.containsKey("CoolingDamper")) {
             textViewLabel3.setText("Cooling Damper : ");
             textViewValue3.setText(dualDuctPoints.get("CoolingDamper").toString());
@@ -1910,16 +1877,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             textViewLabel3.setText("Heating Damper : ");
             textViewValue3.setText(dualDuctPoints.get("HeatingDamper").toString());
         }
-        
+
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
         linearLayoutZonePoints.addView(viewPointRow1);
-        viewPointRow2.setPadding(0,0,0,40);
+        viewPointRow2.setPadding(0, 0, 0, 40);
         linearLayoutZonePoints.addView(viewPointRow2);
     }
 
-    public void loadSSCPUPointsUI(HashMap cpuEquipPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String equipId, boolean isPubNub, String nodeAddress, boolean isLoaded)
-    {
+    public void loadSSCPUPointsUI(HashMap cpuEquipPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String equipId, boolean isPubNub, String nodeAddress, boolean isLoaded) {
 
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
@@ -1934,7 +1900,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         Spinner spinnerValue1 = viewPointRow1.findViewById(R.id.spinnerValue1);
         Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
-
+        CCUUiUtil.setSpinnerDropDownColor(spinnerValue1,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(spinnerValue2,getContext());
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
         textAirflowValue.setText(cpuEquipPoints.get("Discharge Airflow").toString());
 
@@ -1942,8 +1909,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         int conditionMode = 0;
         int fanMode = 0;
         try {
-            conditionMode = (int)((double)cpuEquipPoints.get("Conditioning Mode"));
-            fanMode = (int)((double)cpuEquipPoints.get("Fan Mode"));
+            conditionMode = (int) ((double) cpuEquipPoints.get("Conditioning Mode"));
+            fanMode = (int) ((double) cpuEquipPoints.get("Fan Mode"));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1951,20 +1918,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
                 getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
 
-        if(cpuEquipPoints.containsKey("condEnabled")){
-            if(cpuEquipPoints.get("condEnabled").toString().contains("Cool Only")) {
+        if (cpuEquipPoints.containsKey("condEnabled")) {
+            if (cpuEquipPoints.get("condEnabled").toString().contains("Cool Only")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly,
-                                                                 R.layout.spinner_zone_item);
+                        R.layout.spinner_zone_item);
                 if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1;
                 }
-            } else if(cpuEquipPoints.get("condEnabled").toString().contains("Heat Only")) {
+            } else if (cpuEquipPoints.get("condEnabled").toString().contains("Heat Only")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
-                                                                 R.layout.spinner_zone_item);
+                        R.layout.spinner_zone_item);
                 if (conditionMode == StandaloneConditioningMode.HEAT_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1;
                 }
-            } if(cpuEquipPoints.get("condEnabled").toString().contains("Off")) {
+            }
+            if (cpuEquipPoints.get("condEnabled").toString().contains("Off")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
                 conditionMode = 0;
             }
@@ -1975,7 +1943,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
                 getActivity(), R.array.smartstat_fanmode, R.layout.spinner_zone_item);
-        if(cpuEquipPoints.containsKey("fanEnabled")) {
+        if (cpuEquipPoints.containsKey("fanEnabled")) {
             if (cpuEquipPoints.get("fanEnabled").toString().contains("No High Fan")) {
                 fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_fanmode_low, R.layout.spinner_zone_item);
                 if (fanMode > fanModeAdapter.getCount()) {
@@ -1989,13 +1957,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
         spinnerValue2.setAdapter(fanModeAdapter);
 
-        textViewTitle.setText(cpuEquipPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewTitle.setText(cpuEquipPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(cpuEquipPoints.get("Status").toString());
         textViewLabel1.setText("Conditioning Mode : ");
         textViewLabel2.setText("Fan Mode : ");
 
-        spinnerValue1.setSelection(conditionMode,false);
-        spinnerValue2.setSelection(fanMode,false);
+        spinnerValue1.setSelection(conditionMode, false);
+        spinnerValue2.setSelection(fanMode, false);
 
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
@@ -2003,8 +1971,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         double fanHighHumdOption = Double.valueOf(cpuEquipPoints.get("Fan High Humidity").toString());
         double targetHumidity = 0;
         double targetDeHumidity = 0;
-        if(fanHighHumdOption > 1.0)
-        {
+        if (fanHighHumdOption > 1.0) {
             View viewPointRow2 = inflater.inflate(R.layout.zones_item_type2, null);
 
             TextView textViewLabel3 = viewPointRow2.findViewById(R.id.text_point1label);
@@ -2019,18 +1986,18 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             for (int pos = 1; pos <= 100; pos++)
                 arrayHumdityTargetList.add(pos);
 
-            ArrayAdapter<Integer> humidityTargetAdapter = new ArrayAdapter<Integer>(getActivity(),R.layout.spinner_zone_item,arrayHumdityTargetList);
+            ArrayAdapter<Integer> humidityTargetAdapter = new ArrayAdapter<Integer>(getActivity(), R.layout.spinner_zone_item, arrayHumdityTargetList);
             humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
             humiditySpinner.setAdapter(humidityTargetAdapter);
 
-            if(fanHighHumdOption == 2.0) {
+            if (fanHighHumdOption == 2.0) {
                 textViewLabel3.setText("Target Humidity : ");
-                targetHumidity = (double)cpuEquipPoints.get("Target Humidity");
-                humiditySpinner.setSelection((int)targetHumidity -1, false);
-            }else {
+                targetHumidity = (double) cpuEquipPoints.get("Target Humidity");
+                humiditySpinner.setSelection((int) targetHumidity - 1, false);
+            } else {
                 textViewLabel3.setText("Target Dehumidity : ");
-                targetDeHumidity = (double)cpuEquipPoints.get("Target Dehumidity");
-                humiditySpinner.setSelection((int)targetDeHumidity - 1, false);
+                targetDeHumidity = (double) cpuEquipPoints.get("Target Dehumidity");
+                humiditySpinner.setSelection((int) targetDeHumidity - 1, false);
             }
 
             linearLayoutZonePoints.addView(viewPointRow2);
@@ -2041,23 +2008,23 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
                     try {
-                        if(isHPUFromPubNub) {
-                            if(fanHighHumdOption == 2.0) {
-                                if (targetHumidValue != (position+1)) {
+                        if (isHPUFromPubNub) {
+                            if (fanHighHumdOption == 2.0) {
+                                if (targetHumidValue != (position + 1)) {
                                     Log.i("PubNub", "humidityValue:" + targetHumidValue + " position:" + position);
-                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position+1);
+                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position + 1);
                                 }
-                            }else if(fanHighHumdOption == 3.0) {
-                                if (targetDehumidValue != (position +1)) {
+                            } else if (fanHighHumdOption == 3.0) {
+                                if (targetDehumidValue != (position + 1)) {
                                     Log.i("PubNub", "DehumidityValue:" + targetDehumidValue + " position:" + position);
-                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position+1);
+                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position + 1);
                                 }
                             }
-                        }else{
-                            if(fanHighHumdOption == 2.0)
-                                StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position+1);
-                            else if(fanHighHumdOption == 3.0)
-                                StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position+1);
+                        } else {
+                            if (fanHighHumdOption == 2.0)
+                                StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position + 1);
+                            else if (fanHighHumdOption == 3.0)
+                                StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position + 1);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -2080,7 +2047,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             e.printStackTrace();
         }
         linearLayoutZonePoints.addView(viewDischarge);
-        viewDischarge.setPadding(0,0,0,40);
+        viewDischarge.setPadding(0, 0, 0, 40);
 
         int tempConditionMode = conditionMode;
         int tempFanMode = fanMode;
@@ -2091,14 +2058,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         spinnerValue1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(isCPUFromPubNub) {
+                if (isCPUFromPubNub) {
                     if (tempConditionMode != position) {
                         StandaloneScheduler.updateOperationalPoints(tempEquipId, "temp and conditioning and mode", position);
                     }
                     //isCPUFromPubNub = false;
-                }else {
+                } else {
                     //if(isCPUloaded) {
-                        StandaloneScheduler.updateOperationalPoints(tempEquipId, "temp and conditioning and mode", position);
+                    StandaloneScheduler.updateOperationalPoints(tempEquipId, "temp and conditioning and mode", position);
                     //}
                 }
             }
@@ -2111,21 +2078,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         spinnerValue2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(isCPUFromPubNub) {
+                if (isCPUFromPubNub) {
                     if (tempFanMode != position) {
                         StandaloneScheduler.updateOperationalPoints(tempEquipId, "fan and operation and mode", position);
-                        if((position != 0) && (position % 3 == 0))
+                        if ((position != 0) && (position % 3 == 0))
                             Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(tempEquipId, position).apply();
                         else
-                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode",Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
+                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
                     }
                     isCPUFromPubNub = false;
-                }else {
+                } else {
                     StandaloneScheduler.updateOperationalPoints(tempEquipId, "fan and operation and mode", position);
-                    if((position != 0) && (position % 3 == 0)) //Save only Fan occupied period mode alone, else no need.
+                    if ((position != 0) && (position % 3 == 0)) //Save only Fan occupied period mode alone, else no need.
                         Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(tempEquipId, position).apply();
                     else
-                        Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode",Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
+                        Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
                 }
             }
 
@@ -2138,8 +2105,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         //isCPUloaded = false;
 
     }
-    public void loadSSHPUPointsUI(HashMap hpuEquipPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String equipId, boolean isPubNub, String nodeAddress, boolean isLoaded)
-    {
+
+    public void loadSSHPUPointsUI(HashMap hpuEquipPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String equipId, boolean isPubNub, String nodeAddress, boolean isLoaded) {
         //Log.i("PubNub","UI Update for Zone Points");
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
@@ -2154,43 +2121,44 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         Spinner conditionSpinner = viewPointRow1.findViewById(R.id.spinnerValue1);
         Spinner fanSpinner = viewPointRow1.findViewById(R.id.spinnerValue2);
-
+        CCUUiUtil.setSpinnerDropDownColor(conditionSpinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(fanSpinner,getContext());
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
         textAirflowValue.setText(hpuEquipPoints.get("Discharge Airflow").toString());
 
-        textViewTitle.setText(hpuEquipPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewTitle.setText(hpuEquipPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(hpuEquipPoints.get("Status").toString());
         textViewLabel1.setText("Conditioning Mode : ");
         textViewLabel2.setText("Fan Mode : ");
 
-        pointsOpen.put(hpuEquipPoints.get("StatusTag"),"StatusTag");
-        pointsOpen.put(hpuEquipPoints.get("FanModeTag"),"FanModeTag");
-        pointsOpen.put(hpuEquipPoints.get("ConditionModeTag"),"ConditionModeTag");
+        pointsOpen.put(hpuEquipPoints.get("StatusTag"), "StatusTag");
+        pointsOpen.put(hpuEquipPoints.get("FanModeTag"), "FanModeTag");
+        pointsOpen.put(hpuEquipPoints.get("ConditionModeTag"), "ConditionModeTag");
 
         int conditionMode = 0;
         int fanMode = 0;
         try {
-            conditionMode = (int)(double)(hpuEquipPoints.get("Conditioning Mode"));
-            fanMode = (int)(double)(hpuEquipPoints.get("Fan Mode"));
+            conditionMode = (int) (double) (hpuEquipPoints.get("Conditioning Mode"));
+            fanMode = (int) (double) (hpuEquipPoints.get("Fan Mode"));
         } catch (Exception e) {
             e.printStackTrace();
         }
         ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
                 getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
-        if(hpuEquipPoints.containsKey("condEnabled")){
-            if(hpuEquipPoints.get("condEnabled").toString().contains("Cool Only")) {
+        if (hpuEquipPoints.containsKey("condEnabled")) {
+            if (hpuEquipPoints.get("condEnabled").toString().contains("Cool Only")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly,
-                                                                 R.layout.spinner_zone_item);
+                        R.layout.spinner_zone_item);
                 if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1;
                 }
-            } else if(hpuEquipPoints.get("condEnabled").toString().contains("Heat Only")) {
+            } else if (hpuEquipPoints.get("condEnabled").toString().contains("Heat Only")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
-                                                                 R.layout.spinner_zone_item);
+                        R.layout.spinner_zone_item);
                 if (conditionMode == StandaloneConditioningMode.HEAT_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1; //Select the last item.
                 }
-            } else if(hpuEquipPoints.get("condEnabled").toString().contains("Off")) {
+            } else if (hpuEquipPoints.get("condEnabled").toString().contains("Off")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
                 conditionMode = 0;
             }
@@ -2201,7 +2169,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
                 getActivity(), R.array.smartstat_fanmode, R.layout.spinner_zone_item);
 
-        if(hpuEquipPoints.containsKey("fanEnabled")) {
+        if (hpuEquipPoints.containsKey("fanEnabled")) {
             if (hpuEquipPoints.get("fanEnabled").toString().contains("No High Fan")) {
                 fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_fanmode_low, R.layout.spinner_zone_item);
                 if (fanMode > fanModeAdapter.getCount()) {
@@ -2215,18 +2183,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
         fanSpinner.setAdapter(fanModeAdapter);
 
-        conditionSpinner.setSelection(conditionMode,false);
-        fanSpinner.setSelection(fanMode,false);
+        conditionSpinner.setSelection(conditionMode, false);
+        fanSpinner.setSelection(fanMode, false);
 
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
 
-        double fanHighHumdOption = (double)hpuEquipPoints.get("Fan High Humidity");
+        double fanHighHumdOption = (double) hpuEquipPoints.get("Fan High Humidity");
         //Log.e("fanHighHumdOption","insideZoneFragmentNew "+fanHighHumdOption);
         double targetHumidity = 0;
         double targetDeHumidity = 0;
-        if(fanHighHumdOption > 1.0)
-        {
+        if (fanHighHumdOption > 1.0) {
             View viewPointRow2 = inflater.inflate(R.layout.zones_item_type2, null);
 
             TextView textViewLabel3 = viewPointRow2.findViewById(R.id.text_point1label);
@@ -2241,7 +2208,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             for (int pos = 1; pos <= 100; pos++)
                 arrayHumdityTargetList.add(pos);
 
-            ArrayAdapter<Integer> humidityTargetAdapter = new ArrayAdapter<Integer>(getActivity(),R.layout.spinner_zone_item,arrayHumdityTargetList);
+            ArrayAdapter<Integer> humidityTargetAdapter = new ArrayAdapter<Integer>(getActivity(), R.layout.spinner_zone_item, arrayHumdityTargetList);
             humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
             humiditySpinner.setAdapter(humidityTargetAdapter);
 
@@ -2265,23 +2232,23 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
                     try {
-                        if(isHPUFromPubNub) {
-                            if(fanHighHumdOption == 2.0) {
-                                if (targetHumidValue != (position+1)) {
-                                    Log.i("PubNub", "humidityValue:" + targetHumidValue + " position:" + position+1);
-                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position+1);
+                        if (isHPUFromPubNub) {
+                            if (fanHighHumdOption == 2.0) {
+                                if (targetHumidValue != (position + 1)) {
+                                    Log.i("PubNub", "humidityValue:" + targetHumidValue + " position:" + position + 1);
+                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position + 1);
                                 }
-                            }else if(fanHighHumdOption == 3.0) {
-                                if (targetDehumidValue != (position+1)) {
-                                    Log.i("PubNub", "DehumidityValue:" + targetDehumidValue + " position:" + position+1);
-                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position+1);
+                            } else if (fanHighHumdOption == 3.0) {
+                                if (targetDehumidValue != (position + 1)) {
+                                    Log.i("PubNub", "DehumidityValue:" + targetDehumidValue + " position:" + position + 1);
+                                    StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position + 1);
                                 }
                             }
-                        }else{
-                            if(fanHighHumdOption == 2.0)
-                                StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position+1);
-                            else if(fanHighHumdOption == 3.0)
-                                StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position+1);
+                        } else {
+                            if (fanHighHumdOption == 2.0)
+                                StandaloneScheduler.updateOperationalPoints(equipId, "target and humidity", position + 1);
+                            else if (fanHighHumdOption == 3.0)
+                                StandaloneScheduler.updateOperationalPoints(equipId, "target and dehumidifier", position + 1);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -2298,15 +2265,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         linearLayoutZonePoints.addView(viewPointRow1);
         try {
-            if(viewPointRow1.getParent() != null) {
-                ((ViewGroup)viewPointRow1.getParent()).removeView(viewPointRow1);
+            if (viewPointRow1.getParent() != null) {
+                ((ViewGroup) viewPointRow1.getParent()).removeView(viewPointRow1);
             }
             linearLayoutZonePoints.addView(viewPointRow1);
         } catch (Exception e) {
             e.printStackTrace();
         }
         linearLayoutZonePoints.addView(viewDischarge);
-        viewDischarge.setPadding(0,0,0,40);
+        viewDischarge.setPadding(0, 0, 0, 40);
 
         int tempConditionMode = conditionMode;
         int tempfanMode = fanMode;
@@ -2318,15 +2285,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 try {
-                    if(isHPUFromPubNub) {
+                    if (isHPUFromPubNub) {
                         if (tempConditionMode != position) {
                             Log.i("PubNub", "conditionMode:" + tempConditionMode + " position:" + position);
                             StandaloneScheduler.updateOperationalPoints(tempEquipId, "temp and conditioning and mode", position);
                         }
                         //isFromPubNub = false;
-                    }else{
+                    } else {
                         //if(isHPUloaded) {
-                            StandaloneScheduler.updateOperationalPoints(tempEquipId, "temp and conditioning and mode", position);
+                        StandaloneScheduler.updateOperationalPoints(tempEquipId, "temp and conditioning and mode", position);
                         //}
                     }
                 } catch (Exception e) {
@@ -2344,24 +2311,23 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 try {
-                    if(isHPUFromPubNub) {
-                        if(tempfanMode!= position) {
-                            Log.i("PubNub","fanMode:"+tempfanMode+" position:"+position);
+                    if (isHPUFromPubNub) {
+                        if (tempfanMode != position) {
+                            Log.i("PubNub", "fanMode:" + tempfanMode + " position:" + position);
                             StandaloneScheduler.updateOperationalPoints(tempEquipId, "fan and operation and mode", position);
-                            if((position != 0) && (position % 3 == 0))
+                            if ((position != 0) && (position % 3 == 0))
                                 Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(tempEquipId, position).apply();
                             else
-                                Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode",Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
+                                Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
                         }
                         isHPUFromPubNub = false;
-                    }
-                    else {
+                    } else {
                         //if(isHPUloaded) {
-                            StandaloneScheduler.updateOperationalPoints(tempEquipId, "fan and operation and mode", position);
-                        if((position != 0) && (position % 3 == 0))
+                        StandaloneScheduler.updateOperationalPoints(tempEquipId, "fan and operation and mode", position);
+                        if ((position != 0) && (position % 3 == 0))
                             Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(tempEquipId, position).apply();
                         else
-                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode",Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
+                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
                         //}
                     }
                 } catch (Exception e) {
@@ -2377,8 +2343,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         //isHPUloaded = false;
 
     }
-    public void loadSS2PFCUPointsUI(HashMap p2FCUPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String equipId, boolean isPubNub, String nodeAddress)
-    {
+
+    public void loadSS2PFCUPointsUI(HashMap p2FCUPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String equipId, boolean isPubNub, String nodeAddress) {
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
         View viewPointRow1 = inflater.inflate(R.layout.zones_item_type2, null);
@@ -2396,14 +2362,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         Spinner spinnerValue1 = viewPointRow1.findViewById(R.id.spinnerValue1);
         Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
-
-
+        CCUUiUtil.setSpinnerDropDownColor(spinnerValue1,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(spinnerValue2,getContext());
 
         int conditionMode = 0;
         int fanMode = 0;
         try {
-            conditionMode = (int)((double)p2FCUPoints.get("Conditioning Mode"));
-            fanMode = (int)((double)p2FCUPoints.get("Fan Mode"));
+            conditionMode = (int) ((double) p2FCUPoints.get("Conditioning Mode"));
+            fanMode = (int) ((double) p2FCUPoints.get("Fan Mode"));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -2411,20 +2377,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
                 getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
 
-        if(p2FCUPoints.containsKey("condEnabled")){
-            if(p2FCUPoints.get("condEnabled").toString().contains("Cool Only")) {
+        if (p2FCUPoints.containsKey("condEnabled")) {
+            if (p2FCUPoints.get("condEnabled").toString().contains("Cool Only")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly,
-                                                                 R.layout.spinner_zone_item);
+                        R.layout.spinner_zone_item);
                 if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1; //Select the last item.
                 }
-            } else if(p2FCUPoints.get("condEnabled").toString().contains("Heat Only")) {
+            } else if (p2FCUPoints.get("condEnabled").toString().contains("Heat Only")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
-                                                                 R.layout.spinner_zone_item);
+                        R.layout.spinner_zone_item);
                 if (conditionMode == StandaloneConditioningMode.HEAT_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1; //Select the last item
                 }
-            } if(p2FCUPoints.get("condEnabled").toString().contains("Off")) {
+            }
+            if (p2FCUPoints.get("condEnabled").toString().contains("Off")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
                 conditionMode = 0;
             }
@@ -2434,19 +2401,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         spinnerValue1.setAdapter(conModeAdapter);
         ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
                 getActivity(), R.array.smartstat_2pfcu_fanmode, R.layout.spinner_zone_item);
-        if(p2FCUPoints.containsKey("fanEnabled")) {
+        if (p2FCUPoints.containsKey("fanEnabled")) {
             if (p2FCUPoints.get("fanEnabled").toString().contains("No High Fan")) {
                 fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_medium,
-                                                                 R.layout.spinner_zone_item);
+                        R.layout.spinner_zone_item);
                 if (fanMode > fanModeAdapter.getCount()) {
                     fanMode = StandaloneFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
                 }
-            }else if (p2FCUPoints.get("fanEnabled").toString().contains("No Medium High Fan")) {
+            } else if (p2FCUPoints.get("fanEnabled").toString().contains("No Medium High Fan")) {
                 fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_low, R.layout.spinner_zone_item);
                 if (fanMode > fanModeAdapter.getCount()) {
                     fanMode = StandaloneFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
                 }
-            }else if (p2FCUPoints.get("fanEnabled").toString().contains("No Fan")) {
+            } else if (p2FCUPoints.get("fanEnabled").toString().contains("No Fan")) {
                 fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_off, R.layout.spinner_zone_item);
                 fanMode = 0;
             }
@@ -2454,28 +2421,28 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
         spinnerValue2.setAdapter(fanModeAdapter);
 
-        textViewTitle.setText(p2FCUPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewTitle.setText(p2FCUPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(p2FCUPoints.get("Status").toString());
         textViewLabel1.setText("Conditioning Mode : ");
         textViewLabel2.setText("Fan Mode : ");
 
-        spinnerValue1.setSelection(conditionMode,false);
-        spinnerValue2.setSelection(fanMode,false);
+        spinnerValue1.setSelection(conditionMode, false);
+        spinnerValue2.setSelection(fanMode, false);
 
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
         linearLayoutZonePoints.addView(viewPointRow1);
 
         try {
-            if(viewPointRow1.getParent() != null) {
-                ((ViewGroup)viewPointRow1.getParent()).removeView(viewPointRow1);
+            if (viewPointRow1.getParent() != null) {
+                ((ViewGroup) viewPointRow1.getParent()).removeView(viewPointRow1);
             }
             linearLayoutZonePoints.addView(viewPointRow1);
         } catch (Exception e) {
             e.printStackTrace();
         }
         linearLayoutZonePoints.addView(viewDischarge);
-        viewDischarge.setPadding(0,0,0,40);
+        viewDischarge.setPadding(0, 0, 0, 40);
         int tempConditionMode = conditionMode;
         int tempfanMode = fanMode;
         isFromPubNub = isPubNub;
@@ -2483,12 +2450,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         spinnerValue1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(isFromPubNub){
-                    if(tempConditionMode != position) {
-                    StandaloneScheduler.updateOperationalPoints(tempEquipId, "temp and conditioning and mode", position);
+                if (isFromPubNub) {
+                    if (tempConditionMode != position) {
+                        StandaloneScheduler.updateOperationalPoints(tempEquipId, "temp and conditioning and mode", position);
                     }
                     //isFromPubNub = false;
-                }else{
+                } else {
                     StandaloneScheduler.updateOperationalPoints(tempEquipId, "temp and conditioning and mode", position);
                 }
             }
@@ -2501,21 +2468,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         spinnerValue2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(isFromPubNub) {
-                    if(tempfanMode != position) {
+                if (isFromPubNub) {
+                    if (tempfanMode != position) {
                         StandaloneScheduler.updateOperationalPoints(tempEquipId, "fan and operation and mode", position);
-                        if((position != 0) && (position % 3 == 0))
+                        if ((position != 0) && (position % 3 == 0))
                             Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(tempEquipId, position).apply();
                         else
-                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode",Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
+                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
                     }
                     isFromPubNub = false;
-                }else {
+                } else {
                     StandaloneScheduler.updateOperationalPoints(tempEquipId, "fan and operation and mode", position);
-                    if((position != 0) && (position % 3 == 0))
+                    if ((position != 0) && (position % 3 == 0))
                         Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(tempEquipId, position).apply();
                     else
-                        Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode",Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
+                        Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
                 }
             }
 
@@ -2526,8 +2493,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         });
     }
 
-    public void loadSS4PFCUPointsUI(HashMap p4FCUPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String equipId, boolean isPubNub, String nodeAddress)
-    {
+    public void loadSS4PFCUPointsUI(HashMap p4FCUPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String equipId, boolean isPubNub, String nodeAddress) {
         //boolean isFromPubNub = isPubNub;
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
@@ -2542,6 +2508,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         Spinner spinnerValue1 = viewPointRow1.findViewById(R.id.spinnerValue1);
         Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
+        CCUUiUtil.setSpinnerDropDownColor(spinnerValue1,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(spinnerValue2,getContext());
 
         TextView textAirflowValue = viewDischarge.findViewById(R.id.text_airflowValue);
 
@@ -2551,28 +2519,29 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         int conditionMode = 0;
         int fanMode = 0;
         try {
-            conditionMode = (int)((double)p4FCUPoints.get("Conditioning Mode"));
-            fanMode = (int)((double)p4FCUPoints.get("Fan Mode"));
+            conditionMode = (int) ((double) p4FCUPoints.get("Conditioning Mode"));
+            fanMode = (int) ((double) p4FCUPoints.get("Fan Mode"));
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
                 getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
-        if(p4FCUPoints.containsKey("condEnabled")){
-            if(p4FCUPoints.get("condEnabled").toString().contains("Cool Only")) {
+        if (p4FCUPoints.containsKey("condEnabled")) {
+            if (p4FCUPoints.get("condEnabled").toString().contains("Cool Only")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly,
-                                                                 R.layout.spinner_zone_item);
+                        R.layout.spinner_zone_item);
                 if (conditionMode == StandaloneConditioningMode.COOL_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1; //Select the last item.
                 }
-            } else if(p4FCUPoints.get("condEnabled").toString().contains("Heat Only")) {
+            } else if (p4FCUPoints.get("condEnabled").toString().contains("Heat Only")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly,
-                                                                 R.layout.spinner_zone_item);
+                        R.layout.spinner_zone_item);
                 if (conditionMode == StandaloneConditioningMode.HEAT_ONLY.ordinal()) {
                     conditionMode = conModeAdapter.getCount() - 1; //Select the last item.
                 }
-            } if(p4FCUPoints.get("condEnabled").toString().contains("Off")) {
+            }
+            if (p4FCUPoints.get("condEnabled").toString().contains("Off")) {
                 conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
                 conditionMode = 0;
             }
@@ -2584,10 +2553,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
                 getActivity(), R.array.smartstat_2pfcu_fanmode, R.layout.spinner_zone_item);
 
-        if(p4FCUPoints.containsKey("fanEnabled")) {
+        if (p4FCUPoints.containsKey("fanEnabled")) {
             if (p4FCUPoints.get("fanEnabled").toString().contains("No High Fan")) {
                 fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_medium,
-                                                                 R.layout.spinner_zone_item);
+                        R.layout.spinner_zone_item);
                 if (fanMode > fanModeAdapter.getCount()) {
                     fanMode = StandaloneFanStage.AUTO.ordinal();//Fallback to Auto if an invalid configuration is set.
                 }
@@ -2604,42 +2573,40 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
         spinnerValue2.setAdapter(fanModeAdapter);
 
-        textViewTitle.setText(p4FCUPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewTitle.setText(p4FCUPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(p4FCUPoints.get("Status").toString());
         textViewLabel1.setText("Conditioning Mode : ");
         textViewLabel2.setText("Fan Mode : ");
 
-        spinnerValue1.setSelection(conditionMode,false);
-        spinnerValue2.setSelection(fanMode,false);
+        spinnerValue1.setSelection(conditionMode, false);
+        spinnerValue2.setSelection(fanMode, false);
 
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
         linearLayoutZonePoints.addView(viewPointRow1);
 
         try {
-            if(viewPointRow1.getParent() != null) {
-                ((ViewGroup)viewPointRow1.getParent()).removeView(viewPointRow1);
+            if (viewPointRow1.getParent() != null) {
+                ((ViewGroup) viewPointRow1.getParent()).removeView(viewPointRow1);
             }
             linearLayoutZonePoints.addView(viewPointRow1);
         } catch (Exception e) {
             e.printStackTrace();
         }
         linearLayoutZonePoints.addView(viewDischarge);
-        viewDischarge.setPadding(0,0,0,40);
+        viewDischarge.setPadding(0, 0, 0, 40);
         int tempConditionMode = conditionMode;
         int tempFanMode = fanMode;
         isFromPubNub = isPubNub;
         spinnerValue1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(isFromPubNub)
-                {
-                    if(tempConditionMode != position) {
+                if (isFromPubNub) {
+                    if (tempConditionMode != position) {
                         StandaloneScheduler.updateOperationalPoints(equipId, "temp and conditioning and mode", position);
                     }
                     isFromPubNub = false;
-                }
-                else{
+                } else {
                     StandaloneScheduler.updateOperationalPoints(equipId, "temp and conditioning and mode", position);
                 }
             }
@@ -2652,21 +2619,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         spinnerValue2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(isFromPubNub) {
+                if (isFromPubNub) {
                     if (tempFanMode != position) {
                         StandaloneScheduler.updateOperationalPoints(equipId, "fan and operation and mode", position);
-                        if((position != 0) && (position % 3 == 0))
+                        if ((position != 0) && (position % 3 == 0))
                             Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(equipId, position).apply();
                         else
-                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode",Context.MODE_PRIVATE).edit().remove(equipId).commit();
+                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().remove(equipId).commit();
                     }
                     isFromPubNub = false;
-                }else {
+                } else {
                     StandaloneScheduler.updateOperationalPoints(equipId, "fan and operation and mode", position);
-                    if((position != 0) && (position % 3 == 0))
+                    if ((position != 0) && (position % 3 == 0))
                         Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(equipId, position).apply();
                     else
-                        Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode",Context.MODE_PRIVATE).edit().remove(equipId).commit();
+                        Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().remove(equipId).commit();
                 }
             }
 
@@ -2678,17 +2645,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     }
 
 
-    public void loadEMPointsUI(HashMap EmrPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress)
-    {
+    public void loadEMPointsUI(HashMap EmrPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
 
-        textViewTitle.setText(EmrPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewTitle.setText(EmrPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(EmrPoints.get("Status").toString());
-        viewStatus.setPadding(0,0,0,40);
+        viewStatus.setPadding(0, 0, 0, 40);
         try {
             linearLayoutZonePoints.addView(viewTitle);
             linearLayoutZonePoints.addView(viewStatus);
@@ -2698,8 +2664,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
     }
 
-    public void loadNoDevicesPairedUI(LayoutInflater inflater,LinearLayout linearLayoutZonePoints)
-    {
+    public void loadNoDevicesPairedUI(LayoutInflater inflater, LinearLayout linearLayoutZonePoints) {
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
 
@@ -2708,28 +2673,28 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView statusTitle = viewStatus.findViewById(R.id.inner_status_title);
         statusTitle.setVisibility(View.GONE);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
-        textViewStatus.setGravity(Gravity.CENTER|Gravity.CENTER_HORIZONTAL|Gravity.CENTER_VERTICAL);
+        textViewStatus.setGravity(Gravity.CENTER | Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
         textViewStatus.setText(Html.fromHtml("<b>No device currently Paired</b> <br>Please go to the floor planner on settings page to pair a new device</br>"));
-        viewStatus.setPadding(0,0,0,40);
+        viewStatus.setPadding(0, 0, 0, 40);
         try {
             linearLayoutZonePoints.addView(viewStatus);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    public void loadPLCPointsUI(HashMap plcPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress)
-    {
+
+    public void loadPLCPointsUI(HashMap plcPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
         View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
         View viewPointRow2 = inflater.inflate(R.layout.zones_item_type1, null);
-        
+
         View loopOpRow = inflater.inflate(R.layout.zones_item_type1, null);
         TextView loopOpRowLabel = loopOpRow.findViewById(R.id.text_point1label);
         TextView loopOpRowValue = loopOpRow.findViewById(R.id.text_point1value);
         loopOpRowLabel.setText("Loop Output : ");
-        loopOpRowValue.setText(plcPoints.get("LoopOutput")+"%");
-    
+        loopOpRowValue.setText(plcPoints.get("LoopOutput") + "%");
+
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
 
@@ -2746,36 +2711,35 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         label2.setVisibility(View.GONE);
         value2.setVisibility(View.GONE);
 
-        textViewTitle.setText(plcPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewTitle.setText(plcPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(plcPoints.get("Status").toString());
 
-        labelInputAir.setText("Input  "+plcPoints.get("Unit Type").toString()+" : ");
+        labelInputAir.setText("Input  " + plcPoints.get("Unit Type").toString() + " : ");
 
-        double processValue = (double)plcPoints.get("Input Value");
-        textViewInputAir.setText(String.format("%.2f",processValue)+" "+plcPoints.get("Unit").toString());
+        double processValue = (double) plcPoints.get("Input Value");
+        textViewInputAir.setText(String.format("%.2f", processValue) + " " + plcPoints.get("Unit").toString());
         try {
-            if((boolean)plcPoints.get("Dynamic Setpoint") == true)
-            {
+            if ((boolean) plcPoints.get("Dynamic Setpoint") == true) {
 
-                    labelTarget.setText("Dynamic Target "+plcPoints.get("Dynamic Unit Type").toString()+" : ");
-                    textViewTargetAir.setText(plcPoints.get("Target Value").toString()+" "+plcPoints.get("Dynamic Unit").toString());
-                    labelOffsetAir.setText("Offset Dynamic Target "+plcPoints.get("Dynamic Unit Type").toString()+" : ");
-                    textViewOffsetAir.setText(plcPoints.get("Offset Value").toString()+" "+plcPoints.get("Dynamic Unit").toString());
-                    viewPointRow2.setPadding(0,0,0,40);
-                    linearLayoutZonePoints.addView(viewTitle);
-                    linearLayoutZonePoints.addView(viewStatus);
-                    linearLayoutZonePoints.addView(loopOpRow);
-                    linearLayoutZonePoints.addView(viewPointRow1);
-                    linearLayoutZonePoints.addView(viewPointRow2);
+                labelTarget.setText("Dynamic Target " + plcPoints.get("Dynamic Unit Type").toString() + " : ");
+                textViewTargetAir.setText(plcPoints.get("Target Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
+                labelOffsetAir.setText("Offset Dynamic Target " + plcPoints.get("Dynamic Unit Type").toString() + " : ");
+                textViewOffsetAir.setText(plcPoints.get("Offset Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
+                viewPointRow2.setPadding(0, 0, 0, 40);
+                linearLayoutZonePoints.addView(viewTitle);
+                linearLayoutZonePoints.addView(viewStatus);
+                linearLayoutZonePoints.addView(loopOpRow);
+                linearLayoutZonePoints.addView(viewPointRow1);
+                linearLayoutZonePoints.addView(viewPointRow2);
 
-            }else{
-                    labelTarget.setText("Target "+plcPoints.get("Unit Type").toString().replace("Native-","")+" : ");
-                    textViewTargetAir.setText(plcPoints.get("Target Value").toString()+" "+plcPoints.get("Unit").toString());
-                    viewPointRow1.setPadding(0,0,0,40);
-                    linearLayoutZonePoints.addView(viewTitle);
-                    linearLayoutZonePoints.addView(viewStatus);
-                    linearLayoutZonePoints.addView(loopOpRow);
-                    linearLayoutZonePoints.addView(viewPointRow1);
+            } else {
+                labelTarget.setText("Target " + plcPoints.get("Unit Type").toString().replace("Native-", "") + " : ");
+                textViewTargetAir.setText(plcPoints.get("Target Value").toString() + " " + plcPoints.get("Unit").toString());
+                viewPointRow1.setPadding(0, 0, 0, 40);
+                linearLayoutZonePoints.addView(viewTitle);
+                linearLayoutZonePoints.addView(viewStatus);
+                linearLayoutZonePoints.addView(loopOpRow);
+                linearLayoutZonePoints.addView(viewPointRow1);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -2786,37 +2750,30 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     public static double getPointVal(String id) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
-        for (String marker : p.getMarkers())
-        {
-            if (marker.equals("writable"))
-            {
+        for (String marker : p.getMarkers()) {
+            if (marker.equals("writable")) {
                 ArrayList values = hayStack.readPoint(id);
-                if (values != null && values.size() > 0)
-                {
-                    for (int l = 1; l <= values.size(); l++)
-                    {
+                if (values != null && values.size() > 0) {
+                    for (int l = 1; l <= values.size(); l++) {
                         HashMap valMap = ((HashMap) values.get(l - 1));
                         //System.out.println(valMap);
-                        if ((valMap != null) && (valMap.get("val") != null))
-                        {
+                        if ((valMap != null) && (valMap.get("val") != null)) {
                             return Double.parseDouble(valMap.get("val").toString());
                         }
                     }
                 }
             }
         }
-    
-        for (String marker : p.getMarkers())
-        {
-            if (marker.equals("his"))
-            {
+
+        for (String marker : p.getMarkers()) {
+            if (marker.equals("his")) {
                 return hayStack.readHisValById(p.getId());
             }
         }
         return 0;
     }
-    
-    public void setPointVal(String coolid, double coolval,String heatid, double heatval, String avgid, double avgval) {
+
+    public void setPointVal(String coolid, double coolval, String heatid, double heatval, String avgid, double avgval) {
 
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -2827,26 +2784,22 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 Point heatpoint = new Point.Builder().setHashMap(hayStack.readMapById(heatid)).build();
                 Point avgpoint = new Point.Builder().setHashMap(hayStack.readMapById(avgid)).build();
 
-                if (coolpoint.getMarkers().contains("writable"))
-                {
-                    CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val "+coolpoint.getDisplayName()+": " +coolid+","+heatpoint.getDisplayName()+","+heatval+","+avgpoint.getDisplayName());
-                    ScheduleProcessJob.handleManualDesiredTempUpdate(coolpoint, heatpoint,avgpoint, coolval, heatval,avgval);
+                if (coolpoint.getMarkers().contains("writable")) {
+                    CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val " + coolpoint.getDisplayName() + ": " + coolid + "," + heatpoint.getDisplayName() + "," + heatval + "," + avgpoint.getDisplayName());
+                    ScheduleProcessJob.handleManualDesiredTempUpdate(coolpoint, heatpoint, avgpoint, coolval, heatval, avgval);
 
                 }
 
-                if (coolpoint.getMarkers().contains("his") && (coolval != 0))
-                {
-                    CcuLog.d(L.TAG_CCU_UI, "Set His Val "+coolid+": " +coolval);
+                if (coolpoint.getMarkers().contains("his") && (coolval != 0)) {
+                    CcuLog.d(L.TAG_CCU_UI, "Set His Val " + coolid + ": " + coolval);
                     hayStack.writeHisValById(coolid, coolval);
                 }
-                if (heatpoint.getMarkers().contains("his") && (heatval != 0))
-                {
-                    CcuLog.d(L.TAG_CCU_UI, "Set His Val "+heatid+": " +heatval);
+                if (heatpoint.getMarkers().contains("his") && (heatval != 0)) {
+                    CcuLog.d(L.TAG_CCU_UI, "Set His Val " + heatid + ": " + heatval);
                     hayStack.writeHisValById(heatid, heatval);
                 }
-                if (avgpoint.getMarkers().contains("his") && (ScheduleProcessJob.getSystemOccupancy() == Occupancy.OCCUPIED))
-                {
-                    CcuLog.d(L.TAG_CCU_UI, "Set His Val "+avgid+": " +avgval);
+                if (avgpoint.getMarkers().contains("his") && (ScheduleProcessJob.getSystemOccupancy() == Occupancy.OCCUPIED)) {
+                    CcuLog.d(L.TAG_CCU_UI, "Set His Val " + avgid + ": " + avgval);
                     hayStack.writeHisValById(avgid, avgval);
                 }
             }
@@ -2859,10 +2812,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     public void onResume() {
         // TODO Auto-generated method stub
         super.onResume();
-       // loadGrid(parentRootView);
+        // loadGrid(parentRootView);
 
-        if(getUserVisibleHint())
-        {
+        if (getUserVisibleHint()) {
             UpdatePointHandler.setZoneDataInterface(this);
             Pulse.setCurrentTempInterface(this);
             ScheduleProcessJob.setScheduleDataInterface(this);
@@ -2883,8 +2835,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             }
         };
 
-            weatherUpdate.run();
-        }
+        weatherUpdate.run();
+    }
+
     @Override
     public void onPause() {
         super.onPause();
@@ -2898,7 +2851,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        if(isVisibleToUser) {
+        if (isVisibleToUser) {
             UpdatePointHandler.setZoneDataInterface(this);
             Pulse.setCurrentTempInterface(this);
             ScheduleProcessJob.setScheduleDataInterface(this);
@@ -2914,33 +2867,29 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
     }
 
-    class FloorComparator implements Comparator<Floor>
-    {
+    class FloorComparator implements Comparator<Floor> {
         @Override
         public int compare(Floor a, Floor b) {
             return a.getDisplayName().compareToIgnoreCase(b.getDisplayName());
         }
     }
 
-    public void ScaleImageToNormal(int height,int width, ImageView imageView)
-    {
+    public void ScaleImageToNormal(int height, int width, ImageView imageView) {
         int endHeight = (int) (height / 1.35);
         int endWidth = (int) (width / 1.35);
         imageView.getLayoutParams().height = endHeight;
         imageView.getLayoutParams().width = endWidth;
-        imageView.setPadding(36,36,36,36);
+        imageView.setPadding(36, 36, 36, 36);
     }
 
-    public void ScaleControlToNormal(int height,int width, NonTempControl imageView)
-    {
+    public void ScaleControlToNormal(int height, int width, NonTempControl imageView) {
         int endHeight = (int) (height / 1.35);
         int endWidth = (int) (width / 1.35);
         imageView.getLayoutParams().height = endHeight;
         imageView.getLayoutParams().width = endWidth;
     }
 
-    public void ScaleControlToExpand(int height, int width, NonTempControl imageView)
-    {
+    public void ScaleControlToExpand(int height, int width, NonTempControl imageView) {
         int endHeight = (int) (height * 1.35);
         int endWidth = (int) (width * 1.35);
         imageView.getLayoutParams().height = endHeight;
@@ -2948,21 +2897,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         //imageView.setPadding(20 ,20,20,20);
     }
 
-    public void ScaleImageToBig(int height, int width, ImageView imageView)
-    {
+    public void ScaleImageToBig(int height, int width, ImageView imageView) {
         int endHeight = (int) (height * 1.35);
         int endWidth = (int) (width * 1.35);
         imageView.getLayoutParams().height = endHeight;
         imageView.getLayoutParams().width = endWidth;
-        imageView.setPadding(36,36,36,36);
+        imageView.setPadding(36, 36, 36, 36);
     }
+
     public void showWeather() {
         //if (isWeatherWidget) {
-            weather_data.setVisibility(View.VISIBLE);
-            //mod = 3;
-            //weather_appear.setVisibility(View.GONE);
-            //weather_data.startAnimation(inleft);
-        TranslateAnimation animate = new TranslateAnimation(-weather_data.getWidth(),0,0,0);
+        weather_data.setVisibility(View.VISIBLE);
+        //mod = 3;
+        //weather_appear.setVisibility(View.GONE);
+        //weather_data.startAnimation(inleft);
+        TranslateAnimation animate = new TranslateAnimation(-weather_data.getWidth(), 0, 0, 0);
         animate.setDuration(400);
         animate.setFillAfter(true);
         weather_data.startAnimation(animate);
@@ -2971,31 +2920,28 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
     public void hideWeather() {
         //if (isWeatherWidget) {
-            //mod = 4;
-            //weather_appear.setVisibility(View.VISIBLE);
-            TranslateAnimation animate = new TranslateAnimation(0,-weather_data.getWidth()+5,0,0);
-            animate.setDuration(400);
-            animate.setFillAfter(true);
-            weather_data.startAnimation(animate);
-            //recyclerView.startAnimation(animate);
-            //recyclerView.startAnimation(in);
-            //gridlayout.startAnimation(in);
-            tableLayout.startAnimation(in);
-            //tableLayout.setVisibility(View.VISIBLE);
-            weather_data.setVisibility(View.GONE);
-            //weather_data.setVisibility(View.VISIBLE);
+        //mod = 4;
+        //weather_appear.setVisibility(View.VISIBLE);
+        TranslateAnimation animate = new TranslateAnimation(0, -weather_data.getWidth() + 5, 0, 0);
+        animate.setDuration(400);
+        animate.setFillAfter(true);
+        weather_data.startAnimation(animate);
+        //recyclerView.startAnimation(animate);
+        //recyclerView.startAnimation(in);
+        //gridlayout.startAnimation(in);
+        tableLayout.startAnimation(in);
+        //tableLayout.setVisibility(View.VISIBLE);
+        weather_data.setVisibility(View.GONE);
+        //weather_data.setVisibility(View.VISIBLE);
 
         //}
     }
 
-    public boolean isWeatherShown(){
+    public boolean isWeatherShown() {
         boolean isShown = false;
-        if(weather_data.getVisibility() == View.VISIBLE)
-        {
+        if (weather_data.getVisibility() == View.VISIBLE) {
             isShown = true;
-        }
-        else
-        {
+        } else {
             isShown = false;
         }
         return isShown;
@@ -3005,18 +2951,18 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                CcuLog.d("CCU_UI"," Set Schedule type "+schedule.ordinal());
-                CCUHsApi.getInstance().writeHisValById(id, (double)schedule.ordinal());
+                CcuLog.d("CCU_UI", " Set Schedule type " + schedule.ordinal());
+                CCUHsApi.getInstance().writeHisValById(id, (double) schedule.ordinal());
                 Point p = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build();
-                if(zoneMap.size() > 1) {
+                if (zoneMap.size() > 1) {
                     for (int i = 0; i < zoneMap.size(); i++) {
                         Equip equip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
                         String scheduleTypeId = getScheduleTypeId(equip.getId());
                         CCUHsApi.getInstance().writeDefaultValById(scheduleTypeId, (double) schedule.ordinal());
-                        CCUHsApi.getInstance().writeHisValById(scheduleTypeId, (double)schedule.ordinal());
+                        CCUHsApi.getInstance().writeHisValById(scheduleTypeId, (double) schedule.ordinal());
                     }
-                }else
-                    CCUHsApi.getInstance().writeDefaultValById(id, (double)schedule.ordinal());
+                } else
+                    CCUHsApi.getInstance().writeDefaultValById(id, (double) schedule.ordinal());
                 ScheduleProcessJob.handleScheduleTypeUpdate(p);
             }
         });
@@ -3036,73 +2982,70 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");*/
     }
 
-    
+
     private boolean checkContainment(String scheduleTypeId, Schedule zoneSchedule, Spinner scheduleSpinner, ArrayList<HashMap> zoneMap) {
         Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
         ArrayList<Interval> intervalSpills = new ArrayList<>();
         ArrayList<Interval> systemIntervals = systemSchedule.getMergedIntervals();
-        
-        for (Interval v : systemIntervals)
-        {
+
+        for (Interval v : systemIntervals) {
             CcuLog.d("CCU_UI", "Merged System interval " + v);
         }
-        
+
         ArrayList<Interval> zoneIntervals = zoneSchedule.getScheduledIntervals();
 
-            for(Interval z : zoneIntervals) {
-                boolean add = true;
-                for (Interval s: systemIntervals) {
-                    if (s.contains(z)) {
-                        add = false;
-                        break;
-                    } else if (s.overlaps(z)) {
-                        add = false;
-                        for (Interval i: disconnectedIntervals(systemIntervals,z)){
-                            if (!intervalSpills.contains(i)){
-                                intervalSpills.add(i);
-                            }
+        for (Interval z : zoneIntervals) {
+            boolean add = true;
+            for (Interval s : systemIntervals) {
+                if (s.contains(z)) {
+                    add = false;
+                    break;
+                } else if (s.overlaps(z)) {
+                    add = false;
+                    for (Interval i : disconnectedIntervals(systemIntervals, z)) {
+                        if (!intervalSpills.contains(i)) {
+                            intervalSpills.add(i);
                         }
-
                     }
-                }
-                if (add)
-                {
-                    intervalSpills.add(z);
-                    CcuLog.d(L.TAG_CCU_UI, " Zone Interval not contained "+z);
+
                 }
             }
-        
-        
+            if (add) {
+                intervalSpills.add(z);
+                CcuLog.d(L.TAG_CCU_UI, " Zone Interval not contained " + z);
+            }
+        }
+
+
         if (intervalSpills.size() > 0) {
             StringBuilder spillZones = new StringBuilder();
-            for (Interval i : intervalSpills)
-            {
+            for (Interval i : intervalSpills) {
                 spillZones.append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek()) + " (" + i.getStart().hourOfDay().get() + ":" + (i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()) + " - " + i.getEnd().hourOfDay().get() + ":" + (i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()) + ") \n");
             }
-            
+
             android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getActivity());
             builder.setMessage("Zone Schedule is outside building schedule currently set. " +
-                               "Proceed with trimming the zone schedules to be within the building schedule \n"+spillZones)
-                   .setCancelable(false)
-                   .setTitle("Schedule Errors")
-                   .setIcon(android.R.drawable.ic_dialog_alert)
+                    "Proceed with trimming the zone schedules to be within the building schedule \n" + spillZones)
+                    .setCancelable(false)
+                    .setTitle("Schedule Errors")
+                    .setIcon(android.R.drawable.ic_dialog_alert)
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             scheduleSpinner.setSelection(0);
-                           dialog.dismiss();
+                            dialog.dismiss();
                         }
 
                     })
-                   .setPositiveButton("Force-Trim", new DialogInterface.OnClickListener() {
-                       public void onClick(DialogInterface dialog, int id) {
-                           setScheduleType(scheduleTypeId, ScheduleType.ZONE, zoneMap);
-                           HashMap<String, ArrayList<Interval>> spillsMap = new HashMap<>();
-                           spillsMap.put(zoneSchedule.getRoomRef(), intervalSpills);
-                           ScheduleUtil.trimZoneSchedule(mSchedule, spillsMap);
-                           CCUHsApi.getInstance().scheduleSync();
-                       }
-                   });
-            
+                    .setPositiveButton("Force-Trim", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            setScheduleType(scheduleTypeId, ScheduleType.ZONE, zoneMap);
+                            HashMap<String, ArrayList<Interval>> spillsMap = new HashMap<>();
+                            spillsMap.put(zoneSchedule.getRoomRef(), intervalSpills);
+                            ScheduleUtil.trimZoneSchedule(mSchedule, spillsMap);
+                            CCUHsApi.getInstance().scheduleSync();
+                        }
+                    });
+
             AlertDialog alert = builder.create();
             alert.show();
             return false;
@@ -3111,8 +3054,264 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
     }
 
-    private String getScheduleTypeId(String equipId){
-        return CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \""+equipId+"\"");
+    private String getScheduleTypeId(String equipId) {
+        return CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \"" + equipId + "\"");
     }
-    
+
+    private void loadSENSEPointsUI(HashMap sensePoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
+
+        View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
+        TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
+        textViewTitle.setText(sensePoints.get("Profile").toString() + " (" + nodeAddress + ")");
+        linearLayoutZonePoints.addView(viewTitle);
+
+
+        if (sensePoints.get("isTh1Enable") == "true") {
+            TextView textViewth1 = new TextView(getContext());
+            textViewth1.setTextSize(24);
+            textViewth1.setPadding(40, 0, 0, 10);
+            textViewth1.setText(sensePoints.get("Thermistor1").toString() + " : " + (sensePoints.get("Th1Val").toString()) + " " + (sensePoints.get("Unit3").toString()));
+            linearLayoutZonePoints.addView(textViewth1);
+        }
+        if (sensePoints.get("isTh2Enable") == "true") {
+            TextView textViewth2 = new TextView(getContext());
+            textViewth2.setTextSize(24);
+            textViewth2.setPadding(40, 0, 0, 10);
+            textViewth2.setText(sensePoints.get("Thermistor2").toString() + " : " + (sensePoints.get("Th2Val").toString()) + " " + (sensePoints.get("Unit4").toString()));
+            linearLayoutZonePoints.addView(textViewth2);
+        }
+
+        if (sensePoints.get("iAn1Enable") == "true") {
+            TextView textViewAnalog1 = new TextView(getContext());
+            textViewAnalog1.setTextSize(24);
+            textViewAnalog1.setPadding(40, 0, 0, 10);
+            textViewAnalog1.setText(sensePoints.get("Analog1").toString() + " : " + (sensePoints.get("An1Val").toString()) + " " + (sensePoints.get("Unit1").toString()));
+            linearLayoutZonePoints.addView(textViewAnalog1);
+        }
+        if (sensePoints.get("iAn2Enable") == "true") {
+            TextView textViewAnalog2 = new TextView(getContext());
+            textViewAnalog2.setTextSize(24);
+            textViewAnalog2.setPadding(40, 0, 0, 10);
+            textViewAnalog2.setText(sensePoints.get("Analog2").toString() + " : " + (sensePoints.get("An2Val").toString()) + " " + (sensePoints.get("Unit2").toString()));
+            linearLayoutZonePoints.addView(textViewAnalog2);
+
+        }
+
+    }
+    private void viewSenseZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap, String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout) {
+
+        Log.i("ProfileTypes", "Points:" + zoneMap.toString());
+        Equip p = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
+        Log.i("ProfileTypes", "p:" + p.toString());
+        double currentAverageTemp = 0;
+        int noTempSensor = 0;
+
+        if (zoneMap.size() > 1 && currentAverageTemp != 0) {
+            currentAverageTemp = currentAverageTemp / (zoneMap.size() - noTempSensor);
+            DecimalFormat decimalFormat = new DecimalFormat("#.#");
+            currentAverageTemp = Double.parseDouble(decimalFormat.format(Math.round(currentAverageTemp * 10.0) / 10.0));
+        }
+        Log.i("EachzoneData", " currentAvg:" + currentAverageTemp);
+        final String[] equipId = {p.getId()};
+        int i = gridPosition;
+        View arcView = inflater.inflate(R.layout.zones_item, (ViewGroup) rootView, false);
+        View zoneDetails = inflater.inflate(R.layout.zones_item_details, null);
+
+        LinearLayout linearLayoutZonePoints = zoneDetails.findViewById(R.id.lt_profilepoints);
+        LinearLayout linearLayoutschedulePoints = zoneDetails.findViewById(R.id.lt_schedule);
+        LinearLayout linearLayoutstatusPoints = zoneDetails.findViewById(R.id.lt_status);
+        linearLayoutstatusPoints.setVisibility(View.GONE);
+        linearLayoutschedulePoints.setVisibility(View.GONE);
+
+        GridItem gridItemObj = new GridItem();
+        gridItemObj.setGridID(i);
+        gridItemObj.setGridItem("Sense");
+        gridItemObj.setNodeAddress(Short.valueOf(p.getGroup()));
+        gridItemObj.setZoneEquips(zoneMap);
+        arcView.setClickable(true);
+        arcView.setTag(gridItemObj);
+        arcView.setId(i);
+        SeekArc seekArc = arcView.findViewById(R.id.seekArc);
+        seekArc.setTag(gridItemObj);
+        seekArc.setCurrentTemp((float) currentAverageTemp);
+        zoneDetails.setTag(gridItemObj);
+
+        TextView textEquipment = arcView.findViewById(R.id.textEquipment);
+        textEquipment.setText(zoneTitle);
+
+        seekArc.scaletoNormal(250, 210);
+        seekArc.setDetailedView(false);
+        LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+        arcView.setPadding(48, 64, 0, 0);
+        try {
+            tablerowLayout[rowcount].addView(arcView, rowLayoutParams);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (((i + 1) % columnCount == 0) && (i != 0)) {
+            try {
+                if (tablerowLayout[rowcount].getParent() != null) {
+                    ((ViewGroup) tablerowLayout[rowcount].getParent()).removeView(tablerowLayout[rowcount]);
+                }
+                tableLayout.addView(tablerowLayout[rowcount++]);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (rowcount < numRows)
+                tablerowLayout[rowcount] = new LinearLayout(tableLayout.getContext());
+        }
+        if (rowcount < numRows) {
+            try {
+                if (tablerowLayout[rowcount].getParent() != null) {
+                    ((ViewGroup) tablerowLayout[rowcount].getParent()).removeView(tablerowLayout[rowcount]);
+                }
+                tableLayout.addView(tablerowLayout[rowcount]);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        seekArcArrayList.add(seekArc);
+        seekArc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                GridItem gridItemNew = (GridItem) v.getTag();
+                boolean isExpanded = false;
+                int clickedItemRow = 0;
+                int clickposition = gridItemNew.getGridID();
+                if (clickedView != -1) {
+                    if (clickposition != clickedView) {
+                        int newRowCount = 0;
+                        int tableRowCount = tableLayout.getChildCount();
+                        if (tableLayout.getChildCount() > 1) {
+                            boolean viewFound = false;
+                            for (int row = 0; row < tableRowCount; row++) {
+                                View rowView = tableLayout.getChildAt(row);
+                                LinearLayout tableRow = (LinearLayout) rowView;
+                                int cellCount = tableRow.getChildCount();
+                                for (int j = 0; j < cellCount; j++) {
+                                    RelativeLayout gridItem = (RelativeLayout) tableRow.getChildAt(j);
+                                    GridItem viewTag = (GridItem) gridItem.getTag();
+                                    if (viewTag.getGridID() == clickedView ) {
+                                        if (viewTag.getGridItem().equals("Sense") || viewTag.getGridItem().equals("Temp")) {
+                                            SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
+                                            TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
+                                            textViewzone.setTextAppearance(getActivity(), R.style.label_black);
+                                            textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                            tableLayout.removeViewAt(row + 1);
+                                            seekArcExpanded.setDetailedView(false);
+                                            seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
+                                            seekArcExpanded.scaletoNormal(250, 210);
+                                            gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                        } else {
+                                            TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
+                                            textViewzone.setTextAppearance(getActivity(), R.style.label_black);
+                                            textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                            tableLayout.removeViewAt(row + 1);
+                                            NonTempControl nonTempControl = gridItem.findViewById(R.id.rl_nontemp);
+                                            ScaleControlToNormal(250, 210, nonTempControl);
+                                            nonTempControl.setExpand(false);
+                                            //ScaleImageToNormal(250,210,imageViewExpanded);
+                                            nonTempControl.setBackgroundColor(getResources().getColor(R.color.white));
+                                            gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                        }
+
+                                        isExpanded = false;
+                                        imageOn = false;
+                                        viewFound = true;
+                                        break;
+                                    }
+                                }
+                                if (viewFound) {
+                                    clickedItemRow = row;
+                                    break;
+                                }
+                            }
+
+                            zoneOpen = true;
+                            zoneNonTempOpen = false;
+                            seekArcOpen = seekArc;
+                            zonePointsOpen = zoneDetails;
+                            equipOpen = p;
+                            openZoneMap = zoneMap;
+                            clickedView = gridItemNew.getGridID();
+                            v.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
+                            int index = clickedView / columnCount + 1;
+                            seekArc.setDetailedView(true);
+                            //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
+                            seekArc.scaletoNormalBig(250, 210);
+                            imageOn = true;
+                            selectedView = seekArc.getId();
+                            try {
+                                textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
+                                textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                                zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                                tableLayout.addView(zoneDetails, index);
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            isExpanded = true;
+                        }
+                    } else if (clickposition == clickedView) {
+                        v.setBackgroundColor(getResources().getColor(R.color.white));
+                        textEquipment.setTextAppearance(getActivity(), R.style.label_black);
+                        textEquipment.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                        tableLayout.removeView(zoneDetails);
+                        imageOn = false;
+                        seekArc.setDetailedView(false);
+                        seekArc.scaletoNormal(250, 210);
+                        showWeather();
+                        clickedView = -1;
+                        isExpanded = false;
+                    }
+                } else {
+                    zoneOpen = false;
+                    zoneNonTempOpen = true;
+                    seekArcOpen = seekArc;
+                    zonePointsOpen = zoneDetails;
+                    equipOpen = p;
+                    openZoneMap = zoneMap;
+                    clickedView = gridItemNew.getGridID();
+                    seekArc.setClickable(true);
+                    v.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                    int index = clickedView / columnCount + 1;
+                    seekArc.setDetailedView(true);
+                    //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
+                    seekArc.scaletoNormalBig(250, 210);
+                    hideWeather();
+                    imageOn = true;
+                    selectedView = seekArc.getId();
+                    try {
+                        textEquipment.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
+                        textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                        zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                        tableLayout.addView(zoneDetails, index);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    isExpanded = true;
+                }
+
+                zoneOpen = false;
+                v.setContentDescription(zoneTitle);
+                linearLayoutZonePoints.removeAllViews();
+                for (int k = 0; k < openZoneMap.size(); k++) {
+                    Equip updatedEquip = new Equip.Builder().setHashMap(openZoneMap.get(k)).build();
+                    if (updatedEquip.getProfile().contains("SENSE")) {
+                        HashMap sensePoints = ScheduleProcessJob.getHyperStatSenseEquipPoints(updatedEquip.getGroup());
+                        // seekArc.setCurrentTemp(Float.parseFloat(sensePoints.get("curtempwithoffset").toString()));
+                        loadSENSEPointsUI(sensePoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
+                    }
+
+                }
+
+            }
+        });
+
+
+    }
+
+
 }

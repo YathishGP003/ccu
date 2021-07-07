@@ -37,6 +37,7 @@ import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.registration.FreshRegistration;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
@@ -227,6 +228,7 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
                 }
             }
         });
+        setSpinnerDropDownIcon();
     }
 
     private void goTonext() {
@@ -675,6 +677,30 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
     
     short getAnalogVal(double min, double max, double val) {
         return max > min ? (short) (10 * (min + (max - min) * val/100)) : (short) (10 * (min - (min - max) * val/100));
+    }
+
+    private void setSpinnerDropDownIcon(){
+        CCUUiUtil.setSpinnerDropDownColor(relay1Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay2Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay3Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay4Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay5Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay6Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(relay7Spinner,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog1Min,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog1Max,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog2Min,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog2Max,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog3Min,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog3Max,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog4MinCooling,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog4MaxCooling,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog4MinHeating,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(analog4MaxHeating,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(ahuAnalog1Test,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(ahuAnalog2Test,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(ahuAnalog3Test,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(ahuAnalog4Test,getContext());
     }
 }
 

@@ -110,8 +110,9 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.2"
                 android:padding="8dp"
-                app:srcCompat="@drawable/icon_arrowright"
-                tools:ignore="ContentDescription" />
+                app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
+                tools:ignore="ContentDescription"
+                app:tint="?orange_75f" />
         </LinearLayout>
 
         <LinearLayout
@@ -136,8 +137,9 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.2"
                 android:padding="8dp"
-                app:srcCompat="@drawable/icon_arrowright"
-                tools:ignore="ContentDescription" />
+                app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
+                tools:ignore="ContentDescription"
+                app:tint="?orange_75f" />
         </LinearLayout>
 
         <LinearLayout
@@ -163,7 +165,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.2"
                 android:padding="8dp"
-                app:srcCompat="@drawable/icon_arrowright"
+                app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
                 tools:ignore="ContentDescription" />
         </LinearLayout>
 

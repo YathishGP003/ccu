@@ -122,6 +122,7 @@ class AlertsRepository(
       alert.setFixed(true)
       alert.setSyncStatus(false)
       dataStore.updateAlert(alert)
+      alertDefsState.remove(alert)
 
       // special handling in preferences for "CCU RESTART" alert.  Is that restart alert, or that it was restarted?
       if (alert.mTitle.equals("CCU RESTART", ignoreCase = true)) {

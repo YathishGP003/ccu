@@ -33,7 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="350dp"
         android:layout_gravity="center"
-        app:mcv_selectionColor="@color/accent"
+        app:mcv_selectionColor="?orange_75f"
         app:mcv_selectionMode="range"
         app:mcv_showOtherDates="all"
         app:mcv_headerTextAppearance="@style/month_text_appearance"
@@ -55,7 +55,7 @@
             android:background="@null"
             android:fontFamily="@font/lato_regular"
             android:text="CANCEL"
-            android:textColor="@color/orange_75f"
+            android:textColor="?orange_75f"
             android:textSize="20dp" />
 
         <View android:layout_width="0.01dp"
@@ -73,7 +73,7 @@
             android:background="@null"
             android:fontFamily="@font/lato_regular"
             android:text="SAVE"
-            android:textColor="@color/orange_75f"
+            android:textColor="?orange_75f"
             android:textSize="20dp" />
 
     </LinearLayout>

@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -39,6 +40,7 @@ import a75f.io.logic.bo.building.sse.SingleStageConfig;
 import a75f.io.logic.bo.building.sse.SingleStageProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import androidx.annotation.Nullable;
 import butterknife.BindView;
@@ -161,7 +163,8 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
         temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
         sseRelay1Actuator = (Spinner)view.findViewById(R.id.sseRelay1Actuator);
         sseRelay2Actuator = (Spinner)view.findViewById(R.id.sseRelay2Actuator);
-        setDividerColor(temperatureOffset);
+        CCUUiUtil.setSpinnerDropDownColor(sseRelay1Actuator,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(sseRelay2Actuator,getContext());
         temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];//{"-4","-3","-2","-1","0","1","2","3","4"};
         for (int nNum = 0; nNum < TEMP_OFFSET_LIMIT * 2 + 1; nNum++)
@@ -303,27 +306,6 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
         Log.d("SSEConfig", "Set Config: Profiles - "+L.ccu().zoneProfiles.size());
     }
 
-    private void setDividerColor(NumberPicker picker) {
-        Field[] numberPickerFields = NumberPicker.class.getDeclaredFields();
-        for (Field field : numberPickerFields) {
-            if (field.getName().equals("mSelectionDivider")) {
-                field.setAccessible(true);
-                try {
-                    field.set(picker, getResources().getDrawable(R.drawable.divider_np));
-                } catch (IllegalArgumentException e) {
-                    Log.v("NP", "Illegal Argument Exception");
-                    e.printStackTrace();
-                } catch (Resources.NotFoundException e) {
-                    Log.v("NP", "Resources NotFound");
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    Log.v("NP", "Illegal Access Exception");
-                    e.printStackTrace();
-                }
-                break;
-            }
-        }
-    }
 
     @Override
     @OnCheckedChanged({R.id.sseRelay1ForceTestBtn,R.id.sseRelay2ForceTestBtn,

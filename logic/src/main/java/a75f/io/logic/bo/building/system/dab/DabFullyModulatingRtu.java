@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.system.dab;
 
 import android.content.Intent;
+import android.util.Log;
 
 import java.util.HashMap;
 
@@ -122,6 +123,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         
         setSystemPoint("operating and mode", dabSystem.systemState.ordinal());
         String systemStatus = (dabSystem.systemState == OFF) ? "System OFF " : getStatusMessage();
+        Log.i("TAG", "getSystemStatusString: oam");
         String scheduleStatus = ScheduleProcessJob.getSystemStatusString();
         CcuLog.d(L.TAG_CCU_SYSTEM, "systemStatusMessage: "+systemStatus);
         CcuLog.d(L.TAG_CCU_SYSTEM, "ScheduleStatus: " +scheduleStatus);

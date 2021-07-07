@@ -20,10 +20,13 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Optional;
+
+
 
 /**
  * Created by ryant on 9/27/2017.
@@ -137,7 +140,7 @@ public class DialogWTMProfiling extends BaseDialogFragment
         if(titleView != null)
         {
             titleView.setGravity(Gravity.CENTER);
-            titleView.setTextColor(getResources().getColor(R.color.progress_color_orange));
+            titleView.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
         }
         int titleDividerId = getContext().getResources()
                                          .getIdentifier("titleDivider", "id", "android");

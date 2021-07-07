@@ -23,6 +23,7 @@
             android:textSize="@dimen/text_medium_xlarge" />
 
         <Spinner
+            style="@style/Widget.AppCompat.Spinner.Underlined"
             android:id="@+id/hmpSetpoint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -48,6 +49,7 @@
             android:textSize="@dimen/text_medium_xlarge" />
 
         <Spinner
+            style="@style/Widget.AppCompat.Spinner.Underlined"
             android:id="@+id/actuator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -77,6 +79,7 @@
                 android:textSize="@dimen/text_medium_xlarge" />
 
             <Spinner
+                style="@style/Widget.AppCompat.Spinner.Underlined"
                 android:id="@+id/maxValveSpinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -103,6 +106,7 @@
                 android:textSize="@dimen/text_medium_xlarge" />
 
             <Spinner
+                style="@style/Widget.AppCompat.Spinner.Underlined"
                 android:id="@+id/minValveSpinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -134,6 +138,7 @@
                 android:textSize="@dimen/text_medium_xlarge" />
 
             <Spinner
+                style="@style/Widget.AppCompat.Spinner.Underlined"
                 android:id="@+id/pSpreadSpinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -159,6 +164,7 @@
                 android:textSize="@dimen/text_medium_xlarge" />
 
             <Spinner
+                style="@style/Widget.AppCompat.Spinner.Underlined"
                 android:id="@+id/iTimeoutSpinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -189,6 +195,7 @@
                 android:textSize="@dimen/text_medium_xlarge" />
 
             <Spinner
+                style="@style/Widget.AppCompat.Spinner.Underlined"
                 android:id="@+id/pGainSpinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -213,6 +220,7 @@
                 android:textSize="@dimen/text_medium_xlarge" />
 
             <Spinner
+                style="@style/Widget.AppCompat.Spinner.Underlined"
                 android:id="@+id/iGainSpinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

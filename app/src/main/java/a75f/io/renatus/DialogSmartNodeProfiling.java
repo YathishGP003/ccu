@@ -24,10 +24,13 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Optional;
+
+
 
 import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.PROFILE_TYPE;
 
@@ -43,7 +46,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     Zone         mZone;
     LightProfile mLightProfile;
     ProfileType mProfileType;
-    
+
     short        mNodeAddress;
     
     String mRoomName;
@@ -410,7 +413,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         //mZone = L.findZoneByName(mFloorName, mRoomName);
         //mLightProfile = (LightProfile) mZone.findProfile(ProfileType.LIGHT);
         mProfileType = ProfileType.values()[getArguments().getInt(FragmentCommonBundleArgs.PROFILE_TYPE)];
-        
+
         return view;
     }
     
@@ -551,7 +554,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         if(titleView != null)
         {
             titleView.setGravity(Gravity.CENTER);
-            titleView.setTextColor(getResources().getColor(R.color.progress_color_orange));
+            titleView.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
         }
         int titleDividerId = getContext().getResources()
                                          .getIdentifier("titleDivider", "id", "android");

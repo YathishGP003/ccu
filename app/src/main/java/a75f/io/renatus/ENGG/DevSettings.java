@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
@@ -11,6 +12,8 @@ import a75f.io.renatus.BuildConfig;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
+
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -35,6 +39,7 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -83,9 +88,11 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     @BindView(R.id.imageCMSerial) ImageView cmSerial;
     @BindView(R.id.imageMBSerial) ImageView mbSerial;
     @BindView(R.id.reconnectSerial) Button reconnectSerial;
-    LinearLayout testParams;
+    public  @BindView(R.id.daikin_theme_config) CheckBox daikinThemeConfig;
+
 
     @BindView(R.id.crashButton) Button crashButton;
+    public @BindView(R.id.btnRestart) Button btnRestart;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -251,8 +258,16 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                 }
             });
         }
-    
+
         configureBtuProxy(zeroToHundredDataAdapter);
+        btnRestart.setOnClickListener((v)->CCUUiUtil.triggerRestart(getContext()));
+        daikinThemeConfig.setChecked(CCUUiUtil.isDaikinThemeEnabled(getContext()));
+        daikinThemeConfig.setOnCheckedChangeListener((buttonView, isChecked)-> {
+            PreferenceManager.getDefaultSharedPreferences(getContext()).edit().
+                    putBoolean(getContext().getString(R.string.prefs_theme_key),isChecked).commit();
+
+        });
+
     }
     
     @Override
@@ -335,5 +350,5 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                                                                     .getInt("cw_FlowRate", 0)));
     
     }
-                             
+
 }

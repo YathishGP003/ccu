@@ -4,11 +4,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
 
     <TextView
         android:id="@+id/default_text_view"
-        style="@style/WindowTextStyle"
+        style="?WindowTextStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingStart="20dp"
@@ -32,7 +33,7 @@
             android:layout_marginStart="64dp"
             android:padding="2.5dp"
             android:rotation="180"
-            app:srcCompat="@drawable/icon_arrowright" />
+            app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24" />
 
         <TextView
             android:id="@+id/textTitleFragment"
@@ -44,7 +45,7 @@
             android:fontFamily="@font/lato_bold"
             android:text="@string/title_smartstatmodule"
             android:textAllCaps="true"
-            android:textColor="@color/orange_75f"
+            android:textColor="?orange_75f"
             android:textSize="33.5sp"
             android:textStyle="bold" />
 
@@ -103,13 +104,14 @@
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="12dp"
-                        android:layout_height="20dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="92dp"
-                        android:src="@drawable/icon_arrowright" />
-
+                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                        tools:ignore="ContentDescription"
+                        app:tint="?orange_75f" />
                     <View
                         android:layout_width="517dp"
                         android:layout_height="0.1dp"
@@ -155,13 +157,14 @@
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="12dp"
-                        android:layout_height="20dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="92dp"
-                        android:src="@drawable/icon_arrowright" />
-
+                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                        tools:ignore="ContentDescription"
+                        app:tint="?orange_75f" />
                     <View
                         android:layout_width="517dp"
                         android:layout_height="0.1dp"
@@ -206,13 +209,14 @@
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="12dp"
-                        android:layout_height="20dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="92dp"
-                        android:src="@drawable/icon_arrowright" />
-
+                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                        tools:ignore="ContentDescription"
+                        app:tint="?orange_75f" />
                     <View
                         android:layout_width="517dp"
                         android:layout_height="0.1dp"
@@ -257,13 +261,14 @@
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="12dp"
-                        android:layout_height="20dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="92dp"
-                        android:src="@drawable/icon_arrowright" />
-
+                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                        tools:ignore="ContentDescription"
+                        app:tint="?orange_75f" />
                     <View
                         android:layout_width="517dp"
                         android:layout_height="0.1dp"
@@ -308,13 +313,14 @@
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="12dp"
-                        android:layout_height="20dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="92dp"
-                        android:src="@drawable/icon_arrowright" />
-
+                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                        tools:ignore="ContentDescription"
+                        app:tint="?orange_75f" />
                     <View
                         android:layout_width="517dp"
                         android:layout_height="0.1dp"
@@ -323,6 +329,8 @@
                         android:alpha="0.37"
                         android:background="@color/text_color" />
                 </RelativeLayout>
+
+
             </LinearLayout>
 
         </ScrollView>
@@ -341,14 +349,14 @@
 
         <Button
             android:id="@+id/first_button"
-            style="@style/buttonstyle"
+            style="?buttonstyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/txt_cancel" />
 
         <Button
             android:id="@+id/second_button"
-            style="@style/buttonstyle"
+            style="?buttonstyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/txt_pair" />

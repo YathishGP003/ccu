@@ -396,6 +396,7 @@ public class Schedule extends Entity
     private DateTime mStartDate;
     private DateTime mEndDate;
     
+    
     public String getRoomRef()
     {
         return mRoomRef;

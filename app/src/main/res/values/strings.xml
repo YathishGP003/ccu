@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name">Renatus</string>
+    <string name="app_75f">Renatus</string>
+    <string name="app_daikin">Daikin</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
@@ -83,7 +84,7 @@
         <item>  DAB Fully Modulating AHU</item>
         <item>  DAB Staged RTU with VFD Fan</item>
         <item>  DAB Advanced Hybrid AHU</item>
-        <item>  Daikin IE Rtu</item>
+        <item>  Daikin IE RTU</item>
     </string-array>
 
     <string-array name="hvac_stage_selector">
@@ -210,7 +211,7 @@
         <item>  Dehumidifier </item>
     </string-array>
     <string-array name="smartstat_relay_hp_changeover">
-    	<item>  O - Energize in cooling</item>
+        <item>  O - Energize in cooling</item>
         <item>  B - Energize in heating</item>
     </string-array>
     <string-array name="schedulePORT">
@@ -503,7 +504,9 @@
     <string name="title_hn">HN</string>
     <string name="title_helionode">Helio Node</string>
     <string name="title_ss">SS</string>
+    <string name="title_hs">HS</string>
     <string name="title_smartstat">Smart Stat</string>
+    <string name="title_hyperstat">HyperStat</string>
     <string name="title_wtm">WTM</string>
     <string name="title_wirelesstemp">Wireless Temperature Monitor</string>
 
@@ -539,6 +542,7 @@
     <string name="desc_dab_dual_duct">Custom terminal profile control for Dual Duct systems with cooling and heating duct</string>
     <!--SMART STAT Module Screen-->
     <string name="title_smartstatmodule">SMART STAT | SELECT MODULE TYPE</string>
+    <string name="title_hyperstatmodule">HYPERSTAT | SELECT MODULE TYPE</string>
     <string name="title_cpu">Conventional Package Unit</string>
     <string name="desc_cpu">Unitary equipment with 2 stages for Heating, Cooling and Fan\nUser can select Fan Low/High/Auto</string>
     <string name="title_commercial">Commercial Package Unit</string>
@@ -546,10 +550,13 @@
     <string name="title_hpu">Heat Pump Unit</string>
     <string name="desc_hpu">Compressor based Heating and Cooling\nReversing Valve determines operational mode</string>
     <string name="title_2pipe">2 Pipe FCU</string>
-    <string name="desc_2pipe">A Coil fed by 1 pair of supply pipes provides heating or cooling\nThe correct mode is based on sensing supply water temperature</string>
+    <string name="desc_2pipe">A coil fed by 1 pair of supply pipes provides heating or cooling\nThe correct mode is based on sensing supply water temperature</string>
     <string name="title_4pipe">4 Pipe FCU</string>
     <string name="desc_4pipe">A water coil fed by separate heating and cooling pipes\nAllows for independent heating/cooling modes</string>
-
+    <string name="title_vrv">VRV</string>
+    <string name="desc_vrv">Connect to the Daikin VRV Indoor Unit using P1 P2 Protocol</string>
+    <string name="title_hypersense">Sense</string>
+    <string name="desc_hypersense">Equipment Connector for Monitoring Data</string>
 
     <!--WTM Module Screen-->
     <string name="title_wtmmodule">WTM | SELECT MODULE TYPE</string>
@@ -843,9 +850,9 @@
 
     <string name="txt_mb_restart_prompt">Changes in config requires Application restart</string>
     <string name="txt_restart">Restart Now</string>
-   <string name="local_sandbox">Local Sandbox</string>
+    <string name="local_sandbox">Local Sandbox</string>
     <string name="change_ip_address">Change IP Address</string>
-   <string name="alert_definitions">Alert Definitions:</string>
+    <string name="alert_definitions">Alert Definitions:</string>
     <string name="active_alerts">Active:</string>
     <string name="resolved">Resolved:</string>
     <string name="in_process">In process:</string>
@@ -915,4 +922,8 @@
     </string-array>
 
     <string name="buttonDesableDelay">2000</string>
+    <string name="analogin1">Analog-in1</string>
+    <string name="analogin2">Analog-in2</string>
+    <string name="title_pairhss">HYPERSTAT | PAIRING STEPS </string>
+    <string name="prefs_theme_key">isEnabled</string>
 </resources>

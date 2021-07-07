@@ -8,12 +8,10 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import androidx.annotation.RequiresApi;
-import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
-import androidx.core.graphics.drawable.DrawableCompat;
+
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -23,6 +21,7 @@ import android.view.View;
 import a75f.io.renatus.R;
 
 import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
+
 
 /**
  * Created by mahesh on 15-08-2019.
@@ -114,7 +113,7 @@ public class RangeBar extends View {
         if (stateReflected == RangeBarState.LOWER_COOLING_LIMIT) {
             mTempIconPaint.setColor(getResources().getColor(R.color.max_temp));
         } else {
-            mTempIconPaint.setColor(getResources().getColor(R.color.accent));
+            mTempIconPaint.setColor(getResources().getColor(R.color.min_temp));
         }
 
         //force push the text if overlap

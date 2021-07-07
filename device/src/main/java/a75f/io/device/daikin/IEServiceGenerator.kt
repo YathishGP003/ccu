@@ -31,8 +31,6 @@ class IEServiceGenerator {
         }
 
         val okHttpClient = OkHttpClient.Builder().apply {
-            addInterceptor(okhttpLogging)
-            addNetworkInterceptor(okhttpLogging)
             addInterceptor(
                 Interceptor { chain ->
                     val builder = chain.request().newBuilder()
@@ -41,6 +39,8 @@ class IEServiceGenerator {
                     return@Interceptor chain.proceed(builder.build())
                 }
             )
+            addInterceptor(okhttpLogging)
+            addNetworkInterceptor(okhttpLogging)
         }.build()
         CcuLog.i(L.TAG_CCU_DEVICE, "create retrofit  $baseUrl")
         return Retrofit.Builder()

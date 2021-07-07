@@ -20,3 +20,15 @@ const val IE_POINT_NAME_ALARM_FAULT = "ActiveFaultEnu"
 const val IE_POINT_NAME_OCCUPANCY_STATUS = "OccStatus"
 
 const val IE_MSG_BODY = "<requests>\n<request>\n%f\n</request>\n</requests>"
+
+internal enum class OccMode {
+    Occ, Unocc, TntOvrd, Auto, UnInit
+}
+
+internal enum class NetApplicMode {
+    Null, Off, HeatOnly, CoolOnly, FanOnly, Auto, Invalid, UnInit
+}
+
+internal enum class HumidityCtrl {
+    None, RelHum, DewPt, Always, UnInit
+}

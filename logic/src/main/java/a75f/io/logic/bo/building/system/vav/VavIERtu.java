@@ -472,20 +472,20 @@ public class VavIERtu extends VavSystemProfile
                                       .setDisplayName(equipDis+"-"+"equipmentIPAddress")
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
-                                      .addMarker("system").addMarker("config").addMarker("ie").addMarker("ip")
-                                      .addMarker("address").addMarker("writable").addMarker("sp")
+                                      .addMarker("system").addMarker("config").addMarker("ie")
+                                      .addMarker("ipAddress").addMarker("writable").addMarker("sp")
                                       .setKind(Kind.STRING)
                                       .setTz(tz)
                                       .build();
         String equipmentIPId = hayStack.addPoint(equipmentIP);
-        hayStack.writeDefaultValById(equipmentIPId, "10.100.11.71" );
+        hayStack.writeDefaultValById(equipmentIPId, "172.16.0.1" );
     
         Point macAddress = new Point.Builder()
                                      .setDisplayName(equipDis+"-"+"macAddress")
                                      .setSiteRef(siteRef)
                                      .setEquipRef(equipref)
-                                     .addMarker("system").addMarker("config").addMarker("ie").addMarker("mac")
-                                     .addMarker("address").addMarker("writable").addMarker("sp")
+                                     .addMarker("system").addMarker("config").addMarker("ie")
+                                     .addMarker("macAddress").addMarker("writable").addMarker("sp")
                                      .setKind(Kind.STRING)
                                      .setTz(tz)
                                      .build();

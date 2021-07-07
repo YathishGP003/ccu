@@ -56,10 +56,11 @@
 
                     <ImageView
                         android:id="@+id/btnEditIp"
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:layout_marginStart="20dp"
+                        android:layout_marginStart="10dp"
+                        android:padding="8dp"
                         android:layout_toEndOf="@+id/equipmentIp"
                         app:srcCompat="@drawable/ic_edit" />
                 </RelativeLayout>
@@ -74,7 +75,7 @@
 
                     <TableRow
                         android:id="@+id/genericRTUHeader"
-                        android:layout_width="300dp"
+                        android:layout_width="600dp"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="2dp">
 
@@ -121,7 +122,7 @@
 
                     <TableRow
                         android:id="@+id/rtuAnalog1"
-                        android:layout_width="300dp"
+                        android:layout_width="600dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginTop="10dp">
@@ -164,7 +165,7 @@
 
                     <TableRow
                         android:id="@+id/rtuAnalog2"
-                        android:layout_width="300dp"
+                        android:layout_width="600dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp">
 
@@ -203,7 +204,7 @@
 
                     <TableRow
                         android:id="@+id/rtuAnalog3"
-                        android:layout_width="300dp"
+                        android:layout_width="600dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp">
 
@@ -243,7 +244,7 @@
 
                     <TableRow
                         android:id="@+id/humidification"
-                        android:layout_width="300dp"
+                        android:layout_width="600dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp">
 
@@ -258,7 +259,7 @@
                                 android:layout_centerVertical="true"
                                 android:layout_gravity="center_vertical"
                                 android:paddingRight="14dp"
-                                android:text="  Humidification "
+                                android:text="  Building Humidity % "
                                 android:textAppearance="@style/text_appearance" />
 
                             <Spinner
@@ -281,10 +282,11 @@
 
                     <TableRow
                         android:id="@+id/oaMin"
-                        android:layout_width="300dp"
+                        android:layout_width="600dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp"
-                        android:layout_marginBottom="15dp">
+                        android:layout_marginBottom="15dp"
+                        android:visibility="gone">
 
                         <RelativeLayout
                             android:layout_width="match_parent"
@@ -294,8 +296,6 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_centerVertical="true"
-                                android:layout_gravity="center_vertical"
-                                android:paddingRight="14dp"
                                 android:text="  OA Minimum "
                                 android:textAppearance="@style/text_appearance"
                                 android:textColor="@color/black" />

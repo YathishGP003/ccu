@@ -13,7 +13,7 @@ import a75f.io.logic.tuners.TunerUtil
 
 
 fun getIEUrl(hayStack : CCUHsApi): String? {
-    return hayStack.readDefaultStrVal("point and system and config and ie and address")
+    return hayStack.readDefaultStrVal("point and system and config and ie and ipAddress")
 }
 
 fun fahrenheitToCelsius(T: Double): Double {

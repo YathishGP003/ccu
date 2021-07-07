@@ -9,22 +9,10 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 
 class IEDeviceHandler {
 
-    internal enum class OccMode {
-        Occ, Unocc, TntOvrd, Auto, UnInit
-    }
-
-    internal enum class NetApplicMode {
-        Null, Off, HeatOnly, CoolOnly, FanOnly, Auto, Invalid, UnInit
-    }
-
-    internal enum class HumidityCtrl {
-        None, RelHum, DewPt, Always, UnInit
-    }
-
     private var currentCondMode = NetApplicMode.UnInit
 
-    private var staticPressureSp : Double = -1.0;
-    private var fanLoopSp : Double = -1.0;
+    private var staticPressureSp : Double = -1.0
+    private var fanLoopSp : Double = -1.0
 
     private var humCtrl : HumidityCtrl = HumidityCtrl.UnInit
 

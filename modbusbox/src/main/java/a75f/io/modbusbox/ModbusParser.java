@@ -67,12 +67,12 @@ public class ModbusParser {
         }
         return equipmentDevice;
     }
-    private EquipmentDevice parseModbusDevice(String json) throws JsonParseException {
+    private EquipmentDevice parseModbusDevice(String json,String fileName) throws JsonParseException {
         EquipmentDevice equipmentDevice = null;
-        if(isValidJSON(json)) {
+        if(isValidJSON(json,fileName)) {
             equipmentDevice = new Gson().fromJson(json, EquipmentDevice.class);
         }else{
-            Log.i("CCU_MODBUS", "INVALID JSON TAG FOR EXTERNAL JSON");
+            Log.i("CCU_MODBUS", "INVALID JSON TAG FOR "+fileName);
         }
         return equipmentDevice;
     }
@@ -178,7 +178,7 @@ public class ModbusParser {
                 try {
                     if(listOfFile[i].isFile())
                     {
-                        EquipmentDevice device = parseModbusDevice(readFileFromFolder(listOfFile[i]));
+                        EquipmentDevice device = parseModbusDevice(readFileFromFolder(listOfFile[i]), listOfFile[i].getName());
                         if(device == null ) continue;
 
                         Log.i("CCU_MODBUS", "Valid JSON file found : "+device.getName() + " EquipType :"+device.getEquipType());
@@ -274,7 +274,7 @@ public class ModbusParser {
         return jsonObjects;
     }
 
-    private boolean isValidJSON(String rawJson){
+    private boolean isValidJSON(String rawJson,String fileName){
         boolean isValid= true;
         try {
             JSONObject jsonObject = new JSONObject(rawJson);
@@ -282,7 +282,7 @@ public class ModbusParser {
             // Check for duplicate Equip ID
             for (int i = 0; i < deviceList.size() ; i++) {
                 if(deviceList.get(i).getModbusEquipIdId().equals(jsonObject.getString("modbusEquipId (_id)"))) {
-                    Log.i("CCU_MODBUS", "Duplicate modbusEquipId: "+jsonObject.getString("modbusEquipId (_id)") +" Device name "+deviceList.get(i).getName());
+                    Log.i("CCU_MODBUS", "Duplicate modbusEquipId found in: "+fileName+" "+jsonObject.getString("modbusEquipId (_id)") +" Device name "+deviceList.get(i).getName());
                    // return false;
                     isValid = false;
                     break;
@@ -292,7 +292,7 @@ public class ModbusParser {
             // Read Registers
             JSONArray registers = jsonObject.getJSONArray("registers");
 
-            if(isContainsDuplicateParametersInSameJSON(registers)){
+            if(isContainsDuplicateParametersInSameJSON(registers,fileName)){
                 Log.i("CCU_MODBUS", registers.toString()+" \n JSON Contains duplicate parameters");
                 isValid = false;
             }
@@ -313,7 +313,7 @@ public class ModbusParser {
                         JSONObject tag = logicalPointTags.getJSONObject(k);
 
                         //Validate the logical Point Tag
-                        if (!isValidTAG(tag.getString("tagName"))) {
+                        if (!isValidTAG(tag.getString("tagName"),fileName)) {
                             isValid =  false;
                         }
                     }
@@ -331,25 +331,25 @@ public class ModbusParser {
     }
 
 
-    private boolean isValidTAG(String tag){
+    private boolean isValidTAG(String tag,String fileName){
         boolean isValid = true;
         // Check for Special Char
         Pattern validPattern = Pattern.compile("[^A-Za-z0-9]");
         Matcher matcher = validPattern.matcher(tag);
         if(matcher.find())
         {
-            Log.i("CCU_MODBUS", "Invalid: tag : '"+tag+ "'  Contains Special Character");
+            Log.i("CCU_MODBUS", "Invalid: tag '"+tag+"' found in "+ fileName + "  Contains Special Character");
             isValid = false;
         }
 
         // Check for Caps
         if(Character.isUpperCase(tag.charAt(0))){
-            Log.i("CCU_MODBUS", "Invalid: tag : '"+tag+"'   Should not start with upper case");
+            Log.i("CCU_MODBUS", "Invalid: tag '"+tag+"' found in "+fileName +"   Should not start with upper case");
             isValid = false;
         }
 
         if(Character.isDigit(tag.charAt(0))){
-            Log.i("CCU_MODBUS", "Invalid: tag : '"+tag+"'   Should not start with Number");
+            Log.i("CCU_MODBUS", "Invalid: tag '"+tag+"' found in "+fileName+"   Should not start with Number");
             isValid = false;
         }
 
@@ -357,7 +357,7 @@ public class ModbusParser {
     }
 
 
-    private boolean isContainsDuplicateParametersInSameJSON(JSONArray jsonArray){
+    private boolean isContainsDuplicateParametersInSameJSON(JSONArray jsonArray,String fileName){
         boolean isValid = false;
         try {
             for (int i = 0; i < jsonArray.length()-1; i++) {
@@ -366,11 +366,11 @@ public class ModbusParser {
                 for (int j = i+1; j < jsonArray.length(); j++) {
                     JSONArray paramJDetails = jsonArray.getJSONObject(j).getJSONArray("parameters");
                         if (paramIDetails.getJSONObject(0).getString("parameterId").equals(paramJDetails.getJSONObject(0).getString("parameterId"))) {
-                            Log.i("CCU_MODBUS", "Duplicate parameter ID found: "+paramJDetails.getJSONObject(0).getString("parameterId")+" Param Name : "+paramIDetails.getJSONObject(0).getString("name"));
+                            Log.i("CCU_MODBUS", "Duplicate parameter ID found in "+fileName+" "+paramJDetails.getJSONObject(0).getString("parameterId")+" Param Name : "+paramIDetails.getJSONObject(0).getString("name"));
                             isValid = true;
                         }
                 }
-                if (isContainsDuplicateParamerInOtherJSON(paramIDetails.getJSONObject(0).getString("parameterId"))) isValid = true;
+                if (isContainsDuplicateParamerInOtherJSON(paramIDetails.getJSONObject(0).getString("parameterId"),fileName)) isValid = true;
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -380,7 +380,7 @@ public class ModbusParser {
         return isValid;
     }
 
-    private boolean isContainsDuplicateParamerInOtherJSON(String paramID){
+    private boolean isContainsDuplicateParamerInOtherJSON(String paramID,String fileName){
         boolean isContainDuplicate = false;
         for (int i = 0; i < deviceList.size(); i++) {
             EquipmentDevice device = deviceList.get(i);
@@ -390,7 +390,7 @@ public class ModbusParser {
 
                 List<Parameter> parameters= registers.get(j).getParameters();
                 if(parameters.get(0).parameterId.equals(paramID)){
-                    Log.i("CCU_MODBUS", "Duplicate parameter ID found: "+paramID+" in "+device.getName() +" Param Name "+parameters.get(0).getName());
+                    Log.i("CCU_MODBUS", "Duplicate parameter ID found in "+fileName+" "+paramID+" in "+device.getName() +" Param Name "+parameters.get(0).getName());
                     isContainDuplicate =  true;
                     break;
                 }

@@ -132,7 +132,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         /*TextView titleView = this.getDialog().findViewById(android.R.id.title);
         if (titleView != null) {
             titleView.setGravity(Gravity.CENTER);
-            titleView.setTextColor(getResources().getColor(R.color.progress_color_orange));
+            titleView.setTextColor(getResources().getColor(R.color.accent75F));
         }*/
         int titleDividerId = getContext().getResources()
                 .getIdentifier("titleDivider", "id", "android");
@@ -194,7 +194,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         hpChangeOverTypeSpinner = (Spinner)view.findViewById(R.id.spinnerPumpChange);
         fanHumiDSpinner = (Spinner)view.findViewById(R.id.spinnerFanHigh);
         temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
-        setDividerColor(temperatureOffset);
+
         temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];//{"-4","-3","-2","-1","0","1","2","3","4"};
         for (int nNum = 0; nNum < TEMP_OFFSET_LIMIT * 2 + 1; nNum++)
@@ -434,7 +434,6 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
             mHPUProfile.updateLogicalMapAndPoints(mSmartNodeAddress, hpuConfig, roomRef);
         }
         L.ccu().zoneProfiles.add(mHPUProfile);
-        Log.d("CPUConfig", "Set Config: Profiles - " + L.ccu().zoneProfiles.size());
     }
 
     private void setDividerColor(NumberPicker picker) {

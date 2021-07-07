@@ -31,6 +31,7 @@ import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.registration.FreshRegistration;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
@@ -167,6 +168,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                 }
             }
         });
+        setSpinnerDropDownIcon();
     }
     
     public void setupEquipAddrEditor() {
@@ -469,5 +471,21 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                 Globals.getInstance().setTestMode(false);
             }
         }
+    }
+
+    private void setSpinnerDropDownIcon(){
+
+        CCUUiUtil.setSpinnerDropDownColor(coolingDatMin,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(coolingDatMax,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(heatingDatMin,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(heatingDatMax,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(spMin,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(spMax,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(coolingTest,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(spTest,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(heatingTest,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(humidificationTest,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(oaMinTest,getContext());
+
     }
 }

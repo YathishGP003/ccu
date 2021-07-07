@@ -1,24 +1,12 @@
- - Merged PR 1255: Revert 'USB device crash'
- - Revert "Merged PR 1150: USB device crash
- - Merged PR 1136: Consider emr and modbus equips in determining system occpuancy
- - Merged PR 1150: USB device crash
- - Merged PR 1254: Peltek device json update
- - Merged PR 1237: Bug 7101: Duplicate Alerts in Production
- - Merged PR 1195: RF enhancements for pairing address
- - Merged PR 1154: 6680 Alerts issues
- - Add system and logical tag to btu param query Correct actualPower tag
- - Merged PR 975: Delete floor remotely only if not used by other CCU
- - Fixed the issue about pairing address - if the pairing address is greater than 9500, it's getting defaulted to 1000
- - Peltek file temp tag updated
- - Remove zone tag from BTU meter measurements
- - Merged PR 1171: 6828 [CCU]: Update smart node string with HelioNode.
- - Merged PR 1045: 5092: CCU - Pubnub edge case with CCU Restart
- - RF enhancements for pairing address
- - Vertical seperation line has been added
- - Pairing device image was updated
- - Update the string with Helio Node
- - Updated the string for Helio Node Profile
- - Updated the name of the profile
- - Merge branch 'master' into Bug/samjith/4778_usb_async_open_crash
- - Fix random USB crash
- - Consider emr and modbus equips in determining system occpuancy
+ - Merged PR 1363: Fix Site deletion and floor handling issues.
+ - Merged PR 1362: Added details to update the Haystack points
+ - Added Null check for SchedulerFragment
+ - Merge branch 'Bug/samjith/site_removal_adding_new_ccu' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/mkundaragi/6918_floorname_edit_is_not_working_properly
+ - Disable room and module when there are no floors
+ - Added Null check for SchedulerFragment
+ - Refactored
+ - Refactored
+ - Added details to update the Haystack points for device and points
+ - Added details to update the Haystack points for device and points
+ - Fix floor floor rename and site deletion issues
+ - Updated ci.config with Daikin build

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-      <item android:state_enabled="true"  android:color="@color/orange_75f" />
+      <item android:state_enabled="true"  android:color="?orange_75f" />
       <item android:color="@color/tuner_group" /> <!-- default -->
 </selector>

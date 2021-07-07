@@ -31,7 +31,7 @@
          android:fontFamily="@font/lato_bold"
          android:text="@string/title_hyperstatmodule"
          android:textAllCaps="true"
-         android:textColor="@color/orange_75f"
+         android:textColor="?orange_75f"
          android:textSize="33.5sp"
          android:textStyle="bold" />
 

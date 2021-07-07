@@ -31,7 +31,7 @@
             android:fontFamily="@font/lato_bold"
             android:text="@string/title_pairhss"
             android:textAllCaps="true"
-            android:textColor="@color/orange_75f"
+            android:textColor="?orange_75f"
             android:textSize="33.5dp"
             android:textStyle="bold" />
 
@@ -69,7 +69,7 @@
             android:drawablePadding="5dp"
             android:fontFamily="@font/lato_bold"
             android:text="@string/button_pair"
-            android:textColor="@color/orange_75f"
+            android:textColor="?orange_75f"
             android:layout_marginRight="24dp"
             android:layout_marginBottom="24dp"
             android:textSize="24dp" />

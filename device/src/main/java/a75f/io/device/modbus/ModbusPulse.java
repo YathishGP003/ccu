@@ -9,6 +9,7 @@ import com.x75f.modbus4j.sero.util.queue.ByteQueue;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -143,7 +144,6 @@ public class ModbusPulse {
         } else if (register.registerType.equals("inputRegister")) {
             respVal = parseIntVal(response);
         } else if (register.registerType.equals("holdingRegister")) {
-            
             if (register.getParameterDefinitionType().equals("float")) {
                     if (register.getWordOrder() != null && register.getWordOrder().equals("littleEndian")) {
                         respVal = parseLittleEndianFloatVal(response);
@@ -153,8 +153,10 @@ public class ModbusPulse {
             } else if (register.getParameterDefinitionType().equals("integer")
                   || register.getParameterDefinitionType().equals("decimal")
                   || register.getParameterDefinitionType().equals("range")) {
-                
+
                 respVal = parseIntVal(response);
+
+
             } else if (register.getParameterDefinitionType().equals("binary")) {
                 
                 if (register.getParameters().size() > 0) {
@@ -176,6 +178,11 @@ public class ModbusPulse {
                         respVal = parseInt64Val(response);
                     }
                 }
+            }
+
+            if(Objects.nonNull(register.multiplier)&&!register.getParameterDefinitionType().equals("boolean")&&!register.getParameterDefinitionType().equals("binary")){
+                double multiplierValue= Double.parseDouble(register.multiplier);
+                respVal=respVal*multiplierValue;
             }
         }
         

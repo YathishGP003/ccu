@@ -49,6 +49,11 @@ android {
         staging {
             minifyEnabled false
         }
+        daikin_prod {
+            minifyEnabled false
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+        }
     }
 
     android.variantFilter { variant ->

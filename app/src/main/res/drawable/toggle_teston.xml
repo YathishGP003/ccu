@@ -10,5 +10,5 @@
         />
     <stroke
         android:width="1dip"
-        android:color="@color/orange" />
+        android:color="?orange_75f" />
 </shape>

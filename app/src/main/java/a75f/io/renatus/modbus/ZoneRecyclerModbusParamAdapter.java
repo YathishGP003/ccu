@@ -31,6 +31,7 @@ import a75f.io.logic.pubnub.ModbusDataInterface;
 import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUiUtil;
 
 public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRecyclerModbusParamAdapter.ViewHolder> implements ModbusDataInterface {
 

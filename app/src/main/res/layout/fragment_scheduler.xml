@@ -56,7 +56,7 @@
                 android:gravity="center_horizontal|bottom"
                 android:padding="5dp"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
-                android:textColor="@color/orange_75f"
+                android:textColor="?orange_75f"
                 app:layout_constraintBottom_toBottomOf="@+id/addEntry"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/addEntry" />
@@ -676,7 +676,7 @@
                 android:textSize="28sp"
                 android:enabled="true"
                 android:drawablePadding="12dp"
-                android:drawableEnd="@drawable/ic_add"
+                android:drawableEnd="@drawable/ic_baseline_add_24"
                 android:fontFamily="@font/lato_bold"
                 android:text="Add Vacation"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"

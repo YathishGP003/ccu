@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -44,10 +45,12 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.ButterKnife;
 
 import static a75f.io.logic.bo.building.definitions.DamperType.ZeroToTenV;
+
 
 /**
  * Created by samjithsadasivan on 3/13/19.
@@ -63,8 +66,8 @@ public class FragmentDABConfiguration extends BaseDialogFragment
     private NodeType mNodeType;
     private Zone     mZone;
     
-    LinearLayout damper1layout;
-    LinearLayout damper2layout;
+
+
     Spinner      damper1Type;
     Spinner      damper1Size;
     Spinner      damper1Shape;
@@ -149,7 +152,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         if(titleView != null)
         {
             titleView.setGravity(Gravity.CENTER);
-            titleView.setTextColor(getResources().getColor(R.color.orange_75f));
+            titleView.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
             titleView.setTextSize(28);
             titleView.setTypeface(null, Typeface.BOLD);
             
@@ -162,7 +165,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             button.setLayoutParams(layoutParams);
             button.setGravity(Gravity.LEFT);
-            button.setTextColor(getResources().getColor(R.color.orange_75f));
+            button.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
             button.setOnClickListener(v->removeDialogFragment(ID));
             button.setBackgroundColor(Color.TRANSPARENT);
             viewGroup.addView(button);
@@ -212,11 +215,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         }
         
         
-      /*  damper1layout  = (LinearLayout)view.findViewById(R.id.damper1layout);
-        damper1layout.setVisibility(View.VISIBLE);
-    
-        damper2layout  = (LinearLayout)view.findViewById(R.id.damper2layout);
-        damper2layout.setVisibility(View.VISIBLE);*/
+
         
         damper1Size = view.findViewById(R.id.damper1Size);
         ArrayAdapter<CharSequence> damperSizeAdapter = ArrayAdapter.createFromResource(getActivity(),
@@ -241,7 +240,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         
         
         temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
-        setNumberPickerDividerColor(temperatureOffset);
+
         temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];//{"-4","-3","-2","-1","0","1","2","3","4"};
         for (int nNum = 0; nNum < TEMP_OFFSET_LIMIT * 2 + 1; nNum++)
@@ -253,7 +252,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         temperatureOffset.setWrapSelectorWheel(false);
         
         maxCoolingDamperPos = view.findViewById(R.id.maxDamperPos);
-        setNumberPickerDividerColor(maxCoolingDamperPos);
+
         maxCoolingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         maxCoolingDamperPos.setMinValue(0);
         maxCoolingDamperPos.setMaxValue(100);
@@ -261,7 +260,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         maxCoolingDamperPos.setWrapSelectorWheel(false);
         
         minCoolingDamperPos = view.findViewById(R.id.minDamperPos);
-        setNumberPickerDividerColor(minCoolingDamperPos);
+
         minCoolingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         minCoolingDamperPos.setMinValue(0);
         minCoolingDamperPos.setMaxValue(100);
@@ -269,7 +268,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         minCoolingDamperPos.setWrapSelectorWheel(false);
         
         maxHeatingDamperPos = view.findViewById(R.id.maxHeatingDamperPos);
-        setNumberPickerDividerColor(maxHeatingDamperPos);
+
         maxHeatingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         maxHeatingDamperPos.setMinValue(0);
         maxHeatingDamperPos.setMaxValue(100);
@@ -277,18 +276,14 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         maxHeatingDamperPos.setWrapSelectorWheel(false);
         
         minHeatingDamperPos = view.findViewById(R.id.minHeatingDamperPos);
-        setNumberPickerDividerColor(minHeatingDamperPos);
+
         minHeatingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         minHeatingDamperPos.setMinValue(0);
         minHeatingDamperPos.setMaxValue(100);
         minHeatingDamperPos.setValue(40);
         minHeatingDamperPos.setWrapSelectorWheel(false);
         
-        setDividerColor(temperatureOffset);
-        setDividerColor(maxCoolingDamperPos);
-        setDividerColor(minCoolingDamperPos);
-        setDividerColor(maxHeatingDamperPos);
-        setDividerColor(minHeatingDamperPos);
+
 
 
         enableOccupancyControl = view.findViewById(R.id.enableOccupancyControl);
@@ -328,7 +323,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         });
         
         damper2Type = view.findViewById(R.id.damper2Type);
-    
+
         ArrayList<String> damper2Types = new ArrayList<>();
         for (DamperType damper : DamperType.values()) {
             damper2Types.add(damper.displayName+ (damper.name().equals("MAT") ? "": " (Analog-out2)"));
@@ -412,7 +407,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             
             }
         });
-        
+        configSpinnerDropDownColor();
     }
     
     private void setupDabZoneProfile() {
@@ -480,26 +475,14 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             }
         }
     }
-    private void setNumberPickerDividerColor(NumberPicker pk) {
-        Class<?> numberPickerClass = null;
-        try {
-            numberPickerClass = Class.forName("android.widget.NumberPicker");
-            Field selectionDivider = numberPickerClass.getDeclaredField("mSelectionDivider");
-            selectionDivider.setAccessible(true);
-            //if(!CCUUtils.isxlargedevice(getActivity())) {
-            selectionDivider.set(pk, getResources().getDrawable(R.drawable.line_959595));
-            //}else{
-            //   selectionDivider.set(pk, getResources().getDrawable(R.drawable.connect_192x48_orange));
-            //}
-            
-        } catch (ClassNotFoundException e) {
-            Log.e("class not found",e.toString());
-        } catch (NoSuchFieldException e) {
-            Log.e("NoSuchFieldException",e.toString());
-        } catch (IllegalAccessException e) {
-            Log.e("IllegalAccessException",e.toString());
-        }catch (Exception e){
-            Log.e("dividerexception",e.getMessage().toString());
-        }
+
+    private void configSpinnerDropDownColor(){
+        CCUUiUtil.setSpinnerDropDownColor(zonePriority,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(damper1Type,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(damper1Size,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(damper1Shape,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(damper2Type,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(damper2Size,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(damper2Shape,getContext());
     }
 }

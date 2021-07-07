@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name">Renatus</string>
+    <string name="app_75f">Renatus</string>
+    <string name="app_daikin">Daikin</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
@@ -83,7 +84,7 @@
         <item>  DAB Fully Modulating AHU</item>
         <item>  DAB Staged RTU with VFD Fan</item>
         <item>  DAB Advanced Hybrid AHU</item>
-        <item>  Daikin IE Rtu</item>
+        <item>  Daikin IE RTU</item>
     </string-array>
 
     <string-array name="hvac_stage_selector">
@@ -924,5 +925,5 @@
     <string name="analogin1">Analog-in1</string>
     <string name="analogin2">Analog-in2</string>
     <string name="title_pairhss">HYPERSTAT | PAIRING STEPS </string>
-
+    <string name="prefs_theme_key">isEnabled</string>
 </resources>

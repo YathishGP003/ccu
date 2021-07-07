@@ -17,7 +17,7 @@
         android:fontFamily="@font/lato_bold"
         android:text="SENSE"
         android:textAllCaps="true"
-        android:textColor="@color/orange_75f"
+        android:textColor="?orange_75f"
         android:textSize="33.5dp"
         android:textStyle="bold" />
 
@@ -59,7 +59,7 @@
                     android:layout_gravity="center"
                     android:textColor="#202020"
                     android:textSize="30sp"
-                    android:theme="@style/DefaultNumberPickerTheme"
+                    android:theme="?DefaultNumberPickerTheme"
                     />
             </LinearLayout>
 
@@ -232,7 +232,7 @@
                 android:fontFamily="@font/lato_regular"
                 android:text="@string/button_set"
                 android:textAllCaps="true"
-                android:textColor="@color/orange_75f"
+                android:textColor="?orange_75f"
                 android:textSize="19.5dp"
                 />
 

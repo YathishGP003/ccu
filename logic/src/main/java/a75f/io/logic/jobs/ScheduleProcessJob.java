@@ -230,9 +230,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         for (int i=0; i<getAllVacationSchedules.size(); i++){
             if (getAllVacationSchedules.get(i).getEndDate().getMillis() < System.currentTimeMillis()){
                 CCUHsApi.getInstance().deleteEntity("@" + getAllVacationSchedules.get(i).getId());
-                CCUHsApi.getInstance().syncEntityTree();
             }
         }
+        CCUHsApi.getInstance().syncEntityTree();
     }
 
     private static String getDate() {

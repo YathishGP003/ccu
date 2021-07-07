@@ -235,12 +235,6 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         CCUHsApi.getInstance().syncEntityTree();
     }
 
-    private static String getDate() {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-M-dd");
-        Date date = new Date();
-        return dateFormat.format(date);
-    }
-
     public static void processZoneEquipSchedule(Equip equip){
         if(equip != null) {
 

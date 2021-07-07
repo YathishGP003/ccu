@@ -1,5 +1,6 @@
 package a75f.io.renatus.ENGG;
 
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -9,6 +10,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -77,7 +79,7 @@ import butterknife.OnClick;
  * Created by samjithsadasivan isOn 8/17/17.
  */
 
-public class SerialMessageFragment extends Fragment {
+public class SerialMessageFragment extends DialogFragment {
     List<String> messages = Arrays.asList("Select Message",
             "ReadHoldingRegistersRequest",
             "ReadCoilRequest",
@@ -148,6 +150,13 @@ public class SerialMessageFragment extends Fragment {
     public void onStart() {
         super.onStart();
         EventBus.getDefault().register(this);
+        Dialog dialog = getDialog();
+        if (dialog != null)
+        {
+            int width = ViewGroup.LayoutParams.MATCH_PARENT;
+            int height = ViewGroup.LayoutParams.MATCH_PARENT;
+            dialog.getWindow().setLayout(width, height);
+        }
     }
 
     @Override

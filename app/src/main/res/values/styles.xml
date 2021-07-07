@@ -516,4 +516,8 @@
         <item name="android:textColor">#000000</item>
     </style>
 
+    <style name="hssense" parent="Widget.AppCompat.Spinner.Underlined">
+        <item name="android:background"> @drawable/ic_arrow_down</item>
+    </style>
+
 </resources>

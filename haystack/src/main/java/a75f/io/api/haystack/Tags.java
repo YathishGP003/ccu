@@ -95,5 +95,7 @@ public class Tags
     public static final String DESIRED = "desired";
     public static final String SCHEDULE_TYPE = "scheduleType";
     public static final String HUMIDIFICATION = "humidification";
+    public static final String HYPERSTAT = "hyperstat";
+    public static final String SENSE = "sense";
 
 }

@@ -11,6 +11,12 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Device;
+import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Zone;
+import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
+import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
 import a75f.io.device.modbus.ModbusPulse;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwarePacketRequest_t;
@@ -103,6 +109,7 @@ public class LSerial
         {
             byte[] data = event.getBytes();
             MessageType messageType = MessageType.values()[(event.getBytes()[0] & 0xff)];
+            
             if (messageType == MessageType.CM_REGULAR_UPDATE)
             {
                 Pulse.regularCMUpdate(fromBytes(data, CmToCcuOverUsbCmRegularUpdateMessage_t.class));
@@ -144,8 +151,10 @@ public class LSerial
                 DLog.LogdSerial("Event Type CM_TO_CCU_OVER_USB_SN_REBOOT DEVICE_REBOOT:"+data.length+","+data.toString());
                 Pulse.smartDevicesRebootMessage(fromBytes(data, SnRebootIndicationMessage_t.class));
 
+            } else if (isHyperStatMessage(messageType) ) {
+                HyperStatMsgReceiver.processMessage(data, CCUHsApi.getInstance());
             }
-
+            
             // Pass event to external handlers
             Intent eventIntent = new Intent(Globals.IntentActions.LSERIAL_MESSAGE);
             eventIntent.putExtra("eventType", messageType);
@@ -367,6 +376,18 @@ public class LSerial
         mUsbModbusService.modbusWrite(data);
         return true;
     }
+    
+    public synchronized boolean sendSerialBytesToCM(byte[] data)
+    {
+        
+        if (mUsbService == null) {
+            DLog.logUSBServiceNotInitialized();
+            return false;
+        }
+        
+        mUsbService.write(data);
+        return true;
+    }
 
     /***
      *  This method maintains the hash, if it returns false, proceed without needing to add extra
@@ -418,5 +439,24 @@ public class LSerial
             isNodeSeeding = true;
             Pulse.sendSeedMessage(isSs, isTi, addr, roomRef, floorRef);
         }
+    }
+    
+    public void sendHyperStatSeedMessage(Short addr, String roomRef, String floorRef, String profile) {
+        if (isConnected()) {
+            isNodeSeeding = true;
+            CcuLog.d(L.TAG_CCU_DEVICE,
+                     "=================NOW SEEDING NEW PROFILE=====================" + addr + "," + roomRef);
+            Device d = HSUtil.getDevice(addr);
+            Zone zone = HSUtil.getZone(roomRef, floorRef);
+            HyperStatMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
+                                                   d.getEquipRef(), profile, false);
+            LSerial.getInstance().setNodeSeeding(false);
+        }
+    }
+    
+    private static boolean isHyperStatMessage(MessageType messageType) {
+        return messageType == MessageType.HYPERSTAT_CM_TO_CCU_SERIALIZED_MESSAGE ||
+               messageType == MessageType.HYPERSTAT_REGULAR_UPDATE_MESSAGE ||
+               messageType == MessageType.HYPERSTAT_LOCAL_CONTROLS_OVERRIDE_MESSAGE;
     }
 }

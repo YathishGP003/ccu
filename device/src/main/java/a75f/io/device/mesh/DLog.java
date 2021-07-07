@@ -6,6 +6,7 @@ import org.javolution.io.Struct;
 
 import java.io.IOException;
 
+import a75f.io.alerts.BuildConfig;
 import a75f.io.device.json.serializers.JsonSerializer;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -91,5 +92,12 @@ public class DLog
 	{
 		//Log.w(TAG, message);
 		CcuLog.d(L.TAG_CCU_SERIAL, message);
+	}
+	
+	public static boolean isLoggingEnabled() {
+  
+		return BuildConfig.BUILD_TYPE.equals("qa") ||
+		       BuildConfig.BUILD_TYPE.equals("dev") ||
+		       BuildConfig.BUILD_TYPE.equals("local");
 	}
 }

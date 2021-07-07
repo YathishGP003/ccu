@@ -12,6 +12,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
+import a75f.io.api.haystack.Device;
+import a75f.io.api.haystack.Point;
+import a75f.io.renatus.util.NetworkUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
@@ -33,6 +36,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.renovo.bacnet4j.npdu.Network;
+
 import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
@@ -47,7 +52,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -348,7 +352,7 @@ public class FloorPlanFragment extends Fragment {
             if (mModuleListAdapter != null) {
                 mModuleListAdapter.clear();
             }
-            //disableRoomModule();
+            disableZoneModule();
         }
 
         setSystemUnselection();
@@ -637,9 +641,26 @@ public class FloorPlanFragment extends Fragment {
         addModuleEdit.setVisibility(View.INVISIBLE);
     }
 
+    private void disableZoneModule() {
+        addZonelt.setVisibility(View.INVISIBLE);
+        addModulelt.setVisibility(View.INVISIBLE);
+
+        addRoomBtn.setVisibility(View.INVISIBLE);
+        addRoomEdit.setVisibility(View.INVISIBLE);
+        pairModuleBtn.setVisibility(View.INVISIBLE);
+        addModuleEdit.setVisibility(View.INVISIBLE);
+    }
+
 
     @OnClick(R.id.addFloorBtn)
     public void handleFloorBtn() {
+
+        if (!CCUHsApi.getInstance().isPrimaryCcu() && !NetworkUtil.isNetworkConnected(getActivity())) {
+            Toast.makeText(getActivity(), "Floor cannot be added when CCU is offline. Please connect to network.",
+                           Toast.LENGTH_LONG)
+                 .show();
+            return;
+        }
         enableFloorEdit();
         addFloorEdit.setText("");
         addFloorEdit.requestFocus();
@@ -927,9 +948,23 @@ public class FloorPlanFragment extends Fragment {
                             for (Zone zone : HSUtil.getZones(floorToRename.getId())) {
                                 zone.setFloorRef(CCUHsApi.getInstance().getLUID(floor.getId()));
                                 CCUHsApi.getInstance().updateZone(zone, zone.getId());
-                                for (Equip q : HSUtil.getEquips(zone.getId())) {
-                                    q.setFloorRef(floor.getId());
-                                    CCUHsApi.getInstance().updateEquip(q, q.getId());
+                                for (Equip equipDetails : HSUtil.getEquips(zone.getId())) {
+                                    equipDetails.setFloorRef(floor.getId());
+                                    CCUHsApi.getInstance().updateEquip(equipDetails, equipDetails.getId());
+                                    ArrayList<HashMap> ponitsList = CCUHsApi.getInstance().readAll("point and equipRef == \"" + equipDetails.getId()+"\"");
+                                    HashMap device = CCUHsApi.getInstance().read("device and equipRef == \"" + equipDetails.getId()+"\"");
+                                    if(device !=null ) {
+                                        Device deviceDetails = new Device.Builder().setHashMap(device).build();
+                                        deviceDetails.setFloorRef(floor.getId());
+                                        CCUHsApi.getInstance().updateDevice(deviceDetails,deviceDetails.getId());
+                                    }
+
+                                    for(HashMap pointDetailsMap : ponitsList) {
+                                        Point pointDetails = new Point.Builder().setHashMap(pointDetailsMap).build();
+                                        pointDetails.setFloorRef(floor.getId());
+                                        CCUHsApi.getInstance().updatePoint(pointDetails, pointDetails.getId());
+                                    }
+
                                 }
                             }
 
@@ -1103,6 +1138,12 @@ public class FloorPlanFragment extends Fragment {
     }
 
     public void renameFloor(Floor floor) {
+        if (!CCUHsApi.getInstance().isPrimaryCcu() && !NetworkUtil.isNetworkConnected(getActivity())) {
+            Toast.makeText(getActivity(), "Floor cannot be renamed when CCU is offline. Please connect to network.",
+                           Toast.LENGTH_LONG)
+                 .show();
+            return;
+        }
         floorToRename = floor;
         enableFloorEdit();
         addFloorEdit.setText(floor.getDisplayName());
@@ -1210,7 +1251,7 @@ public class FloorPlanFragment extends Fragment {
     @OnClick(R.id.pairModuleBtn)
     public void startPairing() {
         addModulelt.setVisibility(View.GONE);
-        desableForMiliSeconds();
+        disableForMiliSeconds();
         if (mFloorListAdapter.getSelectedPostion() == -1) {
             short meshAddress = L.generateSmartNodeAddress();
 
@@ -1265,6 +1306,7 @@ public class FloorPlanFragment extends Fragment {
         boolean isEMRPaired = false;
         boolean isCCUPaired = false;
         boolean isPaired = false;
+        boolean isSensePaired = false;
 
         if (zoneEquips.size() > 0) {
             isPaired = true;
@@ -1278,10 +1320,13 @@ public class FloorPlanFragment extends Fragment {
                 if (zoneEquips.get(i).getProfile().contains("TEMP_INFLUENCE")) {
                     isCCUPaired = true;
                 }
+                if (zoneEquips.get(i).getProfile().contains("SENSE")) {
+                    isSensePaired = true;
+                }
             }
         }
 
-        if (!isPLCPaired && !isEMRPaired && !isCCUPaired) {
+        if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isSensePaired) {
             short meshAddress = L.generateSmartNodeAddress();
             if (mFloorListAdapter.getSelectedPostion() == -1) {
                 if (L.ccu().oaoProfile != null) {
@@ -1314,6 +1359,9 @@ public class FloorPlanFragment extends Fragment {
             }
             if (isCCUPaired) {
                 Toast.makeText(getActivity(), "CCU as Zone is already paired in this zone", Toast.LENGTH_LONG).show();
+            }
+            if (isSensePaired) {
+                Toast.makeText(getActivity(), "HyperStatSense is already paired in this zone", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -1446,6 +1494,10 @@ public class FloorPlanFragment extends Fragment {
                     showDialogFragment(FragmentModbusEnergyMeterConfiguration
                             .newInstance(Short.parseShort(nodeAddr), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusEnergyMeterConfiguration.ID);
                     break;
+                case HYPERSTAT_SENSE:
+                    showDialogFragment(HyperStatSenseFragment.newInstance(Short.parseShort(nodeAddr)
+                            , zone.getId(), floor.getId(), profile.getProfileType()),HyperStatSenseFragment.ID);
+                    break;
                 case MODBUS_UPS30:
                 case MODBUS_UPS80:
                 case MODBUS_UPS400:
@@ -1463,6 +1515,7 @@ public class FloorPlanFragment extends Fragment {
                 case MODBUS_UPSV:
                 case MODBUS_UPSVL:
                 case MODBUS_VAV_BACnet:
+                case MODBUS_DEFAULT:
                     showDialogFragment(FragmentModbusConfiguration
                             .newInstance(Short.parseShort(nodeAddr), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusConfiguration.ID);
                     break;
@@ -1495,10 +1548,9 @@ public class FloorPlanFragment extends Fragment {
         }
     }
 
-    /**
-     * Disabling the Pair button for 2 seconds then enabling to avoid double click on pair module
-     */
-    public void desableForMiliSeconds(){
+
+    //Disabling the Pair button for 2 seconds thenenabling to avoid double click on pair module
+    public void disableForMiliSeconds(){
         new Thread(new Runnable() {
             @Override
             public void run() {

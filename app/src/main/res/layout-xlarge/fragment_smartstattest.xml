@@ -14,7 +14,7 @@
         android:id="@+id/roomName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="RoomName"
+        android:text="HyperStat Room"
         android:inputType="text"
         android:layout_weight="1"
         />
@@ -33,6 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:visibility="gone"
         />
 
     <EditText
@@ -41,6 +42,7 @@
         android:layout_height="wrap_content"
         android:text="Max Temperature"
         android:inputType="number"
+        android:visibility="gone"
         android:layout_weight="1"/>
 
     <EditText
@@ -49,15 +51,48 @@
         android:layout_height="wrap_content"
         android:text="Minimum Temperature"
         android:inputType="number"
+        android:visibility="gone"
         android:layout_weight="1"/>
 
-    <EditText
-        android:id="@+id/setTemp"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Set Temperature"
-        android:inputType="number"
-        android:layout_weight="1"/>
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Desired Temp Cooling"/>
+
+        <EditText
+            android:id="@+id/setTempCooling"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="74"
+            android:inputType="number"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Desired Temp Heating"/>
+
+        <EditText
+            android:id="@+id/setTempHeating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="70"
+            android:inputType="number"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
 
     <Spinner
         style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -79,6 +114,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Show Centigrade"
+        android:visibility="gone"
         android:layout_weight="1"/>
 
     <CheckBox
@@ -86,50 +122,89 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Enable OccupancyDetection"
+        android:visibility="gone"
         android:layout_weight="1"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_weight="1">
+        android:layout_margin="20dp">
         <Switch
             android:id="@+id/relay1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Relay 1"
-            android:layout_weight="1"/>
+            android:layout_marginRight="30dp"/>
 
         <Switch
             android:id="@+id/relay2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Relay 2"
-            android:layout_weight="1"/>
+            android:layout_marginRight="30dp"/>
 
         <Switch
             android:id="@+id/relay3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Relay 3"
-            android:layout_weight="1"/>
+            android:layout_marginRight="30dp"/>
         <Switch
             android:id="@+id/relay4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Relay 4"
-            android:layout_weight="1"/>
+            android:layout_marginRight="30dp"/>
         <Switch
             android:id="@+id/relay5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Relay 5"
-            android:layout_weight="1"/>
+            android:layout_marginRight="30dp"/>
         <Switch
             android:id="@+id/relay6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Relay 6"
+            android:text="Relay 6" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="20dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Analog1Out"></TextView>
+        <Spinner
+            android:id="@+id/analog1Out"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Analog2Out"></TextView>
+        <Spinner
+            android:id="@+id/analog2Out"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Analog3Out"></TextView>
+        <Spinner
+            android:id="@+id/analog3Out"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_weight="1"/>
 
     </LinearLayout>

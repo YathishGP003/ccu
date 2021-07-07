@@ -243,6 +243,7 @@ public class HyperStatDevice {
             case SENSOR_NO:
             case SENSOR_CO2_EQUIVALENT:
             case SENSOR_CO:
+            case SENSOR_CO2:
                 sensorUnit = "ppm";
                 break;
             case SENSOR_ILLUMINANCE:
@@ -257,6 +258,9 @@ public class HyperStatDevice {
             case SENSOR_VOC:
                 sensorUnit = "ppb";
                 break;
+            case SENSOR_PM2P5:
+            case SENSOR_PM10:
+                sensorUnit =  "ug/m3";
             case SENSOR_OCCUPANCY:
                 isOccupancySensor = true;
                 break;

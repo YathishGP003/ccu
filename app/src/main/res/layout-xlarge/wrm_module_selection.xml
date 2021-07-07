@@ -71,6 +71,7 @@
                 android:orientation="vertical">
 
                 <RelativeLayout
+                    android:id="@+id/rl_vav_head"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="180dp"
@@ -172,7 +173,7 @@
                             </LinearLayout>
 
                             <ImageView
-
+                                android:id="@+id/iv_vavNoFan"
                                 android:layout_width="32dp"
                                 android:layout_height="32dp"
                                 android:layout_alignParentEnd="true"
@@ -223,6 +224,7 @@
                             </LinearLayout>
 
                             <ImageView
+                                android:id="@+id/iv_vavSeriesFan"
                                 android:layout_width="32dp"
                                 android:layout_height="32dp"
                                 android:layout_alignParentEnd="true"
@@ -273,6 +275,7 @@
                             </LinearLayout>
 
                             <ImageView
+                                android:id="@+id/iv_vavParallelFan"
                                 android:layout_width="32dp"
                                 android:layout_height="32dp"
                                 android:layout_alignParentEnd="true"
@@ -295,6 +298,7 @@
 
 
                 <RelativeLayout
+                    android:id="@+id/rl_dab_head"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="40dp"
@@ -397,6 +401,7 @@
                             </LinearLayout>
 
                             <ImageView
+                                android:id="@+id/ivDabSingleDuct"
                                 android:layout_width="32dp"
                                 android:layout_height="32dp"
                                 android:layout_alignParentEnd="true"
@@ -447,6 +452,7 @@
                             </LinearLayout>
 
                             <ImageView
+                                android:id="@+id/ivDabDualDuct"
                                 android:layout_width="32dp"
                                 android:layout_height="32dp"
                                 android:layout_alignParentEnd="true"

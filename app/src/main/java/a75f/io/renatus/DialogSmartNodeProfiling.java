@@ -3,6 +3,8 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -29,6 +32,8 @@ import butterknife.Optional;
 
 
 
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.PROFILE_TYPE;
+
 /**
  * Created by ryant on 9/27/2017.
  */
@@ -40,7 +45,8 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     
     Zone         mZone;
     LightProfile mLightProfile;
-    
+    ProfileType mProfileType;
+
     short        mNodeAddress;
     
     String mRoomName;
@@ -55,8 +61,16 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     RelativeLayout rlVAV;
 
     @Nullable
-    @BindView(R.id.rl_dab)
+    @BindView(R.id.rl_vav_head)
+    RelativeLayout rlVAVHead;
+
+    @Nullable
+    @BindView(R.id.rl_dabTitle)
     RelativeLayout rlDAB;
+
+    @Nullable
+    @BindView(R.id.rl_dab_head)
+    RelativeLayout rlDABHead;
 
     @Nullable
     @BindView(R.id.rl_light)
@@ -121,6 +135,82 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @Nullable
     @BindView(R.id.dabImageViewArrow)
     ImageView dabImageViewArrow;
+
+    @Nullable
+    @BindView(R.id.ivDabSingleDuct)
+    ImageView ivDabSingleDuct;
+
+    @Nullable
+    @BindView(R.id.ivDabDualDuct)
+    ImageView ivDabDualDuct;
+
+    @Nullable
+    @BindView(R.id.iv_vavNoFan)
+    ImageView iv_vavNoFan;
+
+    @Nullable
+    @BindView(R.id.iv_vavSeriesFan)
+    ImageView iv_vavSeriesFan;
+
+    @Nullable
+    @BindView(R.id.iv_vavParallelFan)
+    ImageView iv_vavParallelFan;
+
+    @Nullable
+    @BindView(R.id.textDABTitle)
+    TextView textDABTitle;
+
+    @Nullable
+    @BindView(R.id.textDABTitleDesc)
+    TextView textDABTitleDesc;
+
+    @Nullable
+    @BindView(R.id.textDabSingleDuct)
+    TextView textDabSingleDuct;
+
+    @Nullable
+    @BindView(R.id.textDabSingleDuctDesc)
+    TextView textDabSingleDuctDesc;
+
+    @Nullable
+    @BindView(R.id.textDabDualDuct)
+    TextView textDabDualDuct;
+
+    @Nullable
+    @BindView(R.id.textDabDualDuctDesc)
+    TextView textDabDualDuctDesc;
+
+    @Nullable
+    @BindView(R.id.textVAV)
+    TextView textVAV;
+
+    @Nullable
+    @BindView(R.id.textVAVdesc)
+    TextView textVAVdesc;
+
+    @Nullable
+    @BindView(R.id.textNoFan)
+    TextView textNoFan;
+
+    @Nullable
+    @BindView(R.id.textNoFanDesc)
+    TextView textNoFanDesc;
+
+    @Nullable
+    @BindView(R.id.textSeriesFan)
+    TextView textSeriesFan;
+
+    @Nullable
+    @BindView(R.id.textSeriesFanDesc)
+    TextView textSeriesFanDesc;
+
+    @Nullable
+    @BindView(R.id.textParallelFan)
+    TextView textParallelFan;
+
+    @Nullable
+    @BindView(R.id.textParallelDesc)
+    TextView textParallelDesc;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -322,7 +412,8 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         isPaired = getArguments().getBoolean(FragmentCommonBundleArgs.ALREADY_PAIRED);
         //mZone = L.findZoneByName(mFloorName, mRoomName);
         //mLightProfile = (LightProfile) mZone.findProfile(ProfileType.LIGHT);
-        
+        mProfileType = ProfileType.values()[getArguments().getInt(FragmentCommonBundleArgs.PROFILE_TYPE)];
+
         return view;
     }
     
@@ -336,6 +427,118 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
             int width = ViewGroup.LayoutParams.MATCH_PARENT;
             int height = ViewGroup.LayoutParams.MATCH_PARENT;
             dialog.getWindow().setLayout(width, height);
+        }
+        /*Code to disable VAV profiles if DAB is selected*/
+        if(L.ccu().systemProfile.getProfileType() == ProfileType.DAB || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_ANALOG_RTU
+                || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU
+                ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU){
+            //rlVAV.setEnabled(false);
+            //lt_VAVProfile.setEnabled(false);
+            rlVAVNoFan.setEnabled(false);
+            rlVAVSeriesFan.setEnabled(false);
+            rlVAVParallelFan.setEnabled(false);
+
+            textNoFan.setTextColor(getResources().getColor(R.color.selection_gray));
+            textNoFanDesc.setTextColor(getResources().getColor(R.color.selection_gray));
+            textSeriesFan.setTextColor(getResources().getColor(R.color.selection_gray));
+            textSeriesFanDesc.setTextColor(getResources().getColor(R.color.selection_gray));
+            textParallelFan.setTextColor(getResources().getColor(R.color.selection_gray));
+            textParallelDesc.setTextColor(getResources().getColor(R.color.selection_gray));
+
+            textVAV.setTextColor(getResources().getColor(R.color.selection_gray));
+            textVAVdesc.setTextColor(getResources().getColor(R.color.selection_gray));
+
+            imageViewArrow.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            imageViewArrow.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
+            iv_vavSeriesFan.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            iv_vavSeriesFan.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
+            iv_vavParallelFan.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            iv_vavParallelFan.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
+            iv_vavNoFan.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            iv_vavNoFan.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
+
+            imageViewArrow.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
+            iv_vavSeriesFan.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
+            iv_vavParallelFan.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
+            iv_vavNoFan.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
+        }/*Code to disable DAB profiles if VAV is selected*/
+        else if (L.ccu().systemProfile.getProfileType() == ProfileType.VAV_REHEAT || L.ccu().systemProfile.getProfileType() == ProfileType.VAV_SERIES_FAN
+                || L.ccu().systemProfile.getProfileType() == ProfileType.VAV_PARALLEL_FAN ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_ANALOG_RTU
+                ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU
+                ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU){
+            rlDabSingleDuct.setEnabled(false);
+            rlDabDualDuct.setEnabled(false);
+            textDabSingleDuct.setTextColor(getResources().getColor(R.color.selection_gray));
+            textDabDualDuct.setTextColor(getResources().getColor(R.color.selection_gray));
+            textDabSingleDuctDesc.setTextColor(getResources().getColor(R.color.selection_gray));
+            textDabDualDuctDesc.setTextColor(getResources().getColor(R.color.selection_gray));
+
+            textDABTitle.setTextColor(getResources().getColor(R.color.selection_gray));
+            textDABTitleDesc.setTextColor(getResources().getColor(R.color.selection_gray));
+            dabImageViewArrow.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            dabImageViewArrow.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
+
+            ivDabSingleDuct.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            ivDabSingleDuct.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
+
+            ivDabDualDuct.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            ivDabDualDuct.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
+
+            dabImageViewArrow.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
+            ivDabSingleDuct.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
+            ivDabDualDuct.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
+        }/*Code to disable VAV as well as DAB profiles if Default System Profile is selected*/
+        else if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT){
+            rlVAVNoFan.setEnabled(false);
+            rlVAVSeriesFan.setEnabled(false);
+            rlVAVParallelFan.setEnabled(false);
+
+            textNoFan.setTextColor(getResources().getColor(R.color.selection_gray));
+            textNoFanDesc.setTextColor(getResources().getColor(R.color.selection_gray));
+            textSeriesFan.setTextColor(getResources().getColor(R.color.selection_gray));
+            textSeriesFanDesc.setTextColor(getResources().getColor(R.color.selection_gray));
+            textParallelFan.setTextColor(getResources().getColor(R.color.selection_gray));
+            textParallelDesc.setTextColor(getResources().getColor(R.color.selection_gray));
+
+            textVAV.setTextColor(getResources().getColor(R.color.selection_gray));
+            textVAVdesc.setTextColor(getResources().getColor(R.color.selection_gray));
+
+            imageViewArrow.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            imageViewArrow.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
+            iv_vavSeriesFan.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            iv_vavSeriesFan.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
+            iv_vavParallelFan.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            iv_vavParallelFan.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
+            iv_vavNoFan.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            iv_vavNoFan.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
+
+            imageViewArrow.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
+            iv_vavSeriesFan.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
+            iv_vavParallelFan.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
+            iv_vavNoFan.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
+
+
+            rlDabSingleDuct.setEnabled(false);
+            rlDabDualDuct.setEnabled(false);
+            textDabSingleDuct.setTextColor(getResources().getColor(R.color.selection_gray));
+            textDabDualDuct.setTextColor(getResources().getColor(R.color.selection_gray));
+            textDabSingleDuctDesc.setTextColor(getResources().getColor(R.color.selection_gray));
+            textDabDualDuctDesc.setTextColor(getResources().getColor(R.color.selection_gray));
+
+            textDABTitle.setTextColor(getResources().getColor(R.color.selection_gray));
+            textDABTitleDesc.setTextColor(getResources().getColor(R.color.selection_gray));
+            dabImageViewArrow.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            dabImageViewArrow.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
+
+            ivDabSingleDuct.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            ivDabSingleDuct.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
+
+            ivDabDualDuct.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            ivDabDualDuct.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
+
+            dabImageViewArrow.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
+            ivDabSingleDuct.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
+            ivDabDualDuct.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.icon_arrowright_grey));
         }
         setTitle();
     }

@@ -47,7 +47,8 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 				fragment = OTAUpdateTestFragment.newInstance();
 				break;
 			case 5:
-				fragment = SerialMessageFragment.newInstance();
+				fragment = FieldTestFragment.newInstance();
+				//fragment = SerialMessageFragment.newInstance();
 				break;
 		}
 		return fragment;
@@ -72,7 +73,7 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 			case 4:
 				return "OTA Update";
 			case 5:
-				return "Modbus Test";
+				return "Field Test";
 		}
 		return null;
 	}

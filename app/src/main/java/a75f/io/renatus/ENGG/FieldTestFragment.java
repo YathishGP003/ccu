@@ -8,10 +8,8 @@ import androidx.fragment.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import a75f.io.renatus.R;
-import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -21,11 +19,6 @@ public class FieldTestFragment extends Fragment
 		return new FieldTestFragment();
 	}
 	
-	@BindView(R.id.lightsTestBtn)
-	Button lightBtn;
-	
-	@BindView(R.id.smartStatTestBtn)
-	Button smartStatBtn;
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState) {
@@ -44,12 +37,16 @@ public class FieldTestFragment extends Fragment
 		showDialogFragment(LightingTestFragment.newInstance(), "lighttest");
 	}
 	
-	@OnClick(R.id.smartStatTestBtn)
-	public void handleSmartSmatTest()
+	@OnClick(R.id.hyperStatTestBtn)
+	public void handleHyperTest()
 	{
-		showDialogFragment(SmartStatTestFragment.newInstance() ,"smartstat");
+		showDialogFragment(HyperStatTestFragment.newInstance() , "hyperstattest");
 	}
 	
+	@OnClick(R.id.modbusTestBtn)
+	public void handleModbusTest() {
+		showDialogFragment(SerialMessageFragment.newInstance(), "modbustest");
+	}
 	
 	private void showDialogFragment(DialogFragment dialogFragment, String id)
 	{

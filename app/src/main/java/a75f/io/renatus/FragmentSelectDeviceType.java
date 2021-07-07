@@ -116,6 +116,14 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         showDialogFragment(wrmProfiling, DialogSmartNodeProfiling.ID);
     }
 
+    @OnClick(R.id.rl_hyperstat) void onHyperStatClick() {
+        if (isModbusPaired()) {
+            return;
+        }
+        HyperStatProfileSelectionFragment hyperStatProfiling = HyperStatProfileSelectionFragment.newInstance(mNodeAddress, mRoomName, mFloorName);
+        showDialogFragment(hyperStatProfiling, hyperStatProfiling.getIdString());
+    }
+
     @OnClick(R.id.rl_smartstat) void onSmartStatClick() {
         if (isModbusPaired()) {
             return;
@@ -155,7 +163,8 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         }
         else {
             //For CCU we have it as start address  ending with 99
-            String ccuAddr = String.valueOf(mNodeAddress).substring(0, 2).concat("99");
+            String ccuAddr = String.valueOf(mNodeAddress);
+            ccuAddr = ccuAddr.substring(0, ccuAddr.length()-2).concat("99");
             DialogCCUProfiling ccuProfiling = DialogCCUProfiling.newInstance(Short.parseShort(ccuAddr), mRoomName, mFloorName);
             showDialogFragment(ccuProfiling, DialogCCUProfiling.ID);
         }

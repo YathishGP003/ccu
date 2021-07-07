@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import a75f.io.logger.CcuLog;
+
 /**
  * Created by samjithsadasivan on 10/12/18.
  */
@@ -43,6 +45,7 @@ public class HSUtil
         ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("room and floorRef == \""+floorRef+"\"");
         for (HashMap m : zones)
         {
+            CcuLog.i("CCU_DEVICE"," Zone: "+m);
             if((m.get("id")).toString().equals(roomRef))
                 return new Zone.Builder().setHashMap(m).build();
         }

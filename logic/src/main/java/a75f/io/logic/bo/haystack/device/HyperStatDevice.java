@@ -261,6 +261,7 @@ public class HyperStatDevice {
             case SENSOR_PM2P5:
             case SENSOR_PM10:
                 sensorUnit =  "ug/m3";
+                break;
             case SENSOR_OCCUPANCY:
                 isOccupancySensor = true;
                 break;

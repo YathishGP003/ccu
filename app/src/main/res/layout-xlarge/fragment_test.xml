@@ -8,18 +8,24 @@
        android:layout_width="match_parent"
        android:layout_height="wrap_content"
        android:orientation="vertical">
+   <Button
+       android:id="@+id/modbusTestBtn"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:text="Modbus Test"/>
 
     <Button
-        android:id="@+id/lightsTestBtn"
+        android:id="@+id/hyperStatTestBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Lights Test"/>
+        android:text="HyperStat Test"/>
 
-    <Button
-        android:id="@+id/smartStatTestBtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="SmartStat Test"/>
+   <Button
+       android:id="@+id/lightsTestBtn"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:text="Lights Test"
+       android:visibility="gone"/>
 
    </LinearLayout>
 

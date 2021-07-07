@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-
+apply plugin: 'com.google.protobuf'
 android {
     compileSdkVersion 28
 
@@ -58,6 +58,15 @@ android {
         }
     }
 
+    sourceSets{
+        main.java.srcDirs += "${protobuf.generatedFilesBaseDir}"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
 }
 
 dependencies {
@@ -75,5 +84,29 @@ dependencies {
     implementation project(':BACnet4J')
     implementation project(':modbus4j')
     implementation project(path: ':modbusbox')
+    api 'com.google.protobuf:protobuf-javalite:3.8.0'
 }
+
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.8.0'
+    }
+
+    plugins {
+        javalite {
+            // The codegen for lite comes as a separate artifact
+            artifact = 'com.google.protobuf:protoc-gen-javalite:3.0.0'
+        }
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                    option "lite"
+                }
+            }
+        }
+    }
+}
+
 

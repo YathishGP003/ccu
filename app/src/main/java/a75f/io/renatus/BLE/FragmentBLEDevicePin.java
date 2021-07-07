@@ -33,6 +33,7 @@ import a75f.io.renatus.FragmentEMRConfiguration;
 import a75f.io.renatus.FragmentHeatPumpConfiguration;
 import a75f.io.renatus.FragmentPLCConfiguration;
 import a75f.io.renatus.FragmentTempInfConfiguration;
+import a75f.io.renatus.HyperStatSenseFragment;
 import a75f.io.renatus.bluetooth.BLEAction;
 import a75f.io.renatus.bluetooth.BLEProvisionService;
 import a75f.io.device.ble.BLERoomName;
@@ -431,6 +432,9 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                     case SMARTSTAT_FOUR_PIPE_FCU:
                         showDialogFragment(Fragment4PipeFanCoilUnitConfig.newInstance(mPairingAddress, mName, mNodeType, mFloorName, mProfileType), Fragment4PipeFanCoilUnitConfig.ID);
                         break;
+                    case HYPERSTAT_SENSE:
+                        showDialogFragment(HyperStatSenseFragment.newInstance(mPairingAddress,mName,mFloorName,ProfileType.HYPERSTAT_SENSE),
+                                HyperStatSenseFragment.ID);
                 }
                 
             }
@@ -440,7 +444,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
     
     private boolean needsLinkKey()
     {
-        return !mDevice.getName().equalsIgnoreCase(SerialConsts.SMART_STAT_NAME);
+        return mDevice.getName().equalsIgnoreCase(SerialConsts.SMART_NODE_NAME);
     }
     
     

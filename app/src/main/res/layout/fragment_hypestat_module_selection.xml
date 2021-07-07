@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+   xmlns:app="http://schemas.android.com/apk/res-auto"
+   android:layout_width="match_parent"
+   android:layout_height="match_parent"
+   android:orientation="vertical">
+
+   <RelativeLayout
+      android:id="@+id/layoutHeader"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="70dp">
+
+      <ImageView
+         android:id="@+id/goBackImage"
+         android:layout_width="32dp"
+         android:layout_height="32dp"
+         android:layout_centerVertical="true"
+         android:layout_marginStart="64dp"
+         android:padding="2.5dp"
+         android:rotation="180"
+         app:srcCompat="@drawable/icon_arrowright" />
+
+      <TextView
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_alignParentEnd="true"
+         android:layout_centerVertical="true"
+         android:layout_marginEnd="180dp"
+         android:fontFamily="@font/lato_bold"
+         android:text="@string/title_hyperstatmodule"
+         android:textAllCaps="true"
+         android:textColor="?orange_75f"
+         android:textSize="33.5sp"
+         android:textStyle="bold" />
+
+   </RelativeLayout>
+
+   <ScrollView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="24dp"
+      android:overScrollMode="never">
+
+      <LinearLayout
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:orientation="vertical">
+
+         <RelativeLayout
+             android:id="@+id/hypersenseCell"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:layout_marginStart="180dp">
+
+            <ImageView
+                android:layout_width="12dp"
+                android:layout_height="20dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="92dp"
+                android:src="@drawable/icon_arrowright" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="190dp"
+                android:layout_marginTop="6dp"
+                android:orientation="vertical">
+
+               <TextView
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_gravity="end"
+                   android:text="@string/title_hypersense"
+                   android:textAppearance="@style/title_normal" />
+
+               <TextView
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_marginBottom="12dp"
+                   android:gravity="end"
+                   android:text="@string/desc_hypersense"
+                   android:textAppearance="@style/text_label" />
+
+            </LinearLayout>
+            <View
+                android:layout_width="517dp"
+                android:layout_height="0.1dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:alpha="0.37"
+                android:background="@color/text_color" />
+         </RelativeLayout>
+
+         <RelativeLayout
+            android:id="@+id/cpuCell"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="180dp">
+
+            <ImageView
+               android:layout_width="12dp"
+               android:layout_height="20dp"
+               android:layout_alignParentEnd="true"
+               android:layout_centerVertical="true"
+               android:layout_marginEnd="92dp"
+               android:src="@drawable/icon_arrowright" />
+
+            <LinearLayout
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_alignParentEnd="true"
+               android:layout_centerVertical="true"
+               android:layout_marginEnd="190dp"
+               android:orientation="vertical">
+
+               <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="right"
+                  android:layout_marginBottom="6dp"
+                  android:text="@string/title_cpu"
+                  android:textAppearance="@style/title_normal" />
+
+               <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="12dp"
+                  android:gravity="end"
+                  android:text="@string/desc_cpu"
+                  android:textAppearance="@style/text_label" />
+
+            </LinearLayout>
+
+            <View
+               android:layout_width="517dp"
+               android:layout_height="0.1dp"
+               android:layout_alignParentBottom="true"
+               android:layout_alignParentEnd="true"
+               android:alpha="0.37"
+               android:background="@color/text_color" />
+         </RelativeLayout>
+
+         <RelativeLayout
+            android:id="@+id/hpuCell"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="180dp">
+
+            <ImageView
+               android:layout_width="12dp"
+               android:layout_height="20dp"
+               android:layout_alignParentEnd="true"
+               android:layout_centerVertical="true"
+               android:layout_marginEnd="92dp"
+               android:src="@drawable/icon_arrowright" />
+
+            <LinearLayout
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_alignParentEnd="true"
+               android:layout_centerVertical="true"
+               android:layout_marginEnd="190dp"
+               android:layout_marginTop="6dp"
+               android:orientation="vertical">
+
+               <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="end"
+                  android:text="@string/title_hpu"
+                  android:textAppearance="@style/title_normal" />
+
+               <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="12dp"
+                  android:gravity="end"
+                  android:text="@string/desc_hpu"
+                  android:textAppearance="@style/text_label" />
+
+            </LinearLayout>
+
+            <View
+               android:layout_width="517dp"
+               android:layout_height="0.1dp"
+               android:layout_alignParentBottom="true"
+               android:layout_alignParentEnd="true"
+               android:alpha="0.37"
+               android:background="@color/text_color" />
+         </RelativeLayout>
+
+         <RelativeLayout
+            android:id="@+id/twoPipeCell"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="180dp">
+
+            <ImageView
+               android:layout_width="12dp"
+               android:layout_height="20dp"
+               android:layout_alignParentEnd="true"
+               android:layout_centerVertical="true"
+               android:layout_marginEnd="92dp"
+               android:src="@drawable/icon_arrowright" />
+
+            <LinearLayout
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_alignParentEnd="true"
+               android:layout_centerVertical="true"
+               android:layout_marginEnd="190dp"
+               android:layout_marginTop="6dp"
+               android:orientation="vertical">
+
+               <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="end"
+                  android:text="@string/title_2pipe"
+                  android:textAppearance="@style/title_normal" />
+
+               <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="12dp"
+                  android:gravity="end"
+                  android:text="@string/desc_2pipe"
+                  android:textAppearance="@style/text_label" />
+
+            </LinearLayout>
+
+            <View
+               android:layout_width="517dp"
+               android:layout_height="0.1dp"
+               android:layout_alignParentBottom="true"
+               android:layout_alignParentEnd="true"
+               android:alpha="0.37"
+               android:background="@color/text_color" />
+         </RelativeLayout>
+
+         <RelativeLayout
+            android:id="@+id/fourPipeCell"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="180dp">
+
+            <ImageView
+               android:layout_width="12dp"
+               android:layout_height="20dp"
+               android:layout_alignParentEnd="true"
+               android:layout_centerVertical="true"
+               android:layout_marginEnd="92dp"
+               android:src="@drawable/icon_arrowright" />
+
+            <LinearLayout
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_alignParentEnd="true"
+               android:layout_centerVertical="true"
+               android:layout_marginEnd="190dp"
+               android:layout_marginTop="6dp"
+               android:orientation="vertical">
+
+               <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="end"
+                  android:text="@string/title_4pipe"
+                  android:textAppearance="@style/title_normal" />
+
+               <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="12dp"
+                  android:gravity="end"
+                  android:text="@string/desc_4pipe"
+                  android:textAppearance="@style/text_label" />
+
+            </LinearLayout>
+
+            <View
+               android:layout_width="517dp"
+               android:layout_height="0.1dp"
+               android:layout_alignParentBottom="true"
+               android:layout_alignParentEnd="true"
+               android:alpha="0.37"
+               android:background="@color/text_color" />
+         </RelativeLayout>
+
+         <RelativeLayout
+            android:id="@+id/vrvCell"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="180dp">
+
+            <ImageView
+               android:layout_width="12dp"
+               android:layout_height="20dp"
+               android:layout_alignParentEnd="true"
+               android:layout_centerVertical="true"
+               android:layout_marginEnd="92dp"
+               android:src="@drawable/icon_arrowright" />
+
+            <LinearLayout
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_alignParentEnd="true"
+               android:layout_centerVertical="true"
+               android:layout_marginEnd="190dp"
+               android:layout_marginTop="6dp"
+               android:orientation="vertical">
+
+               <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="end"
+                  android:text="@string/title_vrv"
+                  android:textAppearance="@style/title_normal" />
+
+               <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="12dp"
+                  android:gravity="end"
+                  android:text="@string/desc_vrv"
+                  android:textAppearance="@style/text_label" />
+
+            </LinearLayout>
+         </RelativeLayout>
+
+
+
+      </LinearLayout>
+
+   </ScrollView>
+</LinearLayout>
+

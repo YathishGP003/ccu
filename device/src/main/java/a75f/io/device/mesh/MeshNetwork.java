@@ -6,6 +6,7 @@ import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.DeviceNetwork;
+import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
@@ -62,6 +63,9 @@ public class MeshNetwork extends DeviceNetwork
                             deviceType = NodeType.SMART_STAT;
                         else if(d.getMarkers().contains("ti"))
                             deviceType = NodeType.CONTROL_MOTE;
+                        else if (d.getMarkers().contains("hyperstat")) {
+                            deviceType = NodeType.HYPER_STAT;
+                        }
                         switch (deviceType) {
                             case SMART_NODE:
                                 String snprofile = "dab";
@@ -120,6 +124,26 @@ public class MeshNetwork extends DeviceNetwork
                                     }
                                 }
                                 break;
+                                
+                                
+                            case HYPER_STAT:
+                                String hyperStatProfile = "sense"; //TODO
+                                if (bSeedMessage) {
+                                    CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING HyperStat " +
+                                                              "SEEDS ====================="+zone.getId());
+                                    HyperStatMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
+                                                                           d.getEquipRef(), hyperStatProfile, false);
+                                } else {
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat " +
+                                                               "Settings =====================");
+                                    HyperStatMessageSender.sendSettingsMessage(zone.getDisplayName(),
+                                                                               Integer.parseInt(d.getAddr()), d.getEquipRef());
+    
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat " +
+                                                               "Controls =====================");
+                                    HyperStatMessageSender.sendControlMessage(Integer.parseInt(d.getAddr()), d.getEquipRef());
+                                }
+                                
                         }
                     }
                 }

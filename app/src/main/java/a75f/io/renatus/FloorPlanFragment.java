@@ -1306,6 +1306,7 @@ public class FloorPlanFragment extends Fragment {
         boolean isEMRPaired = false;
         boolean isCCUPaired = false;
         boolean isPaired = false;
+        boolean isSensePaired = false;
 
         if (zoneEquips.size() > 0) {
             isPaired = true;
@@ -1319,10 +1320,13 @@ public class FloorPlanFragment extends Fragment {
                 if (zoneEquips.get(i).getProfile().contains("TEMP_INFLUENCE")) {
                     isCCUPaired = true;
                 }
+                if (zoneEquips.get(i).getProfile().contains("SENSE")) {
+                    isSensePaired = true;
+                }
             }
         }
 
-        if (!isPLCPaired && !isEMRPaired && !isCCUPaired) {
+        if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isSensePaired) {
             short meshAddress = L.generateSmartNodeAddress();
             if (mFloorListAdapter.getSelectedPostion() == -1) {
                 if (L.ccu().oaoProfile != null) {
@@ -1355,6 +1359,9 @@ public class FloorPlanFragment extends Fragment {
             }
             if (isCCUPaired) {
                 Toast.makeText(getActivity(), "CCU as Zone is already paired in this zone", Toast.LENGTH_LONG).show();
+            }
+            if (isSensePaired) {
+                Toast.makeText(getActivity(), "HyperStatSense is already paired in this zone", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -1487,6 +1494,10 @@ public class FloorPlanFragment extends Fragment {
                     showDialogFragment(FragmentModbusEnergyMeterConfiguration
                             .newInstance(Short.parseShort(nodeAddr), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusEnergyMeterConfiguration.ID);
                     break;
+                case HYPERSTAT_SENSE:
+                    showDialogFragment(HyperStatSenseFragment.newInstance(Short.parseShort(nodeAddr)
+                            , zone.getId(), floor.getId(), profile.getProfileType()),HyperStatSenseFragment.ID);
+                    break;
                 case MODBUS_UPS30:
                 case MODBUS_UPS80:
                 case MODBUS_UPS400:
@@ -1504,6 +1515,7 @@ public class FloorPlanFragment extends Fragment {
                 case MODBUS_UPSV:
                 case MODBUS_UPSVL:
                 case MODBUS_VAV_BACnet:
+                case MODBUS_DEFAULT:
                     showDialogFragment(FragmentModbusConfiguration
                             .newInstance(Short.parseShort(nodeAddr), zone.getId(), floor.getId(), profile.getProfileType()), FragmentModbusConfiguration.ID);
                     break;

@@ -1,0 +1,177 @@
+syntax = "proto3";
+
+
+package a75f.io.device;
+
+option java_package = "a75f.io.device";
+option java_outer_classname = "HyperStat";
+
+enum HyperStatRequestType_e {
+  HYPERSTAT_REQUEST_TYPE_UNKNOWN = 0; // default for unsupported decrypt, open-enums
+  HYPERSTAT_REQUEST_TYPE_SETTINGS = 1; // standard device settings
+  HYPERSTAT_REQUEST_TYPE_CONTROLS = 2; // standard device controls
+  HYPERSTAT_REQUEST_TYPE_P1P2_CONTROLS = 3; // special request for Daikin-P1P2-variant controls
+  HYPERSTAT_REQUEST_TYPE_P1P2_FIELD_SETTINGS = 4; // special request for Daikin-P1P2-variant field settings
+}
+
+message HyperStatRequestMessage_t {
+  HyperStatRequestType_e type = 1; // enum specifies what data is being requested
+}
+
+enum HyperStatTemperatureMode_e {
+  HYPERSTAT_TEMP_MODE_SINGLE = 0;
+  HYPERSTAT_TEMP_MODE_DUAL_FIXED_DB = 1;
+  HYPERSTAT_TEMP_MODE_DUAL_VARIABLE_DB = 2;
+}
+message HyperStatSettingsMessage_t {
+  string roomName = 1 ;//[max_size = 20];
+  int32 maxHeatingUserTemp = 2; // Maximum temperature the user can set in degrees F (default 70)
+  int32 minHeatingUserTemp = 3; // Minimum temperature the user can set in degrees F (default 67)
+  int32 maxCoolingUserTemp = 4; // Maximum temperature the user can set in degrees F (default 77)
+  int32 minCoolingUserTemp = 5; // Minimum temperature the user can set in degrees F (default 74)
+  sint32 temperatureOffset = 6; // Offset to be added to the measured room temperature (default 0). Unit is 1/10 of a degree F.
+  int32 heatingDeadBand = 7; // Amount above set temperature at which heating is activated. Unit is 1/10 of a degree F.
+  int32 coolingDeadBand = 8; // Amount below set temperature at which cooling is activated. Unit is 1/10 of a degree F.
+  HyperStatTemperatureMode_e temperatureMode = 9;
+  int32 co2AlertThreshold = 10;
+  int32 vocAlertThreshold = 11;
+  int32 pm25AlertThreshold = 12;
+  bool displayCO2 = 13;
+  bool displayPM25 = 14;
+  bool displayVOC = 15;
+  bool displayHumidity = 16;
+  bool showCentigrade = 17; // 0: show Fahrenheit, 1: show Celsius
+  bool enableExternal10kTemperatureSensor =18; // 1 if the external sensor is enabled
+  bool beaconingEnabled = 19; // 0 if beaconing disabled, 1 if beaconing enabled
+}
+
+enum HyperStatFanSpeed_e {
+  HYPERSTAT_FAN_SPEED_OFF = 0;
+  HYPERSTAT_FAN_SPEED_AUTO = 1;
+  HYPERSTAT_FAN_SPEED_LOW = 2;
+  HYPERSTAT_FAN_SPEED_MED = 3;
+  HYPERSTAT_FAN_SPEED_HIGH = 4;
+}
+
+enum HyperStatConditioningMode_e {
+  HYPERSTAT_CONDITIONING_MODE_OFF = 0;
+  HYPERSTAT_CONDITIONING_MODE_AUTO = 1;
+  HYPERSTAT_CONDITIONING_MODE_HEATING = 2;
+  HYPERSTAT_CONDITIONING_MODE_COOLING = 3;
+}
+
+enum HyperStatOperatingMode_e {
+  HYPERSTAT_OPERATING_MODE_OFF = 0;
+  HYPERSTAT_OPERATING_MODE_HEATING = 1;
+  HYPERSTAT_OPERATING_MODE_COOLING = 2;
+}
+
+message SystemTimePb_t {
+  int32 day = 1; // The day of the week. Refer to ::DayOfWeek_t for a mapping of values.
+  int32 hours = 2; // Number of hours passed since midnight, from 0 to 23
+  int32 minutes = 3; // Number of minutes passed, from 0 to 59
+}
+
+message HyperStatAnalogOutputControl_t {
+  int32 percent = 1; // Determines the output level (0-100%)
+  bool pulseEnabled = 2; // 1 if the output should be pulsed, 0 if the output is a constant voltage
+}
+
+message HyperStatControlsMessage_t {
+  SystemTimePb_t time = 1; // Used to update the current system time
+  int32 setTempCooling = 2; // The desired room temperature. Measured in 2x degrees F. Default 150 (i.e. 75 degrees F).
+  int32 setTempHeating = 3; // The desired room temperature. Measured in 2x degrees F. Default 150 (i.e. 75 degrees F).
+  HyperStatFanSpeed_e fanSpeed = 4; // The desired fan speed
+  HyperStatConditioningMode_e conditioningMode = 5;
+  HyperStatOperatingMode_e operatingMode = 6; // The current operating mode
+  bool relay1 = 7; // digital out for activation
+  bool relay2 = 8; // digital out for activation
+  bool relay3 = 9; // digital out for activation
+  bool relay4 = 10; // digital out for activation
+  bool relay5 = 11; // digital out for activation
+  bool relay6 = 12; // digital out for activation
+  bool reset = 13; // Force a reset of the device remotely when set to 1
+  HyperStatAnalogOutputControl_t analogOut1 = 14; // output for PWM channel 1
+  HyperStatAnalogOutputControl_t analogOut2 = 15; // output for PWM channel 2
+  HyperStatAnalogOutputControl_t analogOut3 = 16; // output for PWM channel 3
+}
+
+message SensorReadingPb_t {
+  int32 sensorType = 1; // Refer to ::SensorType_t for an enumeration of supported sensor types
+  int32 sensorData = 2; // Refer to ::SensorType_t for units of measurement.
+}
+
+message HyperStatRegularUpdateMessage_t {
+  int32 lqi = 1; // Link Quality Indicator of last received data packet
+  int32 rssi = 2; // Received Signal Strength Indicator of last received data packet
+  int32 roomTemperature = 3; // Room temperature in 1/10 of a degree F. This is the adjusted temp and is offset + measured temp.
+  int32 humidity = 4; // Humidity in 1/10 of a percent
+  int32 illuminance = 5; // Illuminance in tens of lux. Typical range for office lighting is 320-500 lux.
+  int32 ultravioletIndex = 6; // A linear scale of UV radiation. Typical range is 0-10.
+  int32 externalAnalogVoltageInput1 = 7; // External voltage sense in millivolts
+  int32 externalAnalogVoltageInput2 = 8; // External voltage sense in millivolts
+  int32 externalThermistorInput1 = 9; // External resistance sense in tens of ohms
+  int32 externalThermistorInput2 = 10; // External resistance sense in tens of ohms
+  repeated SensorReadingPb_t sensorReadings = 11 ;//[(nanopb).max_count = 6]; // List of type-value sensor readings
+  bool occupantDetected = 12; // 0 is no, 1 is yes
+}
+
+message HyperStatLocalControlsOverrideMessage_t {
+  int32 setTempCooling = 1; // The user-specified set temperature. Measured in 2x degrees F.
+  int32 setTempHeating = 2; // The user-specified set temperature. Measured in 2x degrees F.
+  HyperStatFanSpeed_e fanSpeed = 3; // The user-specified fan speed
+  HyperStatConditioningMode_e conditioningMode = 4;
+}
+
+message HyperStatP1P2ControlsMessage_t {
+  int32 operationMode = 1;
+  int32 setTemperature = 2;
+  int32 fanSpeed = 3;
+  int32 airflowDirection = 4;
+  int32 coolHeatOptionRight = 5;
+}
+
+message HyperStatP1P2StatusMessage_t {
+  int32 rcOpManipulation = 1; // Restrict the R/C manipulation by the superior device via the indoor unit. (0- Permitted , 1 - Prohibited)
+  int32 rcStopManipulation = 2;
+  int32 rcTempSettingManipulation = 3;
+  int32 rcTempConditioningManipulation = 4;
+  int32 rcAirflowDirectionSettingManipulation = 5;
+  int32 rcFanSpeedSettingManipulation = 6;
+  int32 operatingStatus = 7; //0- stop, 1- start
+  int32 setOperationMode = 8; // 0: ventilation, 1: heating, 2: cooling, 3: auto, 4-6: reserved, 7: dry, 8 and more: reserved
+  int32 operatingMode = 9;
+  int32 coolingSetTempIntegral = 10;
+  int32 coolingSetTempDecimal = 11;
+  int32 coolingAirflowDirection = 12;//Position 0-4, Swing - 7 (5&6 reserved)
+  int32 coolingFan1Speed = 13; //0-5
+  sint32 heatingSetTempIntegral = 14;
+  int32 heatingSetTempDecimal = 15;
+  int32 heatingAirflowDirection = 16; //Position 0-4, Swing - 7 (5&6 reserved)
+  int32 heatingFan1Speed = 17; //0-5
+  int32 autoModeTempConditioningAvailable = 18; // Auto mode supported or note.
+  int32 ccdConnected = 19; //Central Control device connected to IDU or not
+  int32 rcControlCode = 20;
+  int32 iduSign = 21; //IDU filter status.
+  repeated int32 thData = 22 ;//[(nanopb).max_count = 6]; //Temp reading from 6 thermistors. 1st byte is the integral and second is the decimal part.
+}
+
+message HyperStatCcuDatabaseSeedMessage_t {
+  bytes encryptionKey = 1 ;//[(nanopb).max_size = 16, (nanopb).fixed_length = true]; // The encryption key to use for data sent over the mesh network to/from this device
+  bytes serializedSettingsData = 2 ;//[(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_SETTINGS_MESSAGE
+  bytes serializedControlsData = 3 ;//[(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_CONTROLS_MESSAGE
+}
+
+message HyperStatCmToCcuSerializedMessage_t {
+  uint32 address = 1; // The (16-bit) mesh address of a device
+  int32 cmLqi = 2; // LQI of this received data packet @ CM
+  int32 cmRssi = 3; // RSSI of this received data packet @ CM
+  int32 protocolMessageType = 4; // ProtocolMessageType_t identifier for the serialized message
+  bytes serializedMessageData = 5 ;//[(nanopb).max_size = 109, (nanopb).fixed_length = false];
+}
+
+message HyperStatCcuToCmSerializedMessage_t {
+  uint32 address = 1; // The (16-bit) mesh address of a device
+  int32 protocolMessageType = 2; // ProtocolMessageType_t identifier for the serialized message
+  bytes serializedMessageData = 3;//[(nanopb).max_size = 109, (nanopb).fixed_length = false];
+}

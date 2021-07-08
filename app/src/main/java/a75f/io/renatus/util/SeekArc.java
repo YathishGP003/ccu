@@ -478,7 +478,7 @@ public class SeekArc extends View
 
     }
 
-    private void drawCurrentTemp(Canvas canvas, float currentTemp)
+    public void drawCurrentTemp(Canvas canvas, float currentTemp)
     {
         if (isDetailedView())
             drawCurrentTempTextDetailed(canvas);

@@ -139,6 +139,58 @@
         </RelativeLayout>
 
         <RelativeLayout
+           android:id="@+id/rl_hyperstat"
+           android:layout_width="match_parent"
+           android:layout_height="114dp"
+           android:layout_marginStart="440dp">
+
+            <!-- todo: replace with hyperstat image -->
+            <ImageView
+               android:layout_width="279dp"
+               android:layout_height="62dp"
+               android:layout_alignParentBottom="true"
+               android:src="@drawable/image_hyperstat" />
+
+            <LinearLayout
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_alignParentEnd="true"
+               android:layout_centerVertical="true"
+               android:layout_marginEnd="220dp"
+               android:orientation="vertical">
+
+                <TextView
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_gravity="end"
+                   android:text="@string/title_hs"
+                   android:textAppearance="@style/title_normal" />
+
+                <TextView
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:text="@string/title_hyperstat"
+                   android:textAppearance="@style/text_label" />
+
+            </LinearLayout>
+
+            <ImageView
+               android:layout_width="12dp"
+               android:layout_height="20dp"
+               android:layout_alignParentEnd="true"
+               android:layout_centerVertical="true"
+               android:layout_marginEnd="96dp"
+               android:src="@drawable/icon_arrowright" />
+
+            <View
+               android:layout_width="match_parent"
+               android:layout_height="0.1dp"
+               android:layout_alignParentBottom="true"
+               android:alpha="0.37"
+               android:background="@color/text_color" />
+        </RelativeLayout>
+
+        <RelativeLayout
             android:id="@+id/rl_smartstat"
             android:layout_width="match_parent"
             android:layout_height="114dp"

@@ -20,7 +20,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatSpinner;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -184,7 +183,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 case MODBUS_UPS150:
                 case MODBUS_EMR:
                 case MODBUS_BTU:
-
+                case MODBUS_DEFAULT:
                 case MODBUS_UPS40K:
                 case MODBUS_UPSL:
                 case MODBUS_UPSV:
@@ -331,7 +330,7 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
     private void setUpsModbusProfile() {
         String equipType = equipmentDevice.getEquipType();
         Log.i("equipType", "setUpsModbusProfile: "+equipType);
-        ModbusEquipTypes curEquipTypeSelected = ModbusEquipTypes.valueOf(equipType);
+        ModbusEquipTypes curEquipTypeSelected=ModbusEquipTypes.getEnum(equipType);
         String equipRef = null;
         curSelectedSlaveId = (short) (spAddress.getSelectedItemPosition() + 1);
         if (spAddress.getVisibility() == View.GONE) {
@@ -507,7 +506,15 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
                 } else
                     equipRef = updateModbusProfile(curSelectedSlaveId);
                 break;
-
+            case MODBUS_DEFAULT:
+                CcuLog.d(L.TAG_CCU_UI, "Set modbus Config: MB Profiles - " + L.ccu().zoneProfiles.size() + "," + L.getProfile(curSelectedSlaveId) + "," + curSelectedSlaveId);
+                if (L.getProfile(curSelectedSlaveId) == null) {
+                    modbusProfile.addMbEquip(curSelectedSlaveId, floorRef, zoneRef, equipmentDevice, recyclerModbusParamAdapter.modbusParam, ProfileType.MODBUS_DEFAULT);
+                    L.ccu().zoneProfiles.add(modbusProfile);
+                    equipRef = modbusProfile.getEquip().getId();
+                } else
+                    equipRef = updateModbusProfile(curSelectedSlaveId);
+                break;
         }
         saveToBox(zoneRef, equipRef, equipmentDevice, curSelectedSlaveId, isNewDevice, floorRef);
     }
@@ -607,39 +614,5 @@ public class FragmentModbusConfiguration extends BaseDialogFragment {
             setBtn.setVisibility(View.INVISIBLE);
         }
     }
-    /*public List<EquipmentDevice> loadJSONFromAsset() {
-        List<EquipmentDevice> equipmentDevicesList = new ArrayList<EquipmentDevice>();
-        try {
-            String[] fileList;
-            fileList = getActivity().getAssets().list("modbus");
-            for(String filename: fileList) {
-                InputStream is = getActivity().getAssets().open("modbus/"+filename);
-                int size = is.available();
-                if(size > 0) {
-                    byte[] buffer = new byte[size];
-                    is.read(buffer);
-                    is.close();
-                    EquipmentDevice equipmentDevice = gson.fromJson(new String(buffer, "UTF-8"), EquipmentDevice.class);
-                    List<ModbusEquipsInfo> equipsQueryBuilder = modbusEquipsBox.query()
-                            .equal(ModbusEquipsInfo_.modbusEquipId, equipmentDevice.getModbusEquipIdId()).build().find();
-                    if(equipsQueryBuilder.size() > 0) {
-                        for(ModbusEquipsInfo info : equipsQueryBuilder) {
-                            Log.d("Modbus", "loadjson=" + equipmentDevice.getModbusEquipIdId()+","+info.getModbusEquipId());
-                            if ((info.getModbusEquipId() == null) || !info.getModbusEquipId().equals(equipmentDevice.getModbusEquipIdId())) {
-                                modbusEquipsBox.put(new ModbusEquipsInfo(equipmentDevice));
-                            }
-                        }
-                    }else {
-                        Log.d("Modbus", "loadjson22 new="+equipmentDevice.getName());
-                        modbusEquipsBox.put(new ModbusEquipsInfo(equipmentDevice.getModbusEquipIdId(), equipmentDevice));
-                    }
-                    equipmentDevicesList.add(equipmentDevice);  `
-                }
-            }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return equipmentDevicesList;
-        }
-        return equipmentDevicesList;
-    }*/
+
 }

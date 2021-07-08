@@ -201,7 +201,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                                                          Toast.makeText(getActivity(), "IP Address Empty", Toast.LENGTH_SHORT).show();
                                                          return;
                                                      }
-                                                     CCUHsApi.getInstance().writeDefaultVal("point and system and config and ie and address",editText.getText().toString().trim());
+                                                     CCUHsApi.getInstance().writeDefaultVal("point and system and config and ie and ipAddress",editText.getText().toString().trim());
                                                      equipAddr.setText(editText.getText().toString());
                                                  }
                                              })

@@ -15,8 +15,7 @@ class IEDeviceHandler {
     private var humCtrl : HumidityCtrl = HumidityCtrl.UnInit
     private var occFetchCounter = 0
 
-    private var ieService : IEService? = null
-
+    private lateinit var ieService : IEService
     private lateinit var serviceBaseUrl : String
 
     companion object {
@@ -35,7 +34,9 @@ class IEDeviceHandler {
             return
         }
         //Recreate the retrofit service when IE url has been updated.
-        if (ieService == null || serviceBaseUrl != ieEquipUrl) {
+        if (!::ieService.isInitialized ||
+            !::serviceBaseUrl.isInitialized ||
+            serviceBaseUrl != ieEquipUrl) {
             serviceBaseUrl = ieEquipUrl
             ieService = IEServiceGenerator.instance.createService("http://$serviceBaseUrl:8080")
         }

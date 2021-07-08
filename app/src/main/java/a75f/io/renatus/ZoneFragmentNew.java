@@ -583,7 +583,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     } else {
                         //No devices paired
                         Log.e(LOG_TAG + "RoomData", "Load No device paired Based View");
-                        viewNonTemperatureBasedZone(inflater, rootView, new ArrayList<HashMap>(), zoneTitle, i, tablerowLayout, isZoneAlive);
+                        viewNonTemperatureBasedZone(inflater, rootView, new ArrayList<HashMap>(), zoneTitle, i, tablerowLayout, false);
                         i++;
                     }
                 }

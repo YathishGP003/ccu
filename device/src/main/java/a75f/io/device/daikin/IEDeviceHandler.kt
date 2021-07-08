@@ -10,16 +10,14 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 class IEDeviceHandler {
 
     private var currentCondMode = NetApplicMode.UnInit
-
     private var staticPressureSp : Double = -1.0
     private var fanLoopSp : Double = -1.0
-
     private var humCtrl : HumidityCtrl = HumidityCtrl.UnInit
+    private var occFetchCounter = 0
 
-    private var serviceBaseUrl : String? = null
     private var ieService : IEService? = null
 
-    private var occFetchCounter = 0
+    private lateinit var serviceBaseUrl : String
 
     companion object {
         @JvmStatic
@@ -38,7 +36,8 @@ class IEDeviceHandler {
         }
         //Recreate the retrofit service when IE url has been updated.
         if (ieService == null || serviceBaseUrl != ieEquipUrl) {
-            ieService = IEServiceGenerator.instance.createService("http://$ieEquipUrl:8080")
+            serviceBaseUrl = ieEquipUrl
+            ieService = IEServiceGenerator.instance.createService("http://$serviceBaseUrl:8080")
         }
 
         ieService?.let {

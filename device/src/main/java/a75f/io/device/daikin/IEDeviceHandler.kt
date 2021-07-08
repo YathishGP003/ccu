@@ -28,7 +28,7 @@ class IEDeviceHandler {
         }
     }
 
-    fun sendControl(hayStack: CCUHsApi) {
+    fun sendControl(systemProfile: VavIERtu, hayStack: CCUHsApi) {
 
         CcuLog.e(L.TAG_CCU_DEVICE, "IEDeviceHandler : sendControl")
         val ieEquipUrl : String? = getIEUrl(hayStack)
@@ -42,9 +42,7 @@ class IEDeviceHandler {
         }
 
         ieService?.let {
-            val systemProfile = L.ccu().systemProfile as VavIERtu
-            updateOccMode(it, systemProfile
-            )
+            updateOccMode(it, systemProfile)
             if (systemProfile.getConfigEnabled(Tags.FAN) > 0) {
                 updateFanControl(it, hayStack, systemProfile)
             }

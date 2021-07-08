@@ -21,6 +21,8 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.system.SystemProfile;
+import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.diag.DiagEquip;
 
@@ -197,7 +199,8 @@ public class MeshNetwork extends DeviceNetwork
         Pulse.checkForDeviceDead();
 
         if (ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU) {
-            IEDeviceHandler.getInstance().sendControl(CCUHsApi.getInstance());
+            VavIERtu systemProfile = (VavIERtu) L.ccu().systemProfile;
+            IEDeviceHandler.getInstance().sendControl(systemProfile, CCUHsApi.getInstance());
         }
     
         if (!LSerial.getInstance().isConnected()) {

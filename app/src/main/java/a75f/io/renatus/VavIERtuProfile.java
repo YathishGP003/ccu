@@ -3,6 +3,8 @@ package a75f.io.renatus;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+
+import a75f.io.renatus.util.RxjavaUtil;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
@@ -24,7 +26,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.device.mesh.DaikinIE;
+import a75f.io.device.daikin.DaikinIE;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemMode;
@@ -36,6 +38,7 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 /**
  * Created by samjithsadasivan on 11/6/18.
@@ -72,6 +75,8 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     Prefs prefs;
     boolean isFromReg = false;
     
+    private CompositeDisposable disposable = new CompositeDisposable();
+    
     public static VavAnalogRtuProfile newInstance()
     {
         return new VavAnalogRtuProfile();
@@ -99,9 +104,9 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         if ((L.ccu().systemProfile instanceof VavIERtu))
         {
             systemProfile = (VavIERtu) L.ccu().systemProfile;
-            analog1Cb.setChecked(systemProfile.getConfigEnabled("analog1") > 0);
-            analog2Cb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
-            analog3Cb.setChecked(systemProfile.getConfigEnabled("analog3") > 0);
+            analog1Cb.setChecked(systemProfile.getConfigEnabled("cooling") > 0);
+            analog2Cb.setChecked(systemProfile.getConfigEnabled("fan") > 0);
+            analog3Cb.setChecked(systemProfile.getConfigEnabled("heating") > 0);
             humidificationCb.setChecked(systemProfile.getConfigEnabled("humidification") > 0);
             setupAnalogLimitSelectors();
             setupEquipAddrEditor();
@@ -172,7 +177,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     }
     
     public void setupEquipAddrEditor() {
-        String eqIp = CCUHsApi.getInstance().readDefaultStrVal("point and system and config and ie and address");
+        String eqIp = CCUHsApi.getInstance().readDefaultStrVal("point and system and config and ie and ipAddress");
         equipAddr.setText(eqIp);
         equipAddr.setOnClickListener(new View.OnClickListener()
         {
@@ -312,13 +317,13 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         switch (buttonView.getId())
         {
             case R.id.analog1RTU:
-                setSelectionBackground("analog1", isChecked);
+                setSelectionBackground("cooling", isChecked);
                 break;
             case R.id.analog2RTU:
-                setSelectionBackground("analog2", isChecked);
+                setSelectionBackground("fan", isChecked);
                 break;
             case R.id.analog3RTU:
-                setSelectionBackground("analog3", isChecked);
+                setSelectionBackground("heating", isChecked);
                 break;
             case R.id.humidificationCb:
                 setSelectionBackground("humidification", isChecked);
@@ -378,58 +383,28 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     }
     
     private void setConfigBackground(String tags, double val) {
-        new AsyncTask<String, Void, Void>() {
-            
-            @Override
-            protected Void doInBackground( final String ... params ) {
-                systemProfile.setConfigVal(tags, val);
-                return null;
-            }
-            
-            @Override
-            protected void onPostExecute( final Void result ) {
-                // continue what you are doing...
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        disposable.add(RxjavaUtil.executeBackgroundWithDisposable(
+            () -> systemProfile.setConfigVal(tags, val)
+        ));
     }
     
     private void setSelectionBackground(String analog, boolean selected) {
-        new AsyncTask<String, Void, Void>() {
-            @Override
-            protected void onPreExecute() {
-                ProgressDialogUtils.showProgressDialog(getActivity(),"Saving VAV System Configuration");
-                super.onPreExecute();
-            }
-            @Override
-            protected Void doInBackground( final String ... params ) {
-                systemProfile.setConfigEnabled(analog, selected ? 1: 0);
-                return null;
-            }
-            
-            @Override
-            protected void onPostExecute( final Void result ) {
+        disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+            () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Saving VAV System Configuration"),
+            () -> systemProfile.setConfigEnabled(analog, selected ? 1: 0),
+            () -> {
                 if (!selected) {
                     updateSystemMode();
                 }
                 ProgressDialogUtils.hideProgressDialog();
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        ));
     }
     
     private void setUserIntentBackground(String query, double val) {
-        
-        new AsyncTask<String, Void, Void>() {
-            @Override
-            protected Void doInBackground( final String ... params ) {
-                TunerUtil.writeSystemUserIntentVal(query, val);
-                return null;
-            }
-            
-            @Override
-            protected void onPostExecute( final Void result ) {
-                // continue what you are doing...
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        disposable.add(RxjavaUtil.executeBackgroundWithDisposable(
+            () -> TunerUtil.writeSystemUserIntentVal(query, val)
+        ));
     }
     
     public void updateSystemMode() {
@@ -487,5 +462,11 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         CCUUiUtil.setSpinnerDropDownColor(humidificationTest,getContext());
         CCUUiUtil.setSpinnerDropDownColor(oaMinTest,getContext());
 
+    }
+    
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        disposable.dispose();
     }
 }

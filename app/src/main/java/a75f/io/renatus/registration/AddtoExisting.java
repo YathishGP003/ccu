@@ -20,6 +20,7 @@ import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -51,8 +52,8 @@ public class AddtoExisting extends Fragment {
 
     ImageView            imageGoback;
 
-    TextInputLayout mTextInputSiteId;
-    EditText             mSiteId;
+    //TextInputLayout mTextInputSiteId;
+    //EditText             mSiteId;
 
     TextInputLayout mTextInputEmail;
     EditText             mSiteEmailId;
@@ -66,6 +67,7 @@ public class AddtoExisting extends Fragment {
 
     ProgressBar mProgressDialog;
     Prefs prefs;
+    EditText mEt1, mEt2, mEt3, mEt4, mEt5, mEt6;
 
     public AddtoExisting() {
         // Required empty public constructor
@@ -110,8 +112,8 @@ public class AddtoExisting extends Fragment {
 
         imageGoback = rootView.findViewById(R.id.imageGoback);
 
-        mTextInputSiteId = rootView.findViewById(R.id.textInputSiteID);
-        mSiteId = rootView.findViewById(R.id.editSiteID);
+        //mTextInputSiteId = rootView.findViewById(R.id.textInputSiteID);
+        //mSiteId = rootView.findViewById(R.id.editSiteID);
 
         mTextInputEmail = rootView.findViewById(R.id.textInputEmail);
         mSiteEmailId = rootView.findViewById(R.id.editFacilityEmail);
@@ -124,26 +126,38 @@ public class AddtoExisting extends Fragment {
 
         mProgressDialog = rootView.findViewById(R.id.progressbar);
 
-        mTextInputSiteId.setHintEnabled(false);
+        //mTextInputSiteId.setHintEnabled(false);
         mTextInputEmail.setHintEnabled(false);
         mTextInputPass.setHintEnabled(false);
 
 
-        mTextInputSiteId.setErrorEnabled(true);
+        //mTextInputSiteId.setErrorEnabled(true);
         mTextInputEmail.setErrorEnabled(true);
         mTextInputPass.setErrorEnabled(true);
 
-        mTextInputSiteId.setError("");
+        //mTextInputSiteId.setError("");
         mTextInputEmail.setError("");
         mTextInputPass.setError("");
 
 
 
-        mSiteId.addTextChangedListener(new EditTextWatcher(mSiteId));
+        //mSiteId.addTextChangedListener(new EditTextWatcher(mSiteId));
         mSiteEmailId.addTextChangedListener(new EditTextWatcher(mSiteEmailId));
         mPassword.addTextChangedListener(new EditTextWatcher(mPassword));
 
+        mEt1 = rootView.findViewById(R.id.otp_edit_text1);
+        mEt2 = rootView.findViewById(R.id.otp_edit_text2);
+        mEt3 = rootView.findViewById(R.id.otp_edit_text3);
+        mEt4 = rootView.findViewById(R.id.otp_edit_text4);
+        mEt5 = rootView.findViewById(R.id.otp_edit_text5);
+        mEt6 = rootView.findViewById(R.id.otp_edit_text6);
 
+        addTextWatcher(mEt1);
+        addTextWatcher(mEt2);
+        addTextWatcher(mEt3);
+        addTextWatcher(mEt4);
+        addTextWatcher(mEt5);
+        addTextWatcher(mEt6);
 
         imageGoback.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -152,21 +166,27 @@ public class AddtoExisting extends Fragment {
             }
         });
 
-
         mNext1.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                mNext1.setEnabled(false);
+                //mNext1.setEnabled(false);
                 int[] mandotaryIds = new int []
                         {
-                                R.id.editSiteID
+                                R.id.otp_edit_text1,
+                                R.id.otp_edit_text2,
+                                R.id.otp_edit_text3,
+                                R.id.otp_edit_text4,
+                                R.id.otp_edit_text5,
+                                R.id.otp_edit_text6
                         };
                 if(!validateEditText(mandotaryIds))
                 {
-                    String siteId = StringUtils.trim(mSiteId.getText().toString());
+                    Toast.makeText(mContext, "array not empty", Toast.LENGTH_SHORT).show();
+                    /*String siteId = StringUtils.trim(mSiteId.getText().toString());
                     siteId = StringUtils.prependIfMissing(siteId, "@");
-                    loadExistingSite(siteId);
+                    loadExistingSite(siteId);*/
                 }
+                else Toast.makeText(mContext, "Please check the OTP", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -188,6 +208,66 @@ public class AddtoExisting extends Fragment {
         return rootView;
     }
 
+    private void addTextWatcher(final EditText one) {
+        one.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                switch (one.getId()) {
+                    case R.id.otp_edit_text1:
+                        if (one.length() == 1) {
+                            mEt2.requestFocus();
+                        }
+                        break;
+                    case R.id.otp_edit_text2:
+                        if (one.length() == 1) {
+                            mEt3.requestFocus();
+                        } else if (one.length() == 0) {
+                            mEt1.requestFocus();
+                        }
+                        break;
+                    case R.id.otp_edit_text3:
+                        if (one.length() == 1) {
+                            mEt4.requestFocus();
+                        } else if (one.length() == 0) {
+                            mEt2.requestFocus();
+                        }
+                        break;
+                    case R.id.otp_edit_text4:
+                        if (one.length() == 1) {
+                            mEt5.requestFocus();
+                        } else if (one.length() == 0) {
+                            mEt3.requestFocus();
+                        }
+                        break;
+                    case R.id.otp_edit_text5:
+                        if (one.length() == 1) {
+                            mEt6.requestFocus();
+                        } else if (one.length() == 0) {
+                            mEt4.requestFocus();
+                        }
+                        break;
+                    case R.id.otp_edit_text6:
+                        if (one.length() == 1) {
+                            InputMethodManager inputManager = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+                            inputManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                        } else if (one.length() == 0) {
+                            mEt5.requestFocus();
+                        }
+                        break;
+                }
+            }
+        });
+    }
 
 
     private class EditTextWatcher implements TextWatcher {
@@ -202,16 +282,16 @@ public class AddtoExisting extends Fragment {
 
         public void afterTextChanged(Editable editable) {
             switch(view.getId()){
-                case R.id.editSiteID:
+                /*case R.id.editSiteID:
                     if(mSiteId.getText().length() > 0) {
-                        mTextInputSiteId.setErrorEnabled(true);
-                        mTextInputSiteId.setError(getString(R.string.input_siteid));
+                        //mTextInputSiteId.setErrorEnabled(true);
+                        //mTextInputSiteId.setError(getString(R.string.input_siteid));
                         mSiteId.setError(null);
                     }else {
-                        mTextInputSiteId.setError("");
-                        mTextInputSiteId.setErrorEnabled(true);
+                        //mTextInputSiteId.setError("");
+                        //mTextInputSiteId.setErrorEnabled(true);
                         mSiteId.setError(null);
-                    }
+                    }*/
                 case R.id.editFacilityEmail:
                     if(mSiteEmailId.getText().length() > 0) {
                         mTextInputEmail.setErrorEnabled(true);

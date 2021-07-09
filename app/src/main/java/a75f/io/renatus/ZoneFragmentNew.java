@@ -71,6 +71,7 @@ import a75f.io.device.mesh.Pulse;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
@@ -78,7 +79,7 @@ import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitConfiguration;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
-import a75f.io.logic.jobs.ScheduleProcessJob;
+
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.ZoneDataInterface;
@@ -3133,13 +3134,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         arcView.setId(i);
         SeekArc seekArc = arcView.findViewById(R.id.seekArc);
         seekArc.setTag(gridItemObj);
-        seekArc.setCurrentTemp((float) currentAverageTemp);
         zoneDetails.setTag(gridItemObj);
-
+        seekArc.scaletoNormal(250, 210);
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
-
-        seekArc.scaletoNormal(250, 210);
+        seekArc.setData(false, 10, 20, (float) 30, (float) 40, (float) 50, (float) 60, (float) 70, (float) 80, (float) 90, (float) 90, (float) 100);
         seekArc.setDetailedView(false);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 
@@ -3301,7 +3300,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     Equip updatedEquip = new Equip.Builder().setHashMap(openZoneMap.get(k)).build();
                     if (updatedEquip.getProfile().contains("SENSE")) {
                         HashMap sensePoints = ScheduleProcessJob.getHyperStatSenseEquipPoints(updatedEquip.getGroup());
-                        // seekArc.setCurrentTemp(Float.parseFloat(sensePoints.get("curtempwithoffset").toString()));
+                        seekArc.setCurrentTemp(Float.parseFloat(sensePoints.get("curtempwithoffset").toString()));
                         loadSENSEPointsUI(sensePoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
                     }
 

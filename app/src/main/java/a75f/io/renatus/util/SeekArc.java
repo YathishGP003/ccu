@@ -399,14 +399,16 @@ public class SeekArc extends View
         drawSemiArc(canvas, isDetailedView());
 
         //outer arc numbers from 50 - 90
-        if (isDetailedView())
-            drawWhiteDelimiters(canvas);
+        if (isDetailedView()) drawWhiteDelimiters(canvas);
+        if(true){
+            drawCurrentTemp(canvas, getCurrentTemp());
+        }else{
 
         if (!inHeatingSelectionMode && !inCoolingSelectionMode)
         {
             drawArcBetween(canvas, getHeatingDesiredTemp(), getCoolingDesiredTemp(), mInbetweenPaint);
             drawCurrentTemp(canvas, getCurrentTemp());
-        }
+        }}
 
 
         //drawArcBetween(canvas, getHeatingDesiredTemp(), getCoolingDesiredTemp(), mInbetweenPaint);
@@ -414,6 +416,8 @@ public class SeekArc extends View
         if (isDetailedView())
         {
 
+            if(true){ }
+            else{
             float coolingModeTemp = inCoolingSelectionMode ? getCoolingModeTempTemperature() : getCoolingDesiredTemp();
 
             if (!inCoolingSelectionMode)
@@ -443,9 +447,11 @@ public class SeekArc extends View
                 drawHeatingSliderIcon(canvas, heatingModeTemp);
                 checkForHeatingLine(canvas, heatingModeTemp);
                 drawHeatingText(canvas, heatingModeTemp);
-            }
+            }}
         } else
         {
+            if(true){}
+            else{
             drawIconByTemp(canvas, mGreyLimitNonDetailedView, getHeatingDesiredTemp(),
                            mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
             drawIconByTemp(canvas, mGreyLimitNonDetailedView, getCoolingDesiredTemp(),
@@ -465,15 +471,19 @@ public class SeekArc extends View
                 mInbetweenPaint.setColor(Color.parseColor("#e24301"));
                 drawArcBetween(canvas, getCoolingDesiredTemp(), mCurrentTemp, mInbetweenPaint);
                 mInbetweenPaint.setColor(prevColor);
-            }
+            }}
 
         }
 
         //Draw icon at current temperature
+        if(true){
+            drawIconByTemp(canvas,mCurrentTempRectangle,mCurrentTemp,mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
+        }else{
         if ((getCurrentTemp() > 0) && (getCurrentTemp() > getBuildingLowerTempLimit()) && (getCurrentTemp() < getBuildingUpperTempLimit())) {
             drawIconByTemp(canvas, isDetailedView() ? mCurrentTempRectangle : mRedLimitNonDetailedView,
                     mCurrentTemp, mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
-        }
+        }}
+
 
 
     }
@@ -503,8 +513,8 @@ public class SeekArc extends View
         String heatingDesiredText = String.valueOf(getHeatingDesiredTemp());
         String currentTempText    = String.valueOf(getCurrentTemp());
 
-        mDesiredCoolingSmallTextPaint.getTextBounds(coolingDesiredText, 0, coolingDesiredText.length(), mCoolingTextBounds);
-        mDesiredHeatingSmallTextPaint.getTextBounds(heatingDesiredText, 0, heatingDesiredText.length(), mHeatingTextBounds);
+       // mDesiredCoolingSmallTextPaint.getTextBounds(coolingDesiredText, 0, coolingDesiredText.length(), mCoolingTextBounds);
+       // mDesiredHeatingSmallTextPaint.getTextBounds(heatingDesiredText, 0, heatingDesiredText.length(), mHeatingTextBounds);
         mCurrentTemperatureTextPaint.getTextBounds(currentTempText, 0, currentTempText.length(), bounds);
 
         float widthOfText         = mHeatingTextBounds.width() + paddingBetweenTextDP + bounds.width();
@@ -549,8 +559,8 @@ public class SeekArc extends View
         canvas.drawText(curString, xPositionOfCurrentStringText, yPositionOfCurrentStringText, mCurrentTemperatureStringTextPaint);
         canvas.drawText(tempString, xPositionOfTempStringText, yPositionOfTempStringText, mCurrentTemperatureStringTextPaint);
         canvas.drawText(currentTempText, xPositionOfCurrentText, yPositionOfCurrentText, mCurrentTemperatureTextPaint);
-        canvas.drawText(coolingDesiredText, xPositionOfCoolingText, yPositionOfCoolingText, mDesiredHeatingSmallTextPaint);
-        canvas.drawText(heatingDesiredText, xPositionOfHeatingText, yPositionOfHeatingText, mDesiredCoolingSmallTextPaint);
+       // canvas.drawText(coolingDesiredText, xPositionOfCoolingText, yPositionOfCoolingText, mDesiredHeatingSmallTextPaint);
+        //canvas.drawText(heatingDesiredText, xPositionOfHeatingText, yPositionOfHeatingText, mDesiredCoolingSmallTextPaint);
 
     }
 
@@ -1613,5 +1623,25 @@ public class SeekArc extends View
         drawable.draw(canvas);
 
         return bitmap;
+    }
+    public void setDataSense( float currentTemp)
+    {
+        mCurrentTemp = currentTemp;
+        isDataSet = true;
+        prepareAngleSense();
+        invalidate();
+
+    }
+
+
+    private void prepareAngleSense()
+    {
+        mGapAngle = (300.0f / (mBuildingUpperTempLimit - mBuildingLowerTempLimit));
+
+        mLimitHeatingStartAngle = preCalcAngle(5);
+        mLimitHeatingEndAngle = preCalcAngle(10);
+
+        mLimitCoolingStartAngle = preCalcAngle(0);
+        mLimitCoolingEndAngle = preCalcAngle(70);
     }
 }

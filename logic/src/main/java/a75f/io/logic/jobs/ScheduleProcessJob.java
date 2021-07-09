@@ -1725,7 +1725,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         HashMap sensePoints = new HashMap();
         CCUHsApi haystack = CCUHsApi.getInstance();
         sensePoints.put("Profile","SENSE");
-        double tempOffset = haystack.readDefaultVal("point and offset and temp and group == \""+equipID+"\"");
+        double currentTemp = haystack.readHisValByQuery("zone and point and current and temp and group == \""+equipID+"\"");
+        double tempOffset = haystack.readDefaultVal("point and offset and temperature and group == \""+equipID+"\"");
         double analog1Sensor = haystack.readDefaultVal("point and config and analog1 and input and sensor and group == \"" + equipID + "\"").intValue();
         double analog2Sensor = haystack.readDefaultVal("point and config and analog2 and input and sensor and group == \"" + equipID + "\"").intValue();
         double th1Sensor = haystack.readDefaultVal("point and config and th1 and input and sensor and group == \"" + equipID + "\"").intValue();
@@ -1743,6 +1744,10 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         double th2Val =
             haystack.readHisValByQuery("point and logical and th2 and group == \"" + equipID + "\"");
         int size = 0;
+
+        sensePoints.put("curtempwithoffset",(currentTemp+tempOffset));
+        Log.d("Spoo","curtemp="+(currentTemp+tempOffset));
+
         if (tempOffset  != 0) {
             sensePoints.put("TemperatureOffset",tempOffset);
         }else{

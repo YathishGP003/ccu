@@ -108,6 +108,8 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
             analog2Cb.setChecked(systemProfile.getConfigEnabled("fan") > 0);
             analog3Cb.setChecked(systemProfile.getConfigEnabled("heating") > 0);
             humidificationCb.setChecked(systemProfile.getConfigEnabled("humidification") > 0);
+            zoneTypeSelection.setChecked(systemProfile.getConfigVal("multiZone")==1.0);
+            zoneType.setText(systemProfile.getConfigVal("multiZone")==0.0?"Single Zone":"Multi Zone");
             setupAnalogLimitSelectors();
             setupEquipAddrEditor();
             
@@ -160,7 +162,8 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         analog3Cb.setOnCheckedChangeListener(this);
         humidificationCb.setOnCheckedChangeListener(this);
         zoneTypeSelection.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            zoneType.setText(isChecked?"Single Zone":"Multi Zone");
+            zoneType.setText(isChecked?"Multi Zone":"Single Zone");
+            systemProfile.setConfigVal("multiZone",(isChecked?1.0:0.0));
         });
         view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
 
@@ -182,7 +185,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         String eqIp = CCUHsApi.getInstance().readDefaultStrVal("point and system and config and ie and ipAddress");
         String subnetMaskAddress="255.255.255.0";
         final String[] choices = {eqIp,subnetMaskAddress};
-        ArrayAdapter<String> a =new ArrayAdapter<String>(getContext(),android.R.layout.simple_spinner_item, choices);
+        ArrayAdapter<String> a =new ArrayAdapter<>(getContext(),android.R.layout.simple_spinner_item, choices);
         a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         equipAddr.setAdapter(a);
 

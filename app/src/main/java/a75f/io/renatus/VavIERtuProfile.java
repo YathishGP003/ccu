@@ -60,7 +60,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     @BindView(R.id.heatingDatMax)Spinner heatingDatMax;
     @BindView(R.id.spMin)Spinner spMin;
     @BindView(R.id.spMax)Spinner spMax;
-    @BindView(R.id.equipmentIp) Spinner equipAddr;
+    @BindView(R.id.equipmentIp) EditText equipAddr;
     
     @BindView(R.id.analog1RTUTest) Spinner coolingTest;
     @BindView(R.id.analog2RTUTest) Spinner spTest;
@@ -69,6 +69,9 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     @BindView(R.id.oaMinTest) Spinner oaMinTest;
     @BindView(R.id.buttonNext)
     Button mNext;
+
+    @BindView(R.id.btnEditIp)
+    ImageView btnEditIp;
 
     @BindView(R.id.zone_type) TextView zoneType;
     @BindView(R.id.sp_zone_type) ToggleButton zoneTypeSelection;
@@ -94,6 +97,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         if(getArguments() != null) {
             isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
         }
+        btnEditIp.setOnClickListener(view1 -> equipAddr.setEnabled(true));
         return rootView;
     }
     
@@ -183,13 +187,18 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     
     public void setupEquipAddrEditor() {
         String eqIp = CCUHsApi.getInstance().readDefaultStrVal("point and system and config and ie and ipAddress");
-        String subnetMaskAddress="255.255.255.0";
-        final String[] choices = {eqIp,subnetMaskAddress};
-        ArrayAdapter<String> a =new ArrayAdapter<>(getContext(),android.R.layout.simple_spinner_item, choices);
-        a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        equipAddr.setAdapter(a);
 
-       /* equipAddr.setOnClickListener(new View.OnClickListener()
+
+        // As of now for testing we need edit option so commented bellow code
+         /*
+            String subnetMaskAddress="255.255.255.0";
+            final String[] choices = {eqIp,subnetMaskAddress};
+            ArrayAdapter<String> addressAdapter =new ArrayAdapter<>(getContext(),android.R.layout.simple_spinner_item, choices);
+            addressAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            equipAddr.setAdapter(addressAdapter);
+        */
+        equipAddr.setText(eqIp);
+        equipAddr.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
@@ -219,7 +228,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                                              .create();
                 dialog.show();
             }
-        });*/
+        });
     }
 
     private void goTonext() {

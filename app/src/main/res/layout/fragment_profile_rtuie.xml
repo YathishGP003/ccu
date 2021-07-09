@@ -46,7 +46,7 @@
                         android:textColor="@color/black" />
 
 
-                    <Spinner
+                   <!-- <Spinner
                         android:id="@+id/equipmentIp"
                         style="@style/Widget.AppCompat.Spinner.Underlined"
                         android:layout_width="0dp"
@@ -54,8 +54,27 @@
                         android:layout_height="45dp"
                         android:layout_column="3"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="20dp" />
+                        android:layout_marginLeft="20dp" />-->
+                    <EditText
+                        android:id="@+id/equipmentIp"
+                        android:layout_width="0dp"
+                        android:layout_weight="1.5"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_gravity="start"
+                        android:layout_toEndOf="@+id/ipTitle"
+                        android:enabled="false"
+                        android:textAppearance="@style/text_appearance" />
 
+                    <ImageView
+                        android:id="@+id/btnEditIp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="10dp"
+                        android:padding="8dp"
+                        android:layout_toEndOf="@+id/equipmentIp"
+                        app:srcCompat="@drawable/ic_edit" />
                     <ToggleButton
                         android:layout_marginLeft="20dp"
                         android:id="@+id/sp_zone_type"

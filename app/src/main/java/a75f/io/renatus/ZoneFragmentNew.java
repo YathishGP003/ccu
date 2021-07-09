@@ -97,6 +97,7 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.SeekArc;
 
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
+import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
 
 public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private static final String LOG_TAG = " ZoneFragmentNew ";
@@ -3138,7 +3139,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         seekArc.scaletoNormal(250, 210);
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
-        seekArc.setData(false, 10, 20, (float) 30, (float) 40, (float) 50, (float) 60, (float) 70, (float) 80, (float) 90, (float) 90, (float) 100);
+        seekArc.setSense(true);
+        seekArc.setSenseData(false, 70);
         seekArc.setDetailedView(false);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 

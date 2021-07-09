@@ -220,6 +220,11 @@ public class SeekArc extends View
     HashMap<ProgressType, Float> mProgresses = new HashMap<>();
     private Paint mInbetweenPaint;
     private float mScaledSliderOffset = 0.0f;
+    private boolean isSense = false;
+
+    public void setSense(boolean val){
+        isSense = val;
+    }
 
 
     public interface OnTemperatureChangeListener
@@ -400,7 +405,7 @@ public class SeekArc extends View
 
         //outer arc numbers from 50 - 90
         if (isDetailedView()) drawWhiteDelimiters(canvas);
-        if(true){
+        if(isSense){
             drawCurrentTemp(canvas, getCurrentTemp());
         }else{
 
@@ -416,7 +421,7 @@ public class SeekArc extends View
         if (isDetailedView())
         {
 
-            if(true){ }
+            if(isSense){ }
             else{
             float coolingModeTemp = inCoolingSelectionMode ? getCoolingModeTempTemperature() : getCoolingDesiredTemp();
 
@@ -450,7 +455,7 @@ public class SeekArc extends View
             }}
         } else
         {
-            if(true){}
+            if(isSense){}
             else{
             drawIconByTemp(canvas, mGreyLimitNonDetailedView, getHeatingDesiredTemp(),
                            mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
@@ -476,7 +481,7 @@ public class SeekArc extends View
         }
 
         //Draw icon at current temperature
-        if(true){
+        if(isSense){
             drawIconByTemp(canvas,mCurrentTempRectangle,mCurrentTemp,mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
         }else{
         if ((getCurrentTemp() > 0) && (getCurrentTemp() > getBuildingLowerTempLimit()) && (getCurrentTemp() < getBuildingUpperTempLimit())) {
@@ -509,58 +514,99 @@ public class SeekArc extends View
     //Refactor to move out mem leaks
     private void drawCurrentTempTextDetailed(Canvas canvas)
     {
-        String coolingDesiredText = String.valueOf(getCoolingDesiredTemp());
-        String heatingDesiredText = String.valueOf(getHeatingDesiredTemp());
-        String currentTempText    = String.valueOf(getCurrentTemp());
+        if (isSense) {
+            String currentTempText = String.valueOf(getCurrentTemp());
+            mCurrentTemperatureTextPaint.getTextBounds(currentTempText, 0, currentTempText.length(), bounds);
 
-       // mDesiredCoolingSmallTextPaint.getTextBounds(coolingDesiredText, 0, coolingDesiredText.length(), mCoolingTextBounds);
-       // mDesiredHeatingSmallTextPaint.getTextBounds(heatingDesiredText, 0, heatingDesiredText.length(), mHeatingTextBounds);
-        mCurrentTemperatureTextPaint.getTextBounds(currentTempText, 0, currentTempText.length(), bounds);
+            float widthOfText = mHeatingTextBounds.width() + paddingBetweenTextDP + bounds.width();
+            float heightOfCurrentText = bounds.height();
+            float heightOfStackedText = mCoolingTextBounds.height() + paddingBetweenTextDP + mHeatingTextBounds.height();
 
-        float widthOfText         = mHeatingTextBounds.width() + paddingBetweenTextDP + bounds.width();
-        float heightOfCurrentText = bounds.height();
-        float heightOfStackedText = mCoolingTextBounds.height() + paddingBetweenTextDP + mHeatingTextBounds.height();
+            float heightToUse = Math.max(heightOfCurrentText, heightOfStackedText);
+            float widthToUse = widthOfText;
 
-        float heightToUse = Math.max(heightOfCurrentText, heightOfStackedText);
-        float widthToUse  = widthOfText;
-
-        float xPositionOfCurrentText = cx - (widthToUse / 2f);
-        float yPositionOfCurrentText = cy + (heightToUse / 2f);
+            float xPositionOfCurrentText = cx - (widthToUse / 2f);
+            float yPositionOfCurrentText = cy + (heightToUse / 2f);
+            float widthOfCurText = bounds.width();
 
 
-        float xPositionOfCoolingText = cx + (widthToUse / 2.0f) - mCoolingTextBounds.width();
-        float yPositionOfCoolingText = cy + (heightToUse / 2.0f) - mCoolingTextBounds.height() - paddingBetweenTextDP;
+            float centerOfCurrentTempHorizontal = xPositionOfCurrentText + (widthOfCurText / 2);
+            float yPositionOfBottomOfCurrentTemp = yPositionOfCurrentText + (heightOfCurrentText / 2);
 
-        float xPositionOfHeatingText = cx + (widthToUse / 2.0f) - mCoolingTextBounds.width();
-        float yPositionOfHeatingText = cy + (heightToUse / 2.0f) + mCoolingTextBounds.height() - paddingBetweenTextDP;
+            String curString = "CURRENT";
+            mCurrentTemperatureStringTextPaint.getTextBounds(curString, 0, curString.length(), bounds);
 
-        float widthOfCurText = bounds.width();
+            float xPositionOfCurrentStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
+            float yPositionOfCurrentStringText = yPositionOfBottomOfCurrentTemp;
 
+            float heightOfCurrentStringText = bounds.height();
 
-        float centerOfCurrentTempHorizontal  = xPositionOfCurrentText + (widthOfCurText / 2);
-        float yPositionOfBottomOfCurrentTemp = yPositionOfCurrentText + (heightOfCurrentText / 2);
+            String tempString = "TEMP";
 
-        String curString = "CURRENT";
-        mCurrentTemperatureStringTextPaint.getTextBounds(curString, 0, curString.length(), bounds);
-
-        float xPositionOfCurrentStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
-        float yPositionOfCurrentStringText = yPositionOfBottomOfCurrentTemp;
-
-        float heightOfCurrentStringText = bounds.height();
-
-        String tempString = "TEMP";
-
-        mCurrentTemperatureStringTextPaint.getTextBounds(tempString, 0, tempString.length(), bounds);
+            mCurrentTemperatureStringTextPaint.getTextBounds(tempString, 0, tempString.length(), bounds);
 
 
-        float yPositionOfTempStringText = yPositionOfCurrentStringText + heightOfCurrentStringText + SPACE_BETWEEN_TWO_WORD_STRINGS;
-        float xPositionOfTempStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
+            float yPositionOfTempStringText = yPositionOfCurrentStringText + heightOfCurrentStringText + SPACE_BETWEEN_TWO_WORD_STRINGS;
+            float xPositionOfTempStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
 
-        canvas.drawText(curString, xPositionOfCurrentStringText, yPositionOfCurrentStringText, mCurrentTemperatureStringTextPaint);
-        canvas.drawText(tempString, xPositionOfTempStringText, yPositionOfTempStringText, mCurrentTemperatureStringTextPaint);
-        canvas.drawText(currentTempText, xPositionOfCurrentText, yPositionOfCurrentText, mCurrentTemperatureTextPaint);
-       // canvas.drawText(coolingDesiredText, xPositionOfCoolingText, yPositionOfCoolingText, mDesiredHeatingSmallTextPaint);
-        //canvas.drawText(heatingDesiredText, xPositionOfHeatingText, yPositionOfHeatingText, mDesiredCoolingSmallTextPaint);
+            canvas.drawText(curString, xPositionOfCurrentStringText, yPositionOfCurrentStringText, mCurrentTemperatureStringTextPaint);
+            canvas.drawText(tempString, xPositionOfTempStringText, yPositionOfTempStringText, mCurrentTemperatureStringTextPaint);
+            canvas.drawText(currentTempText, xPositionOfCurrentText, yPositionOfCurrentText, mCurrentTemperatureTextPaint);
+
+        } else {
+            String coolingDesiredText = String.valueOf(getCoolingDesiredTemp());
+            String heatingDesiredText = String.valueOf(getHeatingDesiredTemp());
+            String currentTempText = String.valueOf(getCurrentTemp());
+
+             mDesiredCoolingSmallTextPaint.getTextBounds(coolingDesiredText, 0, coolingDesiredText.length(), mCoolingTextBounds);
+             mDesiredHeatingSmallTextPaint.getTextBounds(heatingDesiredText, 0, heatingDesiredText.length(), mHeatingTextBounds);
+            mCurrentTemperatureTextPaint.getTextBounds(currentTempText, 0, currentTempText.length(), bounds);
+
+            float widthOfText = mHeatingTextBounds.width() + paddingBetweenTextDP + bounds.width();
+            float heightOfCurrentText = bounds.height();
+            float heightOfStackedText = mCoolingTextBounds.height() + paddingBetweenTextDP + mHeatingTextBounds.height();
+
+            float heightToUse = Math.max(heightOfCurrentText, heightOfStackedText);
+            float widthToUse = widthOfText;
+
+            float xPositionOfCurrentText = cx - (widthToUse / 2f);
+            float yPositionOfCurrentText = cy + (heightToUse / 2f);
+
+
+            float xPositionOfCoolingText = cx + (widthToUse / 2.0f) - mCoolingTextBounds.width();
+            float yPositionOfCoolingText = cy + (heightToUse / 2.0f) - mCoolingTextBounds.height() - paddingBetweenTextDP;
+
+            float xPositionOfHeatingText = cx + (widthToUse / 2.0f) - mCoolingTextBounds.width();
+            float yPositionOfHeatingText = cy + (heightToUse / 2.0f) + mCoolingTextBounds.height() - paddingBetweenTextDP;
+
+            float widthOfCurText = bounds.width();
+
+
+            float centerOfCurrentTempHorizontal = xPositionOfCurrentText + (widthOfCurText / 2);
+            float yPositionOfBottomOfCurrentTemp = yPositionOfCurrentText + (heightOfCurrentText / 2);
+
+            String curString = "CURRENT";
+            mCurrentTemperatureStringTextPaint.getTextBounds(curString, 0, curString.length(), bounds);
+
+            float xPositionOfCurrentStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
+            float yPositionOfCurrentStringText = yPositionOfBottomOfCurrentTemp;
+
+            float heightOfCurrentStringText = bounds.height();
+
+            String tempString = "TEMP";
+
+            mCurrentTemperatureStringTextPaint.getTextBounds(tempString, 0, tempString.length(), bounds);
+
+
+            float yPositionOfTempStringText = yPositionOfCurrentStringText + heightOfCurrentStringText + SPACE_BETWEEN_TWO_WORD_STRINGS;
+            float xPositionOfTempStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
+
+            canvas.drawText(curString, xPositionOfCurrentStringText, yPositionOfCurrentStringText, mCurrentTemperatureStringTextPaint);
+            canvas.drawText(tempString, xPositionOfTempStringText, yPositionOfTempStringText, mCurrentTemperatureStringTextPaint);
+            canvas.drawText(currentTempText, xPositionOfCurrentText, yPositionOfCurrentText, mCurrentTemperatureTextPaint);
+            canvas.drawText(coolingDesiredText, xPositionOfCoolingText, yPositionOfCoolingText, mDesiredHeatingSmallTextPaint);
+            canvas.drawText(heatingDesiredText, xPositionOfHeatingText, yPositionOfHeatingText, mDesiredCoolingSmallTextPaint);
+        }
 
     }
 
@@ -1624,24 +1670,14 @@ public class SeekArc extends View
 
         return bitmap;
     }
-    public void setDataSense( float currentTemp)
-    {
-        mCurrentTemp = currentTemp;
+
+    public void setSenseData(boolean detailedView, float curTemp){
+        mCurrentTemp = curTemp;
+        mDetailedView = detailedView;
         isDataSet = true;
-        prepareAngleSense();
+        prepareAngle();
         invalidate();
 
     }
 
-
-    private void prepareAngleSense()
-    {
-        mGapAngle = (300.0f / (mBuildingUpperTempLimit - mBuildingLowerTempLimit));
-
-        mLimitHeatingStartAngle = preCalcAngle(5);
-        mLimitHeatingEndAngle = preCalcAngle(10);
-
-        mLimitCoolingStartAngle = preCalcAngle(0);
-        mLimitCoolingEndAngle = preCalcAngle(70);
-    }
 }

@@ -51,7 +51,7 @@ public class ModbusEquip {
         String tz = siteMap.get("tz").toString();
         String modbusEquipType = equipmentInfo.getEquipType();
         String modbusName = equipmentInfo.getName();
-        String equipDis = siteDis + "-"+modbusName+"-"+modbusEquipType+"-" + slaveId + "-";
+        String equipDis = siteDis + "-"+modbusName+"-"+modbusEquipType+"-" + slaveId ;
         String gatewayRef = null;
         configuredParams = configParams;
         Log.d("Modbus",modbusEquipType+"MbEquip create Entity = "+configuredParams.size());

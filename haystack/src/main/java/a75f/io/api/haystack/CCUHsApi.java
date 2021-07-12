@@ -187,6 +187,18 @@ public class CCUHsApi
         editor.apply();
     }
 
+    public String getHeartbeatVersion() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getString("heartbeatVersion","");
+    }
+
+    public void setHeartbeatVersion(String version) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("heartbeatVersion", version);
+        editor.apply();
+    }
+
     public String getAuthenticationUrl() {
         Log.d("Authentication URL: ","url="+careTakerUrl);
         return careTakerUrl;

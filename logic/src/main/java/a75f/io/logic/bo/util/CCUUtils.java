@@ -31,6 +31,9 @@ public class CCUUtils
     public static Date getLastReceivedTimeForRssi(String nodeAddr){
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap point = CCUHsApi.getInstance().read("point and heartbeat and group == \""+nodeAddr+"\"");
+        if(point.size() == 0){
+            return null;
+        }
         HisItem hisItem = hayStack.curRead(point.get("id").toString());
         return (hisItem == null) ? null : hisItem.getDate();
     }
@@ -38,6 +41,9 @@ public class CCUUtils
     public static Date getLastReceivedTimeForModBus(String slaveId){
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap equip = hayStack.read("equip and modbus and group == \"" + slaveId + "\"");
+        if(equip.size() == 0){
+            return null;
+        }
         HashMap heartBeatPoint = hayStack.read("point and heartbeat and equipRef == \""+equip.get("id")+ "\"");
         if(heartBeatPoint.size() == 0){
             return null;

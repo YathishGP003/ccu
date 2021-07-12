@@ -391,10 +391,8 @@ public class SeekArc extends View
     float mScaledICCTDrawable = 0.0f;
 
     @Override
-    protected void onDraw(Canvas canvas)
-    {
-        if (!isViewMeasured && !isDataSet)
-        {
+    protected void onDraw(Canvas canvas) {
+        if (!isViewMeasured && !isDataSet) {
             return;
 
         }
@@ -405,90 +403,84 @@ public class SeekArc extends View
 
         //outer arc numbers from 50 - 90
         if (isDetailedView()) drawWhiteDelimiters(canvas);
-        if(isSense){
+        if (isSense) {
             drawCurrentTemp(canvas, getCurrentTemp());
-        }else{
+        } else {
 
-        if (!inHeatingSelectionMode && !inCoolingSelectionMode)
-        {
-            drawArcBetween(canvas, getHeatingDesiredTemp(), getCoolingDesiredTemp(), mInbetweenPaint);
-            drawCurrentTemp(canvas, getCurrentTemp());
-        }}
+            if (!inHeatingSelectionMode && !inCoolingSelectionMode) {
+                drawArcBetween(canvas, getHeatingDesiredTemp(), getCoolingDesiredTemp(), mInbetweenPaint);
+                drawCurrentTemp(canvas, getCurrentTemp());
+            }
+        }
 
 
         //drawArcBetween(canvas, getHeatingDesiredTemp(), getCoolingDesiredTemp(), mInbetweenPaint);
 
-        if (isDetailedView())
-        {
+        if (isDetailedView()) {
 
-            if(isSense){ }
-            else{
-            float coolingModeTemp = inCoolingSelectionMode ? getCoolingModeTempTemperature() : getCoolingDesiredTemp();
+            if (!isSense) {
+                float coolingModeTemp = inCoolingSelectionMode ? getCoolingModeTempTemperature() : getCoolingDesiredTemp();
 
-            if (!inCoolingSelectionMode)
-            {
-                drawCoolingDesiredIcon(canvas, coolingModeTemp);
+                if (!inCoolingSelectionMode) {
+                    drawCoolingDesiredIcon(canvas, coolingModeTemp);
+                }
+
+                if (inCoolingSelectionMode) {
+                    drawCoolingLimitBar(canvas);
+                    drawCoolingSliderIcon(canvas, coolingModeTemp);
+                    checkForCoolingLine(canvas, coolingModeTemp);
+                    drawCoolingText(canvas, coolingModeTemp);
+                }
+
+
+                float heatingModeTemp = inHeatingSelectionMode ? getHeatingModeTempTemperature() : getHeatingDesiredTemp();
+
+                if (!inHeatingSelectionMode) {
+                    drawHeatingDesiredIcon(canvas, heatingModeTemp);
+                }
+
+                if (inHeatingSelectionMode) {
+                    drawHeatingLimitBar(canvas);
+                    drawHeatingSliderIcon(canvas, heatingModeTemp);
+                    checkForHeatingLine(canvas, heatingModeTemp);
+                    drawHeatingText(canvas, heatingModeTemp);
+                }
             }
+        } else {
+            if (!isSense) {
+                drawIconByTemp(canvas, mGreyLimitNonDetailedView, getHeatingDesiredTemp(),
+                        mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
+                drawIconByTemp(canvas, mGreyLimitNonDetailedView, getCoolingDesiredTemp(),
+                        mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
 
-            if (inCoolingSelectionMode)
-            {
-                drawCoolingLimitBar(canvas);
-                drawCoolingSliderIcon(canvas, coolingModeTemp);
-                checkForCoolingLine(canvas, coolingModeTemp);
-                drawCoolingText(canvas, coolingModeTemp);
+
+                if ((getCurrentTemp() > 0) && (getCurrentTemp() < getHeatingDesiredTemp())) {
+                    int prevColor = mInbetweenPaint.getColor();
+                    mInbetweenPaint.setColor(Color.parseColor("#e24301"));
+                    drawArcBetween(canvas, mCurrentTemp, mHeatingDesiredTemp, mInbetweenPaint);
+                    mInbetweenPaint.setColor(prevColor);
+                } else if ((getCurrentTemp() > 0) && (getCurrentTemp() > getCoolingDesiredTemp())) {
+
+                    int prevColor = mInbetweenPaint.getColor();
+                    mInbetweenPaint.setColor(Color.parseColor("#e24301"));
+                    drawArcBetween(canvas, getCoolingDesiredTemp(), mCurrentTemp, mInbetweenPaint);
+                    mInbetweenPaint.setColor(prevColor);
+                }
             }
-
-
-            float heatingModeTemp = inHeatingSelectionMode ? getHeatingModeTempTemperature() : getHeatingDesiredTemp();
-
-            if (!inHeatingSelectionMode)
-            {
-                drawHeatingDesiredIcon(canvas, heatingModeTemp);
-            }
-
-            if (inHeatingSelectionMode)
-            {
-                drawHeatingLimitBar(canvas);
-                drawHeatingSliderIcon(canvas, heatingModeTemp);
-                checkForHeatingLine(canvas, heatingModeTemp);
-                drawHeatingText(canvas, heatingModeTemp);
-            }}
-        } else
-        {
-            if(isSense){}
-            else{
-            drawIconByTemp(canvas, mGreyLimitNonDetailedView, getHeatingDesiredTemp(),
-                           mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
-            drawIconByTemp(canvas, mGreyLimitNonDetailedView, getCoolingDesiredTemp(),
-                           mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
-
-
-            if ((getCurrentTemp() > 0) && (getCurrentTemp() < getHeatingDesiredTemp()))
-            {
-                int prevColor = mInbetweenPaint.getColor();
-                mInbetweenPaint.setColor(Color.parseColor("#e24301"));
-                drawArcBetween(canvas, mCurrentTemp, mHeatingDesiredTemp, mInbetweenPaint);
-                mInbetweenPaint.setColor(prevColor);
-            } else if ((getCurrentTemp() > 0) && (getCurrentTemp() > getCoolingDesiredTemp()))
-            {
-
-                int prevColor = mInbetweenPaint.getColor();
-                mInbetweenPaint.setColor(Color.parseColor("#e24301"));
-                drawArcBetween(canvas, getCoolingDesiredTemp(), mCurrentTemp, mInbetweenPaint);
-                mInbetweenPaint.setColor(prevColor);
-            }}
 
         }
 
         //Draw icon at current temperature
-        if(isSense){
-            drawIconByTemp(canvas,mCurrentTempRectangle,mCurrentTemp,mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
-        }else{
-        if ((getCurrentTemp() > 0) && (getCurrentTemp() > getBuildingLowerTempLimit()) && (getCurrentTemp() < getBuildingUpperTempLimit())) {
-            drawIconByTemp(canvas, isDetailedView() ? mCurrentTempRectangle : mRedLimitNonDetailedView,
-                    mCurrentTemp, mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
-        }}
-
+        if (isSense) {
+            if((getCurrentTemp() > 0) ) {
+                drawIconByTemp(canvas, mCurrentTempRectangle, mCurrentTemp, mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
+            }
+        } else {
+            if ((getCurrentTemp() > 0) && (getCurrentTemp() > getBuildingLowerTempLimit()) && (getCurrentTemp() < getBuildingUpperTempLimit())) {
+                drawIconByTemp(canvas, isDetailedView() ? mCurrentTempRectangle : mRedLimitNonDetailedView,
+                        mCurrentTemp, mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
+            }
+        }
 
 
     }

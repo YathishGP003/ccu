@@ -3105,12 +3105,24 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         Log.i("ProfileTypes", "Points:" + zoneMap.toString());
         Equip p = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
         Log.i("ProfileTypes", "p:" + p.toString());
+        double offsetAvg = 0;
         double currentAverageTemp = 0;
+        double curTemp= 0;
         for (int i = 0; i < zoneMap.size(); i++) {
             Equip avgTempEquip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
             double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + avgTempEquip.getId() + "\"");
             currentAverageTemp = (currentAverageTemp + avgTemp);
         }
+        for (int k = 0; k < zoneMap.size(); k++) {
+            Equip updatedEquip = new Equip.Builder().setHashMap(zoneMap.get(k)).build();
+            if (updatedEquip.getProfile().contains("SENSE")) {
+                double offset = CCUHsApi.getInstance().readDefaultVal("point and offset and temperature and group == \""+updatedEquip.getGroup()+"\"");
+                Log.i("EachzoneData", "offset = "+offset );
+                offsetAvg = offsetAvg + (offset/10);
+            }
+        }
+        curTemp = currentAverageTemp + offsetAvg;
+
         Log.i("EachzoneData", " currentAvg:" + currentAverageTemp);
         final String[] equipId = {p.getId()};
         int i = gridPosition;
@@ -3138,7 +3150,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
         seekArc.setSense(true);
-        seekArc.setSenseData(false, (float)currentAverageTemp);
+        seekArc.setSenseData(false, (float)(curTemp));
         seekArc.setDetailedView(false);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 

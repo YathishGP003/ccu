@@ -46,10 +46,12 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.oao.OAOEquip;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.ZoneDataInterface;
@@ -110,7 +112,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	
 	ArrayList<String> modesAvailable = new ArrayList<>();
 	ArrayAdapter<Double> humidityAdapter;
-	
+	private TextView IEGatewayOccupancyStatus;
+	private TextView GUIDDetails;
+	private LinearLayout IEGatewayDetail;
 	Prefs prefs;
 	public SystemFragment()
 	{
@@ -258,7 +262,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		
 		occupancyStatus = view.findViewById(R.id.occupancyStatus);
 		equipmentStatus = view.findViewById(R.id.equipmentStatus);
-		
+		IEGatewayOccupancyStatus = view.findViewById(R.id.IE_Gateway_Occupancy_Status);
+		GUIDDetails = view.findViewById(R.id.GUID_Details);
+		IEGatewayDetail = view.findViewById(R.id.ie_gateway_details);
+
 		sbComfortValue = view.findViewById(R.id.systemComfortValue);
 		
 		targetMaxInsideHumidity = view.findViewById(R.id.targetMaxInsideHumidity);
@@ -514,6 +521,12 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 								.getPosition(TunerUtil.readSystemUserIntentVal("target and max and inside and humidity")), false);
 						targetMinInsideHumidity.setSelection(humidityAdapter
 								.getPosition(TunerUtil.readSystemUserIntentVal("target and min and inside and humidity")), false);
+
+						if(L.ccu().systemProfile instanceof VavIERtu){
+							IEGatewayDetail.setVisibility(View.VISIBLE);
+							IEGatewayOccupancyStatus.setText("IN "+getOccStatus());
+							GUIDDetails.setText(CCUHsApi.getInstance().getSiteGuid());
+						}
 					}
 				}
 			});
@@ -679,4 +692,15 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			mainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
 
 	}
+	private String getOccStatus(){
+		HashMap point = CCUHsApi.getInstance().read("point and " +
+				"system and ie ");
+		if (!point.isEmpty()) {
+			double occStatus = CCUHsApi.getInstance().readHisValById(point.get("id").toString());
+			return Occupancy.values()[(int) occStatus].name();
+		}
+		return null;
+	}
+
+
 }

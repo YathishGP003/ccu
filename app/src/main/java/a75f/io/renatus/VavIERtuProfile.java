@@ -21,7 +21,9 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 
@@ -67,9 +69,12 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     @BindView(R.id.oaMinTest) Spinner oaMinTest;
     @BindView(R.id.buttonNext)
     Button mNext;
+
     @BindView(R.id.btnEditIp)
     ImageView btnEditIp;
-    
+
+    @BindView(R.id.zone_type) TextView zoneType;
+    @BindView(R.id.sp_zone_type) ToggleButton zoneTypeSelection;
     VavIERtu systemProfile = null;
     String PROFILE = "VAV_IE_RTU";
     Prefs prefs;
@@ -92,7 +97,6 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         if(getArguments() != null) {
             isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
         }
-
         btnEditIp.setOnClickListener(view1 -> equipAddr.setEnabled(true));
         return rootView;
     }
@@ -108,6 +112,8 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
             analog2Cb.setChecked(systemProfile.getConfigEnabled("fan") > 0);
             analog3Cb.setChecked(systemProfile.getConfigEnabled("heating") > 0);
             humidificationCb.setChecked(systemProfile.getConfigEnabled("humidification") > 0);
+            zoneTypeSelection.setChecked(systemProfile.getConfigVal("multiZone")==1.0);
+            zoneType.setText(systemProfile.getConfigVal("multiZone")==0.0?"Single Zone":"Multi Zone");
             setupAnalogLimitSelectors();
             setupEquipAddrEditor();
             
@@ -159,7 +165,10 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         analog2Cb.setOnCheckedChangeListener(this);
         analog3Cb.setOnCheckedChangeListener(this);
         humidificationCb.setOnCheckedChangeListener(this);
-
+        zoneTypeSelection.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            zoneType.setText(isChecked?"Multi Zone":"Single Zone");
+            systemProfile.setConfigVal("multiZone",(isChecked?1.0:0.0));
+        });
         view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
 
             @Override
@@ -178,6 +187,16 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     
     public void setupEquipAddrEditor() {
         String eqIp = CCUHsApi.getInstance().readDefaultStrVal("point and system and config and ie and ipAddress");
+
+
+        // As of now for testing we need edit option so commented bellow code
+         /*
+            String subnetMaskAddress="255.255.255.0";
+            final String[] choices = {eqIp,subnetMaskAddress};
+            ArrayAdapter<String> addressAdapter =new ArrayAdapter<>(getContext(),android.R.layout.simple_spinner_item, choices);
+            addressAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            equipAddr.setAdapter(addressAdapter);
+        */
         equipAddr.setText(eqIp);
         equipAddr.setOnClickListener(new View.OnClickListener()
         {
@@ -213,8 +232,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     }
 
     private void goTonext() {
-        //Intent i = new Intent(mContext, RegisterGatherCCUDetails.class);
-        //startActivity(i);
+
         prefs.setBoolean("PROFILE_SETUP",true);
         prefs.setString("PROFILE",PROFILE);
         ((FreshRegistration)getActivity()).selectItem(19);

@@ -354,6 +354,7 @@ public class HyperStatSenseEquip {
                 Log.d(LOG_TAG, "TH1 is null");
             }
             if (config.isTh1Enable) {
+                mHayStack.writeDefaultValById(Th1.get("id").toString(), (double)config.th1Sensor);
                 Log.d(LOG_TAG, "thermister1 toggle update create new entry: ");
                 String id = createSensorPoint(floorRef, roomRef, "th1", config);
                 DeviceUtil.setPointEnabled(mNodeAddr, Port.TH1_IN.name(), true);
@@ -383,6 +384,7 @@ public class HyperStatSenseEquip {
                 Log.d(LOG_TAG, "TH2 is null");
             }
             if (config.isTh2Enable) {
+                mHayStack.writeDefaultValById(Th2.get("id").toString(), (double) config.th2Sensor);
                 Log.d(LOG_TAG, "thermister2 toggle update create new entry: ");
                 String id = createSensorPoint(floorRef, roomRef, "th2", config);
                 DeviceUtil.setPointEnabled(mNodeAddr, Port.TH2_IN.name(), true);
@@ -412,6 +414,7 @@ public class HyperStatSenseEquip {
                 Log.d(LOG_TAG, "An1 is null");
             }
             if (config.isAnalog1Enable) {
+                mHayStack.writeDefaultValById(An1.get("id").toString(), (double) config.analog1Sensor);
                 Log.d(LOG_TAG, "an1 toggle update create new entry: ");
                 String id = createSensorPoint(floorRef, roomRef, "analog1", config);
                 DeviceUtil.setPointEnabled(mNodeAddr, Port.ANALOG_IN_ONE.name(), true);
@@ -443,6 +446,7 @@ public class HyperStatSenseEquip {
             }
             if (config.isAnalog2Enable) {
                 Log.d(LOG_TAG, "an2 toggle update create new entry: ");
+                mHayStack.writeDefaultValById(An2.get("id").toString(), (double) config.analog2Sensor);
                 String id = createSensorPoint(floorRef, roomRef, "analog2", config);
                 DeviceUtil.setPointEnabled(mNodeAddr, Port.ANALOG_IN_TWO.name(), true);
                 DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.ANALOG_IN_TWO.name(), id);

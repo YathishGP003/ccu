@@ -141,9 +141,7 @@ public class ModbusPulse {
         if (register.registerType.equals("discreteInput")) {
             //16bit decimal (ir) or 1 bit (di)
             respVal = parseByteVal(response);
-        } else if (register.registerType.equals("inputRegister")) {
-            respVal = parseIntVal(response);
-        } else if (register.registerType.equals("holdingRegister")) {
+        } else if (register.registerType.equals("inputRegister") || register.registerType.equals("holdingRegister")) {
             if (register.getParameterDefinitionType().equals("float")) {
                     if (register.getWordOrder() != null && register.getWordOrder().equals("littleEndian")) {
                         respVal = parseLittleEndianFloatVal(response);

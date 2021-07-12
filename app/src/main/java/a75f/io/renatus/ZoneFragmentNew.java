@@ -3106,12 +3106,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         Equip p = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
         Log.i("ProfileTypes", "p:" + p.toString());
         double currentAverageTemp = 0;
-        int noTempSensor = 0;
-
-        if (zoneMap.size() > 1 && currentAverageTemp != 0) {
-            currentAverageTemp = currentAverageTemp / (zoneMap.size() - noTempSensor);
-            DecimalFormat decimalFormat = new DecimalFormat("#.#");
-            currentAverageTemp = Double.parseDouble(decimalFormat.format(Math.round(currentAverageTemp * 10.0) / 10.0));
+        for (int i = 0; i < zoneMap.size(); i++) {
+            Equip avgTempEquip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
+            double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + avgTempEquip.getId() + "\"");
+            currentAverageTemp = (currentAverageTemp + avgTemp);
         }
         Log.i("EachzoneData", " currentAvg:" + currentAverageTemp);
         final String[] equipId = {p.getId()};
@@ -3140,7 +3138,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
         seekArc.setSense(true);
-        seekArc.setSenseData(false, 70);
+        seekArc.setSenseData(false, (float)currentAverageTemp);
         seekArc.setDetailedView(false);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 

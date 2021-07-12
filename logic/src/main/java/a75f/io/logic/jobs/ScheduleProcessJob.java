@@ -1745,8 +1745,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             haystack.readHisValByQuery("point and logical and th2 and group == \"" + equipID + "\"");
         int size = 0;
 
-        sensePoints.put("curtempwithoffset",(currentTemp+tempOffset));
-        Log.d("Spoo","curtemp="+(currentTemp+tempOffset));
+        double offset = tempOffset/10;
+        sensePoints.put("curtempwithoffset",(currentTemp+offset));
+        Log.d("Spoo","curtemp="+(currentTemp+offset));
 
         if (tempOffset  != 0) {
             sensePoints.put("TemperatureOffset",tempOffset);

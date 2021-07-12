@@ -66,10 +66,6 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
         this.expandableListDetail = expandableListDetail;
         this.idMap = idmap;
         this.mActivity = activity;
-
-        Log.e("InsideEquipTempExpandableListAdapter","expandableListTitle- "+expandableListTitle);
-        Log.e("InsideEquipTempExpandableListAdapter","expandableListDetail- "+expandableListDetail);
-        Log.e("InsideEquipTempExpandableListAdapter","idMap- "+idMap);
     }
 
     @Override
@@ -85,7 +81,6 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
     {
         final String expandedListText = (String) getChild(listPosition, expandedListPosition);
         //Log.i("Scheduler", "IDE Too Slow: " + expandedListText);
-        Log.e("Scheduler", "InsideEquipTempExpandAdapter " + expandedListText);
 
         if (!expandedListText.startsWith("schedule") && (!expandedListText.startsWith("smartstat")))
         {

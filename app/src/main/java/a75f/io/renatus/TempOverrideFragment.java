@@ -74,7 +74,7 @@ public class TempOverrideFragment extends Fragment {
         String siteName = CCUHsApi.getInstance().read("site").get("dis").toString();
 
         ArrayList<HashMap> Zonedevices = CCUHsApi.getInstance().readAll("device");
-        Log.e("InsideTempOverrideFrag", "Zonedevices- " + Zonedevices);
+        //Log.e("InsideTempOverrideFrag", "Zonedevices- " + Zonedevices);
         for (Map m : Zonedevices) {
             ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and deviceRef == \""+m.get("id")+"\"");
             ArrayList tunerList = new ArrayList();

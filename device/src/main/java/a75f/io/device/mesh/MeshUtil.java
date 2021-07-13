@@ -12,6 +12,8 @@ import static a75f.io.device.DeviceConstants.HEARTBEAT_INTERVAL;
 import static a75f.io.device.DeviceConstants.HEARTBEAT_MULTIPLIER;
 import static a75f.io.device.DeviceConstants.SIMULATION_SLEEP_TIME;
 
+import android.util.Log;
+
 /**
  * Created by samjithsadasivan on 9/19/18.
  */
@@ -79,6 +81,7 @@ public class MeshUtil
     
     public static boolean sendStructToCM(Struct struct)
     {
+        Log.i(Globals.TAG, "sendStructToCM: sendSerialToCM sending data to mesh point ");
         boolean retVal = LSerial.getInstance().sendSerialToCM(struct);
         //If the application is in simualtion mode to work over FTDI with biskit,
         // sleep between messages, so biskit doesn't fall behind.

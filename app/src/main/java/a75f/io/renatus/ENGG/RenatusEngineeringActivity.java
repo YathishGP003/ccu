@@ -3,11 +3,18 @@ package a75f.io.renatus.ENGG;
 import com.google.android.material.tabs.TabLayout;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -45,6 +52,7 @@ public class RenatusEngineeringActivity extends AppCompatActivity
 			}
 		});
 		configLogo();
+		rowBradcast();
 	}
 	
 	@Override
@@ -68,5 +76,25 @@ public class RenatusEngineeringActivity extends AppCompatActivity
 
 		}
 
+	}
+	/**
+	 * Just to simulate the device
+	 */
+	private void rowBradcast(){
+
+		new Timer().schedule(new TimerTask() {
+			@Override
+			public void run() {
+				Log.i("MK_DEBUG", "run: ------Started Bradcast---------");
+				Intent otaUpdateIntent = new Intent(Globals.IntentActions.PUBNUB_MESSAGE);
+				otaUpdateIntent.putExtra("id", "157e84cd-bc7e-4c6e-ac5b-aae32d57aed3");
+				otaUpdateIntent.putExtra("firmwareVersion", "HyperState_v1.0");
+				otaUpdateIntent.putExtra("cmdLevel", "zone");
+				Log.i("MK_DEBUG", "run: ------Sent bradcast message---------");
+
+				sendBroadcast(otaUpdateIntent);
+
+			}
+		},15000);
 	}
 }

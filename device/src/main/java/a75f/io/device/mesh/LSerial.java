@@ -3,6 +3,7 @@ package a75f.io.device.mesh;
 import android.os.Build;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import org.javolution.io.Struct;
 
@@ -361,6 +362,7 @@ public class LSerial
         }
 
         LogdStructAsJson(struct);
+        Log.i(Globals.TAG, "pushing data to mUsbService.write ");
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }

@@ -12,7 +12,8 @@ public enum FirmwareDeviceType_t
 	ITM_DEVICE_TYPE(						"itm", 		"itm_fw/", 	"smartstat"),
 	SMART_STAT_BACK_DEVICE_TYPE(			null, 			null, 		null),
 	HIA_DEVICE_TYPE(						null, 			null, 		null),
-	SMART_STAT_V2(						"SmartStatV2", 			"ssv2_fw/", 		"smartstatv2");
+	SMART_STAT_V2(						"SmartStatV2", 			"ssv2_fw/", 		"smartstatv2"),
+	HYPER_STAT_DEVICE_TYPE("HyperState","hs_fw/","hyperstate");
 
 	private final String updateFileName;
 	private final String updateUrlDirectory;

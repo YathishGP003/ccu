@@ -187,15 +187,15 @@ public class CCUHsApi
         editor.apply();
     }
 
-    public String getHeartbeatVersion() {
+    public boolean isHeartbeatMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getString("heartbeatVersion","");
+        return sharedPreferences.getBoolean("heartbeatMigration",false);
     }
 
-    public void setHeartbeatVersion(String version) {
+    public void setHeartbeatMigrationStatus(boolean isMigrated) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("heartbeatVersion", version);
+        editor.putBoolean("heartbeatMigration", isMigrated);
         editor.apply();
     }
 

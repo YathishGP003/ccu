@@ -28,6 +28,7 @@ import a75f.io.logic.bo.building.sensors.SensorType;
 import a75f.io.logic.bo.haystack.device.HyperStatDevice;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.pubnub.ZoneDataInterface;
 
 import static a75f.io.device.mesh.Pulse.getHumidityConversion;
 
@@ -37,6 +38,7 @@ public class HyperStatMsgReceiver {
     private static final int HYPERSTAT_MESSAGE_ADDR_END_INDEX = 5;
     private static final int HYPERSTAT_MESSAGE_TYPE_INDEX = 13;
     private static final int HYPERSTAT_SERIALIZED_MESSAGE_START_INDEX = 17;
+    private static ZoneDataInterface currentTempInterface = null;
     
     public static void processMessage(byte[] data, CCUHsApi hayStack) {
         try {
@@ -110,7 +112,6 @@ public class HyperStatMsgReceiver {
     private static void writePortInputsToHaystackDatabase(RawPoint rawPoint,
                                                      HyperStatRegularUpdateMessage_t regularUpdateMessage,
                                                      CCUHsApi hayStack) {
-        
         Point point = DeviceHSUtil.getLogicalPointForRawPoint(rawPoint, hayStack);
     
         if (DLog.isLoggingEnabled()) {
@@ -120,7 +121,10 @@ public class HyperStatMsgReceiver {
         if (point == null) {
             return;
         }
-        if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_RT) {
+        if (Port.valueOf(rawPoint.getPort()) == Port.RSSI) {
+            writeHeartbeat(rawPoint, point, regularUpdateMessage, hayStack);
+        }
+        else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_RT) {
             writeRoomTemp(rawPoint, point, regularUpdateMessage, hayStack);
         } else if (Port.valueOf(rawPoint.getPort()) == Port.TH1_IN) {
             writeThermistorVal(rawPoint, point, hayStack,
@@ -139,7 +143,16 @@ public class HyperStatMsgReceiver {
         }
     
     }
-    
+
+    private static void writeHeartbeat(RawPoint rawPoint, Point point,
+                                       HyperStatRegularUpdateMessage_t regularUpdateMessage, CCUHsApi hayStack){
+        hayStack.writeHisValueByIdWithoutCOV(rawPoint.getId(), (double)regularUpdateMessage.getRssi());
+        hayStack.writeHisValueByIdWithoutCOV(point.getId(), (double)regularUpdateMessage.getRssi());
+        if(currentTempInterface != null) {
+            currentTempInterface.refreshScreen(null);
+        }
+    }
+
     private static void writeRoomTemp(RawPoint rawPoint, Point point,
                                HyperStatRegularUpdateMessage_t regularUpdateMessage, CCUHsApi hayStack) {
         
@@ -264,4 +277,7 @@ public class HyperStatMsgReceiver {
                                                          coolingDesiredTemp, heatingDesiredTemp, averageDesiredTemp);
     
     }
+
+    public static void setCurrentTempInterface(ZoneDataInterface in) {
+        currentTempInterface = in; }
 }

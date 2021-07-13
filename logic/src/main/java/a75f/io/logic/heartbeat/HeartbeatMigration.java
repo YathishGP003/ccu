@@ -23,19 +23,10 @@ public class HeartbeatMigration {
     }
 
     private void checkForHeartbeatMigration(){
-        PackageManager manager = Globals.getInstance().getApplicationContext().getPackageManager();
-        try {
-            PackageInfo info = manager.getPackageInfo(Globals.getInstance().getApplicationContext().getPackageName(), 0);
-            String heartbeatVersion = info.versionName ;
-            Log.i(CCU_HEART_BEAT_MIGRATION,"heartbeat version " + CCUHsApi.getInstance().getHeartbeatVersion());
-            if (CCUHsApi.getInstance().getHeartbeatVersion().isEmpty()) {
-                Log.i(CCU_HEART_BEAT_MIGRATION,"heartbeat migration started while migrating to " + heartbeatVersion);
-                upgradeEquipsWithHeartbeatPoints(CCUHsApi.getInstance());
-                CCUHsApi.getInstance().setHeartbeatVersion(heartbeatVersion);
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e(CCU_HEART_BEAT_MIGRATION, e.getMessage());
-            e.printStackTrace();
+        if (!CCUHsApi.getInstance().isHeartbeatMigrationDone()) {
+            Log.i(CCU_HEART_BEAT_MIGRATION,"heartbeat migration started ");
+            upgradeEquipsWithHeartbeatPoints(CCUHsApi.getInstance());
+            CCUHsApi.getInstance().setHeartbeatMigrationStatus(true);
         }
     }
 
@@ -68,14 +59,14 @@ public class HeartbeatMigration {
         modbusEquips.forEach(equipment -> {
             Equip modbusEquip = new Equip.Builder().setHashMap(equipment).build();
             String slaveId = modbusEquip.getGroup();
-            String equipDisplayName = modbusEquip.getDisplayName()+"-"+slaveId;
-            if(!isHeartbeatCreated(hayStack, slaveId)) {
+            String equipDisplayName = modbusEquip.getDisplayName()+"-";
+            if(!isHeartBeatCreatedForModbus(hayStack, slaveId)) {
                 hayStack.addPoint(HeartBeat.getHeartBeatPoint(equipDisplayName, modbusEquip.getId(),
                         modbusEquip.getSiteRef(), modbusEquip.getRoomRef(), modbusEquip.getFloorRef(),
                         Integer.parseInt(slaveId), "modbus", ProfileType.valueOf(modbusEquip.getProfile()),
                         modbusEquip.getTz()));
                 Log.i(CCU_HEART_BEAT_MIGRATION,"heartbeat point added for modbus with the address "+slaveId);
-           }
+          }
         });
     }
 
@@ -110,6 +101,11 @@ public class HeartbeatMigration {
 
     private boolean isHeartbeatCreated(CCUHsApi hayStack, String nodeAddress){
         return hayStack.read("point and heartbeat and group == \""+nodeAddress+"\"").size() > 0;
+    }
+
+    private boolean isHeartBeatCreatedForModbus(CCUHsApi hayStack, String nodeAddress){
+        HashMap equip = hayStack.read("equip and modbus and group == \"" + nodeAddress + "\"");
+        return hayStack.read("point and heartbeat and equipRef == \""+equip.get("id")+ "\"").size() > 0;
     }
 
     private void addRssiPointToDevice(CCUHsApi hayStack, String profile, String nodeAddress, String timeZone,

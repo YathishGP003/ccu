@@ -566,7 +566,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 }
                             }
                             if (profileType.contains(profileHyperStatSense)) {
-                                viewSenseZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout);
+                                viewSenseZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout, isZoneAlive);
                             }
 
                             if (tempModule) {
@@ -3154,20 +3154,28 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         textViewTitle.setText(sensePoints.get("Profile").toString() + " (" + nodeAddress + ")");
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
         linearLayoutZonePoints.addView(viewTitle);
+        View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
+        LinearLayout statusLayout=viewStatus.findViewById(R.id.ll_status);
+        statusLayout.setVisibility(View.GONE);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
+        textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
+        linearLayoutZonePoints.addView(viewStatus);
 
 
         if (sensePoints.get("isTh1Enable") == "true") {
             TextView textViewth1 = new TextView(getContext());
             textViewth1.setTextSize(24);
-            textViewth1.setPadding(40, 0, 0, 10);
+            textViewth1.setPadding(55, 0, 0, 10);
             textViewth1.setText(sensePoints.get("Thermistor1").toString() + " : " + (sensePoints.get("Th1Val").toString()) + " " + (sensePoints.get("Unit3").toString()));
             linearLayoutZonePoints.addView(textViewth1);
         }
         if (sensePoints.get("isTh2Enable") == "true") {
             TextView textViewth2 = new TextView(getContext());
             textViewth2.setTextSize(24);
-            textViewth2.setPadding(40, 0, 0, 10);
+            textViewth2.setPadding(55, 0, 0, 10);
             textViewth2.setText(sensePoints.get("Thermistor2").toString() + " : " + (sensePoints.get("Th2Val").toString()) + " " + (sensePoints.get("Unit4").toString()));
             linearLayoutZonePoints.addView(textViewth2);
         }
@@ -3175,21 +3183,21 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         if (sensePoints.get("iAn1Enable") == "true") {
             TextView textViewAnalog1 = new TextView(getContext());
             textViewAnalog1.setTextSize(24);
-            textViewAnalog1.setPadding(40, 0, 0, 10);
+            textViewAnalog1.setPadding(55, 0, 0, 10);
             textViewAnalog1.setText(sensePoints.get("Analog1").toString() + " : " + (sensePoints.get("An1Val").toString()) + " " + (sensePoints.get("Unit1").toString()));
             linearLayoutZonePoints.addView(textViewAnalog1);
         }
         if (sensePoints.get("iAn2Enable") == "true") {
             TextView textViewAnalog2 = new TextView(getContext());
             textViewAnalog2.setTextSize(24);
-            textViewAnalog2.setPadding(40, 0, 0, 10);
+            textViewAnalog2.setPadding(55, 0, 0, 10);
             textViewAnalog2.setText(sensePoints.get("Analog2").toString() + " : " + (sensePoints.get("An2Val").toString()) + " " + (sensePoints.get("Unit2").toString()));
             linearLayoutZonePoints.addView(textViewAnalog2);
 
         }
 
     }
-    private void viewSenseZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap, String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout) {
+    private void viewSenseZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap, String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout, boolean isZoneAlive) {
 
         Log.i("ProfileTypes", "Points:" + zoneMap.toString());
         Equip p = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
@@ -3207,7 +3215,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         int i = gridPosition;
         View arcView = inflater.inflate(R.layout.zones_item, (ViewGroup) rootView, false);
         View zoneDetails = inflater.inflate(R.layout.zones_item_details, null);
-
+        View status_view = arcView.findViewById(R.id.status_view);
+        TextView textViewModule = arcView.findViewById(R.id.module_status);
+        HeartBeatUtil.zoneStatus(textViewModule, isZoneAlive);
         LinearLayout linearLayoutZonePoints = zoneDetails.findViewById(R.id.lt_profilepoints);
         LinearLayout linearLayoutschedulePoints = zoneDetails.findViewById(R.id.lt_schedule);
         LinearLayout linearLayoutstatusPoints = zoneDetails.findViewById(R.id.lt_status);

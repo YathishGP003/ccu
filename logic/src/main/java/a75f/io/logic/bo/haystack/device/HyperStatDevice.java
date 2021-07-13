@@ -11,6 +11,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 
 /**
  * Models a HyperStat device Haystack entity.
@@ -36,6 +37,7 @@ public class HyperStatDevice {
     public RawPoint analog3Out;
     public RawPoint currentTemp;
     public RawPoint desiredTemp;
+    public RawPoint rssi;
     
     public String deviceRef;
     public String siteRef;
@@ -188,6 +190,7 @@ public class HyperStatDevice {
                           .setUnit("\u00B0F")
                           .setTz(tz)
                           .build();
+        rssi = HeartBeat.getHeartBeatRawPoint(hyperStatNodeAddress, deviceRef, siteRef, roomRef, floorRef, tz);
     }
     
     private RawPoint createRelayPoint(Port relayPort, String name) {
@@ -345,6 +348,7 @@ public class HyperStatDevice {
         CCUHsApi.getInstance().addPoint(analog3Out);
         CCUHsApi.getInstance().addPoint(currentTemp);
         CCUHsApi.getInstance().addPoint(desiredTemp);
+        CCUHsApi.getInstance().addPoint(rssi);
     }
 
     public void addSensor(Port p, String pointRef) {

@@ -13,6 +13,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.HyperStatDevice;
 import a75f.io.logic.bo.haystack.device.SmartNode;
@@ -272,6 +273,9 @@ public class HyperStatSenseEquip {
         String th2InputSensorId = mHayStack.addPoint(th2InputSensor);
         mHayStack.writeDefaultValById(th2InputSensorId, (double) config.th2Sensor >= 0 ? config.th2Sensor : 0.0);
 
+        String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, mEquipRef,
+                siteRef, roomRef, floorRef, mNodeAddr, "sense", tz));
+
         HyperStatDevice device = new HyperStatDevice(mNodeAddr, siteRef, floorRef, roomRef, mEquipRef, "sense");
 
         if (config.isAnalog1Enable) {
@@ -305,6 +309,8 @@ public class HyperStatSenseEquip {
         device.currentTemp.setEnabled(true);
 
         device.addSensor(Port.SENSOR_RH, humidityId);
+        device.rssi.setPointRef(heartBeatId);
+        device.rssi.setEnabled(true);
         device.addPointsToDb();
         mHayStack.syncEntityTree();
     }

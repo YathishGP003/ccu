@@ -51,10 +51,10 @@ public class ModbusEquip {
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
         String modbusEquipType = equipmentInfo.getEquipType();
-        String equipDis = siteDis + "-"+modbusEquipType+"-" + slaveId + "-";
+        String modbusName = equipmentInfo.getName();
+        String equipDis = siteDis + "-"+modbusName+"-"+modbusEquipType+"-" + slaveId ;
         String gatewayRef = null;
         configuredParams = configParams;
-        String modbusName = equipmentInfo.getName();
         Log.d("Modbus",modbusEquipType+"MbEquip create Entity = "+configuredParams.size());
         HashMap systemEquip = hayStack.read("equip and system");
         if (systemEquip != null && systemEquip.size() > 0) {
@@ -62,7 +62,7 @@ public class ModbusEquip {
         }
 
         Equip.Builder mbEquip = new Equip.Builder().setSiteRef(siteRef)
-                    .setDisplayName(equipDis + modbusName)
+                    .setDisplayName(equipDis)
                     .setRoomRef(roomRef)
                     .setFloorRef(floorRef)
                     .setProfile(profileType.name())

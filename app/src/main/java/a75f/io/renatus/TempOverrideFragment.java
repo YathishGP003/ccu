@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -25,9 +26,6 @@ import a75f.io.api.haystack.Point;
 import a75f.io.logic.Globals;
 import butterknife.ButterKnife;
 
-/**
- * Created by Mahesh on 18-07-2019.
- */
 public class TempOverrideFragment extends Fragment {
     ArrayList<HashMap> openZoneMap;
 
@@ -79,11 +77,57 @@ public class TempOverrideFragment extends Fragment {
             ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and deviceRef == \""+m.get("id")+"\"");
             ArrayList tunerList = new ArrayList();
 
+            Log.e("InsideTempOverrideFrag","tuners- "+tuners);
             for (Map t : tuners) {
+                Log.e("InsideTempOverrideFrag","value_t- "+t);
                 if (t.get("dis").toString().startsWith("Analog1In") || t.get("dis").toString().startsWith("Analog1Out") || t.get("dis").toString().startsWith("Analog2In") ||
                         t.get("dis").toString().startsWith("Analog2Out") || t.get("dis").toString().startsWith("relay") || t.get("dis").toString().startsWith("Th") ||
                         t.get("dis").toString().startsWith(siteName) && Objects.nonNull(t.get("dis").toString())) {
-                    tunerList.add(t.get("dis").toString());
+                    String NewexpandedListText = t.get("dis").toString();
+                    if (NewexpandedListText.startsWith("Analog")) {
+                        String relayPos = (NewexpandedListText.substring(6, 7));
+                        Log.e("InsideTempOverrideFrag","relayPos- "+relayPos);
+                        if(getConfigEnabled("analog"+relayPos) > 0) {
+                            tunerList.add(t.get("dis").toString());
+                        }
+                    } else if (NewexpandedListText.startsWith("relay")) {
+                        String relayPos = (t.get("dis").toString().substring(5,6));
+                        if(getConfigEnabled("relay"+relayPos) > 0) {
+                            tunerList.add(t.get("dis").toString());
+                        }
+                    }else if (NewexpandedListText.startsWith("Th")) {
+                        String relayPos = (t.get("dis").toString().substring(2,3));
+                        /*if(getConfigEnabled("Th"+relayPos+"In") > 0) {
+                            tunerList.add(t.get("dis").toString());
+                        }*/
+                    } else if (NewexpandedListText.startsWith(siteName)) {
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, t.get("dis").toString().substring(siteName.length()+1, t.get("dis").toString().length()));
+                        if (NewexpandedListText.startsWith("CM-analog1Out")) {
+                            if(getConfigEnabled("analog1") > 0) {
+                                tunerList.add(t.get("dis").toString());
+                            }
+                        }
+                        else if (NewexpandedListText.startsWith("CM-analog2Out")) {
+                            if(getConfigEnabled("analog2") > 0) {
+                                tunerList.add(t.get("dis").toString());
+                            }
+                        } else if (NewexpandedListText.startsWith("CM-analog3Out")) {
+                            if(getConfigEnabled("analog3") > 0) {
+                                tunerList.add(t.get("dis").toString());
+                            }
+                        }else if (NewexpandedListText.startsWith("CM-analog4Out")) {
+                            if(getConfigEnabled("analog4") > 0) {
+                                tunerList.add(t.get("dis").toString());
+                            }
+                        }
+                        else if (NewexpandedListText.startsWith("relay")) {
+                            String relayPos = (t.get("dis").toString().substring(siteName.length()+6, siteName.length()+7));
+                            if(getConfigEnabled("relay"+relayPos) > 0) {
+                                tunerList.add(t.get("dis").toString());
+                            }
+                        }
+                    }
+                    //tunerList.add(t.get("dis").toString());
                     Collections.sort(tunerList, new Comparator<String>() {
                         @Override
                         public int compare(String s1, String s2) {
@@ -94,6 +138,8 @@ public class TempOverrideFragment extends Fragment {
                 }
             }
             if (tunerList.isEmpty() == false) {
+                Log.e("InsideTempOverrideFrag","val1- "+m.get("dis").toString());
+                Log.e("InsideTempOverrideFrag","val2- "+tunerList);
                 expandableListDetail.put(m.get("dis").toString(), tunerList);
             }
             equipMap.put(m.get("dis").toString(), m.get("id").toString());
@@ -116,7 +162,7 @@ public class TempOverrideFragment extends Fragment {
                 }
                 expandableListView.invalidateViews();
                 if (lastExpandedPosition != -1
-                    && groupPosition != lastExpandedPosition) {
+                        && groupPosition != lastExpandedPosition) {
                     expandableListView.collapseGroup(lastExpandedPosition);
                 }
                 lastExpandedPosition = groupPosition;
@@ -124,6 +170,20 @@ public class TempOverrideFragment extends Fragment {
 
             }
         });
+    }
+
+    public double getConfigEnabled(String config) {
+        //Log.e("InsideTempOverrideExpandableListAdapter","config- "+config);
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap configPoint = hayStack.read("point and system and config and output and enabled and "+config);
+        if (configPoint.isEmpty()){
+            return 0.0;
+        }
+        else{
+            //Log.e("InsideTempOverrideExpandableListAdapter","configPoint- "+configPoint);
+            return hayStack.readPointPriorityVal(configPoint.get("id").toString());
+        }
+
     }
 
     public static double getPointVal(String id) {

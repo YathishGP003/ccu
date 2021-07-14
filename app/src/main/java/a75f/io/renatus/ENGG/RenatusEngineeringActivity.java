@@ -87,8 +87,8 @@ public class RenatusEngineeringActivity extends AppCompatActivity
 			public void run() {
 				Log.i("MK_DEBUG", "run: ------Started Bradcast---------");
 				Intent otaUpdateIntent = new Intent(Globals.IntentActions.PUBNUB_MESSAGE);
-				otaUpdateIntent.putExtra("id", "157e84cd-bc7e-4c6e-ac5b-aae32d57aed3");
-				otaUpdateIntent.putExtra("firmwareVersion", "HyperState_v1.0");
+				otaUpdateIntent.putExtra("id", "73988c47-b0a8-492c-b78d-807fbf81e4a2");
+				otaUpdateIntent.putExtra("firmwareVersion", "HyperStat_v1.1");
 				otaUpdateIntent.putExtra("cmdLevel", "zone");
 				Log.i("MK_DEBUG", "run: ------Sent bradcast message---------");
 

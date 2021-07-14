@@ -472,7 +472,7 @@ public class SeekArc extends View
 
         //Draw icon at current temperature
         if (isSense) {
-            if((getCurrentTemp() > 0) ) {
+            if((getCurrentTemp() > 0) && (getCurrentTemp() > getBuildingLowerTempLimit()) && (getCurrentTemp() < getBuildingUpperTempLimit())) {
                 drawIconByTemp(canvas, mCurrentTempRectangle, mCurrentTemp, mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
             }
         } else {

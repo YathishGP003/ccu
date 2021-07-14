@@ -267,7 +267,7 @@ public class PlcEquip {
         String controlLoopInversionId = hayStack.addPoint(controlLoopInversion);
         hayStack.writeDefaultValById(controlLoopInversionId, config.controlLoopInversion ? 1.0 : 0);
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
-                siteRef, roomRef, floorRef, nodeAddr, "plc", tz, false));
+                siteRef, roomRef, floorRef, nodeAddr, "pid", tz, false));
         
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
 

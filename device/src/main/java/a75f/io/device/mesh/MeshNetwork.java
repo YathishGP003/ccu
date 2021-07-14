@@ -7,6 +7,7 @@ import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.DeviceNetwork;
+import a75f.io.device.daikin.DaikinIE;
 import a75f.io.device.daikin.IEDeviceHandler;
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
@@ -199,6 +200,7 @@ public class MeshNetwork extends DeviceNetwork
         Pulse.checkForDeviceDead();
 
         if (ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU) {
+            //DaikinIE.sendControl();
             VavIERtu systemProfile = (VavIERtu) L.ccu().systemProfile;
             IEDeviceHandler.getInstance().sendControl(systemProfile, CCUHsApi.getInstance());
         }

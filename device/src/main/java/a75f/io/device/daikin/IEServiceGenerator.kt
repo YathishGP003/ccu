@@ -41,6 +41,7 @@ class IEServiceGenerator {
             )
             addInterceptor(okhttpLogging)
             addNetworkInterceptor(okhttpLogging)
+            connectTimeout(30, TimeUnit.SECONDS)
         }.build()
         CcuLog.i(L.TAG_CCU_DEVICE, "create retrofit  $baseUrl")
         return Retrofit.Builder()

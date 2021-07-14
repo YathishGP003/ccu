@@ -74,40 +74,46 @@ public class TempOverrideFragment extends Fragment {
         ArrayList<HashMap> Zonedevices = CCUHsApi.getInstance().readAll("device");
         //Log.e("InsideTempOverrideFrag", "Zonedevices- " + Zonedevices);
         for (Map m : Zonedevices) {
+            //Log.e("InsideTempOverrideFrag","value_m- "+m);
             ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and deviceRef == \""+m.get("id")+"\"");
             ArrayList tunerList = new ArrayList();
 
-            Log.e("InsideTempOverrideFrag","tuners- "+tuners);
+            //Log.e("InsideTempOverrideFrag","tuners- "+tuners);
             for (Map t : tuners) {
-                Log.e("InsideTempOverrideFrag","value_t- "+t);
+                //Log.e("InsideTempOverrideFrag","value_t- "+t);
                 if (t.get("dis").toString().startsWith("Analog1In") || t.get("dis").toString().startsWith("Analog1Out") || t.get("dis").toString().startsWith("Analog2In") ||
                         t.get("dis").toString().startsWith("Analog2Out") || t.get("dis").toString().startsWith("relay") || t.get("dis").toString().startsWith("Th") ||
                         t.get("dis").toString().startsWith(siteName) && Objects.nonNull(t.get("dis").toString())) {
                     String NewexpandedListText = t.get("dis").toString();
+                    //Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText);
                     if (NewexpandedListText.startsWith("Analog")) {
                         String relayPos = (NewexpandedListText.substring(6, 7));
-                        Log.e("InsideTempOverrideFrag","relayPos- "+relayPos);
+                        Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText + ", IsgetConfigEnabled- "+getConfigEnabled("analog"+relayPos));
                         if(getConfigEnabled("analog"+relayPos) > 0) {
                             tunerList.add(t.get("dis").toString());
                         }
                     } else if (NewexpandedListText.startsWith("relay")) {
                         String relayPos = (t.get("dis").toString().substring(5,6));
+                        Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText + ", IsgetConfigEnabled- "+getConfigEnabled("relay"+relayPos));
                         if(getConfigEnabled("relay"+relayPos) > 0) {
                             tunerList.add(t.get("dis").toString());
                         }
                     }else if (NewexpandedListText.startsWith("Th")) {
                         String relayPos = (t.get("dis").toString().substring(2,3));
-                        /*if(getConfigEnabled("Th"+relayPos+"In") > 0) {
+                        Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText + ", IsgetConfigEnabled- "+getConfigEnabled("Th"+relayPos+"In"));
+                        if(getConfigEnabled("Th"+relayPos+"In") > 0) {
                             tunerList.add(t.get("dis").toString());
-                        }*/
+                        }
                     } else if (NewexpandedListText.startsWith(siteName)) {
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, t.get("dis").toString().substring(siteName.length()+1, t.get("dis").toString().length()));
                         if (NewexpandedListText.startsWith("CM-analog1Out")) {
+                            //Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText + ", IsgetConfigEnabled- "+getConfigEnabled("analog1"));
                             if(getConfigEnabled("analog1") > 0) {
                                 tunerList.add(t.get("dis").toString());
                             }
                         }
                         else if (NewexpandedListText.startsWith("CM-analog2Out")) {
+                            //Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText + ", IsgetConfigEnabled- "+getConfigEnabled("analog2"));
                             if(getConfigEnabled("analog2") > 0) {
                                 tunerList.add(t.get("dis").toString());
                             }

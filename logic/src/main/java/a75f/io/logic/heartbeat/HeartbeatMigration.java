@@ -59,8 +59,8 @@ public class HeartbeatMigration {
         modbusEquips.forEach(equipment -> {
             Equip modbusEquip = new Equip.Builder().setHashMap(equipment).build();
             String slaveId = modbusEquip.getGroup();
-            String equipDisplayName = modbusEquip.getDisplayName()+"-";
-            if(!isHeartBeatCreatedForModbus(hayStack, slaveId)) {
+            String equipDisplayName = modbusEquip.getDisplayName();
+            if(!isHeartbeatCreated(hayStack, slaveId)) {
                 hayStack.addPoint(HeartBeat.getHeartBeatPoint(equipDisplayName, modbusEquip.getId(),
                         modbusEquip.getSiteRef(), modbusEquip.getRoomRef(), modbusEquip.getFloorRef(),
                         Integer.parseInt(slaveId), "modbus", ProfileType.valueOf(modbusEquip.getProfile()),
@@ -78,8 +78,7 @@ public class HeartbeatMigration {
         List<HashMap> equips = hayStack.readAll(query);
         equips.forEach(equipment -> {
             Equip equip = new Equip.Builder().setHashMap(equipment).build();
-            String displayName = equip.getDisplayName();
-            String nodeAddress = displayName.substring(displayName.lastIndexOf("-")+1);
+            String nodeAddress = equip.getGroup();
             String equipDisplay = equipDis+nodeAddress;
             if(!isHeartbeatCreated(hayStack, nodeAddress)){
                 String heartBeatId = "";
@@ -101,11 +100,6 @@ public class HeartbeatMigration {
 
     private boolean isHeartbeatCreated(CCUHsApi hayStack, String nodeAddress){
         return hayStack.read("point and heartbeat and group == \""+nodeAddress+"\"").size() > 0;
-    }
-
-    private boolean isHeartBeatCreatedForModbus(CCUHsApi hayStack, String nodeAddress){
-        HashMap equip = hayStack.read("equip and modbus and group == \"" + nodeAddress + "\"");
-        return hayStack.read("point and heartbeat and equipRef == \""+equip.get("id")+ "\"").size() > 0;
     }
 
     private void addRssiPointToDevice(CCUHsApi hayStack, String profile, String nodeAddress, String timeZone,

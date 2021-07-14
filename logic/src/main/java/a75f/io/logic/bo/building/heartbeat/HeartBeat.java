@@ -47,7 +47,7 @@ public class HeartBeat {
     private HeartBeat(String equipDis, String equipRef, String siteRef, String room, String floor, int nodeAddr,
                       String profile, String modbusType, String tz){
         heartBeat = new Point.Builder()
-                .setDisplayName(equipDis+"heartBeat")
+                .setDisplayName(equipDis+"-heartBeat")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(room)

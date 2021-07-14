@@ -71,6 +71,7 @@ import a75f.io.device.mesh.Pulse;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
@@ -78,7 +79,7 @@ import a75f.io.logic.bo.building.dualduct.DualDuctUtil;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitConfiguration;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
-import a75f.io.logic.jobs.ScheduleProcessJob;
+
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.ZoneDataInterface;
@@ -96,6 +97,7 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.SeekArc;
 
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
+import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
 
 public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private static final String LOG_TAG = " ZoneFragmentNew ";
@@ -3103,14 +3105,24 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         Log.i("ProfileTypes", "Points:" + zoneMap.toString());
         Equip p = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
         Log.i("ProfileTypes", "p:" + p.toString());
+        double offsetAvg = 0;
         double currentAverageTemp = 0;
-        int noTempSensor = 0;
-
-        if (zoneMap.size() > 1 && currentAverageTemp != 0) {
-            currentAverageTemp = currentAverageTemp / (zoneMap.size() - noTempSensor);
-            DecimalFormat decimalFormat = new DecimalFormat("#.#");
-            currentAverageTemp = Double.parseDouble(decimalFormat.format(Math.round(currentAverageTemp * 10.0) / 10.0));
+        double curTemp= 0;
+        for (int i = 0; i < zoneMap.size(); i++) {
+            Equip avgTempEquip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
+            double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + avgTempEquip.getId() + "\"");
+            currentAverageTemp = (currentAverageTemp + avgTemp);
         }
+        for (int k = 0; k < zoneMap.size(); k++) {
+            Equip updatedEquip = new Equip.Builder().setHashMap(zoneMap.get(k)).build();
+            if (updatedEquip.getProfile().contains("SENSE")) {
+                double offset = CCUHsApi.getInstance().readDefaultVal("point and offset and temperature and group == \""+updatedEquip.getGroup()+"\"");
+                Log.i("EachzoneData", "offset = "+offset );
+                offsetAvg = offsetAvg + (offset/10);
+            }
+        }
+        curTemp = currentAverageTemp + offsetAvg;
+
         Log.i("EachzoneData", " currentAvg:" + currentAverageTemp);
         final String[] equipId = {p.getId()};
         int i = gridPosition;
@@ -3133,13 +3145,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         arcView.setId(i);
         SeekArc seekArc = arcView.findViewById(R.id.seekArc);
         seekArc.setTag(gridItemObj);
-        seekArc.setCurrentTemp((float) currentAverageTemp);
         zoneDetails.setTag(gridItemObj);
-
+        seekArc.scaletoNormal(250, 210);
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
-
-        seekArc.scaletoNormal(250, 210);
+        seekArc.setSense(true);
+        seekArc.setSenseData(false, (float)(curTemp));
         seekArc.setDetailedView(false);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 
@@ -3301,7 +3312,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     Equip updatedEquip = new Equip.Builder().setHashMap(openZoneMap.get(k)).build();
                     if (updatedEquip.getProfile().contains("SENSE")) {
                         HashMap sensePoints = ScheduleProcessJob.getHyperStatSenseEquipPoints(updatedEquip.getGroup());
-                        // seekArc.setCurrentTemp(Float.parseFloat(sensePoints.get("curtempwithoffset").toString()));
+                        seekArc.setCurrentTemp(Float.parseFloat(sensePoints.get("curtempwithoffset").toString()));
                         loadSENSEPointsUI(sensePoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
                     }
 

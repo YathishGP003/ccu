@@ -46,7 +46,7 @@ public class HyperStatSenseUtil {
 
     public static void updatetempOffset(JsonObject msgObject, Point configPoint, CCUHsApi hayStack){
         double val = msgObject.get("val").getAsDouble();
-        hayStack.writeDefaultValById(configPoint.get("id").toString(), val);
+        hayStack.writeDefaultValById(configPoint.getId(), val);
     }
 
 

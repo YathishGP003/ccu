@@ -1,3 +1,4 @@
+/*Created by Aniket on 07/07/2021*/
 package a75f.io.renatus;
 
 import android.app.Activity;
@@ -43,10 +44,15 @@ import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.logic.bo.building.system.SystemRelayOp;
+import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
+import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
+import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
+import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 
 import static a75f.io.renatus.TempOverrideFragment.getPointVal;
 
@@ -54,12 +60,8 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
     private Fragment mFragment;
     private List<String> expandableListTitle;
     private TreeMap<String, List<String>> expandableListDetail;
-    //private TreeMap<String, String> expandableListDetail;
     private TreeMap<String, String>       idMap;
     String siteName;
-
-    Schedule mSchedule = null;
-    int mScheduleType = -1;
 
     Activity mActivity = null;
 
@@ -73,9 +75,9 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         this.mActivity = activity;
         this.siteName = siteName;
 
-        Log.e("InsideTempOverrideExpandableListAdapter", "expandableListTitle- " + expandableListTitle);
+        /*Log.e("InsideTempOverrideExpandableListAdapter", "expandableListTitle- " + expandableListTitle);
         Log.e("InsideTempOverrideExpandableListAdapter", "expandableListDetail- " + expandableListDetail);
-        Log.e("InsideTempOverrideExpandableListAdapter", "idMap- " + idMap);
+        Log.e("InsideTempOverrideExpandableListAdapter", "idMap- " + idMap);*/
     }
 
     @Override
@@ -91,8 +93,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
     {
         final String expandedListText = (String) getChild(listPosition, expandedListPosition);
         String NewexpandedListText = expandedListText;
-        //Log.i("Scheduler", "IDE Too Slow: " + expandedListText);
-        //Log.e("Scheduler", "InsideTempOverrideExpaAdapter" + expandedListText);
 
         if (!expandedListText.startsWith("schedule") && (!expandedListText.startsWith("smartstat"))) {
             LayoutInflater layoutInflater = (LayoutInflater) this.mFragment.getContext()
@@ -149,7 +149,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         expandedListTextVal.setText("" + getPointVal(idMap.get(expandedListText))+" mV");
                         spinner_override_value.setVisibility(View.VISIBLE);
                     } else if (NewexpandedListText.startsWith("CM-analog1Out")) {
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1");
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1(Cooling)");
                         txt_calculated_output.setText("" + getPointVal(idMap.get(expandedListText))+" dV");
                         spinner_override_value.setVisibility(View.VISIBLE);
                     } else if (NewexpandedListText.startsWith("CM-analog2In")) {
@@ -157,50 +157,31 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         expandedListTextVal.setText("" + getPointVal(idMap.get(expandedListText))+" mV");
                         spinner_override_value.setVisibility(View.VISIBLE);
                     } else if (NewexpandedListText.startsWith("CM-analog2Out")) {
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2");
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2(Fan Speed)");
                         txt_calculated_output.setText("" + getPointVal(idMap.get(expandedListText))+" dV");
                         spinner_override_value.setVisibility(View.VISIBLE);
                     } else if (NewexpandedListText.startsWith("CM-analog3Out")) {
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3");
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3(Heating)");
                         txt_calculated_output.setText("" + getPointVal(idMap.get(expandedListText))+" dV");
                         spinner_override_value.setVisibility(View.VISIBLE);
                     }else if (NewexpandedListText.startsWith("CM-analog4Out")) {
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4");
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4(Composite)");
                         txt_calculated_output.setText("" + getPointVal(idMap.get(expandedListText))+" dV");
                         spinner_override_value.setVisibility(View.VISIBLE);
                     }
                     else if (NewexpandedListText.startsWith("relay")) {
                         String relayPos = (expandedListText.substring(siteName.length()+6, siteName.length()+7));
                         if(getConfigEnabled("relay"+relayPos) > 0) {
-                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos);
-                            List<String> hvac_stage_selector = Arrays.asList(convertView.getResources().getStringArray(R.array.hvac_stage_selector));
-                            Log.e("InsideTempOverrideExpandableListAdapter", "relayData1 " + relayPos + CCUHsApi.getInstance().read("relay" + relayPos));
-                            Log.e("InsideTempOverrideExpandableListAdapter", "hvac_stage_selector- " + hvac_stage_selector);
+                            String relayMapped = getRelayMapping("relay"+relayPos, convertView);
+                            Log.e("InsideTempOverrideExpandableListAdapter", "relayMapped " +relayMapped);
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos +"("+relayMapped+")");
                             txt_calculated_output.setText(Double.compare(getPointVal(idMap.get(expandedListText)), 1.0) == 0 ? "ON" : "OFF");
                             spinner_relay.setVisibility(View.VISIBLE);
                         }
                         else{
                             Object valueToDelete = getChild(listPosition, expandedListPosition);
-                            Object titleDelete = getGroup(listPosition);
-                            Log.e("InsideTempOverrideExpandableListAdapter", "getValueToDelete- " + valueToDelete);
-                            Log.e("InsideTempOverrideExpandableListAdapter", "titleDelete- " + titleDelete.toString());
-
-                            /*for (TreeMap.Entry<String, List<String>> entry : expandableListDetail.entrySet()) {
-                                Log.e("InsideTempOverrideExpandableListAdapter", "entry- " + entry);
-                                //Log.e("InsideTempOverrideExpandableListAdapter", "entry_key- " + entry.getKey());
-                                //Log.e("InsideTempOverrideExpandableListAdapter", "entry_value- " + entry.getValue());
-                                if (entry.getKey().equals(titleDelete)){
-                                    if (entry.getValue().contains(valueToDelete)) {
-                                        entry.getValue().remove(valueToDelete);
-                                    }
-                                }
-                                else
-                                    continue;
-                                Log.e("InsideTempOverrideExpandableListAdapter", "entry_2- " + entry.getValue());
-                            }*/
-                            //Log.e("InsideTempOverrideExpandableListAdapter", "expandableListDetail- " + entry.getValue());
                             expandableListDetail.remove(valueToDelete);
-                            Log.e("InsideTempOverrideExpandableListAdapter", "NewexpandableListDetail- " + expandableListDetail);
+                            //Log.e("InsideTempOverrideExpandableListAdapter", "NewexpandableListDetail- " + expandableListDetail);
                         }
                     }else if (NewexpandedListText.startsWith("CM-th")) {
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(siteName.length()+6, siteName.length()+7));
@@ -208,9 +189,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         spinner_thermistor.setVisibility(View.VISIBLE);
                     }
                 }
-                //String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \""+idMap.get(expandedListText)+"\"");
-                //String unit = CCUHsApi.getInstance().readMapById(equipId);
-                //Log.e("InsideTempOverrideExpandableListAdapter1","readMapById- "+unit);
                 expandedListTextView.setText(NewexpandedListText);
             }
 
@@ -303,6 +281,52 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         return convertView;
     }
 
+    private String getRelayMapping(String relayname, View convertView){
+        String profileName =  L.ccu().systemProfile.getProfileName();
+        List<String> hvac_stage_selector = Arrays.asList(convertView.getResources().getStringArray(R.array.hvac_stage_selector));
+        Log.e("InsideTempOverrideExpandableListAdapter", "hvac_stage_selector- " + hvac_stage_selector);
+        VavStagedRtu vavStagedRtu = new VavStagedRtu();
+        DabStagedRtu dabStagedRtu = new DabStagedRtu();
+        switch (profileName){
+            case "DAB Fully Modulating AHU":
+                DabFullyModulatingRtu dabFullyModulatingRtu = new DabFullyModulatingRtu();
+                if (relayname.equals("relay7"))
+                    if ((int)dabFullyModulatingRtu.getConfigVal("humidifier and type") == 0)
+                        return "Humidifier";
+                    else
+                        return "De-Humidifier";
+                else return "Fan Enable";
+                //return ((int)dabFullyModulatingRtu.getConfigVal(relayname));
+            case "DAB Staged RTU with VFD FAN":
+                return hvac_stage_selector.get((int)dabStagedRtu.getConfigAssociation(relayname));
+            case "DAB Staged RTU":
+                //DabStagedRtu dabStagedRtu = new DabStagedRtu();
+                return hvac_stage_selector.get((int)dabStagedRtu.getConfigAssociation(relayname));
+            case "DAB Advanced Hybrid AHU":
+                return hvac_stage_selector.get((int)dabStagedRtu.getConfigAssociation(relayname));
+            case "VAV Staged RTU":
+                //VavStagedRtu vavStagedRtu = new VavStagedRtu();
+                return hvac_stage_selector.get((int)vavStagedRtu.getConfigAssociation(relayname));
+            case "VAV Fully Modulating AHU":
+                VavFullyModulatingRtu vavFullyModulatingRtu = new VavFullyModulatingRtu();
+                if (relayname.equals("relay7")) {
+                    if ((int) vavFullyModulatingRtu.getConfigVal("humidifier and type") == 0)
+                        return "Humidifier";
+                    else
+                        return "De-Humidifier";
+                }else
+                    return "Fan Enable";
+            case "VAV Staged RTU with VFD Fan":
+                //VavStagedRtu vavStagedRtu1 = new VavStagedRtu();
+                return hvac_stage_selector.get((int)vavStagedRtu.getConfigAssociation(relayname));
+            case "VAV Advanced Hybrid AHU":
+                //VavStagedRtu vavStagedRtu1 = new VavStagedRtu();
+                return hvac_stage_selector.get((int)vavStagedRtu.getConfigAssociation(relayname));
+            case "Daikin IE RTU":
+        }
+        return "Default";
+    }
+
     public void setPointVal(String id, double val) {
         SystemRelayOp op = new SystemRelayOp();
         //Log.e("InsideTempOverrideExpandableListAdapter","system_profile- "+op.getRelayAssociation());
@@ -363,9 +387,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                              View convertView, ViewGroup parent)
     {
         String listTitle = (String) getGroup(listPosition);
-        Log.e("InsideTempOverrideExpandableListAdapter","listTitle- "+listTitle);
-        //Log.e("InsideTempOverrideExpandableListAdapter","zoneList- "+ ZoneProfile.TAG);
-        //Log.e("InsideTempOverrideExpandableListAdapter","relayData1- "+CCUHsApi.getInstance().read("point and system and config and relay6"));
         if (convertView == null)
         {
             LayoutInflater layoutInflater = (LayoutInflater) this.mFragment.getContext().
@@ -380,12 +401,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         else
             listTitleTextView.setText(listTitle);
         return convertView;
-    }
-
-    public double getConfigAssociation(String config) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap configPoint = hayStack.read("point and system and config and output and association and "+config);
-        return hayStack.readPointPriorityVal(configPoint.get("id").toString());
     }
 
     public double getConfigEnabled(String config) {

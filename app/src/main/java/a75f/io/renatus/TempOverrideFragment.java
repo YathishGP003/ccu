@@ -80,29 +80,28 @@ public class TempOverrideFragment extends Fragment {
 
             //Log.e("InsideTempOverrideFrag","tuners- "+tuners);
             for (Map t : tuners) {
-                //Log.e("InsideTempOverrideFrag","value_t- "+t);
                 if (t.get("dis").toString().startsWith("Analog1In") || t.get("dis").toString().startsWith("Analog1Out") || t.get("dis").toString().startsWith("Analog2In") ||
                         t.get("dis").toString().startsWith("Analog2Out") || t.get("dis").toString().startsWith("relay") || t.get("dis").toString().startsWith("Th") ||
                         t.get("dis").toString().startsWith(siteName) && Objects.nonNull(t.get("dis").toString())) {
                     String NewexpandedListText = t.get("dis").toString();
-                    //Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText);
+                    Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText);
                     if (NewexpandedListText.startsWith("Analog")) {
-                        String relayPos = (NewexpandedListText.substring(6, 7));
-                        Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText + ", IsgetConfigEnabled- "+getConfigEnabled("analog"+relayPos));
-                        if(getConfigEnabled("analog"+relayPos) > 0) {
+                        //Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText + ", IsportEnabled- "+t.get("portEnabled").toString());
+                        if(t.get("portEnabled").toString().equals("true")) {
                             tunerList.add(t.get("dis").toString());
+                            Log.e("InsideTempOverrideFrag","value_t- "+t);
                         }
                     } else if (NewexpandedListText.startsWith("relay")) {
-                        String relayPos = (t.get("dis").toString().substring(5,6));
-                        Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText + ", IsgetConfigEnabled- "+getConfigEnabled("relay"+relayPos));
-                        if(getConfigEnabled("relay"+relayPos) > 0) {
+                        Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText + ", IsportEnabled- "+t.get("portEnabled").toString());
+                        if(t.get("portEnabled").toString().equals("true")) {
                             tunerList.add(t.get("dis").toString());
+                            Log.e("InsideTempOverrideFrag","value_t- "+t);
                         }
                     }else if (NewexpandedListText.startsWith("Th")) {
-                        String relayPos = (t.get("dis").toString().substring(2,3));
-                        Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText + ", IsgetConfigEnabled- "+getConfigEnabled("Th"+relayPos+"In"));
-                        if(getConfigEnabled("Th"+relayPos+"In") > 0) {
+                        Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText + ", IsportEnabled- "+t.get("portEnabled"));
+                        if(t.get("portEnabled").toString().equals("true")) {
                             tunerList.add(t.get("dis").toString());
+                            Log.e("InsideTempOverrideFrag","value_t- "+t);
                         }
                     } else if (NewexpandedListText.startsWith(siteName)) {
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, t.get("dis").toString().substring(siteName.length()+1, t.get("dis").toString().length()));
@@ -144,8 +143,6 @@ public class TempOverrideFragment extends Fragment {
                 }
             }
             if (tunerList.isEmpty() == false) {
-                Log.e("InsideTempOverrideFrag","val1- "+m.get("dis").toString());
-                Log.e("InsideTempOverrideFrag","val2- "+tunerList);
                 expandableListDetail.put(m.get("dis").toString(), tunerList);
             }
             equipMap.put(m.get("dis").toString(), m.get("id").toString());

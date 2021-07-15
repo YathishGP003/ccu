@@ -17,6 +17,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
+import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -33,7 +34,10 @@ public class HyperStatSensePairScreen  extends BaseDialogFragment {
     short        mNodeAddress;
     String       mRoomName;
     String       mFloorName;
-    ProfileType       mProfileName;
+    ProfileType   mProfileName;
+
+    @BindView(R.id.hyperSensePairing)
+    ImageView pairImage;
 
 
     @BindView(R.id.imageGoback)
@@ -99,8 +103,13 @@ public class HyperStatSensePairScreen  extends BaseDialogFragment {
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         mProfileName = ProfileType.valueOf(getArguments().getString(FragmentCommonBundleArgs.PROFILE_TYPE));
         ButterKnife.bind(this, view);
+        pairImage = view.findViewById(R.id.hyperSensePairing);
+        if(BuildConfig.BUILD_TYPE.equals("daikin_prod")|| CCUUiUtil.isDaikinThemeEnabled(getContext())){
+            pairImage.setImageDrawable(getResources().getDrawable(R.drawable.daikenhsspairscreen));
+        }
         return view;
     }
+
 
     @Override
     public void onStart()

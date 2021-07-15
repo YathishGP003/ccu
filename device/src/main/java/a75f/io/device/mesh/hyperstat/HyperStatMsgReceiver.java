@@ -141,7 +141,9 @@ public class HyperStatMsgReceiver {
         } else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_RH) {
             writeHumidityVal(rawPoint, point, regularUpdateMessage, hayStack);
         }
-    
+        else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_ILLUMINANCE) {
+            writeIlluminanceVal(rawPoint, point, regularUpdateMessage, hayStack);
+        }
     }
 
     private static void writeHeartbeat(RawPoint rawPoint, Point point,
@@ -177,7 +179,13 @@ public class HyperStatMsgReceiver {
         hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getHumidity());
         hayStack.writeHisValById(point.getId(), getHumidityConversion((double) regularUpdateMessage.getHumidity()));
     }
-    
+
+    private static void writeIlluminanceVal(RawPoint rawPoint, Point point, HyperStatRegularUpdateMessage_t
+            regularUpdateMessage, CCUHsApi hayStack) {
+        hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getIlluminance());
+        hayStack.writeHisValById(point.getId(), (double) regularUpdateMessage.getIlluminance());
+    }
+
     private static void writeSensorInputsToHaystackDatabase(List<HyperStat.SensorReadingPb_t> sensorReadings, int addr) {
         
         HyperStatDevice node = new HyperStatDevice(addr);

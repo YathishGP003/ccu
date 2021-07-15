@@ -3230,6 +3230,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         View status_view = arcView.findViewById(R.id.status_view);
         TextView textViewModule = arcView.findViewById(R.id.module_status);
         HeartBeatUtil.zoneStatus(textViewModule, isZoneAlive);
+        zoneStatus.put(zoneTitle, textViewModule);
         LinearLayout linearLayoutZonePoints = zoneDetails.findViewById(R.id.lt_profilepoints);
         LinearLayout linearLayoutschedulePoints = zoneDetails.findViewById(R.id.lt_schedule);
         LinearLayout linearLayoutstatusPoints = zoneDetails.findViewById(R.id.lt_status);

@@ -3067,36 +3067,59 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         textViewTitle.setText(sensePoints.get("Profile").toString() + " (" + nodeAddress + ")");
         linearLayoutZonePoints.addView(viewTitle);
 
-
         if (sensePoints.get("isTh1Enable") == "true") {
-            TextView textViewth1 = new TextView(getContext());
-            textViewth1.setTextSize(24);
-            textViewth1.setPadding(40, 0, 0, 10);
-            textViewth1.setText(sensePoints.get("Thermistor1").toString() + " : " + (sensePoints.get("Th1Val").toString()) + " " + (sensePoints.get("Unit3").toString()));
-            linearLayoutZonePoints.addView(textViewth1);
+            View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
+            LinearLayout ll = (LinearLayout) viewPointRow1.findViewById(R.id.lt_column1);
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)ll.getLayoutParams();
+            params.setMargins(0, 0, 0, -40);
+            ll.setLayoutParams(params);
+            TextView label = viewPointRow1.findViewById(R.id.text_point1label);
+            TextView val = viewPointRow1.findViewById(R.id.text_point1value);
+            label.setText(sensePoints.get("Thermistor1").toString() + " : ");
+            val.setText((sensePoints.get("Th1Val").toString()) + " " + (sensePoints.get("Unit3").toString()));
+            viewPointRow1.setPadding(30,0,0,0);
+            linearLayoutZonePoints.addView(viewPointRow1);
         }
+
         if (sensePoints.get("isTh2Enable") == "true") {
-            TextView textViewth2 = new TextView(getContext());
-            textViewth2.setTextSize(24);
-            textViewth2.setPadding(40, 0, 0, 10);
-            textViewth2.setText(sensePoints.get("Thermistor2").toString() + " : " + (sensePoints.get("Th2Val").toString()) + " " + (sensePoints.get("Unit4").toString()));
-            linearLayoutZonePoints.addView(textViewth2);
+            View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
+            LinearLayout ll = (LinearLayout) viewPointRow1.findViewById(R.id.lt_column1);
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)ll.getLayoutParams();
+            params.setMargins(0, 0, 0, -40);
+            ll.setLayoutParams(params);
+            TextView label = viewPointRow1.findViewById(R.id.text_point1label);
+            TextView val = viewPointRow1.findViewById(R.id.text_point1value);
+            label.setText(sensePoints.get("Thermistor2").toString() + " : ");
+            val.setText((sensePoints.get("Th2Val").toString()) + " " + (sensePoints.get("Unit4").toString()));
+            viewPointRow1.setPadding(30,0,0,0);
+            linearLayoutZonePoints.addView(viewPointRow1);
         }
 
         if (sensePoints.get("iAn1Enable") == "true") {
-            TextView textViewAnalog1 = new TextView(getContext());
-            textViewAnalog1.setTextSize(24);
-            textViewAnalog1.setPadding(40, 0, 0, 10);
-            textViewAnalog1.setText(sensePoints.get("Analog1").toString() + " : " + (sensePoints.get("An1Val").toString()) + " " + (sensePoints.get("Unit1").toString()));
-            linearLayoutZonePoints.addView(textViewAnalog1);
+            View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
+            LinearLayout ll = (LinearLayout) viewPointRow1.findViewById(R.id.lt_column1);
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)ll.getLayoutParams();
+            params.setMargins(0, 0, 0, -40);
+            ll.setLayoutParams(params);
+            TextView label = viewPointRow1.findViewById(R.id.text_point1label);
+            TextView val = viewPointRow1.findViewById(R.id.text_point1value);
+            label.setText(sensePoints.get("Analog1").toString() + " : ");
+            val.setText((sensePoints.get("An1Val").toString()) + " " + (sensePoints.get("Unit1").toString()));
+            viewPointRow1.setPadding(30,0,0,0);
+            linearLayoutZonePoints.addView(viewPointRow1);
         }
         if (sensePoints.get("iAn2Enable") == "true") {
-            TextView textViewAnalog2 = new TextView(getContext());
-            textViewAnalog2.setTextSize(24);
-            textViewAnalog2.setPadding(40, 0, 0, 10);
-            textViewAnalog2.setText(sensePoints.get("Analog2").toString() + " : " + (sensePoints.get("An2Val").toString()) + " " + (sensePoints.get("Unit2").toString()));
-            linearLayoutZonePoints.addView(textViewAnalog2);
-
+            View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
+            LinearLayout ll = (LinearLayout) viewPointRow1.findViewById(R.id.lt_column1);
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)ll.getLayoutParams();
+            params.setMargins(0, 0, 0, 0);
+            ll.setLayoutParams(params);
+            TextView label = viewPointRow1.findViewById(R.id.text_point1label);
+            TextView val = viewPointRow1.findViewById(R.id.text_point1value);
+            label.setText(sensePoints.get("Analog2").toString() + " : ");
+            val.setText((sensePoints.get("An2Val").toString()) + " " + (sensePoints.get("Unit2").toString()));
+            viewPointRow1.setPadding(30,0,0,0);
+            linearLayoutZonePoints.addView(viewPointRow1);
         }
 
     }

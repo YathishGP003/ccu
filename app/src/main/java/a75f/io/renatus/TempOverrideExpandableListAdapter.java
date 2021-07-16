@@ -74,10 +74,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         this.idMap = idmap;
         this.mActivity = activity;
         this.siteName = siteName;
-
-        /*Log.e("InsideTempOverrideExpandableListAdapter", "expandableListTitle- " + expandableListTitle);
-        Log.e("InsideTempOverrideExpandableListAdapter", "expandableListDetail- " + expandableListDetail);
-        Log.e("InsideTempOverrideExpandableListAdapter", "idMap- " + idMap);*/
     }
 
     @Override
@@ -173,7 +169,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         String relayPos = (expandedListText.substring(siteName.length()+6, siteName.length()+7));
                         if(getConfigEnabled("relay"+relayPos) > 0) {
                             String relayMapped = getRelayMapping("relay"+relayPos, convertView);
-                            Log.e("InsideTempOverrideExpandableListAdapter", "relayMapped " +relayMapped);
                             NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos +"("+relayMapped+")");
                             txt_calculated_output.setText(Double.compare(getPointVal(idMap.get(expandedListText)), 1.0) == 0 ? "ON" : "OFF");
                             spinner_relay.setVisibility(View.VISIBLE);
@@ -181,7 +176,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         else{
                             Object valueToDelete = getChild(listPosition, expandedListPosition);
                             expandableListDetail.remove(valueToDelete);
-                            //Log.e("InsideTempOverrideExpandableListAdapter", "NewexpandableListDetail- " + expandableListDetail);
                         }
                     }else if (NewexpandedListText.startsWith("CM-th")) {
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(siteName.length()+6, siteName.length()+7));
@@ -227,12 +221,8 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     String tunerName = expandableListDetail.get(expandableListTitle.get(listPosition)).get(
                             expandedListPosition);
 
-                    //String tunerVal = String.valueOf(getPointVal(idMap.get(tunerName)));
-                    if (Globals.getInstance().isTemproryOverrideMode()) {
-                        setPointVal(idMap.get(tunerName), Double.parseDouble(spinner_override_value.getSelectedItem().toString()));
-                        //setPointVal(idMap.get(tunerName), Double.parseDouble(spinner_override_value.getSelectedItem().toString()));
-                        idMap.put(idMap.get(tunerName), spinner_override_value.getSelectedItem().toString());
-                    }
+                    setPointVal(idMap.get(tunerName), Double.parseDouble(spinner_override_value.getSelectedItem().toString()));
+                    idMap.put(idMap.get(tunerName), spinner_override_value.getSelectedItem().toString());
 
                 }
                 @Override
@@ -282,13 +272,12 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
     }
 
     private String getRelayMapping(String relayname, View convertView){
-        String profileName =  L.ccu().systemProfile.getProfileName();
+        String profileName =  L.ccu().systemProfile.getProfileType().toString();
         List<String> hvac_stage_selector = Arrays.asList(convertView.getResources().getStringArray(R.array.hvac_stage_selector));
-        Log.e("InsideTempOverrideExpandableListAdapter", "hvac_stage_selector- " + hvac_stage_selector);
         VavStagedRtu vavStagedRtu = new VavStagedRtu();
         DabStagedRtu dabStagedRtu = new DabStagedRtu();
         switch (profileName){
-            case "DAB Fully Modulating AHU":
+            case "SYSTEM_DAB_ANALOG_RTU":
                 DabFullyModulatingRtu dabFullyModulatingRtu = new DabFullyModulatingRtu();
                 if (relayname.equals("relay7"))
                     if ((int)dabFullyModulatingRtu.getConfigVal("humidifier and type") == 0)
@@ -297,17 +286,17 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         return "De-Humidifier";
                 else return "Fan Enable";
                 //return ((int)dabFullyModulatingRtu.getConfigVal(relayname));
-            case "DAB Staged RTU with VFD FAN":
+            case "SYSTEM_DAB_STAGED_VFD_RTU":
                 return hvac_stage_selector.get((int)dabStagedRtu.getConfigAssociation(relayname));
-            case "DAB Staged RTU":
+            case "SYSTEM_DAB_STAGED_RTU":
                 //DabStagedRtu dabStagedRtu = new DabStagedRtu();
                 return hvac_stage_selector.get((int)dabStagedRtu.getConfigAssociation(relayname));
-            case "DAB Advanced Hybrid AHU":
+            case "SYSTEM_DAB_HYBRID_RTU":
                 return hvac_stage_selector.get((int)dabStagedRtu.getConfigAssociation(relayname));
-            case "VAV Staged RTU":
+            case "SYSTEM_VAV_STAGED_RTU":
                 //VavStagedRtu vavStagedRtu = new VavStagedRtu();
                 return hvac_stage_selector.get((int)vavStagedRtu.getConfigAssociation(relayname));
-            case "VAV Fully Modulating AHU":
+            case "SYSTEM_VAV_ANALOG_RTU":
                 VavFullyModulatingRtu vavFullyModulatingRtu = new VavFullyModulatingRtu();
                 if (relayname.equals("relay7")) {
                     if ((int) vavFullyModulatingRtu.getConfigVal("humidifier and type") == 0)
@@ -316,10 +305,10 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         return "De-Humidifier";
                 }else
                     return "Fan Enable";
-            case "VAV Staged RTU with VFD Fan":
+            case "SYSTEM_VAV_STAGED_VFD_RTU":
                 //VavStagedRtu vavStagedRtu1 = new VavStagedRtu();
                 return hvac_stage_selector.get((int)vavStagedRtu.getConfigAssociation(relayname));
-            case "VAV Advanced Hybrid AHU":
+            case "SYSTEM_VAV_HYBRID_RTU":
                 //VavStagedRtu vavStagedRtu1 = new VavStagedRtu();
                 return hvac_stage_selector.get((int)vavStagedRtu.getConfigAssociation(relayname));
             case "Daikin IE RTU":
@@ -328,26 +317,19 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
     }
 
     public void setPointVal(String id, double val) {
-        SystemRelayOp op = new SystemRelayOp();
-        //Log.e("InsideTempOverrideExpandableListAdapter","system_profile- "+op.getRelayAssociation());
-        String logicalPointString = null;
-        String deviceLogicalPointString = null;
         Object logicalPoint = CCUHsApi.getInstance().readMapById(id).get("pointRef");
         if (Objects.nonNull(logicalPoint)) {
-            logicalPointString = logicalPoint.toString();
 
             CCUHsApi hayStack = CCUHsApi.getInstance();
             hayStack.writeHisValById(id, val);
-            hayStack.writeHisValById(logicalPointString, val / 1000);
+            hayStack.writeHisValById(logicalPoint.toString(), val / 1000);
         }
         else{
             Object devicelogicalPoint = CCUHsApi.getInstance().readMapById(id).get("deviceRef");
 
-            deviceLogicalPointString = devicelogicalPoint.toString();
-
             CCUHsApi hayStack = CCUHsApi.getInstance();
             hayStack.writeHisValById(id, val);
-            hayStack.writeHisValById(deviceLogicalPointString, val / 1000);
+            hayStack.writeHisValById(devicelogicalPoint.toString(), val / 1000);
         }
     }
 

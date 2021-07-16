@@ -84,24 +84,18 @@ public class TempOverrideFragment extends Fragment {
                         t.get("dis").toString().startsWith("Analog2Out") || t.get("dis").toString().startsWith("relay") || t.get("dis").toString().startsWith("Th") ||
                         t.get("dis").toString().startsWith(siteName) && Objects.nonNull(t.get("dis").toString())) {
                     String NewexpandedListText = t.get("dis").toString();
-                    Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText);
                     if (NewexpandedListText.startsWith("Analog")) {
                         //Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText + ", IsportEnabled- "+t.get("portEnabled").toString());
                         if(t.get("portEnabled").toString().equals("true")) {
                             tunerList.add(t.get("dis").toString());
-                            Log.e("InsideTempOverrideFrag","value_t- "+t);
                         }
                     } else if (NewexpandedListText.startsWith("relay")) {
-                        Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText + ", IsportEnabled- "+t.get("portEnabled").toString());
                         if(t.get("portEnabled").toString().equals("true")) {
                             tunerList.add(t.get("dis").toString());
-                            Log.e("InsideTempOverrideFrag","value_t- "+t);
                         }
                     }else if (NewexpandedListText.startsWith("Th")) {
-                        Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText + ", IsportEnabled- "+t.get("portEnabled"));
                         if(t.get("portEnabled").toString().equals("true")) {
                             tunerList.add(t.get("dis").toString());
-                            Log.e("InsideTempOverrideFrag","value_t- "+t);
                         }
                     } else if (NewexpandedListText.startsWith(siteName)) {
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, t.get("dis").toString().substring(siteName.length()+1, t.get("dis").toString().length()));

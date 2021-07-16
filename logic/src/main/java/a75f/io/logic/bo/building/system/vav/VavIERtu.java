@@ -165,7 +165,7 @@ public class VavIERtu extends VavSystemProfile
         
         int coolingDat, heatingDat;
         setSystemLoopOp("cooling", systemCoolingLoopOp);
-        if (getConfigVal("cooling and output and enabled") > 0) {
+        if (getConfigEnabled("cooling") > 0) {
             double coolingDatMin = getConfigVal("analog1 and cooling and dat and min");
             double coolingDatMax = getConfigVal("analog1 and cooling and dat and max");
             CcuLog.d(L.TAG_CCU_SYSTEM, "coolingDatMin: "+coolingDatMin+" coolingDatMax: "+coolingDatMax+" SAT: "+getSystemSAT());
@@ -177,8 +177,9 @@ public class VavIERtu extends VavSystemProfile
             }
             
         } else {
-            coolingDat = 0;
+            coolingDat = 70;
         }
+        setCmdSignal("dat and cooling", coolingDat);
         
         if (VavSystemController.getInstance().getSystemState() == HEATING)
         {
@@ -188,7 +189,7 @@ public class VavIERtu extends VavSystemProfile
         }
         
         setSystemLoopOp("heating", systemHeatingLoopOp);
-        if (getConfigVal("heating and output and enabled") > 0) {
+        if (getConfigEnabled("heating") > 0) {
             double heatingDatMin = getConfigVal("analog3 and heating and min");
             double heatingDatMax = getConfigVal("analog3 and heating and max");
             CcuLog.d(L.TAG_CCU_SYSTEM, "heatingDatMin: "+heatingDatMin+" heatingDatMax: "+heatingDatMax+" HeatingSignal : "+VavSystemController.getInstance().getHeatingSignal());
@@ -198,11 +199,13 @@ public class VavIERtu extends VavSystemProfile
                 heatingDat = (int) (heatingDatMin - (heatingDatMax - heatingDatMin) * (systemHeatingLoopOp / 100));
             }
         } else {
-            heatingDat = 0;
+            heatingDat = 75;
         }
+    
+        setCmdSignal("dat and heating", heatingDat);
         
         double datSp = VavSystemController.getInstance().getSystemState() == COOLING ? coolingDat : heatingDat;
-        setCmdSignal("dat", datSp);
+        setCmdSignal("dat and setpoint", datSp);
         
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
         double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+getSystemEquipRef()+"\"");
@@ -256,9 +259,11 @@ public class VavIERtu extends VavSystemProfile
     public String getStatusMessage(){
         
         StringBuilder status = new StringBuilder();
-        status.append(VavSystemController.getInstance().getSystemState() == COOLING ? " Cooling DAT (F): " + getCmdSignal("cooling"):"");
-        status.append(VavSystemController.getInstance().getSystemState() == HEATING ? " Heating DAT (F): " + getCmdSignal("heating"):"");
-        status.append(VavSystemController.getInstance().getSystemState() != OFF ? " | Static Pressure (inch wc): " + (getCmdSignal("fan")):"");
+        status.append(VavSystemController.getInstance().getSystemState() == COOLING ?
+                          " Cooling DAT (F): " + getCmdSignal("cooling and data"):"");
+        status.append(VavSystemController.getInstance().getSystemState() == HEATING ?
+                          " Heating DAT (F): " + getCmdSignal("heating and dat"):"");
+        status.append(VavSystemController.getInstance().getSystemState() != OFF ? " | Static Pressure (inch wc): " + (getStaticPressure()):"");
         
         if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
             status.insert(0, "Free Cooling Used |");
@@ -325,7 +330,7 @@ public class VavIERtu extends VavSystemProfile
         CCUHsApi.getInstance().addPoint(systemClock);
     
         Point occStatus = new Point.Builder()
-                                .setDisplayName(equipDis+"-"+"cccStatus")
+                                .setDisplayName(equipDis+"-"+"occStatus")
                                 .setSiteRef(siteRef)
                                 .setEquipRef(equipRef)
                                 .addMarker("system").addMarker("occStatus").addMarker("ie")
@@ -442,7 +447,7 @@ public class VavIERtu extends VavSystemProfile
                                                    .setTz(tz)
                                                    .build();
         String maxStaticPressureId = hayStack.addPoint(maxStaticPressure);
-        hayStack.writeDefaultValById(maxStaticPressureId, 1.0 );
+        hayStack.writeDefaultValById(maxStaticPressureId, 2.0 );
         
         Point minHeatingDat = new Point.Builder()
                                             .setDisplayName(equipDis+"-"+"minHeatingDat")

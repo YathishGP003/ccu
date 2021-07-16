@@ -2,6 +2,7 @@ package a75f.io.device.daikin
 
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import com.google.gson.GsonBuilder
 import hu.akarnokd.rxjava3.retrofit.RxJava3CallAdapterFactory
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -44,10 +45,15 @@ class IEServiceGenerator {
             connectTimeout(30, TimeUnit.SECONDS)
         }.build()
         CcuLog.i(L.TAG_CCU_DEVICE, "create retrofit  $baseUrl")
+
+        val gson = GsonBuilder()
+            .setLenient()
+            .create()
+
         return Retrofit.Builder()
             .baseUrl(baseUrl)
             .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .addConverterFactory(SimpleXmlConverterFactory.create())
             .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
             .build()

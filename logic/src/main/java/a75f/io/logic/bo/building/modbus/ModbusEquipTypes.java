@@ -11,7 +11,7 @@ public enum ModbusEquipTypes {
 
     public static ModbusEquipTypes getEnum(String value) {
         for (ModbusEquipTypes v : values())
-            if (v.displayName.equalsIgnoreCase(value)) return v;
+            if (v.name().equalsIgnoreCase(value)) return v;
         return MODBUS_DEFAULT;
     }
 }

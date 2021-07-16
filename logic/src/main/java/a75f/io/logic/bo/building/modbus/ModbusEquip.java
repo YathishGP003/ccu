@@ -20,6 +20,7 @@ import a75f.io.api.haystack.modbus.LogicalPointTags;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.UserIntentPointTags;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 
 public class ModbusEquip {
     ProfileType profileType;
@@ -50,10 +51,10 @@ public class ModbusEquip {
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
         String modbusEquipType = equipmentInfo.getEquipType();
-        String equipDis = siteDis + "-"+modbusEquipType+"-" + slaveId + "-";
+        String modbusName = equipmentInfo.getName();
+        String equipDis = siteDis + "-"+modbusName+"-"+modbusEquipType+"-" + slaveId ;
         String gatewayRef = null;
         configuredParams = configParams;
-        String modbusName = equipmentInfo.getName();
         Log.d("Modbus",modbusEquipType+"MbEquip create Entity = "+configuredParams.size());
         HashMap systemEquip = hayStack.read("equip and system");
         if (systemEquip != null && systemEquip.size() > 0) {
@@ -61,7 +62,7 @@ public class ModbusEquip {
         }
 
         Equip.Builder mbEquip = new Equip.Builder().setSiteRef(siteRef)
-                    .setDisplayName(equipDis + modbusName)
+                    .setDisplayName(equipDis)
                     .setRoomRef(roomRef)
                     .setFloorRef(floorRef)
                     .setProfile(profileType.name())
@@ -84,6 +85,8 @@ public class ModbusEquip {
         if (profileType != ProfileType.MODBUS_EMR && profileType != ProfileType.MODBUS_BTU) {
             zoneMarker = "zone";
         }
+        String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
+                siteRef, roomRef, floorRef, slaveId, "modbus", profileType,  tz));
         Point equipScheduleType = new Point.Builder()
                     .setDisplayName(siteDis+"-"+modbusEquipType+"-"+slaveId+"-scheduleType")
                     .setEquipRef(equipRef)

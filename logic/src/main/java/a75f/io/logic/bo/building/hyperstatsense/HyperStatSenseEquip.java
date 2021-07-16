@@ -13,6 +13,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.HyperStatDevice;
 import a75f.io.logic.bo.haystack.device.SmartNode;
@@ -208,6 +209,41 @@ public class HyperStatSenseEquip {
         mHayStack.writeDefaultValById(humidityId, 0.0);
         mHayStack.writeHisValById(humidityId, 0.0);
 
+        Point illuminance = new Point.Builder()
+                .setDisplayName(siteDis + "-SENSE-" + mNodeAddr + "-illuminance")
+                .setEquipRef(mEquipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .setHisInterpolate("cov")
+                .addMarker("zone").addMarker("hyperstat").addMarker("sense")
+                .addMarker("illuminance").addMarker("sensor").addMarker("his").addMarker("cur").addMarker("logical")
+                .setGroup(String.valueOf(mNodeAddr))
+                .setUnit("lux")
+                .setTz(tz)
+                .build();
+        String illuminanceId = CCUHsApi.getInstance().addPoint(illuminance);
+        mHayStack.writeDefaultValById(illuminanceId, 0.0);
+        mHayStack.writeHisValById(illuminanceId, 0.0);
+
+
+      Point  occupancy = new Point.Builder()
+                .setDisplayName(siteDis + "-SENSE-" + mNodeAddr + "-occupancy")
+                .setEquipRef(mEquipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .setHisInterpolate("cov")
+                .addMarker("zone").addMarker("hyperstat").addMarker("sense")
+                .addMarker("sensor").addMarker("occupancy").addMarker("his").addMarker("cur").addMarker("logical")
+                .setGroup(String.valueOf(mNodeAddr))
+                .setEnums("off,on")
+                .setTz(tz)
+                .build();
+        String occupancyId = CCUHsApi.getInstance().addPoint(occupancy);
+        mHayStack.writeDefaultValById(occupancyId, 0.0);
+        mHayStack.writeHisValById(occupancyId, 0.0);
+
         Point analog1InputSensor = new Point.Builder()
                 .setDisplayName(equipDis + "-analog1InputSensor")
                 .setEquipRef(mEquipRef)
@@ -272,6 +308,9 @@ public class HyperStatSenseEquip {
         String th2InputSensorId = mHayStack.addPoint(th2InputSensor);
         mHayStack.writeDefaultValById(th2InputSensorId, (double) config.th2Sensor >= 0 ? config.th2Sensor : 0.0);
 
+        String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, mEquipRef,
+                siteRef, roomRef, floorRef, mNodeAddr, "sense", tz));
+
         HyperStatDevice device = new HyperStatDevice(mNodeAddr, siteRef, floorRef, roomRef, mEquipRef, "sense");
 
         if (config.isAnalog1Enable) {
@@ -305,6 +344,10 @@ public class HyperStatSenseEquip {
         device.currentTemp.setEnabled(true);
 
         device.addSensor(Port.SENSOR_RH, humidityId);
+        device.addSensor(Port.SENSOR_ILLUMINANCE, illuminanceId);
+        device.addSensor(Port.SENSOR_OCCUPANCY, occupancyId);
+        device.rssi.setPointRef(heartBeatId);
+        device.rssi.setEnabled(true);
         device.addPointsToDb();
         mHayStack.syncEntityTree();
     }
@@ -354,6 +397,7 @@ public class HyperStatSenseEquip {
                 Log.d(LOG_TAG, "TH1 is null");
             }
             if (config.isTh1Enable) {
+                mHayStack.writeDefaultValById(Th1.get("id").toString(), (double)config.th1Sensor);
                 Log.d(LOG_TAG, "thermister1 toggle update create new entry: ");
                 String id = createSensorPoint(floorRef, roomRef, "th1", config);
                 DeviceUtil.setPointEnabled(mNodeAddr, Port.TH1_IN.name(), true);
@@ -383,6 +427,7 @@ public class HyperStatSenseEquip {
                 Log.d(LOG_TAG, "TH2 is null");
             }
             if (config.isTh2Enable) {
+                mHayStack.writeDefaultValById(Th2.get("id").toString(), (double) config.th2Sensor);
                 Log.d(LOG_TAG, "thermister2 toggle update create new entry: ");
                 String id = createSensorPoint(floorRef, roomRef, "th2", config);
                 DeviceUtil.setPointEnabled(mNodeAddr, Port.TH2_IN.name(), true);
@@ -412,6 +457,7 @@ public class HyperStatSenseEquip {
                 Log.d(LOG_TAG, "An1 is null");
             }
             if (config.isAnalog1Enable) {
+                mHayStack.writeDefaultValById(An1.get("id").toString(), (double) config.analog1Sensor);
                 Log.d(LOG_TAG, "an1 toggle update create new entry: ");
                 String id = createSensorPoint(floorRef, roomRef, "analog1", config);
                 DeviceUtil.setPointEnabled(mNodeAddr, Port.ANALOG_IN_ONE.name(), true);
@@ -443,6 +489,7 @@ public class HyperStatSenseEquip {
             }
             if (config.isAnalog2Enable) {
                 Log.d(LOG_TAG, "an2 toggle update create new entry: ");
+                mHayStack.writeDefaultValById(An2.get("id").toString(), (double) config.analog2Sensor);
                 String id = createSensorPoint(floorRef, roomRef, "analog2", config);
                 DeviceUtil.setPointEnabled(mNodeAddr, Port.ANALOG_IN_TWO.name(), true);
                 DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.ANALOG_IN_TWO.name(), id);

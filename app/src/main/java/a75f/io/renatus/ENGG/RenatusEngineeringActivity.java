@@ -45,14 +45,8 @@ public class RenatusEngineeringActivity extends AppCompatActivity
 		mTabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
 		
 		mViewPager.setAdapter(mEnggPagerAdapter);
-		mTabLayout.post(new Runnable() {
-			@Override
-			public void run() {
-				mTabLayout.setupWithViewPager(mViewPager, true);
-			}
-		});
+		mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
 		configLogo();
-		rowBradcast();
 	}
 	
 	@Override
@@ -76,25 +70,5 @@ public class RenatusEngineeringActivity extends AppCompatActivity
 
 		}
 
-	}
-	/**
-	 * Just to simulate the device
-	 */
-	private void rowBradcast(){
-
-		new Timer().schedule(new TimerTask() {
-			@Override
-			public void run() {
-				Log.i("MK_DEBUG", "run: ------Started Bradcast---------");
-				Intent otaUpdateIntent = new Intent(Globals.IntentActions.PUBNUB_MESSAGE);
-				otaUpdateIntent.putExtra("id", "73988c47-b0a8-492c-b78d-807fbf81e4a2");
-				otaUpdateIntent.putExtra("firmwareVersion", "HyperStat_v1.1");
-				otaUpdateIntent.putExtra("cmdLevel", "zone");
-				Log.i("MK_DEBUG", "run: ------Sent bradcast message---------");
-
-				sendBroadcast(otaUpdateIntent);
-
-			}
-		},15000);
 	}
 }

@@ -13,7 +13,6 @@ import android.preference.PreferenceManager;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.plc.PlcProfile;
-
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -21,7 +20,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
@@ -55,6 +53,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -92,6 +91,7 @@ import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.GridItem;
+import a75f.io.renatus.util.HeartBeatUtil;
 import a75f.io.renatus.util.NonTempControl;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.SeekArc;
@@ -236,20 +236,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         });
     }
 
-    public void refreshScreen(String id) {
-        if (getActivity() != null) {
-            if (zoneOpen) {
-                //Log.i("PubNub","Zone Point Updating:"+id+" Points:"+pointsOpen.toString());
-                //if(pointsOpen.containsKey(id)) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        updateTemperatureBasedZones(seekArcOpen, zonePointsOpen, equipOpen, getLayoutInflater());
-                        tableLayout.invalidate();
-                    }
-                });
-                //}
-            }
+    public void refreshScreen(String id)
+    {
+        if(getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(zoneOpen) {
+                                updateTemperatureBasedZones(seekArcOpen, zonePointsOpen, equipOpen, getLayoutInflater());
+                                tableLayout.invalidate();
+                            }
+                            refreshZoneHeartBeat();
+                        }
+                    });
         }
     }
 
@@ -515,6 +514,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     Log.d(LOG_TAG, "roomMap.get(m).get(\"id\").toString() = " + roomMap.get(m).get("id").toString());
                     Log.d(LOG_TAG, "floorList.get(mFloorListAdapter.getSelectedPostion()).getId()  = " + floorList.get(mFloorListAdapter.getSelectedPostion()).getId());
                     if (equips.size() > 0) {// zones has devices paired
+                        boolean isZoneAlive = HeartBeatUtil.isZoneAlive(equips);
                         HashMap<String, ArrayList<HashMap>> zoneData = new HashMap<String, ArrayList<HashMap>>();
                         for (HashMap zoneModel : equips) {
                             if (zoneData.containsKey(zoneModel.get("roomRef").toString())) {
@@ -568,16 +568,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 }
                             }
                             if (profileType.contains(profileHyperStatSense)) {
-                                viewSenseZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout);
+                                viewSenseZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout, isZoneAlive);
                             }
 
                             if (tempModule) {
                                 Log.e(LOG_TAG + "RoomData", "Load Temperature Based View");
-                                viewTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout);
+                                viewTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout, isZoneAlive);
                             }
                             if (!tempModule && nontempModule && !profileType.contains(profileHyperStatSense)) {
                                 Log.e(LOG_TAG + "RoomData", "Load Non Temperature Based View");
-                                viewNonTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout);
+                                viewNonTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout, isZoneAlive);
                                 //arcViewParent = inflater.inflate(R.layout.zones_item_smartstat, (ViewGroup) rootView, false);
                             }
                             i++;
@@ -585,7 +585,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     } else {
                         //No devices paired
                         Log.e(LOG_TAG + "RoomData", "Load No device paired Based View");
-                        viewNonTemperatureBasedZone(inflater, rootView, new ArrayList<HashMap>(), zoneTitle, i, tablerowLayout);
+                        viewNonTemperatureBasedZone(inflater, rootView, new ArrayList<HashMap>(), zoneTitle, i, tablerowLayout, false);
                         i++;
                     }
                 }
@@ -594,9 +594,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
     }
 
-    private void viewTemperatureBasedZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap, String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout) {
+    private void viewTemperatureBasedZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap,String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout, boolean isZoneAlive)
+    {
 
-        Log.i("ProfileTypes", "Points:" + zoneMap.toString());
+        Log.i("ProfileTypes","Points:"+zoneMap.toString());
         Equip p = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
         Log.i("ProfileTypes", "p:" + p.toString());
         double currentAverageTemp = 0;
@@ -825,6 +826,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         zoneDetails.setTag(gridItemObj);
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
+        TextView textViewModule = arcView.findViewById(R.id.module_status);
+        View status_view = arcView.findViewById(R.id.status_view);
+        HeartBeatUtil.zoneStatus(textViewModule, isZoneAlive);
+        zoneStatus.put(zoneTitle, textViewModule);
 
         seekArc.scaletoNormal(250, 210);
 
@@ -951,7 +956,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                             textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                                             tableLayout.removeViewAt(row + 1);
                                             NonTempControl nonTempControl = gridItem.findViewById(R.id.rl_nontemp);
-                                            ScaleControlToNormal(250, 210, nonTempControl);
+                                            ScaleControlToNormal(270,210,nonTempControl);
                                             nonTempControl.setExpand(false);
                                             //ScaleImageToNormal(250,210,imageViewExpanded);
                                             nonTempControl.setBackgroundColor(getResources().getColor(R.color.white));
@@ -978,6 +983,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             openZoneMap = zoneMap;
                             clickedView = gridItemNew.getGridID();
                             v.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
+                            status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
                             int index = clickedView / columnCount + 1;
                             seekArc.setDetailedView(true);
                             seekArc.scaletoNormalBig(250, 210);
@@ -1016,6 +1022,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     clickedView = gridItemNew.getGridID();
                     seekArc.setClickable(true);
                     v.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                    status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
                     int index = clickedView / columnCount + 1;
                     seekArc.setDetailedView(true);
                     seekArc.scaletoNormalBig(250, 210);
@@ -1150,7 +1157,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         String zoneId = Schedule.getZoneIdByEquipId(equipId);
         String status = ScheduleProcessJob.getZoneStatusString(zoneId, equipId);
         String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);
-        Log.i("ZonePoints", "zoneId:" + zoneId + " status:" + status + " vacationstatus:" + vacationStatus);
+        Log.i("ZonePoints","zoneId:"+zoneId+" status:"+status+" vacationstatus:"+vacationStatus);
 
         vacationStatusTV.setText(vacationStatus);
         scheduleStatus.setText(status);
@@ -1411,7 +1418,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     }
 
 
-    private void viewNonTemperatureBasedZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap, String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout) {
+    private void viewNonTemperatureBasedZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap,String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout, boolean isZoneAlive)
+    {
 
         Equip p = null;
         int i = gridPosition;
@@ -1431,6 +1439,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         nonTempControl.setTag(gridItemObj);
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
+        TextView textViewModule = arcView.findViewById(R.id.module_status);
+        View status_view = arcView.findViewById(R.id.status_view);
+        HeartBeatUtil.zoneStatus(textViewModule, isZoneAlive);
+        zoneStatus.put(zoneTitle, textViewModule);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         arcView.setPadding(48, 56, 0, 0);
         try {
@@ -1499,7 +1511,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             nonTempControl.setImageViewExpanded(R.drawable.ic_no_device_paired_expanded_icon);
         }
         //ScaleImageToNormal(250,210,imageView);
-        ScaleControlToNormal(250, 210, nonTempControl);
+        ScaleControlToNormal(270,210,nonTempControl);
         nonTempControl.setExpand(false);
 
         //imageView.setOnClickListener(new View.OnClickListener() {
@@ -1533,7 +1545,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                             //ImageView imageViewExpanded = gridItem.findViewById(R.id.imageView);
                                             NonTempControl nonTempControl = gridItem.findViewById(R.id.rl_nontemp);
                                             //ScaleImageToNormal(250,210,imageViewExpanded);
-                                            ScaleControlToNormal(250, 210, nonTempControl);
+                                            ScaleControlToNormal(270,210,nonTempControl);
                                             nonTempControl.setExpand(false);
                                             nonTempControl.setBackgroundColor(getResources().getColor(R.color.white));
                                             gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
@@ -1566,6 +1578,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             openZoneMap = zoneMap;
                             clickedView = gridItemNew.getGridID();
                             v.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
+                            status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
+
                             int index = clickedView / columnCount + 1;
                             //ScaleImageToBig(250,210,imageView);
                             ScaleControlToExpand(250, 210, nonTempControl);
@@ -1585,12 +1599,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         }
                     } else if (clickposition == clickedView) {
                         v.setBackgroundColor(getResources().getColor(R.color.white));
-                        textEquipment.setTextAppearance(getActivity(), R.style.label_black);
+                        status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                        textEquipment.setTextAppearance(getActivity(),R.style.label_black);
                         textEquipment.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                         tableLayout.removeView(zoneDetails);
                         imageOn = false;
                         //ScaleImageToNormal(250,210,imageView);
-                        ScaleControlToNormal(250, 210, nonTempControl);
+                        ScaleControlToNormal(270,210,nonTempControl);
                         nonTempControl.setExpand(false);
                         showWeather();
                         clickedView = -1;
@@ -1604,6 +1619,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     openZoneMap = zoneMap;
                     clickedView = gridItemNew.getGridID();
                     v.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                    status_view.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
                     int index = clickedView / columnCount + 1;
                     //ScaleImageToBig(250,210,imageView);
                     ScaleControlToExpand(250, 210, nonTempControl);
@@ -1698,8 +1714,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                                 RecyclerView modbusParams = zoneDetails.findViewById(R.id.recyclerParams);
                                 TextView tvEquipmentType = zoneDetails.findViewById(R.id.tvEquipmentType);
-                                tvEquipmentType.setText(modbusDevices.get(i).getEquipType() + "(" + modbusDevices.get(i).getSlaveId() + ")");
-                                GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+                                String nodeAddress =  String.valueOf(modbusDevices.get(i).getSlaveId());
+                                tvEquipmentType.setText(modbusDevices.get(i).getEquipType()+ "("+modbusDevices.get(i).getSlaveId()+")");
+                                TextView textViewModule = zoneDetails.findViewById(R.id.module_status);
+                                HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
+                                TextView textViewUpdatedTime = zoneDetails.findViewById(R.id.last_updated_status);
+                                textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
+                                GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(),2);
                                 modbusParams.setLayoutManager(gridLayoutManager);
                                 ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter = new ZoneRecyclerModbusParamAdapter(getContext(),modbusDevices.get(i).getEquipRef(),parameterList);
                                 modbusParams.setAdapter(zoneRecyclerModbusParamAdapter);
@@ -1728,7 +1749,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         View viewPointRow2 = inflater.inflate(R.layout.zones_item_type1, null);
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
+
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
@@ -1742,6 +1767,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         textViewTitle.setText(vavPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(vavPoints.get("Status").toString());
+        textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Damper : ");
         textViewValue1.setText(vavPoints.get("Damper").toString());
         textViewLabel2.setText("Reheat Coil : ");
@@ -1766,6 +1792,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
         textViewLabel2.setVisibility(View.GONE);
@@ -1775,6 +1804,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         textViewTitle.setText(ssePoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(ssePoints.get("Status").toString());
+        textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Discharge Airflow : ");
         textViewValue1.setText(ssePoints.get("Discharge Airflow").toString());
 
@@ -1791,6 +1821,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         textViewLabel1.setVisibility(View.GONE);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
@@ -1802,6 +1835,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         textViewTitle.setText(tiPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(tiPoints.get("Status").toString());
+        textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
 
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
@@ -1816,6 +1850,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
         TextView textViewValue1 = viewPointRow1.findViewById(R.id.text_point1value);
@@ -1823,6 +1860,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         textViewTitle.setText(dabPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(dabPoints.get("Status").toString());
+        textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Damper : ");
         textViewLabel2.setText("Discharge Airflow : ");
         textViewValue1.setText(dabPoints.get("Damper").toString());
@@ -1844,6 +1882,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
@@ -1857,7 +1898,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         textViewTitle.setText(dualDuctPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(dualDuctPoints.get("Status").toString());
-        if (dualDuctPoints.containsKey("CoolingSupplyAirflow")) {
+        textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
+        if (dualDuctPoints.containsKey("CoolingSupplyAirflow") ) {
             textViewLabel1.setText("Cooling Supply Airflow : ");
             textViewValue1.setText(dualDuctPoints.get("CoolingSupplyAirflow").toString());
         } else if (dualDuctPoints.containsKey("HeatingSupplyAirflow")) {
@@ -1896,6 +1938,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
@@ -1961,6 +2006,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         textViewTitle.setText(cpuEquipPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(cpuEquipPoints.get("Status").toString());
+        textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Conditioning Mode : ");
         textViewLabel2.setText("Fan Mode : ");
 
@@ -2117,6 +2163,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
@@ -2130,6 +2179,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         textViewTitle.setText(hpuEquipPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(hpuEquipPoints.get("Status").toString());
+        textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Conditioning Mode : ");
         textViewLabel2.setText("Fan Mode : ");
 
@@ -2354,6 +2404,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
@@ -2425,6 +2478,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         textViewTitle.setText(p2FCUPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(p2FCUPoints.get("Status").toString());
+        textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Conditioning Mode : ");
         textViewLabel2.setText("Fan Mode : ");
 
@@ -2504,6 +2558,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
@@ -2577,6 +2634,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         textViewTitle.setText(p4FCUPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(p4FCUPoints.get("Status").toString());
+        textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Conditioning Mode : ");
         textViewLabel2.setText("Fan Mode : ");
 
@@ -2653,9 +2711,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         textViewTitle.setText(EmrPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(EmrPoints.get("Status").toString());
+        textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
+        viewTitle.setPadding(40,20,0,0);
         viewStatus.setPadding(0, 0, 0, 40);
         try {
             linearLayoutZonePoints.addView(viewTitle);
@@ -2675,7 +2738,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         TextView statusTitle = viewStatus.findViewById(R.id.inner_status_title);
         statusTitle.setVisibility(View.GONE);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
-        textViewStatus.setGravity(Gravity.CENTER | Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        textViewModule.setVisibility(View.GONE);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
+        textViewUpdatedTime.setVisibility(View.GONE);
+        TextView textViewUpdatedText = viewStatus.findViewById(R.id.last_updated);
+        textViewUpdatedText.setVisibility(View.GONE);
+        textViewStatus.setGravity(Gravity.CENTER|Gravity.CENTER_HORIZONTAL|Gravity.CENTER_VERTICAL);
         textViewStatus.setText(Html.fromHtml("<b>No device currently Paired</b> <br>Please go to the floor planner on settings page to pair a new device</br>"));
         viewStatus.setPadding(0, 0, 0, 40);
         try {
@@ -2699,6 +2768,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         TextView labelInputAir = viewPointRow1.findViewById(R.id.text_point1label);
         TextView labelTarget = viewPointRow1.findViewById(R.id.text_point2label);
@@ -2715,6 +2787,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         textViewTitle.setText(plcPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(plcPoints.get("Status").toString());
+        textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
 
         labelInputAir.setText("Input  " + plcPoints.get("Unit Type").toString() + " : ");
 
@@ -3060,12 +3133,38 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         return CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \"" + equipId + "\"");
     }
 
+    HashMap<String, View> zoneStatus = new HashMap<>();
+    private void refreshZoneHeartBeat(){
+        if((floorList.size() == 0) || mFloorListAdapter == null){
+            return;
+        }
+        ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("room and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
+        for (Map zone : zones) {
+            String zoneName = zone.get("dis").toString();
+            ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\""+zone.get("id").toString()+"\" and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
+            if(equips.size() > 0) {
+                boolean isZoneAlive = HeartBeatUtil.isZoneAlive(equips);
+                View statusView  = zoneStatus.get(zoneName);
+                HeartBeatUtil.zoneStatus(statusView, isZoneAlive);
+            }
+        }
+
+    }
+
     private void loadSENSEPointsUI(HashMap sensePoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress) {
 
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         textViewTitle.setText(sensePoints.get("Profile").toString() + " (" + nodeAddress + ")");
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
         linearLayoutZonePoints.addView(viewTitle);
+        View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
+        LinearLayout statusLayout=viewStatus.findViewById(R.id.ll_status);
+        statusLayout.setVisibility(View.GONE);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
+        textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
+        linearLayoutZonePoints.addView(viewStatus);
 
         if (sensePoints.get("isTh1Enable") == "true") {
             View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
@@ -3123,7 +3222,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
 
     }
-    private void viewSenseZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap, String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout) {
+    private void viewSenseZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap, String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout, boolean isZoneAlive) {
 
         Log.i("ProfileTypes", "Points:" + zoneMap.toString());
         Equip p = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
@@ -3151,7 +3250,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         int i = gridPosition;
         View arcView = inflater.inflate(R.layout.zones_item, (ViewGroup) rootView, false);
         View zoneDetails = inflater.inflate(R.layout.zones_item_details, null);
-
+        View status_view = arcView.findViewById(R.id.status_view);
+        TextView textViewModule = arcView.findViewById(R.id.module_status);
+        HeartBeatUtil.zoneStatus(textViewModule, isZoneAlive);
+        zoneStatus.put(zoneTitle, textViewModule);
         LinearLayout linearLayoutZonePoints = zoneDetails.findViewById(R.id.lt_profilepoints);
         LinearLayout linearLayoutschedulePoints = zoneDetails.findViewById(R.id.lt_schedule);
         LinearLayout linearLayoutstatusPoints = zoneDetails.findViewById(R.id.lt_status);
@@ -3346,6 +3448,5 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
 
     }
-
 
 }

@@ -187,12 +187,12 @@ public class CCUHsApi
         editor.apply();
     }
 
-    public boolean isOAOFreeCoolingPointsMigrationDone() {
+    public boolean isOAODamperOpenPointsMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getBoolean("OAOFreeCoolingPointsMigration",false);
+        return sharedPreferences.getBoolean("OAODamperOpenPointsMigration",false);
     }
 
-    public void setOAOFreeCoolingPointsMigrationStatus(boolean isMigrated) {
+    public void setOAODamperOpenPointsMigrationStatus(boolean isMigrated) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("OAOFreeCoolingPointsMigration", isMigrated);

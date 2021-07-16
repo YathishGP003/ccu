@@ -2,27 +2,26 @@ package a75f.io.logic.oao;
 
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Tags;
-import a75f.io.logic.bo.building.oao.FreeCoolingPoint;
+import a75f.io.logic.bo.building.oao.OAODamperOpenPoint;
 
-public class OAOFreeCoolingReasonMigration {
-    private final static String OAO_FREE_COOLING_REASON_MIGRATION = "OAO_FREE_COOLING_REASON_MIGRATION";
+public class OAODamperOpenReasonMigration {
+    private final static String OAO_DAMPER_OPEN_REASON_MIGRATION = "OAO_DAMPER_OPEN_REASON_MIGRATION";
     private final static String MAT = "mat";
     private final static String DCV = "dcv";
 
-    public static void OAOFreeCoolingReasonMigration() {
-        new OAOFreeCoolingReasonMigration().checkForOAOFreeCoolingReasonMigration();
+    public static void initOAOFreeCoolingReasonMigration() {
+        new OAODamperOpenReasonMigration().checkForOAODamperOpenReasonMigration();
     }
 
-    private void checkForOAOFreeCoolingReasonMigration(){
-        if (!CCUHsApi.getInstance().isOAOFreeCoolingPointsMigrationDone()) {
-            Log.i(OAO_FREE_COOLING_REASON_MIGRATION,"OAO free cooling reason migration started ");
+    private void checkForOAODamperOpenReasonMigration(){
+        if (!CCUHsApi.getInstance().isOAODamperOpenPointsMigrationDone()) {
+            Log.i(OAO_DAMPER_OPEN_REASON_MIGRATION,"OAO free cooling reason migration started ");
             upgradeOAOWithFreeCoolingPoints(CCUHsApi.getInstance());
-            CCUHsApi.getInstance().setOAOFreeCoolingPointsMigrationStatus(true);
+            CCUHsApi.getInstance().setOAODamperOpenPointsMigrationStatus(true);
         }
     }
 
@@ -35,7 +34,8 @@ public class OAOFreeCoolingReasonMigration {
         String nodeAddress = equip.getGroup();
         for(String coolingReason : coolingReasons){
             if(!isFreeCoolingPointCreated(hayStack, nodeAddress, coolingReason)){
-                hayStack.addPoint(FreeCoolingPoint.getFreeCoolingPoint(coolingReason+"Available",
+                Log.i("OAO_DAMPER_OPEN_REASON_MIGRATION","point added for OAO for "+coolingReason);
+                hayStack.addPoint(OAODamperOpenPoint.getDamperOpenPoint(coolingReason+"Available",
                         siteDis, equip.getSiteRef(), equip.getRoomRef(), equip.getId(), Integer.parseInt(nodeAddress),
                         equip.getFloorRef(),equip.getTz(), coolingReason));
             }

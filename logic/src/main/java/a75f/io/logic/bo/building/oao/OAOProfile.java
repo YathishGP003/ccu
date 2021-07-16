@@ -30,7 +30,7 @@ public class OAOProfile
     public static boolean economizingAvailable = false;
 
     private boolean dcvAvailable;
-    private boolean matAvailable;
+    private boolean matThrottle;
     
     double economizingLoopOutput;
     double outsideAirCalculatedMinDamper;
@@ -58,12 +58,12 @@ public class OAOProfile
         this.dcvAvailable = dcvAvailable;
     }
 
-    public boolean isMatAvailable() {
-        return matAvailable;
+    public boolean isMatThrottle() {
+        return matThrottle;
     }
 
-    public void setMatAvailable(boolean matAvailable) {
-        this.matAvailable = matAvailable;
+    public void setMatThrottle(boolean matThrottle) {
+        this.matThrottle = matThrottle;
     }
 
     public void addOaoEquip(short addr, OAOProfileConfiguration config, String floorRef, String roomRef) {
@@ -118,14 +118,14 @@ public class OAOProfile
     
         Log.d(L.TAG_CCU_OAO,"outsideAirLoopOutput "+outsideAirLoopOutput+" outsideDamperMatTarget "+outsideDamperMatTarget+" outsideDamperMatMin "+outsideDamperMatMin
                             +" matTemp "+matTemp);
+        setMatThrottle(false);
         if (outsideAirLoopOutput > outsideDamperMinOpen) {
             if (matTemp < outsideDamperMatTarget && matTemp > outsideDamperMatMin) {
                 outsideAirFinalLoopOutput = outsideAirLoopOutput - outsideAirLoopOutput * ((outsideDamperMatTarget - matTemp) / (outsideDamperMatTarget - outsideDamperMatMin));
-                setMatAvailable(true);
+                setMatThrottle(true);
             }
             else {
                 outsideAirFinalLoopOutput = (matTemp <= outsideDamperMatMin) ? outsideDamperMinOpen : outsideAirLoopOutput;
-                setMatAvailable(false);
             }
         } else {
             outsideAirFinalLoopOutput = outsideDamperMinOpen;
@@ -156,7 +156,7 @@ public class OAOProfile
         } else if (outsideAirFinalLoopOutput < (exhaustFanStage2Threshold - exhaustFanHysteresis)) {
             oaoEquip.setHisVal("cmd and exhaust and fan and stage2",0);
         }
-        oaoEquip.setHisVal("mat and available", isMatAvailable()?1:0);
+        oaoEquip.setHisVal("mat and available", isMatThrottle()?1:0);
     }
     public void doEpidemicControl(){
         epidemicState = EpidemicState.OFF;

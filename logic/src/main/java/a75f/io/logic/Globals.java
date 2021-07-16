@@ -52,6 +52,7 @@ import a75f.io.logic.cloud.RenatusServicesUrls;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
+import a75f.io.logic.oao.OAODamperOpenReasonMigration;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerUpgrades;
@@ -178,8 +179,15 @@ public class Globals {
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
 
         importTunersAndScheduleJobs();
+        OAODamperOpenReasonMigration();
     }
-    
+
+    private void OAODamperOpenReasonMigration(){
+        HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
+        if (!site.isEmpty()) {
+            OAODamperOpenReasonMigration.initOAOFreeCoolingReasonMigration();
+        }
+    }
     
     private void importTunersAndScheduleJobs() {
 

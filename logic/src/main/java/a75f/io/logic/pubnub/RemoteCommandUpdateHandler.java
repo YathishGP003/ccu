@@ -24,6 +24,7 @@ public class RemoteCommandUpdateHandler
     public static final String CM_RESET = "CM RESET";
     public static final String SAVE_CCU_LOGS = "save_ccu_logs";
     public static final String RESTART_MODULE = "restart_module";
+    public static final String OTA_UPDATE_HS = "ota_update_hyperStat";
     private static RemoteCommandHandleInterface remoteCommandInterface = null;
     
     public static void handleMessage(JsonObject msgObject, Context context) {
@@ -68,6 +69,7 @@ public class RemoteCommandUpdateHandler
                                 break;
                             case OTA_UPDATE_ITM:
                             case OTA_UPDATE_SD:
+                            case OTA_UPDATE_HS:
                                 CcuLog.i(Globals.TAG,"OTA_UPDATE_SD OTA_UPDATE_ITM update bradcase");
 
                                 Intent otaUpdateIntent = new Intent(Globals.IntentActions.PUBNUB_MESSAGE);
@@ -92,6 +94,7 @@ public class RemoteCommandUpdateHandler
                     switch(cmdType){
                         case OTA_UPDATE_SD:
                         case OTA_UPDATE_ITM:
+                        case OTA_UPDATE_HS:
                             Intent otaUpdateIntent = new Intent(Globals.IntentActions.PUBNUB_MESSAGE);
                             otaUpdateIntent.putExtra("id", id);
                             otaUpdateIntent.putExtra("firmwareVersion", msgObject.get("version").getAsString());

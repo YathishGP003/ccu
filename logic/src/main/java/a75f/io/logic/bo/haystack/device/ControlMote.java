@@ -11,6 +11,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 
 /**
  * Created by samjithsadasivan on 12/6/18.
@@ -27,6 +28,7 @@ public class ControlMote
     public RawPoint th1In;
     public RawPoint th2In;
     public RawPoint currentTemp;
+    public RawPoint rssi;
     public String siteRef;
     public String floorRef;
     public String roomRef;
@@ -197,6 +199,8 @@ public class ControlMote
                 .setTz(tz)
                 .build();
 
+        rssi = HeartBeat.getHeartBeatRawPoint(smartNodeAddress, deviceRef, siteRef, roomRef, floorRef, tz);
+
         th2In = new RawPoint.Builder()
                 .setDisplayName("Th2In-"+smartNodeAddress)
                 .setDeviceRef(deviceRef)
@@ -313,5 +317,6 @@ public class ControlMote
         CCUHsApi.getInstance().addPoint(th1In);
         CCUHsApi.getInstance().addPoint(th2In);
         CCUHsApi.getInstance().addPoint(currentTemp);
+        CCUHsApi.getInstance().addPoint(rssi);
     }
 }

@@ -151,7 +151,7 @@ public class HisSyncHandler
                         CcuLog.e(TAG,"Historized point value for GUID " + pointGuid + "; point ID " + pointID + "; description of " + pointDescription + " is null. Skipping.");
                     }
                 }
-            } else if (unsyncedHisItems.isEmpty() && timeForQuarterHourSync) {
+            } else if (unsyncedHisItems.isEmpty() && timeForQuarterHourSync && !(pointToSync.containsKey("heartbeat") || pointToSync.containsKey("rssi"))) {
 
                 HisItem latestHisItemToReSync = ccuHsApi.tagsDb.getLastHisItem(HRef.copy(pointID));
 

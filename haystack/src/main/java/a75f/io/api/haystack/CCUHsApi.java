@@ -187,6 +187,17 @@ public class CCUHsApi
         editor.apply();
     }
 
+    public boolean isHeartbeatMigrationDone() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean("heartbeatMigration",false);
+    }
+
+    public void setHeartbeatMigrationStatus(boolean isMigrated) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("heartbeatMigration", isMigrated);
+        editor.apply();
+    }
     public boolean isOAODamperOpenPointsMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean("OAODamperOpenPointsMigration",false);
@@ -835,6 +846,12 @@ public class CCUHsApi
         if((item == null)|| (!item.initialized) || !prevVal.equals(val))
             hsClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), HNum.make(val))});
        
+    }
+
+    public synchronized void writeHisValueByIdWithoutCOV(String id, Double val)
+    {
+        hsClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), HNum.make(val))});
+
     }
 
     public synchronized void writeHisValByQuery(String query, Double val)

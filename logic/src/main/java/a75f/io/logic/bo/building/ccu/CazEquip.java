@@ -16,6 +16,7 @@ import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.BuildingTuners;
@@ -270,6 +271,8 @@ public class CazEquip
         String occupancyId = CCUHsApi.getInstance().addPoint(occupancy);
         CCUHsApi.getInstance().writeHisValById(occupancyId, 0.0);
 
+        String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
+                siteRef, roomRef, floorRef, nodeAddr, "ti", tz, false));
 
         //4 TODO map system device?
         ControlMote device = new ControlMote(nodeAddr,siteRef, floorRef, roomRef, equipRef);
@@ -279,6 +282,8 @@ public class CazEquip
         device.th1In.setEnabled(true);
         device.th2In.setPointRef(eatID);
         device.th2In.setEnabled(config.enableThermistor2);
+        device.rssi.setPointRef(heartBeatId);
+        device.rssi.setEnabled(true);
 
 
         device.addSensor(Port.SENSOR_RH, humidityId);

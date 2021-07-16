@@ -416,7 +416,7 @@ public class OTAUpdateService extends IntentService {
      * @param dir The directory to search for the binary file
      */
     private void runBinaryCheck(File dir, int versionMajor, int versionMinor, FirmwareDeviceType_t deviceType) {
-        Log.d(Globals.TAG, "File has beed downloaded runBinaryCheck ");
+        Log.d(Globals.TAG, "File has been downloaded runBinaryCheck ");
         String filename = makeFileName(versionMajor, versionMinor, deviceType);
 
         Log.d(TAG, "[BINARY] Running binary check on file: " + filename);

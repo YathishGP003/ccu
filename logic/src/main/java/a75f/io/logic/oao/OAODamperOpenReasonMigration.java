@@ -19,7 +19,7 @@ public class OAODamperOpenReasonMigration {
 
     private void checkForOAODamperOpenReasonMigration(){
         if (!CCUHsApi.getInstance().isOAODamperOpenPointsMigrationDone()) {
-            Log.i(OAO_DAMPER_OPEN_REASON_MIGRATION,"OAO free cooling reason migration started ");
+            Log.i(OAO_DAMPER_OPEN_REASON_MIGRATION,"OAO Damper open reason point migration started ");
             upgradeOAOWithFreeCoolingPoints(CCUHsApi.getInstance());
             CCUHsApi.getInstance().setOAODamperOpenPointsMigrationStatus(true);
         }

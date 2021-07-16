@@ -156,7 +156,7 @@ public class OAOProfile
         } else if (outsideAirFinalLoopOutput < (exhaustFanStage2Threshold - exhaustFanHysteresis)) {
             oaoEquip.setHisVal("cmd and exhaust and fan and stage2",0);
         }
-        oaoEquip.setHisVal("mat and available", isMatThrottle()?1:0);
+        oaoEquip.setHisVal("mat and available", isMatThrottle() ? 1 : 0);
     }
     public void doEpidemicControl(){
         epidemicState = EpidemicState.OFF;
@@ -385,7 +385,7 @@ public class OAOProfile
                 break;
         }
         oaoEquip.setHisVal("outside and air and calculated and min and damper", outsideAirCalculatedMinDamper);
-        oaoEquip.setHisVal("dcv and available", isDcvAvailable()?1:0);
+        oaoEquip.setHisVal("dcv and available", isDcvAvailable() ? 1 : 0);
     }
     
     public static double getAirEnthalpy(double averageTemp, double averageHumidity) {

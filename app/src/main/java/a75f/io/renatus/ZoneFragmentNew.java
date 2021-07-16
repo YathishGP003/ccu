@@ -3440,13 +3440,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                         seekArc.setCurrentTemp(Float.parseFloat(sensePoints.get("curtempwithoffset").toString()));
                         loadSENSEPointsUI(sensePoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
                     }
-
                 }
-
             }
         });
-
-
     }
 
 }

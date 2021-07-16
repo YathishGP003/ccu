@@ -12,6 +12,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 
 public class SmartStat {
     int smartNodeAddress;
@@ -28,6 +29,7 @@ public class SmartStat {
     public RawPoint relay6;
     public RawPoint currentTemp;
     public RawPoint desiredTemp;
+    public RawPoint rssi;
 
     public String deviceRef;
     public String siteRef;
@@ -224,6 +226,8 @@ public class SmartStat {
                               .setUnit("\u00B0F")
                               .setTz(tz)
                               .build();
+
+        rssi = HeartBeat.getHeartBeatRawPoint(smartNodeAddress, deviceRef, siteRef, roomRef, floorRef, tz);
     }
 	public void addSensor(Port p, String pointRef) {
         RawPoint sensor = new RawPoint.Builder()
@@ -295,6 +299,7 @@ public class SmartStat {
         CCUHsApi.getInstance().addPoint(relay6);
         CCUHsApi.getInstance().addPoint(currentTemp);
         CCUHsApi.getInstance().addPoint(desiredTemp);
+        CCUHsApi.getInstance().addPoint(rssi);
     }
     
     public static void updatePhysicalPointType(int addr, String port, String type) {

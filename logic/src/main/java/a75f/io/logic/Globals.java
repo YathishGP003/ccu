@@ -49,6 +49,7 @@ import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
+import a75f.io.logic.heartbeat.HeartbeatMigration;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
@@ -188,9 +189,16 @@ public class Globals {
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
 
         importTunersAndScheduleJobs();
+        migrateHeartbeatPointForEquips();
     }
     
-    
+    private void migrateHeartbeatPointForEquips(){
+        HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
+        if (!site.isEmpty()) {
+            HeartbeatMigration.initHeartbeatMigration();
+        }
+    }
+
     private void importTunersAndScheduleJobs() {
 
         new Thread()

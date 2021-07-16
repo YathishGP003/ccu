@@ -206,7 +206,7 @@ public class CCUHsApi
     public void setOAODamperOpenPointsMigrationStatus(boolean isMigrated) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("OAOFreeCoolingPointsMigration", isMigrated);
+        editor.putBoolean("OAODamperOpenPointsMigration", isMigrated);
         editor.apply();
     }
 

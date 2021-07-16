@@ -85,7 +85,7 @@ public class OaoArc extends View {
     private float mThumbXPos;
     private float mThumbYPos;
     private int airCO2 = 0, angle = 0;
-
+    private Paint heartBeatSignal;
     public OaoArc(Context context) {
         super(context);
         init(context, null);
@@ -157,6 +157,7 @@ public class OaoArc extends View {
         mUnitTextPaint.setAntiAlias(true);
         mUnitTextPaint.setTextSize(12);
 
+        heartBeatSignal =new Paint();
 
         mTextPaint = new Paint();
         mTextPaint.setTypeface(latoLightFont);
@@ -212,6 +213,16 @@ public class OaoArc extends View {
 
         float yPos = getHeight() /1.1f;  // baseline
         canvas.drawText(oaoTitle, 75, yPos, mOAOTitleTextPaint);
+        Typeface latoLightFont = ResourcesCompat.getFont(getContext(), R.font.lato_light);
+        heartBeatSignal.setTypeface(latoLightFont);
+        heartBeatSignal.setStyle(Paint.Style.FILL);
+        heartBeatSignal.setFakeBoldText(true);
+        heartBeatSignal.setAntiAlias(true);
+        heartBeatSignal.setTextSize(12);
+
+        canvas.drawCircle(140, 240, 6, heartBeatSignal);
+        //canvas.drawCircle(140, 240, 7, new Paint(Color.argb(110,98, 104, 104)));
+
     }
 
     private void drawAirCo2Text(Canvas canvas) {
@@ -354,5 +365,14 @@ public class OaoArc extends View {
 
     private float getAngle(float ppmRead) {
         return (240.0f * (ppmRead / mMax) + 60.0f);
+    }
+
+    public void updateStatus(boolean status){
+        if(status){
+            heartBeatSignal.setColor(Color.parseColor("#02C18D"));
+        }else{
+            heartBeatSignal.setColor(Color.parseColor("#999999"));
+        }
+
     }
 }

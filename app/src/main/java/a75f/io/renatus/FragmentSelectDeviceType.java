@@ -177,6 +177,11 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         showDialogFragment(FragmentModbusType.newInstance(mNodeAddress, mRoomName, mFloorName, misPaired),FragmentModbusType.MID);
     }
 
+    @OnClick(R.id.rlbpos) void onBPOSClick(){
+
+        showDialogFragment(FragmentBPOSTypeSelection.newInstance(mNodeAddress, mRoomName, mFloorName, misPaired),FragmentBPOSTypeSelection.ID);
+    }
+
     @OnClick(R.id.first_button) void onFirstButtonClick() {
         removeDialogFragment(ID);
     }

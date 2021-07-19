@@ -11,6 +11,8 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import com.google.android.material.textfield.TextInputLayout;
+
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
 import android.text.Editable;
@@ -82,7 +84,7 @@ public class AddtoExisting extends Fragment {
     ProgressBar mProgressDialog;
     Prefs prefs;
     EditText mEt1, mEt2, mEt3, mEt4, mEt5, mEt6;
-
+    View toastLayout, toast_Fail;
     public AddtoExisting() {
         // Required empty public constructor
     }
@@ -121,6 +123,11 @@ public class AddtoExisting extends Fragment {
         // Inflate the layout for this fragment
         //((FreshRegistration)getActivity()).showIcons(false);
         View rootView = inflater.inflate(R.layout.fragment_addtoexisting, container, false);
+
+        //Creating the LayoutInflater instance
+        LayoutInflater li = getLayoutInflater();
+        toastLayout = li.inflate(R.layout.custom_toast_layout,(ViewGroup) rootView.findViewById(R.id.custom_toast_layout));
+        toast_Fail = li.inflate(R.layout.custom_toast_layout_failed,(ViewGroup) rootView.findViewById(R.id.custom_toast_layout_fail));
 
         mContext = getContext().getApplicationContext();
 
@@ -203,15 +210,21 @@ public class AddtoExisting extends Fragment {
                 {
                     Toast.makeText(mContext, "array not empty", Toast.LENGTH_SHORT).show();
                     //String siteId = StringUtils.trim(mSiteId.getText().toString());
-                    /*HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
-                    Log.e("InsideAddtoExist","siteId- "+siteId);*/
-                    /*String siteId1 = CCUHsApi.getInstance().getSiteGuid();
-                    Log.e("InsideAddtoExist","siteId1- "+siteId1);*/
-                    /*siteId = StringUtils.prependIfMissing(siteId, "@");
-                    loadExistingSite(siteId);*/
-                    String OTP = et1.getText()+""+et2.getText()+et3.getText()+""+et4.getText()+""+et5.getText()+et6.getText();
-                    Log.e("InsideAddtoExisting","OTP- "+OTP);
-                    OTPValidation("@163607e4-a3ac-4859-8012-ab79f7bf6c0d",OTP);
+                    try {
+                        HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
+                        Log.e("InsideAddtoExist", "siteId- " + siteId);
+                        String site_Id = StringUtils.prependIfMissing(siteId.toString(), "@");
+                        //loadExistingSite(siteId);
+                        String OTP = et1.getText() + "" + et2.getText() + et3.getText() + "" + et4.getText() + "" + et5.getText() + et6.getText();
+                        //Log.e("InsideAddtoExisting","OTP- "+OTP);
+                        if (!site_Id.equals(null))
+                            OTPValidation(site_Id, OTP);
+                        else
+                            Toast.makeText(mContext, "Please create a site first, Site Id is null", Toast.LENGTH_SHORT).show();
+                        OTPValidation("@ad07dfe7-4614-4304-9f6b-9eb612b955ac", OTP);
+                    } catch (Exception e) {
+                        Log.e("InsideAddtoExisting", "Exception- " + e);
+                    }
                 }
                 else Toast.makeText(mContext, "Please check the OTP", Toast.LENGTH_SHORT).show();
             }
@@ -257,56 +270,23 @@ public class AddtoExisting extends Fragment {
                     Log.e("InsideAddtoExisting","isValid- "+jsonObject.getString("valid"));
                     //JSONObject dataObj=jsonObject.getJSONObject("data");
                     if (jsonObject.getString("valid") == "true"){
-                        Toast toast=Toast.makeText(getApplicationContext(),"Success! Your verification code is correct.",Toast.LENGTH_SHORT);
-                        toast.setMargin(50,50);
-                        toast.setGravity(Gravity.CENTER_VERTICAL, 25, 25);
+                        //Getting the View object as defined in the customtoast.xml file
+
+                        //Toast toast=Toast.makeText(getApplicationContext(),"Success! Your verification code is correct.",Toast.LENGTH_SHORT);
+                        Toast toast = new Toast(getApplicationContext());
+                        //toast.setMargin(50,50);
+                        toast.setGravity(Gravity.BOTTOM, 50, 50);
+                        toast.setView(toastLayout);
+                        toast.setDuration(Toast.LENGTH_LONG);
                         toast.show();
+                        saveExistingSite(siteId);
                     }else{
-                        Toast toast=Toast.makeText(getApplicationContext(),"Failed! Your verification code is not correct.",Toast.LENGTH_SHORT);
-                        toast.setMargin(50,50);
-                        toast.setGravity(Gravity.CENTER_VERTICAL, 25, 25);
+                        Toast toast = new Toast(getApplicationContext());
+                        toast.setGravity(Gravity.BOTTOM, 50, 50);
+                        toast.setView(toast_Fail);
+                        toast.setDuration(Toast.LENGTH_LONG);
                         toast.show();
                     }
-                    /*if(jsonObject.getInt("status")==1){
-                        applicationPreference.setData(
-                                applicationPreference.userId,
-                                dataObj.getString("user_id"));
-                        applicationPreference.setData(
-                                applicationPreference.userEmail,
-                                dataObj.getString("email_id"));
-                        applicationPreference.setData(
-                                applicationPreference.userMobile,
-                                dataObj.getString("phone"));
-                        applicationPreference.setData(
-                                applicationPreference.userName,
-                                dataObj.getString("first_name"));
-                        applicationPreference.setData(
-                                applicationPreference.userLastName,
-                                dataObj.getString("last_name"));
-                        applicationPreference.setData(
-                                applicationPreference.user_title,
-                                dataObj.getString("title"));
-                        applicationPreference.setData(
-                                applicationPreference.user_addr,
-                                dataObj.getString("address"));
-                        applicationPreference.setData(
-                                applicationPreference.user_cc,
-                                dataObj.getString("country_code"));
-                        try{
-                            applicationPreference.setData(
-                                    applicationPreference.user_dp,
-                                    dataObj.getString("image"));
-                        }catch (Exception e){
-                            applicationPreference.setData(
-                                    applicationPreference.user_dp,
-                                    "none");
-                        }
-                        finish();
-
-                    }else {
-
-                    }
-                    commonUtils.toastShort(jsonObject.getString("msg"),getApplicationContext());*/
                 } catch (JSONException e) {
                     e.printStackTrace();
                     //commonUtils.toastShort(e.toString(),getApplicationContext());

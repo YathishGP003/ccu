@@ -926,4 +926,8 @@
     <string name="analogin2">Analog-in2</string>
     <string name="title_pairhss">HYPERSTAT | PAIRING STEPS </string>
     <string name="prefs_theme_key">isEnabled</string>
+    <string name="success">Success!</string>
+    <string name="your_verification_code_is_correct">Your Verification code is correct.</string>
+    <string name="your_verification_code_is_not_correct">Your verification code is not correct.</string>
+    <string name="failed">Failed!</string>
 </resources>

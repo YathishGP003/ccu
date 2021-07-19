@@ -2,6 +2,7 @@ package a75f.io.renatus;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -290,12 +291,55 @@ public class RegisterGatherCCUDetails extends Activity {
                 super.onPostExecute(nul);
                 hideProgressDialog();
                 prefs.setBoolean("CCU_SETUP", true);
-                Intent i = new Intent(RegisterGatherCCUDetails.this,
-                        FreshRegistration.class);
-                i.putExtra("viewpager_position", 9);
-                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(i);
-                finish();
+
+                // Create the object of
+                // AlertDialog Builder class
+                AlertDialog.Builder builder
+                        = new AlertDialog
+                        .Builder(RegisterGatherCCUDetails.this);
+
+                // Set the message show for the Alert time
+                builder.setMessage("Are you sure you want to add "+mCCUNameET.getText().toString()+" to site");
+
+                // Set Alert Title
+                builder.setTitle("ADD CCU");
+
+                // Set Cancelable false
+                // for when the user clicks on the outside
+                // the Dialog Box then it will remain show
+                builder.setCancelable(false);
+
+                // Set the positive button with yes name
+                // OnClickListener method is use of
+                // DialogInterface interface.
+
+                builder
+                        .setPositiveButton(
+                                "OK",
+                                new DialogInterface
+                                        .OnClickListener() {
+
+                                    @Override
+                                    public void onClick(DialogInterface dialog,
+                                                        int which)
+                                    {
+
+                                        // When the user click yes button
+                                        // then app will close
+                                        Intent i = new Intent(RegisterGatherCCUDetails.this,
+                                                FreshRegistration.class);
+                                        i.putExtra("viewpager_position", 9);
+                                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        startActivity(i);
+                                        finish();
+                                    }
+                                });
+
+                // Create the Alert dialog
+                AlertDialog alertDialog = builder.create();
+
+                // Show the Alert Dialog box
+                alertDialog.show();
 
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);

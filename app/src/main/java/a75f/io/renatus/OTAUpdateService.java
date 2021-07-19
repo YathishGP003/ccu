@@ -277,10 +277,7 @@ public class OTAUpdateService extends IntentService {
         else if(firmwareVersion.startsWith("Itm_") || firmwareVersion.startsWith("itm_")) {
             mFirmwareDeviceType = FirmwareDeviceType_t.ITM_DEVICE_TYPE;
             startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
-        } else if(firmwareVersion.startsWith("SmartStatV2_") || firmwareVersion.startsWith("smartstatv2_")) {
-            mFirmwareDeviceType = FirmwareDeviceType_t.SMART_STAT_V2;
-            startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
-        }else if(firmwareVersion.startsWith("HyperStat_")) {
+        } else if(firmwareVersion.startsWith("HyperStat_")) {
             CcuLog.i(Globals.TAG,"Handling for Hyper state node ");
             mFirmwareDeviceType = FirmwareDeviceType_t.HYPER_STAT_DEVICE_TYPE;
             startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);

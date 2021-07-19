@@ -179,7 +179,7 @@
 
             <TextView
                 style="@style/title_normal"
-                android:id="@+id/backUpCCUConfig"
+                android:id="@+id/otpGenerator"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"

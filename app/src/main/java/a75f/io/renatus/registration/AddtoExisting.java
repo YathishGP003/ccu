@@ -16,7 +16,9 @@ import androidx.appcompat.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.util.Patterns;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +32,11 @@ import android.widget.Toast;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.projecthaystack.HRef;
+
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.Globals;
@@ -39,6 +46,13 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.RegisterGatherCCUDetails;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.util.retrofit.ApiClient;
+import a75f.io.renatus.util.retrofit.ApiInterface;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Response;
+
+import static com.raygun.raygun4android.RaygunClient.getApplicationContext;
 
 public class AddtoExisting extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -179,12 +193,25 @@ public class AddtoExisting extends Fragment {
                                 R.id.otp_edit_text5,
                                 R.id.otp_edit_text6
                         };
+                EditText et1 = rootView.findViewById(R.id.otp_edit_text1);
+                EditText et2 = rootView.findViewById(R.id.otp_edit_text2);
+                EditText et3 = rootView.findViewById(R.id.otp_edit_text3);
+                EditText et4 = rootView.findViewById(R.id.otp_edit_text4);
+                EditText et5 = rootView.findViewById(R.id.otp_edit_text5);
+                EditText et6 = rootView.findViewById(R.id.otp_edit_text6);
                 if(!validateEditText(mandotaryIds))
                 {
                     Toast.makeText(mContext, "array not empty", Toast.LENGTH_SHORT).show();
-                    /*String siteId = StringUtils.trim(mSiteId.getText().toString());
-                    siteId = StringUtils.prependIfMissing(siteId, "@");
+                    //String siteId = StringUtils.trim(mSiteId.getText().toString());
+                    /*HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
+                    Log.e("InsideAddtoExist","siteId- "+siteId);*/
+                    /*String siteId1 = CCUHsApi.getInstance().getSiteGuid();
+                    Log.e("InsideAddtoExist","siteId1- "+siteId1);*/
+                    /*siteId = StringUtils.prependIfMissing(siteId, "@");
                     loadExistingSite(siteId);*/
+                    String OTP = et1.getText()+""+et2.getText()+et3.getText()+""+et4.getText()+""+et5.getText()+et6.getText();
+                    Log.e("InsideAddtoExisting","OTP- "+OTP);
+                    OTPValidation("@163607e4-a3ac-4859-8012-ab79f7bf6c0d",OTP);
                 }
                 else Toast.makeText(mContext, "Please check the OTP", Toast.LENGTH_SHORT).show();
             }
@@ -206,6 +233,104 @@ public class AddtoExisting extends Fragment {
         });
 
         return rootView;
+    }
+
+    private void OTPValidation(String siteId, String OTPCode) {
+        ApiInterface apiInterface= null;
+        try {
+            apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        }
+        Call<ResponseBody> signInCall = apiInterface.ValidateOTP(siteId,OTPCode);
+        ApiClient.getApiResponse(signInCall, new ApiClient.ApiCallBack() {
+            @Override
+            public void Success(Response<ResponseBody> response) throws IOException {
+                //progressLoader.DismissProgress();
+                String responseData= response.body().string();
+                Log.e("InsideAddtoExisting","Api URL- "+response.raw().request().url().toString());
+                Log.e("InsideAddtoExisting","responseData_Success- "+responseData);
+                try {
+                    JSONObject jsonObject=new JSONObject(responseData);
+                    Log.e("InsideAddtoExisting","isValid- "+jsonObject.getString("valid"));
+                    //JSONObject dataObj=jsonObject.getJSONObject("data");
+                    if (jsonObject.getString("valid") == "true"){
+                        Toast toast=Toast.makeText(getApplicationContext(),"Success! Your verification code is correct.",Toast.LENGTH_SHORT);
+                        toast.setMargin(50,50);
+                        toast.setGravity(Gravity.CENTER_VERTICAL, 25, 25);
+                        toast.show();
+                    }else{
+                        Toast toast=Toast.makeText(getApplicationContext(),"Failed! Your verification code is not correct.",Toast.LENGTH_SHORT);
+                        toast.setMargin(50,50);
+                        toast.setGravity(Gravity.CENTER_VERTICAL, 25, 25);
+                        toast.show();
+                    }
+                    /*if(jsonObject.getInt("status")==1){
+                        applicationPreference.setData(
+                                applicationPreference.userId,
+                                dataObj.getString("user_id"));
+                        applicationPreference.setData(
+                                applicationPreference.userEmail,
+                                dataObj.getString("email_id"));
+                        applicationPreference.setData(
+                                applicationPreference.userMobile,
+                                dataObj.getString("phone"));
+                        applicationPreference.setData(
+                                applicationPreference.userName,
+                                dataObj.getString("first_name"));
+                        applicationPreference.setData(
+                                applicationPreference.userLastName,
+                                dataObj.getString("last_name"));
+                        applicationPreference.setData(
+                                applicationPreference.user_title,
+                                dataObj.getString("title"));
+                        applicationPreference.setData(
+                                applicationPreference.user_addr,
+                                dataObj.getString("address"));
+                        applicationPreference.setData(
+                                applicationPreference.user_cc,
+                                dataObj.getString("country_code"));
+                        try{
+                            applicationPreference.setData(
+                                    applicationPreference.user_dp,
+                                    dataObj.getString("image"));
+                        }catch (Exception e){
+                            applicationPreference.setData(
+                                    applicationPreference.user_dp,
+                                    "none");
+                        }
+                        finish();
+
+                    }else {
+
+                    }
+                    commonUtils.toastShort(jsonObject.getString("msg"),getApplicationContext());*/
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    //commonUtils.toastShort(e.toString(),getApplicationContext());
+                }
+
+            }
+
+            @Override
+            public void Failure(Response<ResponseBody> response) throws IOException
+            {
+                /*progressLoader.DismissProgress();
+                commonUtils.toastShort(response.toString(),getApplicationContext());*/
+                Log.e("InsideAddtoExisting","responseData_Fail- "+response);
+            }
+
+            @Override
+            public void Error(Throwable t)
+            {
+               /* progressLoader.DismissProgress();
+                commonUtils.toastShort(t.toString(),getApplicationContext());*/
+                Log.e("InsideAddtoExisting","responseData_Error- "+t.getMessage().toString());
+
+            }
+        });
     }
 
     private void addTextWatcher(final EditText one) {

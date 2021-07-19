@@ -33,7 +33,7 @@ fun getSystemLoopOp(loopType: String, hayStack : CCUHsApi) : Double {
 }
 
 fun isMultiZoneEnabled(hayStack : CCUHsApi) : Boolean {
-    return hayStack.readHisValByQuery("point and system and config and enabled and multiZone") > 0
+    return hayStack.readDefaultVal("point and system and config and multiZone") > 0
 }
 
 fun getDuctStaticPressureTarget(systemProfile: VavIERtu) : Double {

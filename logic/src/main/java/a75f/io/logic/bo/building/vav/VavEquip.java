@@ -1304,6 +1304,8 @@ public class VavEquip
     public void setDischargeSp(double dischargeSp)
     {
         this.dischargeSp = dischargeSp;
+        CCUHsApi.getInstance().writeHisValByQuery("point and discharge and temp and sp and group == \""+nodeAddr+"\"",
+                                                  dischargeSp);
     }
     public VavUnit getVavUnit()
     {

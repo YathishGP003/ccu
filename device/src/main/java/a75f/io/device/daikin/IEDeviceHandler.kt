@@ -13,7 +13,7 @@ class IEDeviceHandler {
     private var staticPressureSp : Double = -1.0
     private var fanLoopSp : Double = -1.0
     private var humCtrl : HumidityCtrl = HumidityCtrl.UnInit
-    private var occFetchCounter = 0
+    private var fiveMinCounter = 0
 
     private lateinit var ieService : IEService
     private lateinit var serviceBaseUrl : String
@@ -52,13 +52,14 @@ class IEDeviceHandler {
             updateFanControl(it, hayStack, systemProfile)
             updateHumidityControl(it, systemProfile)
             fetchAlarms(it, hayStack)
-            fetchSystemClock(it, hayStack)
 
             //OccStatus to be fetched every 5 minutes
-            if (occFetchCounter++ % 5 == 0) {
+            if (fiveMinCounter == 0 || fiveMinCounter >= 5) {
                 fetchOccStatus(it, hayStack)
-                occFetchCounter = 0
+                fetchSystemClock(it, hayStack)
+                fiveMinCounter = 0;
             }
+            fiveMinCounter++
 
         }
     }
@@ -110,7 +111,7 @@ class IEDeviceHandler {
     private fun updateDatClgSetpoint(service : IEService, systemProfile: VavIERtu) {
         writeToIEDevice(
             service,
-            IE_POINT_TYPE_MI,
+            IE_POINT_TYPE_AV,
             IE_POINT_NAME_DAT_SETPOINT,
             IE_MSG_BODY.format(fahrenheitToCelsius(systemProfile.getCmd("dat and setpoint")))
         )
@@ -120,6 +121,7 @@ class IEDeviceHandler {
      * Update fanLoop only when multizone configuration or dspSp or fanLoopOp changes.
      */
     private fun updateFanControl(service : IEService, hayStack: CCUHsApi, systemProfile: VavIERtu) {
+
         if (isMultiZoneEnabled(hayStack)) {
             val updatedStaticPressureSp = inchToPascal(getDuctStaticPressureTarget(systemProfile))
             if (updatedStaticPressureSp != staticPressureSp) {
@@ -190,9 +192,12 @@ class IEDeviceHandler {
         ieService.readPoint(IE_POINT_TYPE_AV, IE_POINT_NAME_ALARM_WARN)
             .subscribeOn(Schedulers.io())
             .subscribe(
-                { response ->
-                    hayStack.writeHisValByQuery("system and point and ie and alarm and warning",
-                                            response.responseVal.toDouble())
+                { response -> response?.result?.let {
+                                    hayStack.writeHisValByQuery(
+                                        "system and point and ie and alarm and warning",
+                                        it.toDouble()
+                                    )
+                                }
                 },
                 { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching alarm warnings", error) }
             )
@@ -200,9 +205,11 @@ class IEDeviceHandler {
         ieService.readPoint(IE_POINT_TYPE_AV, IE_POINT_NAME_ALARM_PROB)
             .subscribeOn(Schedulers.io())
             .subscribe(
-                { response ->
-                    hayStack.writeHisValByQuery("system and point and ie and alarm and problem",
-                        response.responseVal.toDouble())
+                { response -> response?.result?.let{
+                                    hayStack.writeHisValByQuery(
+                                        "system and point and ie and alarm and problem",
+                                        it.toDouble())
+                                }
                 },
                 { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching alarm problems", error) }
             )
@@ -210,9 +217,11 @@ class IEDeviceHandler {
         ieService.readPoint(IE_POINT_TYPE_AV, IE_POINT_NAME_ALARM_FAULT)
             .subscribeOn(Schedulers.io())
             .subscribe(
-                { response ->
-                    hayStack.writeHisValByQuery("system and point and ie and alarm and fault",
-                        response.responseVal.toDouble())
+                { response -> response?.result?.let {
+                                    hayStack.writeHisValByQuery(
+                                        "system and point and ie and alarm and fault",
+                                    it.toDouble())
+                                }
                 },
                 { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching alarm fault", error) }
             )
@@ -223,9 +232,11 @@ class IEDeviceHandler {
         ieService.readPoint(IE_POINT_TYPE_AV, IE_POINT_NAME_SYSTEM_CLOCK)
             .subscribeOn(Schedulers.io())
             .subscribe(
-                { response ->
-                    hayStack.writeHisValByQuery("system and point and ie and clock",
-                        response.responseVal.toDouble())
+                { response -> response?.result?.let {
+                                    hayStack.writeHisValByQuery(
+                                        "system and point and ie and clock",
+                                    it.toDouble())
+                                }
                 },
                 { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching system clock", error) }
             )
@@ -235,9 +246,11 @@ class IEDeviceHandler {
         ieService.readPoint(IE_POINT_TYPE_MV, IE_POINT_NAME_OCCUPANCY_STATUS)
             .subscribeOn(Schedulers.io())
             .subscribe(
-                { response ->
-                    hayStack.writeHisValByQuery("system and point and ie and occStatus",
-                        response.responseVal.toDouble())
+                { response -> response?.result?.let {
+                                    hayStack.writeHisValByQuery(
+                                        "system and point and ie and occStatus",
+                                        it.toDouble())
+                                }
                 },
                 { error -> CcuLog.e(L.TAG_CCU_DEVICE, "Error fetching occStatus", error) }
             )

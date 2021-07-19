@@ -37,12 +37,14 @@ class IEServiceGenerator {
                     val builder = chain.request().newBuilder()
                     builder.header("Content-Type", "text/plain")
                     builder.header("Authorization", "Bearer=11021962")
+                    builder.header("Connection", "close")
                     return@Interceptor chain.proceed(builder.build())
                 }
             )
             addInterceptor(okhttpLogging)
             addNetworkInterceptor(okhttpLogging)
             connectTimeout(30, TimeUnit.SECONDS)
+            retryOnConnectionFailure(true)
         }.build()
         CcuLog.i(L.TAG_CCU_DEVICE, "create retrofit  $baseUrl")
 

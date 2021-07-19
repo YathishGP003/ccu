@@ -22,6 +22,7 @@ import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.haystack.device.SmartStat;
@@ -457,6 +458,8 @@ public class TwoPipeFanCoilUnitEquip {
                 .setTz(tz)
                 .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
+        String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
+                siteRef, room, floor, nodeAddr, profile, tz ));
         //TODO, what if already equip exists in a zone and its schedule is zone or named? Kumar
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
         CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
@@ -471,6 +474,8 @@ public class TwoPipeFanCoilUnitEquip {
         device.th2In.setEnabled(true);
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
+        device.rssi.setPointRef(heartBeatId);
+        device.rssi.setEnabled(true);
         device.addSensor(Port.SENSOR_RH,humidityId);
         device.addSensor(Port.SENSOR_CO2,co2Id);
         device.addSensor(Port.SENSOR_VOC,vocId);

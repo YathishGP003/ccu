@@ -1,127 +1,50 @@
- - Merged PR 1429: fix merge issue
- - fix merge issue
- - Merged PR 1190: CCU: Hide (grey it out) Incompatible Zone Pairing Options
- - Resolved merge conflicts
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6369/CCU_Hide_Incompatible_Zone_Pairing_Options
- - Merged PR 1323: Modbus json sideloading support
- - Resolved confilts
- - Merge branches 'master' and 'story/mkundaragi/CCU_7247_Modbus_Sideloading_support' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/mkundaragi/CCU_7247_Modbus_Sideloading_support
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6369/CCU_Hide_Incompatible_Zone_Pairing_Options
- - Merged PR 1423: HyperStat integration branch merge.
- - Removed commented code
- - Merge issues
- - Merged PR 1422: Hyperstat sense miscellaneous changes
- - Add HyperStat pairing support
- - Merged PR 1272: 7225 : Liebert Vertiv NXc: OEM has changed the registers
- - Merged PR 1273: 6754 : SX Modbus Profile - Data not shown in CCU
- - added PM2P5 and PM10
- - Merged PR 1334: 6887 : HyperStat Sense Profile Implementation.
- - Merged PR 1413: Addding multiplier to modbus JSON
- - Added extra logs for param id in same json file
- - Removed Logs
- - Merge branch 'story/mkundaragi/CCU_7247_Modbus_Sideloading_support' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/mkundaragi/CCU_7247_Modbus_Sideloading_support
- - display name has been updated
- - updated logs
- - Adding multiplier for json
- - break was missing
- - Merged PR 1383: OAO Arch Progrss color change
- - Merged PR 1373: Fixed Pairing address for CCU
- - other sensor unit
- - temp off tag was changed
- - temp offset is not set to default in oncreate
- - Dynamic sensor units are added
- - Added file name in error message
- - Added new parameter as multiplier
- - merge
- - Added offset and logical point tags
- - Adding Validation across the files
- - Removed comment
- - Added offset and logical point tags
- - Merge branch 'story/sdev/6887_HypeStat_Sense_Profile_Implementation' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/sdev/6887_HypeStat_Sense_Profile_Implementation
- - resend message fix
- - Ion density has been added to the list
- - device duplication resolved and sensor name updated with short dis
- - Zero DB issue resolved and tags updated for humidity
- - sensor values are not changed to integer
- - Merged PR 1326: App name and App logo configuration as per Build
- - adding round off value to raw point as well
- - Removed comment
- - Updated with Enum type
- - Updated with Enum type
- - Merge branches 'master' and 'story/mkundaragi/CCU_7247_Modbus_Sideloading_support' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/mkundaragi/CCU_7247_Modbus_Sideloading_support
- - Updated with Enum type
- - Observations fixed
- - Added Validation for JSON tags
- - Added Validation for JSON tags
- - Fixed Pairing address for CCU
- - Added Validation for JSON tags
- - Validating tags
- - Merged PR 1307: Changed the color of icon
- - Some more fixes
- - Add humidity, fix some issues
- - Merge branch 'story/sdev/6887_HypeStat_Sense_Profile_Implementation' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/sdev/6887_HypeStat_Sense_Profile_Implementation
- - resolved issues raised in QE
- - addressing comments
- - Merge branch 'story/samjith/hyperstat_protobuf_integration' into story/sdev/6887_HypeStat_Sense_Profile_Implementation
- - temp not covered
- - code clean
- - Update sensor values and addition of cur temp
- - Complete configuration of HyperstatSense profile
- - Added null check
- - latest
- - Changed the color of icon
- - Reading JSON files from external storage
- - Zone Fragment Valued updated and able to read
- - Reading JSON files from external storage
- - Reading JSON files from external storage
- - Json has been changed
- - Json changed accordingly
+ - Merged PR 1310: Heart beat point for all the modules
+ - Handled occupancy sensor data
+ - Merging code of 7672- Reading data from device for hyperstat sense as requested by Manju
+ - heartbeat migration included for hyperstat sense
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
+ - Merged PR 1473: 7519 : Zone UI Implementation for Hyperstat Sense
+ - Occupancy point creation
+ - Lower and upper limit for the temp ui
+ - Fixed fetching address of equipment
+ - Added code for Hyperstat -Sense module -heartbeat point
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
+ - Merged PR 1450: Zone marker is added for system level modbus profiles
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
+ - Added code for heartbeat migration task
+ - Logs are removed
+ - Complete Zone UI
+ - Done with current temp
+ - Merged PR 1432: 7584: CCU : Hyperstat sense : Sensor selections reset when toggles were in off state initially.
+ - Handled multiplier for input and holding register
+ - hyphen removed
+ - working
+ - resolved zone tag issue and display name as per requested
  - draft
- - Merge branches 'hyperstat' and 'story/sdev/6887_HypeStat_Sense_Profile_Implementation' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/sdev/6887_HypeStat_Sense_Profile_Implementation
- - draft
- - Avoid sending serialized message
- - Fix message type overwrite
- - Change serialized message structure
- - Merge branches 'story/samjith/hyperstat_protobuf_integration' and 'story/sdev/6887_HypeStat_Sense_Profile_Implementation' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/sdev/6887_HypeStat_Sense_Profile_Implementation
- - remove the device
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/sdev/6887_HypeStat_Sense_Profile_Implementation
- - Merged PR 1235: HyperStat Sense UI Implementation
- - Incompatible Zone Pairing Options will be greyed out.
- - Incompatible Zone Pairing Options will be greyed out.
- - New pair screen added
- - temperature offset wheel is set to false
- - Incompatible Zone Pairing Options will be greyed out.
- - draft
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6369/CCU_Hide_Incompatible_Zone_Pairing_Options
- - Add analog points to haystack device
- - Merge hyperstat branch
- - Add comments
- - Butterknife for events as well
- - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
- - draft
- - Merge branches 'story/sdev/6887_HypeStat_Sense_Profile_Implementation' and 'story/sdev/6889-HyperState_Sense_UI' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/sdev/6887_HypeStat_Sense_Profile_Implementation
- - Included ButterKnife, Dynamically adding spinner values
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6369/CCU_Hide_Incompatible_Zone_Pairing_Options
- - Add support for local override messages
- - Update setting/control message to serialized type
- - Hyperstat sense UI complete
- - removed spaces
- - Hyperstat Sense Configuration fragment
- - draft
- - draft
- - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
- - draft
- - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
- - HyperStat Sense Profile Implementation
- - HyperStat messages implementation
- - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/6369/CCU_Hide_Incompatible_Zone_Pairing_Options
- - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
- - Merge branch 'master' into hyperstat
- - Merge branch 'hyperstat' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into hyperstat
- - WIP
- - Hyperstat test UI
- - While selecting or changing the System profile,the relay mapping will disappear till the loader is shown. Once loader gets off,correct relay mapping will be shown.
- - Hyperstat pairing selection screen
- - Add hyperstat proto file and make gradle changes
- - Device Type Selection -- hyperstat
+ - Resolved the merge conflicts with master after 1.572 release
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
+ - Config was not updated if the ananlogs are changes to enable
+ - removed standalone tag from OAO heartbeat
+ - Resolved alignment issue
+ - Fixed tag issues (standalone and heartbeat), Date format issue, SN EMR issue
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
+ - uncommented date format for today
+ - uncommented date format for today
+ - fixed system tag refresh screen
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
+ - Fixes for modbus heartbeat and addressed review comments
+ - Added code for refreshing zone screen
+ - UI fixes as suggested by QA
+ - Oao and system level level module changes
+ - updating with more modification -module status
+ - added alignment
+ - updating with more modification -module status
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
+ - updating with more modification -module status
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
+ - fixed 2fcu and 4 fcu
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
+ - ui changes for heartbeat
+ - Added heartbeat and module tag for Points
+ - heartbeat points for all equips

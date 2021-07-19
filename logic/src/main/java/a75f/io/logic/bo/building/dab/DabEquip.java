@@ -25,6 +25,7 @@ import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.BuildingTuners;
@@ -389,6 +390,8 @@ public class DabEquip
                 .build();
         String zoneDynamicPriorityPointID = CCUHsApi.getInstance().addPoint(zoneDynamicPriorityPoint);
         CCUHsApi.getInstance().writeHisValById(zoneDynamicPriorityPointID, 10.0);
+        String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
+                siteRef, roomRef, floorRef, nodeAddr, "dab", tz, false));
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
@@ -398,7 +401,9 @@ public class DabEquip
         device.th1In.setEnabled(true);
         device.th2In.setPointRef(dat2Id);
         device.th2In.setEnabled(true);
-        
+        device.rssi.setPointRef(heartBeatId);
+        device.rssi.setEnabled(true);
+
         for (Output op : config.getOutputs()) {
             switch (op.getPort()) {
                 case ANALOG_OUT_ONE:

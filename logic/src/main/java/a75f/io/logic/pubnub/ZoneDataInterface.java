@@ -1,5 +1,6 @@
 package a75f.io.logic.pubnub;
 
+
 public interface ZoneDataInterface {
     void refreshScreen(String id);
     void updateTemperature(double currentTemp, short nodeAddress);

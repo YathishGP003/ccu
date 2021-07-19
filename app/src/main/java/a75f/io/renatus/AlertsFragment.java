@@ -8,6 +8,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,7 +60,7 @@ public class AlertsFragment extends Fragment
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
 		listView= view.findViewById(R.id.alertList);
-
+		alertList=new ArrayList<>();
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -153,10 +155,10 @@ public class AlertsFragment extends Fragment
 		if (!alertManager.hasService()) {
 			alertManager.rebuildServiceNewToken(CCUHsApi.getInstance().getJwt());
 		}
-		alertList = new ArrayList<>(AlertManager.getInstance().getAllAlertsNotInternal());
-
+		AlertManager.getInstance().getAllAlertsNotInternal().forEach(alert -> {
+			if(alert.mAlertType.equalsIgnoreCase("CUSTOMER VISIBLE")) alertList.add(alert);
+		});
 		adapter = new AlertAdapter(alertList,getActivity());
-
 		listView.setAdapter(adapter);
 	}
 }

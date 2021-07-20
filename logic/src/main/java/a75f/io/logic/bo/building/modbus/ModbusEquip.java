@@ -292,7 +292,7 @@ public class ModbusEquip {
             if (tags.length() > 0) {
                 String zoneTag="";
                 if(!equipmentDevice.getEquipType().equals(ModbusCategory.BTU.displayName)
-                        &&!equipmentDevice.getEquipType().equals(ModbusCategory.BTU.displayName)){
+                        &&!equipmentDevice.getEquipType().equals(ModbusCategory.EMR.displayName)){
                     zoneTag="and zone";
                 }
                 HashMap pointRead = CCUHsApi.getInstance().read("point and logical and modbus "+zoneTag + tags + " and equipRef == \"" + equipRef + "\"");

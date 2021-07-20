@@ -348,6 +348,7 @@ public class OAOProfile
         setDcvAvailable(false);
         double dcvCalculatedMinDamper = 0;
         boolean usePerRoomCO2Sensing = oaoEquip.getConfigNumVal("config and oao and co2 and sensing") > 0? true : false;
+        boolean isCo2levelUnderThreshold = true;
         if (usePerRoomCO2Sensing)
         {
             dcvCalculatedMinDamper = L.ccu().systemProfile.getCo2LoopOp();
@@ -360,6 +361,7 @@ public class OAOProfile
             
             if (returnAirCO2 > co2Threshold) {
                 dcvCalculatedMinDamper = (returnAirCO2 - co2Threshold)/co2DamperOpeningRate;
+                isCo2levelUnderThreshold = false;
             }
             Log.d(L.TAG_CCU_OAO," dcvCalculatedMinDamper "+dcvCalculatedMinDamper+" returnAirCO2 "+returnAirCO2+" co2Threshold "+co2Threshold);
         }
@@ -371,7 +373,9 @@ public class OAOProfile
                 if(systemMode != SystemMode.OFF) {
                     outsideDamperMinOpen = epidemicState != EpidemicState.OFF ? outsideAirCalculatedMinDamper : outsideDamperMinOpen;
                     outsideAirCalculatedMinDamper = Math.min(outsideDamperMinOpen + dcvCalculatedMinDamper, 100);
-                    setDcvAvailable(true);
+                    if(!isCo2levelUnderThreshold){
+                        setDcvAvailable(true);
+                    }
                 }else
                     outsideAirCalculatedMinDamper = outsideDamperMinOpen;
                 break;

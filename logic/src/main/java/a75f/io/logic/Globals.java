@@ -180,23 +180,37 @@ public class Globals {
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
 
         importTunersAndScheduleJobs();
-        migrateHeartbeatPointForEquips();
-        OAODamperOpenReasonMigration();
     }
     
-    private void migrateHeartbeatPointForEquips(){
-        HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
+    private void migrateHeartbeatPointForEquips(HashMap<Object, Object> site){
         if (!site.isEmpty()) {
             HeartbeatMigration.initHeartbeatMigration();
         }
     }
 
 
-    private void OAODamperOpenReasonMigration(){
-        HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
+    private void OAODamperOpenReasonMigration(HashMap<Object, Object> site){
         if (!site.isEmpty()) {
             OAODamperOpenReasonMigration.initOAOFreeCoolingReasonMigration();
         }
+    }
+
+    private HashMap<Object, Object>  performBuildingTunerUprades(HashMap<Object, Object> site) {
+        //If site already exists , import building tuners from backend before initializing building tuner equip.
+        if (!site.isEmpty()) {
+            if (CCUHsApi.getInstance().isPrimaryCcu()) {
+                        /* Only primary CCUs shall create new tuners created in the upgrade releases and
+                        non-primary CCUs should fetch in the next app start up.*/
+                BuildingTuners.getInstance().updateBuildingTuners();
+            } else {
+                        /*If a non-primary tuner fails to load all the  building tuners, it should
+                        fall back hard-coded constant tuner values. Creating new tuner instances here will result in
+                        multiple CCUs having duplicate instances of tuners. */
+                CCUHsApi.getInstance().importBuildingTuners();
+            }
+            TunerUpgrades.handleBuildingTunerForceClear(mApplicationContext, CCUHsApi.getInstance());
+        }
+        return site;
     }
 
     private void importTunersAndScheduleJobs() {
@@ -206,24 +220,11 @@ public class Globals {
             @Override
             public void run()
             {
-                //If site already exists , import building tuners from backend before initializing building tuner equip.
                 HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
-                if (!site.isEmpty()) {
-                    if (CCUHsApi.getInstance().isPrimaryCcu()) {
-                        /* Only primary CCUs shall create new tuners created in the upgrade releases and
-                        non-primary CCUs should fetch in the next app start up.*/
-                        BuildingTuners.getInstance().updateBuildingTuners();
-                    } else {
-                        /*If a non-primary tuner fails to load all the  building tuners, it should
-                        fall back hard-coded constant tuner values. Creating new tuner instances here will result in
-                        multiple CCUs having duplicate instances of tuners. */
-                        CCUHsApi.getInstance().importBuildingTuners();
-                    }
-                    TunerUpgrades.handleBuildingTunerForceClear(mApplicationContext, CCUHsApi.getInstance());
-                    
-                    CCUHsApi.getInstance().syncEntityTree();
-                }
-            
+                performBuildingTunerUprades(site);
+                migrateHeartbeatPointForEquips(site);
+                OAODamperOpenReasonMigration(site);
+                CCUHsApi.getInstance().syncEntityTree();
                 loadEquipProfiles();
             
                 if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed())

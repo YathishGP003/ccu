@@ -360,7 +360,6 @@ public class OAOProfile
             
             if (returnAirCO2 > co2Threshold) {
                 dcvCalculatedMinDamper = (returnAirCO2 - co2Threshold)/co2DamperOpeningRate;
-                setDcvAvailable(true);
             }
             Log.d(L.TAG_CCU_OAO," dcvCalculatedMinDamper "+dcvCalculatedMinDamper+" returnAirCO2 "+returnAirCO2+" co2Threshold "+co2Threshold);
         }
@@ -372,6 +371,7 @@ public class OAOProfile
                 if(systemMode != SystemMode.OFF) {
                     outsideDamperMinOpen = epidemicState != EpidemicState.OFF ? outsideAirCalculatedMinDamper : outsideDamperMinOpen;
                     outsideAirCalculatedMinDamper = Math.min(outsideDamperMinOpen + dcvCalculatedMinDamper, 100);
+                    setDcvAvailable(true);
                 }else
                     outsideAirCalculatedMinDamper = outsideDamperMinOpen;
                 break;

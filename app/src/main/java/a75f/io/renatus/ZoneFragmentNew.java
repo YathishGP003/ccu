@@ -3162,6 +3162,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
         LinearLayout statusLayout=viewStatus.findViewById(R.id.ll_status);
         statusLayout.setVisibility(View.GONE);
+        LinearLayout linearl = viewStatus.findViewById(R.id.lllastupdate);
+        LinearLayout.LayoutParams param = (LinearLayout.LayoutParams)linearl.getLayoutParams();
+        param.setMargins(0, 0, 0, -40);
+        linearl.setLayoutParams(param);
         TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         linearLayoutZonePoints.addView(viewStatus);

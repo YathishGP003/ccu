@@ -195,7 +195,7 @@ public class Globals {
         }
     }
 
-    private HashMap<Object, Object>  performBuildingTunerUprades(HashMap<Object, Object> site) {
+    private void performBuildingTunerUprades(HashMap<Object, Object> site) {
         //If site already exists , import building tuners from backend before initializing building tuner equip.
         if (!site.isEmpty()) {
             if (CCUHsApi.getInstance().isPrimaryCcu()) {
@@ -210,7 +210,6 @@ public class Globals {
             }
             TunerUpgrades.handleBuildingTunerForceClear(mApplicationContext, CCUHsApi.getInstance());
         }
-        return site;
     }
 
     private void importTunersAndScheduleJobs() {

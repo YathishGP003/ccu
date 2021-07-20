@@ -1,6 +1,8 @@
 package a75f.io.logic.pubnub;
 
 
+import android.util.Log;
+
 import com.google.gson.JsonObject;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -15,21 +17,17 @@ import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseUtil;
 class HyperStatSenseConfigHandler {
 
     public static void updateConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
-        CcuLog.i(L.TAG_CCU_PUBNUB, "updateHyperStatSenseConfigPoint " + configPoint+" "+msgObject.toString());
-
-        int val = msgObject.get("val").getAsInt();
-
+        CcuLog.i(L.TAG_CCU_PUBNUB, "updateHyperStatSenseConfigPoint " + configPoint+" "+msgObject.toString()
+                +" Markers ="+configPoint.getMarkers());
 
         if (configPoint.getMarkers().contains(Tags.ENABLED)) {
             HyperStatSenseUtil.updateConfigEnabled(msgObject, configPoint, hayStack);
         } else if (configPoint.getMarkers().contains("offset"))  {
             HyperStatSenseUtil.updatetempOffset(msgObject, configPoint, hayStack);
-        } else if (configPoint.getMarkers().contains("logical")) {
+        } else {
             HyperStatSenseUtil.updateConfig(msgObject, configPoint, hayStack);
         }
         writePointFromJson(configPoint, msgObject, hayStack);
-
-
 
     }
 

@@ -540,13 +540,13 @@ public class HyperStatSenseEquip {
         String equipDis = siteDis + "-SENSE-" + mNodeAddr + "-";
         Bundle bundle = new Bundle();
         if (tag.equals("analog1")) {
-            bundle = getAnalogBundle(config.analog1Sensor);
+            bundle = HyperStatSenseUtil.getAnalogBundle(config.analog1Sensor);
         } else if (tag.equals("analog2")) {
-            bundle = getAnalogBundle(config.analog2Sensor);
+            bundle = HyperStatSenseUtil.getAnalogBundle(config.analog2Sensor);
         } else if (tag.equals("th1")) {
-            bundle = getThermistorBundle(config.th1Sensor);
+            bundle = HyperStatSenseUtil.getThermistorBundle(config.th1Sensor);
         } else if (tag.equals("th2")) {
-            bundle = getThermistorBundle(config.th2Sensor);
+            bundle = HyperStatSenseUtil.getThermistorBundle(config.th2Sensor);
         }
 
         String shortDis = bundle.getString("shortDis");

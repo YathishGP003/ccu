@@ -6,6 +6,7 @@ import android.util.Log;
 import com.google.gson.JsonObject;
 
 import java.util.HashMap;
+import java.util.Set;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -19,12 +20,16 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 
+/*
+ * created by spoorthidev on 20-July-2021
+ */
+
 public class HyperStatSenseUtil {
 
     private static String LOG_TAG = "HyperStatSenseUtil";
 
     public static void updateConfigEnabled(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
-        Log.d(LOG_TAG,"updateConfigEnabled ++");
+        Log.d(LOG_TAG, "updateConfigEnabled ++");
         HashMap equipMap = hayStack.readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         String floorRef = equip.getFloorRef();
@@ -32,63 +37,72 @@ public class HyperStatSenseUtil {
         String nodeAddr = equip.getGroup();
         String roomRef = equip.getRoomRef();
         int configVal = msgObject.get("val").getAsInt();
-        HashMap Th1Val = hayStack.read("point and logical and th1 and equipRef == \"" + equipref + "\"");
-        HashMap Th2Val = hayStack.read("point and logical and th2 and equipRef == \"" + equipref + "\"");
-        HashMap An1Val = hayStack.read("point and logical and analog1 and equipRef == \"" + equipref + "\"");
-        HashMap An2Val = hayStack.read("point and logical and analog2 and equipRef == \"" + equipref + "\"");
+
 
         if (configPoint.getMarkers().contains(Tags.TH1)) {
+            HashMap Th1Val = hayStack.read("point and logical and th1 and equipRef == \"" + equipref + "\"");
+            int th1Sensor = hayStack.readDefaultVal("point and config and th1 and input and sensor and equipRef == \"" + equipref + "\"").intValue();
             DeviceUtil.setPointEnabled(Integer.parseInt(nodeAddr), Port.TH1_IN.name(),
                     configVal > 0 ? true : false);
-            if(configVal > 0 ){
-                hayStack.writeDefaultValById(Th1Val.get("id").toString(),0.0);
-            }else{
-                if (Th1Val != null && Th1Val.get("id") != null) {
-                    Log.d(LOG_TAG,"updateConfigEnabled ++ delete th1");
-                    hayStack.deleteEntityTree(Th1Val.get("id").toString());
-                }
+            if (Th1Val != null && Th1Val.get("id") != null) {
+                Log.d(LOG_TAG, "updateConfig ++ delete th1");
+                CCUHsApi.getInstance().deleteEntityTree(Th1Val.get("id").toString());
+            }
+            if (configVal > 0) {
+                String id = createSensorPoint(floorRef, roomRef, "th1", th1Sensor, nodeAddr, equipref);
+                DeviceUtil.setPointEnabled(Integer.valueOf(nodeAddr), Port.TH1_IN.name(), true);
+                DeviceUtil.updatePhysicalPointRef(Integer.valueOf(nodeAddr), Port.TH1_IN.name(), id);
             }
         } else if (configPoint.getMarkers().contains(Tags.TH2)) {
+            HashMap Th2Val = hayStack.read("point and logical and th2 and equipRef == \"" + equipref + "\"");
+            int th2Sensor = hayStack.readDefaultVal("point and config and th2 and input and sensor and equipRef == \"" + equipref + "\"").intValue();
             DeviceUtil.setPointEnabled(Integer.parseInt(nodeAddr), Port.TH2_IN.name(),
                     configVal > 0 ? true : false);
-            if(configVal > 0 ){
-                hayStack.writeDefaultValById(Th2Val.get("id").toString(),0.0);
-            }else{
-                if (Th2Val != null && Th2Val.get("id") != null) {
-                    Log.d(LOG_TAG,"updateConfigEnabled ++ delete th2");
-                    hayStack.deleteEntityTree(Th2Val.get("id").toString());
-                }
+            if (Th2Val != null && Th2Val.get("id") != null) {
+                Log.d(LOG_TAG, "updateConfigEnabled ++ delete th2");
+                hayStack.deleteEntityTree(Th2Val.get("id").toString());
+            }
+            if (configVal > 0) {
+                String id = createSensorPoint(floorRef, roomRef, "th2", th2Sensor, nodeAddr, equipref);
+                DeviceUtil.setPointEnabled(Integer.valueOf(nodeAddr), Port.TH2_IN.name(), true);
+                DeviceUtil.updatePhysicalPointRef(Integer.valueOf(nodeAddr), Port.TH2_IN.name(), id);
             }
         } else if (configPoint.getMarkers().contains(Tags.ANALOG1)) {
+            HashMap An1Val = hayStack.read("point and logical and analog1 and equipRef == \"" + equipref + "\"");
+            int analog1Sensor = hayStack.readDefaultVal("point and config and analog1 and input and sensor and equipRef == \"" + equipref + "\"").intValue();
+
             DeviceUtil.setPointEnabled(Integer.parseInt(nodeAddr), Port.ANALOG_IN_ONE.name(),
                     configVal > 0 ? true : false);
-            if(configVal > 0 ){
-                hayStack.writeDefaultValById(An1Val.get("id").toString(),0.0);
-            }else{
-                if (An1Val != null && An1Val.get("id") != null) {
-                    Log.d(LOG_TAG, "updateConfigEnabled ++ delete An1");
-                    hayStack.deleteEntityTree(An1Val.get("id").toString());
-                }
+            if (An1Val != null && An1Val.get("id") != null) {
+                Log.d(LOG_TAG, "updateConfigEnabled ++ delete An1");
+                hayStack.deleteEntityTree(An1Val.get("id").toString());
+            }
+            if (configVal > 0) {
+                String id = createSensorPoint(floorRef, roomRef, "analog1", analog1Sensor, nodeAddr, equipref);
+                DeviceUtil.setPointEnabled(Integer.valueOf(nodeAddr), Port.ANALOG_IN_ONE.name(), true);
+                DeviceUtil.updatePhysicalPointRef(Integer.valueOf(nodeAddr), Port.ANALOG_IN_ONE.name(), id);
             }
         } else if (configPoint.getMarkers().contains(Tags.ANALOG2)) {
+            HashMap An2Val = hayStack.read("point and logical and analog2 and equipRef == \"" + equipref + "\"");
+            int analog2Sensor = hayStack.readDefaultVal("point and config and analog2 and input and sensor and equipRef == \"" + equipref + "\"").intValue();
             DeviceUtil.setPointEnabled(Integer.parseInt(nodeAddr), Port.ANALOG_IN_TWO.name(),
                     configVal > 0 ? true : false);
-            if(configVal > 0 ){
-                hayStack.writeDefaultValById(An1Val.get("id").toString(),0.0);
-            }else{
-                if (An2Val != null && An2Val.get("id") != null) {
-                    Log.d(LOG_TAG, "updateConfigEnabled ++ delete An2");
-                    hayStack.deleteEntityTree(An2Val.get("id").toString());
-                }
+            if (An2Val != null && An2Val.get("id") != null) {
+                Log.d(LOG_TAG, "updateConfigEnabled ++ delete An2");
+                hayStack.deleteEntityTree(An2Val.get("id").toString());
+            }
+            if (configVal > 0) {
+                String id = createSensorPoint(floorRef, roomRef, "analog2", analog2Sensor, nodeAddr, equipref);
+                DeviceUtil.setPointEnabled(Integer.valueOf(nodeAddr), Port.ANALOG_IN_TWO.name(), true);
+                DeviceUtil.updatePhysicalPointRef(Integer.valueOf(nodeAddr), Port.ANALOG_IN_TWO.name(), id);
             }
         }
-        writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
-        hayStack.syncPointEntityTree();
-
+        // writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
+        hayStack.syncEntityTree();
     }
 
     public static void updatetempOffset(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
-        Log.d(LOG_TAG,"updatetempOffset ++");
+        Log.d(LOG_TAG, "updatetempOffset ++");
         double val = msgObject.get("val").getAsDouble();
         hayStack.writeDefaultValById(configPoint.getId(), val);
         writePointFromJson(configPoint.getId(), val, msgObject, hayStack);
@@ -96,7 +110,7 @@ public class HyperStatSenseUtil {
 
 
     public static void updateConfig(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
-        Log.d(LOG_TAG,"updateConfig ++");
+        Log.d(LOG_TAG, "updateConfig ++");
         HashMap equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         String floorRef = equip.getFloorRef();
@@ -104,50 +118,52 @@ public class HyperStatSenseUtil {
         String nodeAddr = equip.getGroup();
         String roomRef = equip.getRoomRef();
         int configVal = msgObject.get("val").getAsInt();
-        HashMap Th1Val = CCUHsApi.getInstance().read("point and logical and th1 and equipRef == \"" + equipref + "\"");
-        HashMap Th2Val = CCUHsApi.getInstance().read("point and logical and th2 and equipRef == \"" + equipref + "\"");
-        HashMap An1Val = CCUHsApi.getInstance().read("point and logical and analog1 and equipRef == \"" + equipref+ "\"");
-        HashMap An2Val = CCUHsApi.getInstance().read("point and logical and analog2 and equipRef == \"" +equipref + "\"");
 
         CCUHsApi.getInstance().writeDefaultValById(configPoint.getId(), (double) configVal);
 
         if (configPoint.getMarkers().contains(Tags.TH1)) {
+            HashMap Th1Val = CCUHsApi.getInstance().read("point and logical and th1 and equipRef == \"" + equipref + "\"");
+
             if (Th1Val != null && Th1Val.get("id") != null) {
-                Log.d(LOG_TAG,"updateConfig ++ delete th1");
+                Log.d(LOG_TAG, "updateConfig ++ delete th1");
                 CCUHsApi.getInstance().deleteEntityTree(Th1Val.get("id").toString());
             }
-            Log.d(LOG_TAG,"updateConfig  ++ th1");
+            Log.d(LOG_TAG, "updateConfig  ++ th1");
             String id = createSensorPoint(floorRef, roomRef, "th1", configVal, nodeAddr, equipref);
             DeviceUtil.setPointEnabled(Integer.valueOf(nodeAddr), Port.TH1_IN.name(), true);
             DeviceUtil.updatePhysicalPointRef(Integer.valueOf(nodeAddr), Port.TH1_IN.name(), id);
         } else if (configPoint.getMarkers().contains(Tags.TH2)) {
+            HashMap Th2Val = CCUHsApi.getInstance().read("point and logical and th2 and equipRef == \"" + equipref + "\"");
             if (Th2Val != null && Th2Val.get("id") != null) {
-                Log.d(LOG_TAG,"updateConfig ++ delete th2");
+                Log.d(LOG_TAG, "updateConfig ++ delete th2");
                 CCUHsApi.getInstance().deleteEntityTree(Th2Val.get("id").toString());
             }
-            Log.d(LOG_TAG,"updateConfig  ++  th2");
+            Log.d(LOG_TAG, "updateConfig  ++  th2");
             String id = createSensorPoint(floorRef, roomRef, "th2", configVal, nodeAddr, equipref);
             DeviceUtil.setPointEnabled(Integer.valueOf(nodeAddr), Port.TH2_IN.name(), true);
             DeviceUtil.updatePhysicalPointRef(Integer.valueOf(nodeAddr), Port.TH2_IN.name(), id);
         } else if (configPoint.getMarkers().contains(Tags.ANALOG1)) {
+            HashMap An1Val = CCUHsApi.getInstance().read("point and logical and analog1 and equipRef == \"" + equipref + "\"");
             if (An1Val != null && An1Val.get("id") != null) {
-                Log.d(LOG_TAG,"updateConfig ++ delete an1");
+                Log.d(LOG_TAG, "updateConfig ++ delete an1");
                 CCUHsApi.getInstance().deleteEntityTree(An1Val.get("id").toString());
             }
-            Log.d(LOG_TAG,"updateConfig ++ an1");
+            Log.d(LOG_TAG, "updateConfig ++ an1");
             String id = createSensorPoint(floorRef, roomRef, "analog1", configVal, nodeAddr, equipref);
             DeviceUtil.setPointEnabled(Integer.valueOf(nodeAddr), Port.ANALOG_IN_ONE.name(), true);
             DeviceUtil.updatePhysicalPointRef(Integer.valueOf(nodeAddr), Port.ANALOG_IN_ONE.name(), id);
         } else if (configPoint.getMarkers().contains(Tags.ANALOG2)) {
+            HashMap An2Val = CCUHsApi.getInstance().read("point and logical and analog2 and equipRef == \"" + equipref + "\"");
             if (An2Val != null && An2Val.get("id") != null) {
-                Log.d(LOG_TAG,"updateConfig ++ delete an2");
+                Log.d(LOG_TAG, "updateConfig ++ delete an2");
                 CCUHsApi.getInstance().deleteEntityTree(An2Val.get("id").toString());
             }
-            Log.d(LOG_TAG,"updateConfig ++  an2");
+            Log.d(LOG_TAG, "updateConfig ++  an2");
             String id = createSensorPoint(floorRef, roomRef, "analog2", configVal, nodeAddr, equipref);
             DeviceUtil.setPointEnabled(Integer.valueOf(nodeAddr), Port.ANALOG_IN_TWO.name(), true);
             DeviceUtil.updatePhysicalPointRef(Integer.valueOf(nodeAddr), Port.ANALOG_IN_TWO.name(), id);
         }
+        Log.d(LOG_TAG, "before sync");
         CCUHsApi.getInstance().syncEntityTree();
     }
 
@@ -210,14 +226,14 @@ public class HyperStatSenseUtil {
         }
 
         String sensorVariableTagId = CCUHsApi.getInstance().addPoint(sensorTag.build());
-        CCUHsApi.getInstance().writeDefaultValById(sensorVariableTagId, 0.0);
+        // CCUHsApi.getInstance().writeDefaultValById(sensorVariableTagId, 0.0);
         CCUHsApi.getInstance().writeHisValById(sensorVariableTagId, 0.0);
 
         return sensorVariableTagId;
     }
 
 
-    private static Bundle getAnalogBundle(int analog) {
+    public static Bundle getAnalogBundle(int analog) {
         Bundle bundle = new Bundle();
         String shortDis = "Generic 0-10 Voltage";
         String shortDisTarget = "Dynamic Target Voltage";
@@ -348,7 +364,7 @@ public class HyperStatSenseUtil {
         return bundle;
     }
 
-    private static Bundle getThermistorBundle(int th) {
+    public static Bundle getThermistorBundle(int th) {
         Bundle bundle = new Bundle();
         Thermistor thermistor = Thermistor.getThermistorList().get(th);
         String[] markers = new String[]{"temp"};

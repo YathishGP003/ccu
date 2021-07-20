@@ -24,6 +24,7 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
 import a75f.io.logic.bo.building.definitions.SmartStatHeatPumpChangeOverType;
+import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
@@ -433,6 +434,8 @@ public class HeatPumpUnitEquip{
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
         CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
 
+        String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
+                siteRef, room, floor, nodeAddr, profile, tz));
         //Create Physical points and map
         SmartStat device = new SmartStat(nodeAddr, siteRef, floor, room,equipRef,profile);
         //TODO Need to set it for default if not enabled, currently set it as enabled //kumar
@@ -443,6 +446,8 @@ public class HeatPumpUnitEquip{
         device.th2In.setEnabled(config.enableThermistor2);
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
+        device.rssi.setPointRef(heartBeatId);
+        device.rssi.setEnabled(true);
 		device.addSensor(Port.SENSOR_RH, humidityId);
         device.addSensor(Port.SENSOR_CO2, co2Id);
         device.addSensor(Port.SENSOR_VOC, vocId);

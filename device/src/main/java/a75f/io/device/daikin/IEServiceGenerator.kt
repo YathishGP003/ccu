@@ -55,7 +55,7 @@ class IEServiceGenerator {
         return Retrofit.Builder()
             .baseUrl(baseUrl)
             .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create(gson))
+            //.addConverterFactory(GsonConverterFactory.create(gson))
             .addConverterFactory(SimpleXmlConverterFactory.create())
             .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
             .build()

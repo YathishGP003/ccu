@@ -37,19 +37,7 @@ fun isMultiZoneEnabled(hayStack : CCUHsApi) : Boolean {
 }
 
 fun getDuctStaticPressureTarget(systemProfile: VavIERtu) : Double {
-    val staticPressureMin: Double = systemProfile.getConfigVal("analog2 and staticPressure and min")
-    val staticPressureMax: Double = systemProfile.getConfigVal("analog2 and staticPressure and max")
-
-    val systemFanLoopOp = systemProfile.systemFanLoopOp;
-    CcuLog.d(
-        L.TAG_CCU_SYSTEM,
-        "staticPressureMin: $staticPressureMin staticPressureMax: $staticPressureMax systemFanLoopOp: $systemProfile.systemFanLoopOp"
-    )
-    return if (staticPressureMax > staticPressureMin) {
-        CCUUtils.roundToTwoDecimal(staticPressureMin + (staticPressureMax - staticPressureMin) * (systemFanLoopOp / 100.0))
-    } else {
-        CCUUtils.roundToTwoDecimal(staticPressureMin - (staticPressureMin - staticPressureMax) * (systemFanLoopOp / 100.0))
-    }
+    return systemProfile.getCmdSignal("fan")
 }
 
 fun getMeanHumidityTarget() : Double {

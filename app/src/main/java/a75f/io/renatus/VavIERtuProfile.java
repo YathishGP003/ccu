@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -60,6 +61,13 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     @BindView(R.id.heatingDatMax)Spinner heatingDatMax;
     @BindView(R.id.spMin)Spinner spMin;
     @BindView(R.id.spMax)Spinner spMax;
+    @BindView(R.id.spMinLabel)TextView spMinLabel;
+    @BindView(R.id.spMaxLabel)TextView spMaxLabel;
+    @BindView(R.id.fanSpeedMin)Spinner fanSpeedMin;
+    @BindView(R.id.fanSpeedMinLabel)TextView fanSpeedMinLabel;
+    @BindView(R.id.fanSpeedMax)Spinner fanSpeedMax;
+    @BindView(R.id.fanSpeedMaxLabel)TextView fanSpeedMaxLabel;
+    
     @BindView(R.id.equipmentIp) EditText equipAddr;
     
     @BindView(R.id.analog1RTUTest) Spinner coolingTest;
@@ -116,18 +124,12 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
             zoneType.setText(systemProfile.getConfigVal("multiZone")==0.0?"Single Zone":"Multi Zone");
             setupAnalogLimitSelectors();
             setupEquipAddrEditor();
-            
+            handleFanConfigViews(systemProfile.getConfigVal("multiZone") > 0);
         } else {
-            new AsyncTask<String, Void, Void>() {
-        
-                @Override
-                protected void onPreExecute() {
-                    ProgressDialogUtils.showProgressDialog(getActivity(),"Loading System Profile");
-                    super.onPreExecute();
-                }
-        
-                @Override
-                protected Void doInBackground(final String... params) {
+    
+            disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+                () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Loading System Profile"),
+                () -> {
                     if (systemProfile != null) {
                         systemProfile.deleteSystemEquip();
                         L.ccu().systemProfile = null; //Makes sure that System Algos dont run until new profile is ready.
@@ -135,18 +137,14 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                     systemProfile = new VavIERtu();
                     systemProfile.addSystemEquip();
                     L.ccu().systemProfile = systemProfile;
-                    return null;
-                }
-        
-                @Override
-                protected void onPostExecute(final Void result) {
+                },
+                () -> {
                     setupAnalogLimitSelectors();
                     setupEquipAddrEditor();
+                    handleFanConfigViews(systemProfile.getConfigVal("multiZone") > 0);
                     ProgressDialogUtils.hideProgressDialog();
-                    CCUHsApi.getInstance().saveTagsData();
-                    CCUHsApi.getInstance().syncEntityTree();
                 }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+            ));
         }
 
         if(isFromReg){
@@ -168,6 +166,8 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         zoneTypeSelection.setOnCheckedChangeListener((buttonView, isChecked) -> {
             zoneType.setText(isChecked?"Multi Zone":"Single Zone");
             systemProfile.setConfigVal("multiZone",(isChecked?1.0:0.0));
+            handleFanConfigViews(isChecked);
+            systemProfile.handleMultiZoneEnable(isChecked?1.0:0.0);
         });
         view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
 
@@ -269,7 +269,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         spMax.setSelection(val != 0 ? spAdapter.getPosition(val) : spArr.size()-1, false);
     
         ArrayList<Double> heatingDatArr = new ArrayList<>();
-        for (double hdat = 75;  hdat <= 130.0; hdat++)
+        for (double hdat = 75;  hdat <= 100; hdat++)
         {
             heatingDatArr.add(hdat);
         }
@@ -298,22 +298,23 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         heatingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         heatingTest.setAdapter(heatingSatTestAdapter);
         heatingTest.setSelection(0,false);
-    
-        ArrayList<Double> zoroToHundred = new ArrayList<>();
-        for (double i = 0;  i <= 100.0; i++)
-        {
-            zoroToHundred.add(i);
-        }
-        ArrayAdapter<Double> humidificationTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
-        humidificationTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        humidificationTest.setAdapter(humidificationTestAdapter);
+        
+        ArrayAdapter<Double> percentSelectorAdapter = getZeroToHundredArrayAdapter();
+        humidificationTest.setAdapter(percentSelectorAdapter);
         humidificationTest.setSelection(0,false);
-    
-        ArrayAdapter<Double> oaMinTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
-        oaMinTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        oaMinTest.setAdapter(oaMinTestAdapter);
+        
+        oaMinTest.setAdapter(percentSelectorAdapter);
         oaMinTest.setSelection(0,false);
+        
+        fanSpeedMin.setAdapter(percentSelectorAdapter);
+        val = systemProfile.getConfigVal("fanSpeed and min");
+        fanSpeedMin.setSelection(val != 0 ? percentSelectorAdapter.getPosition(val) : 0, false);
     
+    
+        fanSpeedMax.setAdapter(percentSelectorAdapter);
+        val = systemProfile.getConfigVal("fanSpeed and max");
+        fanSpeedMax.setSelection(val != 0 ? percentSelectorAdapter.getPosition(val) : percentSelectorAdapter.getCount()-1,
+                                 false);
     
         coolingDatMin.setOnItemSelectedListener(this);
         coolingDatMax.setOnItemSelectedListener(this);
@@ -326,7 +327,19 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         heatingTest.setOnItemSelectedListener(this);
         humidificationTest.setOnItemSelectedListener(this);
         oaMinTest.setOnItemSelectedListener(this);
+        fanSpeedMin.setOnItemSelectedListener(this);
+        fanSpeedMax.setOnItemSelectedListener(this);
         
+    }
+    
+    private ArrayAdapter<Double> getZeroToHundredArrayAdapter() {
+        ArrayList<Double> zoroToHundred = new ArrayList<>();
+        for (double i = 0;  i <= 100.0; i++) {
+            zoroToHundred.add(i);
+        }
+        ArrayAdapter<Double> adapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        return adapter;
     }
     
     @Override
@@ -373,6 +386,12 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                 break;
             case R.id.heatingDatMax:
                 setConfigBackground("heating and dat and max", val);
+                break;
+            case R.id.fanSpeedMin:
+                setConfigBackground("fanSpeed and min", val);
+                break;
+            case R.id.fanSpeedMax:
+                setConfigBackground("fanSpeed and max", val);
                 break;
             case R.id.analog1RTUTest:
             case R.id.analog3RTUTest:
@@ -486,5 +505,19 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     public void onDestroy() {
         super.onDestroy();
         disposable.dispose();
+    }
+    
+    private void handleFanConfigViews(boolean multiZone) {
+    
+        fanSpeedMin.setVisibility(multiZone ? View.GONE : View.VISIBLE);
+        fanSpeedMinLabel.setVisibility(multiZone ? View.GONE : View.VISIBLE);
+        fanSpeedMax.setVisibility(multiZone ? View.GONE : View.VISIBLE);
+        fanSpeedMaxLabel.setVisibility(multiZone ? View.GONE : View.VISIBLE);
+        
+        spMin.setVisibility(multiZone ? View.VISIBLE : View.GONE);
+        spMinLabel.setVisibility(multiZone ? View.VISIBLE : View.GONE);
+        spMax.setVisibility(multiZone ? View.VISIBLE : View.GONE);
+        spMaxLabel.setVisibility(multiZone ? View.VISIBLE : View.GONE);
+        
     }
 }

@@ -14,14 +14,14 @@ import retrofit2.http.Path
 
 interface IEService {
 
-    @PUT("/BN/MT3/{pointType}/{pointName}/Present_Value?access-token=12345678")
+    @PUT("/BN/MT3/{pointType}/{pointName}/Present_Value?resp-format=eXML")
     fun writePoint(
         @Path("pointType") pointType: String,
         @Path("pointName") pointName: String,
         @Body pointVal : String
     ): Observable<Response<Void>>
 
-    @GET("/BN/MT3/{pointType}/{pointName}/Present_Value?resp-format=eXML&access-token=12345678")
+    @GET("/BN/MT3/{pointType}/{pointName}/Present_Value?resp-format=eXML")
     fun readPoint(
         @Path("pointType") pointType: String,
         @Path("pointName") pointName: String

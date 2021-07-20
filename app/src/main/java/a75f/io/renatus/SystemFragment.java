@@ -538,7 +538,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 						if(L.ccu().systemProfile instanceof VavIERtu){
 							IEGatewayDetail.setVisibility(View.VISIBLE);
-							IEGatewayOccupancyStatus.setText("IN "+getOccStatus());
+							IEGatewayOccupancyStatus.setText(getOccStatus());
 							GUIDDetails.setText(CCUHsApi.getInstance().getSiteGuid());
 						}
 					}
@@ -726,12 +726,18 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	}
 	private String getOccStatus(){
 		HashMap point = CCUHsApi.getInstance().read("point and " +
-				"system and ie ");
+				"system and ie and occStatus");
 		if (!point.isEmpty()) {
 			double occStatus = CCUHsApi.getInstance().readHisValById(point.get("id").toString());
-			return Occupancy.values()[(int) occStatus].name();
+			if (occStatus == 0) {
+				return "Occupied";
+			} else if (occStatus == 1) {
+				return "Unoccupied";
+			} else {
+				return "Tenant Override";
+			}
 		}
-		return null;
+		return "Unoccupied";
 	}
 
 

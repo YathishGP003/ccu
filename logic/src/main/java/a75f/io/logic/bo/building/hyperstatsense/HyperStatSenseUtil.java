@@ -32,18 +32,16 @@ public class HyperStatSenseUtil {
         String nodeAddr = equip.getGroup();
         String roomRef = equip.getRoomRef();
         int configVal = msgObject.get("val").getAsInt();
-        HashMap Th1Val = hayStack.read("point and logical and th1 and equipRef == \"" + equip.getId() + "\"");
-        HashMap Th2Val = hayStack.read("point and logical and th2 and equipRef == \"" + equip.getId() + "\"");
-        HashMap An1Val = hayStack.read("point and logical and analog1 and equipRef == \"" + equip.getId() + "\"");
-        HashMap An2Val = hayStack.read("point and logical and analog2 and equipRef == \"" + equip.getId() + "\"");
+        HashMap Th1Val = hayStack.read("point and logical and th1 and equipRef == \"" + equipref + "\"");
+        HashMap Th2Val = hayStack.read("point and logical and th2 and equipRef == \"" + equipref + "\"");
+        HashMap An1Val = hayStack.read("point and logical and analog1 and equipRef == \"" + equipref + "\"");
+        HashMap An2Val = hayStack.read("point and logical and analog2 and equipRef == \"" + equipref + "\"");
 
         if (configPoint.getMarkers().contains(Tags.TH1)) {
             DeviceUtil.setPointEnabled(Integer.parseInt(nodeAddr), Port.TH1_IN.name(),
                     configVal > 0 ? true : false);
             if(configVal > 0 ){
-                String id = createSensorPoint(floorRef, roomRef, "th1", 0, nodeAddr, equipref);
-                DeviceUtil.setPointEnabled(Integer.valueOf(nodeAddr), Port.TH1_IN.name(), true);
-                DeviceUtil.updatePhysicalPointRef(Integer.valueOf(nodeAddr), Port.TH1_IN.name(), id);
+                hayStack.writeDefaultValById(Th1Val.get("id").toString(),0.0);
             }else{
                 if (Th1Val != null && Th1Val.get("id") != null) {
                     Log.d(LOG_TAG,"updateConfigEnabled ++ delete th1");
@@ -54,9 +52,7 @@ public class HyperStatSenseUtil {
             DeviceUtil.setPointEnabled(Integer.parseInt(nodeAddr), Port.TH2_IN.name(),
                     configVal > 0 ? true : false);
             if(configVal > 0 ){
-                String id = createSensorPoint(floorRef, roomRef, "th2", 0, nodeAddr, equipref);
-                DeviceUtil.setPointEnabled(Integer.valueOf(nodeAddr), Port.TH2_IN.name(), true);
-                DeviceUtil.updatePhysicalPointRef(Integer.valueOf(nodeAddr), Port.TH2_IN.name(), id);
+                hayStack.writeDefaultValById(Th2Val.get("id").toString(),0.0);
             }else{
                 if (Th2Val != null && Th2Val.get("id") != null) {
                     Log.d(LOG_TAG,"updateConfigEnabled ++ delete th2");
@@ -67,9 +63,7 @@ public class HyperStatSenseUtil {
             DeviceUtil.setPointEnabled(Integer.parseInt(nodeAddr), Port.ANALOG_IN_ONE.name(),
                     configVal > 0 ? true : false);
             if(configVal > 0 ){
-                String id = createSensorPoint(floorRef, roomRef, "analog1", 0, nodeAddr, equipref);
-                DeviceUtil.setPointEnabled(Integer.valueOf(nodeAddr), Port.ANALOG_IN_ONE.name(), true);
-                DeviceUtil.updatePhysicalPointRef(Integer.valueOf(nodeAddr), Port.ANALOG_IN_ONE.name(), id);
+                hayStack.writeDefaultValById(An1Val.get("id").toString(),0.0);
             }else{
                 if (An1Val != null && An1Val.get("id") != null) {
                     Log.d(LOG_TAG, "updateConfigEnabled ++ delete An1");
@@ -80,9 +74,7 @@ public class HyperStatSenseUtil {
             DeviceUtil.setPointEnabled(Integer.parseInt(nodeAddr), Port.ANALOG_IN_TWO.name(),
                     configVal > 0 ? true : false);
             if(configVal > 0 ){
-                String id = createSensorPoint(floorRef, roomRef, "analog2", 0, nodeAddr, equipref);
-                DeviceUtil.setPointEnabled(Integer.valueOf(nodeAddr), Port.ANALOG_IN_TWO.name(), true);
-                DeviceUtil.updatePhysicalPointRef(Integer.valueOf(nodeAddr), Port.ANALOG_IN_TWO.name(), id);
+                hayStack.writeDefaultValById(An1Val.get("id").toString(),0.0);
             }else{
                 if (An2Val != null && An2Val.get("id") != null) {
                     Log.d(LOG_TAG, "updateConfigEnabled ++ delete An2");

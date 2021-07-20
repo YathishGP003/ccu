@@ -231,23 +231,23 @@
     </string-array>
 
     <string-array name="zone_priority">
-        <item >No Priority</item>
-        <item >Low</item>
-        <item >Normal</item>
-        <item >High</item>
+        <item>No Priority</item>
+        <item>Low</item>
+        <item>Normal</item>
+        <item>High</item>
     </string-array>
 
     <string-array name="damper_size">
-        <item >4</item>
-        <item >6</item>
-        <item >8</item>
-        <item >10</item>
-        <item >12</item>
-        <item >14</item>
-        <item >16</item>
-        <item >18</item>
-        <item >20</item>
-        <item >22</item>
+        <item>4</item>
+        <item>6</item>
+        <item>8</item>
+        <item>10</item>
+        <item>12</item>
+        <item>14</item>
+        <item>16</item>
+        <item>18</item>
+        <item>20</item>
+        <item>22</item>
     </string-array>
 
     <string name="title_activity_system_scheduler">System Scheduler</string>
@@ -299,6 +299,7 @@
     <string name="input_facilityorg">Organization</string>
     <string name="input_installer_email">Installer Email</string>
     <string name="button_next">Next </string>
+    <string name="otp_send_email">Enter email id</string>
 
     <!--Installer Option-->
     <string name="title_installeroption">Installer Options</string>
@@ -698,7 +699,6 @@
     </string-array>
 
 
-
     <!--DAB Dual Duct-->
     <string name="dab_dual_duct_title">DAB Dual Duct</string>
     <string name="dab_dual_duct_label_temp_offset">TEMP OFFSET</string>
@@ -907,8 +907,8 @@
 
     <string name="label_modbus_energy_meter">MODBUS ENERGY METER</string>
     <string name="title_modbus_energy_proportional_distribution">Energy Proportional Distribution</string>
-   <string name="deleting_floor">Removing floor</string>
-   <string-array name="energy_distribution_values">
+    <string name="deleting_floor">Removing floor</string>
+    <string-array name="energy_distribution_values">
         <item> 0% </item>
         <item> 10% </item>
         <item> 20% </item>
@@ -927,4 +927,6 @@
     <string name="analogin2">Analog-in2</string>
     <string name="title_pairhss">HYPERSTAT | PAIRING STEPS </string>
     <string name="prefs_theme_key">isEnabled</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

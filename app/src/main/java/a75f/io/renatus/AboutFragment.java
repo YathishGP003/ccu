@@ -1,6 +1,5 @@
 package a75f.io.renatus;
 
-import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -126,8 +125,13 @@ public class AboutFragment extends Fragment {
 
         String ccuUID = CCUHsApi.getInstance().getCcuRef().toString();
         tvSerialNumber.setText(ccuUID == null ? CCUHsApi.getInstance().getCcuRef().toString() :ccuUID);
-
         return rootView;
+    }
+    @OnClick(R.id.otpGenerator)
+    public void generateOTP(){
+        AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create();
+        alertDialog.setView(LayoutInflater.from(getContext()).inflate(R.layout.otp_generator_dailog,null));
+        alertDialog.show();
     }
 
     @Override

@@ -349,10 +349,9 @@ public class OTAUpdateService extends IntentService {
             case "equip":
             case "module":
                 //update just the one node
-                    Equip equip = HSUtil.getEquipInfo("@"+id);
-                HashSet<String> h = equip.getMarkers();
-                String mrk =deviceType.getHsMarkerName();
-                    if(equip.getMarkers().contains( deviceType.getHsMarkerName() )) {
+                Equip equip = HSUtil.getEquipInfo("@"+id);
+                Device device = HSUtil.getDevice(Short.parseShort(equip.getGroup()));
+                    if(device.getMarkers().contains( deviceType.getHsMarkerName() )) {
                         Log.d(TAG, "[VALIDATION] Adding device " + equip.getGroup() + " to update");
                         mLwMeshAddresses.add(Integer.parseInt(equip.getGroup()));
                     }

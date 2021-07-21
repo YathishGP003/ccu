@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -346,8 +347,11 @@ public class OTAUpdateService extends IntentService {
                 break;
 
             case "equip":
+            case "module":
                 //update just the one node
                     Equip equip = HSUtil.getEquipInfo("@"+id);
+                HashSet<String> h = equip.getMarkers();
+                String mrk =deviceType.getHsMarkerName();
                     if(equip.getMarkers().contains( deviceType.getHsMarkerName() )) {
                         Log.d(TAG, "[VALIDATION] Adding device " + equip.getGroup() + " to update");
                         mLwMeshAddresses.add(Integer.parseInt(equip.getGroup()));

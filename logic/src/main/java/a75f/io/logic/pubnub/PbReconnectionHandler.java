@@ -35,7 +35,7 @@ class PbReconnectionHandler {
                   .count(PB_HISTORY_FETCH_COUNT)
                   .async((result, status) -> {
             
-                      if (result.getMessages() == null) {
+                      if (result == null || result.getMessages() == null) {
                           CcuLog.d(L.TAG_CCU_PUBNUB, "handleReconnect: Empty messages");
                           return;
                       }

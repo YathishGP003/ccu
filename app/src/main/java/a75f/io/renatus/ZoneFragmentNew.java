@@ -3164,7 +3164,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         statusLayout.setVisibility(View.GONE);
         LinearLayout linearl = viewStatus.findViewById(R.id.lllastupdate);
         LinearLayout.LayoutParams param = (LinearLayout.LayoutParams)linearl.getLayoutParams();
-        param.setMargins(0, 0, 0, -40);
+        param.setMargins(55, 20, 0, 20);
         linearl.setLayoutParams(param);
         TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
@@ -3174,13 +3174,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
             LinearLayout ll = (LinearLayout) viewPointRow1.findViewById(R.id.lt_column1);
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)ll.getLayoutParams();
-            params.setMargins(0, 0, 0, -40);
+            params.setMargins(55, 0, 0, -40);
             ll.setLayoutParams(params);
             TextView label = viewPointRow1.findViewById(R.id.text_point1label);
             TextView val = viewPointRow1.findViewById(R.id.text_point1value);
             label.setText(sensePoints.get("Thermistor1").toString() + " : ");
             val.setText((sensePoints.get("Th1Val").toString()) + " " + (sensePoints.get("Unit3").toString()));
-            viewPointRow1.setPadding(30,0,0,0);
             linearLayoutZonePoints.addView(viewPointRow1);
         }
 
@@ -3188,13 +3187,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
             LinearLayout ll = (LinearLayout) viewPointRow1.findViewById(R.id.lt_column1);
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)ll.getLayoutParams();
-            params.setMargins(0, 0, 0, -40);
+            params.setMargins(55, 0, 0, -40);
             ll.setLayoutParams(params);
             TextView label = viewPointRow1.findViewById(R.id.text_point1label);
             TextView val = viewPointRow1.findViewById(R.id.text_point1value);
             label.setText(sensePoints.get("Thermistor2").toString() + " : ");
             val.setText((sensePoints.get("Th2Val").toString()) + " " + (sensePoints.get("Unit4").toString()));
-            viewPointRow1.setPadding(30,0,0,0);
             linearLayoutZonePoints.addView(viewPointRow1);
         }
 
@@ -3202,26 +3200,24 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
             LinearLayout ll = (LinearLayout) viewPointRow1.findViewById(R.id.lt_column1);
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)ll.getLayoutParams();
-            params.setMargins(0, 0, 0, -40);
+            params.setMargins(55, 0, 0, -40);
             ll.setLayoutParams(params);
             TextView label = viewPointRow1.findViewById(R.id.text_point1label);
             TextView val = viewPointRow1.findViewById(R.id.text_point1value);
             label.setText(sensePoints.get("Analog1").toString() + " : ");
             val.setText((sensePoints.get("An1Val").toString()) + " " + (sensePoints.get("Unit1").toString()));
-            viewPointRow1.setPadding(30,0,0,0);
             linearLayoutZonePoints.addView(viewPointRow1);
         }
         if (sensePoints.get("iAn2Enable") == "true") {
             View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
             LinearLayout ll = (LinearLayout) viewPointRow1.findViewById(R.id.lt_column1);
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)ll.getLayoutParams();
-            params.setMargins(0, 0, 0, 0);
+            params.setMargins(55, 0, 0, 0);
             ll.setLayoutParams(params);
             TextView label = viewPointRow1.findViewById(R.id.text_point1label);
             TextView val = viewPointRow1.findViewById(R.id.text_point1value);
             label.setText(sensePoints.get("Analog2").toString() + " : ");
             val.setText((sensePoints.get("An2Val").toString()) + " " + (sensePoints.get("Unit2").toString()));
-            viewPointRow1.setPadding(30,0,0,0);
             linearLayoutZonePoints.addView(viewPointRow1);
         }
 

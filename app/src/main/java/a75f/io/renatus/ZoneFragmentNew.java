@@ -3414,6 +3414,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     Equip updatedEquip = new Equip.Builder().setHashMap(openZoneMap.get(k)).build();
                     if (updatedEquip.getProfile().contains("SENSE")) {
                         HashMap sensePoints = ScheduleProcessJob.getHyperStatSenseEquipPoints(updatedEquip.getGroup());
+                        Log.d("Tempoff issue","float = " +Float.parseFloat(sensePoints.get("curtempwithoffset").toString()));
                         seekArc.setCurrentTemp(Float.parseFloat(sensePoints.get("curtempwithoffset").toString()));
                         loadSENSEPointsUI(sensePoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
                     }

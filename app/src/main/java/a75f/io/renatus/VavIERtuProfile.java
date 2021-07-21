@@ -168,6 +168,11 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
             systemProfile.setConfigVal("multiZone",(isChecked?1.0:0.0));
             handleFanConfigViews(isChecked);
             systemProfile.handleMultiZoneEnable(isChecked?1.0:0.0);
+            if (systemProfile.getConfigVal("multiZone") > 0) {
+                spTest.setAdapter(getSpAdapter());
+            } else {
+                spTest.setAdapter(getZeroToHundredArrayAdapter());
+            }
         });
         view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
 
@@ -253,20 +258,14 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         val = systemProfile.getConfigVal("cooling and dat and max");
         coolingDatMax.setSelection(val != 0 ? coolingDatAdapter.getPosition(val) : coolingDatArr.size()-1 , false);
     
-        ArrayList<Double> spArr = new ArrayList<>();
-        for (int sp = 2;  sp <= 20; sp++)
-        {
-            spArr.add((double)sp/10);
-        }
-        ArrayAdapter<Double> spAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, spArr);
-        spAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        ArrayAdapter<Double> spAdapter = getSpAdapter();
         spMin.setAdapter(spAdapter);
         val = systemProfile.getConfigVal("staticPressure and min");
         spMin.setSelection(spAdapter.getPosition(val) , false);
     
         spMax.setAdapter(spAdapter);
         val = systemProfile.getConfigVal("staticPressure and max");
-        spMax.setSelection(val != 0 ? spAdapter.getPosition(val) : spArr.size()-1, false);
+        spMax.setSelection(val != 0 ? spAdapter.getPosition(val) : spAdapter.getCount()-1, false);
     
         ArrayList<Double> heatingDatArr = new ArrayList<>();
         for (double hdat = 75;  hdat <= 100; hdat++)
@@ -288,11 +287,6 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         coolingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         coolingTest.setAdapter(coolingSatTestAdapter);
         coolingTest.setSelection(0,false);
-        
-        ArrayAdapter<Double> spTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, spArr);
-        spTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        spTest.setAdapter(spTestAdapter);
-        spTest.setSelection(0,false);
     
         ArrayAdapter<Double> heatingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, heatingDatArr);
         heatingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
@@ -309,12 +303,18 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         fanSpeedMin.setAdapter(percentSelectorAdapter);
         val = systemProfile.getConfigVal("fanSpeed and min");
         fanSpeedMin.setSelection(val != 0 ? percentSelectorAdapter.getPosition(val) : 0, false);
-    
-    
+        
         fanSpeedMax.setAdapter(percentSelectorAdapter);
         val = systemProfile.getConfigVal("fanSpeed and max");
         fanSpeedMax.setSelection(val != 0 ? percentSelectorAdapter.getPosition(val) : percentSelectorAdapter.getCount()-1,
                                  false);
+        
+        if (systemProfile.getConfigVal("multiZone") > 0) {
+            spTest.setAdapter(spAdapter);
+        } else {
+            spTest.setAdapter(percentSelectorAdapter);
+        }
+        spTest.setSelection(0,false);
     
         coolingDatMin.setOnItemSelectedListener(this);
         coolingDatMax.setOnItemSelectedListener(this);
@@ -340,6 +340,17 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         ArrayAdapter<Double> adapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         return adapter;
+    }
+    
+    private ArrayAdapter<Double> getSpAdapter() {
+        ArrayList<Double> spArr = new ArrayList<>();
+        for (int sp = 2;  sp <= 20; sp++)
+        {
+            spArr.add((double)sp/10);
+        }
+        ArrayAdapter<Double> spAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, spArr);
+        spAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        return spAdapter;
     }
     
     @Override

@@ -6,14 +6,13 @@ import io.reactivex.rxjava3.core.Single
 import org.simpleframework.xml.Element
 import org.simpleframework.xml.Root
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.PUT
-import retrofit2.http.Path
+import retrofit2.http.*
 
 
 interface IEService {
 
+    @Headers(value = ["Accept: text/plain",
+        "Content-type:text/plain"])
     @PUT("/BN/MT3/{pointType}/{pointName}/Present_Value?resp-format=eXML")
     fun writePoint(
         @Path("pointType") pointType: String,
@@ -21,6 +20,8 @@ interface IEService {
         @Body pointVal : String
     ): Observable<Response<Void>>
 
+    @Headers(value = ["Accept: application/xml",
+        "Content-type:application/xml"])
     @GET("/BN/MT3/{pointType}/{pointName}/Present_Value?resp-format=eXML")
     fun readPoint(
         @Path("pointType") pointType: String,

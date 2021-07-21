@@ -2,6 +2,7 @@ package a75f.io.device.daikin
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Tags
+import a75f.io.device.mesh.RootCommandExecuter
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.system.vav.VavIERtu
@@ -42,6 +43,11 @@ class IEDeviceHandler {
         }
 
         ieService?.let {
+            //Ethernet interface seems to go down randomly, just making sure here that route & addr are configured.
+            RootCommandExecuter.runRootCommand("ip route add 172.16.0.0/24 " +
+                                                    "dev eth0 proto static scope link table wlan0")
+            RootCommandExecuter.runRootCommand("ip addr add 172.16.0.10/24 broadcast " +
+                                                    "172.16.0.255 dev eth0");
             updateOccMode(it, systemProfile)
             if (systemProfile.getConfigEnabled(Tags.FAN) > 0) {
                 updateFanControl(it, hayStack, systemProfile)
@@ -109,11 +115,12 @@ class IEDeviceHandler {
     }
 
     private fun updateDatClgSetpoint(service : IEService, systemProfile: VavIERtu) {
+        CcuLog.d("CCU_SYSTEM","IEDH"+fahrenheitToCelsius(systemProfile.getCmdSignal("dat and setpoint")));
         writeToIEDevice(
             service,
             IE_POINT_TYPE_AV,
             IE_POINT_NAME_DAT_SETPOINT,
-            IE_MSG_BODY.format(fahrenheitToCelsius(systemProfile.getCmd("dat and setpoint")))
+            IE_MSG_BODY.format(fahrenheitToCelsius(systemProfile.getCmdSignal("dat and setpoint")))
         )
     }
 

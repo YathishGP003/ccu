@@ -8,7 +8,7 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory
 import java.util.concurrent.TimeUnit
 
@@ -35,9 +35,9 @@ class IEServiceGenerator {
             addInterceptor(
                 Interceptor { chain ->
                     val builder = chain.request().newBuilder()
-                    builder.header("Content-Type", "text/plain")
                     builder.header("Authorization", "Bearer=11021962")
-                    builder.header("Connection", "close")
+                    //builder.header("Content-Type","text-plain")
+                    //builder.header("Connection", "close")
                     return@Interceptor chain.proceed(builder.build())
                 }
             )
@@ -55,9 +55,11 @@ class IEServiceGenerator {
         return Retrofit.Builder()
             .baseUrl(baseUrl)
             .client(okHttpClient)
-            //.addConverterFactory(GsonConverterFactory.create(gson))
             .addConverterFactory(SimpleXmlConverterFactory.create())
+            .addConverterFactory(ScalarsConverterFactory.create())
+            //.addConverterFactory(GsonConverterFactory.create(gson))
             .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
             .build()
     }
+
 }

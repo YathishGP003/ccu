@@ -205,6 +205,8 @@ public class VavIERtu extends VavSystemProfile
         
         double datSp = VavSystemController.getInstance().getSystemState() == COOLING ? coolingDat : heatingDat;
         setCmdSignal("dat and setpoint", datSp);
+    
+        CcuLog.d(L.TAG_CCU_SYSTEM,"datSp "+getCmdSignal("dat and setpoint"));
         
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
         double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+getSystemEquipRef()+"\"");

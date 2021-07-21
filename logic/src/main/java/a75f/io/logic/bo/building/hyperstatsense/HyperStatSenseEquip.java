@@ -606,7 +606,7 @@ public class HyperStatSenseEquip {
             case 1:
                 shortDis = "Pressure [0-2 in.]";
                 shortDisTarget = "Dynamic Target Pressure";
-                unit = "Inch wc";
+                unit = "inch_of_water";
                 maxVal = "2";
                 minVal = "0";
                 incrementVal = "0.1";
@@ -615,7 +615,7 @@ public class HyperStatSenseEquip {
             case 2:
                 shortDis = "Pressure[0-0.25 in. Differential]";
                 shortDisTarget = "Dynamic Target Pressure Differential";
-                unit = "Inch wc";
+                unit = "inch_of_water";
                 maxVal = "0.25";
                 minVal = "-0.25";
                 incrementVal = "0.01";

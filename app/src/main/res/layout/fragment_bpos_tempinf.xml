@@ -64,9 +64,10 @@
                         style="@style/Widget.AppCompat.Spinner.Underlined"
                         android:layout_width="200dp"
                         android:layout_height="60dp"
-                        android:entries="@array/hvac_stage_selector"
-                        android:layout_marginTop="-25dp"
-                        android:layout_marginLeft="160dp"
+                        android:entries="@array/zone_priority"
+                        android:layout_marginTop="-23dp"
+                        android:layout_marginLeft="260dp"
+                        android:layout_marginBottom="40dp"
                         tools:listitem="@layout/spinner_dropdown_item" />
                 </RelativeLayout>
 
@@ -83,14 +84,14 @@
                         android:id="@+id/autoforceoccupied"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
-                        android:paddingRight="30dp"
+                        android:paddingRight="25dp"
                         android:text="@string/autoforceoccupied"
                         android:textAppearance="@style/title_normal" />
 
                     <ToggleButton
                         android:id="@+id/toogleautoforceoccupied"
-                        android:layout_width="46.12dp"
-                        android:layout_height="27.42dp"
+                        android:layout_width="47dp"
+                        android:layout_height="28dp"
                         android:background="@drawable/toggle_selector"
                         android:checked="false"
                         android:textOff=""
@@ -101,7 +102,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:paddingLeft="70dp">
+                        android:paddingLeft="80dp">
 
                     <TextView
                         android:id="@+id/autoaway"
@@ -112,8 +113,8 @@
 
                     <ToggleButton
                         android:id="@+id/toogleautoaway"
-                        android:layout_width="46.12dp"
-                        android:layout_height="27.42dp"
+                        android:layout_width="47dp"
+                        android:layout_height="28dp"
                         android:background="@drawable/toggle_selector"
                         android:checked="false"
                         android:textOff=""
@@ -157,17 +158,16 @@
                 android:id="@+id/setBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentBottom="true"
-                android:layout_marginRight="24dp"
-                android:layout_marginBottom="24dp"
+                android:layout_marginLeft="1060dp"
+                android:layout_marginTop="620dp"
+                android:paddingRight="15dp"
                 android:background="@null"
                 android:button="@null"
                 android:fontFamily="@font/lato_regular"
                 android:text="@string/button_set"
                 android:textAllCaps="true"
                 android:textColor="?orange_75f"
-                android:textSize="19.5dp" />
+                android:textSize="20dp" />
         </RelativeLayout>
     </ScrollView>
 </LinearLayout>

@@ -19,6 +19,10 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+
+/**
+ * created by spoorthidev on 21-July-2021
+ */
 public class FragmentBPOSTempInfConfiguration extends BaseDialogFragment {
 
     public static String ID = FragmentBPOSTempInfConfiguration.class.getSimpleName();

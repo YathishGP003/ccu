@@ -46,7 +46,7 @@ public class HyperStatSenseUtil {
                     configVal > 0 ? true : false);
             if (Th1Val != null && Th1Val.get("id") != null) {
                 Log.d(LOG_TAG, "updateConfig ++ delete th1");
-                CCUHsApi.getInstance().deleteEntityTree(Th1Val.get("id").toString());
+                CCUHsApi.getInstance().deleteEntity(Th1Val.get("id").toString());
             }
             if (configVal > 0) {
                 String id = createSensorPoint(floorRef, roomRef, "th1", th1Sensor, nodeAddr, equipref);
@@ -60,7 +60,7 @@ public class HyperStatSenseUtil {
                     configVal > 0 ? true : false);
             if (Th2Val != null && Th2Val.get("id") != null) {
                 Log.d(LOG_TAG, "updateConfigEnabled ++ delete th2");
-                hayStack.deleteEntityTree(Th2Val.get("id").toString());
+                hayStack.deleteEntity(Th2Val.get("id").toString());
             }
             if (configVal > 0) {
                 String id = createSensorPoint(floorRef, roomRef, "th2", th2Sensor, nodeAddr, equipref);
@@ -75,7 +75,7 @@ public class HyperStatSenseUtil {
                     configVal > 0 ? true : false);
             if (An1Val != null && An1Val.get("id") != null) {
                 Log.d(LOG_TAG, "updateConfigEnabled ++ delete An1");
-                hayStack.deleteEntityTree(An1Val.get("id").toString());
+                hayStack.deleteEntity(An1Val.get("id").toString());
             }
             if (configVal > 0) {
                 String id = createSensorPoint(floorRef, roomRef, "analog1", analog1Sensor, nodeAddr, equipref);
@@ -89,7 +89,7 @@ public class HyperStatSenseUtil {
                     configVal > 0 ? true : false);
             if (An2Val != null && An2Val.get("id") != null) {
                 Log.d(LOG_TAG, "updateConfigEnabled ++ delete An2");
-                hayStack.deleteEntityTree(An2Val.get("id").toString());
+                CCUHsApi.getInstance().deleteEntity(An2Val.get("id").toString());
             }
             if (configVal > 0) {
                 String id = createSensorPoint(floorRef, roomRef, "analog2", analog2Sensor, nodeAddr, equipref);
@@ -97,8 +97,8 @@ public class HyperStatSenseUtil {
                 DeviceUtil.updatePhysicalPointRef(Integer.valueOf(nodeAddr), Port.ANALOG_IN_TWO.name(), id);
             }
         }
-        // writePointFromJson(configPoint.getId(), configVal, msgObject, hayStack);
-        hayStack.syncEntityTree();
+        CCUHsApi.getInstance().syncPointEntityTree();
+        CCUHsApi.getInstance().syncEntityTree();
     }
 
     public static void updatetempOffset(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
@@ -126,7 +126,7 @@ public class HyperStatSenseUtil {
 
             if (Th1Val != null && Th1Val.get("id") != null) {
                 Log.d(LOG_TAG, "updateConfig ++ delete th1");
-                CCUHsApi.getInstance().deleteEntityTree(Th1Val.get("id").toString());
+                CCUHsApi.getInstance().deleteEntity(Th1Val.get("id").toString());
             }
             Log.d(LOG_TAG, "updateConfig  ++ th1");
             String id = createSensorPoint(floorRef, roomRef, "th1", configVal, nodeAddr, equipref);
@@ -136,7 +136,7 @@ public class HyperStatSenseUtil {
             HashMap Th2Val = CCUHsApi.getInstance().read("point and logical and th2 and equipRef == \"" + equipref + "\"");
             if (Th2Val != null && Th2Val.get("id") != null) {
                 Log.d(LOG_TAG, "updateConfig ++ delete th2");
-                CCUHsApi.getInstance().deleteEntityTree(Th2Val.get("id").toString());
+                CCUHsApi.getInstance().deleteEntity(Th2Val.get("id").toString());
             }
             Log.d(LOG_TAG, "updateConfig  ++  th2");
             String id = createSensorPoint(floorRef, roomRef, "th2", configVal, nodeAddr, equipref);
@@ -146,7 +146,7 @@ public class HyperStatSenseUtil {
             HashMap An1Val = CCUHsApi.getInstance().read("point and logical and analog1 and equipRef == \"" + equipref + "\"");
             if (An1Val != null && An1Val.get("id") != null) {
                 Log.d(LOG_TAG, "updateConfig ++ delete an1");
-                CCUHsApi.getInstance().deleteEntityTree(An1Val.get("id").toString());
+                CCUHsApi.getInstance().deleteEntity(An1Val.get("id").toString());
             }
             Log.d(LOG_TAG, "updateConfig ++ an1");
             String id = createSensorPoint(floorRef, roomRef, "analog1", configVal, nodeAddr, equipref);
@@ -156,7 +156,7 @@ public class HyperStatSenseUtil {
             HashMap An2Val = CCUHsApi.getInstance().read("point and logical and analog2 and equipRef == \"" + equipref + "\"");
             if (An2Val != null && An2Val.get("id") != null) {
                 Log.d(LOG_TAG, "updateConfig ++ delete an2");
-                CCUHsApi.getInstance().deleteEntityTree(An2Val.get("id").toString());
+                CCUHsApi.getInstance().deleteEntity(An2Val.get("id").toString());
             }
             Log.d(LOG_TAG, "updateConfig ++  an2");
             String id = createSensorPoint(floorRef, roomRef, "analog2", configVal, nodeAddr, equipref);
@@ -164,6 +164,7 @@ public class HyperStatSenseUtil {
             DeviceUtil.updatePhysicalPointRef(Integer.valueOf(nodeAddr), Port.ANALOG_IN_TWO.name(), id);
         }
         Log.d(LOG_TAG, "before sync");
+        CCUHsApi.getInstance().syncPointEntityTree();
         CCUHsApi.getInstance().syncEntityTree();
     }
 

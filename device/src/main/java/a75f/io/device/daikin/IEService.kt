@@ -11,7 +11,7 @@ import retrofit2.http.*
 
 interface IEService {
 
-    @Headers(value = ["Accept: text/plain",
+    @Headers(value = ["Accept: application/xml",
         "Content-type:text/plain"])
     @PUT("/BN/MT3/{pointType}/{pointName}/Present_Value?resp-format=eXML")
     fun writePoint(
@@ -21,7 +21,7 @@ interface IEService {
     ): Observable<Response<Void>>
 
     @Headers(value = ["Accept: application/xml",
-        "Content-type:application/xml"])
+        "Content-type:text/plain"])
     @GET("/BN/MT3/{pointType}/{pointName}/Present_Value?resp-format=eXML")
     fun readPoint(
         @Path("pointType") pointType: String,

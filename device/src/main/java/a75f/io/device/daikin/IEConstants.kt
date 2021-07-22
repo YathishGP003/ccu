@@ -19,7 +19,7 @@ const val IE_POINT_NAME_ALARM_PROB = "ActiveProbEnu"
 const val IE_POINT_NAME_ALARM_FAULT = "ActiveFaultEnu"
 const val IE_POINT_NAME_OCCUPANCY_STATUS = "OccStatus"
 
-const val IE_MSG_BODY = "<requests>\n<request>\n%f\n</request>\n</requests>"
+const val IE_MSG_BODY = "<requests><request>%f</request></requests>"
 
 internal enum class OccMode {
     Occ, Unocc, TntOvrd, Auto, UnInit

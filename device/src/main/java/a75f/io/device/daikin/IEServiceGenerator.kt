@@ -8,6 +8,7 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory
 import java.util.concurrent.TimeUnit
@@ -36,28 +37,21 @@ class IEServiceGenerator {
                 Interceptor { chain ->
                     val builder = chain.request().newBuilder()
                     builder.header("Authorization", "Bearer=11021962")
-                    //builder.header("Content-Type","text-plain")
-                    //builder.header("Connection", "close")
                     return@Interceptor chain.proceed(builder.build())
                 }
             )
             addInterceptor(okhttpLogging)
-            addNetworkInterceptor(okhttpLogging)
+            //addNetworkInterceptor(okhttpLogging)
             connectTimeout(30, TimeUnit.SECONDS)
             retryOnConnectionFailure(true)
         }.build()
         CcuLog.i(L.TAG_CCU_DEVICE, "create retrofit  $baseUrl")
 
-        val gson = GsonBuilder()
-            .setLenient()
-            .create()
-
         return Retrofit.Builder()
             .baseUrl(baseUrl)
             .client(okHttpClient)
-            .addConverterFactory(SimpleXmlConverterFactory.create())
             .addConverterFactory(ScalarsConverterFactory.create())
-            //.addConverterFactory(GsonConverterFactory.create(gson))
+            .addConverterFactory(SimpleXmlConverterFactory.create())
             .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
             .build()
     }

@@ -49,19 +49,26 @@ class IEDeviceHandler {
             RootCommandExecuter.runRootCommand("ip addr add 172.16.0.10/24 broadcast " +
                                                     "172.16.0.255 dev eth0");
             updateOccMode(it, systemProfile)
+
+            Thread.sleep(100)
             if (systemProfile.getConfigEnabled(Tags.FAN) > 0) {
                 updateFanControl(it, hayStack, systemProfile)
             }
-
+            Thread.sleep(100)
             updateConditioningMode(it, hayStack)
+            Thread.sleep(100)
             updateDatClgSetpoint(it, systemProfile)
+            Thread.sleep(100)
             updateFanControl(it, hayStack, systemProfile)
+            Thread.sleep(100)
             updateHumidityControl(it, systemProfile)
+            Thread.sleep(100)
             fetchAlarms(it, hayStack)
-
+            Thread.sleep(100)
             //OccStatus to be fetched every 5 minutes
             if (fiveMinCounter == 0 || fiveMinCounter >= 5) {
                 fetchOccStatus(it, hayStack)
+                Thread.sleep(100)
                 fetchSystemClock(it, hayStack)
                 fiveMinCounter = 0;
             }

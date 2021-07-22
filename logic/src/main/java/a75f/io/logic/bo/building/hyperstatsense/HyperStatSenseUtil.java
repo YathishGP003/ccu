@@ -45,7 +45,6 @@ public class HyperStatSenseUtil {
             DeviceUtil.setPointEnabled(Integer.parseInt(nodeAddr), Port.TH1_IN.name(),
                     configVal > 0 ? true : false);
             if (Th1Val != null && Th1Val.get("id") != null) {
-                Log.d(LOG_TAG, "updateConfig ++ delete th1");
                 CCUHsApi.getInstance().deleteEntity(Th1Val.get("id").toString());
             }
             if (configVal > 0) {

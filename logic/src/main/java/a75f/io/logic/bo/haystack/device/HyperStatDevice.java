@@ -253,7 +253,7 @@ public class HyperStatDevice {
                 sensorUnit = "lux";
                 break;
             case SENSOR_PRESSURE:
-                sensorUnit = "inch wc";
+                sensorUnit = "inch_of_water";
                 break;
             case SENSOR_SOUND:
                 sensorUnit = "dB";
@@ -263,7 +263,7 @@ public class HyperStatDevice {
                 break;
             case SENSOR_PM2P5:
             case SENSOR_PM10:
-                sensorUnit =  "ug/m3";
+                sensorUnit =  "ug/\u33A5";
                 break;
             case SENSOR_OCCUPANCY:
                 isOccupancySensor = true;

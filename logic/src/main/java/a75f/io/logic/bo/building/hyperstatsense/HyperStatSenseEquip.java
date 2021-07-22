@@ -391,6 +391,7 @@ public class HyperStatSenseEquip {
         if (config.isTh1Enable != currentConfig.isTh1Enable){
             Log.d(LOG_TAG, "thermister1 toggle update : " + config.isTh1Enable);
             mHayStack.writeDefaultValById(isTh1.get("id").toString(), config.isTh1Enable ? 1.0 : 0.0);
+            mHayStack.writeDefaultValById(Th1.get("id").toString(), (double) config.th1Sensor);
             if(Th1Val != null && Th1Val.get("id") != null){
                 CCUHsApi.getInstance().deleteEntityTree(Th1Val.get("id").toString());
             }else{
@@ -421,6 +422,7 @@ public class HyperStatSenseEquip {
         if (config.isTh2Enable != currentConfig.isTh2Enable){
             Log.d(LOG_TAG, "thermister2 toggle update : " + config.isTh2Enable);
             mHayStack.writeDefaultValById(isTh2.get("id").toString(), config.isTh2Enable ? 1.0 : 0.0);
+            mHayStack.writeDefaultValById(Th2.get("id").toString(), (double) config.th2Sensor);
             if(Th2Val != null && Th2Val.get("id") != null){
                 CCUHsApi.getInstance().deleteEntityTree(Th2Val.get("id").toString());
             }else{
@@ -451,6 +453,7 @@ public class HyperStatSenseEquip {
         if (config.isAnalog1Enable != currentConfig.isAnalog1Enable){
             Log.d(LOG_TAG, "an1 toggle update : " + config.isAnalog1Enable);
             mHayStack.writeDefaultValById(isAn1.get("id").toString(), config.isAnalog1Enable ? 1.0 : 0.0);
+            mHayStack.writeDefaultValById(An1.get("id").toString(), (double) config.analog1Sensor);
             if(An1Val != null && An1Val.get("id") != null){
                 CCUHsApi.getInstance().deleteEntityTree(An1Val.get("id").toString());
             }else{
@@ -482,6 +485,7 @@ public class HyperStatSenseEquip {
         if (config.isAnalog2Enable != currentConfig.isAnalog2Enable){
             Log.d(LOG_TAG, "an2 toggle update : " + config.isAnalog2Enable);
             mHayStack.writeDefaultValById(isAn2.get("id").toString(), config.isAnalog2Enable ? 1.0 : 0.0);
+            mHayStack.writeDefaultValById(An2.get("id").toString(), (double) config.analog2Sensor);
             if(An2Val != null && An2Val.get("id") != null){
                 CCUHsApi.getInstance().deleteEntityTree(An2Val.get("id").toString());
             }else{
@@ -540,13 +544,13 @@ public class HyperStatSenseEquip {
         String equipDis = siteDis + "-SENSE-" + mNodeAddr + "-";
         Bundle bundle = new Bundle();
         if (tag.equals("analog1")) {
-            bundle = getAnalogBundle(config.analog1Sensor);
+            bundle = HyperStatSenseUtil.getAnalogBundle(config.analog1Sensor);
         } else if (tag.equals("analog2")) {
-            bundle = getAnalogBundle(config.analog2Sensor);
+            bundle = HyperStatSenseUtil.getAnalogBundle(config.analog2Sensor);
         } else if (tag.equals("th1")) {
-            bundle = getThermistorBundle(config.th1Sensor);
+            bundle = HyperStatSenseUtil.getThermistorBundle(config.th1Sensor);
         } else if (tag.equals("th2")) {
-            bundle = getThermistorBundle(config.th2Sensor);
+            bundle = HyperStatSenseUtil.getThermistorBundle(config.th2Sensor);
         }
 
         String shortDis = bundle.getString("shortDis");
@@ -583,151 +587,4 @@ public class HyperStatSenseEquip {
         return sensorVariableTagId;
     }
 
-
-    private Bundle getAnalogBundle(int analog) {
-        Bundle bundle = new Bundle();
-        String shortDis = "Generic 0-10 Voltage";
-        String shortDisTarget = "Dynamic Target Voltage";
-        String unit = "V";
-        String maxVal = "10";
-        String minVal = "0";
-        String incrementVal = "0.1";
-        String[] markers = null;
-        switch (analog) {
-            case 0:
-                shortDis = "Generic 0-10 Voltage";
-                shortDisTarget = "Dynamic Target Voltage";
-                unit = "V";
-                maxVal = "10";
-                minVal = "0";
-                incrementVal = "0.1";
-                markers = null;
-                break;
-            case 1:
-                shortDis = "Pressure [0-2 in.]";
-                shortDisTarget = "Dynamic Target Pressure";
-                unit = "inch_of_water";
-                maxVal = "2";
-                minVal = "0";
-                incrementVal = "0.1";
-                markers = new String[]{"pressure"};
-                break;
-            case 2:
-                shortDis = "Pressure[0-0.25 in. Differential]";
-                shortDisTarget = "Dynamic Target Pressure Differential";
-                unit = "inch_of_water";
-                maxVal = "0.25";
-                minVal = "-0.25";
-                incrementVal = "0.01";
-                markers = new String[]{"pressure"};
-                break;
-            case 3:
-                shortDis = "Airflow";
-                shortDisTarget = "Dynamic Target Airflow";
-                unit = "CFM";
-                maxVal = "1000";
-                minVal = "0";
-                incrementVal = "10";
-                markers = new String[]{"airflow"};
-                break;
-            case 4:
-                shortDis = "Humidity";
-                shortDisTarget = "Dynamic Target Humidity";
-                unit = "%";
-                maxVal = "100";
-                minVal = "0";
-                incrementVal = "1.0";
-                markers = new String[]{"humidity"};
-                break;
-            case 5:
-                shortDis = "CO2 Level";
-                shortDisTarget = "Dynamic Target CO2 Level";
-                unit = "ppm";
-                maxVal = "2000";
-                minVal = "0";
-                incrementVal = "100";
-                markers = new String[]{"co2"};
-                break;
-            case 6:
-                shortDis = "CO Level";
-                shortDisTarget = "Dynamic Target CO Level";
-                unit = "ppm";
-                maxVal = "100";
-                minVal = "0";
-                incrementVal = "1.0";
-                markers = new String[]{"co"};
-                break;
-            case 7:
-                shortDis = "NO2 Level";
-                shortDisTarget = "Dynamic Target NO2 Level";
-                unit = "ppm";
-                maxVal = "5";
-                minVal = "0";
-                incrementVal = "0.1";
-                markers = new String[]{"no2"};
-                break;
-            case 8:
-                shortDis = "Current Drawn[CT 0-10]";
-                shortDisTarget = "Dynamic Target Current Draw";
-                unit = "A";
-                maxVal = "10";
-                minVal = "0";
-                incrementVal = "0.1";
-                markers = new String[]{"current", "transformer"};
-                break;
-            case 9:
-                shortDis = "Current Drawn[CT 0-20]";
-                shortDisTarget = "Dynamic Target Current Draw";
-                unit = "A";
-                maxVal = "20";
-                minVal = "0";
-                incrementVal = "0.1";
-                markers = new String[]{"current", "transformer"};
-                break;
-            case 10:
-                shortDis = "Current Drawn[CT 0-50]";
-                shortDisTarget = "Dynamic Target Current Draw";
-                unit = "A";
-                maxVal = "50";
-                minVal = "0";
-                incrementVal = "0.1";
-                markers = new String[]{"current", "transformer"};
-                break;
-            case 11:
-                shortDis = "ION Density";
-                shortDisTarget = "Dynamic Target ION Density";
-                unit = "ions/cc";
-                maxVal = "10";
-                minVal = "0";
-                incrementVal = "1000";
-                markers = new String[]{"ion", "density"};
-                break;
-        }
-
-        bundle.putString("shortDis", shortDis);
-        bundle.putString("shortDisTarget", shortDisTarget);
-        bundle.putString("unit", unit);
-        bundle.putString("maxVal", maxVal);
-        bundle.putString("minVal", minVal);
-        bundle.putString("incrementVal", incrementVal);
-        bundle.putStringArray("markers", markers);
-
-        return bundle;
-    }
-
-    private Bundle getThermistorBundle(int th) {
-        Bundle bundle = new Bundle();
-        Thermistor thermistor = Thermistor.getThermistorList().get(th);
-        String[] markers = new String[]{"temp"};
-
-        bundle.putString("shortDis", thermistor.sensorName);
-        bundle.putString("shortDisTarget", "Target Temperature");
-        bundle.putString("unit", thermistor.engineeringUnit);
-        bundle.putString("maxVal", String.valueOf(thermistor.maxEngineeringValue));
-        bundle.putString("minVal", String.valueOf(thermistor.minEngineeringValue));
-        bundle.putString("incrementVal", String.valueOf(thermistor.incrementEngineeringValue));
-        bundle.putStringArray("markers", markers);
-
-        return bundle;
-    }
 }

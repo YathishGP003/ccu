@@ -391,6 +391,7 @@ public class HyperStatSenseEquip {
         if (config.isTh1Enable != currentConfig.isTh1Enable){
             Log.d(LOG_TAG, "thermister1 toggle update : " + config.isTh1Enable);
             mHayStack.writeDefaultValById(isTh1.get("id").toString(), config.isTh1Enable ? 1.0 : 0.0);
+            mHayStack.writeDefaultValById(Th1.get("id").toString(), (double) config.th1Sensor);
             if(Th1Val != null && Th1Val.get("id") != null){
                 CCUHsApi.getInstance().deleteEntityTree(Th1Val.get("id").toString());
             }else{
@@ -421,6 +422,7 @@ public class HyperStatSenseEquip {
         if (config.isTh2Enable != currentConfig.isTh2Enable){
             Log.d(LOG_TAG, "thermister2 toggle update : " + config.isTh2Enable);
             mHayStack.writeDefaultValById(isTh2.get("id").toString(), config.isTh2Enable ? 1.0 : 0.0);
+            mHayStack.writeDefaultValById(Th2.get("id").toString(), (double) config.th2Sensor);
             if(Th2Val != null && Th2Val.get("id") != null){
                 CCUHsApi.getInstance().deleteEntityTree(Th2Val.get("id").toString());
             }else{
@@ -451,6 +453,7 @@ public class HyperStatSenseEquip {
         if (config.isAnalog1Enable != currentConfig.isAnalog1Enable){
             Log.d(LOG_TAG, "an1 toggle update : " + config.isAnalog1Enable);
             mHayStack.writeDefaultValById(isAn1.get("id").toString(), config.isAnalog1Enable ? 1.0 : 0.0);
+            mHayStack.writeDefaultValById(An1.get("id").toString(), (double) config.analog1Sensor);
             if(An1Val != null && An1Val.get("id") != null){
                 CCUHsApi.getInstance().deleteEntityTree(An1Val.get("id").toString());
             }else{
@@ -482,6 +485,7 @@ public class HyperStatSenseEquip {
         if (config.isAnalog2Enable != currentConfig.isAnalog2Enable){
             Log.d(LOG_TAG, "an2 toggle update : " + config.isAnalog2Enable);
             mHayStack.writeDefaultValById(isAn2.get("id").toString(), config.isAnalog2Enable ? 1.0 : 0.0);
+            mHayStack.writeDefaultValById(An2.get("id").toString(), (double) config.analog2Sensor);
             if(An2Val != null && An2Val.get("id") != null){
                 CCUHsApi.getInstance().deleteEntityTree(An2Val.get("id").toString());
             }else{

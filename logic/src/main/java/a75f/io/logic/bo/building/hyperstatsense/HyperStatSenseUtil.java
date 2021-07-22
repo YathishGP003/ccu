@@ -97,8 +97,9 @@ public class HyperStatSenseUtil {
                 DeviceUtil.updatePhysicalPointRef(Integer.valueOf(nodeAddr), Port.ANALOG_IN_TWO.name(), id);
             }
         }
-        CCUHsApi.getInstance().syncPointEntityTree();
-        CCUHsApi.getInstance().syncEntityTree();
+
+
+        CCUHsApi.getInstance().scheduleSync();
     }
 
     public static void updatetempOffset(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
@@ -164,8 +165,7 @@ public class HyperStatSenseUtil {
             DeviceUtil.updatePhysicalPointRef(Integer.valueOf(nodeAddr), Port.ANALOG_IN_TWO.name(), id);
         }
         Log.d(LOG_TAG, "before sync");
-        CCUHsApi.getInstance().syncPointEntityTree();
-        CCUHsApi.getInstance().syncEntityTree();
+        CCUHsApi.getInstance().scheduleSync();
     }
 
     private static void writePointFromJson(String id, double val, JsonObject msgObject,

@@ -1,8 +1,11 @@
 package a75f.io.logic.bo.building.hyperstatsense;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 
@@ -51,5 +54,11 @@ public class HyperStatSenseProfile extends ZoneProfile {
         return new HashSet<Short>(){{
             add((short)mHyperStatSenseEquip.mNodeAddr);
         }};
+    }
+    
+    @Override
+    public Equip getEquip() {
+        HashMap equip = CCUHsApi.getInstance().read("equip and group == \"" + mHyperStatSenseEquip.mNodeAddr + "\"");
+        return new Equip.Builder().setHashMap(equip).build();
     }
 }

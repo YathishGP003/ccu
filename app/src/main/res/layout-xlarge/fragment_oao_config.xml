@@ -362,19 +362,19 @@
                                 android:id="@+id/textExFanStage2"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:layout_alignParentStart="true"
                                 android:layout_centerInParent="true"
                                 android:text="@string/label_exfan_stage2_threshold"
-                                android:layout_alignParentStart="true"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/exFanStage2Threshold"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
 
 
                         </RelativeLayout>
@@ -388,22 +388,22 @@
                                 android:id="@+id/textCO2Threshold"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
-                                android:text="@string/label_co2threshold"
-                                android:layout_toStartOf="@+id/co2Threshold"
-                                android:layout_marginEnd="5dp"
                                 android:layout_alignParentStart="true"
+                                android:layout_centerInParent="true"
+                                android:layout_marginEnd="5dp"
+                                android:layout_toStartOf="@+id/co2Threshold"
+                                android:text="@string/label_co2threshold"
                                 android:textAppearance="@style/title_normal" />
+
 
                             <Spinner
                                 android:id="@+id/co2Threshold"
-                                android:layout_width="46.12dp"
-                                android:layout_height="27.42dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
-
 
                         </RelativeLayout>
 

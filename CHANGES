@@ -1,50 +1,37 @@
- - Merged PR 1310: Heart beat point for all the modules
- - Handled occupancy sensor data
- - Merging code of 7672- Reading data from device for hyperstat sense as requested by Manju
- - heartbeat migration included for hyperstat sense
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
- - Merged PR 1473: 7519 : Zone UI Implementation for Hyperstat Sense
- - Occupancy point creation
- - Lower and upper limit for the temp ui
- - Fixed fetching address of equipment
- - Added code for Hyperstat -Sense module -heartbeat point
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
- - Merged PR 1450: Zone marker is added for system level modbus profiles
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
- - Added code for heartbeat migration task
- - Logs are removed
- - Complete Zone UI
- - Done with current temp
- - Merged PR 1432: 7584: CCU : Hyperstat sense : Sensor selections reset when toggles were in off state initially.
- - Handled multiplier for input and holding register
- - hyphen removed
- - working
- - resolved zone tag issue and display name as per requested
+ - Merged PR 1578: CCU : In zone page UI current temp should be added again with offset as device is sending the calculated values to CCU.
+ - temp offset is not added
+ - Merged PR 1577: Missed changes
+ - Missed changes
+ - Merged PR 1500: 7155 : CCU : Reconfiguration of Hyperstatsense
+ - resolving merge conflict
+ - Merge branches '7155-CCU_Reconfiguration_of_Hyperstatsense' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into 7155-CCU_Reconfiguration_of_Hyperstatsense
+ - Merged PR 1576: Profile should override the method to get equip profile.
+ - Merged PR 1575: Change pm sensor unit
+ - Merged PR 1530: Modbus points update issue at system level
+ - config selection retain
+ - Merged PR 1555: Resolved UI Issue
+ - changed to schedule sync
+ - Profile should override the method to get equip profile. HyperSense wasn't doing that. It resulted in failure of BuildingProcessJob and history sync.
+ - Change pm sensor unit
+ - syncing with both
+ - Merged PR 1497: 7628 - CCU : Daikin theme support to be added for hyperstat sense profile
+ - Resolved UI Issue
+ - Alignment corrected
+ - Merge branches 'bug/sdev/7628_Daiken_theme_for_hyperstat_Sense' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/sdev/7628_Daiken_theme_for_hyperstat_Sense
+ - logs for temp off issue
+ - removal of unused code
+ - Logical points created
  - draft
- - Resolved the merge conflicts with master after 1.572 release
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
- - Config was not updated if the ananlogs are changes to enable
- - removed standalone tag from OAO heartbeat
- - Resolved alignment issue
- - Fixed tag issues (standalone and heartbeat), Date format issue, SN EMR issue
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
- - uncommented date format for today
- - uncommented date format for today
- - fixed system tag refresh screen
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
- - Fixes for modbus heartbeat and addressed review comments
- - Added code for refreshing zone screen
- - UI fixes as suggested by QA
- - Oao and system level level module changes
- - updating with more modification -module status
- - added alignment
- - updating with more modification -module status
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
- - updating with more modification -module status
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
- - fixed 2fcu and 4 fcu
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
- - ui changes for heartbeat
- - Added heartbeat and module tag for Points
- - heartbeat points for all equips
+ - updating the logical point
+ - Merge branches '7155-CCU_Reconfiguration_of_Hyperstatsense' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into 7155-CCU_Reconfiguration_of_Hyperstatsense
+ - logical point creation
+ - Removed zone marker for collecting the modbus points at system level
+ - Removed zone marker for collecting the modbus points at system level
+ - Pulled master
+ - Merge branches 'bug/sdev/7628_Daiken_theme_for_hyperstat_Sense' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/sdev/7628_Daiken_theme_for_hyperstat_Sense
+ - Name of the sensor set to bold and alligned
+ - Spinner selection is retained even after disabling the toggle
+ - Daikin theme handled for hyperstat sense
+ - Complete reconfiguration
+ - offset and toggle done
+ - draft

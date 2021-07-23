@@ -362,7 +362,6 @@ public class LSerial
         }
 
         LogdStructAsJson(struct);
-        Log.i(Globals.TAG, "pushing data to mUsbService.write ");
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }

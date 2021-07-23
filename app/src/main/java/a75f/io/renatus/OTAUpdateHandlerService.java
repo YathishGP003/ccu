@@ -33,7 +33,6 @@ public class OTAUpdateHandlerService extends Service {
             passIntent.putExtras(intent);
 
             startService(passIntent);
-            Log.i(Globals.TAG, " a75f.io.renatus.OTAUpdateHandlerService.mOtaUpdateEventReceiver  onReceive: "+intent.getAction());
             // Handle special timer-specific events
             switch(intent.getAction()) {
                 case Globals.IntentActions.OTA_UPDATE_START:

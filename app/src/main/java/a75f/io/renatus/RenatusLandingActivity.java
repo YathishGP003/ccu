@@ -500,7 +500,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     @Override
     public void updateRemoteCommands(String commands,String cmdLevel,String id) {
         CcuLog.d("RemoteCommand","PUBNUB RenatusLandingActivity="+commands+","+cmdLevel);
-        CcuLog.i(Globals.TAG,"updateRemoteCommands PUBNUB handle Msgs="+commands+","+cmdLevel);
         if (!commands.isEmpty() && commands.equals(RESTART_CCU)) {
             RenatusApp.closeApp();
         } else if (!commands.isEmpty() && commands.equals(RESTART_TABLET)) {

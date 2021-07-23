@@ -34,11 +34,6 @@ public class RemoteCommandUpdateHandler
             String systemId = cmdLevel.equals("system")? (msgObject.get("id").isJsonNull() ? "":msgObject.get("id").getAsString()) : "";
             String ccuUID = CCUHsApi.getInstance().getCcuRef().toString().replace("@","");
             CcuLog.d("RemoteCommand","PUBNUB handle Msgs="+cmdType+","+cmdLevel+","+remoteCommandInterface);
-            CcuLog.i(Globals.TAG,"PUBNUB handle Msgs="+cmdType+","+cmdLevel+","+remoteCommandInterface);
-
-            CcuLog.i(Globals.TAG,"ID  :"+(msgObject.get("id").isJsonNull() ? "":msgObject.get("id").getAsString()));
-            CcuLog.i(Globals.TAG,"firmwareVersion  :"+msgObject.get("version").getAsString());
-            CcuLog.i(Globals.TAG,"cmdLevel  :"+(cmdLevel));
 
             switch (cmdLevel){
                 case "site":
@@ -70,8 +65,6 @@ public class RemoteCommandUpdateHandler
                             case OTA_UPDATE_ITM:
                             case OTA_UPDATE_SD:
                             case OTA_UPDATE_HS:
-                                CcuLog.i(Globals.TAG,"OTA_UPDATE_SD OTA_UPDATE_ITM update bradcase");
-
                                 Intent otaUpdateIntent = new Intent(Globals.IntentActions.PUBNUB_MESSAGE);
                                 otaUpdateIntent.putExtra("id", msgObject.get("level").getAsString()); // site id
                                 otaUpdateIntent.putExtra("firmwareVersion", msgObject.get("version").getAsString());

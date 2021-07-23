@@ -869,5 +869,4 @@ public abstract class UtilityApplication extends Application {
         String response = ipRoutes.get(0);
         return response;
     }
-
 }

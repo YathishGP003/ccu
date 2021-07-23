@@ -146,6 +146,12 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
             mHSSenseConfig = (HyperStatSenseConfiguration) mHSSenseProfile.getProfileConfiguration(mNodeAddress);
             mTemperatureOffset.setValue((int) (mHSSenseConfig.temperatureOffset + TEMP_OFFSET_LIMIT));
 
+
+            mThermostat1Sp.setSelection(mHSSenseConfig.th1Sensor);
+            mThermostat2Sp.setSelection(mHSSenseConfig.th2Sensor);
+            mAnalog1Sp.setSelection(mHSSenseConfig.analog1Sensor);
+            mAnalog2Sp.setSelection(mHSSenseConfig.analog2Sensor);
+
             mThermostat1Sp.setEnabled(mHSSenseConfig.isTh1Enable);
             mThermostat2Sp.setEnabled(mHSSenseConfig.isTh2Enable);
             mAnalog1Sp.setEnabled(mHSSenseConfig.isAnalog1Enable);
@@ -155,19 +161,6 @@ public class HyperStatSenseFragment extends BaseDialogFragment {
             mTherm2toggle.setChecked(mHSSenseConfig.isTh2Enable);
             mAnalog1toggle.setChecked(mHSSenseConfig.isAnalog1Enable);
             mAnalog2toggle.setChecked(mHSSenseConfig.isAnalog2Enable);
-
-            if (mHSSenseConfig.isTh1Enable) {
-                mThermostat1Sp.setSelection(mHSSenseConfig.th1Sensor);
-            }
-            if (mHSSenseConfig.isTh2Enable) {
-                mThermostat2Sp.setSelection(mHSSenseConfig.th2Sensor);
-            }
-            if (mHSSenseConfig.isAnalog1Enable) {
-                mAnalog1Sp.setSelection(mHSSenseConfig.analog1Sensor);
-            }
-            if (mHSSenseConfig.isAnalog2Enable) {
-                mAnalog2Sp.setSelection(mHSSenseConfig.analog2Sensor);
-            }
 
         } else {
             CcuLog.d(L.TAG_CCU_UI, "Create Hyperstatsense Profile: ");

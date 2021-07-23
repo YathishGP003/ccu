@@ -45,7 +45,14 @@ fun getMeanHumidityTarget() : Double {
             TunerUtil.readSystemUserIntentVal("target and min and inside and humidity"))/2
 }
 
+/**
+ * Daikin IE requires to tbe set 'occupied' if 75F system is occupied
+ * or when there is conditioning during 'unoccupied' time.
+ */
 fun isSystemOccupied(systemProfile: VavIERtu) : Boolean {
-    return systemProfile.systemController.getSystemState() != SystemController.State.OFF
-            && (systemProfile.systemCoolingLoopOp > 0 || systemProfile.systemHeatingLoopOp > 0)
+    return (systemProfile.systemController.getSystemState() != SystemController.State.OFF
+            && ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
+            && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)
+            || systemProfile.systemCoolingLoopOp > 0
+            || systemProfile.systemHeatingLoopOp > 0
 }

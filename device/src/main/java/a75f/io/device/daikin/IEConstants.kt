@@ -3,6 +3,7 @@ package a75f.io.device.daikin;
 const val IE_POINT_TYPE_MI = "MI"
 const val IE_POINT_TYPE_MV = "MV"
 const val IE_POINT_TYPE_AV = "AV"
+const val IE_POINT_TYPE_SY = "SY"
 
 const val IE_POINT_NAME_OCCUPANCY = "OccMode"
 const val IE_POINT_NAME_CONDITIONING_MODE = "NetApplicMode"

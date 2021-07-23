@@ -73,7 +73,6 @@ class IEDeviceHandler {
                 fiveMinCounter = 0;
             }
             fiveMinCounter++
-
         }
     }
 
@@ -243,7 +242,7 @@ class IEDeviceHandler {
     }
 
     private fun fetchSystemClock(ieService: IEService, hayStack: CCUHsApi) {
-        ieService.readPoint(IE_POINT_TYPE_AV, IE_POINT_NAME_SYSTEM_CLOCK)
+        ieService.readPoint(IE_POINT_TYPE_SY, IE_POINT_NAME_SYSTEM_CLOCK)
             .subscribeOn(Schedulers.io())
             .subscribe(
                 { response -> response?.result?.let {

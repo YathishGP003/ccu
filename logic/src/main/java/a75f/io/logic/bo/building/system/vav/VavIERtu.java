@@ -152,8 +152,7 @@ public class VavIERtu extends VavSystemProfile
         updateOutsideWeatherParams();
         SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
         
-        if (VavSystemController.getInstance().getSystemState() == COOLING && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
-        {
+        if (VavSystemController.getInstance().getSystemState() == COOLING && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO)) {
             double satSpMax = VavTRTuners.getSatTRTunerVal("spmax");
             double satSpMin = VavTRTuners.getSatTRTunerVal("spmin");
             CcuLog.d(L.TAG_CCU_SYSTEM, "satSpMax :" + satSpMax + " satSpMin: " + satSpMin + " SAT: " + getSystemSAT());
@@ -180,8 +179,7 @@ public class VavIERtu extends VavSystemProfile
         }
         setCmdSignal("cooling", coolingDat);
         
-        if (VavSystemController.getInstance().getSystemState() == HEATING)
-        {
+        if (VavSystemController.getInstance().getSystemState() == HEATING) {
             systemHeatingLoopOp = VavSystemController.getInstance().getHeatingSignal();
         } else {
             systemHeatingLoopOp = 0;
@@ -211,22 +209,27 @@ public class VavIERtu extends VavSystemProfile
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
         double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+getSystemEquipRef()+"\"");
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
+        
         if(epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE){
+            
             double smartPurgeDabFanLoopOp = TunerUtil.readTunerValByQuery("system and purge and vav and fan and loop and output", getSystemEquipRef());
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
             double spSpMin = VavTRTuners.getStaticPressureTRTunerVal("spmin");
 
             CcuLog.d(L.TAG_CCU_SYSTEM,"spSpMax :"+spSpMax+" spSpMin: "+spSpMin+" SP: "+getStaticPressure());
             double staticPressureLoopOutput = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax -spSpMin)) ;
-            if(VavSystemController.getInstance().getSystemState() == COOLING && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO)) {
+            
+            if(VavSystemController.getInstance().getSystemState() == COOLING &&
+               (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO)) {
                 if(staticPressureLoopOutput < ((spSpMax - spSpMin) * smartPurgeDabFanLoopOp))
                     systemFanLoopOp = ((spSpMax - spSpMin) * smartPurgeDabFanLoopOp);
                 else
                     systemFanLoopOp = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax -spSpMin))  ;
             }else if(VavSystemController.getInstance().getSystemState() == HEATING)
                 systemFanLoopOp = Math.max((int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier),smartPurgeDabFanLoopOp);
-        }else if ((VavSystemController.getInstance().getSystemState() == COOLING) && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
-        {
+            
+        }else if ((VavSystemController.getInstance().getSystemState() == COOLING) &&
+                  (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO)) {
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
             double spSpMin = VavTRTuners.getStaticPressureTRTunerVal("spmin");
             
@@ -256,13 +259,11 @@ public class VavIERtu extends VavSystemProfile
         String scheduleStatus = ScheduleProcessJob.getSystemStatusString();
         CcuLog.d(L.TAG_CCU_SYSTEM, "StatusMessage: "+systemStatus);
         CcuLog.d(L.TAG_CCU_SYSTEM, "ScheduleStatus: " +scheduleStatus);
-        if (!CCUHsApi.getInstance().readDefaultStrVal("system and status and message").equals(systemStatus))
-        {
+        if (!CCUHsApi.getInstance().readDefaultStrVal("system and status and message").equals(systemStatus)) {
             CCUHsApi.getInstance().writeDefaultVal("system and status and message", systemStatus);
             Globals.getInstance().getApplicationContext().sendBroadcast(new Intent(ACTION_STATUS_CHANGE));
         }
-        if (!CCUHsApi.getInstance().readDefaultStrVal("system and scheduleStatus").equals(scheduleStatus))
-        {
+        if (!CCUHsApi.getInstance().readDefaultStrVal("system and scheduleStatus").equals(scheduleStatus)) {
             CCUHsApi.getInstance().writeDefaultVal("system and scheduleStatus", scheduleStatus);
         }
     }

@@ -10,8 +10,6 @@ import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.util.Log;
 
-import javax.microedition.khronos.opengles.GL;
-
 import a75f.io.logic.Globals;
 import a75f.io.usbserial.UsbService;
 
@@ -33,6 +31,7 @@ public class OTAUpdateHandlerService extends Service {
             passIntent.putExtras(intent);
 
             startService(passIntent);
+
             // Handle special timer-specific events
             switch(intent.getAction()) {
                 case Globals.IntentActions.OTA_UPDATE_START:

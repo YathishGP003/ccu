@@ -43,32 +43,31 @@
 
     <LinearLayout
         android:id="@+id/status_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:layout_below="@+id/seekArc"
         android:layout_alignLeft="@id/seekArc"
         android:layout_alignRight="@id/seekArc"
-        android:gravity="center_horizontal|center_vertical">
-
+        android:layout_width="match_parent"
+        android:gravity="center_horizontal|center_vertical"
+        android:layout_height="wrap_content">
         <TextView
             android:id="@+id/textEquipment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:clickable="false"
-            android:duplicateParentState="true"
-            android:focusable="false"
             android:text="DAB"
-            android:textAppearance="@style/label_black" />
+            android:textAppearance="@style/label_black"
+            android:clickable="false"
+            android:focusable="false"
+            android:duplicateParentState="true"/>
 
         <TextView
             android:id="@+id/module_status"
-            android:layout_width="9dp"
-            android:layout_height="9dp"
-            android:layout_alignParentRight="true"
-            android:layout_gravity="top"
             android:layout_marginLeft="5dp"
+            android:layout_gravity="top"
+            android:gravity="top"
+            android:layout_width="9dp"
+            android:layout_alignParentRight="true"
             android:background="@drawable/module_dead"
-            android:gravity="top" />
+            android:layout_height="9dp"/>
     </LinearLayout>
 
 

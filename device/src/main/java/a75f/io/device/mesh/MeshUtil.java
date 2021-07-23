@@ -12,8 +12,6 @@ import static a75f.io.device.DeviceConstants.HEARTBEAT_INTERVAL;
 import static a75f.io.device.DeviceConstants.HEARTBEAT_MULTIPLIER;
 import static a75f.io.device.DeviceConstants.SIMULATION_SLEEP_TIME;
 
-import android.util.Log;
-
 /**
  * Created by samjithsadasivan on 9/19/18.
  */

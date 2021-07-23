@@ -20,7 +20,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -38,7 +37,6 @@ import a75f.io.device.serial.FirmwareDeviceType_t;
 import a75f.io.device.serial.MessageConstants;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SnRebootIndicationMessage_t;
-import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.Globals;
 import a75f.io.logic.bo.util.ByteArrayUtils;
@@ -46,8 +44,6 @@ import a75f.io.usbserial.UsbService;
 
 import static a75f.io.alerts.AlertsConstantsKt.FIRMWARE_OTA_UPDATE_ENDED;
 import static a75f.io.alerts.AlertsConstantsKt.FIRMWARE_OTA_UPDATE_STARTED;
-
-import javax.microedition.khronos.opengles.GL;
 
 public class OTAUpdateService extends IntentService {
 
@@ -86,6 +82,7 @@ public class OTAUpdateService extends IntentService {
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         String action = intent.getAction();
+
         if(action == null) {
             return;
         }
@@ -110,7 +107,6 @@ public class OTAUpdateService extends IntentService {
         }
         /* The service has been launched in response to a file download */
         else if(action.equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {
-            Log.i(TAG, "onHandleIntent: handleFileDownloadComplete calling ");
             handleFileDownloadComplete(intent);
         }
         /* The service has been launched in response to OTA update timeout */
@@ -242,10 +238,10 @@ public class OTAUpdateService extends IntentService {
      * @param intent The Intent which started this OTA update
      */
     private void handleOtaUpdateStartRequest(Intent intent) {
-
         String id = intent.getStringExtra("id");
         String firmwareVersion = intent.getStringExtra("firmwareVersion");
         String cmdLevel = intent.getStringExtra("cmdLevel");
+
         if(id == null || firmwareVersion == null) {
             return;
         }
@@ -355,6 +351,7 @@ public class OTAUpdateService extends IntentService {
             resetUpdateVariables();
             return;
         }
+
         moveUpdateToNextNode();
         sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_START));
     }
@@ -430,6 +427,7 @@ public class OTAUpdateService extends IntentService {
         AlertGenerateHandler.handleMessage(FIRMWARE_OTA_UPDATE_STARTED, "Firmware OTA update for"+" "+ccuName+" "+"started for smart node"+" "+mCurrentLwMeshAddress+" "+"with version"+" "+versionMajor + "." + versionMinor);
         mUpdateInProgress = true;
         mLastSentPacket = -1;
+
         setUpdateFile(binary, deviceType);
     }
 
@@ -444,6 +442,8 @@ public class OTAUpdateService extends IntentService {
     private long startFileDownload(String filename, FirmwareDeviceType_t deviceType, String fileFormat) {
         String filePathSystem = DOWNLOAD_DIR.toString() + "/" + filename + fileFormat;
         String filePathUrl = DOWNLOAD_BASE_URL + deviceType.getUpdateUrlDirectory() + filename + fileFormat;
+
+        Log.d(TAG, "[DOWNLOAD] Starting download of file " + filePathUrl);
 
         DownloadManager.Request downloadRequest = new DownloadManager.Request(Uri.parse(filePathUrl))
                 .setTitle(filename + fileFormat)
@@ -558,6 +558,7 @@ public class OTAUpdateService extends IntentService {
             resetUpdateVariables();
             return;
         }
+
         Log.d(TAG, "[STARTUP] Successfully moved binary file to RAM, sending metadata");
         sendFirmwareMetadata(deviceType);
     }
@@ -643,6 +644,7 @@ public class OTAUpdateService extends IntentService {
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "[METADATA] [SN:" + mCurrentLwMeshAddress + "] [DATA: " + ByteArrayUtils.byteArrayToHexString(message.getByteBuffer().array(), true) + "]");
         }
+
         try {
             MeshUtil.sendStructToCM(message);
         } catch (Exception e) {

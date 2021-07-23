@@ -211,17 +211,17 @@ public class AddtoExisting extends Fragment {
                     Toast.makeText(mContext, "array not empty", Toast.LENGTH_SHORT).show();
                     //String siteId = StringUtils.trim(mSiteId.getText().toString());
                     try {
-                        HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
+                        /*HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
                         Log.e("InsideAddtoExist", "siteId- " + siteId);
-                        String site_Id = StringUtils.prependIfMissing(siteId.toString(), "@");
+                        String site_Id = StringUtils.prependIfMissing(siteId.toString(), "@");*/
                         //loadExistingSite(siteId);
                         String OTP = et1.getText() + "" + et2.getText() + et3.getText() + "" + et4.getText() + "" + et5.getText() + et6.getText();
                         //Log.e("InsideAddtoExisting","OTP- "+OTP);
-                        if (!site_Id.equals(null))
+                        /*if (!site_Id.equals(null))
                             OTPValidation(site_Id, OTP);
                         else
-                            Toast.makeText(mContext, "Please create a site first, Site Id is null", Toast.LENGTH_SHORT).show();
-                        OTPValidation("@ad07dfe7-4614-4304-9f6b-9eb612b955ac", OTP);
+                            Toast.makeText(mContext, "Please create a site first, Site Id is null", Toast.LENGTH_SHORT).show();*/
+                        OTPValidation("@edbbcdfc-b055-47c4-9edc-2b896e2cde98", OTP);
                     } catch (Exception e) {
                         Log.e("InsideAddtoExisting", "Exception- " + e);
                     }

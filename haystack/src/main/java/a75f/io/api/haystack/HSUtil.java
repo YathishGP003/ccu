@@ -266,6 +266,12 @@ public class HSUtil
                 || (pointEntity.containsKey(Tags.ADAPTIVE) && pointEntity.containsKey(Tags.DELTA))
                 || (pointEntity.containsKey(Tags.MAXIMIZED) && pointEntity.containsKey(Tags.EXIT));
     }
+
+    public static boolean isSenseConfig(String id, CCUHsApi hayStack) {
+        HashMap pointEntity = hayStack.readMapById(id);
+        return pointEntity.containsKey(Tags.SENSE)
+                && pointEntity.containsKey(Tags.HYPERSTAT);
+    }
     
     /**
      * Currently checks only FCU type. Will be made generic after other profies

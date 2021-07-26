@@ -22,7 +22,10 @@ import java.util.Objects;
 import java.util.TreeMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Floor;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Zone;
 import a75f.io.logic.Globals;
 import butterknife.ButterKnife;
 
@@ -53,7 +56,23 @@ public class TempOverrideFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_temp_override, container, false);
         ButterKnife.bind(this, rootView);
+        loadExistingZones();
         return rootView;
+    }
+    ArrayList<Floor> siteFloorList = new ArrayList<>();
+    ArrayList<String> siteRoomList = new ArrayList<>();
+    private void loadExistingZones() {
+        siteFloorList.clear();
+        siteRoomList.clear();
+        ArrayList<Floor> floorList = HSUtil.getFloors();
+        siteFloorList.addAll(floorList);
+        for (Floor f : floorList) {
+            ArrayList<Zone> zoneList = HSUtil.getZones(f.getId());
+            for (Zone zone : zoneList) {
+                siteRoomList.add(zone.getDisplayName());
+            }
+            Log.e("InsideTempOverrideFrag", "siteRoomList- " + siteRoomList);
+        }
     }
 
     @Override
@@ -70,6 +89,23 @@ public class TempOverrideFragment extends Fragment {
         expandableListDetail = new TreeMap<>();
         expandableListDetail_CMDevice = new HashMap<>();
         String siteName = CCUHsApi.getInstance().read("site").get("dis").toString();
+
+        //ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone and roomRef");
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and group");
+        Log.e("InsideTempOverrideFrag", "equips- " + equips);
+        Log.e("InsideTempOverrideFrag", "point- " + CCUHsApi.getInstance().readAll("equip and group and id="+equips.get(0).get("id")));
+        ArrayList<String> equipsRef = new ArrayList<String>();
+        for(int i = 0; i<equips.size(); i++) {
+            equipsRef.add(i, equips.get(i).get("roomRef").toString());
+        }
+        Collections.sort(equipsRef, new Comparator<String>() {
+            @Override
+            public int compare(String s1, String s2) {
+                return s1.compareToIgnoreCase(s2);
+            }
+        });
+        Collections.reverse(equipsRef);
+        Log.e("InsideTempOverrideFrag", "equipsRef- " + equipsRef);
 
         ArrayList<HashMap> Zonedevices = CCUHsApi.getInstance().readAll("device");
         //Log.e("InsideTempOverrideFrag", "Zonedevices- " + Zonedevices);
@@ -141,7 +177,8 @@ public class TempOverrideFragment extends Fragment {
             }
             equipMap.put(m.get("dis").toString(), m.get("id").toString());
             expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
-            expandableListAdapter = new TempOverrideExpandableListAdapter(TempOverrideFragment.this, expandableListTitle, expandableListDetail, pointMap, getActivity(), siteName);
+
+            expandableListAdapter = new TempOverrideExpandableListAdapter(TempOverrideFragment.this, expandableListTitle, expandableListDetail, pointMap, getActivity(), siteName, equipsRef);
             expandableListView.setAdapter(expandableListAdapter);
         }
 

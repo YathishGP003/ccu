@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.text.method.DigitsKeyListener;
 import android.text.method.KeyListener;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,12 +31,15 @@ import org.joda.time.Interval;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.TreeMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Floor;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
@@ -44,15 +48,12 @@ import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
-import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.definitions.ScheduleType;
-import a75f.io.logic.bo.building.sensors.Sensor;
-import a75f.io.logic.bo.building.sensors.SensorManager;
-import a75f.io.logic.bo.building.system.SystemRelayOp;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
+import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.CCUUiUtil;
 
 import static a75f.io.renatus.TempOverrideFragment.getPointVal;
 
@@ -62,11 +63,12 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
     private TreeMap<String, List<String>> expandableListDetail;
     private TreeMap<String, String>       idMap;
     String siteName;
+    private ArrayList<String> equipsRef;
 
     Activity mActivity = null;
 
     public TempOverrideExpandableListAdapter(Fragment fragment, List<String> expandableListTitle,
-                                             TreeMap<String, List<String>> expandableListDetail, TreeMap idmap, Activity activity, String siteName)
+                                             TreeMap<String, List<String>> expandableListDetail, TreeMap idmap, Activity activity, String siteName, ArrayList<String> equipsRef)
     {
         this.mFragment = fragment;
         this.expandableListTitle = expandableListTitle;
@@ -74,6 +76,11 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         this.idMap = idmap;
         this.mActivity = activity;
         this.siteName = siteName;
+        this.equipsRef = equipsRef;
+        Log.e("InsideTempOverrideExpandableListAdapter", "expandableListTitle- " + expandableListTitle);
+        Log.e("InsideTempOverrideExpandableListAdapter", "expandableListDetail- " + expandableListDetail);
+        Log.e("InsideTempOverrideExpandableListAdapter", "idMap- " + idMap);
+        Log.e("InsideTempOverrideExpandableListAdapter", "equipsRef- " + equipsRef);
     }
 
     @Override
@@ -132,6 +139,8 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     spinner_override_value.setVisibility(View.VISIBLE);
                 } else if (expandedListText.startsWith("relay")) {
                     NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + expandedListText.substring(5, 6));
+                    String relayMapped = getRelayMapping("relay"+expandedListText.substring(5, 6), convertView);
+                    //NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + expandedListText.substring(5, 6)+"("+relayMapped+")");
                     txt_calculated_output.setText(Double.compare(getPointVal(idMap.get(expandedListText)),1.0) == 0 ? "ON" : "OFF");
                     spinner_relay.setVisibility(View.VISIBLE);
                 }else if (expandedListText.startsWith("Th")) {
@@ -186,29 +195,99 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 expandedListTextView.setText(NewexpandedListText);
             }
 
-            ArrayList<Double> targetVal = new ArrayList<Double>();
+            ArrayList<String> targetVal = new ArrayList<String>();
             for (int pos = (int)(100*0); pos <= (100*10); pos+=(100*0.1)) {
-                targetVal.add(pos /100.0);
+                targetVal.add(pos /100.0 +" V");
             }
-            ArrayAdapter<Double> targetValAdapter = new ArrayAdapter<Double>(mActivity, android.R.layout.simple_spinner_item, targetVal);
-            targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            ArrayAdapter<String> targetValAdapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_item, targetVal){
+                public View getView(int position, View convertView,ViewGroup parent) {
+
+                    View v = super.getView(position, convertView, parent);
+
+                    //((TextView) v).setTextSize(16);
+                    ((TextView) v).setTextAppearance(R.style.text_appearance);
+                    ((TextView) v).setGravity(Gravity.CENTER);
+
+                    return v;
+
+                }
+
+                public View getDropDownView(int position, View convertView,ViewGroup parent) {
+
+                    View v = super.getDropDownView(position, convertView,parent);
+
+                    ((TextView) v).setGravity(Gravity.CENTER);
+                    ((TextView) v).setTextAppearance(R.style.text_appearance);
+
+                    return v;
+
+                }
+            };
+
+            //targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinner_override_value.setAdapter(targetValAdapter);
             spinner_override_value.invalidate();
 
             ArrayList<String> relyVal = new ArrayList<String>();
             relyVal.add("OFF");
             relyVal.add("ON");
-            ArrayAdapter<String> relayValAdapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_item, relyVal);
-            relayValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            ArrayAdapter<String> relayValAdapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_item, relyVal){
+                public View getView(int position, View convertView,ViewGroup parent) {
+
+                    View v = super.getView(position, convertView, parent);
+
+                    //((TextView) v).setTextSize(16);
+                    ((TextView) v).setTextAppearance(R.style.text_appearance);
+                    ((TextView) v).setGravity(Gravity.CENTER);
+
+                    return v;
+
+                }
+
+                public View getDropDownView(int position, View convertView,ViewGroup parent) {
+
+                    View v = super.getDropDownView(position, convertView,parent);
+
+                    ((TextView) v).setGravity(Gravity.CENTER);
+                    ((TextView) v).setTextAppearance(R.style.text_appearance);
+
+                    return v;
+
+                }
+            };
+            //relayValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinner_relay.setAdapter(relayValAdapter);
             spinner_relay.invalidate();
 
-            ArrayList<Integer> thermistorVal = new ArrayList<Integer>();
+            ArrayList<String> thermistorVal = new ArrayList<String>();
             for (int pos = (100); pos <= (100*100); pos+=(100)) {
-                thermistorVal.add(pos);
+                thermistorVal.add(pos+" Ohm");
             }
-            ArrayAdapter<Integer> thermistorAdapter = new ArrayAdapter<Integer>(mActivity, android.R.layout.simple_spinner_item, thermistorVal);
-            thermistorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            ArrayAdapter<String> thermistorAdapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_item, thermistorVal){
+                public View getView(int position, View convertView,ViewGroup parent) {
+
+                    View v = super.getView(position, convertView, parent);
+
+                    //((TextView) v).setTextSize(16);
+                    ((TextView) v).setTextAppearance(R.style.text_appearance);
+                    ((TextView) v).setGravity(Gravity.CENTER);
+
+                    return v;
+
+                }
+
+                public View getDropDownView(int position, View convertView,ViewGroup parent) {
+
+                    View v = super.getDropDownView(position, convertView,parent);
+
+                    ((TextView) v).setGravity(Gravity.CENTER);
+                    ((TextView) v).setTextAppearance(R.style.text_appearance);
+
+                    return v;
+
+                }
+            };
+            //thermistorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinner_thermistor.setAdapter(thermistorAdapter);
             spinner_thermistor.invalidate();
 
@@ -220,9 +299,10 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     Globals.getInstance().setTemproryOverrideMode(true);
                     String tunerName = expandableListDetail.get(expandableListTitle.get(listPosition)).get(
                             expandedListPosition);
-
-                    setPointVal(idMap.get(tunerName), Double.parseDouble(spinner_override_value.getSelectedItem().toString()));
-                    idMap.put(idMap.get(tunerName), spinner_override_value.getSelectedItem().toString());
+                    String selectedSpinnerItem = spinner_override_value.getSelectedItem().toString();
+                    int index=selectedSpinnerItem.lastIndexOf("V");
+                    setPointVal(idMap.get(tunerName), Double.parseDouble(selectedSpinnerItem.substring(0,index-1)));
+                    idMap.put(idMap.get(tunerName), selectedSpinnerItem.substring(0,index-1));
 
                 }
                 @Override
@@ -257,8 +337,10 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     Globals.getInstance().setTemproryOverrideMode(true);
                     String tunerName = expandableListDetail.get(expandableListTitle.get(listPosition)).get(
                             expandedListPosition);
-                    setPointVal(idMap.get(tunerName), Double.parseDouble(spinner_thermistor.getSelectedItem().toString()));
-                    idMap.put(idMap.get(tunerName), spinner_thermistor.getSelectedItem().toString());
+                    String selectedSpinnerItem = spinner_thermistor.getSelectedItem().toString();
+                    int index=selectedSpinnerItem.lastIndexOf("Ohm");
+                    setPointVal(idMap.get(tunerName), Double.parseDouble(selectedSpinnerItem.substring(0,index-1)));
+                    idMap.put(idMap.get(tunerName), selectedSpinnerItem.substring(0,index-1));
 
                 }
                 @Override
@@ -266,6 +348,10 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 {
                 }
             });
+
+            CCUUiUtil.setSpinnerDropDownColor(spinner_override_value,mActivity.getApplicationContext());
+            CCUUiUtil.setSpinnerDropDownColor(spinner_relay,mActivity.getApplicationContext());
+            CCUUiUtil.setSpinnerDropDownColor(spinner_thermistor,mActivity.getApplicationContext());
         }
 
         return convertView;
@@ -352,6 +438,21 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         return this.expandableListTitle.get(listPosition);
     }
 
+    public String getZoneTitle(int listPosition) {
+        String zoneTitle = null;
+        if (listPosition != 0){
+            ArrayList<HashMap> roomMap = CCUHsApi.getInstance().readAll("room and floorRef and id == " + equipsRef.get(listPosition-1));
+            //ArrayList<HashMap> roomMap = CCUHsApi.getInstance().readAll("room and floorRef");
+            //ArrayList<HashMap> roomMap = CCUHsApi.getInstance().readAll("equip and group");
+            //ArrayList<HashMap> roomMap1 = CCUHsApi.getInstance().readAll("room and floorRef and id == @75d7c6b3-1c0e-4c2d-9738-ef9de187ccf7");
+            Log.e("InsideTempOverrideExpandableListAdapter", "listPosition- " + listPosition);
+            Log.e("InsideTempOverrideExpandableListAdapter", "roomMap12- " + CCUHsApi.getInstance().readAll("room and floorRef"));
+            Log.e("InsideTempOverrideExpandableListAdapter", "roomMap- " + roomMap);
+            zoneTitle = roomMap.get(0).get("dis").toString();
+        }
+        return zoneTitle;
+    }
+
     @Override
     public int getGroupCount()
     {
@@ -369,20 +470,43 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                              View convertView, ViewGroup parent)
     {
         String listTitle = (String) getGroup(listPosition);
+        String zoneTitle = getZoneTitle(listPosition);
+        Log.e("InsideTempOverrideExpandableListAdapter", "zoneTitle- " + zoneTitle);
         if (convertView == null)
         {
             LayoutInflater layoutInflater = (LayoutInflater) this.mFragment.getContext().
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(R.layout.temp_override_tuner_list_group, null);
         }
-        TextView listTitleTextView = (TextView) convertView
-                .findViewById(R.id.listTitle);
-        listTitleTextView.setTypeface(null, Typeface.BOLD);
-        if (listTitle.equals("CM-device"))
-            listTitleTextView.setText(L.ccu().systemProfile.getProfileName());
-        else
-            listTitleTextView.setText(listTitle);
-        return convertView;
+
+        /*ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone and roomRef");
+        ArrayList<String> equipsRef = new ArrayList<String>();
+        for(int i = 0; i<equips.size(); i++) {
+            Log.e("InsideTempOverrideExpandableListAdapter", "equips- " + equips);
+            equipsRef.add(i, equips.get(i).get("roomRef").toString());
+            Log.e("InsideTempOverrideExpandableListAdapter", "equipsRef- " + equipsRef);
+        }*/
+            /*for (int m = 0; m < roomMap.size(); m++) {
+                String zoneTitle = "";
+                zoneTitle = roomMap.get(m).get("dis").toString();
+                Log.e("InsideTempOverrideExpandableListAdapter", "zoneTitle- " + zoneTitle);
+            }*/
+
+        /*for (int i = 0; i<L.ccu().zoneProfiles.size(); i++) {
+            ArrayList<HashMap> roomMap = CCUHsApi.getInstance().readAll("room and floorRef == \"" + floorList.get(i).getId() + "\"");
+            Log.e("InsideTempOverrideExpandableListAdapter", "roomMap- " + roomMap);
+        }*/
+        /*String zoneTitle = roomMap.get(m).get("dis").toString()
+        Log.e("InsideTempOverrideExpandableListAdapter","zoneProfiles- "+L.ccu().zoneProfiles.getClass());*/
+            TextView listTitleTextView = (TextView) convertView
+                    .findViewById(R.id.listTitle);
+            listTitleTextView.setTypeface(null, Typeface.BOLD);
+            if (listTitle.equals("CM-device"))
+                listTitleTextView.setText(L.ccu().systemProfile.getProfileName());
+            else {
+                listTitleTextView.setText(zoneTitle+"-("+listTitle+")");
+            }
+            return convertView;
     }
 
     public double getConfigEnabled(String config) {

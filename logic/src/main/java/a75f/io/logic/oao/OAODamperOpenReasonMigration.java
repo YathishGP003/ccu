@@ -30,6 +30,9 @@ public class OAODamperOpenReasonMigration {
         String siteDis = (String) siteMap.get("dis");
         String[] coolingReasons = {"dcv", "mat"};
         HashMap equipment = hayStack.read("equip and oao");
+        if(equipment.size() == 0){
+            return;
+        }
         Equip equip = new Equip.Builder().setHashMap(equipment).build();
         String nodeAddress = equip.getGroup();
         for(String coolingReason : coolingReasons){

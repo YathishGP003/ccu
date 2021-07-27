@@ -203,6 +203,10 @@ public class MeshNetwork extends DeviceNetwork
             //DaikinIE.sendControl();
             VavIERtu systemProfile = (VavIERtu) L.ccu().systemProfile;
             IEDeviceHandler.getInstance().sendControl(systemProfile, CCUHsApi.getInstance());
+            
+            if (DLog.isLoggingEnabled()) {
+                sendIETestMessage(systemProfile);
+            }
         }
     
         if (!LSerial.getInstance().isConnected()) {
@@ -232,5 +236,15 @@ public class MeshNetwork extends DeviceNetwork
         MeshUtil.sendStructToCM(msg);
         
         
+    }
+    
+    private void sendIETestMessage(VavIERtu systemProfile) {
+        CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
+        msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
+        msg.analog0.set((short) systemProfile.getCmdSignal("dat and setpoint"));
+        msg.analog1.set((short) systemProfile.getCmdSignal("fan"));
+        msg.analog2.set((short) systemProfile.getSystemController().getAverageSystemHumidity());
+        msg.analog3.set((short) (systemProfile.getCmdSignal("staticPressure") * 10));
+        MeshUtil.sendStructToCM(msg);
     }
 }

@@ -140,8 +140,8 @@ public class SensorManager {
         nativeSensors.add(new NativeSensor("Native-Illuminance", "lux", 0, 2000, 10, SensorType.ILLUMINANCE));
         nativeSensors.add(new NativeSensor("Native-Co2 Equivalent", "ppm", 400, 60000, 10, SensorType.CO2_EQUIVALENT));
         nativeSensors.add(new NativeSensor("Native-UVIndex", "", 0, 10, 0.1, SensorType.UVI));
-        nativeSensors.add(new NativeSensor("Native-PM2P5", "ug/m3", 0, 1000, 10, SensorType.PM2P5));
-        nativeSensors.add(new NativeSensor("Native-PM10", "ug/m3", 0, 1000, 10, SensorType.PM10));
+        nativeSensors.add(new NativeSensor("Native-PM2P5", "ug/\u33A5", 0, 1000, 10, SensorType.PM2P5));
+        nativeSensors.add(new NativeSensor("Native-PM10", "ug/\u33A5", 0, 1000, 10, SensorType.PM10));
         
         return nativeSensors;
     }

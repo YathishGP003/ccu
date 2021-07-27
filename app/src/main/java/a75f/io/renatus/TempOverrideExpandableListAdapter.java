@@ -260,7 +260,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
             spinner_relay.invalidate();
 
             ArrayList<String> thermistorVal = new ArrayList<String>();
-            for (int pos = (100); pos <= (100*100); pos+=(100)) {
+            for (int pos = (100*0); pos <= (100*100); pos+=(100)) {
                 thermistorVal.add(pos+" Ohm");
             }
             ArrayAdapter<String> thermistorAdapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_item, thermistorVal){

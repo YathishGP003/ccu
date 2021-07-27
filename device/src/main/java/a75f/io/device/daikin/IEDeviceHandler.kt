@@ -12,7 +12,7 @@ class IEDeviceHandler {
 
     private var currentCondMode = NetApplicMode.UnInit
     private var staticPressureSp : Double = -1.0
-    private var fanLoopSp : Double = -1.0
+    private var fanSpeedSp : Double = -1.0
     private var humCtrl : HumidityCtrl = HumidityCtrl.UnInit
     private var fiveMinCounter = 0
 
@@ -50,6 +50,8 @@ class IEDeviceHandler {
                                                     "172.16.0.255 dev eth0");
             updateOccMode(it, systemProfile)
 
+            //Sleep is experimental to give a breather to IE. Could be removed in future
+            //IE responds consistently without this.
             Thread.sleep(100)
             if (systemProfile.getConfigEnabled(Tags.FAN) > 0) {
                 updateFanControl(it, hayStack, systemProfile)
@@ -121,7 +123,6 @@ class IEDeviceHandler {
     }
 
     private fun updateDatClgSetpoint(service : IEService, systemProfile: VavIERtu) {
-        CcuLog.d("CCU_SYSTEM","IEDH"+fahrenheitToCelsius(systemProfile.getCmdSignal("dat and setpoint")));
         writeToIEDevice(
             service,
             IE_POINT_TYPE_AV,
@@ -145,17 +146,18 @@ class IEDeviceHandler {
                     IE_MSG_BODY.format(updatedStaticPressureSp)
                 )
                 staticPressureSp = updatedStaticPressureSp
-                fanLoopSp = -1.0
+                fanSpeedSp = -1.0
             }
         } else {
-            if (fanLoopSp != systemProfile.systemFanLoopOp) {
+            val fanSpeed = getFanSpeedTarget(systemProfile)
+            if (fanSpeedSp != fanSpeed) {
                 writeToIEDevice(
                     service,
                     IE_POINT_TYPE_AV,
                     IE_POINT_NAME_FAN_SPEED_CONTROL,
-                    IE_MSG_BODY.format(systemProfile.systemFanLoopOp)
+                    IE_MSG_BODY.format(fanSpeed)
                 )
-                fanLoopSp = systemProfile.systemFanLoopOp
+                fanSpeedSp = fanSpeed
                 staticPressureSp = -1.0
             }
         }
@@ -184,7 +186,7 @@ class IEDeviceHandler {
                 service,
                 IE_POINT_TYPE_AV,
                 IE_POINT_NAME_HUMIDITY_SETPOINT,
-                IE_MSG_BODY.format(getMeanHumidityTarget())
+                IE_MSG_BODY.format(getHumidityTarget())
             )
 
         } else {

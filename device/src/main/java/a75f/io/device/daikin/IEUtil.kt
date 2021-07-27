@@ -37,12 +37,15 @@ fun isMultiZoneEnabled(hayStack : CCUHsApi) : Boolean {
 }
 
 fun getDuctStaticPressureTarget(systemProfile: VavIERtu) : Double {
+    return systemProfile.getCmdSignal("staticPressure")
+}
+
+fun getFanSpeedTarget(systemProfile: VavIERtu) : Double {
     return systemProfile.getCmdSignal("fan")
 }
 
-fun getMeanHumidityTarget() : Double {
-    return (TunerUtil.readSystemUserIntentVal("target and max and inside and humidity") +
-            TunerUtil.readSystemUserIntentVal("target and min and inside and humidity"))/2
+fun getHumidityTarget() : Double {
+    return TunerUtil.readSystemUserIntentVal("target and max and inside and humidity")
 }
 
 /**

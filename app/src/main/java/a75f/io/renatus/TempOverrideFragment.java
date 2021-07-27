@@ -71,7 +71,6 @@ public class TempOverrideFragment extends Fragment {
             for (Zone zone : zoneList) {
                 siteRoomList.add(zone.getDisplayName());
             }
-            Log.e("InsideTempOverrideFrag", "siteRoomList- " + siteRoomList);
         }
     }
 
@@ -92,8 +91,6 @@ public class TempOverrideFragment extends Fragment {
 
         //ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone and roomRef");
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and group");
-        Log.e("InsideTempOverrideFrag", "equips- " + equips);
-        Log.e("InsideTempOverrideFrag", "point- " + CCUHsApi.getInstance().readAll("equip and group and id="+equips.get(0).get("id")));
         ArrayList<String> equipsRef = new ArrayList<String>();
         for(int i = 0; i<equips.size(); i++) {
             equipsRef.add(i, equips.get(i).get("roomRef").toString());
@@ -105,7 +102,6 @@ public class TempOverrideFragment extends Fragment {
             }
         });
         Collections.reverse(equipsRef);
-        Log.e("InsideTempOverrideFrag", "equipsRef- " + equipsRef);
 
         ArrayList<HashMap> Zonedevices = CCUHsApi.getInstance().readAll("device");
         //Log.e("InsideTempOverrideFrag", "Zonedevices- " + Zonedevices);
@@ -170,7 +166,6 @@ public class TempOverrideFragment extends Fragment {
                             return s1.compareToIgnoreCase(s2);
                         }
                     });
-                    Log.e("InsideTempOverrideFrag", "tunerList- " + tunerList);
                     newTunerList.clear();
                     for (int i=0; i<tunerList.size(); i++){
                         if (tunerList.get(i).toString().contains("Analog1In")){
@@ -262,7 +257,6 @@ public class TempOverrideFragment extends Fragment {
                         else
                             continue;
                     }
-                    Log.e("InsideTempOverrideFrag", "newTunerList- " + newTunerList);
                     pointMap.put(t.get("dis").toString(), t.get("id").toString());
                 }
             }

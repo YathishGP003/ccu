@@ -439,24 +439,14 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
     }
 
     public String getZoneTitle(int listPosition) {
-        String zoneTitle = null;
-        if (listPosition != 0){
-            //ArrayList<HashMap> roomMap = CCUHsApi.getInstance().readAll("room and floorRef and id == " + getGroup(listPosition-1));
-            //ArrayList<HashMap> roomMap = CCUHsApi.getInstance().readAll("room and floorRef");
+        if (listPosition != 0) {
             String listTitle = (String) getGroup(listPosition);
-            //ArrayList<HashMap> roomMap = CCUHsApi.getInstance().readAll("equip and zone and group == "+listTitle.substring(3,listTitle.length()));
-            ArrayList<HashMap> roomMap = CCUHsApi.getInstance().readAll("equip and group == 1000");
-            Zone zone = HSUtil.getZone("@75d7c6b3-1c0e-4c2d-9738-ef9de187ccf7", "@30582c99-8d77-4489-a3ba-d6c6b2f2c4b4");
-            //ArrayList<HashMap> roomMap1 = CCUHsApi.getInstance().readAll("room and floorRef and id == @75d7c6b3-1c0e-4c2d-9738-ef9de187ccf7");
-            Log.e("InsideTempOverrideExpandableListAdapter", "listTitle- " + listTitle);
-            Log.e("InsideTempOverrideExpandableListAdapter", "listPosition- " + listPosition);
-            //Log.e("InsideTempOverrideExpandableListAdapter", "roomMap12- " + CCUHsApi.getInstance().readAll("room and floorRef"));
-            Log.e("InsideTempOverrideExpandableListAdapter", "roomMap- " + roomMap);
-            Log.e("InsideTempOverrideExpandableListAdapter", "zone- " + zone);
-            Log.e("InsideTempOverrideExpandableListAdapter", "zoneDisplayName- " + zone.getDisplayName());
-            /*zoneTitle = roomMap.get(0).get("dis").toString();*/
+            HashMap roomMap = CCUHsApi.getInstance().read("equip and group == \"" + listTitle.substring(3, listTitle.length()) + "\"");
+            Zone zone = HSUtil.getZone(roomMap.get("roomRef").toString(), roomMap.get("floorRef").toString());
+            return zone.getDisplayName() + "-" + listTitle.substring(3, listTitle.length());
         }
-        return zoneTitle;
+        else
+            return null;
     }
 
     @Override
@@ -510,7 +500,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
             if (listTitle.equals("CM-device"))
                 listTitleTextView.setText(L.ccu().systemProfile.getProfileName());
             else {
-                listTitleTextView.setText(zoneTitle+"-("+listTitle+")");
+                listTitleTextView.setText(zoneTitle);
             }
             return convertView;
     }

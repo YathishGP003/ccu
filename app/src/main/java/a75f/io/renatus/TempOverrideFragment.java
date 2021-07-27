@@ -113,6 +113,7 @@ public class TempOverrideFragment extends Fragment {
             //Log.e("InsideTempOverrideFrag","value_m- "+m);
             ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and deviceRef == \""+m.get("id")+"\"");
             ArrayList tunerList = new ArrayList();
+            ArrayList newTunerList = new ArrayList();
 
             //Log.e("InsideTempOverrideFrag","tuners- "+tuners);
             for (Map t : tuners) {
@@ -169,13 +170,112 @@ public class TempOverrideFragment extends Fragment {
                             return s1.compareToIgnoreCase(s2);
                         }
                     });
+                    Log.e("InsideTempOverrideFrag", "tunerList- " + tunerList);
+                    newTunerList.clear();
+                    for (int i=0; i<tunerList.size(); i++){
+                        if (tunerList.get(i).toString().contains("Analog1In")){
+                            if (!newTunerList.contains(tunerList.get(i))) {
+
+                                newTunerList.add(tunerList.get(i));
+                            }
+                        }
+                        else
+                            continue;
+                    }
+                    for (int i=0; i<tunerList.size(); i++){
+                        if (tunerList.get(i).toString().contains("Analog2In")){
+                            if (!newTunerList.contains(tunerList.get(i))) {
+
+                                newTunerList.add(tunerList.get(i));
+                            }
+                        }
+                        else
+                            continue;
+                    }
+                    for (int i=0; i<tunerList.size(); i++){
+                        if (tunerList.get(i).toString().contains("Analog3In")){
+                            if (!newTunerList.contains(tunerList.get(i))) {
+
+                                newTunerList.add(tunerList.get(i));
+                            }
+                        }
+                        else
+                            continue;
+                    }
+                    for (int i=0; i<tunerList.size(); i++){
+                        if (tunerList.get(i).toString().contains("Analog1Out") || tunerList.get(i).toString().contains("analog1Out")){
+                            if (!newTunerList.contains(tunerList.get(i))) {
+
+                                newTunerList.add(tunerList.get(i));
+                            }
+                        }
+                        else
+                            continue;
+                    }
+                    for (int i=0; i<tunerList.size(); i++){
+                        if (tunerList.get(i).toString().contains("Analog2Out") || tunerList.get(i).toString().contains("analog2Out")){
+                            if (!newTunerList.contains(tunerList.get(i))) {
+
+                                newTunerList.add(tunerList.get(i));
+                            }
+                        }
+                        else
+                            continue;
+                    }
+                    for (int i=0; i<tunerList.size(); i++){
+                        if (tunerList.get(i).toString().contains("Analog3Out") || tunerList.get(i).toString().contains("analog3Out")){
+                            if (!newTunerList.contains(tunerList.get(i))) {
+
+                                newTunerList.add(tunerList.get(i));
+                            }
+                        }
+                        else
+                            continue;
+                    }
+                    for (int i=0; i<tunerList.size(); i++){
+                        if (tunerList.get(i).toString().contains("Th1In")){
+                            if (!newTunerList.contains(tunerList.get(i))) {
+
+                                newTunerList.add(tunerList.get(i));
+                            }
+                        }
+                        else
+                            continue;
+                    }
+                    for (int i=0; i<tunerList.size(); i++){
+                        if (tunerList.get(i).toString().contains("Th2In")){
+                            if (!newTunerList.contains(tunerList.get(i))) {
+
+                                newTunerList.add(tunerList.get(i));
+                            }
+                        }
+                        else
+                            continue;
+                    }
+                    for (int i=0; i<tunerList.size(); i++){
+                        if (tunerList.get(i).toString().contains("relay")){
+                            if (!newTunerList.contains(tunerList.get(i))) {
+
+                                newTunerList.add(tunerList.get(i));
+                            }
+                        }
+                        else
+                            continue;
+                    }
+                    Log.e("InsideTempOverrideFrag", "newTunerList- " + newTunerList);
                     pointMap.put(t.get("dis").toString(), t.get("id").toString());
                 }
             }
-            if (tunerList.isEmpty() == false) {
+            /*if (tunerList.isEmpty() == false) {
                 expandableListDetail.put(m.get("dis").toString(), tunerList);
+                Log.e("InsideTempOverrideFrag", "tunerList- " + tunerList);
+            }*/
+            if (newTunerList.isEmpty() == false) {
+                expandableListDetail.put(m.get("dis").toString(), newTunerList);
+                //Log.e("InsideTempOverrideFrag", "tunerList- " + newTunerList);
             }
             equipMap.put(m.get("dis").toString(), m.get("id").toString());
+            //Log.e("InsideTempOverrideFrag", "equipMap- " + equipMap);
             expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
 
             expandableListAdapter = new TempOverrideExpandableListAdapter(TempOverrideFragment.this, expandableListTitle, expandableListDetail, pointMap, getActivity(), siteName, equipsRef);

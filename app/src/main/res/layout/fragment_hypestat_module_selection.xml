@@ -20,7 +20,8 @@
          android:layout_marginStart="64dp"
          android:padding="2.5dp"
          android:rotation="180"
-         app:srcCompat="@drawable/icon_arrowright" />
+          android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+          app:tint="?orange_75f" />
 
       <TextView
          android:layout_width="wrap_content"
@@ -55,12 +56,13 @@
              android:layout_marginStart="180dp">
 
             <ImageView
-                android:layout_width="12dp"
-                android:layout_height="20dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="92dp"
-                android:src="@drawable/icon_arrowright" />
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                app:tint="?orange_75f" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -103,12 +105,13 @@
             android:layout_marginStart="180dp">
 
             <ImageView
-               android:layout_width="12dp"
-               android:layout_height="20dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                android:layout_alignParentEnd="true"
                android:layout_centerVertical="true"
                android:layout_marginEnd="92dp"
-               android:src="@drawable/icon_arrowright" />
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                app:tint="?orange_75f" />
 
             <LinearLayout
                android:layout_width="wrap_content"
@@ -152,12 +155,13 @@
             android:layout_marginStart="180dp">
 
             <ImageView
-               android:layout_width="12dp"
-               android:layout_height="20dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                android:layout_alignParentEnd="true"
                android:layout_centerVertical="true"
                android:layout_marginEnd="92dp"
-               android:src="@drawable/icon_arrowright" />
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                app:tint="?orange_75f" />
 
             <LinearLayout
                android:layout_width="wrap_content"
@@ -201,12 +205,13 @@
             android:layout_marginStart="180dp">
 
             <ImageView
-               android:layout_width="12dp"
-               android:layout_height="20dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                android:layout_alignParentEnd="true"
                android:layout_centerVertical="true"
                android:layout_marginEnd="92dp"
-               android:src="@drawable/icon_arrowright" />
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                app:tint="?orange_75f" />
 
             <LinearLayout
                android:layout_width="wrap_content"
@@ -250,12 +255,13 @@
             android:layout_marginStart="180dp">
 
             <ImageView
-               android:layout_width="12dp"
-               android:layout_height="20dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                android:layout_alignParentEnd="true"
                android:layout_centerVertical="true"
                android:layout_marginEnd="92dp"
-               android:src="@drawable/icon_arrowright" />
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                app:tint="?orange_75f" />
 
             <LinearLayout
                android:layout_width="wrap_content"
@@ -299,12 +305,13 @@
             android:layout_marginStart="180dp">
 
             <ImageView
-               android:layout_width="12dp"
-               android:layout_height="20dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                android:layout_alignParentEnd="true"
                android:layout_centerVertical="true"
                android:layout_marginEnd="92dp"
-               android:src="@drawable/icon_arrowright" />
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                app:tint="?orange_75f" />
 
             <LinearLayout
                android:layout_width="wrap_content"

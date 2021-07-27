@@ -21,6 +21,7 @@ import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.UserIntentPointTags;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
+import a75f.io.modbusbox.ModbusCategory;
 
 public class ModbusEquip {
     ProfileType profileType;
@@ -289,7 +290,12 @@ public class ModbusEquip {
             }
 
             if (tags.length() > 0) {
-                HashMap pointRead = CCUHsApi.getInstance().read("point and logical and modbus and zone" + tags + " and equipRef == \"" + equipRef + "\"");
+                String zoneTag="";
+                if(!equipmentDevice.getEquipType().equals(ModbusCategory.BTU.displayName)
+                        &&!equipmentDevice.getEquipType().equals(ModbusCategory.EMR.displayName)){
+                    zoneTag="and zone";
+                }
+                HashMap pointRead = CCUHsApi.getInstance().read("point and logical and modbus "+zoneTag + tags + " and equipRef == \"" + equipRef + "\"");
                 Point logicalPoint = new Point.Builder().setHashMap(pointRead).build();
 
                 if (configParams.isDisplayInUI()) {

@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -27,6 +26,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logic.Globals;
+import a75f.io.renatus.util.ZoneSorter;
 import butterknife.ButterKnife;
 
 public class TempOverrideFragment extends Fragment {
@@ -92,7 +92,7 @@ public class TempOverrideFragment extends Fragment {
         //ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone and roomRef");
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and group");
         ArrayList<String> equipsRef = new ArrayList<String>();
-        for(int i = 0; i<equips.size(); i++) {
+        for (int i = 0; i < equips.size(); i++) {
             equipsRef.add(i, equips.get(i).get("roomRef").toString());
         }
         Collections.sort(equipsRef, new Comparator<String>() {
@@ -107,7 +107,7 @@ public class TempOverrideFragment extends Fragment {
         //Log.e("InsideTempOverrideFrag", "Zonedevices- " + Zonedevices);
         for (Map m : Zonedevices) {
             //Log.e("InsideTempOverrideFrag","value_m- "+m);
-            ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and deviceRef == \""+m.get("id")+"\"");
+            ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and deviceRef == \"" + m.get("id") + "\"");
             ArrayList tunerList = new ArrayList();
             ArrayList newTunerList = new ArrayList();
 
@@ -119,42 +119,40 @@ public class TempOverrideFragment extends Fragment {
                     String NewexpandedListText = t.get("dis").toString();
                     if (NewexpandedListText.startsWith("Analog")) {
                         //Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText + ", IsportEnabled- "+t.get("portEnabled").toString());
-                        if(t.get("portEnabled").toString().equals("true")) {
+                        if (t.get("portEnabled").toString().equals("true")) {
                             tunerList.add(t.get("dis").toString());
                         }
                     } else if (NewexpandedListText.startsWith("relay")) {
-                        if(t.get("portEnabled").toString().equals("true")) {
+                        if (t.get("portEnabled").toString().equals("true")) {
                             tunerList.add(t.get("dis").toString());
                         }
-                    }else if (NewexpandedListText.startsWith("Th")) {
-                        if(t.get("portEnabled").toString().equals("true")) {
+                    } else if (NewexpandedListText.startsWith("Th")) {
+                        if (t.get("portEnabled").toString().equals("true")) {
                             tunerList.add(t.get("dis").toString());
                         }
                     } else if (NewexpandedListText.startsWith(siteName)) {
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, t.get("dis").toString().substring(siteName.length()+1, t.get("dis").toString().length()));
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, t.get("dis").toString().substring(siteName.length() + 1, t.get("dis").toString().length()));
                         if (NewexpandedListText.startsWith("CM-analog1Out")) {
                             //Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText + ", IsgetConfigEnabled- "+getConfigEnabled("analog1"));
-                            if(getConfigEnabled("analog1") > 0) {
+                            if (getConfigEnabled("analog1") > 0) {
                                 tunerList.add(t.get("dis").toString());
                             }
-                        }
-                        else if (NewexpandedListText.startsWith("CM-analog2Out")) {
+                        } else if (NewexpandedListText.startsWith("CM-analog2Out")) {
                             //Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText + ", IsgetConfigEnabled- "+getConfigEnabled("analog2"));
-                            if(getConfigEnabled("analog2") > 0) {
+                            if (getConfigEnabled("analog2") > 0) {
                                 tunerList.add(t.get("dis").toString());
                             }
                         } else if (NewexpandedListText.startsWith("CM-analog3Out")) {
-                            if(getConfigEnabled("analog3") > 0) {
+                            if (getConfigEnabled("analog3") > 0) {
                                 tunerList.add(t.get("dis").toString());
                             }
-                        }else if (NewexpandedListText.startsWith("CM-analog4Out")) {
-                            if(getConfigEnabled("analog4") > 0) {
+                        } else if (NewexpandedListText.startsWith("CM-analog4Out")) {
+                            if (getConfigEnabled("analog4") > 0) {
                                 tunerList.add(t.get("dis").toString());
                             }
-                        }
-                        else if (NewexpandedListText.startsWith("relay")) {
-                            String relayPos = (t.get("dis").toString().substring(siteName.length()+6, siteName.length()+7));
-                            if(getConfigEnabled("relay"+relayPos) > 0) {
+                        } else if (NewexpandedListText.startsWith("relay")) {
+                            String relayPos = (t.get("dis").toString().substring(siteName.length() + 6, siteName.length() + 7));
+                            if (getConfigEnabled("relay" + relayPos) > 0) {
                                 tunerList.add(t.get("dis").toString());
                             }
                         }
@@ -167,94 +165,85 @@ public class TempOverrideFragment extends Fragment {
                         }
                     });
                     newTunerList.clear();
-                    for (int i=0; i<tunerList.size(); i++){
-                        if (tunerList.get(i).toString().contains("Analog1In")){
+                    for (int i = 0; i < tunerList.size(); i++) {
+                        if (tunerList.get(i).toString().contains("Analog1In")) {
                             if (!newTunerList.contains(tunerList.get(i))) {
 
                                 newTunerList.add(tunerList.get(i));
                             }
-                        }
-                        else
+                        } else
                             continue;
                     }
-                    for (int i=0; i<tunerList.size(); i++){
-                        if (tunerList.get(i).toString().contains("Analog2In")){
+                    for (int i = 0; i < tunerList.size(); i++) {
+                        if (tunerList.get(i).toString().contains("Analog2In")) {
                             if (!newTunerList.contains(tunerList.get(i))) {
 
                                 newTunerList.add(tunerList.get(i));
                             }
-                        }
-                        else
+                        } else
                             continue;
                     }
-                    for (int i=0; i<tunerList.size(); i++){
-                        if (tunerList.get(i).toString().contains("Analog3In")){
+                    for (int i = 0; i < tunerList.size(); i++) {
+                        if (tunerList.get(i).toString().contains("Analog3In")) {
                             if (!newTunerList.contains(tunerList.get(i))) {
 
                                 newTunerList.add(tunerList.get(i));
                             }
-                        }
-                        else
+                        } else
                             continue;
                     }
-                    for (int i=0; i<tunerList.size(); i++){
-                        if (tunerList.get(i).toString().contains("Analog1Out") || tunerList.get(i).toString().contains("analog1Out")){
+                    for (int i = 0; i < tunerList.size(); i++) {
+                        if (tunerList.get(i).toString().contains("Analog1Out") || tunerList.get(i).toString().contains("analog1Out")) {
                             if (!newTunerList.contains(tunerList.get(i))) {
 
                                 newTunerList.add(tunerList.get(i));
                             }
-                        }
-                        else
+                        } else
                             continue;
                     }
-                    for (int i=0; i<tunerList.size(); i++){
-                        if (tunerList.get(i).toString().contains("Analog2Out") || tunerList.get(i).toString().contains("analog2Out")){
+                    for (int i = 0; i < tunerList.size(); i++) {
+                        if (tunerList.get(i).toString().contains("Analog2Out") || tunerList.get(i).toString().contains("analog2Out")) {
                             if (!newTunerList.contains(tunerList.get(i))) {
 
                                 newTunerList.add(tunerList.get(i));
                             }
-                        }
-                        else
+                        } else
                             continue;
                     }
-                    for (int i=0; i<tunerList.size(); i++){
-                        if (tunerList.get(i).toString().contains("Analog3Out") || tunerList.get(i).toString().contains("analog3Out")){
+                    for (int i = 0; i < tunerList.size(); i++) {
+                        if (tunerList.get(i).toString().contains("Analog3Out") || tunerList.get(i).toString().contains("analog3Out")) {
                             if (!newTunerList.contains(tunerList.get(i))) {
 
                                 newTunerList.add(tunerList.get(i));
                             }
-                        }
-                        else
+                        } else
                             continue;
                     }
-                    for (int i=0; i<tunerList.size(); i++){
-                        if (tunerList.get(i).toString().contains("Th1In")){
+                    for (int i = 0; i < tunerList.size(); i++) {
+                        if (tunerList.get(i).toString().contains("Th1In")) {
                             if (!newTunerList.contains(tunerList.get(i))) {
 
                                 newTunerList.add(tunerList.get(i));
                             }
-                        }
-                        else
+                        } else
                             continue;
                     }
-                    for (int i=0; i<tunerList.size(); i++){
-                        if (tunerList.get(i).toString().contains("Th2In")){
+                    for (int i = 0; i < tunerList.size(); i++) {
+                        if (tunerList.get(i).toString().contains("Th2In")) {
                             if (!newTunerList.contains(tunerList.get(i))) {
 
                                 newTunerList.add(tunerList.get(i));
                             }
-                        }
-                        else
+                        } else
                             continue;
                     }
-                    for (int i=0; i<tunerList.size(); i++){
-                        if (tunerList.get(i).toString().contains("relay")){
+                    for (int i = 0; i < tunerList.size(); i++) {
+                        if (tunerList.get(i).toString().contains("relay")) {
                             if (!newTunerList.contains(tunerList.get(i))) {
 
                                 newTunerList.add(tunerList.get(i));
                             }
-                        }
-                        else
+                        } else
                             continue;
                     }
                     pointMap.put(t.get("dis").toString(), t.get("id").toString());
@@ -272,32 +261,55 @@ public class TempOverrideFragment extends Fragment {
             //Log.e("InsideTempOverrideFrag", "equipMap- " + equipMap);
             expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
 
-            expandableListAdapter = new TempOverrideExpandableListAdapter(TempOverrideFragment.this, expandableListTitle, expandableListDetail, pointMap, getActivity(), siteName, equipsRef);
-            expandableListView.setAdapter(expandableListAdapter);
-        }
-
-        expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
-            @Override
-            public void onGroupExpand(int groupPosition) {
-                // This is breaking HaystackExplorer for me since the second time we grab data here, the order
-                // of the groups changes in the backing data, but not in the UI.  I'm unable to programmatically force the UI to update.
-                // Recommend not updating data after UI drawn, unless we can get the expandable list to redraw.
-                // updateAllData();
-                for (int g = 0; g < expandableListAdapter.getGroupCount(); g++) {
-                    if (g != groupPosition) {
-                        expandableListView.collapseGroup(g);
-                    }
+            Log.e("InsideTempOverrideFrag", "beforeSort- " + expandableListTitle);
+            ArrayList<ZoneSorter> zoneNodesList = new ArrayList<>();
+            for (int i = 0; i < expandableListTitle.size(); i++) {
+                if (!expandableListTitle.get(i).equals("CM-device")) {
+                    int nodeAddress = Integer.parseInt(expandableListTitle.get(i).substring(3));
+                    //int nodeAddress1 = Integer.parseInt(expandableListTitle.get(i + 1).substring(3));
+                    Log.e("InsideTempOverrideFrag", "nodeAddress- " + nodeAddress);
+                    //Log.e("InsideTempOverrideFrag", "nodeAddress1- " + nodeAddress1);
+                    ZoneSorter zoneSorter = new ZoneSorter(expandableListTitle.get(i), nodeAddress);
+                    zoneNodesList.add(zoneSorter);
                 }
-                expandableListView.invalidateViews();
-                if (lastExpandedPosition != -1
-                        && groupPosition != lastExpandedPosition) {
-                    expandableListView.collapseGroup(lastExpandedPosition);
-                }
-                lastExpandedPosition = groupPosition;
-
-
             }
-        });
+            Collections.sort(zoneNodesList, new Comparator<ZoneSorter>() {
+                @Override
+                public int compare(ZoneSorter o1, ZoneSorter o2) {
+                    return o1.getNodeAddress() - o2.getNodeAddress();
+                }
+            });
+            List <String>sortedExpandableListTitle = new ArrayList<String>();
+            for (ZoneSorter zoneName:zoneNodesList){
+                sortedExpandableListTitle.add(zoneName.getZoneName());
+            }
+            sortedExpandableListTitle.add(0,"CM-device");
+            expandableListAdapter = new TempOverrideExpandableListAdapter(TempOverrideFragment.this, sortedExpandableListTitle, expandableListDetail, pointMap, getActivity(), siteName, equipsRef);
+            expandableListView.setAdapter(expandableListAdapter);
+
+            expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
+                @Override
+                public void onGroupExpand(int groupPosition) {
+                    // This is breaking HaystackExplorer for me since the second time we grab data here, the order
+                    // of the groups changes in the backing data, but not in the UI.  I'm unable to programmatically force the UI to update.
+                    // Recommend not updating data after UI drawn, unless we can get the expandable list to redraw.
+                    // updateAllData();
+                    for (int g = 0; g < expandableListAdapter.getGroupCount(); g++) {
+                        if (g != groupPosition) {
+                            expandableListView.collapseGroup(g);
+                        }
+                    }
+                    expandableListView.invalidateViews();
+                    if (lastExpandedPosition != -1
+                            && groupPosition != lastExpandedPosition) {
+                        expandableListView.collapseGroup(lastExpandedPosition);
+                    }
+                    lastExpandedPosition = groupPosition;
+
+
+                }
+            });
+        }
     }
 
     public double getConfigEnabled(String config) {

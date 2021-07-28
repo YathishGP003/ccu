@@ -927,4 +927,16 @@
     <string name="analogin2">Analog-in2</string>
     <string name="title_pairhss">HYPERSTAT | PAIRING STEPS </string>
     <string name="prefs_theme_key">isEnabled</string>
+
+    <string name="textbpos">BPOS</string>
+    <string name="descbpos">Battery Power Occupancy Sensor</string>
+    <string name="title_bpos">BPOS | SELECT MODULE TYPE</string>
+    <string name="autoforceoccupied">Auto Force Occupied</string>
+    <string name="autoaway">Auto Away</string>
+    <string-array name="zone_priority_bpos">
+        <item >Normal</item>
+        <item >No Priority</item>
+        <item >Low</item>
+        <item >High</item>
+    </string-array>
 </resources>

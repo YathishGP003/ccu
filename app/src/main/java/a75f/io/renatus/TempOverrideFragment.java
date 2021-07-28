@@ -260,8 +260,6 @@ public class TempOverrideFragment extends Fragment {
             equipMap.put(m.get("dis").toString(), m.get("id").toString());
             //Log.e("InsideTempOverrideFrag", "equipMap- " + equipMap);
             expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
-
-            Log.e("InsideTempOverrideFrag", "beforeSort- " + expandableListTitle);
             ArrayList<ZoneSorter> zoneNodesList = new ArrayList<>();
             for (int i = 0; i < expandableListTitle.size(); i++) {
                 if (!expandableListTitle.get(i).equals("CM-device")) {

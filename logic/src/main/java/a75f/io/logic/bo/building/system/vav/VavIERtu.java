@@ -386,7 +386,7 @@ public class VavIERtu extends VavSystemProfile
                                 .setEquipRef(equipRef)
                                 .addMarker("system").addMarker("occStatus").addMarker("ie")
                                 .addMarker("sp").addMarker("his")
-                                .setEnums("Occ,UnOcc,TntOvrd")
+                                .setEnums("Occupied,Unoccupied,TenantOverride")
                                 .setTz(tz)
                                 .build();
         String occStatId = CCUHsApi.getInstance().addPoint(occStatus);
@@ -697,7 +697,7 @@ public class VavIERtu extends VavSystemProfile
                                   .setDisplayName(systemEquip.getDisplayName()+"-"+"ductStaticPressure")
                                   .setSiteRef(systemEquip.getSiteRef())
                                   .setEquipRef(systemEquip.getId()).setHisInterpolate("cov")
-                                  .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his")
+                                  .addMarker("system").addMarker("cmd").addMarker("his")
                                   .addMarker("staticPressure").addMarker("ie")
                                   .setUnit("inch wc").setTz(systemEquip.getTz())
                                   .build();

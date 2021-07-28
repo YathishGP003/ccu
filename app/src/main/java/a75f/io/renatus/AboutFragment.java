@@ -14,7 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
-
 import android.os.CountDownTimer;
 import android.util.Log;
 import android.util.Patterns;
@@ -27,11 +26,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -61,14 +56,13 @@ public class AboutFragment extends Fragment {
     private boolean mCCUAppDownloaded = false;
     private boolean mHomeAppDownloaded = false;
     private CountDownTimer otpCountDownTimer;
+    private String previousOTP = "";
     @BindView(R.id.tvSerialNumber)
     TextView tvSerialNumber;
     @BindView(R.id.tvCcuVersion)
     TextView tvCcuVersion;
     @BindView(R.id.tvSiteId)
     TextView tvSiteId;
-
-
 
     ProgressBar loading;
     private AlertDialog.Builder builder;
@@ -162,16 +156,17 @@ public class AboutFragment extends Fragment {
         alertDialog.setCancelable(false);
         alertDialog.show();
         TextView otpTimer = dialogView.findViewById(R.id.otptimer);
-        setOTPValue(otpValue, otpTimer);
-        ImageView otpRegenerate = dialogView.findViewById(R.id.otpRegenerate);
-        refreshOTPValue(otpValue, otpRegenerate, otpTimer);
         EditText emailId = dialogView.findViewById(R.id.otpEmailId);
+        emailId.setEnabled(false);
+        emailId.setVisibility(View.GONE);
+        setOTPValue(otpValue, otpTimer, emailId);
+        ImageView otpRegenerate = dialogView.findViewById(R.id.otpRegenerate);
+        refreshOTPValue(otpValue, otpRegenerate, otpTimer, emailId);
         Button otpEmail = dialogView.findViewById(R.id.buttonEmailOtp);
         emailOTP(emailId, otpEmail, alertDialog);
     }
 
     private void constructOTPValidationTime(String otpCreatedTime, TextView otpTimer) throws ParseException {
-        otpTimer.setText("");
         Date otpGeneratedDate;
         SimpleDateFormat utcDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         utcDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -232,13 +227,16 @@ public class AboutFragment extends Fragment {
         });
     }
 
-    private void refreshOTPValue(TextView otpValue, ImageView otpRegenerate, TextView otpTimer) {
+    private void refreshOTPValue(TextView otpValue, ImageView otpRegenerate, TextView otpTimer, EditText emailId) {
         otpRegenerate.setOnClickListener(v -> {
             OtpResponseCallBack otpResponseCallBack = new OtpResponseCallBack() {
                 @Override
                 public void onOtpResponse(JSONObject response) throws JSONException {
                     ProgressDialogUtils.hideProgressDialog();
                     String otpGenerated = (String) ((JSONObject) response.get("siteCode")).get("code");
+                    previousOTP = otpGenerated;
+                    emailId.setEnabled(true);
+                    emailId.setVisibility(View.VISIBLE);
                     otpValue.setText(otpWithDoubleSpaceBetween(otpGenerated));
                     String expirationDateTime = (String) ((JSONObject) response.get("siteCode")).get(
                             "expirationDateTime");
@@ -261,12 +259,17 @@ public class AboutFragment extends Fragment {
         });
     }
 
-    private void setOTPValue(TextView otpValue, TextView otpTimer) {
+    private void setOTPValue(TextView otpValue, TextView otpTimer, EditText emailId) {
         OtpResponseCallBack otpResponseCallBack = new OtpResponseCallBack() {
             @Override
             public void onOtpResponse(JSONObject response) throws JSONException {
                 ProgressDialogUtils.hideProgressDialog();
                 String otpGenerated = (String) ((JSONObject) response.get("siteCode")).get("code");
+                if(!previousOTP.equals(otpGenerated)){
+                    emailId.setEnabled(true);
+                    emailId.setVisibility(View.VISIBLE);
+                }
+                previousOTP = otpGenerated;
                 otpValue.setText(otpWithDoubleSpaceBetween(otpGenerated));
                 String expirationDateTime = (String) ((JSONObject) response.get("siteCode")).get(
                         "expirationDateTime");

@@ -56,7 +56,6 @@ public class AboutFragment extends Fragment {
     private boolean mCCUAppDownloaded = false;
     private boolean mHomeAppDownloaded = false;
     private CountDownTimer otpCountDownTimer;
-    private String previousOTP = "";
     @BindView(R.id.tvSerialNumber)
     TextView tvSerialNumber;
     @BindView(R.id.tvCcuVersion)
@@ -234,7 +233,7 @@ public class AboutFragment extends Fragment {
                 public void onOtpResponse(JSONObject response) throws JSONException {
                     ProgressDialogUtils.hideProgressDialog();
                     String otpGenerated = (String) ((JSONObject) response.get("siteCode")).get("code");
-                    previousOTP = otpGenerated;
+                    CCUHsApi.getInstance().setOTPGeneratedToAddOrReplaceCCU(otpGenerated);
                     emailId.setEnabled(true);
                     emailId.setVisibility(View.VISIBLE);
                     otpValue.setText(otpWithDoubleSpaceBetween(otpGenerated));
@@ -265,11 +264,11 @@ public class AboutFragment extends Fragment {
             public void onOtpResponse(JSONObject response) throws JSONException {
                 ProgressDialogUtils.hideProgressDialog();
                 String otpGenerated = (String) ((JSONObject) response.get("siteCode")).get("code");
-                if(!previousOTP.equals(otpGenerated)){
+                if(!CCUHsApi.getInstance().getOTPGeneratedToAddOrReplaceCCU().equals(otpGenerated)){
                     emailId.setEnabled(true);
                     emailId.setVisibility(View.VISIBLE);
                 }
-                previousOTP = otpGenerated;
+                CCUHsApi.getInstance().setOTPGeneratedToAddOrReplaceCCU(otpGenerated);
                 otpValue.setText(otpWithDoubleSpaceBetween(otpGenerated));
                 String expirationDateTime = (String) ((JSONObject) response.get("siteCode")).get(
                         "expirationDateTime");

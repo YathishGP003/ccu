@@ -187,6 +187,18 @@ public class CCUHsApi
         editor.apply();
     }
 
+    public String getOTPGeneratedToAddOrReplaceCCU() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getString("OTPToAddOrReplaceCCU","");
+    }
+
+    public void setOTPGeneratedToAddOrReplaceCCU(String otp) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("OTPToAddOrReplaceCCU", otp);
+        editor.apply();
+    }
+
     public boolean isHeartbeatMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean("heartbeatMigration",false);

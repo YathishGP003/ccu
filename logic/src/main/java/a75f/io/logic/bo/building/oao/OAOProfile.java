@@ -28,6 +28,9 @@ public class OAOProfile
 {
     
     public static boolean economizingAvailable = false;
+
+    private boolean dcvAvailable;
+    private boolean matThrottle;
     
     double economizingLoopOutput;
     double outsideAirCalculatedMinDamper;
@@ -46,7 +49,23 @@ public class OAOProfile
     {
         this.economizingAvailable = economizingAvailable;
     }
-    
+
+    public boolean isDcvAvailable() {
+        return dcvAvailable;
+    }
+
+    public void setDcvAvailable(boolean dcvAvailable) {
+        this.dcvAvailable = dcvAvailable;
+    }
+
+    public boolean isMatThrottle() {
+        return matThrottle;
+    }
+
+    public void setMatThrottle(boolean matThrottle) {
+        this.matThrottle = matThrottle;
+    }
+
     public void addOaoEquip(short addr, OAOProfileConfiguration config, String floorRef, String roomRef) {
         oaoEquip = new OAOEquip(getProfileType(), addr);
         oaoEquip.createEntities(config, floorRef, roomRef);
@@ -99,9 +118,11 @@ public class OAOProfile
     
         Log.d(L.TAG_CCU_OAO,"outsideAirLoopOutput "+outsideAirLoopOutput+" outsideDamperMatTarget "+outsideDamperMatTarget+" outsideDamperMatMin "+outsideDamperMatMin
                             +" matTemp "+matTemp);
+        setMatThrottle(false);
         if (outsideAirLoopOutput > outsideDamperMinOpen) {
             if (matTemp < outsideDamperMatTarget && matTemp > outsideDamperMatMin) {
                 outsideAirFinalLoopOutput = outsideAirLoopOutput - outsideAirLoopOutput * ((outsideDamperMatTarget - matTemp) / (outsideDamperMatTarget - outsideDamperMatMin));
+                setMatThrottle(true);
             }
             else {
                 outsideAirFinalLoopOutput = (matTemp <= outsideDamperMatMin) ? outsideDamperMinOpen : outsideAirLoopOutput;
@@ -135,6 +156,7 @@ public class OAOProfile
         } else if (outsideAirFinalLoopOutput < (exhaustFanStage2Threshold - exhaustFanHysteresis)) {
             oaoEquip.setHisVal("cmd and exhaust and fan and stage2",0);
         }
+        oaoEquip.setHisVal("mat and available", isMatThrottle() ? 1 : 0);
     }
     public void doEpidemicControl(){
         epidemicState = EpidemicState.OFF;
@@ -323,8 +345,10 @@ public class OAOProfile
     }
     
     public void doDcvControl(double outsideDamperMinOpen) {
+        setDcvAvailable(false);
         double dcvCalculatedMinDamper = 0;
         boolean usePerRoomCO2Sensing = oaoEquip.getConfigNumVal("config and oao and co2 and sensing") > 0? true : false;
+        boolean isCo2levelUnderThreshold = true;
         if (usePerRoomCO2Sensing)
         {
             dcvCalculatedMinDamper = L.ccu().systemProfile.getCo2LoopOp();
@@ -337,6 +361,7 @@ public class OAOProfile
             
             if (returnAirCO2 > co2Threshold) {
                 dcvCalculatedMinDamper = (returnAirCO2 - co2Threshold)/co2DamperOpeningRate;
+                isCo2levelUnderThreshold = false;
             }
             Log.d(L.TAG_CCU_OAO," dcvCalculatedMinDamper "+dcvCalculatedMinDamper+" returnAirCO2 "+returnAirCO2+" co2Threshold "+co2Threshold);
         }
@@ -348,6 +373,9 @@ public class OAOProfile
                 if(systemMode != SystemMode.OFF) {
                     outsideDamperMinOpen = epidemicState != EpidemicState.OFF ? outsideAirCalculatedMinDamper : outsideDamperMinOpen;
                     outsideAirCalculatedMinDamper = Math.min(outsideDamperMinOpen + dcvCalculatedMinDamper, 100);
+                    if(!isCo2levelUnderThreshold){
+                        setDcvAvailable(true);
+                    }
                 }else
                     outsideAirCalculatedMinDamper = outsideDamperMinOpen;
                 break;
@@ -361,6 +389,7 @@ public class OAOProfile
                 break;
         }
         oaoEquip.setHisVal("outside and air and calculated and min and damper", outsideAirCalculatedMinDamper);
+        oaoEquip.setHisVal("dcv and available", isDcvAvailable() ? 1 : 0);
     }
     
     public static double getAirEnthalpy(double averageTemp, double averageHumidity) {

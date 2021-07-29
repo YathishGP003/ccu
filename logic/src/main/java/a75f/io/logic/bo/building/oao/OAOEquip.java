@@ -101,6 +101,12 @@ public class OAOEquip
                                         .setTz(tz)
                                         .build();
         String economizingAvailableId = hayStack.addPoint(economizingAvailable);
+
+        String dcvAvailableId = hayStack.addPoint(OAODamperOpenPoint.getDamperOpenPoint("dcvAvailable",
+                siteDis, siteRef, roomRef, equipRef, nodeAddr, floorRef,tz, "dcv"));
+
+        String matThrottleId = hayStack.addPoint(OAODamperOpenPoint.getDamperOpenPoint("matThrottle",
+                siteDis, siteRef, roomRef, equipRef, nodeAddr, floorRef,tz, "mat"));
     
         Point economizingLoopOutput = new Point.Builder()
                                              .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-economizingLoopOutput")
@@ -357,6 +363,8 @@ public class OAOEquip
         hayStack.writeHisValById(exhaustFanStage1Id,0.0);
         hayStack.writeHisValById(exhaustFanStage2Id,0.0);
         hayStack.writeHisValById(economizingAvailableId, 0.0);
+        hayStack.writeHisValById(dcvAvailableId, 0.0);
+        hayStack.writeHisValById(matThrottleId, 0.0);
         hayStack.writeHisValById(weatherOutsideTempId, 0.0);
         hayStack.writeHisValById(weatherOutsideHumidityId, 0.0);
         hayStack.writeHisValById(co2WAId, 0.0);
@@ -624,4 +632,5 @@ public class OAOEquip
         }
         return "default";
     }
+
 }

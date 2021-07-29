@@ -198,6 +198,17 @@ public class CCUHsApi
         editor.putBoolean("heartbeatMigration", isMigrated);
         editor.apply();
     }
+    public boolean isOAODamperOpenPointsMigrationDone() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean("OAODamperOpenPointsMigration",false);
+    }
+
+    public void setOAODamperOpenPointsMigrationStatus(boolean isMigrated) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("OAODamperOpenPointsMigration", isMigrated);
+        editor.apply();
+    }
 
     public String getAuthenticationUrl() {
         Log.d("Authentication URL: ","url="+careTakerUrl);

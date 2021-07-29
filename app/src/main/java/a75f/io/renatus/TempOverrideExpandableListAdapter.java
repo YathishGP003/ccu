@@ -2,14 +2,8 @@
 package a75f.io.renatus;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Typeface;
-import android.os.AsyncTask;
-import android.text.method.DigitsKeyListener;
-import android.text.method.KeyListener;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,42 +11,30 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-
-import org.joda.time.Interval;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.TreeMap;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
-import a75f.io.api.haystack.Point;
-import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
-import a75f.io.logger.CcuLog;
-import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.Thermistor;
+import a75f.io.logic.bo.building.sensors.Sensor;
+import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
-import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
 
 import static a75f.io.renatus.TempOverrideFragment.getPointVal;
@@ -77,10 +59,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         this.mActivity = activity;
         this.siteName = siteName;
         this.equipsRef = equipsRef;
-        Log.e("InsideTempOverrideExpandableListAdapter", "expandableListTitle- " + expandableListTitle);
-        Log.e("InsideTempOverrideExpandableListAdapter", "expandableListDetail- " + expandableListDetail);
-        Log.e("InsideTempOverrideExpandableListAdapter", "idMap- " + idMap);
-        Log.e("InsideTempOverrideExpandableListAdapter", "equipsRef- " + equipsRef);
     }
 
     @Override
@@ -123,24 +101,26 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
 
                 String profile1 = null;
                 String listTitle1 = null;
-                if (!expandedListText.startsWith(siteName)) {
+                /*if (!expandedListText.startsWith(siteName)) {
                     listTitle1 = (String) getGroup(listPosition);
                     HashMap equipGroup1 = CCUHsApi.getInstance().read("equip and group == \"" + listTitle1.substring(3) + "\"");
                     profile1 = equipGroup1.get("profile").toString();
                     Log.e("InsideTempOverrideExpandableListAdapter", "profile1- " + profile1);
-                }
+                }*/
                 if (expandedListText.startsWith("Analog1In")) {
                     NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1");
                     expandedListTextVal.setText("" + getPointVal(idMap.get(expandedListText))+" "+CCUHsApi.getInstance().readMapById(equipId).get("unit"));
                     spinner_override_value.setVisibility(View.VISIBLE);
                 } else if (expandedListText.startsWith("Analog1Out")) {
                     String analogOut1Mapped = getZoneMapping("Analog-out1", listPosition, convertView);
-                    if (!analogOut1Mapped.equals("")) NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1("+analogOut1Mapped+")");
+                    if (!analogOut1Mapped.equals("")) NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n("+analogOut1Mapped+")");
                     else NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1");
                     txt_calculated_output.setText("" + getPointVal(idMap.get(expandedListText))+" "+CCUHsApi.getInstance().readMapById(equipId).get("unit"));
                     spinner_override_value.setVisibility(View.VISIBLE);
                 } else if (expandedListText.startsWith("Analog2In")) {
-                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in2");
+                    String analogIn2Mapped = getZoneMapping("Analog2In", listPosition, convertView);
+                    if (!analogIn2Mapped.equals("")) NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in2\n("+analogIn2Mapped+")");
+                    else NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in2");
                     expandedListTextVal.setText("" + getPointVal(idMap.get(expandedListText))+" "+CCUHsApi.getInstance().readMapById(equipId).get("unit"));
                     spinner_override_value.setVisibility(View.VISIBLE);
                 } else if (expandedListText.startsWith("Analog2Out")) {
@@ -169,7 +149,10 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         expandedListTextVal.setText("" + getPointVal(idMap.get(expandedListText))+" mV");
                         spinner_override_value.setVisibility(View.VISIBLE);
                     } else if (NewexpandedListText.startsWith("CM-analog1Out")) {
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1(Cooling)");
+                        if (getConfigEnabled("analog1") > 0) {
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Cooling)");                        }
+                        else
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1");
                         txt_calculated_output.setText("" + getPointVal(idMap.get(expandedListText))+" dV");
                         spinner_override_value.setVisibility(View.VISIBLE);
                     } else if (NewexpandedListText.startsWith("CM-analog2In")) {
@@ -177,15 +160,22 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         expandedListTextVal.setText("" + getPointVal(idMap.get(expandedListText))+" mV");
                         spinner_override_value.setVisibility(View.VISIBLE);
                     } else if (NewexpandedListText.startsWith("CM-analog2Out")) {
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2(Fan Speed)");
+                        if (getConfigEnabled("analog2") > 0)
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Fan Speed)");
+                        else
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2");
                         txt_calculated_output.setText("" + getPointVal(idMap.get(expandedListText))+" dV");
                         spinner_override_value.setVisibility(View.VISIBLE);
                     } else if (NewexpandedListText.startsWith("CM-analog3Out")) {
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3(Heating)");
+                        if (getConfigEnabled("analog3") > 0)
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Heating)");
+                        else NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3");
                         txt_calculated_output.setText("" + getPointVal(idMap.get(expandedListText))+" dV");
                         spinner_override_value.setVisibility(View.VISIBLE);
                     }else if (NewexpandedListText.startsWith("CM-analog4Out")) {
-                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4(Composite)");
+                        if (getConfigEnabled("analog4") > 0)
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Composite)");
+                        else NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4");
                         txt_calculated_output.setText("" + getPointVal(idMap.get(expandedListText))+" dV");
                         spinner_override_value.setVisibility(View.VISIBLE);
                     }
@@ -193,14 +183,13 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         String relayPos = (expandedListText.substring(siteName.length()+6, siteName.length()+7));
                         if(getConfigEnabled("relay"+relayPos) > 0) {
                             String relayMapped = getRelayMapping("relay"+relayPos, convertView);
-                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos +"("+relayMapped+")");
-                            txt_calculated_output.setText(Double.compare(getPointVal(idMap.get(expandedListText)), 1.0) == 0 ? "ON" : "OFF");
-                            spinner_relay.setVisibility(View.VISIBLE);
+                            NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos +"\n("+relayMapped+")");
                         }
                         else{
                             Object valueToDelete = getChild(listPosition, expandedListPosition);
                             expandableListDetail.remove(valueToDelete);
-                        }
+                        }txt_calculated_output.setText(Double.compare(getPointVal(idMap.get(expandedListText)), 1.0) == 0 ? "ON" : "OFF");
+                        spinner_relay.setVisibility(View.VISIBLE);
                     }else if (NewexpandedListText.startsWith("CM-th")) {
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(siteName.length()+6, siteName.length()+7));
                         txt_calculated_output.setText("" + getPointVal(idMap.get(expandedListText))+" Ohm");
@@ -414,21 +403,19 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 return hvac_stage_selector.get((int)vavStagedRtu.getConfigAssociation(relayname));
             case "Daikin IE RTU":
         }
-        return "Default";
+        return "";
     }
 
     private String getZoneMapping(String pointname, int listPosition, View convertView){
         String listTitle = (String) getGroup(listPosition);
-        Log.e("InsideTempOverrideExpandableListAdapter", "listPosition- " + listPosition);
-        Log.e("InsideTempOverrideExpandableListAdapter", "listTitle- " + listTitle);
         HashMap equipGroup = CCUHsApi.getInstance().read("equip and group == \"" + listTitle.substring(3) + "\"");
         String profile = equipGroup.get("profile").toString();
-        Log.e("InsideTempOverrideExpandableListAdapter", "profile- " + profile);
+
         switch (profile){
             case "SSE":
                 if (pointname.startsWith("relay")){
                     int relaypos = (int)getConfigNumVal("enable and "+pointname, Integer.parseInt(listTitle.substring(3)));
-                    Log.e("InsideTempOverrideExpandableListAdapter", "relaypos- " + relaypos);
+
                     List<String> sse_relay1_mode = Arrays.asList(convertView.getResources().getStringArray(R.array.sse_relay1_mode));
                     List<String> sse_relay2_mode = Arrays.asList(convertView.getResources().getStringArray(R.array.sse_relay2_mode));
                     if (pointname.equals("relay1"))
@@ -441,8 +428,9 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }else if (pointname.equals("Thermistor2")){
                     return "External Sensor";
                 }
+                break;
             case "VAV_SERIES_FAN":
-                Log.e("InsideTempOverrideExpandableListAdapter", "VAV_SERIES_FAN_pointname- " + pointname);
+
                 if (pointname.equals("Analog-out2"))
                     return "Modulating Reheat";
                 else if (pointname.equals("Analog-out1"))
@@ -453,6 +441,31 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     return "Discharge Airflow";
                 else if (pointname.equals("Thermistor2"))
                     return "Supply Airflow";
+                break;
+            case "VAV_PARALLEL_FAN":
+                if (pointname.equals("Analog-out2"))
+                    return "Modulating Reheat";
+                else if (pointname.equals("Analog-out1"))
+                    return "Modulating Damper";
+                else if (pointname.equals("relay2"))
+                    return "Parallel Fan";
+                else if (pointname.equals("Thermistor1"))
+                    return "Discharge Airflow";
+                else if (pointname.equals("Thermistor2"))
+                    return "Supply Airflow";
+                break;
+            case "VAV_REHEAT":
+                if (pointname.equals("Analog-out2"))
+                    return "Modulating Reheat";
+                else if (pointname.equals("Analog-out1"))
+                    return "Modulating Damper";
+                else if (pointname.equals("relay2"))
+                    return "Series Fan";
+                else if (pointname.equals("Thermistor1"))
+                    return "Discharge Airflow";
+                else if (pointname.equals("Thermistor2"))
+                    return "Supply Airflow";
+                break;
             case "SMARTSTAT_CONVENTIONAL_PACK_UNIT":
                 if (pointname.equals("relay1"))
                     return "Cooling Stage 1";
@@ -468,7 +481,76 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     return "Fan High Speed";
                 else if (pointname.equals("Thermistor1"))
                     return "Airflow Sensor";
+                break;
             case "PLC":
+                HashMap equip = CCUHsApi.getInstance().read("equip and pid and group == \"" + listTitle.substring(3) + "\"");
+                String equipRef = equip.get("id").toString();
+                if (pointname.equals("Analog2In")){
+                    ArrayList<String> analog2InArr = new ArrayList<>();
+                    for (Sensor r : SensorManager.getInstance().getExternalSensorList()) {
+                        if (!r.sensorName.contains("ION Meter")) {
+                            analog2InArr.add(r.sensorName + " " + r.engineeringUnit);
+                        }
+                    }
+                    int analogInSelection = CCUHsApi.getInstance().readDefaultVal("point and config and analog2 and input and sensor and equipRef == \"" + equipRef + "\"").intValue();
+                    return analog2InArr.get(analogInSelection);
+                }
+                else if (pointname.equals("Thermistor1")) {
+                    ArrayList<String> th1InArr = new ArrayList<>();
+                    th1InArr.add("Not Used");
+                    for (Thermistor m : Thermistor.getThermistorList()) {
+                        th1InArr.add(m.sensorName+" "+m.engineeringUnit);
+                    }
+                    int thSelection = CCUHsApi.getInstance().readDefaultVal("point and config and th1 and input and sensor and equipRef == \"" + equipRef + "\"").intValue();
+                    return th1InArr.get(thSelection);
+                }
+                break;
+            case "SMARTSTAT_HEAT_PUMP_UNIT":
+                if (pointname.equals("relay1"))
+                    return "Compressor Stage 1";
+                else if (pointname.equals("relay2"))
+                    return "Compressor Stage 2";
+                else if (pointname.equals("relay3"))
+                    return "Fan Low Speed";
+                else if (pointname.equals("relay4"))
+                    return "Aux Heating\nStage 1";
+                else if (pointname.equals("relay5"))
+                    return "Fan High Speed";
+                else if (pointname.equals("relay6"))
+                    return "Heat Pump Changeover";
+                else if (pointname.equals("Thermistor1"))
+                    return "Airflow Sensor";
+                break;
+            case "SMARTSTAT_TWO_PIPE_FCU":
+                if (pointname.equals("relay1"))
+                    return "Fan medium speed";
+                else if (pointname.equals("relay2"))
+                    return "Fan high speed ";
+                else if (pointname.equals("relay3"))
+                    return "Fan Low Speed";
+                else if (pointname.equals("relay4"))
+                    return "Aux Heating\nStage 1";
+                else if (pointname.equals("relay6"))
+                    return "Water Valve";
+                else if (pointname.equals("Thermistor1"))
+                    return "Airflow temper\n-ature sensor";
+                else if (pointname.equals("Thermistor2"))
+                    return "Supply water sensor";
+                break;
+            case "SMARTSTAT_FOUR_PIPE_FCU":
+                if (pointname.equals("relay1"))
+                    return "Fan medium speed";
+                else if (pointname.equals("relay2"))
+                    return "Fan high speed ";
+                else if (pointname.equals("relay3"))
+                    return "Fan Low Speed";
+                else if (pointname.equals("relay4"))
+                    return "Heating Water\nValve";
+                else if (pointname.equals("relay6"))
+                    return "Cooling Water\nValve";
+                else if (pointname.equals("Thermistor1"))
+                    return "Airflow temper\n-ature sensor";
+                break;
         }
         return "";
     }

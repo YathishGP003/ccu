@@ -26,6 +26,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logic.Globals;
+import a75f.io.logic.L;
 import a75f.io.renatus.util.ZoneSorter;
 import butterknife.ButterKnife;
 
@@ -112,49 +113,63 @@ public class TempOverrideFragment extends Fragment {
             ArrayList newTunerList = new ArrayList();
 
             //Log.e("InsideTempOverrideFrag","tuners- "+tuners);
+            String profileName =  L.ccu().systemProfile.getProfileType().toString();
             for (Map t : tuners) {
+                /*Log.e("InsideTempOverrideFrag","t- "+t);
+                Log.e("InsideTempOverrideFrag","t.get"+t.get("dis").toString());*/
                 if (t.get("dis").toString().startsWith("Analog1In") || t.get("dis").toString().startsWith("Analog1Out") || t.get("dis").toString().startsWith("Analog2In") ||
                         t.get("dis").toString().startsWith("Analog2Out") || t.get("dis").toString().startsWith("relay") || t.get("dis").toString().startsWith("Th") ||
                         t.get("dis").toString().startsWith(siteName) && Objects.nonNull(t.get("dis").toString())) {
                     String NewexpandedListText = t.get("dis").toString();
                     if (NewexpandedListText.startsWith("Analog")) {
                         //Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText + ", IsportEnabled- "+t.get("portEnabled").toString());
-                        if (t.get("portEnabled").toString().equals("true")) {
+                        /*if (t.get("portEnabled").toString().equals("true")) {
                             tunerList.add(t.get("dis").toString());
-                        }
+                        }*/tunerList.add(t.get("dis").toString());
                     } else if (NewexpandedListText.startsWith("relay")) {
-                        if (t.get("portEnabled").toString().equals("true")) {
+                        /*if (t.get("portEnabled").toString().equals("true")) {
                             tunerList.add(t.get("dis").toString());
-                        }
+                        }*/tunerList.add(t.get("dis").toString());
                     } else if (NewexpandedListText.startsWith("Th")) {
-                        if (t.get("portEnabled").toString().equals("true")) {
+                        /*if (t.get("portEnabled").toString().equals("true")) {
                             tunerList.add(t.get("dis").toString());
-                        }
+                        }*/tunerList.add(t.get("dis").toString());
                     } else if (NewexpandedListText.startsWith(siteName)) {
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, t.get("dis").toString().substring(siteName.length() + 1, t.get("dis").toString().length()));
                         if (NewexpandedListText.startsWith("CM-analog1Out")) {
                             //Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText + ", IsgetConfigEnabled- "+getConfigEnabled("analog1"));
-                            if (getConfigEnabled("analog1") > 0) {
-                                tunerList.add(t.get("dis").toString());
-                            }
+                            tunerList.add(t.get("dis").toString());
+                            /*if (profileName.equals("SYSTEM_VAV_ANALOG_RTU")|| profileName.equals("SYSTEM_VAV_HYBRID_RTU") || profileName.equals("SYSTEM_DAB_ANALOG_RTU")
+                                    || profileName.equals("SYSTEM_DAB_HYBRID_RTU"))
+                                tunerList.add(t.get("dis").toString());*/
                         } else if (NewexpandedListText.startsWith("CM-analog2Out")) {
                             //Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText + ", IsgetConfigEnabled- "+getConfigEnabled("analog2"));
-                            if (getConfigEnabled("analog2") > 0) {
-                                tunerList.add(t.get("dis").toString());
-                            }
+                            tunerList.add(t.get("dis").toString());
+                            /*if (profileName.equals("SYSTEM_VAV_ANALOG_RTU")|| profileName.equals("SYSTEM_VAV_HYBRID_RTU") || profileName.equals("SYSTEM_VAV_STAGED_VFD_RTU")
+                                    || profileName.equals("SYSTEM_DAB_ANALOG_RTU") || profileName.equals("SYSTEM_DAB_STAGED_VFD_RTU") || profileName.equals("SYSTEM_DAB_HYBRID_RTU"))
+                                tunerList.add(t.get("dis").toString());*/
                         } else if (NewexpandedListText.startsWith("CM-analog3Out")) {
-                            if (getConfigEnabled("analog3") > 0) {
-                                tunerList.add(t.get("dis").toString());
-                            }
+                            tunerList.add(t.get("dis").toString());
+                            /*if (profileName.equals("SYSTEM_VAV_ANALOG_RTU")|| profileName.equals("SYSTEM_VAV_HYBRID_RTU") || profileName.equals("SYSTEM_DAB_ANALOG_RTU")
+                            || profileName.equals("SYSTEM_DAB_HYBRID_RTU"))
+                                tunerList.add(t.get("dis").toString());*/
                         } else if (NewexpandedListText.startsWith("CM-analog4Out")) {
-                            if (getConfigEnabled("analog4") > 0) {
-                                tunerList.add(t.get("dis").toString());
-                            }
+                            tunerList.add(t.get("dis").toString());
+                            /*if (profileName.equals("SYSTEM_VAV_ANALOG_RTU")|| profileName.equals("SYSTEM_VAV_HYBRID_RTU") || profileName.equals("SYSTEM_DAB_ANALOG_RTU")
+                            || profileName.equals("SYSTEM_DAB_HYBRID_RTU"))
+                                tunerList.add(t.get("dis").toString());*/
                         } else if (NewexpandedListText.startsWith("relay")) {
                             String relayPos = (t.get("dis").toString().substring(siteName.length() + 6, siteName.length() + 7));
-                            if (getConfigEnabled("relay" + relayPos) > 0) {
-                                tunerList.add(t.get("dis").toString());
-                            }
+                            tunerList.add(t.get("dis").toString());
+                            /*if (profileName.equals("SYSTEM_VAV_ANALOG_RTU") || profileName.equals("SYSTEM_DAB_ANALOG_RTU")){
+                                if (Integer.parseInt(relayPos) == 3 || Integer.parseInt(relayPos) == 7)
+                                    tunerList.add(t.get("dis").toString());
+                            }else if (profileName.equals("SYSTEM_VAV_HYBRID_RTU") || profileName.equals("SYSTEM_VAV_STAGED_VFD_RTU") || profileName.equals("SYSTEM_VAV_STAGED_RTU")
+                            || profileName.equals("SYSTEM_DAB_STAGED_VFD_RTU") || profileName.equals("SYSTEM_DAB_ANALOG_RTU") || profileName.equals("SYSTEM_DAB_HYBRID_RTU")){
+                                if (Integer.parseInt(relayPos) == 1 || Integer.parseInt(relayPos) == 2 || Integer.parseInt(relayPos) == 3 || Integer.parseInt(relayPos) == 4 ||
+                                        Integer.parseInt(relayPos) == 5 || Integer.parseInt(relayPos) == 6 || Integer.parseInt(relayPos) == 7)
+                                    tunerList.add(t.get("dis").toString());
+                            }*/
                         }
                     }
                     //tunerList.add(t.get("dis").toString());
@@ -220,6 +235,15 @@ public class TempOverrideFragment extends Fragment {
                             continue;
                     }
                     for (int i = 0; i < tunerList.size(); i++) {
+                        if (tunerList.get(i).toString().contains("Analog4Out") || tunerList.get(i).toString().contains("analog4Out")) {
+                            if (!newTunerList.contains(tunerList.get(i))) {
+
+                                newTunerList.add(tunerList.get(i));
+                            }
+                        } else
+                            continue;
+                    }
+                    for (int i = 0; i < tunerList.size(); i++) {
                         if (tunerList.get(i).toString().contains("Th1In")) {
                             if (!newTunerList.contains(tunerList.get(i))) {
 
@@ -249,10 +273,6 @@ public class TempOverrideFragment extends Fragment {
                     pointMap.put(t.get("dis").toString(), t.get("id").toString());
                 }
             }
-            /*if (tunerList.isEmpty() == false) {
-                expandableListDetail.put(m.get("dis").toString(), tunerList);
-                Log.e("InsideTempOverrideFrag", "tunerList- " + tunerList);
-            }*/
             if (newTunerList.isEmpty() == false) {
                 expandableListDetail.put(m.get("dis").toString(), newTunerList);
                 //Log.e("InsideTempOverrideFrag", "tunerList- " + newTunerList);
@@ -265,7 +285,7 @@ public class TempOverrideFragment extends Fragment {
                 if (!expandableListTitle.get(i).equals("CM-device")) {
                     int nodeAddress = Integer.parseInt(expandableListTitle.get(i).substring(3));
                     //int nodeAddress1 = Integer.parseInt(expandableListTitle.get(i + 1).substring(3));
-                    Log.e("InsideTempOverrideFrag", "nodeAddress- " + nodeAddress);
+                    //Log.e("InsideTempOverrideFrag", "nodeAddress- " + nodeAddress);
                     //Log.e("InsideTempOverrideFrag", "nodeAddress1- " + nodeAddress1);
                     ZoneSorter zoneSorter = new ZoneSorter(expandableListTitle.get(i), nodeAddress);
                     zoneNodesList.add(zoneSorter);

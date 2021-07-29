@@ -4,6 +4,7 @@ package a75f.io.renatus;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Typeface;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -101,12 +102,12 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
 
                 String profile1 = null;
                 String listTitle1 = null;
-                /*if (!expandedListText.startsWith(siteName)) {
+                if (!expandedListText.startsWith(siteName)) {
                     listTitle1 = (String) getGroup(listPosition);
                     HashMap equipGroup1 = CCUHsApi.getInstance().read("equip and group == \"" + listTitle1.substring(3) + "\"");
-                    profile1 = equipGroup1.get("profile").toString();
-                    Log.e("InsideTempOverrideExpandableListAdapter", "profile1- " + profile1);
-                }*/
+                    /*profile1 = equipGroup1.get("profile").toString();
+                    Log.e("InsideTempOverrideExpandableListAdapter", "profile1- " + profile1);*/
+                }
                 if (expandedListText.startsWith("Analog1In")) {
                     NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-in1");
                     expandedListTextVal.setText("" + getPointVal(idMap.get(expandedListText))+" "+CCUHsApi.getInstance().readMapById(equipId).get("unit"));
@@ -132,13 +133,16 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     spinner_override_value.setVisibility(View.VISIBLE);
                 } else if (expandedListText.startsWith("relay")) {
                     String relayMapped = getZoneMapping("relay"+expandedListText.substring(5, 6), listPosition, convertView);
-                    if (!relayMapped.equals("")) NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + expandedListText.substring(5, 6)+"\n("+relayMapped+")");
+                    if (!relayMapped.equals(""))
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + expandedListText.substring(5, 6)+"\n("+relayMapped+")");
                     else NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + expandedListText.substring(5, 6));
                     txt_calculated_output.setText(Double.compare(getPointVal(idMap.get(expandedListText)),1.0) == 0 ? "ON" : "OFF");
                     spinner_relay.setVisibility(View.VISIBLE);
                 }else if (expandedListText.startsWith("Th")) {
                     String thermistorMapped = getZoneMapping("Thermistor"+expandedListText.substring(2,3), listPosition, convertView);
-                    if (!thermistorMapped.equals("")) NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3)+"\n("+thermistorMapped+")");
+                    //String listTitle = (String) getGroup(listPosition);
+                    if ((int)getConfigNumVal("enable and th"+expandedListText.substring(2,3),Integer.parseInt(getGroup(listPosition).toString().substring(3))) == 1)
+                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3)+"\n("+thermistorMapped+")");
                     else NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3));
                     txt_calculated_output.setText("" + getPointVal(idMap.get(expandedListText))+" "+CCUHsApi.getInstance().readMapById(equipId).get("unit"));
                     spinner_thermistor.setVisibility(View.VISIBLE);
@@ -419,7 +423,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     List<String> sse_relay1_mode = Arrays.asList(convertView.getResources().getStringArray(R.array.sse_relay1_mode));
                     List<String> sse_relay2_mode = Arrays.asList(convertView.getResources().getStringArray(R.array.sse_relay2_mode));
                     if (pointname.equals("relay1"))
-                        return sse_relay1_mode.get(relaypos-1);
+                        return sse_relay1_mode.get(relaypos);
                     else if (pointname.equals("relay2"))
                         return sse_relay2_mode.get(relaypos);
                 }
@@ -550,6 +554,12 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     return "Cooling Water\nValve";
                 else if (pointname.equals("Thermistor1"))
                     return "Airflow temper\n-ature sensor";
+                break;
+            case "DUAL_DUCT":
+                if (pointname.equals("Thermistor1"))
+                    return "Discharge Airflow\n 10K sensor";
+                else if (pointname.equals("Thermistor2"))
+                    return "Supply Air sensor";
                 break;
         }
         return "";

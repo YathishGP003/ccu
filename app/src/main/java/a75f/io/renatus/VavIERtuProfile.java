@@ -65,6 +65,8 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     @BindView(R.id.spMaxLabel)TextView spMaxLabel;
     @BindView(R.id.fanSpeedMin)Spinner fanSpeedMin;
     @BindView(R.id.fanSpeedMax)Spinner fanSpeedMax;
+    @BindView(R.id.fanSpeedMinLabel)TextView fanSpeedMinLabel;
+    @BindView(R.id.fanSpeedMaxLabel)TextView fanSpeedMaxLabel;
     
     
     @BindView(R.id.equipmentIp) EditText equipAddr;
@@ -525,6 +527,11 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         spMinLabel.setVisibility(multiZone ? View.VISIBLE : View.GONE);
         spMax.setVisibility(multiZone ? View.VISIBLE : View.GONE);
         spMaxLabel.setVisibility(multiZone ? View.VISIBLE : View.GONE);
+    
+        fanSpeedMin.setVisibility(multiZone ? View.GONE : View.VISIBLE);
+        fanSpeedMinLabel.setVisibility(multiZone ? View.GONE : View.VISIBLE);
+        fanSpeedMax.setVisibility(multiZone ? View.GONE : View.VISIBLE);
+        fanSpeedMaxLabel.setVisibility(multiZone ? View.GONE : View.VISIBLE);
         
     }
 }

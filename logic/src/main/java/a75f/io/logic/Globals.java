@@ -19,6 +19,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.CCUApplication;
+import a75f.io.logic.bo.building.bpos.BPOSProfile;
 import a75f.io.logic.bo.building.ccu.CazProfile;
 import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -394,6 +395,11 @@ public class Globals {
                             HyperStatSenseProfile hssense = new HyperStatSenseProfile();
                             hssense.addHyperStatSenseEquip(Short.valueOf(eq.getGroup()));
                             L.ccu().zoneProfiles.add(hssense);
+                            break;
+                        case BPOS:
+                            BPOSProfile bpos = new BPOSProfile();
+                            bpos.addBPOSEquip(Short.valueOf(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(bpos);
                             break;
                         case MODBUS_PAC:
                         case MODBUS_RRS:

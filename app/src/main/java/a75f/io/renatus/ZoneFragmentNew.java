@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 
 import a75f.io.logic.bo.building.Output;
+import a75f.io.logic.bo.building.bpos.BPOSUtil;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.plc.PlcProfile;
 import androidx.annotation.Nullable;
@@ -543,6 +544,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             String profileDualDuct = "DUAL_DUCT";
                             String profileModBus = "MODBUS";
                             String profileHyperStatSense = "HYPERSTAT_SENSE";
+                            String profilebpos = "BPOS";
 
                             boolean tempModule = false;
                             boolean nontempModule = false;
@@ -555,6 +557,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                         profileType.contains(profileSSE) ||
                                         profileType.contains(profileSmartStat) ||
                                         profileType.contains(profileTempInfluence) ||
+                                        profileType.contains(profilebpos) ||
                                         profileType.contains(profileDualDuct)) {
                                     tempModule = true;
                                     Log.e(LOG_TAG + "RoomData", "Load SmartNode ProfileType:" + profileType);
@@ -1113,6 +1116,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 HashMap dualDuctPoints = DualDuctUtil.getEquipPointsForView(p.getId());
                                 Log.i("PointsValue", "DualDuct Points:" + dualDuctPoints.toString());
                                 loadDualDuctPointsUI(dualDuctPoints, inflater, linearLayoutZonePoints, p.getGroup());
+                            }
+                            if (p.getProfile().startsWith("BPOS")) {
+                                HashMap bposPoint = BPOSUtil.getbposPoints(p.getId());
+                                Log.i("PointsValue", "DualDuct Points:" + bposPoint.toString());
+                                loadBPOSPointsUI(bposPoint, inflater, linearLayoutZonePoints, p.getGroup());
                             }
                         }
                     }
@@ -3436,6 +3444,51 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 }
             }
         });
+    }
+
+    private void loadBPOSPointsUI(HashMap point, LayoutInflater inflater,
+                                  LinearLayout linearLayoutZonePoints,
+                                  String nodeAddress) {
+
+
+        View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
+        View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
+        View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
+        View viewPointRow2 = inflater.inflate(R.layout.zones_item_type1, null);
+
+        TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
+        TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewModule = viewTitle.findViewById(R.id.module_status);
+        HeartBeatUtil.moduleStatus(textViewModule, nodeAddress);
+        TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
+
+        TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
+        TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
+        TextView textViewLabel3 = viewPointRow2.findViewById(R.id.text_point1label);
+
+        TextView textViewValue1 = viewPointRow1.findViewById(R.id.text_point1value);
+        TextView textViewValue2 = viewPointRow1.findViewById(R.id.text_point2value);
+        TextView textViewValue3 = viewPointRow2.findViewById(R.id.text_point1value);
+
+
+        textViewTitle.setText(point.get("Profile").toString() + " (" + nodeAddress + ")");
+        textViewStatus.setText(point.get("Status").toString());
+        textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
+
+
+        textViewLabel2.setText("Humidity: ");
+        textViewValue2.setText(point.get("humidity").toString());
+
+
+        textViewLabel3.setText("Force Occupied: ");
+        textViewValue3.setText(point.get("forceoccupied").toString());
+
+
+        linearLayoutZonePoints.addView(viewTitle);
+        linearLayoutZonePoints.addView(viewStatus);
+        linearLayoutZonePoints.addView(viewPointRow1);
+       // viewPointRow2.setPadding(0, 0, 0, 40);
+        linearLayoutZonePoints.addView(viewPointRow2);
     }
 
 }

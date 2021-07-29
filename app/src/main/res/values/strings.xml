@@ -932,10 +932,5 @@
     <string name="title_bpos">BPOS | SELECT MODULE TYPE</string>
     <string name="autoforceoccupied">Auto Force Occupied</string>
     <string name="autoaway">Auto Away</string>
-    <string-array name="zone_priority_bpos">
-        <item >Normal</item>
-        <item >No Priority</item>
-        <item >Low</item>
-        <item >High</item>
-    </string-array>
+
 </resources>

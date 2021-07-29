@@ -69,7 +69,7 @@ public class FragmentBPOSTypeSelection extends BaseDialogFragment {
 
     @OnClick(R.id.rl_bpostempinf)
     public void Onclicktempinf() {
-        showDialogFragment(FragmentBPOSTempInfConfiguration.newInstance(mNodeAddress, mRoomName, mFloorName, misPaired),
+        showDialogFragment(FragmentBPOSTempInfConfiguration.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.BPOS),
                 FragmentBPOSTempInfConfiguration.ID);
     }
 

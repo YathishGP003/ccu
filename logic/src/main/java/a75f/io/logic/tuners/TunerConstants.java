@@ -145,6 +145,7 @@ public class TunerConstants
     public static final String ALERT_TUNER = "ALERT";
     public static final String LCM_TUNER = "LCM";
     public static final String DUAL_DUCT_TUNER_GROUP = "DAB";
+    public static final String BPOS_TUNER_GROUP = "BPOS";
     
     public static final double DEFAULT_COOLING_DB = 2.0; //Default deadband value based on dual temp diff 70 and 74 (// (74-70)/2.0)
     public static final double DEFAULT_HEATING_DB = 2.0;

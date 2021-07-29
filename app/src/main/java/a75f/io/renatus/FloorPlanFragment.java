@@ -1498,6 +1498,10 @@ public class FloorPlanFragment extends Fragment {
                     showDialogFragment(HyperStatSenseFragment.newInstance(Short.parseShort(nodeAddr)
                             , zone.getId(), floor.getId(), profile.getProfileType()),HyperStatSenseFragment.ID);
                     break;
+                case BPOS:
+                    showDialogFragment(FragmentBPOSTempInfConfiguration.newInstance(Short.parseShort(nodeAddr),
+                            zone.getId(), floor.getId(), profile.getProfileType()),FragmentBPOSTempInfConfiguration.ID);
+                    break;
                 case MODBUS_UPS30:
                 case MODBUS_UPS80:
                 case MODBUS_UPS400:

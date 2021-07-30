@@ -67,7 +67,13 @@ public class UpdatePointHandler
             updatePoints(localPoint);
             return;
         }
-    
+
+        if (HSUtil.isSenseConfig(pointUid, CCUHsApi.getInstance())) {
+            HyperStatSenseConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
+            updatePoints(localPoint);
+            return;
+        }
+
         /* Only the config changes require profile specific handling.
          * DesiredTemp or Schedule type updates are handled using generic implementation below.
          */

@@ -1746,7 +1746,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         int size = 0;
 
         double offset = tempOffset/10;
-        sensePoints.put("curtempwithoffset",(currentTemp+offset));
+        double t = currentTemp + offset;
+
+        sensePoints.put("curtempwithoffset",(currentTemp));
 
         if (tempOffset  != 0) {
             sensePoints.put("TemperatureOffset",tempOffset);

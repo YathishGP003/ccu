@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <RelativeLayout
+                android:id="@+id/layoutHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp">
+
+
+                <TextView
+                    android:id="@+id/textTitleFragment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:fontFamily="@font/lato_bold"
+                    android:text="@string/title_tempinfluence"
+                    android:textAllCaps="true"
+                    android:textColor="?orange_75f"
+                    android:textSize="33.5dp"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/layoutHeader"
+                android:layout_marginTop="46dp"
+                android:orientation="vertical"
+                android:paddingLeft="200dp"
+                android:paddingRight="200dp">
+
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="36dp"
+                    android:layout_marginStart="100dp">
+
+                    <TextView
+                        android:id="@+id/textZonePriority"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:text="@string/label_zonepriority"
+                        android:textAppearance="@style/title_normal" />
+
+                    <Spinner
+                        android:id="@+id/zonePriority"
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:layout_width="200dp"
+                        android:layout_height="60dp"
+                        android:entries="@array/zone_priority_bpos"
+                        android:layout_marginTop="-23dp"
+                        android:layout_marginLeft="260dp"
+                        android:layout_marginBottom="40dp"
+                        tools:listitem="@layout/spinner_dropdown_item" />
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/autoforceoccupied"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:paddingRight="25dp"
+                        android:text="@string/autoforceoccupied"
+                        android:textAppearance="@style/title_normal" />
+
+                    <ToggleButton
+                        android:id="@+id/toogleautoforceoccupied"
+                        android:layout_width="47dp"
+                        android:layout_height="28dp"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="false"
+                        android:textOff=""
+                        android:textOn="" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingLeft="80dp">
+
+                    <TextView
+                        android:id="@+id/autoaway"
+                        android:layout_width="181dp"
+                        android:layout_height="40dp"
+                        android:text="@string/autoaway"
+                        android:textAppearance="@style/title_normal" />
+
+                    <ToggleButton
+                        android:id="@+id/toogleautoaway"
+                        android:layout_width="47dp"
+                        android:layout_height="28dp"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="false"
+                        android:textOff=""
+                        android:textOn="" />
+                </LinearLayout>
+
+
+                </LinearLayout>
+
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="72dp">
+
+                    <TextView
+                        android:id="@+id/textTempOffset"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:text="@string/label_tempoffsetnp"
+                        android:textAppearance="@style/label_values" />
+
+                    <NumberPicker
+                        android:id="@+id/temperatureOffset"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/textTempOffset"
+                        android:layout_centerHorizontal="true"
+                        android:textColor="#202020"
+                        android:textSize="30sp"
+                        android:theme="?DefaultNumberPickerTheme" />
+                </RelativeLayout>
+
+            </LinearLayout>
+
+
+            <Button
+                android:id="@+id/setBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="1060dp"
+                android:layout_marginTop="620dp"
+                android:paddingRight="15dp"
+                android:background="@null"
+                android:button="@null"
+                android:fontFamily="@font/lato_regular"
+                android:text="@string/button_set"
+                android:textAllCaps="true"
+                android:textColor="?orange_75f"
+                android:textSize="20dp" />
+        </RelativeLayout>
+    </ScrollView>
+</LinearLayout>
+

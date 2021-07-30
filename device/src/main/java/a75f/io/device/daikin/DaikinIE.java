@@ -1,4 +1,4 @@
-package a75f.io.device.mesh;
+package a75f.io.device.daikin;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -61,7 +61,7 @@ public class DaikinIE
                 
                 VavIERtu systemProfile = (VavIERtu) L.ccu().systemProfile;
                 
-                if (systemProfile.getConfigEnabled("analog2") > 0)
+                if (systemProfile.getConfigEnabled("fan") > 0)
                 {
                     sendStaticPressure(String.format(DAIKIN_IE_SP_URL, eqIp));
                 }
@@ -127,7 +127,7 @@ public class DaikinIE
     }
     
     public static String getIEUrl() {
-        return CCUHsApi.getInstance().readDefaultStrVal("point and system and config and ie and address");
+        return CCUHsApi.getInstance().readDefaultStrVal("point and system and config and ie and ipAddress");
     }
     
     private static void sendCoolingDATAutoControl(String url){

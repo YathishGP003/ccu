@@ -192,7 +192,7 @@ data class HttpHeaders(
    val apiKey: String? = null
 )
 
-private class DateTimeTypeConverter : JsonSerializer<DateTime>, JsonDeserializer<DateTime?> {
+class DateTimeTypeConverter : JsonSerializer<DateTime>, JsonDeserializer<DateTime?> {
    override fun serialize(src: DateTime, srcType: Type?, context: JsonSerializationContext?): JsonElement {
       return JsonPrimitive(src.toString())
    }

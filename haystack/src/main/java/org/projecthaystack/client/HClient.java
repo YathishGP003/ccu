@@ -593,6 +593,8 @@ public class HClient extends HProj
           Reader r = new BufferedReader(new InputStreamReader(c.getInputStream(), StandardCharsets.UTF_8));
           int n;
           while ((n = r.read()) > 0) s.append((char)n);
+          c.getInputStream().close();
+          
           return s.toString();
         } finally {
           try {

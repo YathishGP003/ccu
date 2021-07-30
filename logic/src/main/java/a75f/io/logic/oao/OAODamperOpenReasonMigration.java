@@ -7,6 +7,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.oao.OAODamperOpenPoint;
+import a75f.io.logic.util.PreferenceUtil;
 
 public class OAODamperOpenReasonMigration {
     private final static String OAO_DAMPER_OPEN_REASON_MIGRATION = "OAO_DAMPER_OPEN_REASON_MIGRATION";
@@ -18,10 +19,10 @@ public class OAODamperOpenReasonMigration {
     }
 
     private void checkForOAODamperOpenReasonMigration(){
-        if (!CCUHsApi.getInstance().isOAODamperOpenPointsMigrationDone()) {
+        if (!PreferenceUtil.isOAODamperOpenPointsMigrationDone()) {
             Log.i(OAO_DAMPER_OPEN_REASON_MIGRATION,"OAO Damper open reason point migration started ");
             upgradeOAOWithFreeCoolingPoints(CCUHsApi.getInstance());
-            CCUHsApi.getInstance().setOAODamperOpenPointsMigrationStatus(true);
+            PreferenceUtil.setOAODamperOpenPointsMigrationStatus(true);
         }
     }
 

@@ -187,41 +187,6 @@ public class CCUHsApi
         editor.apply();
     }
 
-    public String getOTPGeneratedToAddOrReplaceCCU() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getString("OTPToAddOrReplaceCCU","");
-    }
-
-    public void setOTPGeneratedToAddOrReplaceCCU(String otp) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("OTPToAddOrReplaceCCU", otp);
-        editor.apply();
-    }
-
-    public boolean isHeartbeatMigrationDone() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getBoolean("heartbeatMigration",false);
-    }
-
-    public void setHeartbeatMigrationStatus(boolean isMigrated) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("heartbeatMigration", isMigrated);
-        editor.apply();
-    }
-    public boolean isOAODamperOpenPointsMigrationDone() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getBoolean("OAODamperOpenPointsMigration",false);
-    }
-
-    public void setOAODamperOpenPointsMigrationStatus(boolean isMigrated) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("OAODamperOpenPointsMigration", isMigrated);
-        editor.apply();
-    }
-
     public String getAuthenticationUrl() {
         Log.d("Authentication URL: ","url="+careTakerUrl);
         return careTakerUrl;

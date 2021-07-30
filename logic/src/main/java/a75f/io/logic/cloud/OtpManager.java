@@ -99,7 +99,12 @@ public class OtpManager {
                 try {
                     String result = response.body().string();
                     CcuLog.i(TAG_CCU_OTP, result);
-                    otpResponseCallBack.onOtpResponse(new JSONObject(result));
+                    JSONObject otpResponse = new JSONObject(result);
+                    if((Boolean) ((JSONObject) otpResponse.get("siteCode")).get("expired")){
+                        postOTPRefresh(siteID, otpResponseCallBack);
+                        return;
+                    }
+                    otpResponseCallBack.onOtpResponse(otpResponse);
                 } catch (Exception e) {
                     e.printStackTrace();
                     CcuLog.e(TAG_CCU_OTP, e.getMessage());

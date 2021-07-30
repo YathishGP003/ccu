@@ -41,6 +41,7 @@ import java.util.TimeZone;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.cloud.OtpManager;
 import a75f.io.logic.cloud.OtpResponseCallBack;
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.ENGG.AppInstaller;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
@@ -193,7 +194,7 @@ public class AboutFragment extends Fragment {
             }
             @Override
             public void onFinish() {
-                otpTimer.setText("Please refresh to generate new OTP");
+                otpTimer.setText("OTP has expired. Please refresh to generate a new.");
             }
         };
     }
@@ -233,7 +234,7 @@ public class AboutFragment extends Fragment {
                 public void onOtpResponse(JSONObject response) throws JSONException {
                     ProgressDialogUtils.hideProgressDialog();
                     String otpGenerated = (String) ((JSONObject) response.get("siteCode")).get("code");
-                    CCUHsApi.getInstance().setOTPGeneratedToAddOrReplaceCCU(otpGenerated);
+                    PreferenceUtil.setOTPGeneratedToAddOrReplaceCCU(otpGenerated);
                     emailId.setEnabled(true);
                     emailId.setVisibility(View.VISIBLE);
                     otpValue.setText(otpWithDoubleSpaceBetween(otpGenerated));
@@ -264,11 +265,11 @@ public class AboutFragment extends Fragment {
             public void onOtpResponse(JSONObject response) throws JSONException {
                 ProgressDialogUtils.hideProgressDialog();
                 String otpGenerated = (String) ((JSONObject) response.get("siteCode")).get("code");
-                if(!CCUHsApi.getInstance().getOTPGeneratedToAddOrReplaceCCU().equals(otpGenerated)){
+                if(!PreferenceUtil.getOTPGeneratedToAddOrReplaceCCU().equals(otpGenerated)){
                     emailId.setEnabled(true);
                     emailId.setVisibility(View.VISIBLE);
                 }
-                CCUHsApi.getInstance().setOTPGeneratedToAddOrReplaceCCU(otpGenerated);
+                PreferenceUtil.setOTPGeneratedToAddOrReplaceCCU(otpGenerated);
                 otpValue.setText(otpWithDoubleSpaceBetween(otpGenerated));
                 String expirationDateTime = (String) ((JSONObject) response.get("siteCode")).get(
                         "expirationDateTime");

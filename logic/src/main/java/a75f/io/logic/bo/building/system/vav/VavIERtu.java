@@ -677,8 +677,7 @@ public class VavIERtu extends VavSystemProfile
             }
             
             if (cmdStaticPressure.isEmpty()) {
-                createStaticPressureConfigPoints(systemEquip.getSiteRef(), systemEquip.getDisplayName(),
-                                                 systemEquip.getId(), systemEquip.getTz(), hayStack);
+
                 Point staticPressure = new Point.Builder()
                                       .setDisplayName(systemEquip.getDisplayName()+"-"+"ductStaticPressure")
                                       .setSiteRef(systemEquip.getSiteRef())
@@ -688,9 +687,8 @@ public class VavIERtu extends VavSystemProfile
                                       .setUnit("inch wc").setTz(systemEquip.getTz())
                                       .build();
                 hayStack.addPoint(staticPressure);
-    
-                createStaticPressureConfigPoints(systemEquip.getSiteRef(), systemEquip.getDisplayName(), systemEquip.getId(),
-                                           systemEquip.getTz(), hayStack);
+                createStaticPressureConfigPoints(systemEquip.getSiteRef(), systemEquip.getDisplayName(),
+                                                 systemEquip.getId(), systemEquip.getTz(), hayStack);
             }
             
             
@@ -701,17 +699,17 @@ public class VavIERtu extends VavSystemProfile
             deleteStaticPressureConfigPoints(hayStack);
     
             if (cmdFanSpeed.isEmpty()) {
-            Point fanSpeedCmd = new Point.Builder()
-                                    .setDisplayName(systemEquip.getDisplayName()+"-"+"fanSpeed")
-                                    .setSiteRef(systemEquip.getSiteRef())
-                                    .setEquipRef(systemEquip.getId()).setHisInterpolate("cov")
-                                    .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his")
-                                    .addMarker("ie")
-                                    .setUnit("%").setTz(systemEquip.getTz())
-                                    .build();
-            hayStack.addPoint(fanSpeedCmd);
-            createFanSpeedConfigPoints(systemEquip.getSiteRef(), systemEquip.getDisplayName(), systemEquip.getId(),
-                                       systemEquip.getTz(), hayStack);
+                Point fanSpeedCmd = new Point.Builder()
+                                        .setDisplayName(systemEquip.getDisplayName()+"-"+"fanSpeed")
+                                        .setSiteRef(systemEquip.getSiteRef())
+                                        .setEquipRef(systemEquip.getId()).setHisInterpolate("cov")
+                                        .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his")
+                                        .addMarker("ie")
+                                        .setUnit("%").setTz(systemEquip.getTz())
+                                        .build();
+                hayStack.addPoint(fanSpeedCmd);
+                createFanSpeedConfigPoints(systemEquip.getSiteRef(), systemEquip.getDisplayName(), systemEquip.getId(),
+                                           systemEquip.getTz(), hayStack);
             }
         }
         CCUHsApi.getInstance().syncEntityTree();

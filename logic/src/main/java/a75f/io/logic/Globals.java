@@ -127,14 +127,6 @@ public class Globals {
                 .getBoolean("biskit_mode", false);
     }
 
-    public boolean isTemproryOverrideMode(){
-        return isTempOverride;
-    }
-
-    public void setTemproryOverrideMode(boolean isTemproryOverrideMode){
-        isTempOverride = isTemproryOverrideMode;
-    }
-
     public boolean isTestMode()
     {
         return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)

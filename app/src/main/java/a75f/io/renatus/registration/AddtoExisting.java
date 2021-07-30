@@ -5,6 +5,8 @@ import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.constants.HttpConstants;
 import a75f.io.constants.SiteFieldConstants;
 import a75f.io.logger.CcuLog;
+
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -210,20 +212,23 @@ public class AddtoExisting extends Fragment {
                 {
                     Toast.makeText(mContext, "array not empty", Toast.LENGTH_SHORT).show();
                     //String siteId = StringUtils.trim(mSiteId.getText().toString());
+                    String OTP = et1.getText() + "" + et2.getText() + et3.getText() + "" + et4.getText() + "" + et5.getText() + et6.getText();
                     try {
                         /*HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
-                        Log.e("InsideAddtoExist", "siteId- " + siteId);
-                        String site_Id = StringUtils.prependIfMissing(siteId.toString(), "@");*/
+                        String site_Id = StringUtils.prependIfMissing(siteId.toString(), "@");
                         //loadExistingSite(siteId);
-                        String OTP = et1.getText() + "" + et2.getText() + et3.getText() + "" + et4.getText() + "" + et5.getText() + et6.getText();
-                        //Log.e("InsideAddtoExisting","OTP- "+OTP);
-                        /*if (!site_Id.equals(null))
+                        Log.e("InsideAddtoExisting","OTP- "+OTP);
+                        Log.e("InsideAddtoExist", "siteId- " + siteId);
+                        if (!site_Id.equals(null))
                             OTPValidation(site_Id, OTP);
-                        else
-                            Toast.makeText(mContext, "Please create a site first, Site Id is null", Toast.LENGTH_SHORT).show();*/
-                        OTPValidation("@edbbcdfc-b055-47c4-9edc-2b896e2cde98", OTP);
+                        else {
+                            Toast.makeText(mContext, "Please create a site first, Site Id is null", Toast.LENGTH_SHORT).show();
+                        }*/
+                        OTPValidation("@e27d9682-9f6c-4875-80ed-9df6b8da459e", OTP);
                     } catch (Exception e) {
                         Log.e("InsideAddtoExisting", "Exception- " + e);
+                        Toast.makeText(mContext, "Something went wrong..Check Site Id", Toast.LENGTH_SHORT).show();
+                        //OTPValidation("@e27d9682-9f6c-4875-80ed-9df6b8da459e", OTP);
                     }
                 }
                 else Toast.makeText(mContext, "Please check the OTP", Toast.LENGTH_SHORT).show();
@@ -280,6 +285,7 @@ public class AddtoExisting extends Fragment {
                         toast.setDuration(Toast.LENGTH_LONG);
                         toast.show();
                         saveExistingSite(siteId);
+                        //loadExistingSite(siteId);
                     }else{
                         Toast toast = new Toast(getApplicationContext());
                         toast.setGravity(Gravity.BOTTOM, 50, 50);
@@ -534,7 +540,8 @@ public class AddtoExisting extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                saveExistingSite(siteId);
+                //saveExistingSite(siteId);
+                navigateToCCUScreen();
                 Toast.makeText(getActivity(), "Thank you for confirming using this site", Toast.LENGTH_LONG).show();
 
             }

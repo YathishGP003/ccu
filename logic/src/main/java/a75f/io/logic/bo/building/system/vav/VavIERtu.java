@@ -276,9 +276,10 @@ public class VavIERtu extends VavSystemProfile
         status.append(VavSystemController.getInstance().getSystemState() == HEATING ?
                           " Heating DAT (F): " + getCmdSignal("heating"):"");
         if (VavSystemController.getInstance().getSystemState() != OFF) {
-            status.append(" | Fan Speed (%): " + (getCmdSignal("fan")));
             if (getConfigVal("multiZone") > 0) {
                 status.append( " | Static Pressure (inch wc): " + (getCmdSignal("staticPressure")));
+            } else {
+                status.append(" | Fan Speed (%): " + (getCmdSignal("fan")));
             }
         }
         
@@ -385,8 +386,8 @@ public class VavIERtu extends VavSystemProfile
                                 .setSiteRef(siteRef)
                                 .setEquipRef(equipRef)
                                 .addMarker("system").addMarker("occStatus").addMarker("ie")
-                                .addMarker("sp").addMarker("his")
-                                .setEnums("Occ,UnOcc,TntOvrd")
+                                .addMarker("sp").addMarker("his").setHisInterpolate("cov")
+                                .setEnums("Occupied,Unoccupied,TenantOverride")
                                 .setTz(tz)
                                 .build();
         String occStatId = CCUHsApi.getInstance().addPoint(occStatus);
@@ -526,7 +527,6 @@ public class VavIERtu extends VavSystemProfile
         String macAddressId = hayStack.addPoint(macAddress);
         hayStack.writeDefaultValById(macAddressId, "" );
         
-        createFanSpeedConfigPoints(siteRef, equipDis, equipref, tz, hayStack);
         createStaticPressureConfigPoints(siteRef, equipDis, equipref, tz, hayStack);
     }
     
@@ -598,20 +598,8 @@ public class VavIERtu extends VavSystemProfile
                     HashMap fanSpeed = CCUHsApi.getInstance().read("point and system and cmd and fan");
                     HashMap staticPressure = CCUHsApi.getInstance().read("point and system and cmd and staticPressure");
                     if((int)val > 0) {
-                        if (fanSpeed.isEmpty()) {
-                            CcuLog.i(L.TAG_CCU_SYSTEM, "create Fan Speed  ");
-                        Point fanSpeedCmd = new Point.Builder()
-                                                .setDisplayName(equipDis+"-"+"fanSpeed")
-                                                .setSiteRef(siteRef)
-                                                .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
-                                                .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his")
-                                                .addMarker("ie")
-                                                .setUnit("%").setTz(tz)
-                                                .build();
-                        hayStack.addPoint(fanSpeedCmd);
-                        }
-                        
-                        if (staticPressure.isEmpty() && getConfigVal("multiZone") > 0) {
+                        if (getConfigVal("multiZone") > 0) {
+                            if (staticPressure.isEmpty()) {
                             CcuLog.i(L.TAG_CCU_SYSTEM, "create staticPressure  ");
                             Point staticPressureCmd = new Point.Builder()
                                                           .setDisplayName(equipDis+"-"+"ductStaticPressure")
@@ -622,6 +610,20 @@ public class VavIERtu extends VavSystemProfile
                                                           .setUnit("inch wc").setTz(tz)
                                                           .build();
                             hayStack.addPoint(staticPressureCmd);
+                            }
+                        } else {
+                            if (fanSpeed.isEmpty()) {
+                                CcuLog.i(L.TAG_CCU_SYSTEM, "create Fan Speed  ");
+                                Point fanSpeedCmd = new Point.Builder()
+                                                        .setDisplayName(equipDis+"-"+"fanSpeed")
+                                                        .setSiteRef(siteRef)
+                                                        .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
+                                                        .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his")
+                                                        .addMarker("ie")
+                                                        .setUnit("%").setTz(tz)
+                                                        .build();
+                                hayStack.addPoint(fanSpeedCmd);
+                            }
                         }
                         
                     } else {
@@ -654,25 +656,6 @@ public class VavIERtu extends VavSystemProfile
                         CCUHsApi.getInstance().addPoint(heatingSignal);
                     }
                     break;
-                case "humidification":
-                    HashMap cmdHumid = CCUHsApi.getInstance().read("point and system and cmd and humidifier");
-                    if(cmdHumid != null && cmdHumid.size() > 0) {
-                        if(val == 0.0) {
-                            CCUHsApi.getInstance().deleteEntityTree(cmdHumid.get("id").toString());
-                        }
-                    }else {
-                        Point heatingSignal = new Point.Builder()
-                                .setDisplayName(equipDis+"-"+"humidifier")
-                                .setSiteRef(siteRef)
-                                .setEquipRef(configEnabledPt.getEquipRef()).setHisInterpolate("cov")
-                                .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his")
-                                .addMarker("ie")
-                                .setEnums("off,on")
-                                .setUnit("%").setTz(tz)
-                                .build();
-                        CCUHsApi.getInstance().addPoint(heatingSignal);
-                    }
-                    break;
             }
 
             CCUHsApi.getInstance().syncEntityTree();
@@ -684,29 +667,52 @@ public class VavIERtu extends VavSystemProfile
         Equip systemEquip = new Equip.Builder().setHashMap(hayStack.read("system and equip")).build();
     
         HashMap cmdStaticPressure = CCUHsApi.getInstance().read("point and system and cmd and staticPressure");
+        HashMap cmdFanSpeed = CCUHsApi.getInstance().read("point and system and cmd and fan");
     
         if ((int)val > 0) {
-            
-            if (!cmdStaticPressure.isEmpty()) {
-                return;
+    
+            if (!cmdFanSpeed.isEmpty()) {
+                hayStack.deleteEntityTree(cmdFanSpeed.get("id").toString());
+                deleteFanSpeedConfigPoints(hayStack);
             }
             
-            createStaticPressureConfigPoints(systemEquip.getSiteRef(), systemEquip.getDisplayName(),
-                                             systemEquip.getId(), systemEquip.getTz(), hayStack);
-            Point fanSignal = new Point.Builder()
-                                  .setDisplayName(systemEquip.getDisplayName()+"-"+"ductStaticPressure")
-                                  .setSiteRef(systemEquip.getSiteRef())
-                                  .setEquipRef(systemEquip.getId()).setHisInterpolate("cov")
-                                  .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his")
-                                  .addMarker("staticPressure").addMarker("ie")
-                                  .setUnit("inch wc").setTz(systemEquip.getTz())
-                                  .build();
-            hayStack.addPoint(fanSignal);
+            if (cmdStaticPressure.isEmpty()) {
+                createStaticPressureConfigPoints(systemEquip.getSiteRef(), systemEquip.getDisplayName(),
+                                                 systemEquip.getId(), systemEquip.getTz(), hayStack);
+                Point staticPressure = new Point.Builder()
+                                      .setDisplayName(systemEquip.getDisplayName()+"-"+"ductStaticPressure")
+                                      .setSiteRef(systemEquip.getSiteRef())
+                                      .setEquipRef(systemEquip.getId()).setHisInterpolate("cov")
+                                      .addMarker("system").addMarker("cmd").addMarker("his")
+                                      .addMarker("staticPressure").addMarker("ie")
+                                      .setUnit("inch wc").setTz(systemEquip.getTz())
+                                      .build();
+                hayStack.addPoint(staticPressure);
+    
+                createStaticPressureConfigPoints(systemEquip.getSiteRef(), systemEquip.getDisplayName(), systemEquip.getId(),
+                                           systemEquip.getTz(), hayStack);
+            }
+            
+            
         } else {
             if (!cmdStaticPressure.isEmpty()) {
                 CCUHsApi.getInstance().deleteEntityTree(cmdStaticPressure.get("id").toString());
             }
             deleteStaticPressureConfigPoints(hayStack);
+    
+            if (cmdFanSpeed.isEmpty()) {
+            Point fanSpeedCmd = new Point.Builder()
+                                    .setDisplayName(systemEquip.getDisplayName()+"-"+"fanSpeed")
+                                    .setSiteRef(systemEquip.getSiteRef())
+                                    .setEquipRef(systemEquip.getId()).setHisInterpolate("cov")
+                                    .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his")
+                                    .addMarker("ie")
+                                    .setUnit("%").setTz(systemEquip.getTz())
+                                    .build();
+            hayStack.addPoint(fanSpeedCmd);
+            createFanSpeedConfigPoints(systemEquip.getSiteRef(), systemEquip.getDisplayName(), systemEquip.getId(),
+                                       systemEquip.getTz(), hayStack);
+            }
         }
         CCUHsApi.getInstance().syncEntityTree();
     }
@@ -739,7 +745,7 @@ public class VavIERtu extends VavSystemProfile
         hayStack.writeDefaultValById(maxFanSpeedId, 100.0 );
     }
     
-    /*private void deleteFanSpeedConfigPoints(CCUHsApi hayStack) {
+    private void deleteFanSpeedConfigPoints(CCUHsApi hayStack) {
         HashMap fanSpeedMin = hayStack.read("system and config and fanSpeed and min and ie");
         if (!fanSpeedMin.isEmpty()) {
             hayStack.deleteWritablePoint(fanSpeedMin.get("id").toString());
@@ -749,7 +755,7 @@ public class VavIERtu extends VavSystemProfile
         if (!fanSpeedMax.isEmpty()) {
             hayStack.deleteWritablePoint(fanSpeedMax.get("id").toString());
         }
-    }*/
+    }
     
     private void createStaticPressureConfigPoints(String siteRef, String equipDis, String equipRef, String tz,
                                             CCUHsApi hayStack) {

@@ -65,6 +65,8 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     @BindView(R.id.spMaxLabel)TextView spMaxLabel;
     @BindView(R.id.fanSpeedMin)Spinner fanSpeedMin;
     @BindView(R.id.fanSpeedMax)Spinner fanSpeedMax;
+    @BindView(R.id.fanSpeedMinLabel)TextView fanSpeedMinLabel;
+    @BindView(R.id.fanSpeedMaxLabel)TextView fanSpeedMaxLabel;
     
     
     @BindView(R.id.equipmentIp) EditText equipAddr;
@@ -119,11 +121,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
             analog2Cb.setChecked(systemProfile.getConfigEnabled("fan") > 0);
             analog3Cb.setChecked(systemProfile.getConfigEnabled("heating") > 0);
             humidificationCb.setChecked(systemProfile.getConfigEnabled("humidification") > 0);
-            zoneTypeSelection.setChecked(systemProfile.getConfigVal("multiZone")==1.0);
-            zoneType.setText(systemProfile.getConfigVal("multiZone")==0.0?"Single Zone":"Multi Zone");
-            setupAnalogLimitSelectors();
-            setupEquipAddrEditor();
-            handleFanConfigViews(systemProfile.getConfigVal("multiZone") > 0);
+            refreshUI();
         } else {
     
             disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
@@ -138,9 +136,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                     L.ccu().systemProfile = systemProfile;
                 },
                 () -> {
-                    setupAnalogLimitSelectors();
-                    setupEquipAddrEditor();
-                    handleFanConfigViews(systemProfile.getConfigVal("multiZone") > 0);
+                    refreshUI();
                     ProgressDialogUtils.hideProgressDialog();
                 }
             ));
@@ -187,6 +183,14 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
             }
         });
         setSpinnerDropDownIcon();
+    }
+    
+    private void refreshUI() {
+        setupAnalogLimitSelectors();
+        setupEquipAddrEditor();
+        zoneTypeSelection.setChecked(systemProfile.getConfigVal("multiZone") > 0);
+        zoneType.setText(systemProfile.getConfigVal("multiZone")> 0?"Multi Zone":"Single Zone");
+        handleFanConfigViews(systemProfile.getConfigVal("multiZone") > 0);
     }
     
     public void setupEquipAddrEditor() {
@@ -523,6 +527,11 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         spMinLabel.setVisibility(multiZone ? View.VISIBLE : View.GONE);
         spMax.setVisibility(multiZone ? View.VISIBLE : View.GONE);
         spMaxLabel.setVisibility(multiZone ? View.VISIBLE : View.GONE);
+    
+        fanSpeedMin.setVisibility(multiZone ? View.GONE : View.VISIBLE);
+        fanSpeedMinLabel.setVisibility(multiZone ? View.GONE : View.VISIBLE);
+        fanSpeedMax.setVisibility(multiZone ? View.GONE : View.VISIBLE);
+        fanSpeedMaxLabel.setVisibility(multiZone ? View.GONE : View.VISIBLE);
         
     }
 }

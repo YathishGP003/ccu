@@ -3235,15 +3235,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + avgTempEquip.getId() + "\"");
             currentAverageTemp = (currentAverageTemp + avgTemp);
         }
-        for (int k = 0; k < zoneMap.size(); k++) {
-            Equip updatedEquip = new Equip.Builder().setHashMap(zoneMap.get(k)).build();
-            if (updatedEquip.getProfile().contains("SENSE")) {
-                double offset = CCUHsApi.getInstance().readDefaultVal("point and offset and temperature and group == \""+updatedEquip.getGroup()+"\"");
-                Log.i("EachzoneData", "offset = "+offset );
-                offsetAvg = offsetAvg + (offset/10);
-            }
-        }
-        curTemp = currentAverageTemp + offsetAvg;
+
+        curTemp = currentAverageTemp ;
 
         Log.i("EachzoneData", " currentAvg:" + currentAverageTemp);
         final String[] equipId = {p.getId()};

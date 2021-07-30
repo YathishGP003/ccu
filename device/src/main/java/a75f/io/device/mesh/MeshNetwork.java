@@ -207,6 +207,7 @@ public class MeshNetwork extends DeviceNetwork
             if (DLog.isLoggingEnabled()) {
                 sendIETestMessage(systemProfile);
             }
+            return;
         }
     
         if (!LSerial.getInstance().isConnected()) {

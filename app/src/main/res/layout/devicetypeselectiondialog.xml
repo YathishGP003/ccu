@@ -51,6 +51,12 @@
 
     </RelativeLayout>
 
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/layoutHeader"
+        android:overScrollMode="never">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -175,12 +181,13 @@
             </LinearLayout>
 
             <ImageView
-               android:layout_width="12dp"
-               android:layout_height="20dp"
-               android:layout_alignParentEnd="true"
-               android:layout_centerVertical="true"
-               android:layout_marginEnd="96dp"
-               android:src="@drawable/icon_arrowright" />
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="96dp"
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                app:tint="?orange_75f" />
 
             <View
                android:layout_width="match_parent"
@@ -419,6 +426,58 @@
                 android:layout_alignParentBottom="true"/>
         </RelativeLayout>
 
+        <RelativeLayout
+            android:id="@+id/rlbpos"
+            android:layout_width="match_parent"
+            android:layout_height="114dp"
+            android:layout_marginStart="440dp">
+
+            <ImageView
+                android:layout_width="300dp"
+                android:layout_height="90dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginStart="10dp"
+                app:srcCompat="@drawable/bpos_devicetype" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="220dp"
+                android:layout_centerVertical="true"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/textbpos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:text="@string/textbpos"
+                    android:textAppearance="@style/title_normal"/>
+
+                <TextView
+                    android:id="@+id/descbpos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/descbpos"
+                    android:textAppearance="@style/text_label"/>
+
+            </LinearLayout>
+            <ImageView
+                android:id="@+id/nextbpos"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginEnd="96dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                app:tint="?orange_75f" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.1dp"
+                android:background="@color/text_color"
+                android:alpha="0.37"
+                android:layout_alignParentBottom="true"/>
+        </RelativeLayout>
+
         <RadioGroup
             android:id="@+id/deviceTypeSelection"
             android:layout_width="0dp"
@@ -479,7 +538,7 @@
         </RadioGroup>
 
     </LinearLayout>
-
+    </ScrollView>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -506,5 +565,6 @@
             android:text="@string/txt_pair" />
 
     </LinearLayout>
+
 
 </RelativeLayout>

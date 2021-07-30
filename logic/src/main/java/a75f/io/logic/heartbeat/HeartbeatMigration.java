@@ -12,6 +12,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logic.Globals;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
+import a75f.io.logic.util.PreferenceUtil;
 
 public class HeartbeatMigration {
 
@@ -23,10 +24,10 @@ public class HeartbeatMigration {
     }
 
     private void checkForHeartbeatMigration(){
-        if (!CCUHsApi.getInstance().isHeartbeatMigrationDone()) {
+        if (!PreferenceUtil.isHeartbeatMigrationDone()) {
             Log.i(CCU_HEART_BEAT_MIGRATION,"heartbeat migration started ");
             upgradeEquipsWithHeartbeatPoints(CCUHsApi.getInstance());
-            CCUHsApi.getInstance().setHeartbeatMigrationStatus(true);
+            PreferenceUtil.setHeartbeatMigrationStatus(true);
         }
     }
 

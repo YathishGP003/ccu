@@ -1,7 +1,9 @@
 package a75f.io.device.daikin
 
 import a75f.io.device.R
+import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
+import a75f.io.logic.L
 import android.content.Context
 import hu.akarnokd.rxjava3.retrofit.RxJava3CallAdapterFactory
 import okhttp3.Interceptor
@@ -12,11 +14,13 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory
 import java.security.KeyStore
 import java.security.SecureRandom
+import java.security.cert.Certificate
 import java.security.cert.CertificateException
+import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
+import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.*
-import javax.net.ssl.KeyManagerFactory.getDefaultAlgorithm
 
 class IEServiceGenerator {
     private val sslEnabled : Boolean = true
@@ -72,6 +76,8 @@ class IEServiceGenerator {
                     @Throws(CertificateException::class)
                     override fun checkServerTrusted(chain: Array<X509Certificate?>?, authType: String?) {
                         try {
+                            CcuLog.i(L.TAG_CCU_DEVICE, "checkServerTrusted - chain length $chain.size")
+                            CcuLog.i(L.TAG_CCU_DEVICE, Arrays.toString(chain))
                             chain!![0]!!.checkValidity()
                         } catch (e: Exception) {
                             throw CertificateException("Certificate not valid or trusted.")
@@ -124,7 +130,14 @@ class IEServiceGenerator {
 
     fun readKeyStore(context: Context): KeyStore? = KeyStore.getInstance(KeyStore.getDefaultType()).also{
         val inputStream = context.resources.openRawResource(R.raw.root_ca_daikin)
-        it.load(inputStream, null)
+        CcuLog.i(L.TAG_CCU_DEVICE, "Certificate $inputStream")
+        val cf: CertificateFactory = CertificateFactory.getInstance("X.509")
+        val ca: Certificate = inputStream.use { inputStream ->
+            cf.generateCertificate(inputStream)
+        }
+        it.load(null, null)
+        CcuLog.i(L.TAG_CCU_DEVICE,ca.toString())
+        it.setCertificateEntry("ca",ca)
     }
 
 

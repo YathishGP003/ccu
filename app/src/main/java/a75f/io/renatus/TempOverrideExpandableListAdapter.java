@@ -144,7 +144,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     if ((int)getConfigNumVal("enable and th"+expandedListText.substring(2,3),Integer.parseInt(getGroup(listPosition).toString().substring(3))) == 1)
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3)+"\n("+thermistorMapped+")");
                     else NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(2, 3));
-                    txt_calculated_output.setText("" + getPointVal(idMap.get(expandedListText))+" "+CCUHsApi.getInstance().readMapById(equipId).get("unit"));
+                    expandedListTextVal.setText("" + getPointVal(idMap.get(expandedListText))+" "+CCUHsApi.getInstance().readMapById(equipId).get("unit"));
                     spinner_thermistor.setVisibility(View.VISIBLE);
                 }else if (expandedListText.startsWith(siteName)) {
                     NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, expandedListText.substring(siteName.length()+1, expandedListText.length()));
@@ -196,7 +196,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         spinner_relay.setVisibility(View.VISIBLE);
                     }else if (NewexpandedListText.startsWith("CM-th")) {
                         NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Thermistor " + expandedListText.substring(siteName.length()+6, siteName.length()+7));
-                        txt_calculated_output.setText("" + getPointVal(idMap.get(expandedListText))+" Ohm");
+                        expandedListTextVal.setText("" + getPointVal(idMap.get(expandedListText))+" Ohm");
                         spinner_thermistor.setVisibility(View.VISIBLE);
                     }
                 }

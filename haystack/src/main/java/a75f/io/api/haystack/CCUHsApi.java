@@ -187,18 +187,6 @@ public class CCUHsApi
         editor.apply();
     }
 
-    public boolean isHeartbeatMigrationDone() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getBoolean("heartbeatMigration",false);
-    }
-
-    public void setHeartbeatMigrationStatus(boolean isMigrated) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("heartbeatMigration", isMigrated);
-        editor.apply();
-    }
-
     public String getAuthenticationUrl() {
         Log.d("Authentication URL: ","url="+careTakerUrl);
         return careTakerUrl;

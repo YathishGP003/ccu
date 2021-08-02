@@ -2,9 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:id="@+id/main_layout"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_height="match_parent"
-    android:id="@+id/main_layout"
     android:orientation="vertical">
 
     <RelativeLayout
@@ -187,8 +187,8 @@
                             android:textAppearance="@style/label_black" />
 
                         <Spinner
-                            android:id="@+id/targetMinInsideHumidity"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
+                            android:id="@+id/targetMinInsideHumidity"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
@@ -242,6 +242,49 @@
                             android:textSize="16sp" />
 
                     </LinearLayout>
+
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="30dp"
+                        android:text="@string/txt_CCU_occupancy_status"
+                        android:textAppearance="@style/label_black" />
+
+                    <TextView
+                        android:id="@+id/IE_Gateway_Occupancy_Status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:text=""
+                        android:textSize="20sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="30dp"
+                        android:text="@string/txt_GUID_details"
+                        android:textAppearance="@style/label_black" />
+
+                    <TextView
+                        android:id="@+id/GUID_Details"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:text=""
+                        android:textSize="20sp" />
 
                 </LinearLayout>
 
@@ -381,7 +424,6 @@
                             android:layout_gravity="start"
                             android:text="@string/lable_smart_postpurge"
                             android:textAppearance="@style/label_black" />
-
                         <Space
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"

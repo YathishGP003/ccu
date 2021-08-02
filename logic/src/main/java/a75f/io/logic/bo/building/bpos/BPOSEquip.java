@@ -14,10 +14,12 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.BPOSTuners;
 import a75f.io.logic.tuners.TITuners;
 
@@ -59,6 +61,10 @@ public class BPOSEquip {
         if (systemEquip != null && systemEquip.size() > 0) {
             ahuRef = systemEquip.get("id").toString();
         }
+
+        Log.d(LOG_TAG, "config: " + config.gettempOffset() + " - " + config.getautoAway() + " - " +
+                "--" + config.getautoforceOccupied() + " - " + config.getzonePriority());
+
         Equip.Builder b = new Equip.Builder()
                 .setSiteRef(siteRef)
                 .setDisplayName(equipDis)
@@ -71,12 +77,12 @@ public class BPOSEquip {
                 .setTz(tz)
                 .setGroup(String.valueOf(mNodeAddr));
         mEquipRef = CCUHsApi.getInstance().addEquip(b.build());
-        BPOSTuners.addEquipTuners(CCUHsApi.getInstance(), siteRef, siteDis + "-BPOS-" +
-                        mNodeAddr, mEquipRef, roomRef, floorRef, tz);
+
+        BPOSTuners.addEquipTuners(CCUHsApi.getInstance(), siteRef, siteDis , mEquipRef, roomRef, floorRef, tz);
 
 
         Point currentTemp = new Point.Builder()
-                .setDisplayName(siteDis + "-SENSE-" + mNodeAddr + "-currentTemp")
+                .setDisplayName(siteDis + "-BPOS-" + mNodeAddr + "-currentTemp")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -94,7 +100,7 @@ public class BPOSEquip {
         CCUHsApi.getInstance().writeHisValById(ctID, 0.0);
 
         Point humidity = new Point.Builder()
-                .setDisplayName(siteDis + "-SENSE-" + mNodeAddr + "-humidity")
+                .setDisplayName(siteDis + "-BPOS-" + mNodeAddr + "-humidity")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -113,7 +119,7 @@ public class BPOSEquip {
 
 
         Point occupancy = new Point.Builder()
-                .setDisplayName(siteDis + "-SENSE-" + mNodeAddr + "-occupancy")
+                .setDisplayName(siteDis + "-BPOS-" + mNodeAddr + "-occupancy")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -142,8 +148,9 @@ public class BPOSEquip {
                 .setTz(tz)
                 .build();
         String zonePriorityId = CCUHsApi.getInstance().addPoint(zonePriority);
-        CCUHsApi.getInstance().writeDefaultValById(zonePriorityId, (double) config.getPriority().ordinal());
-        CCUHsApi.getInstance().writeHisValById(zonePriorityId, (double) config.getPriority().ordinal());
+        CCUHsApi.getInstance().writeDefaultValById(zonePriorityId,
+                (double) config.getPriority().ordinal());
+        CCUHsApi.getInstance().writeHisValById(zonePriorityId, (double) config.getzonePriority());
 
         Point temperatureOffset = new Point.Builder()
                 .setDisplayName(equipDis + "-temperatureOffset")
@@ -156,7 +163,8 @@ public class BPOSEquip {
                 .setTz(tz)
                 .build();
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
-        CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId, (double) config.gettempOffset());
+        CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId,
+                (double) config.gettempOffset());
 
         Point autoforceoccupied = new Point.Builder()
                 .setDisplayName(equipDis + "-autoforceoccupied")
@@ -169,7 +177,8 @@ public class BPOSEquip {
                 .setTz(tz)
                 .build();
         String autoforceoccupiedId = CCUHsApi.getInstance().addPoint(autoforceoccupied);
-        CCUHsApi.getInstance().writeDefaultValById(autoforceoccupiedId, config.getautoforceOccupied() ? 1.0 : 0.0);
+        CCUHsApi.getInstance().writeDefaultValById(autoforceoccupiedId,
+                config.getautoforceOccupied() ? 1.0 : 0.0);
 
         Point autoforceaway = new Point.Builder()
                 .setDisplayName(equipDis + "-autoforceaway")
@@ -182,7 +191,8 @@ public class BPOSEquip {
                 .setTz(tz)
                 .build();
         String autoforceawayId = CCUHsApi.getInstance().addPoint(autoforceaway);
-        CCUHsApi.getInstance().writeDefaultValById(autoforceawayId, config.getautoAway() ? 1.0 : 0.0);
+        CCUHsApi.getInstance().writeDefaultValById(autoforceawayId, config.getautoAway() ? 1.0 :
+                0.0);
 
         Point equipScheduleType = new Point.Builder()
                 .setDisplayName(equipDis + "-scheduleType")
@@ -244,7 +254,7 @@ public class BPOSEquip {
         CCUHsApi.getInstance().addPoint(desiredTempHeating);
 
         Point equipStatus = new Point.Builder()
-                .setDisplayName(siteDis+"-BPOS-"+mNodeAddr+"-equipStatus")
+                .setDisplayName(siteDis + "-BPOS-" + mNodeAddr + "-equipStatus")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -258,7 +268,7 @@ public class BPOSEquip {
         CCUHsApi.getInstance().writeHisValById(equipStatusId, 0.0);
 
         Point equipStatusMessage = new Point.Builder()
-                .setDisplayName(siteDis+"-BPOS-"+mNodeAddr+"-equipStatusMessage")
+                .setDisplayName(siteDis + "-BPOS-" + mNodeAddr + "-equipStatusMessage")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -273,7 +283,7 @@ public class BPOSEquip {
 
 
         Point zoneDynamicPriorityPoint = new Point.Builder()
-                .setDisplayName(equipDis+"-zoneDynamicPriority")
+                .setDisplayName(equipDis +"-BPOS-" + mNodeAddr + "-zoneDynamicPriority")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -283,10 +293,29 @@ public class BPOSEquip {
                 .setGroup(String.valueOf(mNodeAddr))
                 .setTz(tz)
                 .build();
-        String zoneDynamicPriorityPointID = CCUHsApi.getInstance().addPoint(zoneDynamicPriorityPoint);
+        String zoneDynamicPriorityPointID =
+                CCUHsApi.getInstance().addPoint(zoneDynamicPriorityPoint);
         CCUHsApi.getInstance().writeHisValById(zoneDynamicPriorityPointID, 10.0);
 
-        String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, mEquipRef,
+
+        Point occupancyDetection = new Point.Builder()
+                .setDisplayName(equipDis + "-BPOS-" + mNodeAddr + "-occupancyDetection")
+                .setEquipRef(mEquipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef).setHisInterpolate("cov")
+                .addMarker("occupancy").addMarker("detection").addMarker("bpos").addMarker("his").addMarker("zone")
+                .setGroup(String.valueOf(mNodeAddr))
+                .setEnums("false,true")
+                .setTz(tz)
+                .build();
+        String occupancyDetectionId = CCUHsApi.getInstance().addPoint(occupancyDetection);
+        CCUHsApi.getInstance().writeHisValById(occupancyDetectionId, 0.0);
+
+
+
+        String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis
+                , mEquipRef,
                 siteRef, roomRef, floorRef, mNodeAddr, "bpos", tz, false));
 
         SmartNode device = new SmartNode(mNodeAddr, siteRef, floorRef, roomRef, mEquipRef);
@@ -297,6 +326,7 @@ public class BPOSEquip {
         device.desiredTemp.setPointRef(dtId);
         device.desiredTemp.setEnabled(true);
         device.addSensor(Port.SENSOR_RH, humidityId);
+        device.addSensor(Port.SENSOR_OCCUPANCY,occupancyId);
 
 
         device.addPointsToDb();
@@ -307,7 +337,7 @@ public class BPOSEquip {
         setDesiredTempHeating(70.0);
         setHumidity(0);
 
-       // setScheduleStatus("");
+        // setScheduleStatus("");
 
 
         CCUHsApi.getInstance().syncEntityTree();
@@ -317,21 +347,48 @@ public class BPOSEquip {
 
     public BPOSConfiguration getbposconfiguration() {
         BPOSConfiguration bposconfig = new BPOSConfiguration();
-        bposconfig.settempOffset(CCUHsApi.getInstance().readDefaultVal("point and temperature and offset and equipRef == \"" + mEquipRef + "\""));
-        bposconfig.setzonePriority(CCUHsApi.getInstance().readDefaultVal("point and priority and equipRef == \"" + mEquipRef + "\"").intValue());
-        bposconfig.setautoforceOccupied(CCUHsApi.getInstance().readDefaultVal("point and autoforceoccupied and equipRef == \"" + mEquipRef + "\"") > 0);
-        bposconfig.setautoforceOccupied(CCUHsApi.getInstance().readDefaultVal("point and autoforceawayll and equipRef == \"" + mEquipRef + "\"") > 0);
-
+        bposconfig.settempOffset(CCUHsApi.getInstance().readDefaultVal("point and temperature and" +
+                " offset and equipRef == \"" + mEquipRef + "\""));
+        bposconfig.setzonePriority(CCUHsApi.getInstance().readDefaultVal("point and priority and " +
+                "config  and equipRef == \"" + mEquipRef + "\"").intValue());
+        bposconfig.setautoforceOccupied(CCUHsApi.getInstance().readDefaultVal("point and " +
+                "autoforceoccupied and equipRef == \"" + mEquipRef + "\"") > 0);
+        bposconfig.setautoAway(CCUHsApi.getInstance().readDefaultVal("point and autoforceaway and" +
+                " equipRef == \"" + mEquipRef + "\"") > 0);
+        Log.d(LOG_TAG,
+                "config: " + bposconfig.gettempOffset() + " - " + bposconfig.getautoAway() + " - " +
+                "--" + bposconfig.getautoforceOccupied() + " - " + bposconfig.getzonePriority());
         return bposconfig;
     }
 
-    public void update(ProfileType type, int node, BPOSConfiguration config, String floorRef, String roomRef) {
+    public void update(ProfileType type, int node, BPOSConfiguration config, String floorRef,
+                       String roomRef) {
 
+        HashMap tempOffset = CCUHsApi.getInstance().read("point and temperature and offset and " +
+                "equipRef == \"" + mEquipRef + "\"");
+        HashMap zonepriority = CCUHsApi.getInstance().read("point and priority and config and " +
+                "equipRef == \"" + mEquipRef + "\"");
+        HashMap autoaway = CCUHsApi.getInstance().read("point and autoforceaway and config and " +
+                "equipRef == \"" + mEquipRef + "\"");
+        HashMap autooccupied = CCUHsApi.getInstance().read("point and autoforceoccupied and " +
+                "config and equipRef == \"" + mEquipRef + "\"");
+
+        CCUHsApi.getInstance().writeDefaultValById(tempOffset.get("id").toString(),
+                config.gettempOffset());
+        CCUHsApi.getInstance().writeDefaultValById(zonepriority.get("id").toString(),
+                (double) config.getzonePriority());
+        CCUHsApi.getInstance().writeDefaultValById(autoaway.get("id").toString(),
+                config.getautoAway() ? 1.0 : 0.0);
+        CCUHsApi.getInstance().writeDefaultValById(autooccupied.get("id").toString(),
+                config.getautoforceOccupied() ? 1.0 : 0.0);
+
+        CCUHsApi.getInstance().syncEntityTree();
     }
 
 
     public double getCurrentTemp() {
-        currentTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor " +
+        currentTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor" +
+                " " +
                 "and current and group == \"" + mNodeAddr + "\"");
         return currentTemp;
     }
@@ -343,7 +400,8 @@ public class BPOSEquip {
     }
 
     public double getHumidity() {
-        humidity = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity and sensor " +
+        humidity = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity and " +
+                "sensor " +
                 "and current and group == \"" + mNodeAddr + "\"");
         return humidity;
     }
@@ -403,7 +461,8 @@ public class BPOSEquip {
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL,
+        CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id),
+                HayStackConstants.DEFAULT_POINT_LEVEL,
                 HNum.make(desiredTemp), HNum.make(0));
 
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
@@ -435,20 +494,51 @@ public class BPOSEquip {
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL,
+        CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id),
+                HayStackConstants.DEFAULT_POINT_LEVEL,
                 HNum.make(desiredTemp), HNum.make(0));
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
     }
 
-    public void setScheduleStatus(String status)
-    {
+    public void setScheduleStatus(String status) {
         ArrayList points = CCUHsApi.getInstance().readAll("point and scheduleStatus and group " +
-                "== \""+mNodeAddr+"\"");
-        String id = ((HashMap)points.get(0)).get("id").toString();
+                "== \"" + mNodeAddr + "\"");
+        String id = ((HashMap) points.get(0)).get("id").toString();
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
         CCUHsApi.getInstance().writeDefaultValById(id, status);
+    }
+
+    public void setStatus(double status, boolean emergency) {
+        if (getStatus() != status) {
+            CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + mNodeAddr + "\"", status);
+        }
+
+        String message;
+        if (emergency) {
+            message = (status == 0 ? "Recirculating Air" : status == 1 ? "Emergency Cooling" :
+                    "Emergency Heating");
+        } else {
+            if (ScheduleProcessJob.getSystemOccupancy() == Occupancy.PRECONDITIONING) {
+                message = "In Preconditioning ";
+            } else {
+                message = (status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" :
+                        "Warming Space");
+            }
+        }
+
+        String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message" +
+                " and writable and group == \"" + mNodeAddr + "\"");
+        if (!curStatus.equals(message)) {
+            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and" +
+                    " group == \"" + mNodeAddr + "\"", message);
+        }
+    }
+
+    public double getStatus() {
+        return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == " +
+                "\"" + mNodeAddr + "\"");
     }
 
 }

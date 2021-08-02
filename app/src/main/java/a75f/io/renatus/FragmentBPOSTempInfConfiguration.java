@@ -38,6 +38,7 @@ import butterknife.OnClick;
 public class FragmentBPOSTempInfConfiguration extends BaseDialogFragment {
 
     public static String ID = FragmentBPOSTempInfConfiguration.class.getSimpleName();
+    private static String LOG_TAG = "FragmentBPOSTempInfConfiguration";
     static final int TEMP_OFFSET_LIMIT = 100;
     private short    mNodeAddress;
     String floorRef;
@@ -111,7 +112,7 @@ public class FragmentBPOSTempInfConfiguration extends BaseDialogFragment {
         super.onViewCreated(view, savedInstanceState);
 
         mBPOSProfile =(BPOSProfile) L.getProfile(mNodeAddress);
-        mBPOSProfile = new BPOSProfile();
+
         mTemperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];
         for (int nNum = 0; nNum < TEMP_OFFSET_LIMIT * 2 + 1; nNum++)
@@ -121,7 +122,19 @@ public class FragmentBPOSTempInfConfiguration extends BaseDialogFragment {
         mTemperatureOffset.setMaxValue(TEMP_OFFSET_LIMIT * 2);
         mTemperatureOffset.setValue(TEMP_OFFSET_LIMIT);
         mTemperatureOffset.setWrapSelectorWheel(false);
-        mZonePriority.setSelection(2);
+
+        if(mBPOSProfile != null){
+            mBPOSConfig = (BPOSConfiguration) mBPOSProfile.getProfileConfiguration(mNodeAddress);
+
+            mTemperatureOffset.setValue((int) (mBPOSConfig.gettempOffset() + TEMP_OFFSET_LIMIT));
+            mZonePriority.setSelection(mBPOSConfig.getzonePriority());
+            mAutoAway.setChecked(mBPOSConfig.getautoAway());
+            mAutoforceoccupied.setChecked(mBPOSConfig.getautoforceOccupied());
+        }else {
+            mBPOSProfile = new BPOSProfile();
+            mZonePriority.setSelection(2);
+        }
+
     }
 
     @OnClick(R.id.setBtn)
@@ -156,6 +169,7 @@ public class FragmentBPOSTempInfConfiguration extends BaseDialogFragment {
         BPOSConfiguration bpos = new BPOSConfiguration();
         bpos.settempOffset(mTemperatureOffset.getValue() - TEMP_OFFSET_LIMIT);
         bpos.setPriority(ZonePriority.values()[mZonePriority.getSelectedItemPosition()]);
+        bpos.setzonePriority(mZonePriority.getSelectedItemPosition());
         bpos.setautoforceOccupied(mAutoforceoccupied.isChecked());
         bpos.setautoAway(mAutoAway.isChecked());
 
@@ -163,11 +177,14 @@ public class FragmentBPOSTempInfConfiguration extends BaseDialogFragment {
         mBPOSProfile.getProfileConfiguration().put(mNodeAddress,bpos);
 
         if(mBPOSConfig == null ){
+            Log.d(LOG_TAG, "Creating new config");
             mBPOSProfile.addBPOSEquip(ProfileType.BPOS,mNodeAddress,bpos,floorRef,zoneRef);
         }else{
+            Log.d(LOG_TAG, "Updating config");
             mBPOSProfile.updateBPOS(ProfileType.BPOS,mNodeAddress,bpos,floorRef,zoneRef);
         }
         L.ccu().zoneProfiles.add(mBPOSProfile);
+
         CcuLog.d(L.TAG_CCU_UI, "Set BPOS Config: Profiles - " + L.ccu().zoneProfiles.size());
 
     }

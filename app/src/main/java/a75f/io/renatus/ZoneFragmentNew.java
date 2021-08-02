@@ -3464,11 +3464,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
         TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
-        TextView textViewLabel3 = viewPointRow2.findViewById(R.id.text_point1label);
+
 
         TextView textViewValue1 = viewPointRow1.findViewById(R.id.text_point1value);
         TextView textViewValue2 = viewPointRow1.findViewById(R.id.text_point2value);
-        TextView textViewValue3 = viewPointRow2.findViewById(R.id.text_point1value);
+
 
 
         textViewTitle.setText(point.get("Profile").toString() + " (" + nodeAddress + ")");
@@ -3476,19 +3476,28 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
 
 
-        textViewLabel2.setText("Humidity: ");
-        textViewValue2.setText(point.get("humidity").toString());
+        textViewLabel1.setText("Humidity: ");
+        textViewValue1.setText(point.get("humidity").toString());
 
 
-        textViewLabel3.setText("Force Occupied: ");
-        textViewValue3.setText(point.get("forceoccupied").toString());
+        double occupied = (double) point.get("forceoccupied");
+        if(occupied == (double)Occupancy.FORCEDOCCUPIED.ordinal()){
+            textViewLabel2.setText("Force Occupied: ");
+            textViewValue2.setText("YES");
+        }else if(occupied == (double)Occupancy.AUTOFORCEOCCUPIED.ordinal()){
+            textViewLabel2.setText("Force Occupied(AUTO): ");
+            textViewValue2.setText("YES");
+        }else{
+            textViewLabel2.setText("Force Occupied: ");
+            textViewValue2.setText("NO");
+        }
 
 
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
         linearLayoutZonePoints.addView(viewPointRow1);
        // viewPointRow2.setPadding(0, 0, 0, 40);
-        linearLayoutZonePoints.addView(viewPointRow2);
+       // linearLayoutZonePoints.addView(viewPointRow2);
     }
 
 }

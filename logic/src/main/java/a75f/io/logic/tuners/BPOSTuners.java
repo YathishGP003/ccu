@@ -14,12 +14,12 @@ public class BPOSTuners {
 
     public static void addDefaultBPOSTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,
                                           String tz) {
-        HashMap tuner = CCUHsApi.getInstance().read("point and tuner and default and ti");
+        HashMap tuner = CCUHsApi.getInstance().read("point and tuner and default and bpos");
         if (tuner != null && tuner.size() > 0) {
             CcuLog.d(L.TAG_CCU_SYSTEM, "Default BPOS Tuner points already exist");
             return;
         }
-        CcuLog.d(L.TAG_CCU_SYSTEM,"Default TI Tuner  does not exist. Create Now");
+        CcuLog.d(L.TAG_CCU_SYSTEM,"Default BPOS Tuner  does not exist. Create Now");
         Point zonePrioritySpread = new Point.Builder()
                 .setDisplayName(equipDis+"-BPOS-"+"zonePrioritySpread")
                 .setSiteRef(siteRef)
@@ -165,7 +165,7 @@ public class BPOSTuners {
                 .setTz(tz)
                 .build();
         String forcedOccupiedTimerid = hayStack.addPoint(forcedOccupiedTimer);
-        hayStack.writePointForCcuUser(forcedOccupiedTimerid, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.VAV_INTEGRAL_TIMEOUT, 0);
+        hayStack.writePointForCcuUser(forcedOccupiedTimerid, TunerConstants.VAV_DEFAULT_VAL_LEVEL,120.0     , 0);
         hayStack.writeHisValById(forcedOccupiedTimerid, TunerConstants.VAV_INTEGRAL_TIMEOUT);
 
 
@@ -180,7 +180,7 @@ public class BPOSTuners {
                 .setTz(tz)
                 .build();
         String autoAwayZoneTimerid = hayStack.addPoint(autoAwayZoneTimer);
-        hayStack.writePointForCcuUser(autoAwayZoneTimerid, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.VAV_INTEGRAL_TIMEOUT, 0);
+        hayStack.writePointForCcuUser(autoAwayZoneTimerid, TunerConstants.VAV_DEFAULT_VAL_LEVEL,30.0, 0);
         hayStack.writeHisValById(autoAwayZoneTimerid, TunerConstants.VAV_INTEGRAL_TIMEOUT);
 
 
@@ -195,7 +195,7 @@ public class BPOSTuners {
                 .setTz(tz)
                 .build();
         String autoAwayZoneSetbackTempid = hayStack.addPoint(autoAwayZoneSetbackTemp);
-        hayStack.writePointForCcuUser(autoAwayZoneSetbackTempid, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.VAV_INTEGRAL_TIMEOUT, 0);
+        hayStack.writePointForCcuUser(autoAwayZoneSetbackTempid, TunerConstants.VAV_DEFAULT_VAL_LEVEL,2.0, 0);
         hayStack.writeHisValById(autoAwayZoneSetbackTempid, TunerConstants.VAV_INTEGRAL_TIMEOUT);
 
 
@@ -203,7 +203,7 @@ public class BPOSTuners {
 
     public static void addEquipTuners(CCUHsApi hayStack, String siteRef, String equipdis, String equipref,
                                         String roomRef, String floorRef, String tz) {
-        Log.d("CCU", "addEquipTiTuners for " + equipdis);
+        Log.d("CCU", "addEquipTuners for " + equipdis);
 
         ZoneTuners.addZoneTunersForEquip(hayStack, siteRef, equipdis, equipref, roomRef, floorRef, tz);
         Point zonePrioritySpread = new Point.Builder()
@@ -371,7 +371,7 @@ public class BPOSTuners {
                 .setTz(tz)
                 .build();
         String forcedOccupiedTimerid = hayStack.addPoint(forcedOccupiedTimer);
-        hayStack.writePointForCcuUser(forcedOccupiedTimerid, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.VAV_INTEGRAL_TIMEOUT, 0);
+        hayStack.writePointForCcuUser(forcedOccupiedTimerid, TunerConstants.VAV_DEFAULT_VAL_LEVEL,120.0, 0);
         hayStack.writeHisValById(forcedOccupiedTimerid, TunerConstants.VAV_INTEGRAL_TIMEOUT);
 
 
@@ -386,7 +386,7 @@ public class BPOSTuners {
                 .setTz(tz)
                 .build();
         String autoAwayZoneTimerid = hayStack.addPoint(autoAwayZoneTimer);
-        hayStack.writePointForCcuUser(autoAwayZoneTimerid, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.VAV_INTEGRAL_TIMEOUT, 0);
+        hayStack.writePointForCcuUser(autoAwayZoneTimerid, TunerConstants.VAV_DEFAULT_VAL_LEVEL,30.0, 0);
         hayStack.writeHisValById(autoAwayZoneTimerid, TunerConstants.VAV_INTEGRAL_TIMEOUT);
 
 
@@ -401,7 +401,7 @@ public class BPOSTuners {
                 .setTz(tz)
                 .build();
         String autoAwayZoneSetbackTempid = hayStack.addPoint(autoAwayZoneSetbackTemp);
-        hayStack.writePointForCcuUser(autoAwayZoneSetbackTempid, TunerConstants.VAV_DEFAULT_VAL_LEVEL,TunerConstants.VAV_INTEGRAL_TIMEOUT, 0);
+        hayStack.writePointForCcuUser(autoAwayZoneSetbackTempid, TunerConstants.VAV_DEFAULT_VAL_LEVEL,2.0, 0);
         hayStack.writeHisValById(autoAwayZoneSetbackTempid, TunerConstants.VAV_INTEGRAL_TIMEOUT);
 
     }

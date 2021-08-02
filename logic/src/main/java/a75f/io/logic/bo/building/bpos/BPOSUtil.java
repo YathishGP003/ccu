@@ -17,9 +17,8 @@ public class BPOSUtil {
                 "message and equipRef == \"" + equipID + "\"");
         double humidity = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity and sensor " +
                 "and current and group == \"" + equipID + "\"");
-        boolean forceoccupied = CCUHsApi.getInstance().readHisValByQuery("point and autoforceoccupied " +
-                "and  group == \"" + equipID + "\"")>0;
-
+        double forceoccupied = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and sensor and " +
+                "equipRef == \"" + equipID + "\"");
 
 
         if (equipStatusPoint.length() > 0) {
@@ -28,10 +27,7 @@ public class BPOSUtil {
             points.put("Status", "OFF");
         }
         points.put("humidity",String.valueOf(humidity));
-        if(forceoccupied){
-            points.put("forceoccupied","YES");
-        }else
-            points.put("forceoccupied","NO");
+        points.put("forceoccupied",forceoccupied);
 
         return points;
     }

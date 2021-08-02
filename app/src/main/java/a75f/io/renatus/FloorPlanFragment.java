@@ -1307,6 +1307,7 @@ public class FloorPlanFragment extends Fragment {
         boolean isCCUPaired = false;
         boolean isPaired = false;
         boolean isSensePaired = false;
+        boolean isBPOSPaired = false;
 
         if (zoneEquips.size() > 0) {
             isPaired = true;
@@ -1323,10 +1324,13 @@ public class FloorPlanFragment extends Fragment {
                 if (zoneEquips.get(i).getProfile().contains("SENSE")) {
                     isSensePaired = true;
                 }
+                if (zoneEquips.get(i).getProfile().contains("BPOS")) {
+                    isBPOSPaired = true;
+                }
             }
         }
 
-        if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isSensePaired) {
+        if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isSensePaired && !isBPOSPaired) {
             short meshAddress = L.generateSmartNodeAddress();
             if (mFloorListAdapter.getSelectedPostion() == -1) {
                 if (L.ccu().oaoProfile != null) {
@@ -1362,6 +1366,9 @@ public class FloorPlanFragment extends Fragment {
             }
             if (isSensePaired) {
                 Toast.makeText(getActivity(), "HyperStatSense is already paired in this zone", Toast.LENGTH_LONG).show();
+            }
+            if (isBPOSPaired) {
+                Toast.makeText(getActivity(), "BPOS is already paired in this zone", Toast.LENGTH_LONG).show();
             }
         }
     }

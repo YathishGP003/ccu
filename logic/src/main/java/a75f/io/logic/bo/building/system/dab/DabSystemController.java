@@ -121,7 +121,8 @@ public class DabSystemController extends SystemController
                                                            .getInstance()
                                                            .readAllEntities("(equip and zone and dab) or " +
                                                                             "(equip and zone and dualDuct) or " +
-                                                                            "(equip and zone and ti)"
+                                                                            "(equip and zone and ti)"+
+                                                                   "(equip and zone and bpos)"
         );
     
         updateSystemTempHumidity(allEquips);

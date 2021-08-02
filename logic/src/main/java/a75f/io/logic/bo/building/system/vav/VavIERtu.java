@@ -673,11 +673,10 @@ public class VavIERtu extends VavSystemProfile
     
             if (!cmdFanSpeed.isEmpty()) {
                 hayStack.deleteEntityTree(cmdFanSpeed.get("id").toString());
-                deleteFanSpeedConfigPoints(hayStack);
             }
             
-            if (cmdStaticPressure.isEmpty()) {
-
+            if (cmdStaticPressure.isEmpty() && getConfigEnabled("fan") > 0) {
+                
                 Point staticPressure = new Point.Builder()
                                       .setDisplayName(systemEquip.getDisplayName()+"-"+"ductStaticPressure")
                                       .setSiteRef(systemEquip.getSiteRef())
@@ -687,18 +686,19 @@ public class VavIERtu extends VavSystemProfile
                                       .setUnit("inch wc").setTz(systemEquip.getTz())
                                       .build();
                 hayStack.addPoint(staticPressure);
-                createStaticPressureConfigPoints(systemEquip.getSiteRef(), systemEquip.getDisplayName(),
-                                                 systemEquip.getId(), systemEquip.getTz(), hayStack);
+                
             }
+            deleteFanSpeedConfigPoints(hayStack);
+            createStaticPressureConfigPoints(systemEquip.getSiteRef(), systemEquip.getDisplayName(),
+                                             systemEquip.getId(), systemEquip.getTz(), hayStack);
             
             
         } else {
             if (!cmdStaticPressure.isEmpty()) {
                 CCUHsApi.getInstance().deleteEntityTree(cmdStaticPressure.get("id").toString());
             }
-            deleteStaticPressureConfigPoints(hayStack);
     
-            if (cmdFanSpeed.isEmpty()) {
+            if (cmdFanSpeed.isEmpty() && getConfigEnabled("fan") > 0) {
                 Point fanSpeedCmd = new Point.Builder()
                                         .setDisplayName(systemEquip.getDisplayName()+"-"+"fanSpeed")
                                         .setSiteRef(systemEquip.getSiteRef())
@@ -708,9 +708,10 @@ public class VavIERtu extends VavSystemProfile
                                         .setUnit("%").setTz(systemEquip.getTz())
                                         .build();
                 hayStack.addPoint(fanSpeedCmd);
-                createFanSpeedConfigPoints(systemEquip.getSiteRef(), systemEquip.getDisplayName(), systemEquip.getId(),
-                                           systemEquip.getTz(), hayStack);
             }
+            deleteStaticPressureConfigPoints(hayStack);
+            createFanSpeedConfigPoints(systemEquip.getSiteRef(), systemEquip.getDisplayName(), systemEquip.getId(),
+                                       systemEquip.getTz(), hayStack);
         }
         CCUHsApi.getInstance().syncEntityTree();
     }
@@ -757,6 +758,8 @@ public class VavIERtu extends VavSystemProfile
     
     private void createStaticPressureConfigPoints(String siteRef, String equipDis, String equipRef, String tz,
                                             CCUHsApi hayStack) {
+        CcuLog.i(L.TAG_CCU_SYSTEM," createStaticPressureConfigPoints ");
+        
         Point minStaticPressure = new Point.Builder()
                                       .setDisplayName(equipDis+"-"+"minStaticPressure")
                                       .setSiteRef(siteRef)
@@ -785,11 +788,13 @@ public class VavIERtu extends VavSystemProfile
     private void deleteStaticPressureConfigPoints(CCUHsApi hayStack) {
         HashMap spMin = hayStack.read("system and config and staticPressure and min and ie");
         if (!spMin.isEmpty()) {
+            CcuLog.i(L.TAG_CCU_SYSTEM," deleteStaticPressureConfigPoints "+spMin);
             hayStack.deleteWritablePoint(spMin.get("id").toString());
         }
         
         HashMap spMax = hayStack.read("system and config and staticPressure and max and ie");
         if (!spMax.isEmpty()) {
+            CcuLog.i(L.TAG_CCU_SYSTEM," deleteStaticPressureConfigPoints "+spMax);
             hayStack.deleteWritablePoint(spMax.get("id").toString());
         }
     }

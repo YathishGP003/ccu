@@ -18,7 +18,7 @@ import a75f.io.api.haystack.Zone;
 
 public class TestCcuHsApi {
     
-    @Test @Ignore("Not a unit test; only for visualizing data with printlns")
+    @Test //@Ignore("Not a unit test; only for visualizing data with printlns")
     public void testSite()
     {
         CCUHsApi hayStack = new CCUHsApi();
@@ -143,6 +143,7 @@ public class TestCcuHsApi {
                                     .setRoomRef(zoneRef)
                                     .setDeviceRef(deviceRef)
                                     .setFloorRef(floorRef)
+                                    .setPort("TH1_IN")
                                     .addMarker("discharge").addMarker("physical")
                                     .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
                                     .setTz("Chicago")
@@ -151,7 +152,7 @@ public class TestCcuHsApi {
         
         hayStack.addPoint(testRawPoint);
         
-        long time1 = System.currentTimeMillis();
+        /*long time1 = System.currentTimeMillis();
         ArrayList<HashMap> p = hayStack.readAll("point and temp4000 and logical");
         long time2 = System.currentTimeMillis();
         HashMap p1 = hayStack.read("point and temp4000 and logical");
@@ -159,7 +160,10 @@ public class TestCcuHsApi {
         long time3 = System.currentTimeMillis();
         
         System.out.println(time2-time1);
-        System.out.println(time3-time2);
+        System.out.println(time3-time2);*/
+        
+        HashMap rawPoint = hayStack.read("physical and port == \""+"@TH1_IN"+"\"");
+        System.out.println(rawPoint);
     
     }
     

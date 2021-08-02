@@ -1,37 +1,68 @@
- - Merged PR 1578: CCU : In zone page UI current temp should be added again with offset as device is sending the calculated values to CCU.
- - temp offset is not added
- - Merged PR 1577: Missed changes
- - Missed changes
- - Merged PR 1500: 7155 : CCU : Reconfiguration of Hyperstatsense
- - resolving merge conflict
- - Merge branches '7155-CCU_Reconfiguration_of_Hyperstatsense' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into 7155-CCU_Reconfiguration_of_Hyperstatsense
- - Merged PR 1576: Profile should override the method to get equip profile.
- - Merged PR 1575: Change pm sensor unit
- - Merged PR 1530: Modbus points update issue at system level
- - config selection retain
- - Merged PR 1555: Resolved UI Issue
- - changed to schedule sync
- - Profile should override the method to get equip profile. HyperSense wasn't doing that. It resulted in failure of BuildingProcessJob and history sync.
- - Change pm sensor unit
- - syncing with both
- - Merged PR 1497: 7628 - CCU : Daikin theme support to be added for hyperstat sense profile
- - Resolved UI Issue
- - Alignment corrected
- - Merge branches 'bug/sdev/7628_Daiken_theme_for_hyperstat_Sense' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/sdev/7628_Daiken_theme_for_hyperstat_Sense
- - logs for temp off issue
- - removal of unused code
- - Logical points created
- - draft
- - updating the logical point
- - Merge branches '7155-CCU_Reconfiguration_of_Hyperstatsense' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into 7155-CCU_Reconfiguration_of_Hyperstatsense
- - logical point creation
- - Removed zone marker for collecting the modbus points at system level
- - Removed zone marker for collecting the modbus points at system level
- - Pulled master
- - Merge branches 'bug/sdev/7628_Daiken_theme_for_hyperstat_Sense' and 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into bug/sdev/7628_Daiken_theme_for_hyperstat_Sense
- - Name of the sensor set to bold and alligned
- - Spinner selection is retained even after disabling the toggle
- - Daikin theme handled for hyperstat sense
- - Complete reconfiguration
- - offset and toggle done
- - draft
+ - Merged PR 1634: Remove humidifier point, fan status fix and make occStatus point interpolated
+ - Resolve merge conflicts
+ - Remove humidifier point, fan status fix and make occStatus point interpolated
+ - Merged PR 1627: Daikin IE profile
+ - Merged PR 1633: Dcwb algo fix
+ - Remove humidifier point, fan status fix and make occStatus point interpolated
+ - Merged PR 1607: OTP generation for adding/replacing CCU
+ - Pulling out Shared pref related code from CCUHsApi to PreferanceUtil
+ - Dcwb algo fix
+ - Merge master
+ - Handle fanSpeed based on staticPressure point
+ - Skip sending ccu activation message when IE profile is configured
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6925_OTP_Generation
+ - Merged PR 1506: OAO damper opened for Economization, DCV Ventilation & Limited by MAT
+ - Fixes for QA observations
+ - Added code to persist OTP in shared pref
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6929_OAO_damper
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6925_OTP_Generation
+ - Email restriction if otp is not sent to email when generated.
+ - Merged PR 1553: BPOS UI Implementation
+ - Added test support
+ - Fanspeed related changes
+ - Handled the null pointer exception when no oao is paired in migration task
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6929_OAO_damper
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6925_OTP_Generation
+ - otp generation
+ - zone pririty with normal as default
+ - Merged PR 1582: 7755 :CCU : In zone page UI current temp should be added again with offset as device is sending the calculated values to CCU.
+ - Update occupancy calculation for DaikinIE
+ - Update 'PUT' request content type and added delay between write/reads
+ - Updated the cur temp
+ - Add eth network interface and ip route
+ - Merge branch 'master' into story/samjith/daikin_ie_profile
+ - Update fanSpeed point when multizone mode changed
+ - BPOS UI
+ - Fan speed UI and points added
+ - to enable dcv added another check to see if co2 is more than threshold
+ - to enable dcv added another check to see if co2 is more than threshold
+ - otp generation
+ - Fixed DCV available point's value
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6929_OAO_damper
+ - Initial screen of otp generation
+ - Initial screen of otp generation
+ - UI Implementation
+ - Fixed QA issues
+ - Merge branch 'master' into story/samjith/daikin_ie_profile
+ - WIP
+ - Added migration for oao damper opened reason
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6929_OAO_damper
+ - Added migration for oao damper opened reason
+ - Added migration for oao damper opened reason
+ - Free cooling points for OAO- MAT and DCV. Also mogration job to include these points for previously paired OAOs.
+ - Connection timeout for IE
+ - Merged PR 1459: Implemented Daikin IE profile UI
+ - Merge branch 'master' into story/samjith/daikin_ie_profile
+ - Enabled the Ip edit option for testing
+ - Updating Daikin UI for existing profile
+ - WIP
+ - Updating Daikin UI for existing profile
+ - Merge branch 'story/samjith/daikin_ie_profile' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/samjith/daikin_ie_profile
+ - refactor
+ - Merge branch 'master' into story/samjith/daikin_ie_profile
+ - Merge master
+ - change tags
+ - Implement fetch messages
+ - Fix request formatting issue, handle IE url update and many other small things
+ - Update functions kotlin implementation
+ - add macAddress point and update tags

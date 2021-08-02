@@ -26,6 +26,15 @@ public class RxjavaUtil {
                   .subscribe();
     }
     
+    public static Disposable executeBackgroundWithDisposable(Runnable function) {
+        return Completable.fromCallable(() -> {
+                        function.run();
+                        return true;
+                    })
+                  .subscribeOn(Schedulers.io())
+                  .subscribe();
+    }
+    
     /**
      * RxJava based alternative to async task. (Risky !- Does not handle Disposable)
      * @param preExecuteFunction  - Executed on main/host thread

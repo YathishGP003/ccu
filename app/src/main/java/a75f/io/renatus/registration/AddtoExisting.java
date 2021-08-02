@@ -108,7 +108,6 @@ public class AddtoExisting extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,6 +118,9 @@ public class AddtoExisting extends Fragment {
         }
     }
 
+    HRef siteId;
+    String site_Id;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -126,133 +128,136 @@ public class AddtoExisting extends Fragment {
         //((FreshRegistration)getActivity()).showIcons(false);
         View rootView = inflater.inflate(R.layout.fragment_addtoexisting, container, false);
 
-        HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
-        String site_Id = StringUtils.prependIfMissing(siteId.toString(), "@");
-        Log.e("InsideAddtoExist", "siteId-onCreateView " + siteId);
-        Log.e("InsideAddtoExist", "site_Id-onCreateView " + site_Id);
+        try {
+            siteId = CCUHsApi.getInstance().getSiteIdRef();
+            site_Id = StringUtils.prependIfMissing(siteId.toString(), "@");
+            Log.e("InsideAddtoExist", "siteId-onCreateView " + siteId);
+            Log.e("InsideAddtoExist", "site_Id-onCreateView " + site_Id);
 
-        //Creating the LayoutInflater instance
-        LayoutInflater li = getLayoutInflater();
-        toastLayout = li.inflate(R.layout.custom_toast_layout,(ViewGroup) rootView.findViewById(R.id.custom_toast_layout));
-        toast_Fail = li.inflate(R.layout.custom_toast_layout_failed,(ViewGroup) rootView.findViewById(R.id.custom_toast_layout_fail));
+            //Creating the LayoutInflater instance
+            LayoutInflater li = getLayoutInflater();
+            toastLayout = li.inflate(R.layout.custom_toast_layout, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout));
+            toast_Fail = li.inflate(R.layout.custom_toast_layout_failed, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_fail));
 
-        mContext = getContext().getApplicationContext();
+            mContext = getContext().getApplicationContext();
 
-        imageGoback = rootView.findViewById(R.id.imageGoback);
+            imageGoback = rootView.findViewById(R.id.imageGoback);
 
-        //mTextInputSiteId = rootView.findViewById(R.id.textInputSiteID);
-        //mSiteId = rootView.findViewById(R.id.editSiteID);
+            //mTextInputSiteId = rootView.findViewById(R.id.textInputSiteID);
+            //mSiteId = rootView.findViewById(R.id.editSiteID);
 
-        mTextInputEmail = rootView.findViewById(R.id.textInputEmail);
-        mSiteEmailId = rootView.findViewById(R.id.editFacilityEmail);
+            mTextInputEmail = rootView.findViewById(R.id.textInputEmail);
+            mSiteEmailId = rootView.findViewById(R.id.editFacilityEmail);
 
-        mTextInputPass = rootView.findViewById(R.id.textInputPassword);
-        mPassword = rootView.findViewById(R.id.editFacilityPass);
+            mTextInputPass = rootView.findViewById(R.id.textInputPassword);
+            mPassword = rootView.findViewById(R.id.editFacilityPass);
 
-        mNext1 = rootView.findViewById(R.id.buttonNext1);
-        mNext2 = rootView.findViewById(R.id.buttonNext2);
+            mNext1 = rootView.findViewById(R.id.buttonNext1);
+            mNext2 = rootView.findViewById(R.id.buttonNext2);
 
-        mProgressDialog = rootView.findViewById(R.id.progressbar);
+            mProgressDialog = rootView.findViewById(R.id.progressbar);
 
-        //mTextInputSiteId.setHintEnabled(false);
-        mTextInputEmail.setHintEnabled(false);
-        mTextInputPass.setHintEnabled(false);
-
-
-        //mTextInputSiteId.setErrorEnabled(true);
-        mTextInputEmail.setErrorEnabled(true);
-        mTextInputPass.setErrorEnabled(true);
-
-        //mTextInputSiteId.setError("");
-        mTextInputEmail.setError("");
-        mTextInputPass.setError("");
+            //mTextInputSiteId.setHintEnabled(false);
+            mTextInputEmail.setHintEnabled(false);
+            mTextInputPass.setHintEnabled(false);
 
 
+            //mTextInputSiteId.setErrorEnabled(true);
+            mTextInputEmail.setErrorEnabled(true);
+            mTextInputPass.setErrorEnabled(true);
 
-        //mSiteId.addTextChangedListener(new EditTextWatcher(mSiteId));
-        mSiteEmailId.addTextChangedListener(new EditTextWatcher(mSiteEmailId));
-        mPassword.addTextChangedListener(new EditTextWatcher(mPassword));
+            //mTextInputSiteId.setError("");
+            mTextInputEmail.setError("");
+            mTextInputPass.setError("");
 
-        mEt1 = rootView.findViewById(R.id.otp_edit_text1);
-        mEt2 = rootView.findViewById(R.id.otp_edit_text2);
-        mEt3 = rootView.findViewById(R.id.otp_edit_text3);
-        mEt4 = rootView.findViewById(R.id.otp_edit_text4);
-        mEt5 = rootView.findViewById(R.id.otp_edit_text5);
-        mEt6 = rootView.findViewById(R.id.otp_edit_text6);
 
-        addTextWatcher(mEt1);
-        addTextWatcher(mEt2);
-        addTextWatcher(mEt3);
-        addTextWatcher(mEt4);
-        addTextWatcher(mEt5);
-        addTextWatcher(mEt6);
+            //mSiteId.addTextChangedListener(new EditTextWatcher(mSiteId));
+            mSiteEmailId.addTextChangedListener(new EditTextWatcher(mSiteEmailId));
+            mPassword.addTextChangedListener(new EditTextWatcher(mPassword));
 
-        imageGoback.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                ((FreshRegistration)getActivity()).selectItem(1);
-            }
-        });
+            mEt1 = rootView.findViewById(R.id.otp_edit_text1);
+            mEt2 = rootView.findViewById(R.id.otp_edit_text2);
+            mEt3 = rootView.findViewById(R.id.otp_edit_text3);
+            mEt4 = rootView.findViewById(R.id.otp_edit_text4);
+            mEt5 = rootView.findViewById(R.id.otp_edit_text5);
+            mEt6 = rootView.findViewById(R.id.otp_edit_text6);
 
-        mNext1.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                //mNext1.setEnabled(false);
-                int[] mandotaryIds = new int []
-                        {
-                                R.id.otp_edit_text1,
-                                R.id.otp_edit_text2,
-                                R.id.otp_edit_text3,
-                                R.id.otp_edit_text4,
-                                R.id.otp_edit_text5,
-                                R.id.otp_edit_text6
-                        };
-                EditText et1 = rootView.findViewById(R.id.otp_edit_text1);
-                EditText et2 = rootView.findViewById(R.id.otp_edit_text2);
-                EditText et3 = rootView.findViewById(R.id.otp_edit_text3);
-                EditText et4 = rootView.findViewById(R.id.otp_edit_text4);
-                EditText et5 = rootView.findViewById(R.id.otp_edit_text5);
-                EditText et6 = rootView.findViewById(R.id.otp_edit_text6);
-                if(!validateEditText(mandotaryIds))
-                {
-                    Toast.makeText(mContext, "array not empty", Toast.LENGTH_SHORT).show();
-                    //String siteId = StringUtils.trim(mSiteId.getText().toString());
-                    String OTP = et1.getText() + "" + et2.getText() + et3.getText() + "" + et4.getText() + "" + et5.getText() + et6.getText();
-                    try {
+            addTextWatcher(mEt1);
+            addTextWatcher(mEt2);
+            addTextWatcher(mEt3);
+            addTextWatcher(mEt4);
+            addTextWatcher(mEt5);
+            addTextWatcher(mEt6);
+
+            imageGoback.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    // TODO Auto-generated method stub
+                    //((FreshRegistration) getActivity()).selectItem(1);
+                    ((FreshRegistration) getActivity()).selectItem(22);
+                    //getFragmentManager().popBackStack();
+                }
+            });
+
+            mNext1.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    // TODO Auto-generated method stub
+                    //mNext1.setEnabled(false);
+                    int[] mandotaryIds = new int[]
+                            {
+                                    R.id.otp_edit_text1,
+                                    R.id.otp_edit_text2,
+                                    R.id.otp_edit_text3,
+                                    R.id.otp_edit_text4,
+                                    R.id.otp_edit_text5,
+                                    R.id.otp_edit_text6
+                            };
+                    EditText et1 = rootView.findViewById(R.id.otp_edit_text1);
+                    EditText et2 = rootView.findViewById(R.id.otp_edit_text2);
+                    EditText et3 = rootView.findViewById(R.id.otp_edit_text3);
+                    EditText et4 = rootView.findViewById(R.id.otp_edit_text4);
+                    EditText et5 = rootView.findViewById(R.id.otp_edit_text5);
+                    EditText et6 = rootView.findViewById(R.id.otp_edit_text6);
+                    if (!validateEditText(mandotaryIds)) {
+                        Toast.makeText(mContext, "array not empty", Toast.LENGTH_SHORT).show();
+                        //String siteId = StringUtils.trim(mSiteId.getText().toString());
+                        String OTP = et1.getText() + "" + et2.getText() + et3.getText() + "" + et4.getText() + "" + et5.getText() + et6.getText();
+                        try {
                         /*HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
                         String site_Id = StringUtils.prependIfMissing(siteId.toString(), "@");*/
-                        //loadExistingSite(siteId);
-                        Log.e("InsideAddtoExisting","OTP- "+OTP);
-                        Log.e("InsideAddtoExist", "siteId- " + siteId);
-                        if (!site_Id.equals(null))
-                            OTPValidation(site_Id, OTP);
-                        else {
-                            Toast.makeText(mContext, "Please create a site first, Site Id is null", Toast.LENGTH_SHORT).show();
+                            //loadExistingSite(siteId);
+                            Log.e("InsideAddtoExisting", "OTP- " + OTP);
+                            Log.e("InsideAddtoExist", "siteId- " + siteId);
+                            if (!site_Id.equals(null))
+                                OTPValidation(site_Id, OTP);
+                            else {
+                                Toast.makeText(mContext, "Please create a site first, Site Id is null", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (Exception e) {
+                            Log.e("InsideAddtoExisting", "Exception- " + e);
+                            Toast.makeText(mContext, "Something went wrong..Check Site Id", Toast.LENGTH_SHORT).show();
+                            //OTPValidation("@e27d9682-9f6c-4875-80ed-9df6b8da459e", OTP);
                         }
-                    } catch (Exception e) {
-                        Log.e("InsideAddtoExisting", "Exception- " + e);
-                        Toast.makeText(mContext, "Something went wrong..Check Site Id", Toast.LENGTH_SHORT).show();
-                        //OTPValidation("@e27d9682-9f6c-4875-80ed-9df6b8da459e", OTP);
+                    } else
+                        Toast.makeText(mContext, "Please check the OTP", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            mNext2.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    // TODO Auto-generated method stub
+                    int[] mandotaryIds = new int[]
+                            {
+                                    R.id.editFacilityEmail,
+                                    R.id.editFacilityPass
+                            };
+                    if (!validateEditText(mandotaryIds)) {
+                        goTonext();
                     }
                 }
-                else Toast.makeText(mContext, "Please check the OTP", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        mNext2.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                int[] mandotaryIds = new int []
-                        {
-                                R.id.editFacilityEmail,
-                                R.id.editFacilityPass
-                        };
-                if(!validateEditText(mandotaryIds))
-                {
-                    goTonext();
-                }
-            }
-        });
+            });
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
         return rootView;
     }

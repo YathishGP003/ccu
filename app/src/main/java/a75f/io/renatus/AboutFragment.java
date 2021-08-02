@@ -176,6 +176,7 @@ public class AboutFragment extends Fragment {
     public void goToInstallType(){
         Intent intent = new Intent(getActivity(), FreshRegistration.class);
         intent.putExtra("viewpager_position",6);
+        intent.putExtra("isAboutFragment","yes");
         startActivity(intent);
     }
 

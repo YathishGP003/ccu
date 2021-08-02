@@ -231,23 +231,23 @@
     </string-array>
 
     <string-array name="zone_priority">
-        <item >No Priority</item>
-        <item >Low</item>
-        <item >Normal</item>
-        <item >High</item>
+        <item>No Priority</item>
+        <item>Low</item>
+        <item>Normal</item>
+        <item>High</item>
     </string-array>
 
     <string-array name="damper_size">
-        <item >4</item>
-        <item >6</item>
-        <item >8</item>
-        <item >10</item>
-        <item >12</item>
-        <item >14</item>
-        <item >16</item>
-        <item >18</item>
-        <item >20</item>
-        <item >22</item>
+        <item>4</item>
+        <item>6</item>
+        <item>8</item>
+        <item>10</item>
+        <item>12</item>
+        <item>14</item>
+        <item>16</item>
+        <item>18</item>
+        <item>20</item>
+        <item>22</item>
     </string-array>
 
     <string name="title_activity_system_scheduler">System Scheduler</string>
@@ -299,6 +299,7 @@
     <string name="input_facilityorg">Organization</string>
     <string name="input_installer_email">Installer Email</string>
     <string name="button_next">Next </string>
+    <string name="otp_send_email">Enter email id</string>
 
     <!--Installer Option-->
     <string name="title_installeroption">Installer Options</string>
@@ -670,6 +671,7 @@
     <string name="title_edit">EDIT</string>
     <string name="title_save">SAVE</string>
     <string name="title_unregister">UNREGISTER</string>
+    <string name="title_generate_otp">Generate OTP</string>
 
     <!--Temperature override Screen-->
     <string name="title_io_parameters">I/O \nParameters</string>
@@ -695,7 +697,6 @@
         <item>  Not enabled </item>
         <item>  Fan </item>
     </string-array>
-
 
 
     <!--DAB Dual Duct-->
@@ -906,8 +907,8 @@
 
     <string name="label_modbus_energy_meter">MODBUS ENERGY METER</string>
     <string name="title_modbus_energy_proportional_distribution">Energy Proportional Distribution</string>
-   <string name="deleting_floor">Removing floor</string>
-   <string-array name="energy_distribution_values">
+    <string name="deleting_floor">Removing floor</string>
+    <string-array name="energy_distribution_values">
         <item> 0% </item>
         <item> 10% </item>
         <item> 20% </item>
@@ -926,6 +927,8 @@
     <string name="analogin2">Analog-in2</string>
     <string name="title_pairhss">HYPERSTAT | PAIRING STEPS </string>
     <string name="prefs_theme_key">isEnabled</string>
+    <string name="txt_CCU_occupancy_status">Occupancy Status on IE Gateway :</string>
+    <string name="txt_GUID_details">GUID Details:</string>
 
     <string name="textbpos">BPOS</string>
     <string name="descbpos">Battery Power Occupancy Sensor</string>

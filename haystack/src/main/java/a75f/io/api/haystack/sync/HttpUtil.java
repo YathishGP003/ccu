@@ -143,8 +143,7 @@ public class HttpUtil
                     response.append(line);
                     response.append('\n');
                 }
-
-
+                connection.getInputStream().close();
                 return responseCode == 200 ? response.toString() : null;
 
             } catch (Exception e) {

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical">
+
+    <TextView
+        style="?WindowTextStyle"
+        android:id="@+id/default_text_view"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:paddingBottom="8dp"
+        android:paddingLeft="20dp"
+        android:paddingTop="20dp"
+        android:visibility="gone"
+        android:text="place holder">
+    </TextView>
+    <RelativeLayout
+        android:id="@+id/layoutHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="70dp">
+
+        <ImageView
+            android:id="@+id/imageGoback"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="2.5dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="64dp"
+            android:rotation="180"
+            app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
+            app:tint="?orange_75f" />
+
+        <TextView
+            android:id="@+id/textTitleFragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="180dp"
+            android:layout_centerVertical="true"
+            android:fontFamily="@font/lato_bold"
+            android:text="@string/title_bpos"
+            android:textAllCaps="true"
+            android:textColor="?orange_75f"
+            android:textSize="33.5dp"
+            android:textStyle="bold" />
+
+    </RelativeLayout>
+    <LinearLayout
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="46dp"
+        android:layout_width="match_parent"
+        android:orientation="vertical">
+
+
+
+        <ScrollView
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:overScrollMode="never">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:id="@+id/rl_bpostempinf"
+                    android:layout_width="match_parent"
+                    android:layout_height="92dp"
+                    android:layout_marginLeft="180dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="190dp"
+                        android:layout_centerVertical="true"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/textTempInf"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="right"
+                            android:text="@string/title_tempinfluence"
+                            android:textAppearance="@style/title_normal"/>
+
+                        <TextView
+                            android:id="@+id/textCPCdesc"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/desc_tempinfluence"
+                            android:gravity="right|center_vertical"
+                            android:textAppearance="@style/text_label"/>
+
+                    </LinearLayout>
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="92dp"
+                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                        tools:ignore="ContentDescription"
+                        app:tint="?orange_75f" />
+                </RelativeLayout>
+
+            </LinearLayout>
+
+        </ScrollView>
+    </LinearLayout>
+
+</LinearLayout>
+

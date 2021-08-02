@@ -35,6 +35,7 @@
             android:roundIcon="${roundicon}"
             android:supportsRtl="true"
             android:theme="@style/RenatusApp75FTheme"
+            android:usesCleartextTraffic="true"
             tools:replace="android:label">
 
         <service android:name=".bluetooth.BLEProvisionService"/>

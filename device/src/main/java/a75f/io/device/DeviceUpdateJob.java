@@ -42,25 +42,27 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
     
     public void doJob()
     {
-        CcuLog.d(L.TAG_CCU_JOB, "DeviceUpdateJob -> ");
-        watchdogMonitor = false;
-        HashMap site = CCUHsApi.getInstance().read("site");
-        if (site == null || site.size() == 0) {
-            CcuLog.d(L.TAG_CCU_DEVICE,"No Site Registered ! <-DeviceUpdateJob ");
-            return;
+        try {
+            CcuLog.d(L.TAG_CCU_JOB, "DeviceUpdateJob -> ");
+            watchdogMonitor = false;
+            HashMap site = CCUHsApi.getInstance().read("site");
+            if (site == null || site.size() == 0) {
+                CcuLog.d(L.TAG_CCU_DEVICE, "No Site Registered ! <-DeviceUpdateJob ");
+                return;
+            }
+            HashMap ccu = CCUHsApi.getInstance().read("ccu");
+            if (ccu.size() == 0) {
+                CcuLog.d(L.TAG_CCU_JOB, "No CCU Registered ! <-DeviceUpdateJob ");
+                return;
+            }
+            deviceNw.sendMessage();
+            deviceNw.sendSystemControl();
+            CcuLog.d(L.TAG_CCU_JOB, "<-DeviceUpdateJob ");
+            //Todo tobe tested with real device setup
+            modbusNetwork.sendMessage();
+        } catch (Exception e) {
+            CcuLog.e(L.TAG_CCU_DEVICE,"DeviceUpdateJob Exception! ", e);
         }
-        HashMap ccu = CCUHsApi.getInstance().read("ccu");
-        if (ccu.size() == 0) {
-            CcuLog.d(L.TAG_CCU_JOB,"No CCU Registered ! <-DeviceUpdateJob ");
-            return;
-        }
-        deviceNw.sendMessage();
-        deviceNw.sendSystemControl();
-        CcuLog.d(L.TAG_CCU_JOB, "<-DeviceUpdateJob ");
-
-        //Todo tobe tested with real device setup
-        modbusNetwork.sendMessage();
-        modbusNetwork.sendSystemControl();
     }
     
 }

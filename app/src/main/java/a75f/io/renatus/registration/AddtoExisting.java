@@ -126,6 +126,11 @@ public class AddtoExisting extends Fragment {
         //((FreshRegistration)getActivity()).showIcons(false);
         View rootView = inflater.inflate(R.layout.fragment_addtoexisting, container, false);
 
+        HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
+        String site_Id = StringUtils.prependIfMissing(siteId.toString(), "@");
+        Log.e("InsideAddtoExist", "siteId-onCreateView " + siteId);
+        Log.e("InsideAddtoExist", "site_Id-onCreateView " + site_Id);
+
         //Creating the LayoutInflater instance
         LayoutInflater li = getLayoutInflater();
         toastLayout = li.inflate(R.layout.custom_toast_layout,(ViewGroup) rootView.findViewById(R.id.custom_toast_layout));
@@ -215,7 +220,7 @@ public class AddtoExisting extends Fragment {
                     String OTP = et1.getText() + "" + et2.getText() + et3.getText() + "" + et4.getText() + "" + et5.getText() + et6.getText();
                     try {
                         /*HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
-                        String site_Id = StringUtils.prependIfMissing(siteId.toString(), "@");
+                        String site_Id = StringUtils.prependIfMissing(siteId.toString(), "@");*/
                         //loadExistingSite(siteId);
                         Log.e("InsideAddtoExisting","OTP- "+OTP);
                         Log.e("InsideAddtoExist", "siteId- " + siteId);
@@ -223,8 +228,7 @@ public class AddtoExisting extends Fragment {
                             OTPValidation(site_Id, OTP);
                         else {
                             Toast.makeText(mContext, "Please create a site first, Site Id is null", Toast.LENGTH_SHORT).show();
-                        }*/
-                        OTPValidation("@e27d9682-9f6c-4875-80ed-9df6b8da459e", OTP);
+                        }
                     } catch (Exception e) {
                         Log.e("InsideAddtoExisting", "Exception- " + e);
                         Toast.makeText(mContext, "Something went wrong..Check Site Id", Toast.LENGTH_SHORT).show();
@@ -284,8 +288,8 @@ public class AddtoExisting extends Fragment {
                         toast.setView(toastLayout);
                         toast.setDuration(Toast.LENGTH_LONG);
                         toast.show();
-                        saveExistingSite(siteId);
-                        //loadExistingSite(siteId);
+                        //saveExistingSite(siteId);
+                        loadExistingSite(siteId);
                     }else{
                         Toast toast = new Toast(getApplicationContext());
                         toast.setGravity(Gravity.BOTTOM, 50, 50);
@@ -540,8 +544,8 @@ public class AddtoExisting extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                //saveExistingSite(siteId);
-                navigateToCCUScreen();
+                saveExistingSite(siteId);
+                //navigateToCCUScreen();
                 Toast.makeText(getActivity(), "Thank you for confirming using this site", Toast.LENGTH_LONG).show();
 
             }

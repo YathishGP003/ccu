@@ -496,4 +496,6 @@ public class Globals {
     public void setSiteAlreadyCreated(boolean siteAlreadyCreated) {
         _siteAlreadyCreated = siteAlreadyCreated;
     }
+
+    public static final String TAG = "DEV_DEBUG";
 }

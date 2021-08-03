@@ -784,6 +784,7 @@ public class OTAUpdateService extends IntentService {
 
         mCurrentLwMeshAddress = mLwMeshAddresses.get(0);
         mLwMeshAddresses.remove(0);
+        Log.i(Globals.TAG, "mCurrentLwMeshAddress "+mCurrentLwMeshAddress + " mLwMeshAddresses : "+mLwMeshAddresses.size());
 
         runMetadataCheck(DOWNLOAD_DIR, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
     }

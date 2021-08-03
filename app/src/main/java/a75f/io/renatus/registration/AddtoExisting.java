@@ -48,6 +48,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RegisterGatherCCUDetails;
+import a75f.io.renatus.RenatusLandingActivity;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.retrofit.ApiClient;
@@ -193,8 +194,10 @@ public class AddtoExisting extends Fragment {
                 public void onClick(View v) {
                     // TODO Auto-generated method stub
                     //((FreshRegistration) getActivity()).selectItem(1);
-                    ((FreshRegistration) getActivity()).selectItem(22);
+                    //((FreshRegistration) getActivity()).selectItem(22);
                     //getFragmentManager().popBackStack();
+                    Intent intent = new Intent(getActivity(), RenatusLandingActivity.class);
+                    startActivity(intent);
                 }
             });
 
@@ -225,7 +228,7 @@ public class AddtoExisting extends Fragment {
                         /*HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
                         String site_Id = StringUtils.prependIfMissing(siteId.toString(), "@");*/
                             //loadExistingSite(siteId);
-                            Log.e("InsideAddtoExisting", "OTP- " + OTP);
+                            Log.e("InsideAddtoExist", "OTP- " + OTP);
                             Log.e("InsideAddtoExist", "siteId- " + siteId);
                             if (!site_Id.equals(null))
                                 OTPValidation(site_Id, OTP);
@@ -233,7 +236,7 @@ public class AddtoExisting extends Fragment {
                                 Toast.makeText(mContext, "Please create a site first, Site Id is null", Toast.LENGTH_SHORT).show();
                             }
                         } catch (Exception e) {
-                            Log.e("InsideAddtoExisting", "Exception- " + e);
+                            Log.e("InsideAddtoExist", "Exception- " + e);
                             Toast.makeText(mContext, "Something went wrong..Check Site Id", Toast.LENGTH_SHORT).show();
                             //OTPValidation("@e27d9682-9f6c-4875-80ed-9df6b8da459e", OTP);
                         }
@@ -277,11 +280,11 @@ public class AddtoExisting extends Fragment {
             public void Success(Response<ResponseBody> response) throws IOException {
                 //progressLoader.DismissProgress();
                 String responseData= response.body().string();
-                Log.e("InsideAddtoExisting","Api URL- "+response.raw().request().url().toString());
-                Log.e("InsideAddtoExisting","responseData_Success- "+responseData);
+                Log.e("InsideAddtoExist","Api URL- "+response.raw().request().url().toString());
+                Log.e("InsideAddtoExist","responseData_Success- "+responseData);
                 try {
                     JSONObject jsonObject=new JSONObject(responseData);
-                    Log.e("InsideAddtoExisting","isValid- "+jsonObject.getString("valid"));
+                    Log.e("InsideAddtoExist","isValid- "+jsonObject.getString("valid"));
                     //JSONObject dataObj=jsonObject.getJSONObject("data");
                     if (jsonObject.getString("valid") == "true"){
                         //Getting the View object as defined in the customtoast.xml file
@@ -314,7 +317,7 @@ public class AddtoExisting extends Fragment {
             {
                 /*progressLoader.DismissProgress();
                 commonUtils.toastShort(response.toString(),getApplicationContext());*/
-                Log.e("InsideAddtoExisting","responseData_Fail- "+response);
+                Log.e("InsideAddtoExist","responseData_Fail- "+response);
             }
 
             @Override
@@ -322,7 +325,7 @@ public class AddtoExisting extends Fragment {
             {
                /* progressLoader.DismissProgress();
                 commonUtils.toastShort(t.toString(),getApplicationContext());*/
-                Log.e("InsideAddtoExisting","responseData_Error- "+t.getMessage().toString());
+                Log.e("InsideAddtoExist","responseData_Error- "+t.getMessage().toString());
 
             }
         });
@@ -617,7 +620,12 @@ public class AddtoExisting extends Fragment {
                 String siteId = strings[0];
                 boolean retVal = false;
                 if (StringUtils.isNotBlank(siteId)) {
-                    retVal = CCUHsApi.getInstance().syncExistingSite(siteId);
+                    try{
+                        retVal = CCUHsApi.getInstance().syncExistingSite(siteId);
+                    }
+                    catch (Exception e){
+                        e.printStackTrace();
+                    }
                     Globals.getInstance().setSiteAlreadyCreated(true);
                     CCUHsApi.getInstance().setPrimaryCcu(false);
                     L.ccu().systemProfile = new DefaultSystem();

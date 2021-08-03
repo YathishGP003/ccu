@@ -93,35 +93,29 @@ public class AlertsFragment extends Fragment
 			}
 		});
 		
-		listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-			
-			public boolean onItemLongClick(AdapterView<?> arg0, View v,
-			                               int position, long arg3) {
+		listView.setOnItemLongClickListener((arg0, v, position, arg3) -> {
 
-				AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-				builder.setMessage("Delete ?")
-				       .setCancelable(true)
-				       .setIcon(android.R.drawable.ic_dialog_alert)
-				       .setPositiveButton("OK", (dialog, id) -> {
-							Alert alert = alertList.get(position);
-							// Remove item from local list regardless of server response.  Just log failure.
-							alertList.remove(position);
-							adapter.resetList(alertList);
-							alertDeleteDisposable =
-								AlertManager.getInstance().deleteAlert(alert)
-										   .observeOn(AndroidSchedulers.mainThread())
-										   .subscribe( () -> CcuLog.i("CCU_ALERT", "delete success"),
-												throwable -> CcuLog.w("CCU_ALERT", "delete failure", throwable));
-						   })
-						.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							//do things
-						}
-						});
-				AlertDialog alert = builder.create();
-				alert.show();
-				return true;
-			}
+			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+			builder.setMessage("Delete ?")
+				   .setCancelable(true)
+				   .setIcon(android.R.drawable.ic_dialog_alert)
+				   .setPositiveButton("OK", (dialog, id) -> {
+						Alert alert = alertList.get(position);
+						// Remove item from local list regardless of server response.  Just log failure.
+						alertList.remove(position);
+						adapter.resetList(alertList);
+						alertDeleteDisposable =
+							AlertManager.getInstance().deleteAlert(alert)
+									   .observeOn(AndroidSchedulers.mainThread())
+									   .subscribe( () -> CcuLog.i("CCU_ALERT", "delete success"),
+											throwable -> CcuLog.w("CCU_ALERT", "delete failure", throwable));
+					   })
+					.setNegativeButton("Cancel", (dialog, id) -> {
+						//do things
+					});
+			AlertDialog alert = builder.create();
+			alert.show();
+			return true;
 		});
 	}
 	

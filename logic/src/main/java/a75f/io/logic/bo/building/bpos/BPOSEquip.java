@@ -15,6 +15,7 @@ import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.Occupancy;
+import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
@@ -22,6 +23,10 @@ import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.BPOSTuners;
 import a75f.io.logic.tuners.TITuners;
+
+/*
+ * created by spoorthidev on 3-August-2021
+ */
 
 public class BPOSEquip {
 
@@ -78,11 +83,12 @@ public class BPOSEquip {
                 .setGroup(String.valueOf(mNodeAddr));
         mEquipRef = CCUHsApi.getInstance().addEquip(b.build());
 
-        BPOSTuners.addEquipTuners(CCUHsApi.getInstance(), siteRef, siteDis , mEquipRef, roomRef, floorRef, tz);
+        BPOSTuners.addEquipTuners(CCUHsApi.getInstance(), siteRef, equipDis, mEquipRef, roomRef,
+                floorRef, tz);
 
 
         Point currentTemp = new Point.Builder()
-                .setDisplayName(siteDis + "-BPOS-" + mNodeAddr + "-currentTemp")
+                .setDisplayName(equipDis + "-currentTemp")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -100,7 +106,7 @@ public class BPOSEquip {
         CCUHsApi.getInstance().writeHisValById(ctID, 0.0);
 
         Point humidity = new Point.Builder()
-                .setDisplayName(siteDis + "-BPOS-" + mNodeAddr + "-humidity")
+                .setDisplayName(equipDis + "-humidity")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -108,7 +114,7 @@ public class BPOSEquip {
                 .setHisInterpolate("cov")
                 .addMarker("zone")
                 .addMarker("humidity").addMarker("sensor").addMarker("his").addMarker("cur")
-                .addMarker("logical").addMarker("bpos")
+                .addMarker("logical").addMarker("bpos").addMarker("air")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setUnit("%")
                 .setTz(tz)
@@ -119,7 +125,7 @@ public class BPOSEquip {
 
 
         Point occupancy = new Point.Builder()
-                .setDisplayName(siteDis + "-BPOS-" + mNodeAddr + "-occupancy")
+                .setDisplayName(equipDis + "-occupancy")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -127,7 +133,7 @@ public class BPOSEquip {
                 .setHisInterpolate("cov")
                 .addMarker("zone").addMarker("bpos")
                 .addMarker("sensor").addMarker("occupancy").addMarker("his").addMarker("cur")
-                .addMarker("logical")
+                .addMarker("logical").addMarker("writable")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setEnums("off,on")
                 .setTz(tz)
@@ -139,6 +145,8 @@ public class BPOSEquip {
         Point zonePriority = new Point.Builder()
                 .setDisplayName(equipDis + "-zonePriority")
                 .setEquipRef(mEquipRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
                 .setSiteRef(siteRef)
                 .setHisInterpolate("cov")
                 .addMarker("config").addMarker("bpos").addMarker("writable").addMarker("zone")
@@ -156,6 +164,8 @@ public class BPOSEquip {
                 .setDisplayName(equipDis + "-temperatureOffset")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
                 .addMarker("config").addMarker("bpos").addMarker("writable").addMarker("zone")
                 .addMarker("temperature").addMarker("offset")
                 .setGroup(String.valueOf(mNodeAddr))
@@ -170,6 +180,8 @@ public class BPOSEquip {
                 .setDisplayName(equipDis + "-autoforceoccupied")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
                 .addMarker("config").addMarker("bpos").addMarker("writable").addMarker("zone")
                 .addMarker("autoforceoccupied")
                 .setGroup(String.valueOf(mNodeAddr))
@@ -184,6 +196,8 @@ public class BPOSEquip {
                 .setDisplayName(equipDis + "-autoforceaway")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
                 .addMarker("config").addMarker("bpos").addMarker("writable").addMarker("zone")
                 .addMarker("autoforceaway")
                 .setGroup(String.valueOf(mNodeAddr))
@@ -212,7 +226,7 @@ public class BPOSEquip {
 
 
         Point desiredTemp = new Point.Builder()
-                .setDisplayName(siteDis + "-BPOS-" + mNodeAddr + "-desiredTemp")
+                .setDisplayName(equipDis + "-desiredTemp")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -226,7 +240,7 @@ public class BPOSEquip {
         String dtId = CCUHsApi.getInstance().addPoint(desiredTemp);
 
         Point desiredTempCooling = new Point.Builder()
-                .setDisplayName(siteDis + "-BPOS-" + mNodeAddr + "-desiredTempCooling")
+                .setDisplayName(equipDis + "-desiredTempCooling")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -240,7 +254,7 @@ public class BPOSEquip {
         CCUHsApi.getInstance().addPoint(desiredTempCooling);
 
         Point desiredTempHeating = new Point.Builder()
-                .setDisplayName(siteDis + "-BPOS-" + mNodeAddr + "-desiredTempHeating")
+                .setDisplayName(equipDis + "-desiredTempHeating")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -254,7 +268,7 @@ public class BPOSEquip {
         CCUHsApi.getInstance().addPoint(desiredTempHeating);
 
         Point equipStatus = new Point.Builder()
-                .setDisplayName(siteDis + "-BPOS-" + mNodeAddr + "-equipStatus")
+                .setDisplayName(equipDis + "-equipStatus")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -268,7 +282,7 @@ public class BPOSEquip {
         CCUHsApi.getInstance().writeHisValById(equipStatusId, 0.0);
 
         Point equipStatusMessage = new Point.Builder()
-                .setDisplayName(siteDis + "-BPOS-" + mNodeAddr + "-equipStatusMessage")
+                .setDisplayName(equipDis + "-equipStatusMessage")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -280,10 +294,11 @@ public class BPOSEquip {
                 .setKind(Kind.STRING)
                 .build();
         String equipStatusMessageLd = CCUHsApi.getInstance().addPoint(equipStatusMessage);
+        CCUHsApi.getInstance().writeHisValById(equipStatusMessageLd, 0.0);
 
 
         Point zoneDynamicPriorityPoint = new Point.Builder()
-                .setDisplayName(equipDis +"-BPOS-" + mNodeAddr + "-zoneDynamicPriority")
+                .setDisplayName(equipDis + "-zoneDynamicPriority")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
@@ -299,19 +314,19 @@ public class BPOSEquip {
 
 
         Point occupancyDetection = new Point.Builder()
-                .setDisplayName(equipDis + "-BPOS-" + mNodeAddr + "-occupancyDetection")
+                .setDisplayName(equipDis + "-occupancyDetection")
                 .setEquipRef(mEquipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef).setHisInterpolate("cov")
-                .addMarker("occupancy").addMarker("detection").addMarker("bpos").addMarker("his").addMarker("zone")
+                .addMarker("occupancy").addMarker("detection").addMarker("bpos")
+                .addMarker("his").addMarker("zone").addMarker("writable")
                 .setGroup(String.valueOf(mNodeAddr))
                 .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String occupancyDetectionId = CCUHsApi.getInstance().addPoint(occupancyDetection);
         CCUHsApi.getInstance().writeHisValById(occupancyDetectionId, 0.0);
-
 
 
         String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis
@@ -326,7 +341,7 @@ public class BPOSEquip {
         device.desiredTemp.setPointRef(dtId);
         device.desiredTemp.setEnabled(true);
         device.addSensor(Port.SENSOR_RH, humidityId);
-        device.addSensor(Port.SENSOR_OCCUPANCY,occupancyId);
+        device.addSensor(Port.SENSOR_OCCUPANCY, occupancyId);
 
 
         device.addPointsToDb();
@@ -357,7 +372,7 @@ public class BPOSEquip {
                 " equipRef == \"" + mEquipRef + "\"") > 0);
         Log.d(LOG_TAG,
                 "config: " + bposconfig.gettempOffset() + " - " + bposconfig.getautoAway() + " - " +
-                "--" + bposconfig.getautoforceOccupied() + " - " + bposconfig.getzonePriority());
+                        "--" + bposconfig.getautoforceOccupied() + " - " + bposconfig.getzonePriority());
         return bposconfig;
     }
 
@@ -539,6 +554,17 @@ public class BPOSEquip {
     public double getStatus() {
         return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == " +
                 "\"" + mNodeAddr + "\"");
+    }
+
+    public void setStatus(double status) {
+
+        ZoneState state = ZoneState.values()[((int) status)];
+
+        Log.d("Spoo_LOG", "state.toString() equip" + state.toString());
+
+        CCUHsApi.getInstance().writeDefaultVal("point and status and message " +
+                " and group == \"" + mNodeAddr + "\"", state.toString());
+
     }
 
 }

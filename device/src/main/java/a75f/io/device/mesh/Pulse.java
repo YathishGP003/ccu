@@ -1136,7 +1136,7 @@ public class Pulse
 
 	private static void updateBPOSOccupancyStatus(RawPoint sp, double val, short addr,Device device){
 
-		double occuEnabled =  CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and enable and occupancy and group == \""+addr+"\"");
+		double occuEnabled =  CCUHsApi.getInstance().readDefaultVal("point and zone and config  and enable and occupancy and group == \""+addr+"\"");
 		double curOccuStatus = CCUHsApi.getInstance().readHisValById(sp.getPointRef());
 		if((occuEnabled > 0) && (curOccuStatus != val) ) { //only if occupancy enabled
 			HashMap occDetPoint = CCUHsApi.getInstance().read("point and occupancy and detection and his and equipRef== \"" + device.getEquipRef() + "\"");

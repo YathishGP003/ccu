@@ -20,20 +20,21 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Optional;
 
+/*
+ * created by spoorthidev on 3-August-2021
+ */
 
 public class FragmentBPOSTypeSelection extends BaseDialogFragment {
 
     public static final String ID = FragmentBPOSTypeSelection.class.getSimpleName();
 
-   @BindView(R.id.rl_bpostempinf)
+    @BindView(R.id.rl_bpostempinf)
     View tempinfo;
     Zone mZone;
-
-    short        mNodeAddress;
-
-    String       mRoomName;
-    String       mFloorName;
-    Boolean      misPaired;
+    short mNodeAddress;
+    String mRoomName;
+    String mFloorName;
+    Boolean misPaired;
 
 
     @Override
@@ -42,7 +43,8 @@ public class FragmentBPOSTypeSelection extends BaseDialogFragment {
     }
 
 
-    public static FragmentBPOSTypeSelection newInstance(short meshAddress, String roomName, String floorName,boolean isPaired){
+    public static FragmentBPOSTypeSelection newInstance(short meshAddress, String roomName,
+                                                        String floorName, boolean isPaired) {
         FragmentBPOSTypeSelection f = new FragmentBPOSTypeSelection();
         Bundle bundle = new Bundle();
         bundle.putShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR, meshAddress);
@@ -55,7 +57,8 @@ public class FragmentBPOSTypeSelection extends BaseDialogFragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.bpos_typeselection, container, false);
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 
@@ -69,14 +72,14 @@ public class FragmentBPOSTypeSelection extends BaseDialogFragment {
 
     @OnClick(R.id.rl_bpostempinf)
     public void Onclicktempinf() {
-        showDialogFragment(FragmentBPOSTempInfConfiguration.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.BPOS),
+        showDialogFragment(FragmentBPOSTempInfConfiguration.newInstance(mNodeAddress, mRoomName,
+                mFloorName, ProfileType.BPOS),
                 FragmentBPOSTempInfConfiguration.ID);
     }
 
     @Optional
     @OnClick(R.id.imageGoback)
-    void onGoBackButtonClick()
-    {
+    void onGoBackButtonClick() {
         removeDialogFragment(ID);
     }
 
@@ -84,8 +87,7 @@ public class FragmentBPOSTypeSelection extends BaseDialogFragment {
     public void onStart() {
         super.onStart();
         Dialog dialog = getDialog();
-        if (dialog != null)
-        {
+        if (dialog != null) {
             int width = ViewGroup.LayoutParams.MATCH_PARENT;
             int height = ViewGroup.LayoutParams.MATCH_PARENT;
             dialog.getWindow().setLayout(width, height);

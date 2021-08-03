@@ -3469,7 +3469,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         TextView textViewValue1 = viewPointRow1.findViewById(R.id.text_point1value);
         TextView textViewValue2 = viewPointRow1.findViewById(R.id.text_point2value);
 
-
+        Log.d("BPOSUtil","Status="+point.get("Status").toString() +
+                "humidity ="+point.get("humidity").toString() +
+                "forceoccupied" + point.get("forceoccupied"));
 
         textViewTitle.setText(point.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(point.get("Status").toString());
@@ -3482,10 +3484,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         double occupied = (double) point.get("forceoccupied");
         if(occupied == (double)Occupancy.FORCEDOCCUPIED.ordinal()){
-            textViewLabel2.setText("Force Occupied: ");
+            textViewLabel2.setText("Temporary Hold: ");
             textViewValue2.setText("YES");
         }else if(occupied == (double)Occupancy.AUTOFORCEOCCUPIED.ordinal()){
-            textViewLabel2.setText("Force Occupied(AUTO): ");
+            textViewLabel2.setText("Temporary Hold(AUTO): ");
             textViewValue2.setText("YES");
         }else{
             textViewLabel2.setText("Force Occupied: ");

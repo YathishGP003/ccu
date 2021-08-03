@@ -93,6 +93,7 @@ public class OTAUpdateService extends IntentService {
         }
         /* An activity has requested the OTA update to end (for debugging) */
         else if(action.equals(Globals.IntentActions.ACTIVITY_RESET)) {
+            Log.i(Globals.TAG, "completeUpdate : calling  ACTIVITY_RESET ");
             resetUpdateVariables();
             completeUpdate();
         }
@@ -103,6 +104,7 @@ public class OTAUpdateService extends IntentService {
         }
         /* The service has been launched in response to a CM disconnect */
         else if(action.equals(UsbService.ACTION_USB_DETACHED)) {
+            Log.i(Globals.TAG, "completeUpdate : calling  ACTION_USB_DETACHED ");
             resetUpdateVariables();
             completeUpdate();
         }
@@ -112,6 +114,7 @@ public class OTAUpdateService extends IntentService {
         }
         /* The service has been launched in response to OTA update timeout */
         else if(action.equals(Globals.IntentActions.OTA_UPDATE_TIMED_OUT)) {
+            Log.i(Globals.TAG, "completeUpdate : calling  OTA_UPDATE_TIMED_OUT ");
             resetUpdateVariables();
             completeUpdate();
         }
@@ -155,7 +158,7 @@ public class OTAUpdateService extends IntentService {
             Log.d(TAG, "[DOWNLOAD] Download failed, reason: " + reason);
 
             //TODO retry a couple of times, depending on error
-
+            Log.i(Globals.TAG, " Download failed, reason: so reseting the status by calling  completeUpdate ");
             resetUpdateVariables();
             completeUpdate();
             return;
@@ -507,6 +510,7 @@ public class OTAUpdateService extends IntentService {
      * @param deviceType The type of device whose files are to be deleted
      */
     private void deleteFilesByDeviceType(File dir, FirmwareDeviceType_t deviceType){
+        Log.i(Globals.TAG, "deleteFilesByDeviceType: called ");
         try {
             for (File file : dir.listFiles()) {
                 if (file.getName().startsWith(deviceType.getUpdateFileName() + "_v")) {
@@ -773,6 +777,7 @@ public class OTAUpdateService extends IntentService {
         resetUpdateVariables();
 
         if(mLwMeshAddresses.isEmpty()) {
+            Log.i(Globals.TAG, " moveUpdateToNextNode  mLwMeshAddresses.isEmpty() completeUpdate");
             completeUpdate();
             return;
         }
@@ -805,6 +810,7 @@ public class OTAUpdateService extends IntentService {
      *
      */
     private void completeUpdate() {
+        Log.i(Globals.TAG, "completeUpdate : called ");
         deleteFilesByDeviceType(DOWNLOAD_DIR, mFirmwareDeviceType);
 
         mVersionMajor = -1;
@@ -816,7 +822,7 @@ public class OTAUpdateService extends IntentService {
         mBinaryDownloadId = -1;
 
         mUpdateInProgress = false;
-
+        Log.i(Globals.TAG, "broadcasting OTA_UPDATE_COMPLETE ");
         Intent completeIntent = new Intent(Globals.IntentActions.OTA_UPDATE_COMPLETE);
         sendBroadcast(completeIntent);
 

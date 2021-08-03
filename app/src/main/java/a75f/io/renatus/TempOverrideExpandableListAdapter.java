@@ -30,6 +30,7 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Thermistor;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
@@ -366,12 +367,12 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
     }
 
     private String getRelayMapping(String relayname, View convertView){
-        String profileName =  L.ccu().systemProfile.getProfileType().toString();
+        ProfileType profile =  L.ccu().systemProfile.getProfileType();
         List<String> hvac_stage_selector = Arrays.asList(convertView.getResources().getStringArray(R.array.hvac_stage_selector));
         VavStagedRtu vavStagedRtu = new VavStagedRtu();
         DabStagedRtu dabStagedRtu = new DabStagedRtu();
-        switch (profileName){
-            case "SYSTEM_DAB_ANALOG_RTU":
+        switch (profile){
+            case SYSTEM_DAB_ANALOG_RTU:
                 DabFullyModulatingRtu dabFullyModulatingRtu = new DabFullyModulatingRtu();
                 if (relayname.equals("relay7"))
                     if ((int)dabFullyModulatingRtu.getConfigVal("humidifier and type") == 0)
@@ -380,17 +381,17 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         return "De-Humidifier";
                 else return "Fan Enable";
                 //return ((int)dabFullyModulatingRtu.getConfigVal(relayname));
-            case "SYSTEM_DAB_STAGED_VFD_RTU":
+            case SYSTEM_DAB_STAGED_VFD_RTU:
                 return hvac_stage_selector.get((int)dabStagedRtu.getConfigAssociation(relayname));
-            case "SYSTEM_DAB_STAGED_RTU":
+            case SYSTEM_DAB_STAGED_RTU:
                 //DabStagedRtu dabStagedRtu = new DabStagedRtu();
                 return hvac_stage_selector.get((int)dabStagedRtu.getConfigAssociation(relayname));
-            case "SYSTEM_DAB_HYBRID_RTU":
+            case SYSTEM_DAB_HYBRID_RTU:
                 return hvac_stage_selector.get((int)dabStagedRtu.getConfigAssociation(relayname));
-            case "SYSTEM_VAV_STAGED_RTU":
+            case SYSTEM_VAV_STAGED_RTU:
                 //VavStagedRtu vavStagedRtu = new VavStagedRtu();
                 return hvac_stage_selector.get((int)vavStagedRtu.getConfigAssociation(relayname));
-            case "SYSTEM_VAV_ANALOG_RTU":
+            case SYSTEM_VAV_ANALOG_RTU:
                 VavFullyModulatingRtu vavFullyModulatingRtu = new VavFullyModulatingRtu();
                 if (relayname.equals("relay7")) {
                     if ((int) vavFullyModulatingRtu.getConfigVal("humidifier and type") == 0)
@@ -399,13 +400,12 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         return "De-Humidifier";
                 }else
                     return "Fan Enable";
-            case "SYSTEM_VAV_STAGED_VFD_RTU":
+            case SYSTEM_VAV_STAGED_VFD_RTU:
                 //VavStagedRtu vavStagedRtu1 = new VavStagedRtu();
                 return hvac_stage_selector.get((int)vavStagedRtu.getConfigAssociation(relayname));
-            case "SYSTEM_VAV_HYBRID_RTU":
+            case SYSTEM_VAV_HYBRID_RTU:
                 //VavStagedRtu vavStagedRtu1 = new VavStagedRtu();
                 return hvac_stage_selector.get((int)vavStagedRtu.getConfigAssociation(relayname));
-            case "Daikin IE RTU":
         }
         return "";
     }
@@ -570,19 +570,11 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
     }
 
     public void setPointVal(String id, double val) {
-        Object logicalPoint = CCUHsApi.getInstance().readMapById(id).get("pointRef");
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        hayStack.writeHisValById(id, val);
+        Object logicalPoint = hayStack.readMapById(id).get("pointRef");
         if (Objects.nonNull(logicalPoint)) {
-
-            CCUHsApi hayStack = CCUHsApi.getInstance();
-            hayStack.writeHisValById(id, val);
             hayStack.writeHisValById(logicalPoint.toString(), val / 1000);
-        }
-        else{
-            Object devicelogicalPoint = CCUHsApi.getInstance().readMapById(id).get("deviceRef");
-
-            CCUHsApi hayStack = CCUHsApi.getInstance();
-            hayStack.writeHisValById(id, val);
-            hayStack.writeHisValById(devicelogicalPoint.toString(), val / 1000);
         }
     }
 

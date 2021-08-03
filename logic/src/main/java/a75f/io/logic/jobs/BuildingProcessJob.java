@@ -55,58 +55,61 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
         L.pingCloudServer();
         
         DiagEquip.getInstance().updatePoints();
-
         if (!Globals.getInstance().isTemproryOverrideMode()) {
-            try {
-                //TODO Crash here causing issues in Analytics portal #RENATUS-396 kumar
-                for (ZoneProfile profile : L.ccu().zoneProfiles) {
-                    profile.updateZonePoints();
-                }
-
-                if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed()) {
-                    CCUHsApi.getInstance().syncEntityTree();
-                    if (CCUHsApi.getInstance().siteSynced()) {
-                        String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
-                        PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(), siteUID);
-                    }
-                }
-
-                if (L.ccu().oaoProfile != null) {
-                    L.ccu().oaoProfile.doOAO();
-                } else {
-                    CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double) EpidemicState.OFF.ordinal());
-                }
-
-                if (!Globals.getInstance().isTestMode()) {
-                    L.ccu().systemProfile.doSystemControl();
-                }
-
-                L.saveCCUState();
-
-                new Thread() {
-                    @Override
-                    public void run() {
-                        try {
-                            CCUHsApi.getInstance().syncHisData();
-                        } catch (Exception e) {
-                            //We do understand the consequences of doing this.
-                            //But the system could still continue to work in standalone mode controlling the hvac system
-                            //even if there are failures in data synchronization with backend.
-                            CcuLog.e(L.TAG_CCU_JOB, "His Sync Failed !", e);
-                        }
-                    }
-                }.start();
-
-                DateTime now = new DateTime();
-                boolean timeForEntitySync = now.getMinuteOfDay() % 15 == 0 ? true : false;
-                if (timeForEntitySync) {
-                    CCUHsApi.getInstance().scheduleSync();
-                }
-
-            } catch (Exception e) {
-                CcuLog.e(L.TAG_CCU_JOB, "BuildingProcessJob Failed ! ", e);
-            }
+            CCUHsApi.getInstance().syncHisData();
+            return;
         }
+
+        try {
+            //TODO Crash here causing issues in Analytics portal #RENATUS-396 kumar
+            for (ZoneProfile profile : L.ccu().zoneProfiles) {
+                profile.updateZonePoints();
+            }
+
+            if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed()) {
+                CCUHsApi.getInstance().syncEntityTree();
+                if (CCUHsApi.getInstance().siteSynced()) {
+                    String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
+                    PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(), siteUID);
+                }
+            }
+
+            if (L.ccu().oaoProfile != null) {
+                L.ccu().oaoProfile.doOAO();
+            } else {
+                CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double) EpidemicState.OFF.ordinal());
+            }
+
+            if (!Globals.getInstance().isTestMode()) {
+                L.ccu().systemProfile.doSystemControl();
+            }
+
+            L.saveCCUState();
+
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        CCUHsApi.getInstance().syncHisData();
+                    } catch (Exception e) {
+                        //We do understand the consequences of doing this.
+                        //But the system could still continue to work in standalone mode controlling the hvac system
+                        //even if there are failures in data synchronization with backend.
+                        CcuLog.e(L.TAG_CCU_JOB, "His Sync Failed !", e);
+                    }
+                }
+            }.start();
+
+            DateTime now = new DateTime();
+            boolean timeForEntitySync = now.getMinuteOfDay() % 15 == 0 ? true : false;
+            if (timeForEntitySync) {
+                CCUHsApi.getInstance().scheduleSync();
+            }
+
+        } catch (Exception e) {
+            CcuLog.e(L.TAG_CCU_JOB, "BuildingProcessJob Failed ! ", e);
+        }
+
         CcuLog.d(L.TAG_CCU_JOB,"<- BuildingProcessJob");
     }
 }

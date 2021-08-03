@@ -14,6 +14,7 @@ public class Floor extends Entity
     private String            displayName;
     private ArrayList<String> markers;
     private String siteRef;
+    private String floorNum;
     public void setId(String id)
     {
         this.id = id;
@@ -46,6 +47,7 @@ public class Floor extends Entity
         private String            displayName;
         private ArrayList<String> markers = new ArrayList<>();;
         private String            siteRef;
+        private String floorNum;
         private String id;
         public Builder setDisplayName(String displayName)
         {
@@ -69,6 +71,7 @@ public class Floor extends Entity
             f.siteRef = this.siteRef;
             f.markers = this.markers;
             f.id = this.id;
+            f.floorNum = this.floorNum;
             return f;
         }
     
@@ -93,6 +96,10 @@ public class Floor extends Entity
                 else if(pair.getKey().equals("siteRef"))
                 {
                     this.siteRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("floorNum"))
+                {
+                    this.floorNum = pair.getValue().toString();
                 }
                 //it.remove();
             }

@@ -1,11 +1,14 @@
 package a75f.io.device.mesh;
 
 import a75f.io.alerts.AlertManager;
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.DeviceNetwork;
+import a75f.io.device.daikin.DaikinIE;
+import a75f.io.device.daikin.IEDeviceHandler;
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
@@ -19,6 +22,8 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.system.SystemProfile;
+import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.diag.DiagEquip;
 
@@ -186,7 +191,24 @@ public class MeshNetwork extends DeviceNetwork
     }
     
     public void sendSystemControl() {
-        CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendSystemControl");
+        CcuLog.i(L.TAG_CCU_DEVICE, "MeshNetwork SendSystemControl");
+        
+        if (ccu().systemProfile == null) {
+            CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendSystemControl : Abort , No system profile");
+            return;
+        }
+        Pulse.checkForDeviceDead();
+
+        if (ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU) {
+            //DaikinIE.sendControl();
+            VavIERtu systemProfile = (VavIERtu) L.ccu().systemProfile;
+            IEDeviceHandler.getInstance().sendControl(systemProfile, CCUHsApi.getInstance());
+            
+            if (DLog.isLoggingEnabled()) {
+                sendIETestMessage(systemProfile);
+            }
+            return;
+        }
     
         if (!LSerial.getInstance().isConnected()) {
             CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
@@ -197,17 +219,6 @@ public class MeshNetwork extends DeviceNetwork
             AlertManager.getInstance().fixCMDead();
         }
         
-        if (ccu().systemProfile == null) {
-            CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendSystemControl : Abort , No system profile");
-            return;
-        }
-        Pulse.checkForDeviceDead();
-
-        if (ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU)
-        {
-            DaikinIE.sendControl();
-        }
-       
         CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
         msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
         msg.analog0.set((short) ControlMote.getAnalogOut("analog1"));
@@ -226,5 +237,15 @@ public class MeshNetwork extends DeviceNetwork
         MeshUtil.sendStructToCM(msg);
         
         
+    }
+    
+    private void sendIETestMessage(VavIERtu systemProfile) {
+        CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
+        msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
+        msg.analog0.set((short) systemProfile.getCmdSignal("dat and setpoint"));
+        msg.analog1.set((short) systemProfile.getCmdSignal("fan"));
+        msg.analog2.set((short) systemProfile.getSystemController().getAverageSystemHumidity());
+        msg.analog3.set((short) (systemProfile.getCmdSignal("staticPressure") * 10));
+        MeshUtil.sendStructToCM(msg);
     }
 }

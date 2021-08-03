@@ -5,6 +5,7 @@ import org.joda.time.DateTime;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
+import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import org.projecthaystack.HBool;
 import org.projecthaystack.HDateTime;
@@ -151,7 +152,7 @@ public class HisSyncHandler
                         CcuLog.e(TAG,"Historized point value for GUID " + pointGuid + "; point ID " + pointID + "; description of " + pointDescription + " is null. Skipping.");
                     }
                 }
-            } else if (unsyncedHisItems.isEmpty() && timeForQuarterHourSync && !(pointToSync.containsKey("heartbeat") || pointToSync.containsKey("rssi"))) {
+            } else if (unsyncedHisItems.isEmpty() && timeForQuarterHourSync && !skipForcedHisWrites(pointToSync)) {
 
                 HisItem latestHisItemToReSync = ccuHsApi.tagsDb.getLastHisItem(HRef.copy(pointID));
 
@@ -198,6 +199,13 @@ public class HisSyncHandler
                 }
             }
         }
+    }
+    
+    //These points need not be synced unless there is a 'history' entry
+    private boolean skipForcedHisWrites(HashMap pointToSync) {
+        return pointToSync.containsKey("heartbeat")
+               || pointToSync.containsKey("rssi")
+               || (pointToSync.containsKey("system") && pointToSync.containsKey("clock"));
     }
 
     private HDict[] hDictListToArray(List<HDict> hDictList) {

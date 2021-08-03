@@ -1,50 +1,68 @@
- - Merged PR 1310: Heart beat point for all the modules
- - Handled occupancy sensor data
- - Merging code of 7672- Reading data from device for hyperstat sense as requested by Manju
- - heartbeat migration included for hyperstat sense
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
- - Merged PR 1473: 7519 : Zone UI Implementation for Hyperstat Sense
- - Occupancy point creation
- - Lower and upper limit for the temp ui
- - Fixed fetching address of equipment
- - Added code for Hyperstat -Sense module -heartbeat point
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
- - Merged PR 1450: Zone marker is added for system level modbus profiles
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
- - Added code for heartbeat migration task
- - Logs are removed
- - Complete Zone UI
- - Done with current temp
- - Merged PR 1432: 7584: CCU : Hyperstat sense : Sensor selections reset when toggles were in off state initially.
- - Handled multiplier for input and holding register
- - hyphen removed
- - working
- - resolved zone tag issue and display name as per requested
- - draft
- - Resolved the merge conflicts with master after 1.572 release
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
- - Config was not updated if the ananlogs are changes to enable
- - removed standalone tag from OAO heartbeat
- - Resolved alignment issue
- - Fixed tag issues (standalone and heartbeat), Date format issue, SN EMR issue
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
- - uncommented date format for today
- - uncommented date format for today
- - fixed system tag refresh screen
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
- - Fixes for modbus heartbeat and addressed review comments
- - Added code for refreshing zone screen
- - UI fixes as suggested by QA
- - Oao and system level level module changes
- - updating with more modification -module status
- - added alignment
- - updating with more modification -module status
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
- - updating with more modification -module status
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
- - fixed 2fcu and 4 fcu
- - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6669_CCU_HeartBeat
- - ui changes for heartbeat
- - Added heartbeat and module tag for Points
- - heartbeat points for all equips
+ - Merged PR 1634: Remove humidifier point, fan status fix and make occStatus point interpolated
+ - Resolve merge conflicts
+ - Remove humidifier point, fan status fix and make occStatus point interpolated
+ - Merged PR 1627: Daikin IE profile
+ - Merged PR 1633: Dcwb algo fix
+ - Remove humidifier point, fan status fix and make occStatus point interpolated
+ - Merged PR 1607: OTP generation for adding/replacing CCU
+ - Pulling out Shared pref related code from CCUHsApi to PreferanceUtil
+ - Dcwb algo fix
+ - Merge master
+ - Handle fanSpeed based on staticPressure point
+ - Skip sending ccu activation message when IE profile is configured
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6925_OTP_Generation
+ - Merged PR 1506: OAO damper opened for Economization, DCV Ventilation & Limited by MAT
+ - Fixes for QA observations
+ - Added code to persist OTP in shared pref
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6929_OAO_damper
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6925_OTP_Generation
+ - Email restriction if otp is not sent to email when generated.
+ - Merged PR 1553: BPOS UI Implementation
+ - Added test support
+ - Fanspeed related changes
+ - Handled the null pointer exception when no oao is paired in migration task
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6929_OAO_damper
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6925_OTP_Generation
+ - otp generation
+ - zone pririty with normal as default
+ - Merged PR 1582: 7755 :CCU : In zone page UI current temp should be added again with offset as device is sending the calculated values to CCU.
+ - Update occupancy calculation for DaikinIE
+ - Update 'PUT' request content type and added delay between write/reads
+ - Updated the cur temp
+ - Add eth network interface and ip route
+ - Merge branch 'master' into story/samjith/daikin_ie_profile
+ - Update fanSpeed point when multizone mode changed
+ - BPOS UI
+ - Fan speed UI and points added
+ - to enable dcv added another check to see if co2 is more than threshold
+ - to enable dcv added another check to see if co2 is more than threshold
+ - otp generation
+ - Fixed DCV available point's value
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6929_OAO_damper
+ - Initial screen of otp generation
+ - Initial screen of otp generation
+ - UI Implementation
+ - Fixed QA issues
+ - Merge branch 'master' into story/samjith/daikin_ie_profile
+ - WIP
+ - Added migration for oao damper opened reason
+ - Merge branch 'master' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/jtheertha/6929_OAO_damper
+ - Added migration for oao damper opened reason
+ - Added migration for oao damper opened reason
+ - Free cooling points for OAO- MAT and DCV. Also mogration job to include these points for previously paired OAOs.
+ - Connection timeout for IE
+ - Merged PR 1459: Implemented Daikin IE profile UI
+ - Merge branch 'master' into story/samjith/daikin_ie_profile
+ - Enabled the Ip edit option for testing
+ - Updating Daikin UI for existing profile
+ - WIP
+ - Updating Daikin UI for existing profile
+ - Merge branch 'story/samjith/daikin_ie_profile' of https://dev.azure.com/75fdevelopment/75F%20Engineering/_git/ccu into story/samjith/daikin_ie_profile
+ - refactor
+ - Merge branch 'master' into story/samjith/daikin_ie_profile
+ - Merge master
+ - change tags
+ - Implement fetch messages
+ - Fix request formatting issue, handle IE url update and many other small things
+ - Update functions kotlin implementation
+ - add macAddress point and update tags

@@ -20,7 +20,8 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="64dp"
             android:rotation="180"
-            app:srcCompat="@drawable/icon_arrowright" />
+            android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+            app:tint="?orange_75f" />
 
         <TextView
             android:id="@+id/title"
@@ -38,6 +39,7 @@
     </RelativeLayout>
 
     <ImageView
+        android:id="@+id/hyperSensePairing"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:src="@drawable/sensepairscreen"
@@ -65,7 +67,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:background="@null"
-            android:drawableRight="@drawable/icon_arrowright"
+            android:drawableRight="@drawable/ic_baseline_keyboard_arrow_right_24"
+            app:tint="?orange_75f"
             android:drawablePadding="5dp"
             android:fontFamily="@font/lato_bold"
             android:text="@string/button_pair"

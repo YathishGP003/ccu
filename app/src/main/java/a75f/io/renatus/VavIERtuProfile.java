@@ -158,17 +158,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         analog2Cb.setOnCheckedChangeListener(this);
         analog3Cb.setOnCheckedChangeListener(this);
         humidificationCb.setOnCheckedChangeListener(this);
-        zoneTypeSelection.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            zoneType.setText(isChecked?"Multi Zone":"Single Zone");
-            systemProfile.setConfigVal("multiZone",(isChecked?1.0:0.0));
-            handleFanConfigViews(isChecked);
-            systemProfile.handleMultiZoneEnable(isChecked?1.0:0.0);
-            if (systemProfile.getConfigVal("multiZone") > 0) {
-                spTest.setAdapter(getSpAdapter());
-            } else {
-                spTest.setAdapter(getZeroToHundredArrayAdapter());
-            }
-        });
+        
         view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
 
             @Override
@@ -191,6 +181,23 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         zoneTypeSelection.setChecked(systemProfile.getConfigVal("multiZone") > 0);
         zoneType.setText(systemProfile.getConfigVal("multiZone")> 0?"Multi Zone":"Single Zone");
         handleFanConfigViews(systemProfile.getConfigVal("multiZone") > 0);
+        setUpZoneTypeListener();
+    }
+    
+    private void setUpZoneTypeListener() {
+        zoneTypeSelection.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            zoneTypeSelection.setEnabled(false);
+            zoneType.setText(isChecked?"Multi Zone":"Single Zone");
+            systemProfile.setConfigVal("multiZone",(isChecked?1.0:0.0));
+            handleFanConfigViews(isChecked);
+            systemProfile.handleMultiZoneEnable(isChecked?1.0:0.0);
+            if (systemProfile.getConfigVal("multiZone") > 0) {
+                spTest.setAdapter(getSpAdapter());
+            } else {
+                spTest.setAdapter(getZeroToHundredArrayAdapter());
+            }
+            zoneTypeSelection.setEnabled(true);
+        });
     }
     
     public void setupEquipAddrEditor() {

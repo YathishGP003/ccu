@@ -55,7 +55,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
         L.pingCloudServer();
         
         DiagEquip.getInstance().updatePoints();
-        if (!Globals.getInstance().isTemproryOverrideMode()) {
+        if (Globals.getInstance().isTemproryOverrideMode()) {
             CCUHsApi.getInstance().syncHisData();
             return;
         }

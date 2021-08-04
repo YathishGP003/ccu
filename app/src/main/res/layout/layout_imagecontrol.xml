@@ -76,41 +76,48 @@
             android:layout_toRightOf="@+id/imageViewExpanded"
             >
 
-            <TextView
-                android:id="@+id/textEmTotal"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="2456.4"
-                android:textSize="16sp" />
-            <TextView
-                android:id="@+id/textTotalUnit"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="KWh"
-                android:textSize="16sp"
-                android:textColor="?orange_75f"
                 android:layout_marginTop="5dp"
-                android:layout_toEndOf="@+id/textEmTotal"
-                android:layout_alignTop="@+id/textEmTotal" />
+                android:id="@+id/ll_textEmTotal">
+                <TextView
+                    android:id="@+id/textEmTotal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2456.4"
+                    android:textSize="16sp" />
+                <TextView
+                    android:id="@+id/textTotalUnit"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="KWh"
+                    android:textSize="16sp"
+                    android:textColor="?orange_75f"
+                    android:layout_toEndOf="@+id/textEmTotal"/>
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/textEmCurrent"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/textEmTotal"
-                android:text="25"
-                android:textSize="16sp" />
-            <TextView
-                android:id="@+id/textCurrentUnit"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="KWh"
-                android:textSize="16sp"
-                android:textColor="?orange_75f"
                 android:layout_marginTop="5dp"
-                android:layout_toEndOf="@+id/textEmCurrent"
-                android:layout_alignTop="@+id/textEmCurrent" />
+                android:layout_below="@+id/ll_textEmTotal">
+                <TextView
+                    android:id="@+id/textEmCurrent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="25"
+                    android:textSize="16sp"/>
+                <TextView
+                    android:id="@+id/textCurrentUnit"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="KWh"
+                    android:textSize="16sp"
+                    android:textColor="?orange_75f"
+                    android:layout_toEndOf="@+id/textEmCurrent"
+                    android:layout_alignTop="@+id/textEmCurrent" />
+            </LinearLayout>
 
         </RelativeLayout>
 </RelativeLayout>

@@ -82,7 +82,7 @@ public class OTAUpdateService extends IntentService {
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         String action = intent.getAction();
-
+        Log.i(Globals.TAG, "onHandleIntent  action  "+action);
         if(action == null) {
             return;
         }
@@ -122,7 +122,7 @@ public class OTAUpdateService extends IntentService {
         else if(action.equals(Globals.IntentActions.LSERIAL_MESSAGE)) {
             MessageType eventType = (MessageType) intent.getSerializableExtra("eventType");
             byte[] eventBytes = intent.getByteArrayExtra("eventBytes");
-
+            Log.i(Globals.TAG, "onHandleIntent  eventType  "+eventType);
             switch(eventType) {
                 case CM_TO_CCU_OVER_USB_FIRMWARE_UPDATE_ACK:
                     handleOtaUpdateAck(eventBytes);
@@ -205,6 +205,7 @@ public class OTAUpdateService extends IntentService {
     }
 
     private void handleNodeReboot(byte[] eventBytes) {
+        Log.i(Globals.TAG, "handleNodeReboot called ");
         SnRebootIndicationMessage_t msg = new SnRebootIndicationMessage_t();
         msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
 

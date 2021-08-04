@@ -516,33 +516,35 @@ public class MasterControlView extends LinearLayout {
                 HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min");
                 HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max");
 
+                //Building level tuners points are only written on Level 16. Generally writes made from CCU are
+                // written to level 8 , but BuildingTuners are considered to be at "Site level".
                 if (buildingCoolingUpperLimit.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(buildingCoolingUpperLimit.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) coolingTemperatureUpperLimit, 0);
+                    CCUHsApi.getInstance().writePoint(buildingCoolingUpperLimit.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL, "ccu_" + ccuName, (double) coolingTemperatureUpperLimit, 0);
                     CCUHsApi.getInstance().writeHisValById(buildingCoolingUpperLimit.get("id").toString(), (double) coolingTemperatureUpperLimit);
                 }
 
                 if (buildingCoolingLowerLimit.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(buildingCoolingLowerLimit.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) coolingTemperatureLowerLimit, 0);
+                    CCUHsApi.getInstance().writePoint(buildingCoolingLowerLimit.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL, "ccu_" + ccuName, (double) coolingTemperatureLowerLimit, 0);
                     CCUHsApi.getInstance().writeHisValById(buildingCoolingLowerLimit.get("id").toString(), (double) coolingTemperatureLowerLimit);
                 }
 
                 if (buildingHeatingUpperLimit.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(buildingHeatingUpperLimit.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) heatingTemperatureUpperLimit, 0);
+                    CCUHsApi.getInstance().writePoint(buildingHeatingUpperLimit.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL, "ccu_" + ccuName, (double) heatingTemperatureUpperLimit, 0);
                     CCUHsApi.getInstance().writeHisValById(buildingHeatingUpperLimit.get("id").toString(), (double) heatingTemperatureUpperLimit);
                 }
 
                 if (buildingHeatingLowerLimit.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(buildingHeatingLowerLimit.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) heatingTemperatureLowerLimit, 0);
+                    CCUHsApi.getInstance().writePoint(buildingHeatingLowerLimit.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL, "ccu_" + ccuName, (double) heatingTemperatureLowerLimit, 0);
                     CCUHsApi.getInstance().writeHisValById(buildingHeatingLowerLimit.get("id").toString(), (double) heatingTemperatureLowerLimit);
                 }
 
                 if (buildingMax.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(buildingMax.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) buildingTemperatureUpperLimit, 0);
+                    CCUHsApi.getInstance().writePoint(buildingMax.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL, "ccu_" + ccuName, (double) buildingTemperatureUpperLimit, 0);
                     CCUHsApi.getInstance().writeHisValById(buildingMax.get("id").toString(), (double) buildingTemperatureUpperLimit);
                 }
 
                 if (buildingMin.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(buildingMin.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_" + ccuName, (double) buildingTemperatureLowerLimit, 0);
+                    CCUHsApi.getInstance().writePoint(buildingMin.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL, "ccu_" + ccuName, (double) buildingTemperatureLowerLimit, 0);
                     CCUHsApi.getInstance().writeHisValById(buildingMin.get("id").toString(), (double) buildingTemperatureLowerLimit);
                 }
 

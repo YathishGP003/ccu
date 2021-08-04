@@ -31,6 +31,7 @@ import a75f.io.logic.pubnub.ModbusDataInterface;
 import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUiUtil;
 
 public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRecyclerModbusParamAdapter.ViewHolder> implements ModbusDataInterface {
 
@@ -286,7 +287,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                 tags.append(" and ").append(marker.getTagName());
             }
         }
-        HashMap pointRead = CCUHsApi.getInstance().read("point and logical and modbus and zone" + tags + " and equipRef == \"" + equipRef + "\"");
+        HashMap pointRead = CCUHsApi.getInstance().read("point and logical and modbus " + tags + " and equipRef == \"" + equipRef + "\"");
         Point logicalPoint = new Point.Builder().setHashMap(pointRead).build();
         return logicalPoint;
     }

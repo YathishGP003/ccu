@@ -239,6 +239,7 @@ public class VavReheatProfile extends VavProfile
         double dischargeSp = supplyAirTemp + (datMax - supplyAirTemp) * Math.min(heatingLoopOp, 50) / 50;
         valveController.updateControlVariable(dischargeSp, dischargeTemp);
         valveController.dump();
+        vavDevice.setDischargeSp(dischargeSp);
         int valvePosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
     
         CcuLog.d(L.TAG_CCU_ZONE,

@@ -8,6 +8,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import com.google.android.material.button.MaterialButton;
+
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
 import android.text.Html;
@@ -57,6 +59,10 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUiUtil;
+
+
+
 
 /**
  * Created by samjithsadasivan on 1/17/19.
@@ -77,8 +83,8 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     TunerExpandableLayoutHelper tunerExpandableLayoutHelper;
     int childSelected = 0;
     ArrayList<HashMap> updatedTunerValues;
-    MaterialButton saveTunerValues;
-    MaterialButton cancelTunerUpdate;
+    private Button saveTunerValues;
+    private Button cancelTunerUpdate;
     EditText editChangeReason;
     EditText editTunerSearch;
     Spinner spinnerSelection;
@@ -441,7 +447,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             });
             buttonCancelTuners.setOnClickListener(dialogV -> {
                 saveTunerValues.setEnabled(true);
-                saveTunerValues.setTextColor(getActivity().getColor(R.color.orange_75f));
+                saveTunerValues.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                 valueDialog.dismiss();
             });
             linearLayoutBody.invalidate();
@@ -690,7 +696,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     }
                     if (updatedTunerValues.size() > 0) {
                         saveTunerValues.setEnabled(true);
-                        saveTunerValues.setTextColor(getActivity().getColor(R.color.orange_75f));
+                        saveTunerValues.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                     }
                 }
                 break;

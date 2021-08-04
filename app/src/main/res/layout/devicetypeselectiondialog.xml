@@ -8,7 +8,7 @@
 
     <TextView
         android:id="@+id/default_text_view"
-        style="@style/WindowTextStyle"
+        style="?WindowTextStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingStart="8dp"
@@ -32,7 +32,8 @@
             android:layout_marginStart="64dp"
             android:padding="2.5dp"
             android:rotation="180"
-            app:srcCompat="@drawable/icon_arrowright" />
+            app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
+            app:tint="?orange_75f" />
 
         <TextView
             android:id="@+id/textTitleFragment"
@@ -44,12 +45,18 @@
             android:fontFamily="@font/lato_bold"
             android:text="@string/label_selectdevicetype"
             android:textAllCaps="true"
-            android:textColor="@color/orange_75f"
+            android:textColor="?orange_75f"
             android:textSize="33.5sp"
             android:textStyle="bold" />
 
     </RelativeLayout>
 
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/layoutHeader"
+        android:overScrollMode="never">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -67,14 +74,14 @@
                 android:layout_width="279dp"
                 android:layout_height="130dp"
                 android:layout_alignParentBottom="true"
-                android:src="@drawable/image_sn" />
+                android:src="@drawable/smart_helio_node" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:layout_marginEnd="220dp"
+                android:layout_marginEnd="360dp"
                 android:orientation="vertical">
 
                 <TextView
@@ -93,15 +100,41 @@
                     android:textAppearance="@style/text_label" />
 
             </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="220dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textHN"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:text="@string/title_hn"
+                    android:textAppearance="@style/title_normal" />
+
+                <TextView
+                    android:id="@+id/textHelioNode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_helionode"
+                    android:textAppearance="@style/text_label" />
+
+            </LinearLayout>
+
 
             <ImageView
                 android:id="@+id/nextSN"
-                android:layout_width="12dp"
-                android:layout_height="20dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="96dp"
-                android:src="@drawable/icon_arrowright" />
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                app:tint="?orange_75f" />
 
             <View
                 android:layout_width="match_parent"
@@ -109,6 +142,59 @@
                 android:layout_alignParentBottom="true"
                 android:alpha="0.37"
                 android:background="@color/text_color" />
+        </RelativeLayout>
+
+        <RelativeLayout
+           android:id="@+id/rl_hyperstat"
+           android:layout_width="match_parent"
+           android:layout_height="114dp"
+           android:layout_marginStart="440dp">
+
+            <!-- todo: replace with hyperstat image -->
+            <ImageView
+               android:layout_width="279dp"
+               android:layout_height="62dp"
+               android:layout_alignParentBottom="true"
+               android:src="@drawable/image_hyperstat" />
+
+            <LinearLayout
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_alignParentEnd="true"
+               android:layout_centerVertical="true"
+               android:layout_marginEnd="220dp"
+               android:orientation="vertical">
+
+                <TextView
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_gravity="end"
+                   android:text="@string/title_hs"
+                   android:textAppearance="@style/title_normal" />
+
+                <TextView
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:text="@string/title_hyperstat"
+                   android:textAppearance="@style/text_label" />
+
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="96dp"
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                app:tint="?orange_75f" />
+
+            <View
+               android:layout_width="match_parent"
+               android:layout_height="0.1dp"
+               android:layout_alignParentBottom="true"
+               android:alpha="0.37"
+               android:background="@color/text_color" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -150,12 +236,13 @@
 
             <ImageView
                 android:id="@+id/nextSS"
-                android:layout_width="12dp"
-                android:layout_height="20dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="96dp"
-                android:src="@drawable/icon_arrowright" />
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                app:tint="?orange_75f" />
 
             <View
                 android:layout_width="match_parent"
@@ -205,12 +292,13 @@
 
             <ImageView
                 android:id="@+id/nextWTM"
-                android:layout_width="12dp"
-                android:layout_height="20dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="96dp"
-                android:src="@drawable/icon_arrowright" />
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                app:tint="?orange_75f" />
 
             <View
                 android:layout_width="match_parent"
@@ -228,12 +316,21 @@
             android:layout_marginStart="440dp">
 
             <ImageView
+                android:id="@+id/ccu75_img"
+                android:visibility="gone"
                 android:layout_width="300dp"
-                android:layout_height="114dp"
+                android:layout_height="113dp"
                 android:layout_alignParentBottom="true"
                 android:layout_marginStart="10dp"
                 android:src="@drawable/image_ccu" />
-
+            <ImageView
+                android:id="@+id/daikin_ccu"
+                android:layout_width="300dp"
+                android:layout_height="70dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginStart="10dp"
+                android:visibility="gone"
+                android:src="@drawable/ccu" />
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -261,12 +358,13 @@
 
             <ImageView
                 android:id="@+id/nextCCU"
-                android:layout_width="12dp"
-                android:layout_height="20dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="96dp"
-                android:src="@drawable/icon_arrowright" />
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                app:tint="?orange_75f" />
 
             <View
                 android:layout_width="match_parent"
@@ -313,12 +411,65 @@
             </LinearLayout>
             <ImageView
                 android:id="@+id/nextMb"
-                android:layout_width="12dp"
-                android:layout_height="20dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_marginEnd="96dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:src="@drawable/icon_arrowright"/>
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                app:tint="?orange_75f" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.1dp"
+                android:background="@color/text_color"
+                android:alpha="0.37"
+                android:layout_alignParentBottom="true"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rlbpos"
+            android:layout_width="match_parent"
+            android:layout_height="114dp"
+            android:layout_marginStart="440dp">
+
+            <ImageView
+                android:layout_width="300dp"
+                android:layout_height="90dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginStart="10dp"
+                app:srcCompat="@drawable/bpos_devicetype" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="220dp"
+                android:layout_centerVertical="true"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/textbpos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:text="@string/textbpos"
+                    android:textAppearance="@style/title_normal"/>
+
+                <TextView
+                    android:id="@+id/descbpos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/descbpos"
+                    android:textAppearance="@style/text_label"/>
+
+            </LinearLayout>
+            <ImageView
+                android:id="@+id/nextbpos"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginEnd="96dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                app:tint="?orange_75f" />
             <View
                 android:layout_width="match_parent"
                 android:layout_height="0.1dp"
@@ -387,7 +538,7 @@
         </RadioGroup>
 
     </LinearLayout>
-
+    </ScrollView>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -401,18 +552,19 @@
 
         <Button
             android:id="@+id/first_button"
-            style="@style/buttonstyle"
+            style="?buttonstyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/txt_cancel" />
 
         <Button
             android:id="@+id/second_button"
-            style="@style/buttonstyle"
+            style="?buttonstyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/txt_pair" />
 
     </LinearLayout>
+
 
 </RelativeLayout>

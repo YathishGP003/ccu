@@ -13,7 +13,18 @@
             android:gravity="left"
             android:padding="10dp"
             android:text="VAV Reheat - No Fan"
-            android:textAppearance="@style/action_text_appearance"
+            android:textAppearance="?action_text_appearance"
             android:textAllCaps="false"/>
 
-    </LinearLayout>
+        <TextView
+            android:id="@+id/module_status"
+            android:layout_marginLeft="5dp"
+            android:layout_gravity="top"
+            android:gravity="top"
+            android:layout_width="9dp"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/module_dead"
+            android:layout_height="9dp"/>
+
+
+</LinearLayout>

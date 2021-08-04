@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'com.google.protobuf'
 
 android {
     compileSdkVersion 28
@@ -45,6 +47,11 @@ android {
         staging {
             minifyEnabled false
         }
+        daikin_prod {
+            minifyEnabled false
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+        }
     }
 
     android.variantFilter { variant ->
@@ -53,6 +60,16 @@ android {
         }
     }
 
+    sourceSets{
+        main.java.srcDirs += "${protobuf.generatedFilesBaseDir}"
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+    }
 }
 
 dependencies {
@@ -70,5 +87,38 @@ dependencies {
     implementation project(':BACnet4J')
     implementation project(':modbus4j')
     implementation project(path: ':modbusbox')
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.7.2'
+    implementation 'com.squareup.retrofit2:converter-simplexml:2.3.0'
+    implementation "com.github.akarnokd:rxjava3-retrofit-adapter:3.0.0"
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-scalars:2.9.0'
+
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
+    implementation 'io.reactivex.rxjava3:rxjava:3.0.0'
+    api 'com.google.protobuf:protobuf-javalite:3.8.0'
 }
+
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.8.0'
+    }
+
+    plugins {
+        javalite {
+            // The codegen for lite comes as a separate artifact
+            artifact = 'com.google.protobuf:protoc-gen-javalite:3.0.0'
+        }
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                    option "lite"
+                }
+            }
+        }
+    }
+}
+
 

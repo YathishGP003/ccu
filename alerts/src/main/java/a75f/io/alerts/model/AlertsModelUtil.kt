@@ -2,6 +2,7 @@ package a75f.io.alerts.model
 
 import a75f.io.alerts.AlertDefinition
 import a75f.io.api.haystack.Alert
+import a75f.io.logger.CcuLog
 import java.lang.StringBuilder
 
 /**
@@ -14,7 +15,7 @@ import java.lang.StringBuilder
 /** Map of alert def titles to alert defe */
 typealias AlertDefsMap = MutableMap<String, AlertDefinition>
 
-/** Map of keys (title+equipId) to full AlertDef occurrance state (alert def, occurrance, progress) */
+/** Map of keys (title+equipId) to full AlertDef occurrence state (alert def, occurrence, progress) */
 typealias AlertDefsState = MutableMap<AlertsDefStateKey, AlertDefOccurrenceState>
 
 /** Nice print out for debugging */
@@ -75,8 +76,7 @@ fun List<Alert>.find(alertDefOccurrence: AlertDefOccurrence): Alert? {
 
    forEach { alert ->
       if (alert.mTitle == alertToCheck.mTitle
-          && alert.ref == alertDefOccurrence.pointId) {
-
+          && alert.equipId == alertDefOccurrence.equipRef?.replaceFirst("@","")) {
             return alert
       }
    }
@@ -96,17 +96,29 @@ fun AlertDefsState.getActiveAlerts(): List<AlertDefOccurrence> = filter { it.val
 /** Calculates new alert definitions state by adding list of new occurrences to this current state.*/
 operator fun AlertDefsState.plusAssign(occurrences: List<AlertDefOccurrence>) {
 
+   // all the positive occurrences this time around, and their keys
    val positives = occurrences.filter { it.testPositive }
    val positiveKeys = positives.map { it.key }
 
+   // initialize collections for use internal to this function
    val updates: AlertDefsState = mutableMapOf()
    val deletions: MutableList<AlertDefOccurrence> = mutableListOf()
 
-   // for existing noted alert defs...
+   fun handleNewAlertOccurrence(alertDefOccurrence: AlertDefOccurrence) {
+      val offset = alertDefOccurrence.alertDef.offset?.toInt() ?: 0
+      if (offset <= 1) {
+         updates.put(alertDefOccurrence.key, AlertDefOccurrenceState(alertDefOccurrence, AlertDefProgress.Raised()))
+      } else {
+         updates.put(alertDefOccurrence.key, AlertDefOccurrenceState(alertDefOccurrence, AlertDefProgress.Partial()))
+      }
+   }
+
+   // for existing alert defs, i.e. in *this* collection
    forEach { (key, value) ->
       val alertDefOccurrence = value.occurrence
       val progress = value.progress
 
+      // if the existing key is still among the positive occurrences...
       if ( key in positiveKeys ) {
          when {
             progress is AlertDefProgress.Partial -> {
@@ -119,7 +131,7 @@ operator fun AlertDefsState.plusAssign(occurrences: List<AlertDefOccurrence>) {
                }
             }
             // it was fixed, but now it's occurring again
-            progress.isFixed() -> updates.put(key, value.copy(progress = AlertDefProgress.Partial()))
+            progress.isFixed() -> handleNewAlertOccurrence(alertDefOccurrence)
             // was active, remains active
             else -> {} //ignore active alerts
          }
@@ -136,14 +148,8 @@ operator fun AlertDefsState.plusAssign(occurrences: List<AlertDefOccurrence>) {
 
    // For newly raised alert defs
    positives.forEach { alertDefOccurrence ->
-
       if ( alertDefOccurrence.key !in keys) {
-         val offset = alertDefOccurrence.alertDef.offset?.toInt() ?: 0
-         if (offset <= 1) {
-            updates.put(alertDefOccurrence.key, AlertDefOccurrenceState(alertDefOccurrence, AlertDefProgress.Raised()))
-         } else {
-            updates.put(alertDefOccurrence.key, AlertDefOccurrenceState(alertDefOccurrence, AlertDefProgress.Partial()))
-         }
+         handleNewAlertOccurrence(alertDefOccurrence)
       }
    }
 

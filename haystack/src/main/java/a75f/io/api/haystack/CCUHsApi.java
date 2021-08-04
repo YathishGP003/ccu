@@ -191,10 +191,20 @@ public class CCUHsApi
         Log.d("Authentication URL: ","url="+careTakerUrl);
         return careTakerUrl;
     }
-    
-    public synchronized void saveTagsData()
+
+    public synchronized void saveTagsData() {
+        saveTagsData(false);
+    }
+
+    /**
+     * Save all of our data (entities, point arrays, ids to sync) to disk.
+
+     * @param immediate whether the disk write in Shared Prefs should be immediate, synchronous.  If false,
+     *                  SharedPrefs will write to memory immediate but write to disk when convenient.
+     */
+    public synchronized void saveTagsData(boolean immediate)
     {
-        tagsDb.saveTags();
+        tagsDb.saveTags(immediate);
     }
 
     public String addSite(Site s)
@@ -830,6 +840,12 @@ public class CCUHsApi
        
     }
 
+    public synchronized void writeHisValueByIdWithoutCOV(String id, Double val)
+    {
+        hsClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), HNum.make(val))});
+
+    }
+
     public synchronized void writeHisValByQuery(String query, Double val)
     {
         if (CACHED_HIS_QUERY)
@@ -901,6 +917,21 @@ public class CCUHsApi
         deleteWritableArray(id);
         deleteEntity(id);
     }
+
+    public void deleteFloorEntityTreeLeavingRemoteFloorIntact(String id) {
+        HashMap entity = CCUHsApi.getInstance().read("id == " + id);
+        if (entity.get("floor") == null) {
+            // not a floor :-(
+            CcuLog.w("CCU_HS", "Attempt to delete Floor locally with non-floor entity id");
+            return;
+        }
+        ArrayList<HashMap> rooms = readAll("room and floorRef == \"" + id + "\"");
+        for (HashMap room : rooms)
+        {
+            deleteEntityTree(room.get("id").toString());
+        }
+        deleteEntityLocally(entity.get("id").toString());
+    }
     
     public void deleteEntityTree(String id)
     {
@@ -908,15 +939,12 @@ public class CCUHsApi
         HashMap entity = CCUHsApi.getInstance().read("id == " + id);
         if (entity.get("site") != null)
         {
-            ArrayList<HashMap> floors = readAll("floor");
-            for (HashMap floor : floors)
-            {
-                deleteEntityTree(floor.get("id").toString());
-            }
+            //Deleting site from a CCU should not remove shared entities like site , floor or building tuner.
             ArrayList<HashMap> equips = readAll("equip and siteRef == \"" + id + "\"");
             for (HashMap equip : equips)
             {
-                deleteEntityTree(equip.get("id").toString());
+                if (!equip.containsKey("tuner"))
+                    deleteEntityTree(equip.get("id").toString());
             }
             ArrayList<HashMap> devices = readAll("device and siteRef == \"" + id + "\"");
             for (HashMap device : devices)
@@ -926,9 +954,9 @@ public class CCUHsApi
             ArrayList<HashMap> schedules = readAll("schedule and siteRef == \"" + id + "\"");
             for (HashMap schedule : schedules)
             {
-                deleteEntity(schedule.get("id").toString());
+                if (!schedule.containsKey("building"))
+                    deleteEntity(schedule.get("id").toString());
             }
-            deleteEntity(id);
         }
         else if (entity.get("floor") != null)
         {

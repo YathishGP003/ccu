@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name">Renatus</string>
+    <string name="app_75f">Renatus</string>
+    <string name="app_daikin">Daikin</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
@@ -29,8 +30,8 @@
     <string name="ble_not_supported">BLE Not Supported</string>
     <string name="error_bluetooth_not_supported">Bluetooth not supported.</string>
     <string name="gatt_connect_failed">Pairing Failed. Could not connect gatt.</string>
-    <string name="sn_pairing_error">SmartNode/SmartStat Pairing could not be done. Please try again!</string>
-    <string name="sn_bond_error">SmartNode/SmartStat is already Bonded. Please reset smartnode and unpair from bluetooth paired devices and try again.</string>
+    <string name="sn_pairing_error">SmartNode/HelioNode/SmartStat Pairing could not be done. Please try again!</string>
+    <string name="sn_bond_error">SmartNode/HelioNode/SmartStat is already Bonded. Please reset smartnode/helionode and unpair from bluetooth paired devices and try again.</string>
     <string name="ble_no_devices_found_warning">No devices found.  (Please have smart devices in advertisement mode and be within range)</string>
     <string name="scan_dialog_title">Scanning for 75F devices</string>
     <string name="unable_to_bluetooth">Unable to initialize bluetooth</string>
@@ -83,7 +84,7 @@
         <item>  DAB Fully Modulating AHU</item>
         <item>  DAB Staged RTU with VFD Fan</item>
         <item>  DAB Advanced Hybrid AHU</item>
-        <item>  Daikin IE Rtu</item>
+        <item>  Daikin IE RTU</item>
     </string-array>
 
     <string-array name="hvac_stage_selector">
@@ -210,7 +211,7 @@
         <item>  Dehumidifier </item>
     </string-array>
     <string-array name="smartstat_relay_hp_changeover">
-    	<item>  O - Energize in cooling</item>
+        <item>  O - Energize in cooling</item>
         <item>  B - Energize in heating</item>
     </string-array>
     <string-array name="schedulePORT">
@@ -230,23 +231,23 @@
     </string-array>
 
     <string-array name="zone_priority">
-        <item >No Priority</item>
-        <item >Low</item>
-        <item >Normal</item>
-        <item >High</item>
+        <item>No Priority</item>
+        <item>Low</item>
+        <item>Normal</item>
+        <item>High</item>
     </string-array>
 
     <string-array name="damper_size">
-        <item >4</item>
-        <item >6</item>
-        <item >8</item>
-        <item >10</item>
-        <item >12</item>
-        <item >14</item>
-        <item >16</item>
-        <item >18</item>
-        <item >20</item>
-        <item >22</item>
+        <item>4</item>
+        <item>6</item>
+        <item>8</item>
+        <item>10</item>
+        <item>12</item>
+        <item>14</item>
+        <item>16</item>
+        <item>18</item>
+        <item>20</item>
+        <item>22</item>
     </string-array>
 
     <string name="title_activity_system_scheduler">System Scheduler</string>
@@ -298,6 +299,7 @@
     <string name="input_facilityorg">Organization</string>
     <string name="input_installer_email">Installer Email</string>
     <string name="button_next">Next </string>
+    <string name="otp_send_email">Enter email id</string>
 
     <!--Installer Option-->
     <string name="title_installeroption">Installer Options</string>
@@ -500,13 +502,17 @@
     <!--Pairing Screen-->
     <string name="title_sn">SN</string>
     <string name="title_smartnode">Smart Node</string>
+    <string name="title_hn">HN</string>
+    <string name="title_helionode">Helio Node</string>
     <string name="title_ss">SS</string>
+    <string name="title_hs">HS</string>
     <string name="title_smartstat">Smart Stat</string>
+    <string name="title_hyperstat">HyperStat</string>
     <string name="title_wtm">WTM</string>
     <string name="title_wirelesstemp">Wireless Temperature Monitor</string>
 
     <!--SMART NODE Module Screen-->
-    <string name="title_smartnodemodule">SMART NODE | SELECT MODULE TYPE</string>
+    <string name="title_smartnodemodule">SMART NODE | HELIO NODE | SELECT MODULE TYPE</string>
     <string name="title_vav">VAV with Reheat</string>
     <string name="desc_vav">Control a VAV box for airflow and reheat valves/electric coils</string>
     <string name="title_dab">Dynamic Airflow Balancing</string>
@@ -537,6 +543,7 @@
     <string name="desc_dab_dual_duct">Custom terminal profile control for Dual Duct systems with cooling and heating duct</string>
     <!--SMART STAT Module Screen-->
     <string name="title_smartstatmodule">SMART STAT | SELECT MODULE TYPE</string>
+    <string name="title_hyperstatmodule">HYPERSTAT | SELECT MODULE TYPE</string>
     <string name="title_cpu">Conventional Package Unit</string>
     <string name="desc_cpu">Unitary equipment with 2 stages for Heating, Cooling and Fan\nUser can select Fan Low/High/Auto</string>
     <string name="title_commercial">Commercial Package Unit</string>
@@ -544,10 +551,13 @@
     <string name="title_hpu">Heat Pump Unit</string>
     <string name="desc_hpu">Compressor based Heating and Cooling\nReversing Valve determines operational mode</string>
     <string name="title_2pipe">2 Pipe FCU</string>
-    <string name="desc_2pipe">A Coil fed by 1 pair of supply pipes provides heating or cooling\nThe correct mode is based on sensing supply water temperature</string>
+    <string name="desc_2pipe">A coil fed by 1 pair of supply pipes provides heating or cooling\nThe correct mode is based on sensing supply water temperature</string>
     <string name="title_4pipe">4 Pipe FCU</string>
     <string name="desc_4pipe">A water coil fed by separate heating and cooling pipes\nAllows for independent heating/cooling modes</string>
-
+    <string name="title_vrv">VRV</string>
+    <string name="desc_vrv">Connect to the Daikin VRV Indoor Unit using P1 P2 Protocol</string>
+    <string name="title_hypersense">Sense</string>
+    <string name="desc_hypersense">Equipment Connector for Monitoring Data</string>
 
     <!--WTM Module Screen-->
     <string name="title_wtmmodule">WTM | SELECT MODULE TYPE</string>
@@ -604,7 +614,7 @@
     <string name="label_threshold_relay2_off">Turn OFF Relay 2</string>
 
     <!--ENERGY METER SCREEN-->
-    <string name="label_eminstruction">This profile allows monitoring and graphing of energy usage via Modbus energy meter\nconnected to the Smart Node. Please wire up the meter as shown below.</string>
+    <string name="label_eminstruction">This profile allows monitoring and graphing of energy usage via Modbus energy meter\nconnected to the Smart Node|Helio Node. Please wire up the meter as shown below.</string>
 
     <!--TEMPERATURE MONITORING Screen-->
     <string name="label_mainsensor">Main Temperature/Humidity Sensor</string>
@@ -648,7 +658,7 @@
     <string name="lable_epidemic_settings_text">Epidemic Mode Settings</string>
 
     <!--PAIRING INSTRUCTION Screen-->
-    <string name="title_pairsn">SMART NODE | PAIRING STEPS </string>
+    <string name="title_pairsn">SMART NODE | HELIO NODE | PAIRING STEPS </string>
     <string name="title_pairss">SMART STAT | PAIRING STEPS </string>
     <string name="button_pair">PAIR</string>
 
@@ -661,6 +671,7 @@
     <string name="title_edit">EDIT</string>
     <string name="title_save">SAVE</string>
     <string name="title_unregister">UNREGISTER</string>
+    <string name="title_generate_otp">Generate OTP</string>
 
     <!--Temperature override Screen-->
     <string name="title_io_parameters">I/O \nParameters</string>
@@ -686,7 +697,6 @@
         <item>  Not enabled </item>
         <item>  Fan </item>
     </string-array>
-
 
 
     <!--DAB Dual Duct-->
@@ -774,7 +784,7 @@
     <string name="txt_place_holder">place holder</string>
     <string name="txt_cancel">Cancel</string>
     <string name="txt_pair">Pair</string>
-    <string name="txt_smartnode">Smartnode</string>
+    <string name="txt_smartnode">Smartnode|Helionode</string>
     <string name="txt_smartstat">SmartStat</string>
     <string name="txt_itm_hia">ITM-HIA</string>
     <string name="txt_itm_lpi">ITM-LPI</string>
@@ -841,9 +851,9 @@
 
     <string name="txt_mb_restart_prompt">Changes in config requires Application restart</string>
     <string name="txt_restart">Restart Now</string>
-   <string name="local_sandbox">Local Sandbox</string>
+    <string name="local_sandbox">Local Sandbox</string>
     <string name="change_ip_address">Change IP Address</string>
-   <string name="alert_definitions">Alert Definitions:</string>
+    <string name="alert_definitions">Alert Definitions:</string>
     <string name="active_alerts">Active:</string>
     <string name="resolved">Resolved:</string>
     <string name="in_process">In process:</string>
@@ -897,6 +907,7 @@
 
     <string name="label_modbus_energy_meter">MODBUS ENERGY METER</string>
     <string name="title_modbus_energy_proportional_distribution">Energy Proportional Distribution</string>
+    <string name="deleting_floor">Removing floor</string>
     <string-array name="energy_distribution_values">
         <item> 0% </item>
         <item> 10% </item>
@@ -912,4 +923,22 @@
     </string-array>
 
     <string name="buttonDesableDelay">2000</string>
+    <string name="analogin1">Analog-in1</string>
+    <string name="analogin2">Analog-in2</string>
+    <string name="title_pairhss">HYPERSTAT | PAIRING STEPS </string>
+    <string name="prefs_theme_key">isEnabled</string>
+    <string name="txt_CCU_occupancy_status">Occupancy Status on IE Gateway :</string>
+    <string name="txt_GUID_details">GUID Details:</string>
+
+    <string name="textbpos">BPOS</string>
+    <string name="descbpos">Battery Power Occupancy Sensor</string>
+    <string name="title_bpos">BPOS | SELECT MODULE TYPE</string>
+    <string name="autoforceoccupied">Auto Force Occupied</string>
+    <string name="autoaway">Auto Away</string>
+    <string-array name="zone_priority_bpos">
+        <item >Normal</item>
+        <item >No Priority</item>
+        <item >Low</item>
+        <item >High</item>
+    </string-array>
 </resources>

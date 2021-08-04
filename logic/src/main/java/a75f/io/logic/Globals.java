@@ -24,6 +24,7 @@ import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.erm.EmrProfile;
+import a75f.io.logic.bo.building.hyperstatsense.HyperStatSenseProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
@@ -48,11 +49,15 @@ import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
+import a75f.io.logic.heartbeat.HeartbeatMigration;
 import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
+import a75f.io.logic.oao.OAODamperOpenReasonMigration;
 import a75f.io.logic.pubnub.PbSubscriptionHandler;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.tuners.TunerUpgrades;
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.watchdog.Watchdog;
 
 /*
@@ -169,6 +174,7 @@ public class Globals {
         RenatusServicesUrls urls = servicesEnv.getUrls();
 
         CCUHsApi ccuHsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl());
+        PreferenceUtil.setContext(this.mApplicationContext);
         ccuHsApi.testHarnessEnabled = testHarness;
 
         //set SN address band
@@ -178,7 +184,36 @@ public class Globals {
         importTunersAndScheduleJobs();
     }
     
-    
+    private void migrateHeartbeatPointForEquips(HashMap<Object, Object> site){
+        if (!site.isEmpty()) {
+            HeartbeatMigration.initHeartbeatMigration();
+        }
+    }
+
+
+    private void OAODamperOpenReasonMigration(HashMap<Object, Object> site){
+        if (!site.isEmpty()) {
+            OAODamperOpenReasonMigration.initOAOFreeCoolingReasonMigration();
+        }
+    }
+
+    private void performBuildingTunerUprades(HashMap<Object, Object> site) {
+        //If site already exists , import building tuners from backend before initializing building tuner equip.
+        if (!site.isEmpty()) {
+            if (CCUHsApi.getInstance().isPrimaryCcu()) {
+                        /* Only primary CCUs shall create new tuners created in the upgrade releases and
+                        non-primary CCUs should fetch in the next app start up.*/
+                BuildingTuners.getInstance().updateBuildingTuners();
+            } else {
+                        /*If a non-primary tuner fails to load all the  building tuners, it should
+                        fall back hard-coded constant tuner values. Creating new tuner instances here will result in
+                        multiple CCUs having duplicate instances of tuners. */
+                CCUHsApi.getInstance().importBuildingTuners();
+            }
+            TunerUpgrades.handleBuildingTunerForceClear(mApplicationContext, CCUHsApi.getInstance());
+        }
+    }
+
     private void importTunersAndScheduleJobs() {
 
         new Thread()
@@ -186,23 +221,11 @@ public class Globals {
             @Override
             public void run()
             {
-                //If site already exists , import building tuners from backend before initializing building tuner equip.
                 HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
-                if (!site.isEmpty()) {
-                    if (CCUHsApi.getInstance().isPrimaryCcu()) {
-                        /* Only primary CCUs shall create new tuners created in the upgrade releases and
-                        non-primary CCUs should fetch in the next app start up.*/
-                        BuildingTuners.getInstance().updateBuildingTuners();
-                    } else {
-                        /*If a non-primary tuner fails to load all the  building tuners, it should
-                        fall back hard-coded constant tuner values. Creating new tuner instances here will result in
-                        multiple CCUs having duplicate instances of tuners. */
-                        CCUHsApi.getInstance().importBuildingTuners();
-                    }
-                    
-                    CCUHsApi.getInstance().syncEntityTree();
-                }
-            
+                performBuildingTunerUprades(site);
+                migrateHeartbeatPointForEquips(site);
+                OAODamperOpenReasonMigration(site);
+                CCUHsApi.getInstance().syncEntityTree();
                 loadEquipProfiles();
             
                 if (!PbSubscriptionHandler.getInstance().isPubnubSubscribed())
@@ -379,6 +402,11 @@ public class Globals {
                             fourPfcu.addLogicalMap(Short.valueOf(eq.getGroup()), z.getId());
                             L.ccu().zoneProfiles.add(fourPfcu);
                             break;
+                        case HYPERSTAT_SENSE:
+                            HyperStatSenseProfile hssense = new HyperStatSenseProfile();
+                            hssense.addHyperStatSenseEquip(Short.valueOf(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(hssense);
+                            break;
                         case MODBUS_PAC:
                         case MODBUS_RRS:
                         case MODBUS_VRF:
@@ -398,6 +426,7 @@ public class Globals {
                         case MODBUS_UPSVL:
                         case MODBUS_VAV_BACnet:
                         case MODBUS_EMR_ZONE:
+                        case MODBUS_DEFAULT:
                             ModbusProfile mbProfile = new ModbusProfile();
                             mbProfile.addMbEquip(Short.valueOf(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
                             L.ccu().zoneProfiles.add(mbProfile);
@@ -450,7 +479,7 @@ public class Globals {
         HashMap device = CCUHsApi.getInstance().read("device and addr");
         if (device != null && device.size() > 0 && device.get("modbus") == null && device.get("addr") != null) {
             String nodeAdd = device.get("addr").toString();
-            return nodeAdd.substring(0, 2).concat("00");
+            return nodeAdd.substring(0, nodeAdd.length()-2).concat("00");
         } else {
             HashMap band = CCUHsApi.getInstance().read("point and snband");
             if (band != null && band.size() > 0 && band.get("val") != null) {

@@ -3,6 +3,8 @@ package a75f.io.renatus;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+
+import a75f.io.renatus.util.RxjavaUtil;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
@@ -17,24 +19,29 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.device.mesh.DaikinIE;
+import a75f.io.device.daikin.DaikinIE;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.registration.FreshRegistration;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 /**
  * Created by samjithsadasivan on 11/6/18.
@@ -54,6 +61,14 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     @BindView(R.id.heatingDatMax)Spinner heatingDatMax;
     @BindView(R.id.spMin)Spinner spMin;
     @BindView(R.id.spMax)Spinner spMax;
+    @BindView(R.id.spMinLabel)TextView spMinLabel;
+    @BindView(R.id.spMaxLabel)TextView spMaxLabel;
+    @BindView(R.id.fanSpeedMin)Spinner fanSpeedMin;
+    @BindView(R.id.fanSpeedMax)Spinner fanSpeedMax;
+    @BindView(R.id.fanSpeedMinLabel)TextView fanSpeedMinLabel;
+    @BindView(R.id.fanSpeedMaxLabel)TextView fanSpeedMaxLabel;
+    
+    
     @BindView(R.id.equipmentIp) EditText equipAddr;
     
     @BindView(R.id.analog1RTUTest) Spinner coolingTest;
@@ -63,13 +78,18 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     @BindView(R.id.oaMinTest) Spinner oaMinTest;
     @BindView(R.id.buttonNext)
     Button mNext;
+
     @BindView(R.id.btnEditIp)
     ImageView btnEditIp;
-    
+
+    @BindView(R.id.zone_type) TextView zoneType;
+    @BindView(R.id.sp_zone_type) ToggleButton zoneTypeSelection;
     VavIERtu systemProfile = null;
     String PROFILE = "VAV_IE_RTU";
     Prefs prefs;
     boolean isFromReg = false;
+    
+    private CompositeDisposable disposable = new CompositeDisposable();
     
     public static VavAnalogRtuProfile newInstance()
     {
@@ -86,7 +106,6 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         if(getArguments() != null) {
             isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
         }
-
         btnEditIp.setOnClickListener(view1 -> equipAddr.setEnabled(true));
         return rootView;
     }
@@ -98,24 +117,16 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         if ((L.ccu().systemProfile instanceof VavIERtu))
         {
             systemProfile = (VavIERtu) L.ccu().systemProfile;
-            analog1Cb.setChecked(systemProfile.getConfigEnabled("analog1") > 0);
-            analog2Cb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
-            analog3Cb.setChecked(systemProfile.getConfigEnabled("analog3") > 0);
+            analog1Cb.setChecked(systemProfile.getConfigEnabled("cooling") > 0);
+            analog2Cb.setChecked(systemProfile.getConfigEnabled("fan") > 0);
+            analog3Cb.setChecked(systemProfile.getConfigEnabled("heating") > 0);
             humidificationCb.setChecked(systemProfile.getConfigEnabled("humidification") > 0);
-            setupAnalogLimitSelectors();
-            setupEquipAddrEditor();
-            
+            refreshUI();
         } else {
-            new AsyncTask<String, Void, Void>() {
-        
-                @Override
-                protected void onPreExecute() {
-                    ProgressDialogUtils.showProgressDialog(getActivity(),"Loading System Profile");
-                    super.onPreExecute();
-                }
-        
-                @Override
-                protected Void doInBackground(final String... params) {
+    
+            disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+                () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Loading System Profile"),
+                () -> {
                     if (systemProfile != null) {
                         systemProfile.deleteSystemEquip();
                         L.ccu().systemProfile = null; //Makes sure that System Algos dont run until new profile is ready.
@@ -123,18 +134,12 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                     systemProfile = new VavIERtu();
                     systemProfile.addSystemEquip();
                     L.ccu().systemProfile = systemProfile;
-                    return null;
-                }
-        
-                @Override
-                protected void onPostExecute(final Void result) {
-                    setupAnalogLimitSelectors();
-                    setupEquipAddrEditor();
+                },
+                () -> {
+                    refreshUI();
                     ProgressDialogUtils.hideProgressDialog();
-                    CCUHsApi.getInstance().saveTagsData();
-                    CCUHsApi.getInstance().syncEntityTree();
                 }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+            ));
         }
 
         if(isFromReg){
@@ -153,7 +158,17 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         analog2Cb.setOnCheckedChangeListener(this);
         analog3Cb.setOnCheckedChangeListener(this);
         humidificationCb.setOnCheckedChangeListener(this);
-
+        zoneTypeSelection.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            zoneType.setText(isChecked?"Multi Zone":"Single Zone");
+            systemProfile.setConfigVal("multiZone",(isChecked?1.0:0.0));
+            handleFanConfigViews(isChecked);
+            systemProfile.handleMultiZoneEnable(isChecked?1.0:0.0);
+            if (systemProfile.getConfigVal("multiZone") > 0) {
+                spTest.setAdapter(getSpAdapter());
+            } else {
+                spTest.setAdapter(getZeroToHundredArrayAdapter());
+            }
+        });
         view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
 
             @Override
@@ -167,10 +182,29 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                 }
             }
         });
+        setSpinnerDropDownIcon();
+    }
+    
+    private void refreshUI() {
+        setupAnalogLimitSelectors();
+        setupEquipAddrEditor();
+        zoneTypeSelection.setChecked(systemProfile.getConfigVal("multiZone") > 0);
+        zoneType.setText(systemProfile.getConfigVal("multiZone")> 0?"Multi Zone":"Single Zone");
+        handleFanConfigViews(systemProfile.getConfigVal("multiZone") > 0);
     }
     
     public void setupEquipAddrEditor() {
-        String eqIp = CCUHsApi.getInstance().readDefaultStrVal("point and system and config and ie and address");
+        String eqIp = CCUHsApi.getInstance().readDefaultStrVal("point and system and config and ie and ipAddress");
+
+
+        // As of now for testing we need edit option so commented bellow code
+         /*
+            String subnetMaskAddress="255.255.255.0";
+            final String[] choices = {eqIp,subnetMaskAddress};
+            ArrayAdapter<String> addressAdapter =new ArrayAdapter<>(getContext(),android.R.layout.simple_spinner_item, choices);
+            addressAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            equipAddr.setAdapter(addressAdapter);
+        */
         equipAddr.setText(eqIp);
         equipAddr.setOnClickListener(new View.OnClickListener()
         {
@@ -194,7 +228,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                                                          Toast.makeText(getActivity(), "IP Address Empty", Toast.LENGTH_SHORT).show();
                                                          return;
                                                      }
-                                                     CCUHsApi.getInstance().writeDefaultVal("point and system and config and ie and address",editText.getText().toString().trim());
+                                                     CCUHsApi.getInstance().writeDefaultVal("point and system and config and ie and ipAddress",editText.getText().toString().trim());
                                                      equipAddr.setText(editText.getText().toString());
                                                  }
                                              })
@@ -206,8 +240,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     }
 
     private void goTonext() {
-        //Intent i = new Intent(mContext, RegisterGatherCCUDetails.class);
-        //startActivity(i);
+
         prefs.setBoolean("PROFILE_SETUP",true);
         prefs.setString("PROFILE",PROFILE);
         ((FreshRegistration)getActivity()).selectItem(19);
@@ -228,23 +261,17 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         val = systemProfile.getConfigVal("cooling and dat and max");
         coolingDatMax.setSelection(val != 0 ? coolingDatAdapter.getPosition(val) : coolingDatArr.size()-1 , false);
     
-        ArrayList<Double> spArr = new ArrayList<>();
-        for (int sp = 2;  sp <= 10; sp++)
-        {
-            spArr.add((double)sp/10);
-        }
-        ArrayAdapter<Double> spAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, spArr);
-        spAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        ArrayAdapter<Double> spAdapter = getSpAdapter();
         spMin.setAdapter(spAdapter);
         val = systemProfile.getConfigVal("staticPressure and min");
         spMin.setSelection(spAdapter.getPosition(val) , false);
     
         spMax.setAdapter(spAdapter);
         val = systemProfile.getConfigVal("staticPressure and max");
-        spMax.setSelection(val != 0 ? spAdapter.getPosition(val) : spArr.size()-1, false);
+        spMax.setSelection(val != 0 ? spAdapter.getPosition(val) : spAdapter.getCount()-1, false);
     
         ArrayList<Double> heatingDatArr = new ArrayList<>();
-        for (double hdat = 75;  hdat <= 130.0; hdat++)
+        for (double hdat = 75;  hdat <= 100; hdat++)
         {
             heatingDatArr.add(hdat);
         }
@@ -263,32 +290,34 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         coolingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         coolingTest.setAdapter(coolingSatTestAdapter);
         coolingTest.setSelection(0,false);
-        
-        ArrayAdapter<Double> spTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, spArr);
-        spTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        spTest.setAdapter(spTestAdapter);
-        spTest.setSelection(0,false);
     
         ArrayAdapter<Double> heatingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, heatingDatArr);
         heatingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         heatingTest.setAdapter(heatingSatTestAdapter);
         heatingTest.setSelection(0,false);
-    
-        ArrayList<Double> zoroToHundred = new ArrayList<>();
-        for (double i = 0;  i <= 100.0; i++)
-        {
-            zoroToHundred.add(i);
-        }
-        ArrayAdapter<Double> humidificationTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
-        humidificationTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        humidificationTest.setAdapter(humidificationTestAdapter);
+        
+        ArrayAdapter<Double> percentSelectorAdapter = getZeroToHundredArrayAdapter();
+        humidificationTest.setAdapter(percentSelectorAdapter);
         humidificationTest.setSelection(0,false);
-    
-        ArrayAdapter<Double> oaMinTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
-        oaMinTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        oaMinTest.setAdapter(oaMinTestAdapter);
+        
+        oaMinTest.setAdapter(percentSelectorAdapter);
         oaMinTest.setSelection(0,false);
-    
+        
+        fanSpeedMin.setAdapter(percentSelectorAdapter);
+        val = systemProfile.getConfigVal("fanSpeed and min");
+        fanSpeedMin.setSelection(val != 0 ? percentSelectorAdapter.getPosition(val) : 0, false);
+        
+        fanSpeedMax.setAdapter(percentSelectorAdapter);
+        val = systemProfile.getConfigVal("fanSpeed and max");
+        fanSpeedMax.setSelection(val != 0 ? percentSelectorAdapter.getPosition(val) : percentSelectorAdapter.getCount()-1,
+                                 false);
+        
+        if (systemProfile.getConfigVal("multiZone") > 0) {
+            spTest.setAdapter(spAdapter);
+        } else {
+            spTest.setAdapter(percentSelectorAdapter);
+        }
+        spTest.setSelection(0,false);
     
         coolingDatMin.setOnItemSelectedListener(this);
         coolingDatMax.setOnItemSelectedListener(this);
@@ -301,7 +330,30 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         heatingTest.setOnItemSelectedListener(this);
         humidificationTest.setOnItemSelectedListener(this);
         oaMinTest.setOnItemSelectedListener(this);
+        fanSpeedMin.setOnItemSelectedListener(this);
+        fanSpeedMax.setOnItemSelectedListener(this);
         
+    }
+    
+    private ArrayAdapter<Double> getZeroToHundredArrayAdapter() {
+        ArrayList<Double> zoroToHundred = new ArrayList<>();
+        for (double i = 0;  i <= 100.0; i++) {
+            zoroToHundred.add(i);
+        }
+        ArrayAdapter<Double> adapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        return adapter;
+    }
+    
+    private ArrayAdapter<Double> getSpAdapter() {
+        ArrayList<Double> spArr = new ArrayList<>();
+        for (int sp = 2;  sp <= 20; sp++)
+        {
+            spArr.add((double)sp/10);
+        }
+        ArrayAdapter<Double> spAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, spArr);
+        spAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        return spAdapter;
     }
     
     @Override
@@ -310,13 +362,13 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         switch (buttonView.getId())
         {
             case R.id.analog1RTU:
-                setSelectionBackground("analog1", isChecked);
+                setSelectionBackground("cooling", isChecked);
                 break;
             case R.id.analog2RTU:
-                setSelectionBackground("analog2", isChecked);
+                setSelectionBackground("fan", isChecked);
                 break;
             case R.id.analog3RTU:
-                setSelectionBackground("analog3", isChecked);
+                setSelectionBackground("heating", isChecked);
                 break;
             case R.id.humidificationCb:
                 setSelectionBackground("humidification", isChecked);
@@ -349,6 +401,12 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
             case R.id.heatingDatMax:
                 setConfigBackground("heating and dat and max", val);
                 break;
+            case R.id.fanSpeedMin:
+                setConfigBackground("fanSpeed and min", val);
+                break;
+            case R.id.fanSpeedMax:
+                setConfigBackground("fanSpeed and max", val);
+                break;
             case R.id.analog1RTUTest:
             case R.id.analog3RTUTest:
                 checkTestMode();
@@ -376,58 +434,28 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     }
     
     private void setConfigBackground(String tags, double val) {
-        new AsyncTask<String, Void, Void>() {
-            
-            @Override
-            protected Void doInBackground( final String ... params ) {
-                systemProfile.setConfigVal(tags, val);
-                return null;
-            }
-            
-            @Override
-            protected void onPostExecute( final Void result ) {
-                // continue what you are doing...
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        disposable.add(RxjavaUtil.executeBackgroundWithDisposable(
+            () -> systemProfile.setConfigVal(tags, val)
+        ));
     }
     
     private void setSelectionBackground(String analog, boolean selected) {
-        new AsyncTask<String, Void, Void>() {
-            @Override
-            protected void onPreExecute() {
-                ProgressDialogUtils.showProgressDialog(getActivity(),"Saving VAV System Configuration");
-                super.onPreExecute();
-            }
-            @Override
-            protected Void doInBackground( final String ... params ) {
-                systemProfile.setConfigEnabled(analog, selected ? 1: 0);
-                return null;
-            }
-            
-            @Override
-            protected void onPostExecute( final Void result ) {
+        disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+            () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Saving VAV System Configuration"),
+            () -> systemProfile.setConfigEnabled(analog, selected ? 1: 0),
+            () -> {
                 if (!selected) {
                     updateSystemMode();
                 }
                 ProgressDialogUtils.hideProgressDialog();
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        ));
     }
     
     private void setUserIntentBackground(String query, double val) {
-        
-        new AsyncTask<String, Void, Void>() {
-            @Override
-            protected Void doInBackground( final String ... params ) {
-                TunerUtil.writeSystemUserIntentVal(query, val);
-                return null;
-            }
-            
-            @Override
-            protected void onPostExecute( final Void result ) {
-                // continue what you are doing...
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        disposable.add(RxjavaUtil.executeBackgroundWithDisposable(
+            () -> TunerUtil.writeSystemUserIntentVal(query, val)
+        ));
     }
     
     public void updateSystemMode() {
@@ -469,5 +497,41 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                 Globals.getInstance().setTestMode(false);
             }
         }
+    }
+
+    private void setSpinnerDropDownIcon(){
+
+        CCUUiUtil.setSpinnerDropDownColor(coolingDatMin,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(coolingDatMax,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(heatingDatMin,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(heatingDatMax,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(spMin,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(spMax,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(coolingTest,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(spTest,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(heatingTest,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(humidificationTest,getContext());
+        CCUUiUtil.setSpinnerDropDownColor(oaMinTest,getContext());
+
+    }
+    
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        disposable.dispose();
+    }
+    
+    private void handleFanConfigViews(boolean multiZone) {
+        
+        spMin.setVisibility(multiZone ? View.VISIBLE : View.GONE);
+        spMinLabel.setVisibility(multiZone ? View.VISIBLE : View.GONE);
+        spMax.setVisibility(multiZone ? View.VISIBLE : View.GONE);
+        spMaxLabel.setVisibility(multiZone ? View.VISIBLE : View.GONE);
+    
+        fanSpeedMin.setVisibility(multiZone ? View.GONE : View.VISIBLE);
+        fanSpeedMinLabel.setVisibility(multiZone ? View.GONE : View.VISIBLE);
+        fanSpeedMax.setVisibility(multiZone ? View.GONE : View.VISIBLE);
+        fanSpeedMaxLabel.setVisibility(multiZone ? View.GONE : View.VISIBLE);
+        
     }
 }

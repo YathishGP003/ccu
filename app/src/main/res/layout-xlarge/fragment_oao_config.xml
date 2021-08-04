@@ -32,7 +32,7 @@
                     android:fontFamily="@font/lato_bold"
                     android:text="@string/title_oao"
                     android:textAllCaps="true"
-                    android:textColor="@color/orange_75f"
+                    android:textColor="?orange_75f"
                     android:textSize="33.5dp"
                     android:textStyle="bold" />
 
@@ -362,19 +362,19 @@
                                 android:id="@+id/textExFanStage2"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:layout_alignParentStart="true"
                                 android:layout_centerInParent="true"
                                 android:text="@string/label_exfan_stage2_threshold"
-                                android:layout_alignParentStart="true"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/exFanStage2Threshold"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
 
 
                         </RelativeLayout>
@@ -388,12 +388,13 @@
                                 android:id="@+id/textCO2Threshold"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
-                                android:text="@string/label_co2threshold"
-                                android:layout_toStartOf="@+id/co2Threshold"
-                                android:layout_marginEnd="5dp"
                                 android:layout_alignParentStart="true"
+                                android:layout_centerInParent="true"
+                                android:layout_marginEnd="5dp"
+                                android:layout_toStartOf="@+id/co2Threshold"
+                                android:text="@string/label_co2threshold"
                                 android:textAppearance="@style/title_normal" />
+
 
                             <Spinner
                                 android:id="@+id/co2Threshold"
@@ -403,7 +404,6 @@
                                 android:layout_gravity="center_vertical"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
-
 
                         </RelativeLayout>
 
@@ -423,15 +423,15 @@
                                 android:layout_marginEnd="5dp"
                                 android:textAppearance="@style/title_normal" />
 
+
                             <ToggleButton
                                 android:id="@+id/roomCO2Sensing"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
+                                android:layout_width="46.12dp"
+                                android:layout_height="27.42dp"
+                                android:layout_alignParentRight="true"
                                 android:layout_centerVertical="true"
-                                android:layout_marginLeft="10dp"
-                                android:background="@null"
-                                android:button="@drawable/toggle_selector"
+                                android:layout_marginTop="35dp"
+                                android:background="@drawable/toggle_selector"
                                 android:checked="false"
                                 android:textOff=""
                                 android:textOn="" />
@@ -484,7 +484,7 @@
                 android:fontFamily="@font/lato_regular"
                 android:text="@string/button_set"
                 android:textAllCaps="true"
-                android:textColor="@color/orange_75f"
+                android:textColor="?orange_75f"
                 android:textSize="19.5dp" />
         </LinearLayout>
 

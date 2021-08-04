@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.Html;
@@ -36,8 +37,12 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.TunerNumberPicker;
 import butterknife.ButterKnife;
+
+
 
 
 public class DialogTunerPriorityArray extends BaseDialogFragment implements PriorityItemClickListener, TunerUndoClickListener {
@@ -392,11 +397,13 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             if (tunerItemSelected.containsKey("reset")) {
                 tunerItemSelected.remove("reset");
             }
+            String colorHex = CCUUiUtil.getColorCode(getContext());
+
             String text = "Level " + (position + 1) + " " + levelName;
-            text = text.replaceAll("System", "<font color='#E24301'>System</font>");
-            text = text.replaceAll(getString(R.string.txt_tunersModule), "<font color='#E24301'>Module</font>");
-            text = text.replaceAll("Zone", "<font color='#E24301'>Zone</font>");
-            text = text.replaceAll("Building", "<font color='#E24301'>Building</font>");
+            text = text.replaceAll("System", "<font color='"+colorHex+"'>System</font>");
+            text = text.replaceAll(getString(R.string.txt_tunersModule), "<font color='"+colorHex+"'>Module</font>");
+            text = text.replaceAll("Zone", "<font color='"+colorHex+"'>Zone</font>");
+            text = text.replaceAll("Building", "<font color='"+colorHex+"'>Building</font>");
             textViewLevel.setText(Html.fromHtml(text));
 
             if (tunerItemSelected.containsKey("minVal") && tunerItemSelected.containsKey("maxVal")) {
@@ -464,7 +471,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     //Toast.makeText(getActivity(), "TunersUI-oldValue:" + oldValue + " newValue:" + newValue, Toast.LENGTH_SHORT).show();
                     if (oldValue != newValue) {
                         buttonSaveAlert.setEnabled(true);
-                        buttonSaveAlert.setTextColor(getActivity().getColor(R.color.orange_75f));
+                        buttonSaveAlert.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                         buttonUndo.setVisibility(View.VISIBLE);
                         selectedTunerValue = valueList.get(newValue);
                     }
@@ -487,7 +494,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                             priorityArrayAdapter.notifyItemChanged(position);
                             valueDialog.dismiss();
                             buttonSaveTuner.setEnabled(true);
-                            buttonSaveTuner.setTextColor(getActivity().getColor(R.color.orange_75f));
+                            buttonSaveTuner.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                         }
                 );
             } else {
@@ -505,7 +512,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             buttonSaveTuner.setTextColor(getActivity().getColor(R.color.grey_select));
         } else {
             buttonSaveTuner.setEnabled(true);
-            buttonSaveTuner.setTextColor(getActivity().getColor(R.color.orange_75f));
+            buttonSaveTuner.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
             revertMap = item;
         }
     }

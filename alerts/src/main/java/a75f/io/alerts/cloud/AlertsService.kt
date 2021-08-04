@@ -6,11 +6,13 @@ import a75f.io.logger.CcuLog
 import com.google.gson.*
 import hu.akarnokd.rxjava3.retrofit.RxJava3CallAdapterFactory
 import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.joda.time.DateTime
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
@@ -51,12 +53,15 @@ interface AlertsService {
    /**
     * Creates an alert for this site in the remote service.
     * The service returns the same alert, with _id & timesteamp added.
+    *
+    * We pass back a Response here so we can get access to the error message encoded into the
+    * regular response body (as opposed to in the error response / exception)
     */
    @POST("/alerts/{siteId}")
    fun createAlert(
       @Path("siteId") siteId: String,
       @Body alert: AlertSyncDto
-   ): Single<Alert>
+   ): Single<Response<Alert>>
 
    /**
     * Updates an alert for this site in the remote service.
@@ -187,7 +192,7 @@ data class HttpHeaders(
    val apiKey: String? = null
 )
 
-private class DateTimeTypeConverter : JsonSerializer<DateTime>, JsonDeserializer<DateTime?> {
+class DateTimeTypeConverter : JsonSerializer<DateTime>, JsonDeserializer<DateTime?> {
    override fun serialize(src: DateTime, srcType: Type?, context: JsonSerializationContext?): JsonElement {
       return JsonPrimitive(src.toString())
    }

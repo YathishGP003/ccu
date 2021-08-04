@@ -52,6 +52,9 @@ public class EquipProcessor
         equipmentDevices = parser.parseAllEquips(c);
         energyMeterDevices = parser.parseEneryMeterEquips(c);
         energyMeterSystemDevices = parser.parseEneryMeterSystemEquips(c);
+        modbusBTUMeterDevices = parser.readBTUMeterDeviceDetails(c);
+        readExternalJsonData();
+
         for(EquipmentDevice equipmentDevice:equipmentDevices){
             addEquips(equipmentDevice);
         }
@@ -62,10 +65,19 @@ public class EquipProcessor
             addEquips(equipmentDevice);
         }
 
-        modbusBTUMeterDevices = parser.readBTUMeterDeviceDetails(c);
         for(EquipmentDevice equipmentDevice:modbusBTUMeterDevices){
             addEquips(equipmentDevice);
         }
+
+    }
+
+
+    private void readExternalJsonData(){
+        // Read external Json data
+
+        parser.readExternalJSONFromDir("/sdcard/ccu/modbus",equipmentDevices,modbusBTUMeterDevices,energyMeterSystemDevices,energyMeterDevices);
+        Log.i("CCU_MODBUS", "Modbus external JSON file scan completed");
+
     }
 
     public void addEquips(EquipmentDevice equipmentDevice) {

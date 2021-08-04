@@ -11,4 +11,5 @@ public class SerialConsts
 	public static final int CIRCUIT_NAME_MAX_LENGTH = 20;
 	public static final String SMART_STAT_NAME = "75F-SMART-STAT";
 	public static final String SMART_NODE_NAME = "75F-SN";
+	public static final String HYPERSTAT_NAME = "75F-HYPERSTAT";
 }

@@ -220,6 +220,11 @@ public class SeekArc extends View
     HashMap<ProgressType, Float> mProgresses = new HashMap<>();
     private Paint mInbetweenPaint;
     private float mScaledSliderOffset = 0.0f;
+    private boolean isSense = false;
+
+    public void setSense(boolean val){
+        isSense = val;
+    }
 
 
     public interface OnTemperatureChangeListener
@@ -267,19 +272,19 @@ public class SeekArc extends View
     {
         mCurrentBitmapMatrix = new Matrix();
 
-        mHeatingRectangle = drawableToBitmap(context.getResources().getDrawable(R.drawable.ic_heating_dt_two));
+        mHeatingRectangle = drawableToBitmap(context.getDrawable(R.drawable.ic_heating_dt_two));
         //mHeatingRectangle = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_heating_dt_two);
-        mCoolingRectangle = drawableToBitmap(context.getResources().getDrawable(R.drawable.ic_cooling_dt_two));
+        mCoolingRectangle = drawableToBitmap(context.getDrawable(R.drawable.ic_cooling_dt_two));
         //mCoolingRectangle = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_cooling_dt_two);
-        mHeatingProgressCircle = drawableToBitmap(context.getResources().getDrawable(R.drawable.ic_heating_slider));
+        mHeatingProgressCircle = drawableToBitmap(context.getDrawable(R.drawable.ic_heating_slider));
         //mHeatingProgressCircle = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_heating_slider);
-        mCoolingProgressCircle = drawableToBitmap(context.getResources().getDrawable(R.drawable.ic_cooling_slider));
+        mCoolingProgressCircle = drawableToBitmap(context.getDrawable(R.drawable.ic_cooling_slider));
         //mCoolingProgressCircle = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_cooling_slider);
-        mCurrentTempRectangle = drawableToBitmap(context.getResources().getDrawable(R.drawable.ic_ct_two));
+        mCurrentTempRectangle = drawableToBitmap(context.getDrawable(R.drawable.ic_ct_two));
         //mCurrentTempRectangle = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_ct_two);
-        mRedLimitNonDetailedView = drawableToBitmap(context.getResources().getDrawable(R.drawable.ic_ct_red_two));
+        mRedLimitNonDetailedView = drawableToBitmap(context.getDrawable(R.drawable.ic_ct_red_two));
         //mRedLimitNonDetailedView = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_ct_red_two);
-        mGreyLimitNonDetailedView = drawableToBitmap(context.getResources().getDrawable(R.drawable.ic_ct_grey));
+        mGreyLimitNonDetailedView = drawableToBitmap(context.getDrawable(R.drawable.ic_ct_grey));
         //mGreyLimitNonDetailedView = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_ct_grey);
 
 
@@ -386,10 +391,8 @@ public class SeekArc extends View
     float mScaledICCTDrawable = 0.0f;
 
     @Override
-    protected void onDraw(Canvas canvas)
-    {
-        if (!isViewMeasured && !isDataSet)
-        {
+    protected void onDraw(Canvas canvas) {
+        if (!isViewMeasured && !isDataSet) {
             return;
 
         }
@@ -399,86 +402,90 @@ public class SeekArc extends View
         drawSemiArc(canvas, isDetailedView());
 
         //outer arc numbers from 50 - 90
-        if (isDetailedView())
-            drawWhiteDelimiters(canvas);
-
-        if (!inHeatingSelectionMode && !inCoolingSelectionMode)
-        {
-            drawArcBetween(canvas, getHeatingDesiredTemp(), getCoolingDesiredTemp(), mInbetweenPaint);
+        if (isDetailedView()) drawWhiteDelimiters(canvas);
+        if (isSense) {
             drawCurrentTemp(canvas, getCurrentTemp());
+        } else {
+
+            if (!inHeatingSelectionMode && !inCoolingSelectionMode) {
+                drawArcBetween(canvas, getHeatingDesiredTemp(), getCoolingDesiredTemp(), mInbetweenPaint);
+                drawCurrentTemp(canvas, getCurrentTemp());
+            }
         }
 
 
         //drawArcBetween(canvas, getHeatingDesiredTemp(), getCoolingDesiredTemp(), mInbetweenPaint);
 
-        if (isDetailedView())
-        {
+        if (isDetailedView()) {
 
-            float coolingModeTemp = inCoolingSelectionMode ? getCoolingModeTempTemperature() : getCoolingDesiredTemp();
+            if (!isSense) {
+                float coolingModeTemp = inCoolingSelectionMode ? getCoolingModeTempTemperature() : getCoolingDesiredTemp();
 
-            if (!inCoolingSelectionMode)
-            {
-                drawCoolingDesiredIcon(canvas, coolingModeTemp);
+                if (!inCoolingSelectionMode) {
+                    drawCoolingDesiredIcon(canvas, coolingModeTemp);
+                }
+
+                if (inCoolingSelectionMode) {
+                    drawCoolingLimitBar(canvas);
+                    drawCoolingSliderIcon(canvas, coolingModeTemp);
+                    checkForCoolingLine(canvas, coolingModeTemp);
+                    drawCoolingText(canvas, coolingModeTemp);
+                }
+
+
+                float heatingModeTemp = inHeatingSelectionMode ? getHeatingModeTempTemperature() : getHeatingDesiredTemp();
+
+                if (!inHeatingSelectionMode) {
+                    drawHeatingDesiredIcon(canvas, heatingModeTemp);
+                }
+
+                if (inHeatingSelectionMode) {
+                    drawHeatingLimitBar(canvas);
+                    drawHeatingSliderIcon(canvas, heatingModeTemp);
+                    checkForHeatingLine(canvas, heatingModeTemp);
+                    drawHeatingText(canvas, heatingModeTemp);
+                }
             }
-
-            if (inCoolingSelectionMode)
-            {
-                drawCoolingLimitBar(canvas);
-                drawCoolingSliderIcon(canvas, coolingModeTemp);
-                checkForCoolingLine(canvas, coolingModeTemp);
-                drawCoolingText(canvas, coolingModeTemp);
-            }
+        } else {
+            if (!isSense) {
+                drawIconByTemp(canvas, mGreyLimitNonDetailedView, getHeatingDesiredTemp(),
+                        mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
+                drawIconByTemp(canvas, mGreyLimitNonDetailedView, getCoolingDesiredTemp(),
+                        mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
 
 
-            float heatingModeTemp = inHeatingSelectionMode ? getHeatingModeTempTemperature() : getHeatingDesiredTemp();
+                if ((getCurrentTemp() > 0) && (getCurrentTemp() < getHeatingDesiredTemp())) {
+                    int prevColor = mInbetweenPaint.getColor();
+                    mInbetweenPaint.setColor(Color.parseColor("#e24301"));
+                    drawArcBetween(canvas, mCurrentTemp, mHeatingDesiredTemp, mInbetweenPaint);
+                    mInbetweenPaint.setColor(prevColor);
+                } else if ((getCurrentTemp() > 0) && (getCurrentTemp() > getCoolingDesiredTemp())) {
 
-            if (!inHeatingSelectionMode)
-            {
-                drawHeatingDesiredIcon(canvas, heatingModeTemp);
-            }
-
-            if (inHeatingSelectionMode)
-            {
-                drawHeatingLimitBar(canvas);
-                drawHeatingSliderIcon(canvas, heatingModeTemp);
-                checkForHeatingLine(canvas, heatingModeTemp);
-                drawHeatingText(canvas, heatingModeTemp);
-            }
-        } else
-        {
-            drawIconByTemp(canvas, mGreyLimitNonDetailedView, getHeatingDesiredTemp(),
-                           mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
-            drawIconByTemp(canvas, mGreyLimitNonDetailedView, getCoolingDesiredTemp(),
-                           mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
-
-
-            if ((getCurrentTemp() > 0) && (getCurrentTemp() < getHeatingDesiredTemp()))
-            {
-                int prevColor = mInbetweenPaint.getColor();
-                mInbetweenPaint.setColor(Color.parseColor("#e24301"));
-                drawArcBetween(canvas, mCurrentTemp, mHeatingDesiredTemp, mInbetweenPaint);
-                mInbetweenPaint.setColor(prevColor);
-            } else if ((getCurrentTemp() > 0) && (getCurrentTemp() > getCoolingDesiredTemp()))
-            {
-
-                int prevColor = mInbetweenPaint.getColor();
-                mInbetweenPaint.setColor(Color.parseColor("#e24301"));
-                drawArcBetween(canvas, getCoolingDesiredTemp(), mCurrentTemp, mInbetweenPaint);
-                mInbetweenPaint.setColor(prevColor);
+                    int prevColor = mInbetweenPaint.getColor();
+                    mInbetweenPaint.setColor(Color.parseColor("#e24301"));
+                    drawArcBetween(canvas, getCoolingDesiredTemp(), mCurrentTemp, mInbetweenPaint);
+                    mInbetweenPaint.setColor(prevColor);
+                }
             }
 
         }
 
         //Draw icon at current temperature
-        if ((getCurrentTemp() > 0) && (getCurrentTemp() > getBuildingLowerTempLimit()) && (getCurrentTemp() < getBuildingUpperTempLimit())) {
-            drawIconByTemp(canvas, isDetailedView() ? mCurrentTempRectangle : mRedLimitNonDetailedView,
-                    mCurrentTemp, mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
+        if (isSense) {
+            if((getCurrentTemp() > 0) && (getCurrentTemp() > getBuildingLowerTempLimit()) && (getCurrentTemp() < getBuildingUpperTempLimit())) {
+                drawIconByTemp(canvas, mCurrentTempRectangle, mCurrentTemp, mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
+            }
+        } else {
+            if ((getCurrentTemp() > 0) && (getCurrentTemp() > getBuildingLowerTempLimit()) && (getCurrentTemp() < getBuildingUpperTempLimit())) {
+                drawIconByTemp(canvas, isDetailedView() ? mCurrentTempRectangle : mRedLimitNonDetailedView,
+                        mCurrentTemp, mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
+            }
         }
 
 
     }
 
-    private void drawCurrentTemp(Canvas canvas, float currentTemp)
+    public void drawCurrentTemp(Canvas canvas, float currentTemp)
     {
         if (isDetailedView())
             drawCurrentTempTextDetailed(canvas);
@@ -499,58 +506,99 @@ public class SeekArc extends View
     //Refactor to move out mem leaks
     private void drawCurrentTempTextDetailed(Canvas canvas)
     {
-        String coolingDesiredText = String.valueOf(getCoolingDesiredTemp());
-        String heatingDesiredText = String.valueOf(getHeatingDesiredTemp());
-        String currentTempText    = String.valueOf(getCurrentTemp());
+        if (isSense) {
+            String currentTempText = String.valueOf(getCurrentTemp());
+            mCurrentTemperatureTextPaint.getTextBounds(currentTempText, 0, currentTempText.length(), bounds);
 
-        mDesiredCoolingSmallTextPaint.getTextBounds(coolingDesiredText, 0, coolingDesiredText.length(), mCoolingTextBounds);
-        mDesiredHeatingSmallTextPaint.getTextBounds(heatingDesiredText, 0, heatingDesiredText.length(), mHeatingTextBounds);
-        mCurrentTemperatureTextPaint.getTextBounds(currentTempText, 0, currentTempText.length(), bounds);
+            float widthOfText = mHeatingTextBounds.width() + paddingBetweenTextDP + bounds.width();
+            float heightOfCurrentText = bounds.height();
+            float heightOfStackedText = mCoolingTextBounds.height() + paddingBetweenTextDP + mHeatingTextBounds.height();
 
-        float widthOfText         = mHeatingTextBounds.width() + paddingBetweenTextDP + bounds.width();
-        float heightOfCurrentText = bounds.height();
-        float heightOfStackedText = mCoolingTextBounds.height() + paddingBetweenTextDP + mHeatingTextBounds.height();
+            float heightToUse = Math.max(heightOfCurrentText, heightOfStackedText);
+            float widthToUse = widthOfText;
 
-        float heightToUse = Math.max(heightOfCurrentText, heightOfStackedText);
-        float widthToUse  = widthOfText;
-
-        float xPositionOfCurrentText = cx - (widthToUse / 2f);
-        float yPositionOfCurrentText = cy + (heightToUse / 2f);
+            float xPositionOfCurrentText = cx - (widthToUse / 2f);
+            float yPositionOfCurrentText = cy + (heightToUse / 2f);
+            float widthOfCurText = bounds.width();
 
 
-        float xPositionOfCoolingText = cx + (widthToUse / 2.0f) - mCoolingTextBounds.width();
-        float yPositionOfCoolingText = cy + (heightToUse / 2.0f) - mCoolingTextBounds.height() - paddingBetweenTextDP;
+            float centerOfCurrentTempHorizontal = xPositionOfCurrentText + (widthOfCurText / 2);
+            float yPositionOfBottomOfCurrentTemp = yPositionOfCurrentText + (heightOfCurrentText / 2);
 
-        float xPositionOfHeatingText = cx + (widthToUse / 2.0f) - mCoolingTextBounds.width();
-        float yPositionOfHeatingText = cy + (heightToUse / 2.0f) + mCoolingTextBounds.height() - paddingBetweenTextDP;
+            String curString = "CURRENT";
+            mCurrentTemperatureStringTextPaint.getTextBounds(curString, 0, curString.length(), bounds);
 
-        float widthOfCurText = bounds.width();
+            float xPositionOfCurrentStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
+            float yPositionOfCurrentStringText = yPositionOfBottomOfCurrentTemp;
 
+            float heightOfCurrentStringText = bounds.height();
 
-        float centerOfCurrentTempHorizontal  = xPositionOfCurrentText + (widthOfCurText / 2);
-        float yPositionOfBottomOfCurrentTemp = yPositionOfCurrentText + (heightOfCurrentText / 2);
+            String tempString = "TEMP";
 
-        String curString = "CURRENT";
-        mCurrentTemperatureStringTextPaint.getTextBounds(curString, 0, curString.length(), bounds);
-
-        float xPositionOfCurrentStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
-        float yPositionOfCurrentStringText = yPositionOfBottomOfCurrentTemp;
-
-        float heightOfCurrentStringText = bounds.height();
-
-        String tempString = "TEMP";
-
-        mCurrentTemperatureStringTextPaint.getTextBounds(tempString, 0, tempString.length(), bounds);
+            mCurrentTemperatureStringTextPaint.getTextBounds(tempString, 0, tempString.length(), bounds);
 
 
-        float yPositionOfTempStringText = yPositionOfCurrentStringText + heightOfCurrentStringText + SPACE_BETWEEN_TWO_WORD_STRINGS;
-        float xPositionOfTempStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
+            float yPositionOfTempStringText = yPositionOfCurrentStringText + heightOfCurrentStringText + SPACE_BETWEEN_TWO_WORD_STRINGS;
+            float xPositionOfTempStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
 
-        canvas.drawText(curString, xPositionOfCurrentStringText, yPositionOfCurrentStringText, mCurrentTemperatureStringTextPaint);
-        canvas.drawText(tempString, xPositionOfTempStringText, yPositionOfTempStringText, mCurrentTemperatureStringTextPaint);
-        canvas.drawText(currentTempText, xPositionOfCurrentText, yPositionOfCurrentText, mCurrentTemperatureTextPaint);
-        canvas.drawText(coolingDesiredText, xPositionOfCoolingText, yPositionOfCoolingText, mDesiredHeatingSmallTextPaint);
-        canvas.drawText(heatingDesiredText, xPositionOfHeatingText, yPositionOfHeatingText, mDesiredCoolingSmallTextPaint);
+            canvas.drawText(curString, xPositionOfCurrentStringText, yPositionOfCurrentStringText, mCurrentTemperatureStringTextPaint);
+            canvas.drawText(tempString, xPositionOfTempStringText, yPositionOfTempStringText, mCurrentTemperatureStringTextPaint);
+            canvas.drawText(currentTempText, xPositionOfCurrentText, yPositionOfCurrentText, mCurrentTemperatureTextPaint);
+
+        } else {
+            String coolingDesiredText = String.valueOf(getCoolingDesiredTemp());
+            String heatingDesiredText = String.valueOf(getHeatingDesiredTemp());
+            String currentTempText = String.valueOf(getCurrentTemp());
+
+             mDesiredCoolingSmallTextPaint.getTextBounds(coolingDesiredText, 0, coolingDesiredText.length(), mCoolingTextBounds);
+             mDesiredHeatingSmallTextPaint.getTextBounds(heatingDesiredText, 0, heatingDesiredText.length(), mHeatingTextBounds);
+            mCurrentTemperatureTextPaint.getTextBounds(currentTempText, 0, currentTempText.length(), bounds);
+
+            float widthOfText = mHeatingTextBounds.width() + paddingBetweenTextDP + bounds.width();
+            float heightOfCurrentText = bounds.height();
+            float heightOfStackedText = mCoolingTextBounds.height() + paddingBetweenTextDP + mHeatingTextBounds.height();
+
+            float heightToUse = Math.max(heightOfCurrentText, heightOfStackedText);
+            float widthToUse = widthOfText;
+
+            float xPositionOfCurrentText = cx - (widthToUse / 2f);
+            float yPositionOfCurrentText = cy + (heightToUse / 2f);
+
+
+            float xPositionOfCoolingText = cx + (widthToUse / 2.0f) - mCoolingTextBounds.width();
+            float yPositionOfCoolingText = cy + (heightToUse / 2.0f) - mCoolingTextBounds.height() - paddingBetweenTextDP;
+
+            float xPositionOfHeatingText = cx + (widthToUse / 2.0f) - mCoolingTextBounds.width();
+            float yPositionOfHeatingText = cy + (heightToUse / 2.0f) + mCoolingTextBounds.height() - paddingBetweenTextDP;
+
+            float widthOfCurText = bounds.width();
+
+
+            float centerOfCurrentTempHorizontal = xPositionOfCurrentText + (widthOfCurText / 2);
+            float yPositionOfBottomOfCurrentTemp = yPositionOfCurrentText + (heightOfCurrentText / 2);
+
+            String curString = "CURRENT";
+            mCurrentTemperatureStringTextPaint.getTextBounds(curString, 0, curString.length(), bounds);
+
+            float xPositionOfCurrentStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
+            float yPositionOfCurrentStringText = yPositionOfBottomOfCurrentTemp;
+
+            float heightOfCurrentStringText = bounds.height();
+
+            String tempString = "TEMP";
+
+            mCurrentTemperatureStringTextPaint.getTextBounds(tempString, 0, tempString.length(), bounds);
+
+
+            float yPositionOfTempStringText = yPositionOfCurrentStringText + heightOfCurrentStringText + SPACE_BETWEEN_TWO_WORD_STRINGS;
+            float xPositionOfTempStringText = centerOfCurrentTempHorizontal - (bounds.width() / 2);
+
+            canvas.drawText(curString, xPositionOfCurrentStringText, yPositionOfCurrentStringText, mCurrentTemperatureStringTextPaint);
+            canvas.drawText(tempString, xPositionOfTempStringText, yPositionOfTempStringText, mCurrentTemperatureStringTextPaint);
+            canvas.drawText(currentTempText, xPositionOfCurrentText, yPositionOfCurrentText, mCurrentTemperatureTextPaint);
+            canvas.drawText(coolingDesiredText, xPositionOfCoolingText, yPositionOfCoolingText, mDesiredHeatingSmallTextPaint);
+            canvas.drawText(heatingDesiredText, xPositionOfHeatingText, yPositionOfHeatingText, mDesiredCoolingSmallTextPaint);
+        }
 
     }
 
@@ -1614,4 +1662,14 @@ public class SeekArc extends View
 
         return bitmap;
     }
+
+    public void setSenseData(boolean detailedView, float curTemp){
+        mCurrentTemp = curTemp;
+        mDetailedView = detailedView;
+        isDataSet = true;
+        prepareAngle();
+        invalidate();
+
+    }
+
 }

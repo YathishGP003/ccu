@@ -177,7 +177,7 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
         switchThermistor1 = (ToggleButton) view.findViewById(R.id.toggleAirflow);
         switchExtTempSensor = (ToggleButton) view.findViewById(R.id.toogleExtSensor);
         temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
-        setDividerColor(temperatureOffset);
+
         temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];//{"-4","-3","-2","-1","0","1","2","3","4"};
         for (int nNum = 0; nNum < TEMP_OFFSET_LIMIT * 2 + 1; nNum++)

@@ -277,10 +277,9 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
         colorMinTemp = getResources().getString(0 + R.color.min_temp);
         colorMinTemp = "#" + colorMinTemp.substring(3);
-        //colorMinTemp = "#" + Integer.toHexString(ContextCompat.getColor(getActivity(), R.color.min_temp));
         colorMaxTemp = getResources().getString(0 + R.color.max_temp);
         colorMaxTemp = "#" + colorMaxTemp.substring(3);
-        //colorMaxTemp = "#" + Integer.toHexString(ContextCompat.getColor(getActivity(), R.color.max_temp));
+
 
         textViewaddEntry.setOnClickListener(view -> showDialog(ID_DIALOG_SCHEDULE));
         textViewaddEntryIcon.setOnClickListener(view -> showDialog(ID_DIALOG_SCHEDULE));
@@ -918,8 +917,12 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         String strminTemp = FontManager.getColoredSpanned(Double.toString(coolingTemp), colorMinTemp);
         String strmaxTemp = FontManager.getColoredSpanned(Double.toString(heatingTemp), colorMaxTemp);
 
-        Typeface typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lato_regular.ttf");
-
+        Typeface typeface=Typeface.DEFAULT;
+        try {
+            typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lato_regular.ttf");
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
         if (startTimeHH > endTimeHH || (startTimeHH == endTimeHH && startTimeMM > endTimeMM)) {
             drawScheduleBlock(position, strminTemp, strmaxTemp, typeface, startTimeHH,
@@ -1005,12 +1008,12 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
         Log.i("CCU_UI", "position: "+position+" tempStartTime: " + tempStartTime + " tempEndTime: " + tempEndTime + " startTimeMM: " + startTimeMM + " endTimeMM " + endTimeMM);
 
-
-        AppCompatTextView textViewTemp = new AppCompatTextView(getActivity());
+        if(getContext()==null) return;
+        AppCompatTextView textViewTemp = new AppCompatTextView(getContext());
         textViewTemp.setGravity(Gravity.CENTER_HORIZONTAL);
         textViewTemp.setText(Html.fromHtml(strminTemp + " " + strmaxTemp));
-
-        textViewTemp.setTypeface(typeface);
+        if(typeface!=null)
+            textViewTemp.setTypeface(typeface);
         TextViewCompat.setAutoSizeTextTypeWithDefaults(textViewTemp, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
         textViewTemp.setMaxLines(2);
         textViewTemp.setContentDescription(textView.getText().toString()+"_"+tempStartTime+":"+startTimeMM+"-"+tempEndTime+":"+endTimeMM);

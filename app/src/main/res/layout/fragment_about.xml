@@ -110,8 +110,9 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.2"
                 android:padding="8dp"
-                app:srcCompat="@drawable/icon_arrowright"
-                tools:ignore="ContentDescription" />
+                app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
+                tools:ignore="ContentDescription"
+                app:tint="?orange_75f" />
         </LinearLayout>
 
         <LinearLayout
@@ -136,8 +137,9 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.2"
                 android:padding="8dp"
-                app:srcCompat="@drawable/icon_arrowright"
-                tools:ignore="ContentDescription" />
+                app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
+                tools:ignore="ContentDescription"
+                app:tint="?orange_75f" />
         </LinearLayout>
 
         <LinearLayout
@@ -163,8 +165,33 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.2"
                 android:padding="8dp"
-                app:srcCompat="@drawable/icon_arrowright"
-                tools:ignore="ContentDescription" />
+                app:srcCompat="@drawable/ic_baseline_keyboard_arrow_right_24"
+                tools:ignore="ContentDescription"
+                app:tint="?orange_75f" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/otpGenerator"
+            android:layout_width="match_parent"
+            android:layout_height="82dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="8dp">
+
+            <TextView
+                style="@style/title_normal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="@string/title_generate_otp" />
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:layout_weight="2"
+                app:srcCompat="@drawable/icon_arrowright" />
+
         </LinearLayout>
 
     </LinearLayout>

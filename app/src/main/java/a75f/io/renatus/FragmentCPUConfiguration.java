@@ -183,7 +183,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
         switchExtTempSensor = (ToggleButton) view.findViewById(R.id.toogleCpuExtSensor);
         temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
         fanHumiDSpinner = (Spinner) view.findViewById(R.id.spinnerCpuFanHigh);
-        setDividerColor(temperatureOffset);
+
         temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];//{"-4","-3","-2","-1","0","1","2","3","4"};
         for (int nNum = 0; nNum < TEMP_OFFSET_LIMIT * 2 + 1; nNum++)
@@ -198,7 +198,8 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
                 getActivity(), R.array.smartstat_relay_fanHumiD, R.layout.spinner_cpu_configure_item);
         fanTypeAdapter.setDropDownViewResource(R.layout.spinner_cpu_configure_item);
         fanHumiDSpinner.setAdapter(fanTypeAdapter);
-
+        fanHumiDSpinner.setEnabled(false);
+        switchFanHighOb.setEnabled(false);
 
         switchOccSensor = view.findViewById(R.id.toggleCpuOccupancy);
 

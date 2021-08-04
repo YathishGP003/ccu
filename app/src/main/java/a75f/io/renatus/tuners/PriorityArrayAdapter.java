@@ -3,6 +3,8 @@ package a75f.io.renatus.tuners;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
+
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,6 +18,8 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.renatus.R;
+import a75f.io.renatus.util.CCUUiUtil;
+
 
 public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdapter.PriorityViewHolder> {
     Context context;
@@ -232,7 +236,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
     }
 
     public void setOrangeTextColor(TextView textView) {
-        textView.setTextColor(Color.parseColor("#E24301"));
+        textView.setTextColor(CCUUiUtil.getPrimaryThemeColor(context));
     }
 
     public void setBlackTextColor(TextView textView) {

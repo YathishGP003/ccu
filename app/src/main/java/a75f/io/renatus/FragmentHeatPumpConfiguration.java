@@ -132,7 +132,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         /*TextView titleView = this.getDialog().findViewById(android.R.id.title);
         if (titleView != null) {
             titleView.setGravity(Gravity.CENTER);
-            titleView.setTextColor(getResources().getColor(R.color.progress_color_orange));
+            titleView.setTextColor(getResources().getColor(R.color.accent75F));
         }*/
         int titleDividerId = getContext().getResources()
                 .getIdentifier("titleDivider", "id", "android");
@@ -194,7 +194,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         hpChangeOverTypeSpinner = (Spinner)view.findViewById(R.id.spinnerPumpChange);
         fanHumiDSpinner = (Spinner)view.findViewById(R.id.spinnerFanHigh);
         temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
-        setDividerColor(temperatureOffset);
+
         temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];//{"-4","-3","-2","-1","0","1","2","3","4"};
         for (int nNum = 0; nNum < TEMP_OFFSET_LIMIT * 2 + 1; nNum++)
@@ -209,11 +209,13 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
                 getActivity(), R.array.smartstat_relay_fanHumiD, R.layout.spinner_cpu_configure_item);
         fanTypeAdapter.setDropDownViewResource(R.layout.spinner_cpu_configure_item);
         fanHumiDSpinner.setAdapter(fanTypeAdapter);
+        fanHumiDSpinner.setEnabled(false);
 
         ArrayAdapter<CharSequence> hpChangeOverType = ArrayAdapter.createFromResource(
                 getActivity(), R.array.smartstat_relay_hp_changeover, R.layout.spinner_cpu_configure_item);
         hpChangeOverType.setDropDownViewResource(R.layout.spinner_cpu_configure_item);
         hpChangeOverTypeSpinner.setAdapter(hpChangeOverType);
+        hpChangeOverTypeSpinner.setEnabled(false);
 
 
         switchOccSensor = view.findViewById(R.id.toggleOccupancy);
@@ -432,7 +434,6 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
             mHPUProfile.updateLogicalMapAndPoints(mSmartNodeAddress, hpuConfig, roomRef);
         }
         L.ccu().zoneProfiles.add(mHPUProfile);
-        Log.d("CPUConfig", "Set Config: Profiles - " + L.ccu().zoneProfiles.size());
     }
 
     private void setDividerColor(NumberPicker picker) {
@@ -480,7 +481,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
     }
 
     @Override
-    @OnCheckedChanged({R.id.testHpuRelay1,R.id.testHpuRelay2,R.id.testHpuRelay3,R.id.testHpuRelay4,R.id.testHpuRelay5,R.id.testHpuRelay6,R.id.toggleFanLow, R.id.toggleFanHigh})
+    @OnCheckedChanged({R.id.testHpuRelay1,R.id.testHpuRelay2,R.id.testHpuRelay3,R.id.testHpuRelay4,R.id.testHpuRelay5,R.id.testHpuRelay6,R.id.toggleFanLow, R.id.toggleFanHigh, R.id.toggleHeatPump})
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         switch (buttonView.getId())
         {
@@ -506,18 +507,31 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
                 }
                 break;
             case R.id.toggleFanHigh:
-                if(fanHumiDSpinner.getSelectedItemPosition() > 0){
-                    if(!switchFanHigh.isChecked())
-                        switchFanHigh.setChecked(false);
-                    else
-                        switchFanHigh.setChecked(true);
-                    switchFanHigh.setEnabled(true);
-                }else{
-                    if(!switchFanLowG.isChecked()) {
+                if (isChecked){
+                    fanHumiDSpinner.setEnabled(true);
+                    if(fanHumiDSpinner.getSelectedItemPosition() > 0){
+                        if(!switchFanHigh.isChecked())
+                            switchFanHigh.setChecked(false);
+                        else
+                            switchFanHigh.setChecked(true);
+                        switchFanHigh.setEnabled(true);
+                    }else{
+                        if(!switchFanLowG.isChecked()) {
 
-                        switchFanHigh.setEnabled(false);
-                        switchFanHigh.setChecked(false);
+                            switchFanHigh.setEnabled(false);
+                            switchFanHigh.setChecked(false);
+                        }
                     }
+                }
+                else{
+                    fanHumiDSpinner.setEnabled(false);
+                }
+                break;
+            case R.id.toggleHeatPump:
+                if(isChecked) {
+                    hpChangeOverTypeSpinner.setEnabled(true);
+                }else{
+                    hpChangeOverTypeSpinner.setEnabled(false);
                 }
                 break;
         }

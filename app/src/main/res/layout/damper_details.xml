@@ -338,6 +338,7 @@
                     android:textSize="@dimen/text_medium_xlarge" />
 
                 <NumberPicker
+                    android:theme="?DefaultNumberPickerTheme"
                     android:id="@+id/temperatureOffset"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -366,6 +367,7 @@
                     android:textSize="@dimen/text_medium_xlarge" />
 
                 <NumberPicker
+                    android:theme="?DefaultNumberPickerTheme"
                     android:id="@+id/maxDamperPos"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -394,6 +396,7 @@
                     android:textSize="@dimen/text_medium_xlarge" />
 
                 <NumberPicker
+                    android:theme="?DefaultNumberPickerTheme"
                     android:id="@+id/minDamperPos"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -422,6 +425,7 @@
                     android:textSize="@dimen/text_medium_xlarge" />
 
                 <NumberPicker
+                    android:theme="?DefaultNumberPickerTheme"
                     android:id="@+id/maxHeatingDamperPos"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -450,6 +454,7 @@
                     android:textSize="@dimen/text_medium_xlarge" />
 
                 <NumberPicker
+                    android:theme="?DefaultNumberPickerTheme"
                     android:id="@+id/minHeatingDamperPos"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

@@ -34,7 +34,7 @@
             android:text="@string/connectwifi"
             android:textAllCaps="true"
             android:visibility="gone"
-            android:textColor="@color/orange_75f"
+            android:textColor="?orange_75f"
             android:textSize="33.5dp"
             android:textStyle="bold" />
 
@@ -81,7 +81,7 @@
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:theme="@style/SwitchTheme"
+        android:theme="?SwitchTheme"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/recyclerWifi"

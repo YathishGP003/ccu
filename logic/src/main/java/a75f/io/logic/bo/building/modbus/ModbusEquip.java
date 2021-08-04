@@ -20,6 +20,8 @@ import a75f.io.api.haystack.modbus.LogicalPointTags;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.UserIntentPointTags;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.heartbeat.HeartBeat;
+import a75f.io.modbusbox.ModbusCategory;
 
 public class ModbusEquip {
     ProfileType profileType;
@@ -50,7 +52,8 @@ public class ModbusEquip {
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
         String modbusEquipType = equipmentInfo.getEquipType();
-        String equipDis = siteDis + "-"+modbusEquipType+"-" + slaveId;
+        String modbusName = equipmentInfo.getName();
+        String equipDis = siteDis + "-"+modbusName+"-"+modbusEquipType+"-" + slaveId ;
         String gatewayRef = null;
         configuredParams = configParams;
         Log.d("Modbus",modbusEquipType+"MbEquip create Entity = "+configuredParams.size());
@@ -83,6 +86,8 @@ public class ModbusEquip {
         if (profileType != ProfileType.MODBUS_EMR && profileType != ProfileType.MODBUS_BTU) {
             zoneMarker = "zone";
         }
+        String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
+                siteRef, roomRef, floorRef, slaveId, "modbus", profileType,  tz));
         Point equipScheduleType = new Point.Builder()
                     .setDisplayName(siteDis+"-"+modbusEquipType+"-"+slaveId+"-scheduleType")
                     .setEquipRef(equipRef)
@@ -285,7 +290,12 @@ public class ModbusEquip {
             }
 
             if (tags.length() > 0) {
-                HashMap pointRead = CCUHsApi.getInstance().read("point and logical and modbus and zone" + tags + " and equipRef == \"" + equipRef + "\"");
+                String zoneTag="";
+                if(!equipmentDevice.getEquipType().equals(ModbusCategory.BTU.displayName)
+                        &&!equipmentDevice.getEquipType().equals(ModbusCategory.EMR.displayName)){
+                    zoneTag="and zone";
+                }
+                HashMap pointRead = CCUHsApi.getInstance().read("point and logical and modbus "+zoneTag + tags + " and equipRef == \"" + equipRef + "\"");
                 Point logicalPoint = new Point.Builder().setHashMap(pointRead).build();
 
                 if (configParams.isDisplayInUI()) {

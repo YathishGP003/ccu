@@ -29,9 +29,11 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.Occupancy;
+import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.sensors.NativeSensor;
+import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemController;
@@ -268,10 +270,13 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
 
     private static void writePointsForEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
         if((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab") || equip.getMarkers().contains("dualDuct")
-                || equip.getMarkers().contains("ti")) && !equip.getMarkers().contains("system")) {
+                || equip.getMarkers().contains("ti")) && !equip.getMarkers().contains("system")
+        ||(equip.getMarkers().contains("sense"))  ) {
 
             VAVScheduler.processEquip(equip, equipSchedule, vacation, systemOccupancy);
-        } else if (equip.getMarkers().contains("pid")) {
+        } else if (equip.getMarkers().contains("pid")
+                   || equip.getMarkers().contains("emr")
+                   || equip.getMarkers().contains("modbus")) {
             Occupied occ = equipSchedule.getCurrentValues();
             if (occ != null) {
                 putOccupiedModeCache(equip.getRoomRef(), occ);
@@ -1141,9 +1146,12 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     plcPoints.put("Dynamic Unit", "V");
                     break;
                 case 1:
-                case 2:
                     plcPoints.put("Dynamic Unit Type", "Pressure");
-                    plcPoints.put("Dynamic Unit", "WC");
+                    plcPoints.put("Dynamic Unit", "Inch WC");
+                    break;
+                case 2:
+                    plcPoints.put("Dynamic Unit Type", "Pressure Differential");
+                    plcPoints.put("Dynamic Unit", "Inch WC");
                     break;
                 case 3:
                     plcPoints.put("Dynamic Unit Type", "Airflow");
@@ -1154,21 +1162,27 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                     plcPoints.put("Dynamic Unit", "%");
                     break;
                 case 5:
-                    plcPoints.put("Dynamic Unit Type", "CO2");
+                    plcPoints.put("Dynamic Unit Type", "CO2 Level");
                     plcPoints.put("Dynamic Unit", "PPM");
                     break;
                 case 6:
-                    plcPoints.put("Dynamic Unit Type", "CO");
+                    plcPoints.put("Dynamic Unit Type", "CO Level");
                     plcPoints.put("Dynamic Unit", "PPM");
                     break;
                 case 7:
-                    plcPoints.put("Dynamic Unit Type", "NO2");
+                    plcPoints.put("Dynamic Unit Type", "NO2 Level");
                     plcPoints.put("Dynamic Unit", "PPM");
                     break;
                 case 8:
+                    plcPoints.put("Dynamic Unit Type", "Current Draw");
+                    plcPoints.put("Dynamic Unit", "A");
+                    break;
                 case 9:
+                    plcPoints.put("Dynamic Unit Type", "Current Draw");
+                    plcPoints.put("Dynamic Unit", "A");
+                    break;
                 case 10:
-                    plcPoints.put("Dynamic Unit Type", "Current");
+                    plcPoints.put("Dynamic Unit Type", "Current Draw");
                     plcPoints.put("Dynamic Unit", "A");
                     break;
             }
@@ -1183,7 +1197,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             case 2:
             case 3:
                 plcPoints.put("Unit Type", "Pressure");
-                plcPoints.put("Unit", "WC");
+                plcPoints.put("Unit", "Inch WC");
                 break;
             case 4:
                 plcPoints.put("Unit Type", "Airflow");
@@ -1704,5 +1718,139 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             CCUHsApi.getInstance().pointWrite(HRef.copy(averageDT.get("id").toString()), 4, "manual", HNum.make(0), HNum.make(1, "ms"));
         }
         systemOccupancy = UNOCCUPIED;
+    }
+
+
+    public static HashMap getHyperStatSenseEquipPoints(String equipID) {
+        HashMap sensePoints = new HashMap();
+        CCUHsApi haystack = CCUHsApi.getInstance();
+        sensePoints.put("Profile","SENSE");
+        double currentTemp = haystack.readHisValByQuery("zone and point and current and temp and group == \""+equipID+"\"");
+        double tempOffset = haystack.readDefaultVal("point and offset and temperature and group == \""+equipID+"\"");
+        double analog1Sensor = haystack.readDefaultVal("point and config and analog1 and input and sensor and group == \"" + equipID + "\"").intValue();
+        double analog2Sensor = haystack.readDefaultVal("point and config and analog2 and input and sensor and group == \"" + equipID + "\"").intValue();
+        double th1Sensor = haystack.readDefaultVal("point and config and th1 and input and sensor and group == \"" + equipID + "\"").intValue();
+        double th2Sensor = haystack.readDefaultVal("point and config and th2 and input and sensor and group == \"" + equipID + "\"").intValue();
+        boolean isAnalog1Enable = haystack.readDefaultVal("point and config and analog1 and enabled and group == \"" + equipID + "\"") > 0;
+        boolean isAnalog2Enable = haystack.readDefaultVal("point and config and analog2 and enabled and group == \"" + equipID + "\"") > 0;
+        boolean isTh1Enable =
+            haystack.readDefaultVal("point and config and th1 and enabled and group == \"" + equipID + "\"") > 0;
+        boolean isTh2Enable =
+            haystack.readDefaultVal("point and config and th2 and enabled and group == \"" + equipID + "\"") > 0;
+        double an1Val = haystack.readHisValByQuery("point and logical and analog1 and group == \"" + equipID + "\"");
+        double an2Val = haystack.readHisValByQuery("point and logical and analog2 and group == \"" + equipID + "\"");
+        double th1Val =
+            haystack.readHisValByQuery("point and logical and th1 and group == \"" + equipID + "\"");
+        double th2Val =
+            haystack.readHisValByQuery("point and logical and th2 and group == \"" + equipID + "\"");
+        int size = 0;
+
+        double offset = tempOffset/10;
+        double t = currentTemp + offset;
+
+        sensePoints.put("curtempwithoffset",(currentTemp));
+
+        if (tempOffset  != 0) {
+            sensePoints.put("TemperatureOffset",tempOffset);
+        }else{
+            sensePoints.put("TemperatureOffset",0);
+        }
+
+        if(isAnalog1Enable){
+            size++;
+            sensePoints.put("iAn1Enable","true");
+        } else sensePoints.put("iAn1Enable","false");
+
+        if(isAnalog2Enable){
+            size++;
+            sensePoints.put("iAn2Enable","true");
+        }
+        else sensePoints.put("iAn2Enable","false");
+
+        if(isTh1Enable){
+            size++;
+            sensePoints.put("isTh1Enable","true");
+        }
+        else sensePoints.put("isTh1Enable","false");
+
+        if(isTh2Enable){
+            size++;
+            sensePoints.put("isTh2Enable","true");
+        }
+        else sensePoints.put("isTh2Enable","false");
+
+        sensePoints.put("size",size);
+        if (analog1Sensor >= 0 ) {
+            Sensor selectedSensor = SensorManager.getInstance().getExternalSensorList().get((int) analog1Sensor );
+            sensePoints.put("Analog1",getAnalogShortDis((int) analog1Sensor) );
+            sensePoints.put("Unit1", selectedSensor.engineeringUnit);
+            sensePoints.put("An1Val",an1Val);
+        }
+
+        if (analog2Sensor >= 0) {
+            Sensor selectedSensor = SensorManager.getInstance().getExternalSensorList().get((int) analog2Sensor );
+            sensePoints.put("Analog2", getAnalogShortDis((int) analog2Sensor));
+            sensePoints.put("Unit2", selectedSensor.engineeringUnit);
+            sensePoints.put("An2Val",an2Val);
+        }
+
+        if (th1Sensor >= 0) {
+            Thermistor selectedSensor = Thermistor.getThermistorList().get((int) th1Sensor );
+            sensePoints.put("Thermistor1", selectedSensor.sensorName);
+            sensePoints.put("Unit3", selectedSensor.engineeringUnit);
+            sensePoints.put("Th1Val",th1Val);
+        }
+        if (th2Sensor >= 0) {
+            Thermistor selectedSensor = Thermistor.getThermistorList().get((int) th2Sensor);
+            sensePoints.put("Thermistor2", selectedSensor.sensorName);
+            sensePoints.put("Unit4", selectedSensor.engineeringUnit);
+            sensePoints.put("Th2Val",th2Val);
+        }
+
+        return sensePoints;
+    }
+
+    private static String getAnalogShortDis(int analog) {
+        Log.d("ScheduleProcessJob","Analog selected -"+analog);
+        String shortDis = "Generic 0-10 Voltage";
+        switch (analog) {
+            case 0:
+                shortDis = "Generic 0-10 Voltage";
+                break;
+            case 1:
+                shortDis = "Pressure [0-2 in.]";
+                break;
+            case 2:
+                shortDis = "Pressure[0-0.25 in. Differential]";
+                break;
+            case 3:
+                shortDis = "Airflow";
+                break;
+            case 4:
+                shortDis = "Humidity";
+                break;
+            case 5:
+                shortDis = "CO2 Level";
+                break;
+            case 6:
+                shortDis = "CO Level";
+                break;
+            case 7:
+                shortDis = "NO2 Level";
+                break;
+            case 8:
+                shortDis = "Current Drawn[CT 0-10]";
+                break;
+            case 9:
+                shortDis = "Current Drawn[CT 0-20]";
+                break;
+            case 10:
+                shortDis = "Current Drawn[CT 0-50]";
+                break;
+            case 11:
+                shortDis ="ION Density";
+                break;
+        }
+        return shortDis;
     }
 }

@@ -55,9 +55,11 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
 import a75f.io.renatus.views.TempLimit.TempLimitView;
@@ -186,6 +188,7 @@ public class InstallerOptions extends Fragment {
 
         imageGoback = rootView.findViewById(R.id.imageGoback);
         mAddressBandSpinner = rootView.findViewById(R.id.spinnerAddress);
+        CCUUiUtil.setSpinnerDropDownColor(mAddressBandSpinner,getContext());
         mToggleTempAll = rootView.findViewById(R.id.toggleTempAll);
         mNext = rootView.findViewById(R.id.buttonNext);
         imageTemp = rootView.findViewById(R.id.imageTemp);
@@ -210,15 +213,23 @@ public class InstallerOptions extends Fragment {
         if (ccuId != null) {
             ccuUid = CCUHsApi.getInstance().getCcuRef().toString();
         }
-        if(CCUHsApi.getInstance().isCCURegistered() && ccuUid != null){
-            textBacnetEnable.setVisibility(View.VISIBLE);
-            toggleBACnet.setVisibility(View.VISIBLE);
-        }else {
+
+        if(BuildConfig.BUILD_TYPE.equals("daikin_prod")|| CCUUiUtil.isDaikinThemeEnabled(getContext()))
+        {
             textBacnetEnable.setVisibility(View.GONE);
             toggleBACnet.setVisibility(View.GONE);
+        }else{
+            if(CCUHsApi.getInstance().isCCURegistered() && ccuUid != null){
+                textBacnetEnable.setVisibility(View.VISIBLE);
+                toggleBACnet.setVisibility(View.VISIBLE);
+            }else {
+                textBacnetEnable.setVisibility(View.GONE);
+                toggleBACnet.setVisibility(View.GONE);
+            }
         }
+
         ArrayList<String> addressBand = new ArrayList<>();
-        for (int addr = 1000; addr <= 9900; addr += 100) {
+        for (int addr = 1000; addr <= 10900; addr += 100) {
             addressBand.add(String.valueOf(addr));
         }
 

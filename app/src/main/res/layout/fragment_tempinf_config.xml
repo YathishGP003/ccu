@@ -29,7 +29,7 @@
                     android:fontFamily="@font/lato_bold"
                     android:text="@string/title_tempinfluence"
                     android:textAllCaps="true"
-                    android:textColor="@color/orange_75f"
+                    android:textColor="?orange_75f"
                     android:textSize="33.5dp"
                     android:textStyle="bold" />
 
@@ -85,6 +85,7 @@
 
                 <NumberPicker
                     android:id="@+id/temperatureOffset"
+                    android:theme="?DefaultNumberPickerTheme"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/textTempOffset"
@@ -109,7 +110,7 @@
             android:fontFamily="@font/lato_regular"
             android:text="@string/button_set"
             android:textAllCaps="true"
-            android:textColor="@color/orange_75f"
+            android:textColor="?orange_75f"
             android:textSize="19.5dp" />
         </RelativeLayout>
     </ScrollView>

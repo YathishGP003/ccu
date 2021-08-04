@@ -50,9 +50,12 @@ import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+
 
 /**
  * Created by samjithsadasivan on 6/5/18.
@@ -161,7 +164,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         if(titleView != null)
         {
             titleView.setGravity(Gravity.CENTER);
-            titleView.setTextColor(getResources().getColor(R.color.progress_color_orange));
+            titleView.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
         }
         int titleDividerId = getContext().getResources()
                                          .getIdentifier("titleDivider", "id", "android");
@@ -308,7 +311,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     
     private void initializeNumberPickers(View view) {
         temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
-        setNumberPickerDividerColor(temperatureOffset);
+
         temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];//{"-4","-3","-2","-1","0","1","2","3","4"};
         for (int nNum = 0; nNum < TEMP_OFFSET_LIMIT * 2 + 1; nNum++)
@@ -320,7 +323,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         temperatureOffset.setWrapSelectorWheel(false);
     
         maxCoolingDamperPos = view.findViewById(R.id.maxDamperPos);
-        setNumberPickerDividerColor(maxCoolingDamperPos);
+
         maxCoolingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         maxCoolingDamperPos.setMinValue(0);
         maxCoolingDamperPos.setMaxValue(100);
@@ -328,7 +331,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         maxCoolingDamperPos.setWrapSelectorWheel(false);
     
         minCoolingDamperPos = view.findViewById(R.id.minDamperPos);
-        setNumberPickerDividerColor(minCoolingDamperPos);
+
         minCoolingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         minCoolingDamperPos.setMinValue(0);
         minCoolingDamperPos.setMaxValue(100);
@@ -336,7 +339,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         minCoolingDamperPos.setWrapSelectorWheel(false);
     
         maxHeatingDamperPos = view.findViewById(R.id.maxHeatingDamperPos);
-        setNumberPickerDividerColor(maxHeatingDamperPos);
+
         maxHeatingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         maxHeatingDamperPos.setMinValue(0);
         maxHeatingDamperPos.setMaxValue(100);
@@ -344,19 +347,14 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         maxHeatingDamperPos.setWrapSelectorWheel(false);
     
         minHeatingDamperPos = view.findViewById(R.id.minHeatingDamperPos);
-        setNumberPickerDividerColor(minHeatingDamperPos);
+
         minHeatingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         minHeatingDamperPos.setMinValue(0);
         minHeatingDamperPos.setMaxValue(100);
         minHeatingDamperPos.setValue(20);
         minHeatingDamperPos.setWrapSelectorWheel(false);
     
-        setDividerColor(temperatureOffset);
-        setDividerColor(maxCoolingDamperPos);
-        setDividerColor(minCoolingDamperPos);
-        setDividerColor(maxHeatingDamperPos);
-        setDividerColor(minHeatingDamperPos);
-    }
+         }
     
     private void initializeViews() {
         if (mProfileConfig != null) {

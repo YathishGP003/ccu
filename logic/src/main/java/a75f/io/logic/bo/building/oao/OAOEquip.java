@@ -12,6 +12,7 @@ import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.OAOTuners;
 
@@ -100,6 +101,12 @@ public class OAOEquip
                                         .setTz(tz)
                                         .build();
         String economizingAvailableId = hayStack.addPoint(economizingAvailable);
+
+        String dcvAvailableId = hayStack.addPoint(OAODamperOpenPoint.getDamperOpenPoint("dcvAvailable",
+                siteDis, siteRef, roomRef, equipRef, nodeAddr, floorRef,tz, "dcv"));
+
+        String matThrottleId = hayStack.addPoint(OAODamperOpenPoint.getDamperOpenPoint("matThrottle",
+                siteDis, siteRef, roomRef, equipRef, nodeAddr, floorRef,tz, "mat"));
     
         Point economizingLoopOutput = new Point.Builder()
                                              .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-economizingLoopOutput")
@@ -305,7 +312,9 @@ public class OAOEquip
                                          .setTz(tz)
                                          .build();
         String co2WAId = hayStack.addPoint(co2WA);
-    
+
+        String heartBeatId = CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipRef,
+                siteRef, roomRef, floorRef, nodeAddr, "oao", tz, false));
     
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.analog1In.setPointRef(returnAirCO2Id);
@@ -319,6 +328,8 @@ public class OAOEquip
         device.th1In.setEnabled(true);
         device.th2In.setPointRef(supplyAirTemperatureId);
         device.th2In.setEnabled(true);
+        device.rssi.setPointRef(heartBeatId);
+        device.rssi.setEnabled(true);
         
         device.analog1Out.setEnabled(config.isOpConfigured(Port.ANALOG_OUT_ONE));
         device.analog1Out.setPointRef(outsideAirDamperId);
@@ -352,6 +363,8 @@ public class OAOEquip
         hayStack.writeHisValById(exhaustFanStage1Id,0.0);
         hayStack.writeHisValById(exhaustFanStage2Id,0.0);
         hayStack.writeHisValById(economizingAvailableId, 0.0);
+        hayStack.writeHisValById(dcvAvailableId, 0.0);
+        hayStack.writeHisValById(matThrottleId, 0.0);
         hayStack.writeHisValById(weatherOutsideTempId, 0.0);
         hayStack.writeHisValById(weatherOutsideHumidityId, 0.0);
         hayStack.writeHisValById(co2WAId, 0.0);
@@ -619,4 +632,5 @@ public class OAOEquip
         }
         return "default";
     }
+
 }

@@ -27,7 +27,7 @@ public class ModbusNetwork extends DeviceNetwork
         }
     
         ArrayList<HashMap<Object, Object>> modbusEquips = CCUHsApi.getInstance()
-                                                                  .readAllEntities("zone and equip and modbus");
+                                                                  .readAllEntities("equip and modbus");
         for (HashMap equip : modbusEquips) {
             try {
                 Short slaveId = Short.parseShort(equip.get("group").toString());

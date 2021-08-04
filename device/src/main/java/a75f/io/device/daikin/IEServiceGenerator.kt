@@ -74,14 +74,14 @@ class IEServiceGenerator {
                     }
 
                     @Throws(CertificateException::class)
-                    override fun checkServerTrusted(chain: Array<X509Certificate?>?, authType: String?) {
-                        try {
-                            CcuLog.i(L.TAG_CCU_DEVICE, "checkServerTrusted - chain length $chain.size")
-                            CcuLog.i(L.TAG_CCU_DEVICE, Arrays.toString(chain))
-                            chain!![0]!!.checkValidity()
-                        } catch (e: Exception) {
-                            throw CertificateException("Certificate not valid or trusted.")
-                        }
+                    override fun checkServerTrusted(chain: Array<X509Certificate?>?, authType: String?) = try {
+
+                        validateChain(chain)
+                        chain!![0]!!.checkValidity()
+                        CcuLog.i(L.TAG_CCU_DEVICE, "Certificate validation succeeded")
+                    } catch (e: Exception) {
+                        CcuLog.i(L.TAG_CCU_DEVICE, "Certificate validation failed")
+                        throw CertificateException("Certificate not valid or trusted.$e")
                     }
 
                     override fun getAcceptedIssuers(): Array<X509Certificate?>? {
@@ -130,14 +130,57 @@ class IEServiceGenerator {
 
     fun readKeyStore(context: Context): KeyStore? = KeyStore.getInstance(KeyStore.getDefaultType()).also{
         val inputStream = context.resources.openRawResource(R.raw.root_ca_daikin)
-        CcuLog.i(L.TAG_CCU_DEVICE, "Certificate $inputStream")
+        //CcuLog.i(L.TAG_CCU_DEVICE, "Certificate $inputStream")
         val cf: CertificateFactory = CertificateFactory.getInstance("X.509")
         val ca: Certificate = inputStream.use { inputStream ->
             cf.generateCertificate(inputStream)
         }
         it.load(null, null)
-        CcuLog.i(L.TAG_CCU_DEVICE,ca.toString())
+        //CcuLog.i(L.TAG_CCU_DEVICE,ca.toString())
         it.setCertificateEntry("ca",ca)
+    }
+
+    /**
+     * Validate the certificate chain by comparing Issuer->Subject fields of
+     * Server Certificate -> Intermediate Certificates -> upto the Root certificate.
+     */
+    private fun validateChain(chain: Array<X509Certificate?>?) {
+        var issuerName : String? = null
+
+        for ((index, cert) in chain!!.withIndex()) {
+            issuerName?.run {
+                check(validateCertificates(issuerName.toString(), cert?.subjectX500Principal?.name.toString()))
+            }
+            CcuLog.i(L.TAG_CCU_DEVICE, "Issuer $issuerName")
+            CcuLog.i(L.TAG_CCU_DEVICE, "Subject ${cert?.subjectX500Principal?.name}")
+
+            issuerName = if (issuerName == null) {
+                cert?.issuerX500Principal?.name
+            } else {
+                cert?.subjectX500Principal?.name
+            }
+
+            if (index == chain.size - 1) {
+                CcuLog.i(L.TAG_CCU_DEVICE, "Verify root certificate subject")
+                val keyStore = readKeyStore(Globals.getInstance().applicationContext)
+                val ca : X509Certificate= keyStore?.getCertificate("ca") as X509Certificate
+                CcuLog.i(L.TAG_CCU_DEVICE, " root certificate subject ${ca.subjectX500Principal.name}")
+                check(validateCertificates(issuerName.toString(), ca?.subjectX500Principal.name))
+            }
+        }
+    }
+
+    /**
+     * Compare the organization fields of two certificates.
+     */
+    private fun validateCertificates(issuer : String, subject : String ) : Boolean {
+        val issuerNames: List<String> = issuer.split(",")
+        val subjectNames: List<String> = subject.split(",")
+        CcuLog.i(L.TAG_CCU_DEVICE, "issuerNames $issuerNames")
+        CcuLog.i(L.TAG_CCU_DEVICE, "subjectNames $subjectNames")
+        return issuerNames.find {
+                   name -> name.startsWith("O=")
+               }.equals(subjectNames.find { name -> name.startsWith("O=") })
     }
 
 

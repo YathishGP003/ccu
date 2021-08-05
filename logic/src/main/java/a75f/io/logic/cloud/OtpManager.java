@@ -80,7 +80,7 @@ public class OtpManager {
         });
     }
 
-    public void getOTP(String siteID, OtpResponseCallBack otpResponseCallBack){
+    public void getOTP(String siteID, OtpResponseCallBack otpResponseCallBack, boolean isFromAboutPage){
         Retrofit retrofit = getRetrofitForCareTakerBaseUrl();
         Call<ResponseBody> call = retrofit.create(OtpService.class).getOTP(siteID);
         call.enqueue(new Callback<ResponseBody>() {
@@ -101,8 +101,14 @@ public class OtpManager {
                     CcuLog.i(TAG_CCU_OTP, result);
                     JSONObject otpResponse = new JSONObject(result);
                     if((Boolean) ((JSONObject) otpResponse.get("siteCode")).get("expired")){
-                        postOTPRefresh(siteID, otpResponseCallBack);
+                        if(isFromAboutPage){
+                            otpResponseCallBack.onOtpResponse(new JSONObject("{\"siteCode\":{\"code\":\"\"}}"));
+                        }
+                        else{
+                            postOTPRefresh(siteID, otpResponseCallBack);
+                        }
                         return;
+
                     }
                     otpResponseCallBack.onOtpResponse(otpResponse);
                 } catch (Exception e) {

@@ -59,6 +59,7 @@ public class PbMessageHandler
                     //We do understand the consequences of doing this.
                     //But the system could still continue to work in standalone mode controlling the hvac system
                     //even if there are failures in handling a pubnub message.
+                    e.printStackTrace();
                     CcuLog.e(L.TAG_CCU_PUBNUB, "Failed to handle pubnub !", e);
                 }
             }
@@ -97,6 +98,9 @@ public class PbMessageHandler
     private void handlePbMessage(JsonObject msg, Context context){
         String cmd = msg.get("command") != null ? msg.get("command").getAsString(): "";
         switch (cmd) {
+            case FloorUpdateHandler.CMD:
+                FloorUpdateHandler.updateFloor(msg);
+                break;
             case UpdatePointHandler.CMD:
                 UpdatePointHandler.handleMessage(msg);
                 break;

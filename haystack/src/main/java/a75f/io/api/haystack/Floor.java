@@ -14,12 +14,14 @@ public class Floor extends Entity
     private String            displayName;
     private ArrayList<String> markers;
     private String siteRef;
-    private String floorNum;
+    private Double floorNum;
+    private Double orientation;
+    private String id;
+
     public void setId(String id)
     {
         this.id = id;
     }
-    private String id;
     public void setSiteRef(String siteRef)
     {
         this.siteRef = siteRef;
@@ -43,11 +45,25 @@ public class Floor extends Entity
     public String toString() {
         return displayName;
     }
+    public Double getFloorNum() {
+        return floorNum;
+    }
+    public void setFloorNum(Double floorNum) {
+        this.floorNum = floorNum;
+    }
+    public Double getOrientation() {
+        return orientation;
+    }
+    public void setOrientation(Double orientation) {
+        this.orientation = orientation;
+    }
+
     public static class Builder{
         private String            displayName;
         private ArrayList<String> markers = new ArrayList<>();;
         private String            siteRef;
-        private String floorNum;
+        private Double floorNum;
+        private Double orientation;
         private String id;
         public Builder setDisplayName(String displayName)
         {
@@ -72,6 +88,7 @@ public class Floor extends Entity
             f.markers = this.markers;
             f.id = this.id;
             f.floorNum = this.floorNum;
+            f.orientation = this.orientation;
             return f;
         }
     
@@ -99,7 +116,11 @@ public class Floor extends Entity
                 }
                 else if(pair.getKey().equals("floorNum"))
                 {
-                    this.floorNum = pair.getValue().toString();
+                    this.floorNum = Double.parseDouble(pair.getValue().toString());
+                }
+                else if(pair.getKey().equals("orientation"))
+                {
+                    this.orientation = Double.parseDouble(pair.getValue().toString());
                 }
                 //it.remove();
             }

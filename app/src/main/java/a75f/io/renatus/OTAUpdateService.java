@@ -208,24 +208,32 @@ public class OTAUpdateService extends IntentService {
         Log.i(Globals.TAG, "handleNodeReboot called ");
         SnRebootIndicationMessage_t msg = new SnRebootIndicationMessage_t();
         msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
-
+        Log.i(Globals.TAG, "handleNodeReboot msg.smartNodeAddress.get()  "+msg.smartNodeAddress.get());
+        Log.i(Globals.TAG, "handleNodeReboot mCurrentLwMeshAddress "+mCurrentLwMeshAddress);
+        Log.i(Globals.TAG, "handleNodeReboot mUpdateInProgress "+mUpdateInProgress);
         if ( (msg.smartNodeAddress.get() == mCurrentLwMeshAddress) && mUpdateInProgress) {
+            Log.i(Globals.TAG, "handleNodeReboot sendBroadcast  OTA_UPDATE_NODE_REBOOT");
             sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_NODE_REBOOT));
 
             short versionMajor = msg.smartNodeMajorFirmwareVersion.get();
             short versionMinor = msg.smartNodeMinorFirmwareVersion.get();
             HashMap ccu = CCUHsApi.getInstance().read("ccu");
             String ccuName = ccu.get("dis").toString();
+            Log.i(Globals.TAG, "handleNodeReboot AlertGenerateHandler generating alert");
             AlertGenerateHandler.handleMessage(FIRMWARE_OTA_UPDATE_ENDED, "Firmware OTA update for"+" "+ccuName+" "+"ended for smart node"+" "+ +msg.smartNodeAddress.get()+" "+"with version"+" "+versionMajor + "." + versionMinor);
-
+            Log.i(Globals.TAG, "mUpdateWaitingToComplete : "+mUpdateWaitingToComplete);
+            Log.i(Globals.TAG, "versionMajor : "+versionMajor);
+            Log.i(Globals.TAG, "versionMinor : "+versionMinor);
+            Log.i(Globals.TAG, "versionMinor : "+versionMatches(versionMajor, versionMinor));
             if (mUpdateWaitingToComplete && versionMatches(versionMajor, versionMinor)) {
                 Log.d(TAG, "[UPDATE] [SUCCESSFUL]"
                         + " [SN:" + mCurrentLwMeshAddress + "]"
                         + " [PACKETS:" + mLastSentPacket
                         + "] Updated to target: " + versionMajor + "." + versionMinor);
-
-                moveUpdateToNextNode();
-
+                Log.i(Globals.TAG, "[UPDATE] [SUCCESSFUL]"
+                        + " [SN:" + mCurrentLwMeshAddress + "]"
+                        + " [PACKETS:" + mLastSentPacket
+                        + "] Updated to target: " + versionMajor + "." + versionMinor);
             } else {
                 Log.d(TAG, "[UPDATE] [FAILED]"
                         + " [SN:" + mCurrentLwMeshAddress + "]"
@@ -233,9 +241,16 @@ public class OTAUpdateService extends IntentService {
                         + " [TARGET: " + mVersionMajor
                         + "." + mVersionMinor
                         + "] [ACTUAL: " + versionMajor + "." + versionMinor + "]");
-
-                moveUpdateToNextNode();
+                    Log.i(Globals.TAG, "[UPDATE] [FAILED]"
+                        + " [SN:" + mCurrentLwMeshAddress + "]"
+                        + " [PACKETS:" + mLastSentPacket + "]"
+                        + " [TARGET: " + mVersionMajor
+                        + "." + mVersionMinor
+                        + "] [ACTUAL: " + versionMajor + "." + versionMinor + "]");
+                Log.i(TAG, "handleNodeReboot: moveUpdateToNextNode calling");
             }
+            Log.i(Globals.TAG, "moveUpdateToNextNode : ");
+            moveUpdateToNextNode();
         }
     }
 
@@ -774,9 +789,9 @@ public class OTAUpdateService extends IntentService {
     }
 
     private void moveUpdateToNextNode() {
-        Log.i(Globals.TAG, "moveUpdateToNextNode called ");
+        Log.i(Globals.TAG, "moveUpdateToNextNode called resetUpdateVariables ()");
         resetUpdateVariables();
-
+        Log.i(Globals.TAG, "moveUpdateToNextNode called mLwMeshAddresses"+mLwMeshAddresses.size());
         if(mLwMeshAddresses.isEmpty()) {
             Log.i(Globals.TAG, " moveUpdateToNextNode  mLwMeshAddresses.isEmpty() completeUpdate");
             completeUpdate();
@@ -804,7 +819,7 @@ public class OTAUpdateService extends IntentService {
         mBinaryDownloadId = -1;
 
         mUpdateWaitingToComplete = false;
-
+        Log.i(Globals.TAG, "resetUpdateVariables: mUpdateWaitingToComplete "+mUpdateWaitingToComplete);
         Log.d(TAG, "[RESET] Reset OTA update status");
     }
 

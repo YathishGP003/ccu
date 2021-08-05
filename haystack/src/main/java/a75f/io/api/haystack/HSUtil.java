@@ -240,12 +240,11 @@ public class HSUtil
         return pointMap.isEmpty() ? false : pointMap.get("dis").toString().contains("Building");
     }
 
-    public static boolean isSystemConfigIEAddress(String id, CCUHsApi hayStack) {
+    public static boolean isSystemConfigIE(String id, CCUHsApi hayStack) {
         HashMap pointEntity = hayStack.readMapById(id);
         return pointEntity.containsKey("system")
                && pointEntity.containsKey("config")
-               && pointEntity.containsKey("ie")
-               && pointEntity.containsKey("address");
+               && pointEntity.containsKey("ie");
     }
     
     public static boolean isSystemConfig(String id, CCUHsApi hayStack) {

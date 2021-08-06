@@ -941,4 +941,7 @@
         <item >Low</item>
         <item >High</item>
     </string-array>
+
+    <string name="vrv_label_humidity_min">HumiditySPMin (%)</string>
+    <string name="vrv_label_humidity_max">HumiditySPMax (%)</string>
 </resources>

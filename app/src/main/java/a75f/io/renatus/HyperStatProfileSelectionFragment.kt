@@ -7,6 +7,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
+import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -94,6 +95,7 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
             ) */
       }
       senseCell.setOnClickListener{ showSenseconfigFragment() }
+      vrvCell.setOnClickListener{ showVrvConfigFragment() }
    }
 
    private fun showCPUConfigFragment() {
@@ -113,6 +115,21 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
                          mFloorName,
                          ProfileType.HYPERSTAT_SENSE),
                  HyperStatSensePairScreen.ID
+         )
+      }else{
+         Toast.makeText(context,"Please delete other profiles",Toast.LENGTH_LONG).show();
+      }
+   }
+
+   private fun showVrvConfigFragment() {
+      val zoneEquips   = HSUtil.getEquips(mRoomName).size;
+      if (zoneEquips == 0) {
+         showDialogFragment(
+            HyperStatVrvFragment.newInstance(
+               mNodeAddress,
+               mRoomName,
+               mFloorName,
+            ),HyperStatVrvFragment.ID
          )
       }else{
          Toast.makeText(context,"Please delete other profiles",Toast.LENGTH_LONG).show();

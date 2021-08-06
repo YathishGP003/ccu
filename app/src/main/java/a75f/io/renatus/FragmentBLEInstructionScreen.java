@@ -2,6 +2,8 @@ package a75f.io.renatus;
 
 import android.app.Dialog;
 import android.os.Bundle;
+
+import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import androidx.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -344,6 +346,18 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             else
             {
                 Log.d("FragBleInstrScrn","CPU profile. device scan");
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.SMARTSTAT_FOUR_PIPE_FCU);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
+        else if (mProfileType == ProfileType.HYPERSTAT_VRV) {
+            if (L.isSimulation()) {
+                showDialogFragment(
+                    HyperStatVrvFragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName),
+                    HyperStatVrvFragment.ID);
+            }
+            else {
+                Log.d("FragBleInstrScrn","Hyperstat VRV profile. device scan");
                 FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.SMARTSTAT_FOUR_PIPE_FCU);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }

@@ -3490,7 +3490,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             textViewLabel2.setText("Temporary Hold(AUTO): ");
             textViewValue2.setText("YES");
         }else{
-            textViewLabel2.setText("Force Occupied: ");
+            textViewLabel2.setText("Temporary Hold: ");
             textViewValue2.setText("NO");
         }
 

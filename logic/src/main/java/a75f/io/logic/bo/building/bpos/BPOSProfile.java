@@ -2,6 +2,11 @@ package a75f.io.logic.bo.building.bpos;
 
 import android.util.Log;
 
+import org.joda.time.DateTime;
+
+import java.sql.Time;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -9,6 +14,7 @@ import java.util.Set;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
@@ -59,6 +65,7 @@ public class BPOSProfile extends ZoneProfile {
 
     @Override
     public void updateZonePoints() {
+
         if (isZoneDead()) {
             state = TEMPDEAD;
             String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and " +
@@ -97,7 +104,8 @@ public class BPOSProfile extends ZoneProfile {
                 DabSystemController.getInstance().getEquipDynamicPriority(zoneCoolingLoad != 0 ?
                         zoneCoolingLoad : zoneHeatingLoad, mBPOSEquip.mEquipRef);
 
-
+        ArrayList<HisItem> fortimer =
+                CCUHsApi.getInstance().hisRead(occupancy.get("id").toString(), "today");
         double occDetPoint = CCUHsApi.getInstance().readDefaultVal("point and occupancy and " +
                 "detection " +
                 "and his and equipRef== \"" + mBPOSEquip.mEquipRef + "\"");
@@ -133,17 +141,50 @@ public class BPOSProfile extends ZoneProfile {
             }
         }
 
-        if (!occupied && isAutoforceoccupiedenabled &&
-                occupancyvalue != (double) Occupancy.AUTOAWAY.ordinal() &&
-                occDetPoint > 0) {
-            // enable autoforce occupied for ForcedOccupiedTimer
-            double dt = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and " +
-                    "desired and average and sp and equipRef == \"" + mBPOSEquip.mEquipRef +
-                    "\"");
-            CCUHsApi.getInstance().writeDefaultValById(occupancy.get("id").toString(),
-                    (double) Occupancy.AUTOFORCEOCCUPIED.ordinal());
-            updateDesiredtemp(dt);
+        //use writeHisValueByIdWithoutCOV and use getTemporaryHoldExpiry and use curread to get timer
 
+
+        if (!occupied && isAutoforceoccupiedenabled &&
+                occupancyvalue != (double) Occupancy.AUTOAWAY.ordinal()) {
+            if (occDetPoint > 0)
+                CCUHsApi.getInstance().writeHisValById(occupancy.get("id").toString(),
+                        (double) Occupancy.AUTOFORCEOCCUPIED.ordinal());
+
+            /*check if its already in forced occupy or check if its in auto force occupy
+            if(occupancyvalue != (double) Occupancy.FORCEDOCCUPIED.ordinal() ||
+                   occupancyvalue != (double) Occupancy.AUTOFORCEOCCUPIED.ordinal()){}
+
+                   This case is commented as of now
+
+             */
+
+            //check the timer
+            HisItem hisItem = CCUHsApi.getInstance().curRead(occupancy.get("id").toString());
+            Date  lastupdatedtime = (hisItem == null) ? null : hisItem.getDate();
+
+
+            long th = ScheduleProcessJob.getTemporaryHoldExpiry(HSUtil.getEquipFromZone(String.valueOf(mBPOSEquip.mNodeAddr)));
+            if (th > 0) {
+                DateTime et = new DateTime(th);
+                int min = et.getMinuteOfHour();
+
+                //present time - curread = diff
+                //expiry
+                //when diff is within 2 hours , I will check the expiry is less than 30 min then i again update the duration
+                if(min < 30){
+                    int curmin = new Time(System.currentTimeMillis()).getMinutes();
+                    int lastupdated = lastupdatedtime.getMinutes();
+                    if(curmin-lastupdated < 120){
+                        // enable autoforce occupied for ForcedOccupiedTimer
+                        double dt = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and " +
+                                "desired and average and sp and equipRef == \"" + mBPOSEquip.mEquipRef + "\"");
+                        updateDesiredtemp(dt);
+                    }
+
+                }
+
+
+            }
         }
         if (occupied && isAutoawayenabled && occupancyvalue != Occupancy.AUTOFORCEOCCUPIED.ordinal()) {
             //if the oocupantnotdetected for autoAwayTimer

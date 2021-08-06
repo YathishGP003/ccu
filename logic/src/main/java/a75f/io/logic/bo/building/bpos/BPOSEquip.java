@@ -367,9 +367,9 @@ public class BPOSEquip {
         bposconfig.setzonePriority(CCUHsApi.getInstance().readDefaultVal("point and priority and " +
                 "config  and equipRef == \"" + mEquipRef + "\"").intValue());
         bposconfig.setautoforceOccupied(CCUHsApi.getInstance().readDefaultVal("point and " +
-                "autoforceoccupied and equipRef == \"" + mEquipRef + "\"") > 0);
-        bposconfig.setautoAway(CCUHsApi.getInstance().readDefaultVal("point and autoforceaway and" +
-                " equipRef == \"" + mEquipRef + "\"") > 0);
+                "auto and forced and occupied and equipRef == \"" + mEquipRef + "\"") > 0);
+        bposconfig.setautoAway(CCUHsApi.getInstance().readDefaultVal("point and auto and " +
+                "forced and away and  equipRef == \"" + mEquipRef + "\"") > 0);
         Log.d(LOG_TAG,
                 "config: " + bposconfig.gettempOffset() + " - " + bposconfig.getautoAway() + " - " +
                         "--" + bposconfig.getautoforceOccupied() + " - " + bposconfig.getzonePriority());
@@ -383,10 +383,10 @@ public class BPOSEquip {
                 "equipRef == \"" + mEquipRef + "\"");
         HashMap zonepriority = CCUHsApi.getInstance().read("point and priority and config and " +
                 "equipRef == \"" + mEquipRef + "\"");
-        HashMap autoaway = CCUHsApi.getInstance().read("point and autoforceaway and config and " +
-                "equipRef == \"" + mEquipRef + "\"");
-        HashMap autooccupied = CCUHsApi.getInstance().read("point and autoforceoccupied and " +
-                "config and equipRef == \"" + mEquipRef + "\"");
+        HashMap autoaway = CCUHsApi.getInstance().read("point and config and auto and" +
+                " forced and away and equipRef == \"" + mEquipRef + "\"");
+        HashMap autooccupied = CCUHsApi.getInstance().read("point and " +
+                "auto and forced and occupied and config and equipRef == \"" + mEquipRef + "\"");
 
         CCUHsApi.getInstance().writeDefaultValById(tempOffset.get("id").toString(),
                 config.gettempOffset());

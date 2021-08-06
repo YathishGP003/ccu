@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.TimeZone;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.cloud.OtpManager;
 import a75f.io.logic.cloud.OtpResponseCallBack;
 import a75f.io.logic.util.PreferenceUtil;
@@ -61,6 +62,10 @@ public class AboutFragment extends Fragment {
     TextView tvSerialNumber;
     @BindView(R.id.tvCcuVersion)
     TextView tvCcuVersion;
+    @BindView(R.id.validOTP)
+    TextView validOTP;
+    @BindView(R.id.otpCountDown)
+    TextView otpCountDown;
     @BindView(R.id.tvSiteId)
     TextView tvSiteId;
 
@@ -144,7 +149,33 @@ public class AboutFragment extends Fragment {
 
         String ccuUID = CCUHsApi.getInstance().getCcuRef().toString();
         tvSerialNumber.setText(ccuUID == null ? CCUHsApi.getInstance().getCcuRef().toString() :ccuUID);
+        setOTPOnAboutPage();
         return rootView;
+    }
+
+    private void setOTPOnAboutPage(){
+        OtpResponseCallBack otpResponseCallBack = new OtpResponseCallBack() {
+            @Override
+            public void onOtpResponse(JSONObject response) throws JSONException {
+                    String otpGenerated = (String) ((JSONObject) response.get("siteCode")).get("code");
+                    validOTP.setText(otpGenerated);
+                String expirationDateTime = (String) ((JSONObject) response.get("siteCode")).get(
+                        "expirationDateTime");
+                try {
+                    constructOTPValidationTime(expirationDateTime, otpCountDown, true);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onOtpErrorResponse(JSONObject response) {
+
+            }
+        };
+        if(!PreferenceUtil.getOTPGeneratedToAddOrReplaceCCU().isEmpty()) {
+            new OtpManager().getOTP(tvSiteId.getText().toString(), otpResponseCallBack, true);
+        }
     }
 
     @OnClick(R.id.otpGenerator)
@@ -166,7 +197,7 @@ public class AboutFragment extends Fragment {
         emailOTP(emailId, otpEmail, alertDialog);
     }
 
-    private void constructOTPValidationTime(String otpCreatedTime, TextView otpTimer) throws ParseException {
+    private void constructOTPValidationTime(String otpCreatedTime, TextView otpTimer, boolean isFromAboutPage) throws ParseException {
         Date otpGeneratedDate;
         SimpleDateFormat utcDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         utcDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -175,13 +206,12 @@ public class AboutFragment extends Fragment {
         if(otpCountDownTimer != null){
             otpCountDownTimer.cancel();
         }
-        otpCountDownTimer = getOtpCountDownTimerForOTP(otpTimer, millisOTPAlive);
+        otpCountDownTimer = getOtpCountDownTimerForOTP(otpTimer, millisOTPAlive, isFromAboutPage);
         otpCountDownTimer.start();
-
     }
 
     @NotNull
-    private CountDownTimer getOtpCountDownTimerForOTP(TextView otpTimer, long millisOTPAlive) {
+    private CountDownTimer getOtpCountDownTimerForOTP(TextView otpTimer, long millisOTPAlive, boolean isFromAboutPage) {
         return new CountDownTimer(millisOTPAlive, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
@@ -189,8 +219,24 @@ public class AboutFragment extends Fragment {
                 long hour = (millisUntilFinished / 3600000) % 24;
                 long min = (millisUntilFinished / 60000) % 60;
                 long sec = (millisUntilFinished / 1000) % 60;
-                otpTimer.setText("It will expire in " + f.format(hour) + ":" + f.format(min) + ":" + f.format(sec) +
-                        " hours");
+                StringBuffer otpExpirationTimer = new StringBuffer();
+                if(isFromAboutPage){
+                    otpExpirationTimer.append("(");
+                    otpExpirationTimer.append("Expires in ");
+                }
+                else{
+                    otpExpirationTimer.append("It will expire in " );
+                }
+                otpExpirationTimer.append(f.format(hour));
+                otpExpirationTimer.append(":");
+                otpExpirationTimer.append(f.format(min));
+                otpExpirationTimer.append(":" );
+                otpExpirationTimer.append(f.format(sec));
+                otpExpirationTimer.append(" hours");
+                if(isFromAboutPage){
+                    otpExpirationTimer.append(")");
+                }
+                otpTimer.setText(otpExpirationTimer.toString());
             }
             @Override
             public void onFinish() {
@@ -203,6 +249,7 @@ public class AboutFragment extends Fragment {
         otpEmail.setOnClickListener(v -> {
             if(emailId.getText().toString().isEmpty()){
                 alertDialog.dismiss();
+                setOTPOnAboutPage();
                 return;
             }
             if (!Patterns.EMAIL_ADDRESS.matcher(emailId.getText().toString()).matches()){
@@ -214,12 +261,14 @@ public class AboutFragment extends Fragment {
                 public void onOtpResponse(JSONObject response) throws JSONException {
                     Toast.makeText(getContext(),"email sent", Toast.LENGTH_SHORT).show();
                     alertDialog.dismiss();
+                    setOTPOnAboutPage();
                 }
 
                 @Override
                 public void onOtpErrorResponse(JSONObject response) throws JSONException {
                     Toast.makeText(getContext(),"Error in sending email", Toast.LENGTH_LONG).show();
                     alertDialog.dismiss();
+                    setOTPOnAboutPage();
                 }
             };
             new OtpManager().postOTPShare(tvSiteId.getText().toString(), emailId.getText().toString(),
@@ -233,7 +282,8 @@ public class AboutFragment extends Fragment {
                 @Override
                 public void onOtpResponse(JSONObject response) throws JSONException {
                     ProgressDialogUtils.hideProgressDialog();
-                    String otpGenerated = (String) ((JSONObject) response.get("siteCode")).get("code");
+                    String otpGenerated = null;
+                    otpGenerated = (String) ((JSONObject) response.get("siteCode")).get("code");
                     PreferenceUtil.setOTPGeneratedToAddOrReplaceCCU(otpGenerated);
                     emailId.setEnabled(true);
                     emailId.setVisibility(View.VISIBLE);
@@ -241,7 +291,7 @@ public class AboutFragment extends Fragment {
                     String expirationDateTime = (String) ((JSONObject) response.get("siteCode")).get(
                             "expirationDateTime");
                     try {
-                        constructOTPValidationTime(expirationDateTime, otpTimer);
+                        constructOTPValidationTime(expirationDateTime, otpTimer, false);
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
@@ -250,7 +300,7 @@ public class AboutFragment extends Fragment {
                 @Override
                 public void onOtpErrorResponse(JSONObject response) throws JSONException {
                     ProgressDialogUtils.hideProgressDialog();
-                    String errorMessage = (String) response.get("response");
+                    String errorMessage = errorMessage = (String) response.get("response");
                     otpValue.setText(errorMessage);
                 }
             };
@@ -274,7 +324,7 @@ public class AboutFragment extends Fragment {
                 String expirationDateTime = (String) ((JSONObject) response.get("siteCode")).get(
                         "expirationDateTime");
                 try {
-                    constructOTPValidationTime(expirationDateTime, otpTimer);
+                    constructOTPValidationTime(expirationDateTime, otpTimer, false);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
@@ -282,12 +332,13 @@ public class AboutFragment extends Fragment {
             @Override
             public void onOtpErrorResponse(JSONObject response) throws JSONException {
                 ProgressDialogUtils.hideProgressDialog();
-                String errorMessage = (String) response.get("response");
+                String errorMessage = null;
+                errorMessage = (String) response.get("response");
                 otpValue.setText(errorMessage);
             }
         };
         ProgressDialogUtils.showProgressDialog(getActivity(), "Fetching OTP");
-        new OtpManager().getOTP(tvSiteId.getText().toString(), otpResponseCallBack);
+        new OtpManager().getOTP(tvSiteId.getText().toString(), otpResponseCallBack, false);
     }
 
     @Override

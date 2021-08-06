@@ -118,6 +118,7 @@ public class TempOverrideFragment extends Fragment {
                         t.get("dis").toString().startsWith("Analog2Out") || t.get("dis").toString().startsWith("relay") || t.get("dis").toString().startsWith("Th") ||
                         t.get("dis").toString().startsWith(siteName) && Objects.nonNull(t.get("dis").toString())) {
                     String NewexpandedListText = t.get("dis").toString();
+                    Log.e("InsideTempOverrideFrag","NewexpandedListText- "+NewexpandedListText);
                     if (NewexpandedListText.startsWith("Analog")) {
                         tunerList.add(t.get("dis").toString());
                     } else if (NewexpandedListText.startsWith("relay")) {

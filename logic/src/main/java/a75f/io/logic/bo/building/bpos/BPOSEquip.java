@@ -175,6 +175,8 @@ public class BPOSEquip {
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
         CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId,
                 (double) config.gettempOffset());
+        CCUHsApi.getInstance().writeHisValById(temperatureOffsetId,
+                (double) config.gettempOffset());
 
         Point autoforceoccupied = new Point.Builder()
                 .setDisplayName(equipDis + "-autoforceoccupied")
@@ -190,6 +192,8 @@ public class BPOSEquip {
                 .build();
         String autoforceoccupiedId = CCUHsApi.getInstance().addPoint(autoforceoccupied);
         CCUHsApi.getInstance().writeDefaultValById(autoforceoccupiedId,
+                config.getautoforceOccupied() ? 1.0 : 0.0);
+        CCUHsApi.getInstance().writeHisValById(autoforceoccupiedId,
                 config.getautoforceOccupied() ? 1.0 : 0.0);
 
         Point autoforceaway = new Point.Builder()
@@ -207,6 +211,8 @@ public class BPOSEquip {
         String autoforceawayId = CCUHsApi.getInstance().addPoint(autoforceaway);
         CCUHsApi.getInstance().writeDefaultValById(autoforceawayId, config.getautoAway() ? 1.0 :
                 0.0);
+        CCUHsApi.getInstance().writeHisValById(autoforceawayId,
+                config.getautoforceOccupied() ? 1.0 : 0.0);
 
         Point equipScheduleType = new Point.Builder()
                 .setDisplayName(equipDis + "-scheduleType")

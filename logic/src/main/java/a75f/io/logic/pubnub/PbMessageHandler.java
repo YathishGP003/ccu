@@ -99,7 +99,7 @@ public class PbMessageHandler
         String cmd = msg.get("command") != null ? msg.get("command").getAsString(): "";
         switch (cmd) {
             case FloorUpdateHandler.CMD:
-                FloorUpdateHandler.updateFloor(msg);
+               FloorUpdateHandler.updateFloor(msg);
                 break;
             case UpdatePointHandler.CMD:
                 UpdatePointHandler.handleMessage(msg);

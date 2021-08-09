@@ -14,6 +14,7 @@ import android.os.Looper;
 
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Point;
+import a75f.io.logic.pubnub.FloorUpdateHandler;
 import a75f.io.renatus.util.NetworkUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import androidx.annotation.Nullable;
@@ -932,6 +933,8 @@ public class FloorPlanFragment extends Fragment {
                         .setSiteRef(floorToRename.getSiteRef())
                         .build();
                 hsFloor.setId(floorToRename.getId());
+                hsFloor.setOrientation(floorToRename.getOrientation());
+                hsFloor.setFloorNum(floorToRename.getFloorNum());
                 for (Floor floor : siteFloorList) {
                     if (floor.getDisplayName().equals(addFloorEdit.getText().toString())) {
                         AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());

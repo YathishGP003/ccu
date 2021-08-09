@@ -20,7 +20,7 @@ import a75f.io.api.haystack.sync.HttpUtil;
 
 public class FloorUpdateHandler {
     public static final String CMD = "updateEntity";
-    public static Floor updateFloor(JsonObject msgObject){
+    public static void updateFloor(JsonObject msgObject){
         String uid = msgObject.get("ids").getAsJsonArray().get(0).toString().replaceAll("\"", "");
         HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));
         HDict[] dictArr  = {b.toDict()};
@@ -41,18 +41,19 @@ public class FloorUpdateHandler {
                 String siteRef = row.get("siteRef").toString();
                 String orientation = row.get("orientation").toString();
                 String floorNum = row.get("floorNum").toString();
-                floor = new Floor.Builder()
+                /*floor = new Floor.Builder()
                         .setDisplayName(row.get("dis").toString())
                         .setSiteRef(row.get("siteRef").toString())
-                        .build();
-                floor.setId(row.get("id").toString());
+                        .build();*/
+                //floor.setId(row.get("id").toString());
                 floor.setOrientation(Double.parseDouble(row.get("orientation").toString()));
                 floor.setFloorNum(Double.parseDouble(row.get("floorNum").toString()));
+
                 Log.i("Jayatheertha", id+">>>"+dis+">>>"+floorStr+">>>"+floorNum+">>>"+orientation+">>>"+siteRef);
 
                 //CCUHsApi.getInstance().tagsDb.removeIdMap.values().remove(id);
             }
+
         }
-        return floor;
     }
 }

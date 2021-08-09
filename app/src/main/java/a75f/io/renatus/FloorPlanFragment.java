@@ -14,7 +14,6 @@ import android.os.Looper;
 
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Point;
-import a75f.io.logic.pubnub.FloorUpdateHandler;
 import a75f.io.renatus.util.NetworkUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import androidx.annotation.Nullable;

@@ -14,8 +14,8 @@ public class Floor extends Entity
     private String            displayName;
     private ArrayList<String> markers;
     private String siteRef;
-    private Double floorNum;
-    private Double orientation;
+    private double floorNum;
+    private double orientation;
     private String id;
 
     public void setId(String id)
@@ -45,16 +45,16 @@ public class Floor extends Entity
     public String toString() {
         return displayName;
     }
-    public Double getFloorNum() {
+    public double getFloorNum() {
         return floorNum;
     }
-    public void setFloorNum(Double floorNum) {
+    public void setFloorNum(double floorNum) {
         this.floorNum = floorNum;
     }
-    public Double getOrientation() {
+    public double getOrientation() {
         return orientation;
     }
-    public void setOrientation(Double orientation) {
+    public void setOrientation(double orientation) {
         this.orientation = orientation;
     }
 
@@ -62,8 +62,8 @@ public class Floor extends Entity
         private String            displayName;
         private ArrayList<String> markers = new ArrayList<>();;
         private String            siteRef;
-        private Double floorNum;
-        private Double orientation;
+        private double floorNum;
+        private double orientation;
         private String id;
         public Builder setDisplayName(String displayName)
         {

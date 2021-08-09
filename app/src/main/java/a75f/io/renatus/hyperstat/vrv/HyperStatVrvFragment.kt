@@ -9,8 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.viewModels
-import butterknife.BindView
-import butterknife.ButterKnife
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.energy_pro_dis_item.view.*
@@ -50,6 +48,10 @@ class HyperStatVrvFragment : BaseDialogFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        // register with view model
+        viewModel.initData(requireArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR) as Integer,
+                        requireArguments().getString(FragmentCommonBundleArgs.ARG_NAME),
+                        requireArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME))
         return inflater.inflate(R.layout.fragment_hyperstat_vrv_config, container, false)
     }
 
@@ -66,8 +68,6 @@ class HyperStatVrvFragment : BaseDialogFragment() {
 
         setUpSpinners()
         setUpViewListeners()
-        // register with view model
-        viewModel.initData()
 
         disposables.add(
             viewModel.viewState

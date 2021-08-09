@@ -1,9 +1,14 @@
 package a75f.io.renatus.hyperstat.vrv
 
+import a75f.io.api.haystack.CCUHsApi
+import a75f.io.logic.L
+import a75f.io.logic.bo.building.vrv.VrvProfile
+import a75f.io.logic.bo.building.vrv.VrvProfileConfiguration
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
+import org.apache.commons.beanutils.converters.IntegerConverter
 import kotlin.math.round
 
 class HyperStatVrvViewModel(application: Application) : AndroidViewModel(application) {
@@ -19,20 +24,53 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
     val viewState: BehaviorSubject<VrvViewState> = BehaviorSubject.create()
     val oneTimeActions: PublishSubject<OneTimeUiActions> = PublishSubject.create()
 
+    var vrvProfile : VrvProfile? = null
+    lateinit var nodeAddr : Integer
+    lateinit var roomRef : String
+    lateinit var floorRef : String
     private val currentState: VrvViewState
         get() = viewState.value
 
 
-    fun initData() {
+    fun initData(addr : Integer, room : String, floor : String) {
+        nodeAddr = addr
+        roomRef = room
+        floorRef = floor
+        vrvProfile = L.getProfile(addr.toShort()) as VrvProfile
         viewState.onNext(getInitialViewState())
     }
 
     private fun getInitialViewState(): VrvViewState {
-        return VrvViewState(
-            tempOffsetPosition = tempOffsetIndexFromValue(-9.9f),
-            humidityMinPosition = 0,
-            humidityMaxPosition = 100
-        )
+        return vrvProfile?.let {
+                        val config : VrvProfileConfiguration = it.getProfileConfiguration(nodeAddr.toShort())
+                        VrvViewState(
+                            config.temperatureOffset.toInt(),
+                            config.minHumiditySp.toInt(),
+                            config.maxHumiditySp.toInt())
+                        } ?:VrvViewState(
+                        tempOffsetPosition = tempOffsetIndexFromValue(-9.9f),
+                        humidityMinPosition = 0,
+                        humidityMaxPosition = 100
+                        )
+    }
+
+    public fun saveProfile() {
+        vrvProfile?.let {
+            it.updateEquip(VrvProfileConfiguration(currentState.tempOffsetPosition.toDouble(),
+                            currentState.humidityMinPosition.toDouble(),
+                            currentState.humidityMaxPosition.toDouble()))
+        }?: run {
+            VrvProfile().createVrvEquip(
+                CCUHsApi.getInstance(), nodeAddr as Integer,
+                VrvProfileConfiguration(
+                    currentState.tempOffsetPosition.toDouble(),
+                    currentState.humidityMinPosition.toDouble(),
+                    currentState.humidityMaxPosition.toDouble(),
+                ),
+                roomRef,
+                floorRef
+            )
+        }
     }
 
     private fun tempOffsetIndexFromValue(tempOffset: Float) =

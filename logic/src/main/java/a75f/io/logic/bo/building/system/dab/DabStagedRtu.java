@@ -297,6 +297,7 @@ public class DabStagedRtu extends DabSystemProfile
             }
         } else if (stage.getValue() >= FAN_1.getValue() && stage.getValue() <= FAN_5.getValue()) {
             double currState = getCmdSignal("fan and stage" + (stage.ordinal() - HEATING_5.ordinal()));
+            CcuLog.d(L.TAG_CCU_SYSTEM," Fan stage curr state "+(stage.ordinal()-HEATING_5.ordinal())+" "+currState);
             if (currState != relayState) {
                 setCmdSignal("fan and stage" + (stage.ordinal() - HEATING_5.ordinal()), relayState);
             }
@@ -763,18 +764,31 @@ public class DabStagedRtu extends DabSystemProfile
 
             String timeZone = CCUHsApi.getInstance().getTimeZone();
             if (val <= Stage.COOLING_5.ordinal() && val >= COOLING_1.ordinal()) {
-                newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system")
-                        .addMarker("cmd").addMarker("cooling").addMarker("stage" + newStageNum).addMarker("his").addMarker("runtime").setTz(timeZone).build();
+                if (CCUHsApi.getInstance().read("point and system and cooling and cmd and stage"+newStageNum).isEmpty()) {
+                    newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(
+                        equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("stage" + newStageNum).addMarker(
+                        "his").addMarker("runtime").setTz(timeZone).build();
+                }
             } else if (val >= Stage.HEATING_1.ordinal() && val <= HEATING_5.ordinal()) {
-                newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system")
-                        .addMarker("cmd").addMarker("heating").addMarker("stage" + newStageNum).addMarker("his").addMarker("runtime").setTz(timeZone).build();
+                if (CCUHsApi.getInstance().read("point and system and heating and cmd and stage"+newStageNum).isEmpty()) {
+                    newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(
+                        equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system").addMarker("cmd").addMarker("heating").addMarker("stage" + newStageNum).addMarker(
+                        "his").addMarker("runtime").setTz(timeZone).build();
+                }
             } else if (val >= Stage.FAN_1.ordinal() && val <= Stage.FAN_5.ordinal()) {
-                newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system")
-                        .addMarker("cmd").addMarker("fan").addMarker("stage" + newStageNum).addMarker("his").addMarker("runtime").setTz(timeZone).build();
+                if (CCUHsApi.getInstance().read("point and system and fan and cmd and stage"+newStageNum).isEmpty()) {
+                    newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(
+                        equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system").addMarker("cmd").addMarker("fan").addMarker("stage" + newStageNum).addMarker(
+                        "his").addMarker("runtime").setTz(timeZone).build();
+                }
             } else if (val == HUMIDIFIER.ordinal()) {
-                newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system")
-                        .addMarker("cmd").addMarker("humidifier").addMarker("his").setEnums("off,on").setTz(timeZone).build();
+                if (CCUHsApi.getInstance().read("point and system and cmd and humidifier").isEmpty()) {
+                    newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(
+                        equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his").setEnums("off,on").setTz(
+                        timeZone).build();
+                }
             } else if (val == DEHUMIDIFIER.ordinal()) {
+                if (CCUHsApi.getInstance().read("point and system and cmd and dehumidifier" ).isEmpty())
                 newCmdPoint = new Point.Builder().setSiteRef(oldPoint.getSiteRef()).setEquipRef(oldPoint.getEquipRef()).setDisplayName(equipDis + "-" + updatedStage.displayName).setHisInterpolate("cov").addMarker("system")
                         .addMarker("cmd").addMarker("dehumidifier").addMarker("his").setEnums("off,on").setTz(timeZone).build();
             }
@@ -783,6 +797,7 @@ public class DabStagedRtu extends DabSystemProfile
                 CCUHsApi.getInstance().deleteEntity(oldPoint.getId());
             }
             if(newCmdPoint != null){
+                
                 String newCmdPointId = CCUHsApi.getInstance().addPoint(newCmdPoint);
                 CCUHsApi.getInstance().writeHisValById(newCmdPointId,0.0);
             }
